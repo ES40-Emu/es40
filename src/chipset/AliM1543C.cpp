@@ -274,6 +274,9 @@
 #include "DMA.h"
 #include "system/System.h"
 #include "graphics/VGA.h"
+#include <cerrno>
+#include <limits>
+#include <string>
 
 #ifdef DEBUG_PIC
 bool  pic_messages = false;
@@ -431,6 +434,87 @@ void CAliM1543C::init()
 		time_t host_now;
 		time(&host_now);
 		state.toy_offset = (long)(set_time - host_now);
+	}
+	else
+	{
+		// Seed only the initial TOY offset; guest clock writes can replace it.
+		const std::string timezone{myCfg->get_text_value("timezone", "local")};
+		const bool local = timezone.compare(0, 5, "local") == 0;
+		const size_t base_length = local ? 5 : 3;
+		if (!local && timezone.compare(0, 3, "utc") != 0)
+			FAILURE_1(Configuration, "Invalid timezone: %s", timezone.c_str());
+
+		long long offset = 0;
+		char unit = 's';
+		if (timezone.size() != base_length)
+		{
+			const char sign = timezone[base_length];
+			const char* digits = timezone.c_str() + base_length + 1;
+			char* end;
+			errno = 0;
+			const long magnitude = strtol(digits, &end, 10);
+			if ((sign != '+' && sign != '-') || *digits < '0' || *digits > '9' ||
+				errno == ERANGE || magnitude > (std::numeric_limits<int>::max)() ||
+				*end == '\0' || end[1] != '\0')
+				FAILURE_1(Configuration, "Invalid timezone: %s", timezone.c_str());
+			offset = sign == '-' ? -magnitude : magnitude;
+			unit = *end;
+		}
+
+		const time_t host_now = time(nullptr);
+		long long shifted = host_now;
+		switch (unit)
+		{
+		case 's': shifted += offset; break;
+		case 'm': shifted += offset * 60; break;
+		case 'h': shifted += offset * 3600; break;
+		case 'd': shifted += offset * 86400; break;
+		case 'M':
+		case 'y': break;
+		default:
+			FAILURE_1(Configuration, "Invalid timezone: %s", timezone.c_str());
+		}
+		if (host_now == (time_t)-1 || shifted < (std::numeric_limits<time_t>::min)() ||
+			shifted > (std::numeric_limits<time_t>::max)())
+			FAILURE_1(Configuration, "Timezone out of range: %s", timezone.c_str());
+
+		const time_t target_time = (time_t)shifted;
+		struct tm target = {};
+#ifdef _WIN32
+		const bool converted = (local ? localtime_s(&target, &target_time)
+			: gmtime_s(&target, &target_time)) == 0;
+#else
+		const bool converted = (local ? localtime_r(&target_time, &target)
+			: gmtime_r(&target_time, &target)) != nullptr;
+#endif
+		if (!converted)
+			FAILURE_1(Configuration, "Timezone out of range: %s", timezone.c_str());
+
+		if (unit == 'M' || unit == 'y')
+		{
+			const long long year = target.tm_year + (unit == 'M' ? offset / 12 : offset);
+			if (year <= (std::numeric_limits<int>::min)() ||
+				year >= (std::numeric_limits<int>::max)())
+				FAILURE_1(Configuration, "Timezone out of range: %s", timezone.c_str());
+			target.tm_year = (int)year;
+			if (unit == 'M')
+				target.tm_mon += (int)(offset % 12);
+		}
+
+		// The RTC reads UTC plus toy_offset. Treat the desired wall time as UTC.
+#ifdef _WIN32
+		const time_t seeded = _mkgmtime(&target);
+		const bool conversion_failed = seeded == (time_t)-1;
+#else
+		errno = 0;
+		const time_t seeded = timegm(&target);
+		const bool conversion_failed = seeded == (time_t)-1 && errno != 0;
+#endif
+		const double delta = difftime(seeded, host_now);
+		if (conversion_failed || delta < (std::numeric_limits<long>::min)() ||
+			delta >= -(double)(std::numeric_limits<long>::min)())
+			FAILURE_1(Configuration, "Timezone out of range: %s", timezone.c_str());
+		state.toy_offset = (long)delta;
 	}
 
 	state.toy_stored_data[0x17] = myCfg->get_bool_value("vga_console") ? 1 : 0;

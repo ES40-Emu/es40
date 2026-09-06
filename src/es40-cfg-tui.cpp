@@ -414,6 +414,11 @@ WINDOW *create_window(
     if (helptext != NULL)
         set_min_width(&nCols, helptext);
 
+    if (nLines > scrh)
+        nLines = scrh - 2;
+    if (nCols > scrw)
+        nCols = scrw - 2;
+
     if (begin_y == -1 && begin_x == -1)
     {
         begin_y = (scrh - nLines - 2) / 2;
@@ -622,7 +627,10 @@ FormValues_t show_form(
         set_min_width(&nCols, entry[i].preset);
     }
 
-    WINDOW *my_win = create_window(nLines + 1, nCols + 1, -1, -1, title, helptext);
+    if (nLines + 2 > scrh)
+        FAILURE_1(Runtime, "Screen is too small for form, need %d lines", nLines + 2);
+
+    WINDOW *my_win = create_window(nLines, nCols + 1, -1, -1, title, helptext);
     PANEL *my_panel = new_panel(my_win);
     update_panels();
 
@@ -1602,10 +1610,15 @@ void validation_ev68cb_cpuspeed(FIELD *field)
     set_field_type(field, TYPE_INTEGER, 2, 10, 1250);
 }
 
+void validation_ev68cb_max_ticks(FIELD *field)
+{
+    set_field_type(field, TYPE_INTEGER, 1, 1, INT_MAX);
+}
+
 // Form for EV68CB
 void edit_ev68cb(const char *title)
 {
-    vector<FormEntry_t> entry; // (enabled, speed [,nohle]) * MAX_CPUS
+    vector<FormEntry_t> entry; // (enabled, speed, max_instr_per_tick [,nohle]) * MAX_CPUS
 
     for (int i = 0; i < MAX_CPUS; ++i)
     {
@@ -1633,6 +1646,14 @@ void edit_ev68cb(const char *title)
                          "and run the real SRM PALcode instead.",
                          validation_bool});
 #endif
+        const string max_ticks = cpu + ".timer.max_instr_per_tick";
+        entry.push_back({strdup(max_ticks.c_str()), "1250000", "timer.max_instr_per_tick",
+                         "Upper bound on guest instructions retired between 1024 Hz interval-timer\n"
+                        "ticks. Real Alpha silicon topped out at 1.25 GHz (EV68).\n"
+                        "A CPU that reaches this bound before the next wall-clock tick is due is\n"
+                        "held (slept) until the tick lands, so the guest never sees more than this\n"
+                        "many instructions per tick and its tick-counted clock stays wall-clock accurate.",
+                         validation_ev68cb_max_ticks});
     }
     const int num_entries = entry.size();
     const int entries_per_cpu = num_entries / MAX_CPUS;
@@ -3011,12 +3032,19 @@ int main(int argc, char **argv)
     signal(SIGWINCH, resizeHandler);
 #endif
 
-    es40_banner("AlphaServer ES40 emulator configuration utility");
+    try
+    {
+        es40_banner("AlphaServer ES40 emulator configuration utility");
 
-    bool save_results = main_menu();
+        bool save_results = main_menu();
 
-    if (save_results)
-        write_configuration(out_filename);
+        if (save_results)
+            write_configuration(out_filename);
+    }
+	catch (CException& e)
+	{
+		printf("Failure: %s\n", e.displayText().c_str());
+    }
 
     return 0;
 }

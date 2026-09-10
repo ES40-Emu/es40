@@ -46,6 +46,7 @@
 // TODO: For PCI cards, implement adding multiple cards of the same type.
 // TODO: Add the option to remove things.
 // TODO: Add the option to quit forms without checks or storing the results.
+// TODO: If multiple GUIs are available (SDL, X11, ...), insert a selector.
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1276,18 +1277,33 @@ void add_scsi_disks(const char *title, const int max_scsi_id, CConfigurator *par
  * GUI configuration
  **/
 
-#ifdef HAVE_SDL
-void validation_gui_sdl_mousespeed(FIELD *field)
+#if defined(HAVE_SDL)
+void validation_hotkey(FIELD *field)
 {
-    set_field_type(field, TYPE_NUMERIC, 1, 0.1, 10.0);
+    // TODO: I found no way to match case-insensitively?!
+    // see src/sdl.cpp parse_sdl_hotkey() et al.
+    set_field_type(field, TYPE_REGEXP,
+        "^ *"
+        "(none|"
+        "((Ctrl|Alt|Shift|GUI|Control|Option|Command|Cmd|Super|Win|Windows|Meta)"
+        "(\\+(Ctrl|Alt|Shift|GUI|Control|Option|Command|Cmd|Super|Win|Windows|Meta))*"
+        "\\+(F[0-9]+|PageUp|PageDown|Insert|Delete|Escape|Home|End|Keypad \\+|Keypad -|PgUp|PgDn|PageDn|Ins|Del|Esc|KeypadPlus|KpPlus|KeypadMinus|KpMinus|[A-Z0-9])"
+        ")) *$");
 }
 
-void validation_gui_sdl_scaleratio(FIELD *field)
-{
-    set_field_type(field, TYPE_INTEGER, 1, 0, 10);
-}
+#define HOTKEY_HELP \
+    "Values are case-insensitive combinations such as \"Ctrl+F11\" or \"GUI+Shift+M\".\n" \
+    "Modifiers, if any, precede exactly one non-modifier key.\n"                          \
+    "Supported modifiers are Ctrl, Alt, Shift and GUI; Control, Option, Command,\n"       \
+    "Cmd, Super, Win, Windows and Meta are accepted aliases. The key name uses\n"         \
+    "SDL's names, including F1-F24, PageUp, PageDown, Home, End, Insert, Delete,\n"       \
+    "Escape, letters and digits; PgUp, PgDn, Esc, Del and Ins are also accepted.\n"       \
+    "Only the listed modifiers may be held.\n"                                            \
+    "Set a binding to \"none\" to disable that keyboard binding.\n"                       \
+    "Invalid or duplicate bindings are reported at runtime and\n"                         \
+    "the affected actions are disabled."
 
-bool check_gui_sdl(FormEntry_t entry[], int num_entries, FormValues_t values)
+bool check_gui_sdl_keyboard(FormEntry_t entry[], int num_entries, FormValues_t values)
 {
     if (!strcmp(values[fentry_index(entry, num_entries, "keyboard use mapping?")], STR_YES) &&
         !strcmp(values[fentry_index(entry, num_entries, "keyboard map")], ""))
@@ -1298,8 +1314,8 @@ bool check_gui_sdl(FormEntry_t entry[], int num_entries, FormValues_t values)
     return TRUE;
 }
 
-// Form for SDL GUI
-void edit_gui_sdl(const char *title)
+// Form for SDL GUI keyboard & general hotkey settings
+void edit_gui_sdl_keyboard(const char *title)
 {
     FormEntry_t entry[] = {
         {"keyboard use mapping?", STR_NO, "keyboard.use_mapping",
@@ -1310,39 +1326,14 @@ void edit_gui_sdl(const char *title)
         {"keyboard map", "keys.map", "keyboard.map",
          "The keymap file to use when keyboard.use_mapping is enabled.",
          validation_file},
-        {"mouse.speed favtor", "1.0", "mouse.speed",
-         "Multiplier applied to host mouse motion before it is passed to the guest.\n"
-         "Use a value below 1.0 to slow the guest pointer down (e.g. 0.5 for half speed),\n"
-         "or above 1.0 (up to 10.0) to speed it up.",
-         validation_gui_sdl_mousespeed},
-        {"mouse invert x?", STR_NO, "mouse.invert_x",
-         "Reverse the direction of host mouse motion on the horizontal axis.",
-         validation_yes_no},
-        {"mouse invert y?", STR_NO, "mouse.invert_y",
-         "Reverse the direction of host mouse motion on the vertical axis.",
-         validation_yes_no},
-        {"video linear", STR_YES, "video.linear",
-         "Filtering used when the guest display is scaled to the window size:\n"
-         "true = linear (smooth), false = nearest neighbor (sharp pixels).",
-         validation_yes_no},
-        {"video scale ratio", "0", "video.scale_ratio",
-         "Integer scale factor for the emulator window (1 - 8). For example,"
-         "2 renders the guest's 640x480 display in a 1280x960 window. The default\n"
-         "is 0, which sizes the window automatically from the OS display scale\n"
-         "(DPI) setting.",
-         validation_gui_sdl_scaleratio},
-        {"video scale change enable?", STR_NO, "video.scale_change_enable",
-         "If enabled, the display scale ratio can be adjusted on the fly\n"
-         "while the emulator is running, without restarting.\n"
-         "The change is not persisted back to the config file.\n"
-         "The runtime defaults are:\n"
-         "  Ctrl+PageUp   - increase scale by 1 (clamped at 8x)\n"
-         "  Ctrl+PageDown - decrease scale by 1 (clamped at 1x)\n"
-         "Optional overrides to the keys used can be configured directly in the config file.\n"
-         "These hotkey bindings take effect only\n"
-         "when runtime display scale changes are enabled.",
-         validation_yes_no}
-        // TODO: Implement editing of hotkey.*
+        {"hotkey.media", "Ctrl+F11", "hotkey.media",
+         "Host key combination used to bring up the removable media selector.\n"
+         HOTKEY_HELP,
+         validation_hotkey},
+        {"hotkey.ctrl_alt_delete", "Ctrl+Alt+End", "hotkey.ctrl_alt_delete",
+         "Host key combination used to send Ctrl+Alt+Delete to the guest.\n"
+         HOTKEY_HELP,
+         validation_hotkey}
     };
     const int num_entries = ARRAY_SIZE(entry);
     CConfigurator *c;
@@ -1360,11 +1351,7 @@ void edit_gui_sdl(const char *title)
             preset[i] = (char *)entry[i].preset;
     }
 
-    FormValues_t values = show_form(title, entry, preset, num_entries, check_gui_sdl);
-
-    if (c != nullptr)
-        theConfig->remove_child(c->get_myName());
-    c = new CConfigurator(theConfig, (char *)"gui", (char *)"sdl");
+    FormValues_t values = show_form(title, entry, preset, num_entries, check_gui_sdl_keyboard);
 
     for (int i = 0; i < num_entries; ++i)
         c->set_value(strdup(entry[i].name), strdup(values[i]));
@@ -1374,9 +1361,145 @@ void edit_gui_sdl(const char *title)
         free(values[i]);
     free(values);
 }
+
+void validation_gui_sdl_mousespeed(FIELD *field)
+{
+    set_field_type(field, TYPE_NUMERIC, 1, 0.1, 10.0);
+}
+
+// Form for SDL GUI mouse settings
+void edit_gui_sdl_mouse(const char *title)
+{
+    FormEntry_t entry[] = {
+        {"mouse.speed favtor", "1.0", "mouse.speed",
+         "Multiplier applied to host mouse motion before it is passed to the guest.\n"
+         "Use a value below 1.0 to slow the guest pointer down (e.g. 0.5 for half speed),\n"
+         "or above 1.0 (up to 10.0) to speed it up.",
+         validation_gui_sdl_mousespeed},
+        {"mouse invert x?", STR_NO, "mouse.invert_x",
+         "Reverse the direction of host mouse motion on the horizontal axis.",
+         validation_yes_no},
+        {"mouse invert y?", STR_NO, "mouse.invert_y",
+         "Reverse the direction of host mouse motion on the vertical axis.",
+         validation_yes_no},
+        {"hotkey.mouse_capture", "Ctrl+F10", "hotkey.mouse_capture",
+         "Host key combination used to toggle mouse capture.\n"
+         HOTKEY_HELP,
+         validation_hotkey}
+    };
+    const int num_entries = ARRAY_SIZE(entry);
+    CConfigurator *c;
+    FormValues_t preset;
+
+    c = theConfig->find_child("gui");
+    preset = (FormValues_t)calloc(num_entries, sizeof(char *));
+
+    for (int i = 0; i < num_entries; ++i)
+    {
+        char *p;
+        if (entry[i].name != NULL && c != nullptr && (p = c->get_text_value(entry[i].name)) != NULL)
+            preset[i] = p;
+        else
+            preset[i] = (char *)entry[i].preset;
+    }
+
+    FormValues_t values = show_form(title, entry, preset, num_entries, NULL);
+
+    for (int i = 0; i < num_entries; ++i)
+        c->set_value(strdup(entry[i].name), strdup(values[i]));
+
+    // Clean up
+    for (int i = 0; i < num_entries; ++i)
+        free(values[i]);
+    free(values);
+}
+
+void validation_gui_sdl_scaleratio(FIELD *field)
+{
+    set_field_type(field, TYPE_INTEGER, 1, 0, 10);
+}
+
+// Form for SDL GUI video settings
+void edit_gui_sdl_video(const char *title)
+{
+    FormEntry_t entry[] = {
+        {"video linear", STR_YES, "video.linear",
+         "Filtering used when the guest display is scaled to the window size:\n"
+         "true = linear (smooth), false = nearest neighbor (sharp pixels).",
+         validation_yes_no},
+        {"video scale ratio", "0", "video.scale_ratio",
+         "Integer scale factor for the emulator window (1 - 8). For example,"
+         "2 renders the guest's 640x480 display in a 1280x960 window. The default\n"
+         "is 0, which sizes the window automatically from the OS display scale\n"
+         "(DPI) setting.",
+         validation_gui_sdl_scaleratio},
+        {"video scale change enable?", STR_NO, "video.scale_change_enable",
+         "If enabled, the display scale ratio can be adjusted on the fly\n"
+         "while the emulator is running, without restarting.\n"
+         "The change is not persisted back to the config file.\n"
+         "The hotkey bindings take effect only\n"
+         "when runtime display scale changes are enabled.",
+         validation_yes_no},
+        {"hotkey.scale_up", "Ctrl+PageUp", "hotkey.scale_up",
+         "Host key combination used to increase runtime window scale by 1 (clamped at 8x).\n"
+         HOTKEY_HELP,
+         validation_hotkey},
+        {"hotkey.scale_down", "Ctrl+PageDown", "hotkey.scale_down",
+         "Host key combination used to decrease runtime window scale by 1 (clamped at 1x).\n"
+         HOTKEY_HELP,
+         validation_hotkey},
+        {"hotkey.reset_window", "Ctrl+Alt+Home", "hotkey.reset_window",
+         "Host key combination used to reset window size.\n"
+         HOTKEY_HELP,
+         validation_hotkey}
+    };
+    const int num_entries = ARRAY_SIZE(entry);
+    CConfigurator *c;
+    FormValues_t preset;
+
+    c = theConfig->find_child("gui");
+    preset = (FormValues_t)calloc(num_entries, sizeof(char *));
+
+    for (int i = 0; i < num_entries; ++i)
+    {
+        char *p;
+        if (entry[i].name != NULL && c != nullptr && (p = c->get_text_value(entry[i].name)) != NULL)
+            preset[i] = p;
+        else
+            preset[i] = (char *)entry[i].preset;
+    }
+
+    FormValues_t values = show_form(title, entry, preset, num_entries, NULL);
+
+    for (int i = 0; i < num_entries; ++i)
+        c->set_value(strdup(entry[i].name), strdup(values[i]));
+
+    // Clean up
+    for (int i = 0; i < num_entries; ++i)
+        free(values[i]);
+    free(values);
+}
+
+// Menu for SDL GUI
+void edit_gui_sdl(const char *title)
+{
+    MenuEntry_t entry[] = {
+        {"Edit keyboard settings", "Edit SDL keyboard and general settings.", edit_gui_sdl_keyboard},
+        {"Edit mouse settings", "Edit SDL mouse settings.", edit_gui_sdl_mouse},
+        {"Edit video settings", "Edit SDL video settings.", edit_gui_sdl_video}
+    };
+    const int num_entries = ARRAY_SIZE(entry);
+    CConfigurator *c;
+
+    c = theConfig->find_child("gui");
+    if (c == nullptr)
+        c = new CConfigurator(theConfig, (char*)"gui", (char*)"sdl");
+
+    show_menu(title, entry, num_entries, MENU_3RD_LEVEL);
+}
 #endif // HAVE_SDL
 
-#ifdef HAVE_X11
+#if 0 && defined(HAVE_X11)
 bool check_gui_x11(FormEntry_t entry[], int num_entries, FormValues_t values)
 {
     if (!strcmp(values[fentry_index(entry, num_entries, "keyboard use mapping?")], STR_YES) &&
@@ -1408,6 +1531,9 @@ void edit_gui_x11(const char *title)
     FormValues_t preset;
 
     c = theConfig->find_child("gui");
+    if (c == nullptr)
+        c = new CConfigurator(theConfig, (char*)"gui", (char*)"x11");
+
     preset = (FormValues_t)calloc(num_entries, sizeof(char *));
 
     for (int i = 0; i < num_entries; ++i)
@@ -1420,10 +1546,6 @@ void edit_gui_x11(const char *title)
     }
 
     FormValues_t values = show_form(title, entry, preset, num_entries, check_gui_x11);
-
-    if (c != nullptr)
-        theConfig->remove_child(c->get_myName());
-    c = new CConfigurator(theConfig, (char *)"gui", (char *)"x11");
 
     for (int i = 0; i < num_entries; ++i)
     {

@@ -227,7 +227,9 @@ u64 CDMA::ReadMem(int index, u64 address, int dsize)
 			ctrlr = (index == DMA1_IO_MAIN) ? 1 : 0;
 			if (address == 0)
 			{
-				data = state.controller[ctrlr].status | ((state.controller[ctrlr].request & 0x0f) << 4);
+				// Pending requests are visible even when masked or disabled.
+				u8 requests = state.controller[ctrlr].request | state.controller[ctrlr].drq;
+				data = state.controller[ctrlr].status | ((requests & 0x0f) << 4);
 				state.controller[ctrlr].status = 0;
 			}
 			else if (address == 7)
@@ -375,6 +377,7 @@ void CDMA::WriteMem(int index, u64 address, int dsize, u64 data)
 				state.controller[num].command = 0;
 				state.controller[num].status = 0;
 				state.controller[num].request = 0;
+				// Reset the controller, not the request lines driven by devices.
 				state.controller[num].mask = 0x0f;
 				break;
 
@@ -522,6 +525,22 @@ void CDMA::set_request(int num, int channel, int data) {
 }
 
 /**
+ * Set a device's logical DRQ level without changing its software request bit.
+ **/
+void CDMA::set_drq(int channel, bool asserted)
+{
+	// Apply the same device-channel validation as the transfer interfaces.
+	dma_transfer_width(channel);
+	int ctrlr = channel < 4 ? 0 : 1;
+	int local_channel = channel & 0x03;
+	if (asserted)
+		state.controller[ctrlr].drq |= (1 << local_channel);
+	else
+		state.controller[ctrlr].drq &= ~(1 << local_channel);
+	do_dma();
+}
+
+/**
  * Perform a DMA if one is ready.
  *
  * \todo I'm not sure what would actually trigger this, so its mostly just a
@@ -537,7 +556,8 @@ void CDMA::do_dma()
 			{
 				if ((state.controller[ctrlr].mask & (1 << chnl)) == 0) // channel not masked
 				{
-					if (state.controller[ctrlr].request & (1 << chnl)) // channel has request
+					if ((state.controller[ctrlr].request | state.controller[ctrlr].drq) &
+						(1 << chnl)) // channel has a software or device request
 					{
 						// Do it!
 					}
@@ -573,6 +593,7 @@ bool CDMA::advance_transfer(int channel, size_t units)
 		return false;
 
 	state.controller[ctrlr].status |= 1 << local_channel;
+	// TC clears the software request; the device owns its DRQ level.
 	state.controller[ctrlr].request &= ~(1 << local_channel);
 	if (state.channel[channel].mode & 0x10)
 	{

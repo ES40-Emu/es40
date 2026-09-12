@@ -68,7 +68,12 @@ public:
   virtual int   SaveState(FILE* f);
   virtual int   RestoreState(FILE* f);
 
+  // Software request register: controller 0-1, local channel 0-3.
   void          set_request(int index, int channel, int data);
+  // Device request line: global channel 0-3 or 5-7.
+  // asserted is the logical request state, not the electrical pin level.
+  // Only the device lowers this line; TC and master clear do not lower it.
+  void          set_drq(int channel, bool asserted);
 
   struct SDMA_result
   {
@@ -81,6 +86,7 @@ public:
   // length 0 uses the current count.
   // Transfers on channels 5-7 must cover whole words.
   // send: device to memory; recv: memory to device.
+  // Calls remain device-paced and do not require an explicit set_drq().
   // A wrong direction or illegal transfer type is blocked.
   // Verify services the count without accessing memory or the buffer:
   // blocked is false, transferred is zero, and terminal_count reports completion.
@@ -120,7 +126,8 @@ private:
     {
       u8  status;
       u8  command;
-      u8  request;
+      u8  request; // software request bits
+      u8  drq;     // device-driven request levels, independent of mask/command
       u8  mask;
       bool lobyte; // low byte is next for address or count access
     } controller[2];

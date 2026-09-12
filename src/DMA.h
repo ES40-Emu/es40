@@ -72,8 +72,8 @@ public:
 
   struct SDMA_result
   {
-    size_t transferred;    // Bytes moved by this call, including the final unit.
-    bool blocked;          // No transfer; DMA registers and buffers are unchanged.
+    size_t transferred;    // Bytes moved by this call; zero for verify.
+    bool blocked;          // No DMA service; registers and buffers are unchanged.
     bool terminal_count;   // This call exhausted the count, even with auto-init.
   };
 
@@ -81,12 +81,15 @@ public:
   // length 0 uses the current count.
   // Transfers on channels 5-7 must cover whole words.
   // send: device to memory; recv: memory to device.
+  // A wrong direction or illegal transfer type is blocked.
+  // Verify services the count without accessing memory or the buffer:
+  // blocked is false, transferred is zero, and terminal_count reports completion.
   // Results do not clear the guest-visible terminal-count status.
   SDMA_result   send_data(int channel, void* data, size_t length = 0);
   SDMA_result   recv_data(int channel, void* data, size_t length = 0);
   // One byte on channels 0-3, one little-endian word on channels 5-7.
   // Byte sends use the low 8 bits; byte receives are zero-extended.
-  // A blocked receive leaves data unchanged.
+  // A blocked or verify receive leaves data unchanged.
   SDMA_result   send_unit(int channel, u16 data);
   SDMA_result   recv_unit(int channel, u16& data);
   // Raw byte/word count register (number of DMA units minus one).

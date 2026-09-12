@@ -602,14 +602,32 @@ CDMA::SDMA_result CDMA::send_data(int channel, void* data, size_t length)
 	{
 		if ((state.controller[ctrlr].mask & (1 << local_channel)) == 0)
 		{
-			u64 addr = dma_address(state.channel[channel].pagebase,
-				state.channel[channel].current, width);
+			u8 transfer_type = state.channel[channel].mode & 0x0c;
+			// 8237 Write means device to memory; Verify has no data direction.
+			if (transfer_type != 0x00 && transfer_type != 0x04)
+			{
+				if (DMA_TRACE_CHANNEL(channel))
+					printf("dma: send on channel %d blocked by transfer type %02x.\n",
+						channel, transfer_type);
+				return result;
+			}
 			size_t count = get_transfer_size(channel);
 			if (length > 0 && length < count) count = length;
 			if (count % width)
 				FAILURE(InvalidArgument, "dma: word-channel transfer length must be even");
 			size_t units = count / width;
 
+			if (transfer_type == 0x00)
+			{
+				if (DMA_TRACE_CHANNEL(channel))
+					printf("dma: verify on channel %d: %zx bytes.\n", channel, count);
+				result.terminal_count = advance_transfer(channel, units);
+				result.blocked = false;
+				return result;
+			}
+
+			u64 addr = dma_address(state.channel[channel].pagebase,
+				state.channel[channel].current, width);
 			if (DMA_TRACE_CHANNEL(channel))
 			{
 				printf("DMA send_data:  %zx @ %16" PRIx64 "\n  ", count, addr);
@@ -678,14 +696,32 @@ CDMA::SDMA_result CDMA::recv_data(int channel, void* data, size_t length)
 	{
 		if ((state.controller[ctrlr].mask & (1 << local_channel)) == 0)
 		{
-			u64 addr = dma_address(state.channel[channel].pagebase,
-				state.channel[channel].current, width);
+			u8 transfer_type = state.channel[channel].mode & 0x0c;
+			// 8237 Read means memory to device.
+			if (transfer_type != 0x00 && transfer_type != 0x08)
+			{
+				if (DMA_TRACE_CHANNEL(channel))
+					printf("dma: receive on channel %d blocked by transfer type %02x.\n",
+						channel, transfer_type);
+				return result;
+			}
 			size_t count = get_transfer_size(channel);
 			if (length > 0 && length < count) count = length;
 			if (count % width)
 				FAILURE(InvalidArgument, "dma: word-channel transfer length must be even");
 			size_t units = count / width;
 
+			if (transfer_type == 0x00)
+			{
+				if (DMA_TRACE_CHANNEL(channel))
+					printf("dma: verify on channel %d: %zx bytes.\n", channel, count);
+				result.terminal_count = advance_transfer(channel, units);
+				result.blocked = false;
+				return result;
+			}
+
+			u64 addr = dma_address(state.channel[channel].pagebase,
+				state.channel[channel].current, width);
 			if (DMA_TRACE_CHANNEL(channel))
 				printf("DMA recv_data:  %zx @ %16" PRIx64 "\n", count, addr);
 			if (state.channel[channel].mode & 0x20)

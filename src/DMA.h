@@ -88,12 +88,12 @@ public:
   // Transfers on channels 5-7 must cover whole words.
   // send: device to memory; recv: memory to device.
   // Calls remain device-paced and do not require an explicit set_drq().
-  // A wrong direction or illegal transfer type is blocked.
+  // Cascade mode, a wrong direction or an illegal transfer type is blocked.
   // Verify services the count without accessing memory or the buffer:
   // blocked is false, transferred is zero, and terminal_count reports exhaustion.
   // eop ends the transfer after the last unit serviced by this call, including
   // when length is capped by the current count. It is not a latched pin level.
-  // External EOP is ignored in cascade mode. Blocked calls do not apply EOP.
+  // Blocked calls do not apply EOP, including calls on cascade-mode channels.
   // EOP sets completion status and masks or auto-initializes the channel;
   // otherwise the remaining address/count are retained. DRQ is unchanged.
   // terminal_count and external_eop can both be true; completion occurs once.

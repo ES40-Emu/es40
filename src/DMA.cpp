@@ -620,8 +620,13 @@ CDMA::SDMA_result CDMA::send_data(int channel, void* data, size_t length, bool e
 	int ctrlr = channel < 4 ? 0 : 1;
 	int local_channel = channel & 0x03;
 	SDMA_result result = { 0, true, false, false };
-	// A cascade channel does not act on an external EOP.
-	eop = eop && (state.channel[channel].mode & 0xc0) != 0xc0;
+	// Cascade passes bus control to another controller, not buffer data.
+	if ((state.channel[channel].mode & 0xc0) == 0xc0)
+	{
+		if (DMA_TRACE_CHANNEL(channel))
+			printf("dma: send on channel %d blocked by cascade mode.\n", channel);
+		return result;
+	}
 
 	// The PCI helpers otherwise silently skip DMA when bus mastering is disabled.
 	if (!theAli || !(theAli->config_read(0, 0x04, 16) & 0x04))
@@ -718,7 +723,12 @@ CDMA::SDMA_result CDMA::recv_data(int channel, void* data, size_t length, bool e
 	int ctrlr = channel < 4 ? 0 : 1;
 	int local_channel = channel & 0x03;
 	SDMA_result result = { 0, true, false, false };
-	eop = eop && (state.channel[channel].mode & 0xc0) != 0xc0;
+	if ((state.channel[channel].mode & 0xc0) == 0xc0)
+	{
+		if (DMA_TRACE_CHANNEL(channel))
+			printf("dma: receive on channel %d blocked by cascade mode.\n", channel);
+		return result;
+	}
 
 	// Avoid zero-filling the device buffer and advancing a blocked transfer.
 	if (!theAli || !(theAli->config_read(0, 0x04, 16) & 0x04))

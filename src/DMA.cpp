@@ -576,10 +576,8 @@ size_t CDMA::get_transfer_size(int channel)
 /**
  * Advance the current registers by transferred byte/word units and report TC.
  **/
-bool CDMA::advance_transfer(int channel, size_t units)
+bool CDMA::advance_transfer(int channel, size_t units, bool eop)
 {
-	int ctrlr = channel < 4 ? 0 : 1;
-	int local_channel = channel & 0x03;
 	// Check before narrowing: a full transfer can contain 65536 units.
 	bool terminal_count = units == (size_t)state.channel[channel].count + 1;
 
@@ -589,11 +587,20 @@ bool CDMA::advance_transfer(int channel, size_t units)
 		state.channel[channel].current += (u16)units;
 	state.channel[channel].count -= (u16)units;
 
-	if (!terminal_count)
-		return false;
+	if (terminal_count || eop)
+		complete_transfer(channel);
+	return terminal_count;
+}
 
+/**
+ * Complete TC or external EOP without consuming any additional DMA units.
+ **/
+void CDMA::complete_transfer(int channel)
+{
+	int ctrlr = channel < 4 ? 0 : 1;
+	int local_channel = channel & 0x03;
 	state.controller[ctrlr].status |= 1 << local_channel;
-	// TC clears the software request; the device owns its DRQ level.
+	// TC and EOP clear the software request; the device owns its DRQ level.
 	state.controller[ctrlr].request &= ~(1 << local_channel);
 	if (state.channel[channel].mode & 0x10)
 	{
@@ -602,18 +609,19 @@ bool CDMA::advance_transfer(int channel, size_t units)
 	}
 	else
 		state.controller[ctrlr].mask |= 1 << local_channel;
-	return true;
 }
 
 /**
  * Transfer device-buffer bytes to memory, up to the current DMA count.
  **/
-CDMA::SDMA_result CDMA::send_data(int channel, void* data, size_t length)
+CDMA::SDMA_result CDMA::send_data(int channel, void* data, size_t length, bool eop)
 {
 	size_t width = dma_transfer_width(channel);
 	int ctrlr = channel < 4 ? 0 : 1;
 	int local_channel = channel & 0x03;
-	SDMA_result result = { 0, true, false };
+	SDMA_result result = { 0, true, false, false };
+	// A cascade channel does not act on an external EOP.
+	eop = eop && (state.channel[channel].mode & 0xc0) != 0xc0;
 
 	// The PCI helpers otherwise silently skip DMA when bus mastering is disabled.
 	if (!theAli || !(theAli->config_read(0, 0x04, 16) & 0x04))
@@ -642,7 +650,8 @@ CDMA::SDMA_result CDMA::send_data(int channel, void* data, size_t length)
 			{
 				if (DMA_TRACE_CHANNEL(channel))
 					printf("dma: verify on channel %d: %zx bytes.\n", channel, count);
-				result.terminal_count = advance_transfer(channel, units);
+				result.terminal_count = advance_transfer(channel, units, eop);
+				result.external_eop = eop;
 				result.blocked = false;
 				return result;
 			}
@@ -686,7 +695,8 @@ CDMA::SDMA_result CDMA::send_data(int channel, void* data, size_t length)
 						count - first_count);
 				}
 			}
-			result.terminal_count = advance_transfer(channel, units);
+			result.terminal_count = advance_transfer(channel, units, eop);
+			result.external_eop = eop;
 			result.transferred = count;
 			result.blocked = false;
 		}
@@ -702,12 +712,13 @@ CDMA::SDMA_result CDMA::send_data(int channel, void* data, size_t length)
 	return result;
 }
 
-CDMA::SDMA_result CDMA::recv_data(int channel, void* data, size_t length)
+CDMA::SDMA_result CDMA::recv_data(int channel, void* data, size_t length, bool eop)
 {
 	size_t width = dma_transfer_width(channel);
 	int ctrlr = channel < 4 ? 0 : 1;
 	int local_channel = channel & 0x03;
-	SDMA_result result = { 0, true, false };
+	SDMA_result result = { 0, true, false, false };
+	eop = eop && (state.channel[channel].mode & 0xc0) != 0xc0;
 
 	// Avoid zero-filling the device buffer and advancing a blocked transfer.
 	if (!theAli || !(theAli->config_read(0, 0x04, 16) & 0x04))
@@ -736,7 +747,8 @@ CDMA::SDMA_result CDMA::recv_data(int channel, void* data, size_t length)
 			{
 				if (DMA_TRACE_CHANNEL(channel))
 					printf("dma: verify on channel %d: %zx bytes.\n", channel, count);
-				result.terminal_count = advance_transfer(channel, units);
+				result.terminal_count = advance_transfer(channel, units, eop);
+				result.external_eop = eop;
 				result.blocked = false;
 				return result;
 			}
@@ -767,7 +779,8 @@ CDMA::SDMA_result CDMA::recv_data(int channel, void* data, size_t length)
 						count - first_count);
 				}
 			}
-			result.terminal_count = advance_transfer(channel, units);
+			result.terminal_count = advance_transfer(channel, units, eop);
+			result.external_eop = eop;
 			result.transferred = count;
 			result.blocked = false;
 		}
@@ -783,18 +796,18 @@ CDMA::SDMA_result CDMA::recv_data(int channel, void* data, size_t length)
 	return result;
 }
 
-CDMA::SDMA_result CDMA::send_unit(int channel, u16 data)
+CDMA::SDMA_result CDMA::send_unit(int channel, u16 data, bool eop)
 {
 	size_t width = dma_transfer_width(channel);
 	u8 buffer[2] = { (u8)data, (u8)(data >> 8) };
-	return send_data(channel, buffer, width);
+	return send_data(channel, buffer, width, eop);
 }
 
-CDMA::SDMA_result CDMA::recv_unit(int channel, u16& data)
+CDMA::SDMA_result CDMA::recv_unit(int channel, u16& data, bool eop)
 {
 	size_t width = dma_transfer_width(channel);
 	u8 buffer[2] = { 0, 0 };
-	SDMA_result result = recv_data(channel, buffer, width);
+	SDMA_result result = recv_data(channel, buffer, width, eop);
 	if (result.transferred == width)
 		data = (u16)(buffer[0] | ((u16)buffer[1] << 8));
 	return result;

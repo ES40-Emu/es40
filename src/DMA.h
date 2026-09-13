@@ -72,7 +72,7 @@ public:
   void          set_request(int index, int channel, int data);
   // Device request line: global channel 0-3 or 5-7.
   // asserted is the logical request state, not the electrical pin level.
-  // Only the device lowers this line; TC and master clear do not lower it.
+  // Only the device lowers this line; TC, EOP and master clear do not lower it.
   void          set_drq(int channel, bool asserted);
 
   struct SDMA_result
@@ -80,6 +80,7 @@ public:
     size_t transferred;    // Bytes moved by this call; zero for verify.
     bool blocked;          // No DMA service; registers and buffers are unchanged.
     bool terminal_count;   // This call exhausted the count, even with auto-init.
+    bool external_eop;     // This call honored the device's EOP indication.
   };
 
   // Buffers and lengths are in bytes.
@@ -89,15 +90,23 @@ public:
   // Calls remain device-paced and do not require an explicit set_drq().
   // A wrong direction or illegal transfer type is blocked.
   // Verify services the count without accessing memory or the buffer:
-  // blocked is false, transferred is zero, and terminal_count reports completion.
+  // blocked is false, transferred is zero, and terminal_count reports exhaustion.
+  // eop ends the transfer after the last unit serviced by this call, including
+  // when length is capped by the current count. It is not a latched pin level.
+  // External EOP is ignored in cascade mode. Blocked calls do not apply EOP.
+  // EOP sets completion status and masks or auto-initializes the channel;
+  // otherwise the remaining address/count are retained. DRQ is unchanged.
+  // terminal_count and external_eop can both be true; completion occurs once.
   // Results do not clear the guest-visible terminal-count status.
-  SDMA_result   send_data(int channel, void* data, size_t length = 0);
-  SDMA_result   recv_data(int channel, void* data, size_t length = 0);
+  SDMA_result   send_data(int channel, void* data, size_t length = 0,
+                  bool eop = false);
+  SDMA_result   recv_data(int channel, void* data, size_t length = 0,
+                  bool eop = false);
   // One byte on channels 0-3, one little-endian word on channels 5-7.
   // Byte sends use the low 8 bits; byte receives are zero-extended.
   // A blocked or verify receive leaves data unchanged.
-  SDMA_result   send_unit(int channel, u16 data);
-  SDMA_result   recv_unit(int channel, u16& data);
+  SDMA_result   send_unit(int channel, u16 data, bool eop = false);
+  SDMA_result   recv_unit(int channel, u16& data, bool eop = false);
   // Raw byte/word count register (number of DMA units minus one).
   int           get_count(int channel) { return state.channel[channel].count; };
   // Current count plus one in bytes; independent of mask/enable state.
@@ -105,7 +114,8 @@ public:
 
 private:
   void          do_dma();
-  bool          advance_transfer(int channel, size_t units);
+  bool          advance_transfer(int channel, size_t units, bool eop);
+  void          complete_transfer(int channel);
 
   /// The state structure contains all elements that need to be saved to the statefile.
   struct SDMA_state

@@ -228,8 +228,7 @@ u64 CDMA::ReadMem(int index, u64 address, int dsize)
 			if (address == 0)
 			{
 				// Pending requests are visible even when masked or disabled.
-				u8 requests = state.controller[ctrlr].request | state.controller[ctrlr].drq;
-				data = state.controller[ctrlr].status | ((requests & 0x0f) << 4);
+				data = state.controller[ctrlr].status | (get_requests(ctrlr) << 4);
 				state.controller[ctrlr].status = 0;
 			}
 			else if (address == 7)
@@ -541,6 +540,29 @@ void CDMA::set_drq(int channel, bool asserted)
 }
 
 /**
+ * Read request inputs without changing either controller's stored request bits.
+ **/
+u8 CDMA::get_requests(int ctrlr)
+{
+	u8 requests = state.controller[ctrlr].request | state.controller[ctrlr].drq;
+	// Controller 0's HRQ drives controller 1's channel-4 request input.
+	// Software requests bypass the channel mask; hardware DRQ does not.
+	if (ctrlr == 1 && !(state.controller[0].command & 0x04) &&
+		((state.controller[0].request |
+		(state.controller[0].drq & ~state.controller[0].mask)) & 0x0f))
+		requests |= 0x01;
+	return requests & 0x0f;
+}
+
+bool CDMA::cascade_enabled()
+{
+	// These gate the grant, not the request input seen in controller 1's status.
+	return !(state.controller[1].command & 0x04) &&
+		!(state.controller[1].mask & 0x01) &&
+		(state.channel[4].mode & 0xc0) == 0xc0;
+}
+
+/**
  * Perform a DMA if one is ready.
  *
  * \todo I'm not sure what would actually trigger this, so its mostly just a
@@ -550,14 +572,15 @@ void CDMA::do_dma()
 {
 	for (int ctrlr = 0; ctrlr < 2; ctrlr++)
 	{
-		if ((state.controller[ctrlr].command & 0x04) == 0) // controller not disabled.
+		if ((state.controller[ctrlr].command & 0x04) == 0 &&
+			(ctrlr != 0 || cascade_enabled()))
 		{
 			for (int chnl = 0; chnl < 4; chnl++)
 			{
-				if ((state.controller[ctrlr].mask & (1 << chnl)) == 0) // channel not masked
+				if ((state.controller[ctrlr].mask & (1 << chnl)) == 0 ||
+					(state.controller[ctrlr].request & (1 << chnl)))
 				{
-					if ((state.controller[ctrlr].request | state.controller[ctrlr].drq) &
-						(1 << chnl)) // channel has a software or device request
+					if (get_requests(ctrlr) & (1 << chnl))
 					{
 						// Do it!
 					}
@@ -625,6 +648,14 @@ CDMA::SDMA_result CDMA::send_data(int channel, void* data, size_t length, bool e
 	{
 		if (DMA_TRACE_CHANNEL(channel))
 			printf("dma: send on channel %d blocked by cascade mode.\n", channel);
+		return result;
+	}
+	if (channel < 4 && !cascade_enabled())
+	{
+		if (DMA_TRACE_CHANNEL(channel))
+			printf("dma: send on channel %d blocked by channel 4: command %02x, mask %02x, mode %02x.\n",
+				channel, state.controller[1].command, state.controller[1].mask,
+				state.channel[4].mode);
 		return result;
 	}
 
@@ -727,6 +758,14 @@ CDMA::SDMA_result CDMA::recv_data(int channel, void* data, size_t length, bool e
 	{
 		if (DMA_TRACE_CHANNEL(channel))
 			printf("dma: receive on channel %d blocked by cascade mode.\n", channel);
+		return result;
+	}
+	if (channel < 4 && !cascade_enabled())
+	{
+		if (DMA_TRACE_CHANNEL(channel))
+			printf("dma: receive on channel %d blocked by channel 4: command %02x, mask %02x, mode %02x.\n",
+				channel, state.controller[1].command, state.controller[1].mask,
+				state.channel[4].mode);
 		return result;
 	}
 

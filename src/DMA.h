@@ -88,6 +88,8 @@ public:
   // Transfers on channels 5-7 must cover whole words.
   // send: device to memory; recv: memory to device.
   // Calls remain device-paced and do not require an explicit set_drq().
+  // Channels 0-3 also require controller 1 enabled and channel 4 unmasked
+  // and programmed for cascade. Channel 4's address/count are not serviced.
   // Cascade mode, a wrong direction or an illegal transfer type is blocked.
   // Verify services the count without accessing memory or the buffer:
   // blocked is false, transferred is zero, and terminal_count reports exhaustion.
@@ -113,6 +115,8 @@ public:
   size_t        get_transfer_size(int channel);
 
 private:
+  u8            get_requests(int ctrlr);
+  bool          cascade_enabled();
   void          do_dma();
   bool          advance_transfer(int channel, size_t units, bool eop);
   void          complete_transfer(int channel);

@@ -459,7 +459,7 @@ void mvwprintw_center(WINDOW *win, int y, int maxw, const char *text)
 
     int left_x = (maxw - len + 1) / 2;
 
-    mvwprintw(win, y, left_x, text);
+    mvwprintw(win, y, left_x, "%s", text);
 }
 
 /**
@@ -500,7 +500,7 @@ WINDOW *create_window(
     if (title != NULL)
         mvwprintw_center(my_win, 0, nCols, title);
     if (helptext != NULL)
-        mvwprintw(my_win, nLines + 1, nCols - strlen(helptext), helptext);
+        mvwprintw(my_win, nLines + 1, nCols - strlen(helptext), "%s", helptext);
 
     return my_win;
 }
@@ -539,7 +539,7 @@ void show_text(const char *title, const char *text)
     p = linebuffer;
     for (int i = 1; i <= nLines; ++i)
     {
-        mvwprintw(my_win, i, 1, p);
+        mvwprintw(my_win, i, 1, "%s", p);
         p += strlen(p) + 1; // Skip NUL terminating part
     }
 
@@ -789,7 +789,7 @@ FormValues_t show_form(
     post_form(my_form);
 
     for (int i = 0; i < num_entries; ++i)
-        mvwprintw(my_win, 2 * i + 1, 1, entry[i].label);
+        mvwprintw(my_win, 2 * i + 1, 1, "%s", entry[i].label);
 
     form_driver(my_form, REQ_FIRST_FIELD);
     form_driver(my_form, REQ_END_FIELD);
@@ -1049,9 +1049,8 @@ void es40_banner(const char *title)
 #endif
         if (count % factor == 0)
         {
-            string dur = string("(") + i2s(count / factor) + ")";
             // No idea why the coordinates need offsets...
-            mvwprintw(my_win, maxy - 1, maxx - 2 - strlen(dur.c_str()), dur.c_str());
+            mvwprintw(my_win, maxy - 1, maxx - 2 - 3, "(%1d)", count / factor);
             update_panels();
             doupdate();
         }

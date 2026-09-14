@@ -30,6 +30,10 @@
  *
  * $Id$
  *
+ * X-0.7        Martin Vorländer                                14-SEP-2026
+ *      Implement QUIT, add program help.
+ * X-0.6        Martin Vorländer                                09-SEP-2026
+ *      Rework SDL menu.
  * X-0.5        Martin Vorländer                                05-SEP-2026
  *      Fully functional version.
  * X-0.4        Martin Vorländer                                28-AUG-2026
@@ -45,8 +49,6 @@
 // TODO: For forms that the user does not enter, insert the default values (e.g. system settings) before saving,
 // TODO: For PCI cards, implement adding multiple cards of the same type.
 // TODO: Add the option to remove things.
-// TODO: Add the option to quit forms without checks or storing the results.
-// TODO: If multiple GUIs are available (SDL, X11, ...), insert a selector.
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -109,10 +111,18 @@ using namespace std;
 #define MENU_3RD_LEVEL 7, 10
 #define MENU_4TH_LEVEL 10, 13
 
+// curses: action keys
+#define MYKEY_HELP KEY_F(1)
+#define MYKEY_EXIT KEY_F(2)
+#define MYKEY_QUIT KEY_F(3)
+#define MYKEY_HELP_STR "F1"
+#define MYKEY_EXIT_STR "F2"
+#define MYKEY_QUIT_STR "F3"
+
 // curses: "normal" Keys
-#define KEY_TAB 9
-#define KEY_RETURN 10
-#define KEY_DEL 127
+#define MYKEY_TAB 9
+#define MYKEY_RETURN 10
+#define MYKEY_DEL 127
 
 /**
  * Menu item type
@@ -499,25 +509,28 @@ void show_text(const char *title, const char *text)
  * with upper left corner at row 'begin_y', column 'begin_x'.
  *
  * React to keys pressed:
- * <UP>, <DOWN>: go to previous/next item
- * <ENTER>: if item's callback is NULL: exit menu,
+ * <UP>, <DOWN>: go to previous/next item, wrapping around
+ * <ENTER>: if item callback is NULL: exit menu,
  *          else call its callback
- * <F1>: Display item's description
+ * <F1>: Display item description
  * <F2>: exit menu
+ * <F3>: quit menu
  *
  * Returns the index of the last item selected,
- * or -1 if leaving via <F2>.
+ * or -1, -2 if leaving via <F2> and <F3>, respectively.
  **/
 int show_menu(
     const char *title,
     MenuEntry_t entry[], int num_entries,
     int begin_y, int begin_x)
 {
-    const char *helptext = "F1 for help, F2 to Exit";
+    const char *helptext = MYKEY_HELP_STR ": help, " MYKEY_EXIT_STR ": exit";
+    char dashes[80] = "";
 
     int nLines = num_entries;
     int nCols = 0;
 
+    set_min_width(&nCols, helptext);
     for (int i = 0; i < num_entries; ++i)
         set_min_width(&nCols, entry[i].text);
 
@@ -527,10 +540,25 @@ int show_menu(
 
     ITEM **my_item = (ITEM **)calloc(num_entries + 1, sizeof(ITEM *));
     for (int i = 0; i < num_entries; ++i)
-        my_item[i] = new_item(entry[i].text, NULL);
+        if (entry[i].text != NULL)
+            my_item[i] = new_item(entry[i].text, NULL);
+        else
+        {
+            if (dashes[0] == '\0')
+            {
+                size_t len = nCols;
+                if (len > sizeof(dashes))
+                    len = sizeof(dashes);
+                memset(dashes, '-', len);
+                dashes[len - 1] = '\0';
+            }
+            my_item[i] = new_item(dashes, NULL);
+            item_opts_off(my_item[i], O_SELECTABLE);
+        }
     my_item[num_entries] = (ITEM *)NULL;
 
     MENU *my_menu = new_menu(my_item);
+    set_menu_grey(my_menu, A_NORMAL); // No multi-select, but unselectable items
     set_menu_win(my_menu, my_win);
     set_menu_sub(my_menu, derwin(my_win, nLines, nCols, 1, 1));
     post_menu(my_menu);
@@ -545,29 +573,42 @@ int show_menu(
         cur_idx = item_index(cur);
         switch (wgetch(my_win))
         {
-        case KEY_F(1):
+        case MYKEY_HELP:
             show_text(entry[cur_idx].text, entry[cur_idx].description);
             break;
-        case KEY_F(2):
+/*
+        case MYKEY_QUIT:
+            cur_idx = -2;
+            stay_in_loop = FALSE;
+            break;
+ */
+        case MYKEY_EXIT:
             cur_idx = -1;
             stay_in_loop = FALSE;
             break;
         case KEY_DOWN:
-            menu_driver(my_menu, REQ_DOWN_ITEM);
+            if (cur_idx == num_entries - 1)
+                menu_driver(my_menu, REQ_FIRST_ITEM);
+            else
+                menu_driver(my_menu, REQ_DOWN_ITEM);
             break;
         case KEY_UP:
-            menu_driver(my_menu, REQ_UP_ITEM);
-            break;
-        case KEY_RETURN:
-            SelectFuncPtr callback;
-
-            callback = entry[cur_idx].select_callback;
-            if (callback == NULL)
-                stay_in_loop = FALSE;
+            if (cur_idx == 0)
+                menu_driver(my_menu, REQ_LAST_ITEM);
             else
+                menu_driver(my_menu, REQ_UP_ITEM);
+            break;
+        case MYKEY_RETURN:
+            if ((item_opts(cur) & O_SELECTABLE) != 0)
             {
-                callback(item_name(cur));
-                pos_menu_cursor(my_menu);
+                SelectFuncPtr callback = entry[cur_idx].select_callback;
+                if (callback == NULL)
+                    stay_in_loop = FALSE;
+                else
+                {
+                    callback(item_name(cur));
+                    pos_menu_cursor(my_menu);
+                }
             }
             break;
         default:
@@ -598,17 +639,19 @@ int show_menu(
  * Fill in the fields from 'preset'.
  *
  * React to keys pressed:
- * <UP> / <DOWN>, <ENTER>: go to previous/next field
+ * <UP> / <DOWN>, <ENTER>: go to previous/next field, wrapping around
  * <TAB>, <RIGHT> / Shift-<TAB>, <LEFT>: in enum fields, go to next/previous choice
  * <F1>: Display field description
  * <F2>: exit form
+ * <F3>: quit form
  * any other printable character is entered in the current field
  *
  * When the form is exited, call 'check_callback' (if not NULL).
  * If this returns FALSE, stay in the form.
  *
  * The entered values are returned in a 'num_entries' wide array.
- * The calling routine is responsible for freeing values' storage.
+ * The calling routine is responsible for freeing values' storage,
+ * except when leaving via <F3>. In that case, NULL is returned
  *
  **/
 FormValues_t show_form(
@@ -618,7 +661,7 @@ FormValues_t show_form(
     int num_entries,
     FormCheckFuncPtr check_callback)
 {
-    const char *helptext = "F1 for help, F2 to Exit";
+    const char *helptext = MYKEY_HELP_STR ": help, " MYKEY_EXIT_STR ": exit, " MYKEY_QUIT_STR ": quit";
 
     int nLines = num_entries * 2; // label + field
     int nCols = scrw - 20;
@@ -685,16 +728,20 @@ FormValues_t show_form(
             int cur_idx = field_index(cur_field);
             switch (int c = wgetch(my_win))
             {
-            case KEY_F(1):
+            case MYKEY_HELP:
                 show_text(entry[cur_idx].label, entry[cur_idx].description);
                 break;
-            case KEY_F(2):
+            case MYKEY_QUIT:
+                free(values);
+                values = NULL;
+                stay_in_loop = FALSE;
+            case MYKEY_EXIT:
                 if (form_driver(my_form, REQ_VALIDATION) == E_OK)
                     stay_in_loop = FALSE;
                 else
                     show_text("Error", "Field validation failed");
                 break;
-            case KEY_TAB:
+            case MYKEY_TAB:
                 if (field_type(cur_field) == TYPE_ENUM)
                 {
                     form_driver(my_form, REQ_NEXT_CHOICE);
@@ -709,12 +756,18 @@ FormValues_t show_form(
                 }
                 break;
             case KEY_DOWN:
-            case KEY_RETURN:
-                form_driver(my_form, REQ_NEXT_FIELD);
+            case MYKEY_RETURN:
+                if (cur_idx == num_entries - 1)
+                    form_driver(my_form, REQ_FIRST_FIELD);
+                else
+                    form_driver(my_form, REQ_NEXT_FIELD);
                 form_driver(my_form, REQ_END_LINE);
                 break;
             case KEY_UP:
-                form_driver(my_form, REQ_PREV_FIELD);
+                if (cur_idx == 0)
+                    form_driver(my_form, REQ_LAST_FIELD);
+                else
+                    form_driver(my_form, REQ_PREV_FIELD);
                 form_driver(my_form, REQ_END_LINE);
                 break;
             case KEY_LEFT:
@@ -736,7 +789,7 @@ FormValues_t show_form(
                     form_driver(my_form, REQ_NEXT_CHAR);
                 break;
             case KEY_BACKSPACE: // Ctrl-H
-            case KEY_DEL:
+            case MYKEY_DEL:
                 if (field_type(cur_field) != TYPE_ENUM)
                     form_driver(my_form, REQ_DEL_PREV);
                 break;
@@ -753,6 +806,9 @@ FormValues_t show_form(
                 break;
             }
         }
+
+        if (values == NULL)
+            break;
 
         for (int i = 0; i < num_entries; ++i)
         {
@@ -791,6 +847,59 @@ FormValues_t show_form(
     free(my_fld);
 
     return values;
+}
+
+void show_help(const char *title)
+{
+    const char *text[] = {
+        "The program consists of menus and forms.",
+        "",
+        "In menus, the following keys can be used:",
+        "<UP>, <DOWN>: go to previous/next item, wrapping around",
+        "<ENTER>: select item",
+        "<" MYKEY_HELP_STR ">: Display item description",
+        "<" MYKEY_EXIT_STR ">: exit menu.",
+        "",
+        "Before saving results at program exit, the consistency of data is checked.",
+        "",
+        "Forms contain labels and entry fields, which can have various types.",
+        "The follwoing keys are recognized:",
+        "<UP> / <DOWN>, <ENTER>: go to previous/next field, wrapping around",
+        "<TAB>, <RIGHT> / <LEFT>: in choice fields, go to next/previous choice",
+        "<" MYKEY_HELP_STR ">: Display field description",
+        "<" MYKEY_EXIT_STR ">: exit form",
+        "<" MYKEY_QUIT_STR ">: quit form without saving results.",
+        "Any other printable character is entered in the current field.",
+        "",
+        "On leaving a form field, the validity of data entered into the field may be checked.",
+        "On leaving a form via <" MYKEY_EXIT_STR ">, the validity of data may be checked."};
+    int num_entries = ARRAY_SIZE(text);
+    const char *helptext = "Any key to continue";
+
+    int nLines = num_entries;
+    int nCols = 0;
+
+    for (int i = 0; i < num_entries; ++i)
+        set_min_width(&nCols, text[i]);
+
+    WINDOW *my_win = create_window(nLines, nCols, -1, -1, title, helptext);
+    PANEL *my_panel = new_panel(my_win);
+
+    for (int i = 0; i < num_entries; ++i)
+        mvwprintw_center(my_win, i + 1, nCols, text[i]);
+
+    update_panels();
+    doupdate();
+
+    wgetch(my_win);
+
+    // Clean up
+    del_panel(my_panel);
+    wclear(my_win);
+    wrefresh(my_win);
+    delwin(my_win);
+    update_panels();
+    doupdate();
 }
 
 /**
@@ -1248,6 +1357,7 @@ void add_scsi_disks(const char *title, const int max_scsi_id, CConfigurator *par
     while (TRUE)
     {
         int sel = show_menu(title, entry.data(), num_entries, MENU_4TH_LEVEL);
+
         if (sel <= 0)
             break;
 
@@ -1283,15 +1393,15 @@ void validation_hotkey(FIELD *field)
     // TODO: I found no way to match case-insensitively?!
     // see src/sdl.cpp parse_sdl_hotkey() et al.
     set_field_type(field, TYPE_REGEXP,
-        "^ *"
-        "(none|"
-        "((Ctrl|Alt|Shift|GUI|Control|Option|Command|Cmd|Super|Win|Windows|Meta)"
-        "(\\+(Ctrl|Alt|Shift|GUI|Control|Option|Command|Cmd|Super|Win|Windows|Meta))*"
-        "\\+(F[0-9]+|PageUp|PageDown|Insert|Delete|Escape|Home|End|Keypad \\+|Keypad -|PgUp|PgDn|PageDn|Ins|Del|Esc|KeypadPlus|KpPlus|KeypadMinus|KpMinus|[A-Z0-9])"
-        ")) *$");
+                   "^ *"
+                   "(none|"
+                   "((Ctrl|Alt|Shift|GUI|Control|Option|Command|Cmd|Super|Win|Windows|Meta)"
+                   "(\\+(Ctrl|Alt|Shift|GUI|Control|Option|Command|Cmd|Super|Win|Windows|Meta))*"
+                   "\\+(F[0-9]+|PageUp|PageDown|Insert|Delete|Escape|Home|End|Keypad \\+|Keypad -|PgUp|PgDn|PageDn|Ins|Del|Esc|KeypadPlus|KpPlus|KeypadMinus|KpMinus|[A-Z0-9])"
+                   ")) *$");
 }
 
-#define HOTKEY_HELP \
+#define HOTKEY_HELP                                                                       \
     "Values are case-insensitive combinations such as \"Ctrl+F11\" or \"GUI+Shift+M\".\n" \
     "Modifiers, if any, precede exactly one non-modifier key.\n"                          \
     "Supported modifiers are Ctrl, Alt, Shift and GUI; Control, Option, Command,\n"       \
@@ -1327,14 +1437,11 @@ void edit_gui_sdl_keyboard(const char *title)
          "The keymap file to use when keyboard.use_mapping is enabled.",
          validation_file},
         {"hotkey.media", "Ctrl+F11", "hotkey.media",
-         "Host key combination used to bring up the removable media selector.\n"
-         HOTKEY_HELP,
+         "Host key combination used to bring up the removable media selector.\n" HOTKEY_HELP,
          validation_hotkey},
         {"hotkey.ctrl_alt_delete", "Ctrl+Alt+End", "hotkey.ctrl_alt_delete",
-         "Host key combination used to send Ctrl+Alt+Delete to the guest.\n"
-         HOTKEY_HELP,
-         validation_hotkey}
-    };
+         "Host key combination used to send Ctrl+Alt+Delete to the guest.\n" HOTKEY_HELP,
+         validation_hotkey}};
     const int num_entries = ARRAY_SIZE(entry);
     CConfigurator *c;
     FormValues_t preset;
@@ -1353,13 +1460,17 @@ void edit_gui_sdl_keyboard(const char *title)
 
     FormValues_t values = show_form(title, entry, preset, num_entries, check_gui_sdl_keyboard);
 
-    for (int i = 0; i < num_entries; ++i)
-        c->set_value(strdup(entry[i].name), strdup(values[i]));
+    if (values != NULL)
+    {
+        for (int i = 0; i < num_entries; ++i)
+            c->set_value(strdup(entry[i].name), strdup(values[i]));
 
-    // Clean up
-    for (int i = 0; i < num_entries; ++i)
-        free(values[i]);
-    free(values);
+        // Clean up
+        for (int i = 0; i < num_entries; ++i)
+            free(values[i]);
+        free(values);
+    }
+    free(preset);
 }
 
 void validation_gui_sdl_mousespeed(FIELD *field)
@@ -1383,10 +1494,8 @@ void edit_gui_sdl_mouse(const char *title)
          "Reverse the direction of host mouse motion on the vertical axis.",
          validation_yes_no},
         {"hotkey.mouse_capture", "Ctrl+F10", "hotkey.mouse_capture",
-         "Host key combination used to toggle mouse capture.\n"
-         HOTKEY_HELP,
-         validation_hotkey}
-    };
+         "Host key combination used to toggle mouse capture.\n" HOTKEY_HELP,
+         validation_hotkey}};
     const int num_entries = ARRAY_SIZE(entry);
     CConfigurator *c;
     FormValues_t preset;
@@ -1405,13 +1514,17 @@ void edit_gui_sdl_mouse(const char *title)
 
     FormValues_t values = show_form(title, entry, preset, num_entries, NULL);
 
-    for (int i = 0; i < num_entries; ++i)
-        c->set_value(strdup(entry[i].name), strdup(values[i]));
+    if (values != NULL)
+    {
+        for (int i = 0; i < num_entries; ++i)
+            c->set_value(strdup(entry[i].name), strdup(values[i]));
 
-    // Clean up
-    for (int i = 0; i < num_entries; ++i)
-        free(values[i]);
-    free(values);
+        // Clean up
+        for (int i = 0; i < num_entries; ++i)
+            free(values[i]);
+        free(values);
+    }
+    free(preset);
 }
 
 void validation_gui_sdl_scaleratio(FIELD *field)
@@ -1441,18 +1554,14 @@ void edit_gui_sdl_video(const char *title)
          "when runtime display scale changes are enabled.",
          validation_yes_no},
         {"hotkey.scale_up", "Ctrl+PageUp", "hotkey.scale_up",
-         "Host key combination used to increase runtime window scale by 1 (clamped at 8x).\n"
-         HOTKEY_HELP,
+         "Host key combination used to increase runtime window scale by 1 (clamped at 8x).\n" HOTKEY_HELP,
          validation_hotkey},
         {"hotkey.scale_down", "Ctrl+PageDown", "hotkey.scale_down",
-         "Host key combination used to decrease runtime window scale by 1 (clamped at 1x).\n"
-         HOTKEY_HELP,
+         "Host key combination used to decrease runtime window scale by 1 (clamped at 1x).\n" HOTKEY_HELP,
          validation_hotkey},
         {"hotkey.reset_window", "Ctrl+Alt+Home", "hotkey.reset_window",
-         "Host key combination used to reset window size.\n"
-         HOTKEY_HELP,
-         validation_hotkey}
-    };
+         "Host key combination used to reset window size.\n" HOTKEY_HELP,
+         validation_hotkey}};
     const int num_entries = ARRAY_SIZE(entry);
     CConfigurator *c;
     FormValues_t preset;
@@ -1471,13 +1580,17 @@ void edit_gui_sdl_video(const char *title)
 
     FormValues_t values = show_form(title, entry, preset, num_entries, NULL);
 
-    for (int i = 0; i < num_entries; ++i)
-        c->set_value(strdup(entry[i].name), strdup(values[i]));
+    if (values != NULL)
+    {
+        for (int i = 0; i < num_entries; ++i)
+            c->set_value(strdup(entry[i].name), strdup(values[i]));
 
-    // Clean up
-    for (int i = 0; i < num_entries; ++i)
-        free(values[i]);
-    free(values);
+        // Clean up
+        for (int i = 0; i < num_entries; ++i)
+            free(values[i]);
+        free(values);
+    }
+    free(preset);
 }
 
 // Menu for SDL GUI
@@ -1486,14 +1599,18 @@ void edit_gui_sdl(const char *title)
     MenuEntry_t entry[] = {
         {"Edit keyboard settings", "Edit SDL keyboard and general settings.", edit_gui_sdl_keyboard},
         {"Edit mouse settings", "Edit SDL mouse settings.", edit_gui_sdl_mouse},
-        {"Edit video settings", "Edit SDL video settings.", edit_gui_sdl_video}
-    };
+        {"Edit video settings", "Edit SDL video settings.", edit_gui_sdl_video}};
     const int num_entries = ARRAY_SIZE(entry);
     CConfigurator *c;
 
     c = theConfig->find_child("gui");
+    if (c != nullptr && strcmp(c->get_myValue(), "sdl"))
+    {
+        c->remove_child(c->get_myName());
+        c = nullptr;
+    }
     if (c == nullptr)
-        c = new CConfigurator(theConfig, (char*)"gui", (char*)"sdl");
+        c = new CConfigurator(theConfig, (char *)"gui", (char *)"sdl");
 
     show_menu(title, entry, num_entries, MENU_3RD_LEVEL);
 }
@@ -1531,6 +1648,11 @@ void edit_gui_x11(const char *title)
     FormValues_t preset;
 
     c = theConfig->find_child("gui");
+    if (c != nullptr && strcmp(c->get_myValue(), "x11"))
+    {
+        c->remove_child(c->get_myName());
+        c = nullptr;
+    }
     if (c == nullptr)
         c = new CConfigurator(theConfig, (char*)"gui", (char*)"x11");
 
@@ -1547,15 +1669,16 @@ void edit_gui_x11(const char *title)
 
     FormValues_t values = show_form(title, entry, preset, num_entries, check_gui_x11);
 
-    for (int i = 0; i < num_entries; ++i)
+    if (values != NULL)
     {
-        c->set_value(strdup(entry[i].name), strdup(values[i]));
-    }
+        for (int i = 0; i < num_entries; ++i)
+            c->set_value(strdup(entry[i].name), strdup(values[i]));
 
-    // Clean up
-    for (int i = 0; i < num_entries; ++i)
-        free(values[i]);
-    free(values);
+        // Clean up
+        for (int i = 0; i < num_entries; ++i)
+            free(values[i]);
+        free(values);
+    }
     free(preset);
 }
 #endif // HAVE_X11
@@ -1716,17 +1839,20 @@ void edit_tsunami(const char *title)
 
     FormValues_t values = show_form(title, entry, preset, num_entries, check_tsunami);
 
-    idx = fentry_index(entry, num_entries, "memory size");
-    sys0->set_value(strdup("memory.bits"), strdup(i2s(memory_size2bits(values[idx])).c_str()));
+    if (values != NULL)
+    {
+        idx = fentry_index(entry, num_entries, "memory size");
+        sys0->set_value(strdup("memory.bits"), strdup(i2s(memory_size2bits(values[idx])).c_str()));
 
-    for (int i = 0; i < num_entries; ++i)
-        if (entry[i].name != NULL && (strcmp(entry[i].name, "time") || strcmp(values[i], "")))
-            sys0->set_value(strdup(entry[i].name), strdup(values[i]));
+        for (int i = 0; i < num_entries; ++i)
+            if (entry[i].name != NULL && (strcmp(entry[i].name, "time") || strcmp(values[i], "")))
+                sys0->set_value(strdup(entry[i].name), strdup(values[i]));
 
-    // Clean up
-    for (int i = 0; i < num_entries; ++i)
-        free(values[i]);
-    free(values);
+        // Clean up
+        for (int i = 0; i < num_entries; ++i)
+            free(values[i]);
+        free(values);
+    }
     free(preset);
 }
 
@@ -1778,10 +1904,10 @@ void edit_ev68cb(const char *title)
         const string max_ticks = cpu + ".timer.max_instr_per_tick";
         entry.push_back({strdup(max_ticks.c_str()), "1250000", "timer.max_instr_per_tick",
                          "Upper bound on guest instructions retired between 1024 Hz interval-timer\n"
-                        "ticks. Real Alpha silicon topped out at 1.25 GHz (EV68).\n"
-                        "A CPU that reaches this bound before the next wall-clock tick is due is\n"
-                        "held (slept) until the tick lands, so the guest never sees more than this\n"
-                        "many instructions per tick and its tick-counted clock stays wall-clock accurate.",
+                         "ticks. Real Alpha silicon topped out at 1.25 GHz (EV68).\n"
+                         "A CPU that reaches this bound before the next wall-clock tick is due is\n"
+                         "held (slept) until the tick lands, so the guest never sees more than this\n"
+                         "many instructions per tick and its tick-counted clock stays wall-clock accurate.",
                          validation_ev68cb_max_ticks});
     }
     const int num_entries = entry.size();
@@ -1825,37 +1951,40 @@ void edit_ev68cb(const char *title)
 
     FormValues_t values = show_form(title, entry.data(), preset, num_entries, NULL);
 
-    for (int i = 0, j = 0; i < MAX_CPUS; ++i)
+    if (values != NULL)
     {
-        const string enabled = "cpu" + i2s(i) + " enabled?";
-        idx = fentry_index(entry.data(), num_entries, enabled.c_str());
-        if (!strcmp(values[idx], STR_YES))
+        for (int i = 0, j = 0; i < MAX_CPUS; ++i)
         {
-            const string cpu = "cpu" + i2s(j++);
-            c = sys0->find_child(cpu.c_str());
-            if (c != nullptr)
-                sys0->remove_child(c->get_myName());
-            c = new CConfigurator(sys0, (char *)cpu.c_str(), (char *)"ev68cb");
-            for (int k = i * entries_per_cpu; k < (i + 1) * entries_per_cpu; ++k)
-                if (entry[k].name != NULL)
-                    c->set_value(strdup(entry[k].name), strdup(values[k]));
+            const string enabled = "cpu" + i2s(i) + " enabled?";
+            idx = fentry_index(entry.data(), num_entries, enabled.c_str());
+            if (!strcmp(values[idx], STR_YES))
+            {
+                const string cpu = "cpu" + i2s(j++);
+                c = sys0->find_child(cpu.c_str());
+                if (c != nullptr)
+                    sys0->remove_child(c->get_myName());
+                c = new CConfigurator(sys0, (char *)cpu.c_str(), (char *)"ev68cb");
+                for (int k = i * entries_per_cpu; k < (i + 1) * entries_per_cpu; ++k)
+                    if (entry[k].name != NULL)
+                        c->set_value(strdup(entry[k].name), strdup(values[k]));
+            }
+            else
+            {
+                const string cpu = "cpu" + i2s(i);
+                c = sys0->find_child(cpu.c_str());
+                if (c != nullptr)
+                    sys0->remove_child(c->get_myName());
+            }
         }
-        else
-        {
-            const string cpu = "cpu" + i2s(i);
-            c = sys0->find_child(cpu.c_str());
-            if (c != nullptr)
-                sys0->remove_child(c->get_myName());
-        }
+
+        // Clean up
+        for (int i = 0; i < num_entries; ++i)
+            free(values[i]);
+        free(values);
     }
 
-    // Clean up
     for (int i = 0; i < num_entries; ++i)
-    {
         free((void *)entry[i].label);
-        free(values[i]);
-    }
-    free(values);
     free(preset);
 }
 
@@ -1925,46 +2054,49 @@ void edit_ali(const char *title)
 
     FormValues_t values = show_form(title, entry, preset, num_entries, NULL);
 
-    c = sys0->find_child(PCI_SLOT_ALI);
-    if (c != nullptr)
-        sys0->remove_child(c->get_myName());
-    c = new CConfigurator(sys0, (char *)PCI_SLOT_ALI, (char *)"ali");
-
-    idx = fentry_index(entry, num_entries, "Console Output");
-    c->set_value(strdup(entry[idx].name), strdup(!strcmp(values[idx], "graphics") ? STR_YES : STR_NO));
-
-    idx = fentry_index(entry, num_entries, "LPT Output");
-    if (strcmp(values[idx], ""))
-        c->set_value(strdup(entry[idx].name), strdup(values[idx]));
-
-    idx = fentry_index(entry, num_entries, "M7101 PMU enabled?");
-    if (!strcmp(values[idx], STR_YES))
+    if (values != NULL)
     {
-        c = sys0->find_child(PCI_SLOT_PMU);
-        if (c == nullptr)
-            c = new CConfigurator(sys0, (char *)PCI_SLOT_PMU, (char *)"ali_pmu");
-    }
-    else
-    {
-        sys0->remove_child(PCI_SLOT_PMU);
-    }
+        c = sys0->find_child(PCI_SLOT_ALI);
+        if (c != nullptr)
+            sys0->remove_child(c->get_myName());
+        c = new CConfigurator(sys0, (char *)PCI_SLOT_ALI, (char *)"ali");
 
-    idx = fentry_index(entry, num_entries, "USB controller enabled?");
-    if (!strcmp(values[idx], STR_YES))
-    {
-        c = sys0->find_child(PCI_SLOT_USB);
-        if (c == nullptr)
-            c = new CConfigurator(sys0, (char *)PCI_SLOT_USB, (char *)"ali_usb");
-    }
-    else
-    {
-        sys0->remove_child(PCI_SLOT_USB);
-    }
+        idx = fentry_index(entry, num_entries, "Console Output");
+        c->set_value(strdup(entry[idx].name), strdup(!strcmp(values[idx], "graphics") ? STR_YES : STR_NO));
 
-    // Clean up
-    for (int i = 0; i < num_entries; ++i)
-        free(values[i]);
-    free(values);
+        idx = fentry_index(entry, num_entries, "LPT Output");
+        if (strcmp(values[idx], ""))
+            c->set_value(strdup(entry[idx].name), strdup(values[idx]));
+
+        idx = fentry_index(entry, num_entries, "M7101 PMU enabled?");
+        if (!strcmp(values[idx], STR_YES))
+        {
+            c = sys0->find_child(PCI_SLOT_PMU);
+            if (c == nullptr)
+                c = new CConfigurator(sys0, (char *)PCI_SLOT_PMU, (char *)"ali_pmu");
+        }
+        else
+        {
+            sys0->remove_child(PCI_SLOT_PMU);
+        }
+
+        idx = fentry_index(entry, num_entries, "USB controller enabled?");
+        if (!strcmp(values[idx], STR_YES))
+        {
+            c = sys0->find_child(PCI_SLOT_USB);
+            if (c == nullptr)
+                c = new CConfigurator(sys0, (char *)PCI_SLOT_USB, (char *)"ali_usb");
+        }
+        else
+        {
+            sys0->remove_child(PCI_SLOT_USB);
+        }
+
+        // Clean up
+        for (int i = 0; i < num_entries; ++i)
+            free(values[i]);
+        free(values);
+    }
     free(preset);
 }
 
@@ -2046,23 +2178,26 @@ void edit_pci_vga_s3(const char *title)
 
     FormValues_t values = show_form(title, entry, preset, num_entries, check_pci_vga_s3);
 
-    if (c != nullptr)
-        sys0->remove_child(c->get_myName());
+    if (values != NULL)
+    {
+        if (c != nullptr)
+            sys0->remove_child(c->get_myName());
 
-    idx = fentry_index(entry, num_entries, "PCI slot");
-    c = get_pcislot(values[idx]);
-    if (c != nullptr)
-        sys0->remove_child(c->get_myName());
-    c = new CConfigurator(sys0, (char *)(string("pci") + values[idx]).c_str(), (char *)"s3");
+        idx = fentry_index(entry, num_entries, "PCI slot");
+        c = get_pcislot(values[idx]);
+        if (c != nullptr)
+            sys0->remove_child(c->get_myName());
+        c = new CConfigurator(sys0, (char *)(string("pci") + values[idx]).c_str(), (char *)"s3");
 
-    for (int i = 0; i < num_entries; ++i)
-        if (i != idx && entry[i].name != NULL)
-            c->set_value(strdup(entry[i].name), strdup(values[i]));
+        for (int i = 0; i < num_entries; ++i)
+            if (i != idx && entry[i].name != NULL)
+                c->set_value(strdup(entry[i].name), strdup(values[i]));
 
-    // Clean up
-    for (int i = 0; i < num_entries; ++i)
-        free(values[i]);
-    free(values);
+        // Clean up
+        for (int i = 0; i < num_entries; ++i)
+            free(values[i]);
+        free(values);
+    }
     free(preset);
     free(first_free_pcislot);
 }
@@ -2263,22 +2398,25 @@ void edit_pci_dec21143(const char *title)
 
     FormValues_t values = show_form(title, entry, preset, num_entries, NULL);
 
-    if (c != nullptr)
-        sys0->remove_child(c->get_myName());
+    if (values != NULL)
+    {
+        if (c != nullptr)
+            sys0->remove_child(c->get_myName());
 
-    idx = fentry_index(entry, num_entries, "PCI slot");
-    c = get_pcislot(values[idx]);
-    if (c == nullptr)
-        c = new CConfigurator(sys0, (char *)(string("pci") + values[idx]).c_str(), (char *)"dec21143");
+        idx = fentry_index(entry, num_entries, "PCI slot");
+        c = get_pcislot(values[idx]);
+        if (c == nullptr)
+            c = new CConfigurator(sys0, (char *)(string("pci") + values[idx]).c_str(), (char *)"dec21143");
 
-    for (int i = 0; i < num_entries; ++i)
-        if (entry[i].name != NULL)
-            c->set_value(strdup(entry[i].name), strdup(values[i]));
+        for (int i = 0; i < num_entries; ++i)
+            if (entry[i].name != NULL)
+                c->set_value(strdup(entry[i].name), strdup(values[i]));
 
-    // Clean up
-    for (int i = 0; i < num_entries; ++i)
-        free(values[i]);
-    free(values);
+        // Clean up
+        for (int i = 0; i < num_entries; ++i)
+            free(values[i]);
+        free(values);
+    }
     free(preset);
     free(first_free_pcislot);
 #endif // defined(HAVE_PCAP) || defined(HAVE_TAP_NET) || defined(HAVE_VMNET)
@@ -2321,16 +2459,19 @@ void edit_pci_sym53c810_settings(const char *title)
 
     FormValues_t values = show_form(title, entry, preset, num_entries, NULL);
 
-    if (!strcmp(c->get_myName(), PCI_SLOT_TEMP))
+    if (values != NULL)
     {
-        idx = fentry_index(entry, num_entries, "PCI slot");
-        c->set_value(strdup("pci_slot"), strdup(values[idx]));
-    }
+        if (!strcmp(c->get_myName(), PCI_SLOT_TEMP))
+        {
+            idx = fentry_index(entry, num_entries, "PCI slot");
+            c->set_value(strdup("pci_slot"), strdup(values[idx]));
+        }
 
-    // Clean up
-    for (int i = 0; i < num_entries; ++i)
-        free(values[i]);
-    free(values);
+        // Clean up
+        for (int i = 0; i < num_entries; ++i)
+            free(values[i]);
+        free(values);
+    }
     free(preset);
     free(first_free_pcislot);
 }
@@ -2360,7 +2501,10 @@ void edit_pci_sym53c810(const char *title)
     bool check_failed;
     do
     {
-        show_menu(title, entry, num_entries, MENU_3RD_LEVEL);
+        int sel = show_menu(title, entry, num_entries, MENU_3RD_LEVEL);
+
+        if (sel < 0)
+            break;
 
         check_failed = FALSE;
         if (!strcmp(c->get_myName(), PCI_SLOT_TEMP))
@@ -2495,33 +2639,36 @@ void edit_pci_lsi53c1020_settings(const char *title)
 
     FormValues_t values = show_form(title, entry, preset, num_entries, check_pci_lsi53c1020_settings);
 
-    if (!strcmp(c->get_myName(), PCI_SLOT_TEMP))
+    if (values != NULL)
     {
-        idx = fentry_index(entry, num_entries, "PCI slot");
-        c->set_value(strdup("pci_slot"), strdup(values[idx]));
+        if (!strcmp(c->get_myName(), PCI_SLOT_TEMP))
+        {
+            idx = fentry_index(entry, num_entries, "PCI slot");
+            c->set_value(strdup("pci_slot"), strdup(values[idx]));
+        }
+
+        idx = fentry_index(entry, num_entries, "persistant flash?");
+        if (!strcmp(values[idx], STR_YES))
+        {
+            idx = fentry_index(entry, num_entries, "flash file");
+            c->set_value(strdup(entry[idx].name), strdup(values[idx]));
+        }
+
+        idx = fentry_index(entry, num_entries, "initial LSI BIOS and IOC firmware images?");
+        if (!strcmp(values[idx], STR_YES))
+        {
+            idx = fentry_index(entry, num_entries, "rom file");
+            c->set_value(strdup(entry[idx].name), strdup(values[idx]));
+
+            idx = fentry_index(entry, num_entries, "firmware file");
+            c->set_value(strdup(entry[idx].name), strdup(values[idx]));
+        }
+
+        // Clean up
+        for (int i = 0; i < num_entries; ++i)
+            free(values[i]);
+        free(values);
     }
-
-    idx = fentry_index(entry, num_entries, "persistant flash?");
-    if (!strcmp(values[idx], STR_YES))
-    {
-        idx = fentry_index(entry, num_entries, "flash file");
-        c->set_value(strdup(entry[idx].name), strdup(values[idx]));
-    }
-
-    idx = fentry_index(entry, num_entries, "initial LSI BIOS and IOC firmware images?");
-    if (!strcmp(values[idx], STR_YES))
-    {
-        idx = fentry_index(entry, num_entries, "rom file");
-        c->set_value(strdup(entry[idx].name), strdup(values[idx]));
-
-        idx = fentry_index(entry, num_entries, "firmware file");
-        c->set_value(strdup(entry[idx].name), strdup(values[idx]));
-    }
-
-    // Clean up
-    for (int i = 0; i < num_entries; ++i)
-        free(values[i]);
-    free(values);
     free(preset);
     free(first_free_pcislot);
 }
@@ -2550,7 +2697,10 @@ void edit_pci_lsi53c1020(const char *title)
     bool check_failed;
     do
     {
-        show_menu(title, entry, num_entries, MENU_3RD_LEVEL);
+        int sel = show_menu(title, entry, num_entries, MENU_3RD_LEVEL);
+
+        if (sel < 0)
+            break;
 
         check_failed = FALSE;
         if (!strcmp(c->get_myName(), PCI_SLOT_TEMP))
@@ -2607,19 +2757,22 @@ void edit_pci_es1370(const char *title)
 
     FormValues_t values = show_form(title, entry, preset, num_entries, NULL);
 
-    if (c != nullptr)
-        sys0->remove_child(c->get_myName());
+    if (values != NULL)
+    {   
+        if (c != nullptr)
+            sys0->remove_child(c->get_myName());
 
-    idx = fentry_index(entry, num_entries, "PCI slot");
-    c = get_pcislot(values[idx]);
-    if (c != nullptr)
-        sys0->remove_child(c->get_myName());
-    c = new CConfigurator(sys0, (char *)(string("pci") + values[idx]).c_str(), (char *)"es1370");
+        idx = fentry_index(entry, num_entries, "PCI slot");
+        c = get_pcislot(values[idx]);
+        if (c != nullptr)
+            sys0->remove_child(c->get_myName());
+        c = new CConfigurator(sys0, (char *)(string("pci") + values[idx]).c_str(), (char *)"es1370");
 
-    // Clean up
-    for (int i = 0; i < num_entries; ++i)
-        free(values[i]);
-    free(values);
+        // Clean up
+        for (int i = 0; i < num_entries; ++i)
+            free(values[i]);
+        free(values);
+    }
     free(preset);
     free(first_free_pcislot);
 }
@@ -2805,55 +2958,60 @@ void edit_serial(const char *title)
 
     FormValues_t values = show_form(title, entry, preset, num_entries, check_serial);
 
-    for (int i = 0; i < 2; ++i)
+    if (values != NULL)
     {
-        string serial_name = "serial" + i2s(i);
-        string serial_prefix = serial_name + ".";
-        c = sys0->find_child(serial_name.c_str());
-        if (c != nullptr)
-            sys0->remove_child(c->get_myName());
-        c = new CConfigurator(sys0, (char *)serial_name.c_str(), (char *)"serial");
-
-        idx = fentry_index(entry, num_entries, (serial_prefix + "disabled").c_str());
-        if (!strcmp(values[idx], STR_YES))
+        for (int i = 0; i < 2; ++i)
         {
+            string serial_name = "serial" + i2s(i);
+            string serial_prefix = serial_name + ".";
+            c = sys0->find_child(serial_name.c_str());
+            if (c != nullptr)
+                sys0->remove_child(c->get_myName());
+            c = new CConfigurator(sys0, (char *)serial_name.c_str(), (char *)"serial");
+
+            idx = fentry_index(entry, num_entries, (serial_prefix + "disabled").c_str());
+            if (!strcmp(values[idx], STR_YES))
+            {
+                c->set_value(strdup(entry[idx].name), strdup(values[idx]));
+                continue;
+            }
+
+            idx = fentry_index(entry, num_entries, (serial_prefix + "null_attach").c_str());
+            if (!strcmp(values[idx], STR_YES))
+            {
+                c->set_value(strdup(entry[idx].name), strdup(values[idx]));
+                continue;
+            }
+
+            idx = fentry_index(entry, num_entries, (serial_prefix + "port").c_str());
             c->set_value(strdup(entry[idx].name), strdup(values[idx]));
-            continue;
-        }
 
-        idx = fentry_index(entry, num_entries, (serial_prefix + "null_attach").c_str());
-        if (!strcmp(values[idx], STR_YES))
-        {
+            idx = fentry_index(entry, num_entries, (serial_prefix + "raw_mode").c_str());
             c->set_value(strdup(entry[idx].name), strdup(values[idx]));
-            continue;
+
+            idx = fentry_index(entry, num_entries, (serial_prefix + "program").c_str());
+            if (strcmp(values[idx], ""))
+            {
+                int idx2 = fentry_index(entry, num_entries, (serial_prefix + "arguments").c_str());
+                // TODO: Check program path to determine whether dquotes are necessary
+                string action = dquotes + values[idx] + dquotes + " " + values[idx2];
+                c->set_value(strdup("action"), strdup(action.c_str()));
+            }
         }
 
-        idx = fentry_index(entry, num_entries, (serial_prefix + "port").c_str());
-        c->set_value(strdup(entry[idx].name), strdup(values[idx]));
-
-        idx = fentry_index(entry, num_entries, (serial_prefix + "raw_mode").c_str());
-        c->set_value(strdup(entry[idx].name), strdup(values[idx]));
-
-        idx = fentry_index(entry, num_entries, (serial_prefix + "program").c_str());
-        if (strcmp(values[idx], ""))
-        {
-            int idx2 = fentry_index(entry, num_entries, (serial_prefix + "arguments").c_str());
-            // TODO: Check program path to determine whether dquotes are necessary
-            string action = dquotes + values[idx] + dquotes + " " + values[idx2];
-            c->set_value(strdup("action"), strdup(action.c_str()));
-        }
+        // Clean up
+        for (int i = 0; i < num_entries; ++i)
+            free(values[i]);
+        free(values);
     }
 
     // Clean up
     for (int i = 0; i < num_entries; ++i)
     {
-        free(values[i]);
-
         free((void *)entry[i].label);
         if (i % num_attr == 2 || i % num_attr == 5)
             free((void *)entry[i].preset);
     }
-    free(values);
     free(preset);
 }
 
@@ -2877,7 +3035,8 @@ void edit_floppy(const char *title)
     while (TRUE)
     {
         int sel = show_menu(title, entry, num_entries, MENU_2ND_LEVEL);
-        if (sel == -1)
+
+        if (sel < 0)
             break;
         if (sel == 0)
         {
@@ -2921,13 +3080,16 @@ void edit_ide_settings(const char *title)
 
     FormValues_t values = show_form(title, entry, preset, num_entries, NULL);
 
-    idx = fentry_index(entry, num_entries, "dma?");
-    c->set_value(strdup(entry[idx].name), strdup(values[idx]));
+    if (values != NULL)
+    {
+        idx = fentry_index(entry, num_entries, "dma?");
+        c->set_value(strdup(entry[idx].name), strdup(values[idx]));
 
-    // Clean up
-    for (int i = 0; i < num_entries; ++i)
-        free(values[i]);
-    free(values);
+        // Clean up
+        for (int i = 0; i < num_entries; ++i)
+            free(values[i]);
+        free(values);
+    }
     free(preset);
 }
 
@@ -2947,7 +3109,8 @@ void edit_ide_disks(const char *title)
     while (TRUE)
     {
         int sel = show_menu(title, entry, num_entries, MENU_3RD_LEVEL);
-        if (sel == -1)
+
+        if (sel < 0)
             break;
         if (sel == 0)
         {
@@ -3012,17 +3175,20 @@ void edit_mpu401(const char *title)
 
     FormValues_t values = show_form(title, entry, preset, num_entries, NULL);
 
-    if (c != nullptr)
-        sys0->remove_child(c->get_myName());
-    c = new CConfigurator(sys0, (char *)"mpu0", (char *)"mpu401");
+    if (values != NULL)
+    {
+        if (c != nullptr)
+            sys0->remove_child(c->get_myName());
+        c = new CConfigurator(sys0, (char *)"mpu0", (char *)"mpu401");
 
-    idx = fentry_index(entry, num_entries, "midi_out");
-    c->set_value(strdup(entry[idx].name), strdup(values[idx]));
+        idx = fentry_index(entry, num_entries, "midi_out");
+        c->set_value(strdup(entry[idx].name), strdup(values[idx]));
 
-    // Clean up
-    for (int i = 0; i < num_entries; ++i)
-        free(values[i]);
-    free(values);
+        // Clean up
+        for (int i = 0; i < num_entries; ++i)
+            free(values[i]);
+        free(values);
+    }
     free(preset);
 }
 #endif
@@ -3052,7 +3218,10 @@ bool main_menu(void)
         {"MPU-401 device", "", edit_mpu401}
 #endif
         ,
-        {"Quit without saving", "Quit the program without writing to output file", NULL}};
+        {NULL, NULL, NULL},
+        {"Help", "Help with program usage", show_help},
+        {"Quit", "Quit the program without writing to output file", NULL},
+        {"Exit", "Save the results to the output file, and exit the program", NULL}};
     int num_entries = ARRAY_SIZE(entry);
     CConfigurator *c;
     bool save_results;
@@ -3063,7 +3232,7 @@ bool main_menu(void)
         int sel = show_menu("Main menu", entry, num_entries, MENU_1ST_LEVEL);
 
         check_failed = FALSE;
-        save_results = (sel != num_entries - 1);
+        save_results = (sel == -1 || sel == num_entries - 1);
         if (save_results)
         {
             // Find any VGA card
@@ -3121,7 +3290,7 @@ int main(int argc, char **argv)
     }
     else
     {
-        static char minimal_config[] = "sys0 = tsunami { cpu0 = ev68cb {} }";
+        char minimal_config[] = "sys0 = tsunami { cpu0 = ev68cb {} }";
         theConfig = new CConfigurator(nullptr, NULL, NULL, minimal_config, strlen(minimal_config));
     }
     sys0 = theConfig->find_child("sys0");
@@ -3165,9 +3334,9 @@ int main(int argc, char **argv)
         if (save_results)
             write_configuration(out_filename);
     }
-	catch (CException& e)
-	{
-		printf("Failure: %s\n", e.displayText().c_str());
+    catch (CException &e)
+    {
+        printf("Failure: %s\n", e.displayText().c_str());
     }
 
     return 0;

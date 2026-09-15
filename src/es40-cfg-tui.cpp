@@ -2002,7 +2002,7 @@ void edit_ev68cb(const char *title)
         entry.push_back({strdup(nohle.c_str()), STR_NO, "palcode.vms.nohle",
                          "Disable the high-level emulation (HLE) of the OpenVMS PALcode\n"
                          "and run the real SRM PALcode instead.",
-                         validation_bool});
+                         validation_yes_no});
 #endif
         const string max_ticks = cpu + ".timer.max_instr_per_tick";
         entry.push_back({strdup(max_ticks.c_str()), "1250000", "timer.max_instr_per_tick",

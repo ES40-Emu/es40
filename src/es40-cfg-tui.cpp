@@ -1388,71 +1388,75 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
 
     values = show_form(title, entry, preset, num_entries, check_add_disks);
 
-    idx = fentry_index(entry, num_entries, "Type");
-    disk_type = values[idx];
-    bool is_ramdisk = !strcmp(disk_type, "ramdisk");
-
-    idx = fentry_index(entry, num_entries, "Harddisk or CD-ROM");
-    bool is_cdrom = !strcmp(values[idx], "cd-rom");
-    bool is_floppy = !strcmp(parent->get_myName(), "fdc0");
-    if (is_cdrom && (is_ramdisk || is_floppy))
+    if (values != NULL)
     {
-        free(values[idx]);
-        values[idx] = strdup("disk");
-    }
+        idx = fentry_index(entry, num_entries, "Type");
+        disk_type = values[idx];
+        bool is_ramdisk = !strcmp(disk_type, "ramdisk");
 
-    idx = fentry_index(entry, num_entries, "Read-only?");
-    if (is_ramdisk)
-    {
-        free(values[idx]);
-        values[idx] = strdup(STR_NO);
-    }
-    else if (is_cdrom)
-    {
-        free(values[idx]);
-        values[idx] = strdup(STR_YES);
-    }
-
-    if (c != nullptr)
-        parent->remove_child(c->get_myName());
-    c = new CConfigurator(parent, (char *)disk_name, disk_type);
-
-    for (int i = 0; i < num_entries; ++i)
-    {
-        if (!strcmp(entry[i].label, "Harddisk or CD-ROM"))
+        idx = fentry_index(entry, num_entries, "Harddisk or CD-ROM");
+        bool is_cdrom = !strcmp(values[idx], "cd-rom");
+        bool is_floppy = !strcmp(parent->get_myName(), "fdc0");
+        if (is_cdrom && (is_ramdisk || is_floppy))
         {
-            if (!strcmp(values[i], "cd-rom"))
-                c->set_value(strdup(entry[i].name), strdup(STR_YES));
-            else
-                c->set_value(strdup(entry[i].name), strdup(STR_NO));
-            continue;
+            free(values[idx]);
+            values[idx] = strdup("disk");
         }
 
-        if (entry[i].name != NULL)
+        idx = fentry_index(entry, num_entries, "Read-only?");
+        if (is_ramdisk)
         {
-            c->set_value(strdup(entry[i].name), strdup(values[i]));
-            continue;
+            free(values[idx]);
+            values[idx] = strdup(STR_NO);
+        }
+        else if (is_cdrom)
+        {
+            free(values[idx]);
+            values[idx] = strdup(STR_YES);
         }
 
-        if (!strcmp(entry[i].label, "File / Device name") &&
-            (!strcmp(disk_type, "file") || !strcmp(disk_type, "device")))
-            c->set_value(strdup(disk_type), strdup(values[i]));
+        if (c != nullptr)
+            parent->remove_child(c->get_myName());
+        c = new CConfigurator(parent, (char *)disk_name, disk_type);
 
-        if (!strcmp(entry[i].label, "Autocreate size"))
+        for (int i = 0; i < num_entries; ++i)
         {
-            int last = strlen(values[i]) - 1;
-            values[i][last] = toupper(values[i][last]);
-            if (is_ramdisk)
-                c->set_value(strdup("size"), strdup(values[i]));
-            if (!strcmp(disk_type, "file") && strcmp(values[i], ""))
-                c->set_value(strdup("autocreate_size"), strdup(values[i]));
+            if (!strcmp(entry[i].label, "Harddisk or CD-ROM"))
+            {
+                if (!strcmp(values[i], "cd-rom"))
+                    c->set_value(strdup(entry[i].name), strdup(STR_YES));
+                else
+                    c->set_value(strdup(entry[i].name), strdup(STR_NO));
+                continue;
+            }
+
+            if (entry[i].name != NULL)
+            {
+                c->set_value(strdup(entry[i].name), strdup(values[i]));
+                continue;
+            }
+
+            if (!strcmp(entry[i].label, "File / Device name") &&
+                (!strcmp(disk_type, "file") || !strcmp(disk_type, "device")))
+                c->set_value(strdup(disk_type), strdup(values[i]));
+
+            if (!strcmp(entry[i].label, "Autocreate size"))
+            {
+                int last = strlen(values[i]) - 1;
+                values[i][last] = toupper(values[i][last]);
+                if (is_ramdisk)
+                    c->set_value(strdup("size"), strdup(values[i]));
+                if (!strcmp(disk_type, "file") && strcmp(values[i], ""))
+                    c->set_value(strdup("autocreate_size"), strdup(values[i]));
+            }
         }
+
+        // Clean up
+        for (int i = 0; i < num_entries; ++i)
+            free(values[i]);
+        free(values);
     }
 
-    // Clean up
-    for (int i = 0; i < num_entries; ++i)
-        free(values[i]);
-    free(values);
     free(preset);
 }
 

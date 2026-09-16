@@ -61,7 +61,6 @@
 #include <ctype.h>
 #include <locale.h>
 
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -432,7 +431,7 @@ void write_configuration(const char *filename)
     }
 
     // theConfig->write_configuration(f);
-    /* The above does'nt work - The emulator does not recognize the gui section if it appears after the sys0 section */
+    /* The above doesn't work - The emulator does not recognize the gui section if it appears after the sys0 section */
     CConfigurator *c = theConfig->find_child("gui");
     if (c != nullptr)
         c->write_configuration(f);
@@ -762,16 +761,12 @@ FormValues_t show_form(
     {
         // Coordinates relative to the form's derwin() window!
         my_fld[i] = new_field(1, nCols - 1, 2 * i + 1, 1, FALSE, 0);
-        if (entry[i].preset != NULL)
-        {
+
+        if (preset[i] != NULL)
             set_field_buffer(my_fld[i], 0, preset[i]);
-#if defined(_WIN32)
-            // NetBSD libform rejects an unmodified field when O_PASSOK is off instead of
-            // validating it (as ncurses does), so mark presets as modified.
-            set_field_status(my_fld[i], TRUE);
-#endif
-        }
-        set_field_back(my_fld[i], A_UNDERLINE); // Make the field visible.
+        else if (entry[i].preset != NULL)
+            set_field_buffer(my_fld[i], 0, entry[i].preset);
+
         field_opts_off(my_fld[i], O_AUTOSKIP);  // Don't skip to next field when running off the end.
         field_opts_off(my_fld[i], O_STATIC);    // Use a dynamic length field ...
         set_max_field(my_fld[i], 256);          // ... of at most 256.
@@ -780,11 +775,34 @@ FormValues_t show_form(
         ValidationFuncPtr set_field_validation = entry[i].validation_callback;
         if (set_field_validation != NULL)
         {
+            void validation_yes_no(FIELD *);
+
             set_field_validation(my_fld[i]);
             field_opts_off(my_fld[i], O_PASSOK); // Valdidate on every exit
             if (field_type(my_fld[i]) == TYPE_INTEGER || field_type(my_fld[i]) == TYPE_NUMERIC)
                 field_opts_off(my_fld[i], O_NULLOK); // Don't allow empty field
+
+            if (field_type(my_fld[i]) == TYPE_ENUM && set_field_validation == validation_yes_no)
+            {
+                // Normalize values read from a file
+                if (!strcmp(preset[i], "0") || !strcasecmp(preset[i], "false"))
+                    set_field_buffer(my_fld[i], 0, STR_NO);
+                else if (!strcmp(preset[i], "1") || !strcasecmp(preset[i], "true"))
+                    set_field_buffer(my_fld[i], 0, STR_YES);                
+            }
         }
+
+        if (set_field_validation == NULL || field_type(my_fld[i]) != TYPE_ENUM)
+            set_field_back(my_fld[i], A_UNDERLINE); // Make the field visible.
+        else
+            set_field_back(my_fld[i], A_NORMAL); // Clarify that you can't enter data
+
+#if defined(_WIN32)
+        if ((preset[i] != NULL || entry[i].preset != NULL) && (field_opts(my_fld[i]) & O_PASSOK) == 0)
+            // NetBSD libform rejects an unmodified field when O_PASSOK is off instead of
+            // validating it (as ncurses does), so mark presets as modified.
+            set_field_status(my_fld[i], TRUE);
+#endif
     }
     my_fld[num_entries] = NULL;
 
@@ -1175,11 +1193,13 @@ void validation_mac(FIELD *field)
 
 void validation_pcislot(FIELD *field)
 {
-    // Only include free PCI slots
+    // Only include free PCI slots, plus the field's set slot
+    int mybus = 99, myslot = 99;
+    sscanf(field_buffer(field, 0), "%d.%d", &mybus, &myslot);
     vector<char *> choices;
     for (int bus = 0; bus <= 1; ++bus)
         for (int slot = 1; slot <= ((bus == 0) ? 4 : 6); ++slot)
-            if (is_pcislot_free(bus, slot))
+            if (is_pcislot_free(bus, slot) || (bus == mybus && slot == myslot))
             {
                 string pcislot = i2s(bus) + "." + i2s(slot);
                 choices.push_back(strdup(pcislot.c_str()));
@@ -3381,7 +3401,7 @@ bool main_menu(void)
                 if (!strcmp(vga_console, STR_YES) && vgacard == nullptr)
                 {
                     show_text("Error",
-                              "You set console=graphics (in the ALI settings)\n"
+                              "You set vga_console=" STR_YES " (in the ALI settings)\n"
                               "without configuring a VGA card (on the PCI bus).");
                     check_failed = TRUE;
                 }

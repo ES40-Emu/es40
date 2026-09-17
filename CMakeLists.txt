@@ -15,6 +15,7 @@ option(ES40_DISABLE_VMNET "Disable vmnet networking on macOS" OFF)
 option(ES40_DISABLE_LSS_LSM "Disable LSS/LSM (lockstep) builds." OFF)
 option(ES40_DISABLE_IDB "Disable IDB (built-in debugger) builds." OFF)
 option(ES40_DISABLE_ASMJIT "Disable ASMJIT" ON)
+option(ES40_ENABLE_CFG_TUI "Enable build of es40_cfg_tui" ON)
 
 # CPU baseline: AVX2 (default, Haswell+) for performance, or SSE2 for older-host compatibility.
 # Applied on x86 only (no-op on ARM / Apple Silicon). The JIT emits its own x86 and is unaffected;
@@ -234,6 +235,100 @@ target_link_libraries(es40-cfg PRIVATE
 target_compile_definitions(es40-cfg PUBLIC ${ES40_CFG_DEFINITIONS})
 
 set_property(TARGET es40-cfg PROPERTY CXX_STANDARD 17)
+
+########################### ES40_CFG_TUI ###########################
+
+if (ES40_ENABLE_CFG_TUI)
+	set(ES40_CFG_TUI_SOURCES)
+	set(ES40_CFG_TUI_DEFINITIONS)
+	set(ES40_CFG_TUI_LIBRARIES)
+	
+	list(APPEND ES40_CFG_TUI_SOURCES
+	    src/es40-cfg-tui.cpp
+		src/Configurator.cpp
+	    src/base/Exception.cpp
+	    )
+
+	list(APPEND ES40_CFG_TUI_DEFINITIONS
+		CONFIGURATION_ONLY
+	    )
+
+	if (NOT ES40_DISABLE_ASMJIT)
+		list(APPEND ES40_CFG_TUI_DEFINITIONS ES40_JIT)
+	endif()
+
+	if (NOT ES40_DISABLE_NETWORKING)
+		if (ES40_HAVE_PCAP)
+			list(APPEND ES40_CFG_TUI_DEFINITIONS HAVE_PCAP)
+			if (WIN32)
+				#list(APPEND ES40_CFG_TUI_LIBRARIES NPCap::NPCap)
+			else()
+				list(APPEND ES40_CFG_TUI_LIBRARIES PCap::PCap)
+			endif()
+		endif()
+		if (ES40_HAVE_TAP)
+			list(APPEND ES40_CFG_TUI_DEFINITIONS HAVE_TAP_NET)
+		endif()
+		if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+			list(APPEND ES40_CFG_TUI_DEFINITIONS HAVE_VMNET)
+	        list(APPEND ES40_CFG_TUI_LIBRARIES $<LINK_LIBRARY:FRAMEWORK,vmnet>)
+		endif()
+	endif()
+
+	if (NOT ES40_DISABLE_SDL)
+		list(APPEND ES40_CFG_TUI_DEFINITIONS HAVE_SDL)
+	endif()
+
+	if (WIN32)
+	    list(APPEND ES40_CFG_TUI_LIBRARIES winmm)
+	endif()
+
+	# Curses config
+	# see https://cmake.org/cmake/help/v3.24/module/FindCurses.html
+	# modeled after https://runebook.dev/en/docs/cmake/module/findcurses
+    set(CURSES_NEED_NCURSES ON)
+	find_package(Curses REQUIRED)
+
+	# Manually find the required sub-libraries
+	find_library(CURSES_MENU_LIBRARY NAMES menu)
+	find_library(CURSES_FORM_LIBRARY NAMES form)
+	find_library(CURSES_PANEL_LIBRARY NAMES panel)
+	
+	# Collect all Curses-related libraries
+	set(ALL_CURSES_LIBS 
+	    ${CURSES_LIBRARIES} 
+	    ${CURSES_MENU_LIBRARY} 
+	    ${CURSES_FORM_LIBRARY}
+	    ${CURSES_PANEL_LIBRARY}
+	)
+
+	# Ensure the sub-libraries were found
+	if(NOT CURSES_MENU_LIBRARY OR NOT CURSES_FORM_LIBRARY OR NOT CURSES_PANEL_LIBRARY)
+	    message(FATAL_ERROR "Missing Curses sub-libraries (menu/form/panel).")
+	endif()
+
+	# Manually create the Curses::Curses INTERFACE imported target
+	if(CURSES_FOUND AND NOT TARGET Curses::Curses)
+	    # The INTERFACE library holds the properties needed for other targets to link against
+	    add_library(Curses::Curses INTERFACE IMPORTED)
+	    
+	    # Set the properties
+	    set_target_properties(Curses::Curses PROPERTIES
+	        INTERFACE_LINK_LIBRARIES "${ALL_CURSES_LIBS}"
+	        INTERFACE_INCLUDE_DIRECTORIES "${CURSES_INCLUDE_DIRS}"
+	    )
+	endif()
+	
+	list(APPEND ES40_CFG_TUI_LIBRARIES Curses::Curses)
+
+	add_executable(es40_cfg_tui ${ES40_CFG_TUI_SOURCES})
+	
+	target_include_directories(es40_cfg_tui PUBLIC src/)
+	target_compile_definitions(es40_cfg_tui PUBLIC ${ES40_CFG_TUI_DEFINITIONS})
+	target_link_libraries(es40_cfg_tui PUBLIC ${ES40_CFG_TUI_LIBRARIES})
+	
+	set_property(TARGET es40_cfg_tui PROPERTY CXX_STANDARD 17)
+endif()
 
 ############################### ES40 ###############################
 

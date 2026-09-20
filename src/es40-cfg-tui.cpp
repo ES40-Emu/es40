@@ -2015,7 +2015,10 @@ void edit_tsunami(const char *title)
 
 void validation_ev68cb_cpuspeed(FIELD *field)
 {
-    set_field_type(field, TYPE_INTEGER, 2, 10, 1250);
+    // Preceeding and trailing optional blanks added for trimming the field,
+    // see form_field_validation(3X) manpage
+    // (..)? to allow leaving field empty
+    set_field_type(field, TYPE_REGEXP, "^ *([0-9]+[KkMmGg])? *$");
 }
 
 void validation_ev68cb_max_ticks(FIELD *field)
@@ -2043,8 +2046,8 @@ void edit_ev68cb(const char *title)
                              validation_yes_no});
 
         const string speed = cpu + ".speed";
-        entry.push_back({strdup(speed.c_str()), "500", "speed",
-                         "The CPU speed reported to the guest platform (in MHz, ranging from 10 to 1250).\n"
+        entry.push_back({strdup(speed.c_str()), "500M", "speed",
+                         "The CPU speed reported to the guest platform (in Hz, ranging from 10M to 1250M).\n"
                          "This does not affect the speed of the emulation.",
                          validation_ev68cb_cpuspeed});
 #ifndef ES40_JIT

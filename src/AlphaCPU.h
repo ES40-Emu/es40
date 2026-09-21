@@ -218,6 +218,7 @@
 #define INCLUDED_ALPHACPU_H
 
 #include <atomic>
+#include "idle_detect.h"
 #include <chrono>
 
 #include "SystemComponent.h"
@@ -470,6 +471,18 @@ private:
 
   // CALL_PAL WTINT idle nap: enabled by the cpu config, announced once
   bool                                  idle_nap_enabled = false;
+  u32                                   idle_nap_poll_us = 1000; // idle_nap() wake granularity, us
+  // Host-side idle detection (idle_detect cfg). See idle_detect.h.
+  int                                   idle_rule = RULE_NONE;   // EIdleRule, from idle_detect
+  u32                                   idle_spin_count = 2;      // consecutive hits before napping
+  u64                                   idle_spin_min_instr = 0;  // a dispatch must have run at least this many
+  u64                                   m_spin_ic = 0;            // instruction count at that dispatch
+  u32                                   m_spin_hits = 0;
+  // Working set of the current run of full-budget dispatches.
+  static const int                      kSpinSetMax = 8;
+  u64                                   m_spin_set[kSpinSetMax] = { 0 };
+  int                                   m_spin_set_n = 0;
+  bool                                  m_spin_announced = false;
   bool                                  idle_announced = false;
 
   // Wall-clock RPCC: state.cc advances by real elapsed time * cpu_hz so it tracks the configured

@@ -756,10 +756,10 @@ int main(int argc, char* argv[])
 
 	NumberQuestion mhz_q;
 
-	mhz_q.setQuestion("What should the reported to guest platform speed of the CPUs be in Hz?");
+	mhz_q.setQuestion("What should the reported to guest platform speed of the CPUs be in MHz?");
 	mhz_q.setExplanation("This only changes the CPU speed reported to the OS; not the speed of the emulation.");
-	mhz_q.setRange(10000000, 1250000000);
-	mhz_q.setDefault("500000000");
+	mhz_q.setRange(10, 1250);
+	mhz_q.setDefault("500");
 
 	mhz_q.ask();
 

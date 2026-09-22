@@ -2018,7 +2018,7 @@ void validation_ev68cb_cpuspeed(FIELD *field)
     // Preceeding and trailing optional blanks added for trimming the field,
     // see form_field_validation(3X) manpage
     // (..)? to allow leaving field empty
-    set_field_type(field, TYPE_REGEXP, "^ *([0-9]+[KkMmGg])? *$");
+    set_field_type(field, TYPE_INTEGER, 2, 10, 1250);
 }
 
 void validation_ev68cb_max_ticks(FIELD *field)
@@ -2046,8 +2046,8 @@ void edit_ev68cb(const char *title)
                              validation_yes_no});
 
         const string speed = cpu + ".speed";
-        entry.push_back({strdup(speed.c_str()), "500M", "speed",
-                         "The CPU speed reported to the guest platform (in Hz, ranging from 10M to 1250M).\n"
+        entry.push_back({strdup(speed.c_str()), "500", "speed",
+                         "The CPU speed reported to the guest platform (in MHz, ranging from 10 to 1250).\n"
                          "This does not affect the speed of the emulation.",
                          validation_ev68cb_cpuspeed});
 #ifndef ES40_JIT
@@ -2071,6 +2071,7 @@ void edit_ev68cb(const char *title)
     CConfigurator *c;
     FormValues_t preset;
     int idx;
+    char speed[5+1];
 
     preset = (FormValues_t)calloc(num_entries, sizeof(char *));
 
@@ -2085,7 +2086,20 @@ void edit_ev68cb(const char *title)
             {
                 char *p;
                 if (c != nullptr && (p = c->get_text_value(entry[k].name)) != NULL)
-                    preset[k] = p;
+                {
+                    if (!strcmp(entry[k].name, "speed"))
+                    {
+                        // Cut off the trailing "M"
+                        size_t len = strlen(p) - 1;
+                        if (len >= sizeof(speed))
+                            len = sizeof(speed) - 1;
+                        strncpy(speed, p, len);
+                        speed[len] = '\0';
+                        preset[k] = strdup(speed);
+                    }
+                    else
+                        preset[k] = p;
+                }
                 else
                     preset[k] = (char *)entry[k].preset;
             }
@@ -2122,7 +2136,16 @@ void edit_ev68cb(const char *title)
                 c = new CConfigurator(sys0, (char *)cpu.c_str(), (char *)"ev68cb");
                 for (int k = i * entries_per_cpu; k < (i + 1) * entries_per_cpu; ++k)
                     if (entry[k].name != NULL)
-                        c->set_value(strdup(entry[k].name), strdup(values[k]));
+                    {
+                        if (!strcmp(entry[k].name, "speed"))
+                        {
+                            // Add the trailing "M"
+                            snprintf(speed, sizeof(speed), "%sM", values[k]);
+                            c->set_value(strdup(entry[k].name), strdup(speed));
+                        }
+                        else
+                            c->set_value(strdup(entry[k].name), strdup(values[k]));
+                    }
             }
             else
             {

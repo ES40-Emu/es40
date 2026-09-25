@@ -723,7 +723,9 @@ bool CAliM1543C::decodes_memory_access(int index, u64 address, int dsize,
 
 bool CAliM1543C::memory_decode_fallback(int index) const noexcept
 {
-	return index == 60;
+	// READ_DATA models an empty ISA PnP bus, not another device.
+	// Let an actual endpoint behind this bridge supply occupied-port data.
+	return index == 52 || index == 60;
 }
 
 /**

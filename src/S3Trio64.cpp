@@ -1415,19 +1415,11 @@ void CS3Trio64::crtc_map(address_map& map)
 			svga.bank_r = svga.bank_w;
 			})
 	);
-	// Extended BIOS Flag 3 Register (EBIOS-FLG3) (CR6B) - Bios scratchpad
+	// Extended BIOS Flag 3 (CR6B), R/W BIOS scratchpad (DB014-B 17-14).
+	// Trio64's BAR0 address aliases are CR59/CR5A; CR53[3] is reserved.
 	map(0x6b, 0x6b).lrw8(
 		NAME([this](offs_t offset) {
-			const u8 cr53 = s3.cr53;
-			const u8 cr59 = m_crtc_map.read_byte(0x59);
-			if (cr53 & 0x08) {
-				// Trio64 (not Trio64V2): mask per 86Box for non-V chips 0xFE
-				// (Trio64V would use &0xFC, but ES40 emulates Trio64.)
-				return (u8)(cr59 & 0xFE);
-			}
-			else {
-				return cr59;
-			}
+			return s3.cr6b;
 			}),
 		NAME([this](offs_t offset, u8 data) {
 			s3.cr6b = data;
@@ -1436,15 +1428,7 @@ void CS3Trio64::crtc_map(address_map& map)
 	// Extended BIOS Flag 4 Register (EBIOS-FLG3) (CR6C) - Bios scratchpad
 	map(0x6c, 0x6c).lrw8(
 		NAME([this](offs_t offset) {
-			const u8 cr53 = s3.cr53;
-			if (cr53 & 0x08) {
-				// When NEWMMIO bit is set, readback is 00h. 
-				return 0x00;
-			}
-			else {
-				// Otherwise mirror the documented bit from CR5A (mask to 0x80)
-				return (s3.cr5a & 0x80);
-			}
+			return s3.cr6c;
 			}),
 		NAME([this](offs_t offset, u8 data) {
 			s3.cr6c = data;

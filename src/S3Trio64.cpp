@@ -3190,7 +3190,8 @@ bool CS3Trio64::decodes_memory_access(int index, u64 address, int dsize,
 // It does not guarantee simultaneous completion by multiple cards. 
 // Excluded: RAMDAC 3C6-3C9 (CR34 abort/retry, 8-3/15-5), display memory (7.4)
 // and enhanced command/FIFO ports (10-12). ADVFUNC low-byte and SUBSYS_CNTL
-// word writes are included; SUBSYS_STAT reads remain outside this model.
+// word writes and GP_STAT word reads are included; SUBSYS_STAT reads remain
+// outside this model.
 CSystemComponent::SharedAccessProfile CS3Trio64::shared_access_profile(int index,
 	u64 address, int dsize, bool write) const noexcept
 {
@@ -3204,6 +3205,9 @@ CSystemComponent::SharedAccessProfile CS3Trio64::shared_access_profile(int index
 			? SharedAccessProfile::Trio64RegisterIo : SharedAccessProfile::None;
 	case 11: // 4AE8 ADVFUNC_CNTL low-byte write (DB014-B 11-1)
 		return write && address == 0 && dsize == 8
+			? SharedAccessProfile::Trio64RegisterIo : SharedAccessProfile::None;
+	case 17: // 9AE8 GP_STAT word read; CMD writes stay excluded (DB014-B 18-10/11)
+		return !write && address == 0 && dsize == 16
 			? SharedAccessProfile::Trio64RegisterIo : SharedAccessProfile::None;
 	case 12: // 46E8 setup
 	case 32: // 102 option select

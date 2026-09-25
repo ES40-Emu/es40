@@ -97,6 +97,7 @@
   **/
 #include "StdAfx.h"
 #include "S3Trio64.h"
+#include <cmath>
 #include "System.h"
 #include "AliM1543C.h"
 #include <algorithm>
@@ -1235,10 +1236,10 @@ void CS3Trio64::crtc_map(address_map& map)
 			u8 res = 0;
 			res |= (vga.crtc.horz_total >> 8) & 0x01;           // bit 0
 			res |= ((vga.crtc.horz_disp_end >> 7) & 0x02);      // bit 1
-			res |= ((vga.crtc.horz_blank_start >> 6) & 0x04);    // bit 2 (from vga.crtc.horz_blank_start if needed)
+			res |= s3.cr5d & 0x04;                          // bit 2
 			// bit 3: EHB+64 extension — stored in s3.cr5d
 			res |= (s3.cr5d & 0x08);
-			res |= ((vga.crtc.horz_retrace_start >> 4) & 0x10);  // bit 4
+			res |= s3.cr5d & 0x10;                          // bit 4
 			// bit 5: EHS+32 extension — stored in s3.cr5d
 			res |= (s3.cr5d & 0x20);
 			// bits 6-7: DTP bit8, BGT bit8 — stored in s3.cr5d
@@ -1578,11 +1579,11 @@ void CS3Trio64::sequencer_map(address_map& map)
 	// Video CLK PLL
 	map(0x12, 0x12).lrw8(
 		NAME([this](offs_t offset) { return s3.sr12; }),
-		NAME([this](offs_t offset, u8 data) { s3.sr12 = data; })
+		NAME([this](offs_t offset, u8 data) { s3.sr12 = data; load_dclk(); })
 	);
 	map(0x13, 0x13).lrw8(
 		NAME([this](offs_t offset) { return s3.sr13; }),
-		NAME([this](offs_t offset, u8 data) { s3.sr13 = data; })
+		NAME([this](offs_t offset, u8 data) { s3.sr13 = data; load_dclk(); })
 	);
 	// SR14: CLKSYN Control 1
 	map(0x14, 0x14).lrw8(
@@ -1594,23 +1595,8 @@ void CS3Trio64::sequencer_map(address_map& map)
 	map(0x15, 0x15).lrw8(
 		NAME([this](offs_t offset) { return s3.sr15; }),
 		NAME([this](offs_t offset, u8 data) {
-			// load DCLK frequency (would normally have a small variable delay)
-			if (data & 0x02)
-			{
-				s3.clk_pll_n = s3.sr12 & 0x1f;
-				s3.clk_pll_r = (s3.sr12 & 0x60) >> 5;
-				s3.clk_pll_m = s3.sr13 & 0x7f;
-				s3_define_video_mode();
-			}
-			// immediate DCLK/MCLK load
-			if (data & 0x20)
-			{
-				s3.clk_pll_n = s3.sr12 & 0x1f;
-				s3.clk_pll_r = (s3.sr12 & 0x60) >> 5;
-				s3.clk_pll_m = s3.sr13 & 0x7f;
-				s3_define_video_mode();
-			}
 			s3.sr15 = data;
+			load_dclk();
 			})
 	);
 	map(0x17, 0x17).lr8(
@@ -2486,6 +2472,9 @@ void CS3Trio64::init()
 	memset(&vga, 0, sizeof(vga));
 	memset(&svga, 0, sizeof(svga));
 	memset(&timing, 0, sizeof(timing));
+	m_scan = {};
+	m_scan_initialized = false;
+	m_scan_paused = false;
 	memset(vga.dac.color, 0, sizeof(vga.dac.color));
 	memset(vga.dac.loading, 0, sizeof(vga.dac.loading));
 
@@ -2927,6 +2916,166 @@ void CS3Trio64::gc_map(address_map& map)
 	);
 }
 
+// DB014-B 9-1 and 14-13/16. PLL lock delay is not simulated; a permitted
+// load takes effect at this transaction's sampled time. SR15.1 permits repeated
+// loading, while SR15.5 requests an immediate load. SR12/13 alone are staging
+// registers while both controls are clear.
+void CS3Trio64::load_dclk()
+{
+	if (!(s3.sr15 & 0x22))
+		return;
+	const u32 source = (vga.miscellaneous_output >> 2) & 3;
+	if (source == 2)
+		return; // reserved selection: leave the active oscillator unchanged
+	m_scan.dclk_source = source;
+	if (source == 3) {
+		s3.clk_pll_n = s3.sr12 & 0x1f;
+		s3.clk_pll_r = (s3.sr12 >> 5) & 3;
+		s3.clk_pll_m = s3.sr13 & 0x7f;
+	}
+	// The book specifies the two nominal VGA rates but not the automatic
+	// SR12/13 preset encodings; their inherited readback is left unchanged.
+	s3_define_video_mode();
+}
+
+CS3Trio64::ScanTiming CS3Trio64::scan_timing() const
+{
+	ScanTiming t{};
+	// Horizontal start fields in the inherited VGA structure are only bytes.
+	// CR5D retains the additional bits, independently of those render caches.
+	t.horizontal_total = ((vga.crtc.horz_total & 0xff) |
+		((s3.cr5d & 1) << 8)) + 5;
+	t.horizontal_retrace_start = vga.crtc.horz_retrace_start |
+		((s3.cr5d & 0x10) << 4);
+	t.vertical_total = (vga.crtc.vert_total & 0x7ff) + 2;
+	t.vertical_retrace_start = vga.crtc.vert_retrace_start & 0x7ff;
+	t.vertical_retrace_width = ((vga.crtc.vert_retrace_end -
+		t.vertical_retrace_start - 1) & 15) + 1;
+	t.vertical_divisor = vga.crtc.sldiv ? 2 : 1;
+	t.interlace = (s3.cr42 & 0x20) != 0;
+	t.interlace_offset = s3.cr3c;
+	t.sync_enabled = vga.crtc.sync_en != 0;
+
+	double dclk = 0.0;
+	switch (m_scan.dclk_source) {
+	case 0: dclk = 25175000.0; break;
+	case 1: dclk = 28322000.0; break;
+	case 3:
+		dclk = 14318180.0 * (s3.clk_pll_m + 2) /
+			((s3.clk_pll_n + 2) * (1u << (s3.clk_pll_r & 3)));
+		break;
+	default: break; // rejected when restoring a saved clock source
+	}
+	// SR14.0 powers down DCLK; no external test clock is connected to SR14.7.
+	if (vga.sequencer.data[0x14] & 0x81)
+		dclk = 0.0;
+	// SR15.4 divides the RAMDAC VCLK path, not the CRTC character clock
+	// (DB014-B 9-3). Clock-doubled DAC output does not double these counters.
+	double dots_per_character = (vga.sequencer.data[1] & 1) ? 8.0 : 9.0;
+	if (vga.sequencer.data[1] & 8)
+		dots_per_character *= 2.0;
+	if (s3.cr43 & 0x80)
+		dots_per_character *= 2.0;
+	// The Trio's one-clock 15/16-bit modes use half-sized horizontal units.
+	// Their drivers program twice as many CRTC character counts (CR67=3/5).
+	const u8 color_mode = s3.ext_misc_ctrl_2 >> 4;
+	if (color_mode == 3 || color_mode == 5)
+		dots_per_character /= 2.0;
+	t.characters_per_second = dclk / dots_per_character;
+	// Modular end comparators wrap to the next match, including equal low
+	// bits (32 horizontal / 16 vertical). The equal-edge priority is not
+	// specified by the book; this follows the conventional VGA counter model.
+	// DB014-B labels CR5D.5 "+32 DCLKs", but the S3 Xorg driver programs it
+	// for sync widths exceeding 32 CHARACTER clocks. Add a width extension;
+	// ORing an endpoint bit loses it when the low comparator already wraps.
+	t.horizontal_retrace_width = ((vga.crtc.horz_retrace_end -
+		t.horizontal_retrace_start - 1) & 31) + 1;
+	if (s3.cr5d & 0x20)
+		t.horizontal_retrace_width += 32.0;
+	// CR05.6:5 delays the complete HSYNC pulse by up to three character
+	// clocks; it does not change the end comparator's pulse width (14-22).
+	if (t.horizontal_retrace_start < t.horizontal_total)
+		t.horizontal_retrace_start = (t.horizontal_retrace_start +
+			vga.crtc.horz_retrace_skew) % t.horizontal_total;
+	return t;
+}
+
+void CS3Trio64::advance_scan(std::chrono::steady_clock::time_point now)
+{
+	// A nested bus access can sample a later instant before the outer access
+	// resumes. Never rewind a running counter's anchor and count time twice.
+	if (m_scan_initialized && !m_scan_paused && now < m_scan_time)
+		return;
+	const ScanTiming t = scan_timing();
+	const u32 field_lines = t.vertical_total * t.vertical_divisor;
+	// Mode programming does not restart the oscillator. Retain the counters
+	// and reduce out-of-range positions when software changes the totals.
+	m_scan.character = std::fmod(m_scan.character, double(t.horizontal_total));
+	m_scan.line %= field_lines;
+	if (!t.interlace)
+		m_scan.field = 0;
+	if (m_scan_initialized && !m_scan_paused && now > m_scan_time &&
+		t.characters_per_second > 0.0) {
+		const double seconds = std::chrono::duration<double>(now - m_scan_time).count();
+		const double field_characters = double(t.horizontal_total) * field_lines;
+		const double cycle_characters = field_characters * (t.interlace ? 2 : 1);
+		// Reduce elapsed time before combining it with the saved position; a
+		// long host pause must not overflow an integer scan counter.
+		double position = m_scan.character + double(m_scan.line) * t.horizontal_total;
+		if (t.interlace)
+			position += m_scan.field * field_characters;
+		position = std::fmod(position + std::fmod(seconds * t.characters_per_second,
+			cycle_characters), cycle_characters);
+		m_scan.field = t.interlace && position >= field_characters;
+		position = std::fmod(position, field_characters);
+		m_scan.line = u32(position / t.horizontal_total);
+		m_scan.character = std::fmod(position, double(t.horizontal_total));
+	}
+	m_scan_time = now;
+	m_scan_initialized = true;
+}
+
+u8 CS3Trio64::scan_status(std::chrono::steady_clock::time_point now)
+{
+	advance_scan(now);
+	const ScanTiming t = scan_timing();
+	// DB014-B 14-3: bit 0 is horizontal OR vertical retrace; bit 3 is
+	// vertical retrace alone. Neither display-end nor blanking substitutes
+	// for these pulses. Bit 2 reads one. Screen-off and DAC power-down do
+	// not stop the CRTC; SR00's VGA reset bits have no function on Trio64.
+	if (!t.sync_enabled)
+		return 0x04;
+	auto pulse = [](double position, double start, double width, double total) {
+		return start < total && width > 0.0 &&
+			std::fmod(position + total - start, total) < width;
+	};
+	const bool horizontal = pulse(m_scan.character, t.horizontal_retrace_start,
+		t.horizontal_retrace_width, t.horizontal_total);
+	const double line = m_scan.line + m_scan.character / t.horizontal_total;
+	// Interlaced timings already describe a field. CR3C offsets alternate
+	// field start/end by character clocks (DB014-B 15-11); no second halving
+	// of the programmed vertical total is applied. External genlock and
+	// sub-character PLL/sync propagation delays are not modeled.
+	const double field_lines = t.vertical_total * t.vertical_divisor;
+	const double start = t.vertical_retrace_start * t.vertical_divisor;
+	const double width = t.vertical_retrace_width * t.vertical_divisor;
+	bool vertical = false;
+	if (start < field_lines) {
+		if (t.interlace) {
+			// Evaluate both pulses over the full frame so a pulse crossing a
+			// field boundary retains the offset of the field that started it.
+			const double position = m_scan.field * field_lines + line;
+			const double odd_start = field_lines + start +
+				double(t.interlace_offset) / t.horizontal_total;
+			vertical = pulse(position, start, width, field_lines * 2.0) ||
+				pulse(position, odd_start, width, field_lines * 2.0);
+		} else {
+			vertical = pulse(line, start, width, field_lines);
+		}
+	}
+	return 0x04 | ((horizontal || vertical) ? 0x01 : 0) | (vertical ? 0x08 : 0);
+}
+
 void CS3Trio64::recompute_params_clock(int divisor, int xtal)
 {
 	// Store timing parameters for renderer/debug use -- ES40 specific
@@ -2984,6 +3133,11 @@ void CS3Trio64::recompute_params_clock(int divisor, int xtal)
  **/
 void CS3Trio64::start_threads()
 {
+	{
+		std::lock_guard<std::recursive_mutex> lock(cSystem->get_device_bus_mutex());
+		advance_scan(cSystem->device_access_time());
+		m_scan_paused = false;
+	}
 	// Repaint and resize through the normal GUI path after any resume.
 	state.vga_mem_updated = true;
 	state.last_bpp = 0;
@@ -3004,6 +3158,11 @@ void CS3Trio64::start_threads()
  **/
 void CS3Trio64::stop_threads()
 {
+	{
+		std::lock_guard<std::recursive_mutex> lock(cSystem->get_device_bus_mutex());
+		advance_scan(cSystem->device_access_time());
+		m_scan_paused = true;
+	}
 	// During firmware reset, do NOT kill the S3 thread (it owns the SDL window).
 	// Just pause it so the window stays alive.
 	if (cSystem && cSystem->IsResetInProgress())
@@ -4119,6 +4278,7 @@ int CS3Trio64::SaveState(FILE* f)
 {
 	if (!f || !vga.memory || !vga.svga_intf.vram_size)
 		return -1;
+	advance_scan(cSystem->device_access_time());
 	const int res = CPCIDevice::SaveState(f);
 	if (res)
 		return res;
@@ -4137,6 +4297,7 @@ int CS3Trio64::SaveState(FILE* f)
 		!s3_write_record(f, saved_state) || !s3_write_record(f, saved_vga) ||
 		!s3_write_record(f, s3) || !s3_write_record(f, svga) ||
 		!s3_write_record(f, m_8514.ibm8514) || !s3_write_record(f, io_state) ||
+		!s3_write_record(f, m_scan) ||
 		fwrite(&vram_size, sizeof(vram_size), 1, f) != 1 ||
 		fwrite(vga.memory, vram_size, 1, f) != 1 ||
 		fwrite(&s3_magic2, sizeof(s3_magic2), 1, f) != 1)
@@ -4178,6 +4339,7 @@ int CS3Trio64::RestoreState(FILE* f)
 	decltype(svga) saved_svga{};
 	decltype(m_8514.ibm8514) saved_accel{};
 	u8 io_state[3]{};
+	ScanPosition saved_scan{};
 	u32 magic = 0, video_magic = 0, vram_size = 0;
 	if (fread(&magic, sizeof(magic), 1, f) != 1 || magic != s3_magic1 ||
 		fread(&video_magic, sizeof(video_magic), 1, f) != 1 ||
@@ -4185,11 +4347,17 @@ int CS3Trio64::RestoreState(FILE* f)
 		!s3_read_record(f, saved_state) || !s3_read_record(f, saved_vga) ||
 		!s3_read_record(f, saved_s3) || !s3_read_record(f, saved_svga) ||
 		!s3_read_record(f, saved_accel) || !s3_read_record(f, io_state) ||
+		!s3_read_record(f, saved_scan) ||
 		fread(&vram_size, sizeof(vram_size), 1, f) != 1 ||
 		vram_size != vga.svga_intf.vram_size ||
 		saved_vga.svga_intf.vram_size != vga.svga_intf.vram_size ||
 		saved_state.memsize != state.memsize || io_state[0] > 1 ||
-		(io_state[1] & ~0x18) || (io_state[2] & ~0x01))
+		(io_state[1] & ~0x18) || (io_state[2] & ~0x01) ||
+		!std::isfinite(saved_scan.character) || saved_scan.character < 0.0 ||
+		saved_scan.character >= 516.0 || saved_scan.line >= 4098 ||
+		saved_scan.field > 1 ||
+		(saved_scan.dclk_source != 0 && saved_scan.dclk_source != 1 &&
+		 saved_scan.dclk_source != 3))
 	{
 		printf("%s: Invalid or incompatible graphics state.\n", devid_string);
 		return -1;
@@ -4213,6 +4381,11 @@ int CS3Trio64::RestoreState(FILE* f)
 	m_ioas = io_state[0] != 0;
 	m_video_subsys_enable = io_state[1];
 	m_setup_option_select_0102 = io_state[2];
+	m_scan = saved_scan;
+	m_scan_time = cSystem->device_access_time();
+	m_scan_initialized = true;
+	// Preserve whether the caller stopped the VM. Normal System restore
+	// resumes through start_threads; direct device restores remain runnable.
 	memcpy(vga.memory, saved_vram.data(), vram_size);
 
 	// Rebuild host rendering caches from the restored registers. 
@@ -4513,19 +4686,7 @@ u32 CS3Trio64::io_read(u32 address, int dsize)
 	case 0x3ba:
 	case 0x3da:
 	{
-		// Input Status Register 1 — ES40 wall-clock vblank (no CRT timing engine)
-		using clock = std::chrono::steady_clock;
-		static auto t0 = clock::now();
-		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-			clock::now() - t0).count();
-
-		const int frame_ms = 1000 / 70;  // ~70Hz
-		const int vblank_ms = 1;
-
-		data = 0;
-		if ((ms % frame_ms) < vblank_ms)
-			data |= 0x08 | 0x01;
-
+		data = scan_status(cSystem->device_access_time());
 		vga.attribute.state = 0;  // ATC flip-flop reset
 		break;
 	}
@@ -4649,6 +4810,11 @@ void CS3Trio64::io_write_b(u32 address, u8 data)
 {
 	if (!io_access_enabled(address, true))
 		return;
+	// Finish elapsed scan time with the old registers before a timing write.
+	// Every claimant in this PCI transaction receives the same sampled instant.
+	if (address == 0x3c2 || address == 0x3c5 ||
+		address == 0x3b5 || address == 0x3d5)
+		advance_scan(cSystem->device_access_time());
 	switch (address)
 	{
 	case 0x3c0:
@@ -4801,6 +4967,7 @@ void CS3Trio64::write_b_3c2(u8 value)
 
 	// MAME canonical store (flat byte)
 	vga.miscellaneous_output = value;
+	load_dclk();
 
 #if DEBUG_VGA_NOISY
 	printf("io write 3c2: misc_output = 0x%02x\n", value);

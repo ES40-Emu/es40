@@ -120,6 +120,7 @@
 void CSystem::pio_write(u64 a, int dsize, u64 data, CSystemComponent* source)
 {
 	std::lock_guard<std::recursive_mutex> bus_lock(device_bus_mutex);
+	SDeviceAccessScope time_scope(this);
 	SDecodeClaims claims;
 	collect_decode_claims(a, dsize, true, claims, source);
 	const bool mapped = claims.count != 0;
@@ -357,6 +358,7 @@ void CSystem::pio_write(u64 a, int dsize, u64 data, CSystemComponent* source)
 u64 CSystem::pio_read(u64 a, int dsize, CSystemComponent* source)
 {
 	std::lock_guard<std::recursive_mutex> bus_lock(device_bus_mutex);
+	SDeviceAccessScope time_scope(this);
 	SDecodeClaims claims;
 	collect_decode_claims(a, dsize, false, claims, source);
 	if (claims.count == 1)

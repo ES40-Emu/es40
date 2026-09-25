@@ -340,6 +340,34 @@ private:
   std::atomic<bool> PauseThread{ false };
   std::atomic<bool> PauseAck{ false };
 
+  // CRTC counter phase is guest state; the host-time anchor is rebuilt on resume.
+  struct ScanPosition {
+    double character = 0.0;
+    u32 line = 0;
+    u32 field = 0;
+    u32 dclk_source = 0; // active, loaded clock: VGA presets 0/1 or PLL 3
+  } m_scan;
+  struct ScanTiming {
+    double characters_per_second;
+    double horizontal_retrace_width;
+    u32 horizontal_total;
+    u32 horizontal_retrace_start;
+    u32 vertical_total;
+    u32 vertical_retrace_start;
+    u32 vertical_retrace_width;
+    u32 vertical_divisor;
+    u32 interlace_offset;
+    bool interlace;
+    bool sync_enabled;
+  };
+  ScanTiming scan_timing() const;
+  void advance_scan(std::chrono::steady_clock::time_point now);
+  u8 scan_status(std::chrono::steady_clock::time_point now);
+  void load_dclk();
+  std::chrono::steady_clock::time_point m_scan_time{};
+  bool m_scan_initialized = false;
+  bool m_scan_paused = false;
+
   // screen refresh stuff
   std::chrono::steady_clock::time_point m_last_refresh_time;
   // Host dimension cache for this card's single scanout; not snapshot data.

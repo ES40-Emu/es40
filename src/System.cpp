@@ -343,6 +343,35 @@ char    debug_string[10000] = "";
 char* dbg_strptr = debug_string;
 #endif
 
+// A stack-local scope per call keeps recursive dispatch and other host threads
+// independent without reading the clock for devices that do not need it.
+thread_local CSystem::SDeviceAccessScope* CSystem::active_device_access = nullptr;
+
+CSystem::SDeviceAccessScope::SDeviceAccessScope(const CSystem* owner)
+  : system(owner), previous(active_device_access)
+{
+	active_device_access = this;
+}
+
+CSystem::SDeviceAccessScope::~SDeviceAccessScope()
+{
+	active_device_access = previous;
+}
+
+std::chrono::steady_clock::time_point CSystem::device_access_time() const
+{
+	SDeviceAccessScope* scope = active_device_access;
+	if (scope && scope->system == this && scope->sampled)
+		return scope->sample;
+	const auto now = std::chrono::steady_clock::now();
+	if (scope && scope->system == this)
+	{
+		scope->sample = now;
+		scope->sampled = true;
+	}
+	return now;
+}
+
 /**
  * Constructor.
  **/
@@ -1672,6 +1701,7 @@ void CSystem::bind_isa_devices()
 
 void CSystem::init()
 {
+	SDeviceAccessScope time_scope(this);
 	bind_isa_devices();
 	{
 		// Owner links are bound above, after the ranges were registered.
@@ -1696,6 +1726,7 @@ void CSystem::init()
 
 void CSystem::start_threads()
 {
+	SDeviceAccessScope time_scope(this);
 	int i;
 
 	printf("Start threads:");
@@ -1719,9 +1750,15 @@ void CSystem::start_threads()
 void CSystem::stop_threads()
 {
 	printf("Stop threads:");
-	for (int i = 0; i < iNumComponents; i++)
-		if (acComponents[i])
-			acComponents[i]->stop_threads();
+	// Quiesce guest PIO before freezing device clocks, regardless of config
+	// order. Never hold the device-bus mutex while joining worker threads.
+	for (auto* component : acComponents)
+		if (auto* cpu = dynamic_cast<CAlphaCPU*>(component))
+			cpu->stop_threads();
+	SDeviceAccessScope time_scope(this);
+	for (auto* component : acComponents)
+		if (component && !dynamic_cast<CAlphaCPU*>(component))
+			component->stop_threads();
 	printf("\n");
 }
 
@@ -1733,7 +1770,8 @@ void CSystem::stop_threads()
 // 2.6 requires the documented S3 PCI COMMAND mask and fixed STATUS value.
 static const u32 system_state_magic = 0xa1fae540;
 // 2.7 requires writable M7101 docking selectors and removes the CF8/CFC latch.
-static const u32 system_state_version = 0x00020007;
+// 2.8 preserves the Trio64 scan-counter phase.
+static const u32 system_state_version = 0x00020008;
 static const u32 snapshot_identity_limit = 65536;
 
 void CSystem::flush_storage()
@@ -1749,6 +1787,7 @@ void CSystem::flush_storage()
 void CSystem::SaveState(const char* fn)
 {
 	std::lock_guard<std::recursive_mutex> bus_lock(device_bus_mutex);
+	SDeviceAccessScope time_scope(this);
 	std::vector<std::string> identities;
 	for (int i = 0; i < iNumComponents; ++i)
 		acComponents[i]->prepare_snapshot();
@@ -1815,6 +1854,7 @@ void CSystem::SaveState(const char* fn)
 bool CSystem::RestoreState(const char* fn)
 {
 	std::lock_guard<std::recursive_mutex> bus_lock(device_bus_mutex);
+	SDeviceAccessScope time_scope(this);
 	std::unique_ptr<FILE, decltype(&fclose)> file(fopen(fn, "rb"), &fclose);
 	if (!file)
 	{
@@ -1835,7 +1875,7 @@ bool CSystem::RestoreState(const char* fn)
 	if (version != system_state_version)
 	{
 		printf("%%SYS-I-VERSION: State file %s is incompatible; "
-			"version 2.7 is required.\n", fn);
+			"version 2.8 is required.\n", fn);
 		return false;
 	}
 	if (fread(&memory_size, sizeof(memory_size), 1, f) != 1 ||

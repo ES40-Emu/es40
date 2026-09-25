@@ -255,6 +255,9 @@ public:
   // Recursive for nested device dispatch; never hold across thread waits/joins. 
   // Host callbacks already holding a host lock must not wait here.
   std::recursive_mutex& get_device_bus_mutex() { return device_bus_mutex; }
+  // One lazy time sample per mapped transaction or lifecycle operation.
+  // Host bookkeeping only; nested accesses restore their caller's sample.
+  std::chrono::steady_clock::time_point device_access_time() const;
   void          Run();
   int           SingleStep();
 
@@ -341,6 +344,18 @@ public:
   bool          IsShutdownRequested() const noexcept;
 
 private:
+  struct SDeviceAccessScope
+  {
+    explicit SDeviceAccessScope(const CSystem* system);
+    ~SDeviceAccessScope();
+    SDeviceAccessScope(const SDeviceAccessScope&) = delete;
+    SDeviceAccessScope& operator=(const SDeviceAccessScope&) = delete;
+    const CSystem* system;
+    SDeviceAccessScope* previous;
+    std::chrono::steady_clock::time_point sample{};
+    bool sampled = false;
+  };
+  static thread_local SDeviceAccessScope* active_device_access;
   void bind_isa_devices();
   // Recipients and coordinates captured before handlers; nested accesses may
   // remap registry entries without changing the outer transaction.

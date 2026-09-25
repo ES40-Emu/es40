@@ -1126,7 +1126,7 @@ void CSystem::collect_decode_claims(u64 address, int dsize, bool write,
 		return;
 	if (!asMemories[first]->may_overlap)
 	{
-		claims.range[claims.count++] = first;
+		claims.range[claims.count++] = *asMemories[first];
 		return;
 	}
 
@@ -1145,8 +1145,9 @@ void CSystem::collect_decode_claims(u64 address, int dsize, bool write,
 		if (n == SDecodeClaims::kMax * 4)
 		{
 			SDecodeClaims partial;
+			partial.subtractive = sub;
 			for (int k = 0; k < SDecodeClaims::kMax; ++k)
-				partial.range[partial.count++] = list[k];
+				partial.range[partial.count++] = *asMemories[list[k]];
 			report_decode_overlap(address, dsize, write, partial, source,
 				"too many eligible ranges to resolve");
 		}
@@ -1173,19 +1174,19 @@ void CSystem::collect_decode_claims(u64 address, int dsize, bool write,
 		}
 		bool seen = false;
 		for (int m = 0; m < claims.count && !seen; ++m)
-			seen = asMemories[claims.range[m]]->component == r->component;
+			seen = claims.range[m].component == r->component;
 		if (seen)
 			continue; // same-component alias
 		if (claims.count == SDecodeClaims::kMax)
 			report_decode_overlap(address, dsize, write, claims, source,
 				"too many claimants to resolve");
-		claims.range[claims.count++] = list[k];
+		claims.range[claims.count++] = *r;
 	}
 }
 
-std::string CSystem::describe_claimant(int range, u64 address) const
+std::string CSystem::describe_claimant(const SMemoryUser& range, u64 address) const
 {
-	const SMemoryUser* r = asMemories[range].get();
+	const SMemoryUser* r = &range;
 	std::ostringstream s;
 	s << r->component->devid_string;
 	if (const auto* pci = dynamic_cast<const CPCIDevice*>(r->component))
@@ -1258,8 +1259,8 @@ void CSystem::log_shared_event(const std::string& key, const std::string& line)
 		printf("%%PCI-I-SHARED: %s (occurrence %" PRIu64 ")\n", line.c_str(), n);
 }
 
-// before any side effect, figure whether several claimants can complete
-// this access together. Only a profile every claimant reports is modeled.
+// Synchronous functional model for shared PCI I/O and memory: writes reach
+// every claimant, reads must agree. This does not model electrical timing.
 void CSystem::prepare_shared_access(u64 address, int dsize, bool write,
 	const SDecodeClaims& claims, const CSystemComponent* source)
 {
@@ -1269,28 +1270,27 @@ void CSystem::prepare_shared_access(u64 address, int dsize, bool write,
 	if (claims.subtractive)
 		report_decode_overlap(address, dsize, write, claims, source,
 			"several subtractive responders");
-	using Profile = CSystemComponent::SharedAccessProfile;
-	Profile profile = Profile::None;
-	for (int k = 0; k < claims.count; ++k)
-	{
-		const SMemoryUser* r = asMemories[claims.range[k]].get();
-		const Profile p = r->component->shared_access_profile(r->index,
-			address - r->base, dsize, write);
-		if (p == Profile::None || (k && p != profile))
-			report_decode_overlap(address, dsize, write, claims, source,
-				"no shared-access profile covers every claimant");
-		profile = p;
-	}
+	const bool valid_width = dsize == 8 || dsize == 16 || dsize == 32 || dsize == 64;
+	auto within = [&](u64 base, u64 length) {
+		return valid_width && address >= base && address < base + length &&
+			(u64)(dsize / 8) <= base + length - address;
+	};
+	if (!within(U64(0x80000000000), U64(0x100000000)) &&
+		!within(U64(0x80200000000), U64(0x100000000)) &&
+		!within(U64(0x801fc000000), U64(0x2000000)) &&
+		!within(U64(0x803fc000000), U64(0x2000000)))
+		report_decode_overlap(address, dsize, write, claims, source,
+			"shared completion is only modeled for PCI I/O and memory");
 
 	std::ostringstream key, line;
 	key << (write ? 'W' : 'R') << dsize << ':' << std::hex << address;
 	for (int k = 0; k < claims.count; ++k)
-		key << ':' << asMemories[claims.range[k]]->component->devid_string;
+		key << ':' << claims.range[k].component->devid_string;
 	line << (write ? "write " : "read ") << std::dec << dsize << "-bit 0x"
 		<< std::hex << address << " claimed by " << std::dec << claims.count
 		<< " claimants";
 	for (int k = 0; k < claims.count; ++k)
-		line << (k ? ", " : " ") << asMemories[claims.range[k]]->component->devid_string;
+		line << (k ? ", " : " ") << claims.range[k].component->devid_string;
 	log_shared_event(key.str(), line.str());
 }
 
@@ -1305,7 +1305,7 @@ u64 CSystem::resolve_shared_read(u64 address, int dsize,
 	bool agree = true;
 	for (int k = 0; k < claims.count; ++k)
 	{
-		const SMemoryUser* r = asMemories[claims.range[k]].get();
+		const SMemoryUser* r = &claims.range[k];
 		// Capture register context before the read's own side effects.
 		contexts[k] = r->component->describe_access_context(r->index,
 			address - r->base);
@@ -1336,7 +1336,7 @@ u64 CSystem::resolve_shared_read(u64 address, int dsize,
 	}
 	for (int k = 0; k < claims.count; ++k)
 	{
-		detail << "\n    " << asMemories[claims.range[k]]->component->devid_string
+		detail << "\n    " << claims.range[k].component->devid_string
 			<< " returned 0x" << std::hex << values[k];
 		if (!contexts[k].empty())
 			detail << " [" << contexts[k] << ']';
@@ -1360,7 +1360,7 @@ u64 CSystem::resolve_shared_read(u64 address, int dsize,
 	for (int k = 0; k < claims.count; ++k)
 	{
 		const auto* pci = dynamic_cast<const CPCIDevice*>(
-			asMemories[claims.range[k]]->component);
+			claims.range[k].component);
 		if (pci && pci->pci_bus() == shared_read_hose &&
 			pci->pci_dev() == shared_read_device)
 			return values[k];
@@ -1386,7 +1386,7 @@ void CSystem::dispatch_pci_io_write(u64 address, int dsize, u64 data,
 		bool skip = false;
 		for (int k = 0; k < claims.count && !skip; ++k)
 			skip = component->memory_decode_owner() ==
-				asMemories[claims.range[k]]->component->memory_decode_owner();
+				claims.range[k].component->memory_decode_owner();
 		for (const auto& observer : observers)
 			skip |= observer.component == component;
 		if (skip)
@@ -1398,7 +1398,7 @@ void CSystem::dispatch_pci_io_write(u64 address, int dsize, u64 data,
 
 	for (int k = 0; k < claims.count; ++k)
 	{
-		const SMemoryUser* r = asMemories[claims.range[k]].get();
+		const SMemoryUser* r = &claims.range[k];
 		r->component->WriteMem(r->index, address - r->base, dsize, data);
 	}
 	const auto dispatch = claims.count

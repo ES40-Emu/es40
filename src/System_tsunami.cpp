@@ -138,7 +138,7 @@ void CSystem::pio_write(u64 a, int dsize, u64 data, CSystemComponent* source)
 	else
 		for (int k = 0; k < claims.count; ++k)
 		{
-			const SMemoryUser* r = asMemories[claims.range[k]].get();
+			const SMemoryUser* r = &claims.range[k];
 			r->component->WriteMem(r->index, a - r->base, dsize, data);
 		}
 	if (mapped)
@@ -361,7 +361,7 @@ u64 CSystem::pio_read(u64 a, int dsize, CSystemComponent* source)
 	collect_decode_claims(a, dsize, false, claims, source);
 	if (claims.count == 1)
 	{
-		const SMemoryUser* r = asMemories[claims.range[0]].get();
+		const SMemoryUser* r = &claims.range[0];
 		const u64 data = r->component->ReadMem(r->index, a - r->base, dsize);
 		note_pio_access(a, dsize, false, data, 1);
 		return data;

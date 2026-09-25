@@ -342,12 +342,13 @@ public:
 
 private:
   void bind_isa_devices();
-  // Every component claiming one access, found before any handler runs.
+  // Recipients and coordinates captured before handlers; nested accesses may
+  // remap registry entries without changing the outer transaction.
   struct SDecodeClaims
   {
     static constexpr int kMax = 16;
     int count = 0;
-    int range[kMax];
+    SMemoryUser range[kMax];
     bool subtractive = false;
   };
   void recompute_range_overlaps();
@@ -360,7 +361,7 @@ private:
   [[noreturn]] void report_decode_overlap(u64 address, int dsize, bool write,
     const SDecodeClaims& claims, const CSystemComponent* source,
     const char* reason, const std::string& detail = std::string()) const;
-  std::string describe_claimant(int range, u64 address) const;
+  std::string describe_claimant(const SMemoryUser& range, u64 address) const;
   void log_shared_event(const std::string& key, const std::string& line);
   void note_pio_access(u64 address, int dsize, bool write, u64 data, int claims);
   void dispatch_pci_io_write(u64 address, int dsize, u64 data,

@@ -103,8 +103,9 @@ public:
   virtual u32   ReadMem_Legacy(int index, u32 address, int dsize) override;
   bool decodes_memory_access(int index, u64 address, int dsize,
     bool write) const noexcept override;
-  SharedAccessProfile shared_access_profile(int index, u64 address, int dsize,
-    bool write) const noexcept override;
+  u64 capture_pci_io_write(const PciIoWrite& write) const noexcept override;
+  void observe_pci_io_write(const PciIoWrite& write, u64 captured,
+    PciIoWriteDispatch dispatch) override;
   std::string describe_access_context(int index, u64 address) const override;
 
   virtual void  WriteMem_Bar(int func, int bar, u32 address, int dsize,
@@ -370,6 +371,7 @@ private:
   void  io_write(u32 address, int dsize, u32 data);
 
   void  io_write_b(u32 address, u8 data);
+  void  ramdac_write_b(u32 address, u8 data);
 
   void  write_b_3c2(u8 data);
 

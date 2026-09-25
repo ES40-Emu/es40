@@ -3107,7 +3107,14 @@ bool CS3Trio64::decodes_memory_access(int index, u64 address, int dsize,
 	// cannot make this card claim the access. Handlers still gate the lanes
 	// of transactions that this card does claim.
 	if (index == 2)
+	{
+		// COMMAND.5 makes RAMDAC writes passive: never assert DEVSEL for
+		// a transaction starting at 3C6-3C9 (DB014-B 8-4, 19-2). 
+		if (write && address >= 6 && address <= 9 &&
+			(pci_state.config_data[0][1] & endian_32(0x20U)))
+			return false;
 		return address < 16 && io_access_enabled(0x3c0U + (u32)address, write);
+	}
 	if (!normal_access_enabled())
 		return false;
 
@@ -3169,51 +3176,43 @@ bool CS3Trio64::decodes_memory_access(int index, u64 address, int dsize,
 	}
 }
 
-// shared-completion model for register-file I/O. 
-// DB014-B specifies medium DEVSEL (19-3) and basic cycle timing (6-1, 6-2). 
-// It does not guarantee simultaneous completion by multiple cards. 
-// Excluded: RAMDAC accesses other than the 3C6 mask byte read, display memory
-// (7.4) and enhanced command/FIFO ports (10-12). The mask read models successful
-// synchronous completion, not CR34 abort/retry timing (8-4/15-5).
-// ADVFUNC low-byte and SUBSYS_CNTL word writes and GP_STAT word reads are
-// included; SUBSYS_STAT reads remain outside this model.
-CSystemComponent::SharedAccessProfile CS3Trio64::shared_access_profile(int index,
-	u64 address, int dsize, bool write) const noexcept
+u64 CS3Trio64::capture_pci_io_write(const PciIoWrite& write) const noexcept
 {
-	if (dsize != 8 && dsize != 16)
-		return SharedAccessProfile::None;
-	const u64 last = address + dsize / 8 - 1;
-	switch (index)
-	{
-	case 10: // 42E8 SUBSYS_CNTL word write (DB014-B 18-2/3)
-		return write && address == 0 && dsize == 16
-			? SharedAccessProfile::Trio64RegisterIo : SharedAccessProfile::None;
-	case 11: // 4AE8 ADVFUNC_CNTL low-byte write (DB014-B 11-1)
-		return write && address == 0 && dsize == 8
-			? SharedAccessProfile::Trio64RegisterIo : SharedAccessProfile::None;
-	case 17: // 9AE8 GP_STAT word read; CMD writes stay excluded (DB014-B 18-10/11)
-		return !write && address == 0 && dsize == 16
-			? SharedAccessProfile::Trio64RegisterIo : SharedAccessProfile::None;
-	case 12: // 46E8 setup
-	case 32: // 102 option select
-		return dsize == 8 && address == 0 ? SharedAccessProfile::Trio64RegisterIo
-			: SharedAccessProfile::None;
-	case 2: // 3C0-3CF, with only the RAMDAC mask byte read admitted (14-49)
-		if (!write && address == 6 && dsize == 8)
-			return SharedAccessProfile::Trio64RegisterIo;
-		return last < 16 && (last < 6 || address > 9)
-			? SharedAccessProfile::Trio64RegisterIo : SharedAccessProfile::None;
-	case 1: // 3B4/3B5
-	case 3: // 3BA/3BB
-	case 8: // 3D4/3D5
-		return last < 2 ? SharedAccessProfile::Trio64RegisterIo
-			: SharedAccessProfile::None;
-	case 9: // 3DA
-		return last < 1 ? SharedAccessProfile::Trio64RegisterIo
-			: SharedAccessProfile::None;
-	default:
-		return SharedAccessProfile::None;
-	}
+	// Freeze eligibility before any target callback. The token contains only
+	// DAC byte lanes and CR34's master-abort handling, not serialized state.
+	if (write.bus != myPCIBus || !device_at[0] ||
+		(endian_32(pci_state.config_data[0][1]) & 0x21U) != 0x21U ||
+		!normal_access_enabled() || (s3.cr33 & 0x10))
+		return 0;
+	if ((write.dsize != 8 && write.dsize != 16 && write.dsize != 32) ||
+		(write.port & 3U) + write.dsize / 8 > 4 ||
+		write.port < 0x3c4 || write.port > 0x3c9)
+		return 0;
+
+	u64 captured = 0;
+	for (int byte = 0; byte < write.dsize / 8; ++byte)
+		if (write.port + byte >= 0x3c6 && write.port + byte <= 0x3c9)
+			captured |= U64(1) << byte;
+	if (!captured)
+		return 0;
+	// DB014-B 15-5: CR34.0/1 disable master-abort handling. Retry is
+	// not represented by the synchronous dispatcher.
+	if ((s3.cr34 & 3) == 0)
+		captured |= 0x10;
+	return captured;
+}
+
+void CS3Trio64::observe_pci_io_write(const PciIoWrite& write, u64 captured,
+	PciIoWriteDispatch dispatch)
+{
+	// PCI palette snoopers latch completed and master-aborted writes. 
+	// DB014-B does not give a disabled-mode timing table. 
+	// Observing never makes that unclaimed transaction a claimed one.
+	if (dispatch == PciIoWriteDispatch::NoMappedTarget && !(captured & 0x10))
+		return;
+	for (int byte = 0; byte < write.dsize / 8; ++byte)
+		if (captured & (U64(1) << byte))
+			ramdac_write_b(write.port + byte, u8(write.data >> (byte * 8)));
 }
 
 std::string CS3Trio64::describe_access_context(int index, u64 address) const
@@ -4480,6 +4479,9 @@ u32 CS3Trio64::io_read(u32 address, int dsize)
 
 	case 0x3c9:
 		data = ramdac_data_r(0);
+		// DB014-B 14-49: valid palette reads expose six-bit components, even
+		// from older saved bytes. Preserve undefined reads during write mode.
+		if (vga.dac.read) data &= 0x3f;
 		break;
 
 	case 0x3ca:
@@ -4627,6 +4629,19 @@ void CS3Trio64::io_write(u32 address, int dsize, u32 data)
 	}
 }
 
+// Shared by normal target writes and already-qualified passive writes.
+// Keep access/lock checks at the caller so observers use captured eligibility.
+void CS3Trio64::ramdac_write_b(u32 address, u8 data)
+{
+	switch (address)
+	{
+	case 0x3c6: ramdac_mask_w(0, data); break;
+	case 0x3c7: ramdac_read_index_w(0, data); break;
+	case 0x3c8: ramdac_write_index_w(0, data); break;
+	case 0x3c9: ramdac_data_w(0, data); break;
+	}
+}
+
 /**
  * Write one byte to a VGA I/O port.
  **/
@@ -4683,24 +4698,12 @@ void CS3Trio64::io_write_b(u32 address, u8 data)
 		break;
 
 	case 0x3c6:
-		if (m_crtc_map.read_byte(0x33) & 0x10) break;
-		ramdac_mask_w(0, data);
-		break;
-
 	case 0x3c7:
-		// CR33.4 also locks the read-index write (DB014-B 12-2, 14-49).
-		if (m_crtc_map.read_byte(0x33) & 0x10) break;
-		ramdac_read_index_w(0, data);
-		break;
-
 	case 0x3c8:
-		if (m_crtc_map.read_byte(0x33) & 0x10) break;
-		ramdac_write_index_w(0, data);
-		break;
-
 	case 0x3c9:
-		if (m_crtc_map.read_byte(0x33) & 0x10) break;
-		ramdac_data_w(0, data);
+		// CR33.4 locks all RAMDAC writes, including 3C7 (DB014-B 12-2).
+		if (!(s3.cr33 & 0x10))
+			ramdac_write_b(address, data);
 		break;
 
 	case 0x3ce:

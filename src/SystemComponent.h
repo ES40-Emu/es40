@@ -132,12 +132,6 @@ public:
   // A bridge forwarding range yields to its own more specific device handler.
   virtual bool memory_decode_fallback(int index) const noexcept { return false; }
 
-  // Experimental emulator profiles for simultaneous claimants. 
-  // Not a PCI completion guarantee. 
-  // None leaves an overlap unresolved and stops.
-  enum class SharedAccessProfile { None, Trio64RegisterIo };
-  virtual SharedAccessProfile shared_access_profile(int index, u64 address,
-    int dsize, bool write) const noexcept { return SharedAccessProfile::None; }
   // Register context for overlap diagnostics. Must have no side effects.
   virtual std::string describe_access_context(int index, u64 address) const
     { return std::string(); }

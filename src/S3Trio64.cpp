@@ -3172,10 +3172,11 @@ bool CS3Trio64::decodes_memory_access(int index, u64 address, int dsize,
 // shared-completion model for register-file I/O. 
 // DB014-B specifies medium DEVSEL (19-3) and basic cycle timing (6-1, 6-2). 
 // It does not guarantee simultaneous completion by multiple cards. 
-// Excluded: RAMDAC 3C6-3C9 (CR34 abort/retry, 8-3/15-5), display memory (7.4)
-// and enhanced command/FIFO ports (10-12). ADVFUNC low-byte and SUBSYS_CNTL
-// word writes and GP_STAT word reads are included; SUBSYS_STAT reads remain
-// outside this model.
+// Excluded: RAMDAC accesses other than the 3C6 mask byte read, display memory
+// (7.4) and enhanced command/FIFO ports (10-12). The mask read models successful
+// synchronous completion, not CR34 abort/retry timing (8-4/15-5).
+// ADVFUNC low-byte and SUBSYS_CNTL word writes and GP_STAT word reads are
+// included; SUBSYS_STAT reads remain outside this model.
 CSystemComponent::SharedAccessProfile CS3Trio64::shared_access_profile(int index,
 	u64 address, int dsize, bool write) const noexcept
 {
@@ -3197,7 +3198,9 @@ CSystemComponent::SharedAccessProfile CS3Trio64::shared_access_profile(int index
 	case 32: // 102 option select
 		return dsize == 8 && address == 0 ? SharedAccessProfile::Trio64RegisterIo
 			: SharedAccessProfile::None;
-	case 2: // 3C0-3CF without the RAMDAC lanes
+	case 2: // 3C0-3CF, with only the RAMDAC mask byte read admitted (14-49)
+		if (!write && address == 6 && dsize == 8)
+			return SharedAccessProfile::Trio64RegisterIo;
 		return last < 16 && (last < 6 || address > 9)
 			? SharedAccessProfile::Trio64RegisterIo : SharedAccessProfile::None;
 	case 1: // 3B4/3B5

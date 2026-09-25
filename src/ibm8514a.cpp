@@ -1863,11 +1863,22 @@ bit   0-3  Interrupt Reset. Write 1 to a bit to reset the interrupt.
 	12-13  CHPTEST. Used for chip testing.
 	14-15  Graphics Processor Control (GPCTRL).
  */
-void ibm8514a_device::ibm8514_subcontrol_w(uint16_t data)
+void ibm8514a_device::ibm8514_subcontrol_w(uint16_t data, uint16_t mem_mask)
 {
-	ibm8514.subctrl = data;
-	ibm8514.substatus &= ~(data & 0x0f);  // reset interrupts
+	// SUBSYS_CNTL is write-only; subctrl is the internal latch.
+	ibm8514.subctrl = (ibm8514.subctrl & ~mem_mask) | (data & mem_mask);
+	ibm8514.substatus &= ~(data & mem_mask & 0x0f);
 	//  LOG("8514/A: Subsystem control write %04x\n", data);
+	if ((mem_mask & 0xc000) == 0xc000 && (data & 0xc000) == 0x8000)
+	{
+		// Cancel the modeled in-flight operation. 
+		// Clearing only the transfer count leaves GP_STAT busy and lets PIX_TRANS resume the old command.
+		// DB014-B does not specify clearing the programming registers.
+		ibm8514.fifo_idx = 0;
+		ibm8514.gpbusy = false;
+		ibm8514.data_avail = false;
+		ibm8514.state = IBM8514_IDLE;
+	}
 }
 
 uint16_t ibm8514a_device::ibm8514_subcontrol_r()

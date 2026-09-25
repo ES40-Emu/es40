@@ -42,7 +42,7 @@ public:
   uint8_t ibm8514_status_r(offs_t offset);
   void ibm8514_htotal_w(offs_t offset, uint8_t data);
   uint16_t ibm8514_substatus_r();
-  void ibm8514_subcontrol_w(uint16_t data);
+  void ibm8514_subcontrol_w(uint16_t data, uint16_t mem_mask = 0xffff);
   uint16_t ibm8514_subcontrol_r();
   uint16_t ibm8514_htotal_r();
   uint16_t ibm8514_vtotal_r();

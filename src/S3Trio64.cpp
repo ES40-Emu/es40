@@ -3189,7 +3189,8 @@ bool CS3Trio64::decodes_memory_access(int index, u64 address, int dsize,
 // DB014-B specifies medium DEVSEL (19-3) and basic cycle timing (6-1, 6-2). 
 // It does not guarantee simultaneous completion by multiple cards. 
 // Excluded: RAMDAC 3C6-3C9 (CR34 abort/retry, 8-3/15-5), display memory (7.4)
-// and enhanced command/FIFO ports (10-12). ADVFUNC low-byte writes are included.
+// and enhanced command/FIFO ports (10-12). ADVFUNC low-byte and SUBSYS_CNTL
+// word writes are included; SUBSYS_STAT reads remain outside this model.
 CSystemComponent::SharedAccessProfile CS3Trio64::shared_access_profile(int index,
 	u64 address, int dsize, bool write) const noexcept
 {
@@ -3198,6 +3199,9 @@ CSystemComponent::SharedAccessProfile CS3Trio64::shared_access_profile(int index
 	const u64 last = address + dsize / 8 - 1;
 	switch (index)
 	{
+	case 10: // 42E8 SUBSYS_CNTL word write (DB014-B 18-2/3)
+		return write && address == 0 && dsize == 16
+			? SharedAccessProfile::Trio64RegisterIo : SharedAccessProfile::None;
 	case 11: // 4AE8 ADVFUNC_CNTL low-byte write (DB014-B 11-1)
 		return write && address == 0 && dsize == 8
 			? SharedAccessProfile::Trio64RegisterIo : SharedAccessProfile::None;
@@ -3504,15 +3508,12 @@ void CS3Trio64::AccelIOWrite(u32 port, u8 data)
 	switch (port & 0xFFFE) {
 
 		// SUBSYS_CNTL (42E8h write)
-	case 0x42E8:
-		if ((port & 1) == 0)
-			s3.mmio_42e8 = (s3.mmio_42e8 & 0xff00) | data;
-		else
-			s3.mmio_42e8 = (s3.mmio_42e8 & 0x00ff) | (data << 8);
-		dev->ibm8514_subcontrol_w(s3.mmio_42e8);
-		if ((s3.mmio_42e8 & 0xc000) == 0x8000)   // GE-RST = 10b: Graphics Engine reset (DB014-B 18-2)
-			dev->ibm8514.fifo_idx = 0;
+	case 0x42E8: {
+		const unsigned shift = (port & 1) * 8;
+		dev->ibm8514_subcontrol_w(u16(data) << shift, u16(0xff) << shift);
+		s3.mmio_42e8 = dev->ibm8514_subcontrol_r();
 		break;
+	}
 
 		// ADVFUNC_CNTL (4AE8h)
 	case 0x4AE8:
@@ -4587,6 +4588,12 @@ void CS3Trio64::io_write(u32 address, int dsize, u32 data)
 			AccelIOWrite(address, (u8)data);
 			return;
 		case 16:
+			if (address == 0x42e8) {
+				// SUBSYS_CNTL has action fields: apply both lanes once.
+				m_8514.ibm8514_subcontrol_w(u16(data));
+				s3.mmio_42e8 = m_8514.ibm8514_subcontrol_r();
+				return;
+			}
 			AccelIOWrite(address + 0, (u8)(data & 0xFF));
 			AccelIOWrite(address + 1, (u8)((data >> 8) & 0xFF));
 			return;

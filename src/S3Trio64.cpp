@@ -3189,7 +3189,7 @@ bool CS3Trio64::decodes_memory_access(int index, u64 address, int dsize,
 // DB014-B specifies medium DEVSEL (19-3) and basic cycle timing (6-1, 6-2). 
 // It does not guarantee simultaneous completion by multiple cards. 
 // Excluded: RAMDAC 3C6-3C9 (CR34 abort/retry, 8-3/15-5), display memory (7.4)
-// and enhanced ports (command FIFO, 10-12).
+// and enhanced command/FIFO ports (10-12). ADVFUNC low-byte writes are included.
 CSystemComponent::SharedAccessProfile CS3Trio64::shared_access_profile(int index,
 	u64 address, int dsize, bool write) const noexcept
 {
@@ -3198,6 +3198,9 @@ CSystemComponent::SharedAccessProfile CS3Trio64::shared_access_profile(int index
 	const u64 last = address + dsize / 8 - 1;
 	switch (index)
 	{
+	case 11: // 4AE8 ADVFUNC_CNTL low-byte write (DB014-B 11-1)
+		return write && address == 0 && dsize == 8
+			? SharedAccessProfile::Trio64RegisterIo : SharedAccessProfile::None;
 	case 12: // 46E8 setup
 	case 32: // 102 option select
 		return dsize == 8 && address == 0 ? SharedAccessProfile::Trio64RegisterIo

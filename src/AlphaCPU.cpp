@@ -459,7 +459,9 @@ void CAlphaCPU::idle_nap()
 {
 	using namespace std::chrono;
 
-	if (!idle_nap_enabled || (cSystem && cSystem->get_cpu_num() > 1))
+	// Either route may nap: WTINT, or host-side detection.
+	if ((!idle_nap_enabled && idle_rule == RULE_NONE)
+		|| (cSystem && cSystem->get_cpu_num() > 1))
 		return;
 
 	if (!idle_announced)
@@ -481,8 +483,10 @@ void CAlphaCPU::idle_nap()
 		if (now >= deadline)
 			break;
 		auto nap = deadline - now;
-		if (nap > microseconds(100))
-			nap = microseconds(100);
+		// Each wake is a syscall round trip; at a 1024 Hz tick, 100us costs
+		// ~10k/sec of them. Default is the original 100us.
+		if (nap > microseconds(idle_nap_poll_us))
+			nap = microseconds(idle_nap_poll_us);
 		std::this_thread::sleep_for(nap);
 	}
 }
@@ -562,6 +566,22 @@ void CAlphaCPU::init()
 
 	cpu_hz = myCfg->get_num_value("speed", true, 500000000);
 	idle_nap_enabled = myCfg->get_bool_value("idle_nap", false);
+	{
+		const char* _m = myCfg->get_text_value("idle_detect", "off");
+		idle_rule = idle_method_by_name(_m);
+		if (idle_rule < 0)
+		{
+			printf("*** CPU%d *** unknown idle_detect \"%s\" -- idle detection OFF. Known:", get_cpuid(), _m);
+			for (int _i = 0; idle_methods[_i].name; _i++)
+				printf(" %s", idle_methods[_i].name);
+			printf("\n");
+			idle_rule = RULE_NONE;
+		}
+		idle_spin_count = (u32) myCfg->get_num_value("idle_spin_count", false, 2);
+		idle_nap_poll_us = (u32) myCfg->get_num_value("idle_nap_poll_us", false, 1000);
+		if (idle_spin_count < 1)
+			idle_spin_count = 1;
+	}
 	exit_on_pal_halt = myCfg->get_myParent()->get_bool_value("exit_on_pal_halt", false);
 
 	// Instruction-paced interval-timer cap. 
@@ -703,6 +723,22 @@ void CAlphaCPU::ResetForSystemReset()
 
 	cpu_hz = myCfg->get_num_value("speed", true, 500000000);
 	idle_nap_enabled = myCfg->get_bool_value("idle_nap", false);
+	{
+		const char* _m = myCfg->get_text_value("idle_detect", "off");
+		idle_rule = idle_method_by_name(_m);
+		if (idle_rule < 0)
+		{
+			printf("*** CPU%d *** unknown idle_detect \"%s\" -- idle detection OFF. Known:", get_cpuid(), _m);
+			for (int _i = 0; idle_methods[_i].name; _i++)
+				printf(" %s", idle_methods[_i].name);
+			printf("\n");
+			idle_rule = RULE_NONE;
+		}
+		idle_spin_count = (u32) myCfg->get_num_value("idle_spin_count", false, 2);
+		idle_nap_poll_us = (u32) myCfg->get_num_value("idle_nap_poll_us", false, 1000);
+		if (idle_spin_count < 1)
+			idle_spin_count = 1;
+	}
 	exit_on_pal_halt = myCfg->get_myParent()->get_bool_value("exit_on_pal_halt", false);
 	m_max_instr_per_tick = myCfg->get_num_value("timer.max_instr_per_tick", false, 1250000);
 	if (const char* e = getenv("ES40_MAX_INSTR_PER_TICK"))
@@ -923,6 +959,10 @@ void CAlphaCPU::jit_flush_blocks_asm()
 
 void CAlphaCPU::jit_run(int budget)
 {
+	// Relative to the caller's budget, so no magic number here.
+	if (idle_rule != RULE_NONE && idle_spin_min_instr == 0)
+		idle_spin_min_instr = (u64) budget * 3 / 4;
+
 	if (m_jit) m_jit->reclaim_if_pending();   // deferred code reclaim, here at a safe point (no compiled frame live)
 	const auto now = std::chrono::steady_clock::now();
 	cc_last_sync += std::chrono::nanoseconds(g_diag_excluded_ns);   // keep device-diagnostic print stalls out of the RPCC (diag_rpcc.h)
@@ -1010,9 +1050,57 @@ void CAlphaCPU::jit_run(int budget)
 		const u32 start_asn = (u32)state.asn;
 		const bool start_pal_shadow = (start_virt & 1) && state.sde;
 
-		// PAL reset-vector entry
-		if (start_virt == (state.pal_base | 1))
-			flush_icache();
+		// Host-side idle detection. If a dispatch runs its whole instruction
+		// budget and the next starts at an address just seen, several times
+		// over, the guest is going round in circles. This works with the JIT
+		// on because a trace looping back to itself is what produces it.
+		// Getting it wrong costs one sleep: 1ms at most, never past the next
+		// timer tick, ended by any pending interrupt.
+		if (idle_rule != RULE_NONE)
+		{
+			const u64 _ic = state.instruction_count;
+			const int _ipl = (int) ((state.r[32 + 22] >> 8) & 0x1f);   // VMS PALcode keeps PS in p22
+
+			if ((_ic - m_spin_ic) >= idle_spin_min_instr
+				&& (idle_rule != RULE_SPIN_IPL3 || _ipl == 3))
+			{
+				bool seen = false;
+				for (int _i = 0; _i < m_spin_set_n; _i++)
+					if (m_spin_set[_i] == start_virt)
+					{
+						seen = true;
+						break;
+					}
+				if (!seen)
+				{
+					if (m_spin_set_n < kSpinSetMax)
+						m_spin_set[m_spin_set_n++] = start_virt;
+					else
+					{
+						m_spin_set_n = 0;        // too wide to be a loop: start over
+						m_spin_hits = 0;
+					}
+				}
+				if (++m_spin_hits >= idle_spin_count)
+				{
+					m_spin_hits = idle_spin_count;   // saturate
+					if (!m_spin_announced)
+					{
+						m_spin_announced = true;
+						printf("*** CPU%d *** idle_detect engaged at pc=%016llx ipl=%d ***\n",
+							get_cpuid(), (unsigned long long) start_virt, _ipl);
+						fflush(stdout);
+					}
+					idle_nap();
+				}
+			}
+			else
+			{
+				m_spin_hits = 0;
+				m_spin_set_n = 0;
+			}
+			m_spin_ic = _ic;
+		}
 
 		// Resolve the block's physical start side-effect-free (FAKE = no fault, no TB fill) so
 		// execute() stays the sole I-stream fetcher; covers superpage/KSEG (no TB entry). phys

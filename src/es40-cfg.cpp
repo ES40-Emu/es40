@@ -58,6 +58,7 @@
 
 #include "StdAfx.h"
 #include "banner.h"
+#include "SerialListenAddress.h"
 
 #ifdef _WIN32
 #pragma comment(lib, "winmm.lib")
@@ -190,31 +191,6 @@ static string trim_answer(const string& value)
 		return "";
 	size_t last = value.find_last_not_of(" \t\r\n");
 	return value.substr(first, last - first + 1);
-}
-
-static bool valid_listen_address(const string& address)
-{
-	if (address.empty())
-		return true;
-
-	size_t pos = 0;
-	for (int i = 0; i < 4; i++)
-	{
-		size_t start = pos;
-		unsigned int octet = 0;
-		while (pos < address.size() && address[pos] >= '0' && address[pos] <= '9')
-		{
-			octet = octet * 10 + (address[pos++] - '0');
-			if (octet > 255 || pos - start > 3)
-				return false;
-		}
-		// Avoid inet_addr() interpreting leading zeroes as octal.
-		if (pos == start || (pos - start > 1 && address[start] == '0'))
-			return false;
-		if (i < 3 && (pos == address.size() || address[pos++] != '.'))
-			return false;
-	}
-	return pos == address.size() && address != "255.255.255.255";
 }
 
 static string ask_hotkey_override(const SDLHotkeyPrompt& prompt)
@@ -861,21 +837,32 @@ int main(int argc, char* argv[])
 		}
 
 		FreeTextQuestion address_q;
-		address_q.setQuestion("What IPv4 address should serial " + i2s(i) + " listen on?");
-		address_q.setOptions("Enter for all addresses, 127.0.0.1 for local connections only");
+		address_q.setQuestion("What addresses should serial " + i2s(i) + " listen on?");
+		address_q.setOptions("comma-separated IPv4/IPv6 addresses; Enter for all interfaces");
 		address_q.setExplanation(
-			"Leave blank (or enter 0.0.0.0) to listen on all host IPv4 addresses. "
-			"Enter 127.0.0.1 to allow connections only from this host, or enter a "
-			"specific host IPv4 address in dotted-decimal form to use that interface. "
-			"Hostnames and IPv6 addresses are not supported.");
+			"Blank listens on all IPv4 and IPv6 interfaces. "
+			"Use 0.0.0.0 for IPv4 only, :: for IPv6 only, or 127.0.0.1, ::1 for local connections. "
+			"Use numeric addresses separated by commas, with an IPv6 scope if needed "
+			"(e.g. fe80::1%3). No hostnames or ports.");
 		string listen_address;
+		vector<string> listen_addresses;
+		string address_error;
 		for (;;)
 		{
 			listen_address = trim_answer(address_q.ask());
-			if (valid_listen_address(listen_address))
+			if (serial_parse_listen_addresses(listen_address, listen_addresses, address_error))
 				break;
-			cout << "\nPlease enter a dotted-decimal IPv4 address without leading zeroes, "
-				"or leave blank for all addresses.\n\n";
+			cout << "\n" << address_error << "\n\n";
+		}
+		if (!listen_address.empty())
+		{
+			listen_address.clear();
+			for (const string& address : listen_addresses)
+			{
+				if (!listen_address.empty())
+					listen_address += ", ";
+				listen_address += address;
+			}
 		}
 
 		FreeTextQuestion exec_q;
@@ -902,11 +889,17 @@ int main(int argc, char* argv[])
 		if (exec_q.getAnswer() != "none")
 		{
 			arg_q.setQuestion("What arguments should the program use to connect to the serial port?");
-			arg_q.setExplanation("Enter the arguments the program needs.");
+			arg_q.setExplanation("Client arguments. The default uses the first listen address. "
+				"Use brackets around IPv6 URL hosts, e.g. telnet://[::1]:21264.");
 			/* This is the argument format for PuTTy.
 			 */
-			string connect_address = listen_address.empty() || listen_address == "0.0.0.0"
-				? "localhost" : listen_address;
+			string connect_address = listen_addresses.empty() ? "" : listen_addresses.front();
+			if (connect_address.empty() || connect_address == "0.0.0.0")
+				connect_address = "localhost";
+			else if (connect_address == "::")
+				connect_address = "[::1]";
+			else if (connect_address.find(':') != string::npos)
+				connect_address = "[" + connect_address + "]";
 			arg_q.setDefault("telnet://" + connect_address + ":" + port_q.getAnswer());
 
 			arg_q.ask();

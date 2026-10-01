@@ -142,6 +142,7 @@ inline int es40_form_driver(FORM *form, int c)
 
 #include "StdAfx.h"
 #include "Configurator.h"
+#include "SerialListenAddress.h"
 
 #define ARRAY_SIZE(a) (int)(sizeof(a) / sizeof(a[0]))
 
@@ -3220,31 +3221,6 @@ void validation_serial_port(FIELD *field)
     set_field_type(field, TYPE_INTEGER, 1, 1, USHRT_MAX);
 }
 
-static bool valid_listen_address(const string &address)
-{
-    if (address.empty())
-        return true;
-
-    size_t pos = 0;
-    for (int i = 0; i < 4; ++i)
-    {
-        size_t start = pos;
-        unsigned int octet = 0;
-        while (pos < address.size() && address[pos] >= '0' && address[pos] <= '9')
-        {
-            octet = octet * 10 + (address[pos++] - '0');
-            if (octet > 255 || pos - start > 3)
-                return false;
-        }
-        // Avoid inet_addr() interpreting leading zeroes as octal.
-        if (pos == start || (pos - start > 1 && address[start] == '0'))
-            return false;
-        if (i < 3 && (pos == address.size() || address[pos++] != '.'))
-            return false;
-    }
-    return pos == address.size() && address != "255.255.255.255";
-}
-
 bool check_serial(FormEntry_t entry[], int num_entries, FormValues_t values)
 {
     for (int i = 0; i < 2; ++i)
@@ -3256,17 +3232,26 @@ bool check_serial(FormEntry_t entry[], int num_entries, FormValues_t values)
             continue;
 
         int address_idx = fentry_index(entry, num_entries, (serial_prefix + "listen_address").c_str());
-        char *address = values[address_idx];
-        while (*address == ' ')
-            ++address;
-        memmove(values[address_idx], address, strlen(address) + 1);
-        if (!valid_listen_address(values[address_idx]))
+        vector<string> listen_addresses;
+        string error;
+        if (!serial_parse_listen_addresses(values[address_idx], listen_addresses, error))
         {
-            string message = serial_prefix + "listen_address must be empty or a dotted-decimal IPv4 address.\n"
-                "Use 127.0.0.1 for local connections, or 0.0.0.0 for all interfaces.";
+            string message = serial_prefix + "listen_address: " + error;
             show_text("Error", message.c_str());
             return FALSE;
         }
+        string address_value;
+        if (string(values[address_idx]).find_first_not_of(" \t\r\n") != string::npos)
+        {
+            for (const string& address : listen_addresses)
+            {
+                if (!address_value.empty())
+                    address_value += ", ";
+                address_value += address;
+            }
+        }
+        free(values[address_idx]);
+        values[address_idx] = strdup(address_value.c_str());
 
         string serial_program = serial_prefix + "program";
         int idx = fentry_index(entry, num_entries, serial_program.c_str());
@@ -3314,11 +3299,11 @@ void edit_serial(const char *title)
 
         entry[num_attr * i + 3] = {
             strdup((serial_prefix + "listen_address").c_str()), "", "listen_address",
-            "The local IPv4 address the serial device will listen on.\n"
-            "Leave empty, or use 0.0.0.0, to listen on all IPv4 interfaces.\n"
-            "Use 127.0.0.1 to allow connections only from this host.\n"
-            "Hostnames and IPv6 addresses are not supported.\n"
-            "If you choose another local address, use it in the program arguments too.",
+            "Comma-separated numeric IPv4/IPv6 addresses.\n"
+            "Blank: all IPv4 and IPv6 interfaces.\n"
+            "Use 0.0.0.0 for IPv4 only, :: for IPv6 only, or 127.0.0.1, ::1 for local access.\n"
+            "IPv6 scopes: fe80::1%3. No hostnames or ports.\n"
+            "Update client arguments; IPv6 URL hosts need brackets.",
             NULL};
 
         entry[num_attr * i + 4] = {
@@ -3347,9 +3332,9 @@ void edit_serial(const char *title)
         const string arguments_value = "telnet://localhost:" + port_value;
         entry[num_attr * i + 6] = {
             strdup((serial_prefix + "arguments").c_str()), strdup(arguments_value.c_str()), NULL,
-            "Arguments the program should use to connect to the serial port.\n"
-            "Connect to listen_address if set to an address other than 0.0.0.0;\n"
-            "otherwise connect to localhost.",
+            "Client arguments. Choose one listen address.\n"
+            "For wildcards, use localhost (IPv4) or [::1] (IPv6).\n"
+            "Bracket IPv6 URL hosts, e.g. telnet://[::1]:21264.",
             NULL};
     }
     const int num_entries = ARRAY_SIZE(entry);

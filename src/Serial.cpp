@@ -215,10 +215,17 @@
 
 #include "StdAfx.h"
 #include "Serial.h"
+#include "SerialListenAddress.h"
 #include "System.h"
 #include "AliM1543C.h"
 
 #include "network/lockstep.h"
+#include <algorithm>
+#if defined(__VMS)
+#include <ioctl.h>
+#elif !defined(_WIN32)
+#include <sys/ioctl.h>
+#endif
 
 #define UART_BASE_CLOCK  1843200
 #define CYCLE_TIME_MS    20
@@ -272,11 +279,6 @@ void CSerial::init()
 	raw_mode = myCfg->get_bool_value("raw_mode");
 	null_attach = myCfg->get_bool_value("null_attach");
 	listenPort = (int)myCfg->get_num_value("port", false, 8000 + state.iNumber);
-	listenAddress = myCfg->get_text_value("listen_address", "");
-
-	char    s[1000];
-	char* nargv = s;
-	int     i = 0;
 
 	cSystem->RegisterMemory(this, 0,
 		U64(0x00000801fc0003f8) - (0x100 * state.iNumber), 8);
@@ -288,8 +290,6 @@ void CSerial::init()
 		// SERIAL.SYS conclude "no UART here" and skip further probing/polling.
 		state.rcvW = 0;
 		state.rcvR = 0;
-		listenSocket = INVALID_SOCKET;
-		connectSocket = INVALID_SOCKET;
 		printf("%s: disabled - guest will see no UART at this address.\n", devid_string);
 		return;
 	}
@@ -324,89 +324,115 @@ void CSerial::init()
 		in_subneg = false;
 		stageLen = 0;
 		myThread = 0;
-		listenSocket = INVALID_SOCKET;
-		connectSocket = INVALID_SOCKET;
 		printf("%s: null_attach - TX discarded, RX always empty.\n", devid_string);
 		return;
 	}
 
-	// Start Telnet server
-	listenSocket = INVALID_SOCKET;
-	connectSocket = INVALID_SOCKET;
-#if defined(_WIN32)
+	std::vector<std::string> configured_addresses;
+	std::string address_error;
+	if (!serial_parse_listen_addresses(myCfg->get_text_value("listen_address", ""),
+		configured_addresses, address_error))
+		FAILURE(Configuration, std::string(devid_string) + ": listen_address: " + address_error);
 
-  // Windows Sockets only work after calling WSAStartup.
-	WSADATA wsa;
-	const int startup_error = WSAStartup(0x0101, &wsa);
-	if (startup_error != 0)
-		FAILURE_3(Configuration,
-			"%s: serial port %d WSAStartup failed (Winsock error %d)",
-			devid_string, listenPort, startup_error);
-#endif // defined (_WIN32)
-	const auto listener_failure = [this](const char* operation)
+	addrinfo* address = NULL;
+	try
 	{
-		// Capture the original error before cleanup changes it.
 #if defined(_WIN32)
-		const int error = WSAGetLastError();
-		if (listenSocket != INVALID_SOCKET)
-			closesocket(listenSocket);
-		listenSocket = INVALID_SOCKET;
-		WSACleanup();
-		char error_text[256] = {};
-		FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-			nullptr, error, 0, error_text, sizeof(error_text), nullptr);
-		error_text[strcspn(error_text, "\r\n")] = '\0';
-		FAILURE_5(Configuration,
-			"%s: serial port %d %s failed: %s (Winsock error %d)",
-			devid_string, listenPort, operation, error_text, error);
-#else
-		const int error = errno;
-		if (listenSocket != INVALID_SOCKET)
-			close(listenSocket);
-		listenSocket = INVALID_SOCKET;
-		FAILURE_5(Configuration,
-			"%s: serial port %d %s failed: %s (errno %d)",
-			devid_string, listenPort, operation, strerror(error), error);
+		WSADATA wsa;
+		const int startup_error = WSAStartup(MAKEWORD(2, 2), &wsa);
+		if (startup_error != 0)
+			FAILURE_3(Configuration, "%s: serial port %d WSAStartup failed (error %d)",
+				devid_string, listenPort, startup_error);
+		winsock_started = true;
 #endif
-	};
+		const bool all_ipv4 = std::find(configured_addresses.begin(), configured_addresses.end(),
+			"0.0.0.0") != configured_addresses.end();
+		const bool all_ipv6 = std::find(configured_addresses.begin(), configured_addresses.end(),
+			"::") != configured_addresses.end();
+		const std::string port = std::to_string(listenPort);
+		listenSockets.reserve(configured_addresses.size());
+		listenAddresses.reserve(configured_addresses.size());
+		for (const std::string& host : configured_addresses)
+		{
+			const bool ipv6 = host.find(':') != std::string::npos;
+			if ((ipv6 && all_ipv6 && host != "::") || (!ipv6 && all_ipv4 && host != "0.0.0.0"))
+				continue;
+#if defined(_WIN32)
+			if (listenSockets.size() == FD_SETSIZE)
+				FAILURE(Configuration, "Too many serial listen addresses");
+#endif
+			addrinfo hints = {};
+			hints.ai_family = AF_UNSPEC;
+			hints.ai_socktype = SOCK_STREAM;
+			hints.ai_protocol = IPPROTO_TCP;
+			hints.ai_flags = AI_NUMERICHOST;
+			const int error = getaddrinfo(host.c_str(), port.c_str(), &hints, &address);
+			if (error != 0)
+				FAILURE(Configuration, std::string(devid_string) + ": cannot resolve serial address " +
+					host + " (error " + std::to_string(error) + ")");
 
-	listenSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (listenSocket == INVALID_SOCKET)
-		listener_failure("socket");
-
-	struct sockaddr_in Address = {};
-	Address.sin_addr.s_addr = INADDR_ANY;
-	Address.sin_port = htons((u16)(listenPort));
-	Address.sin_family = AF_INET;
-
-	// Listen on one address only, if the config asks for it.
-	if (listenAddress[0])
-	{
-		Address.sin_addr.s_addr = inet_addr(listenAddress);
-		if (Address.sin_addr.s_addr == INADDR_NONE)
-			FAILURE_2(Configuration, "%s: listen_address \"%s\" is not an IPv4 address",
-				devid_string, listenAddress);
+			const auto listener_failure = [this, &host](const char* operation)
+			{
+#if defined(_WIN32)
+				const int error = WSAGetLastError();
+				char text[256] = {};
+				FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+					NULL, error, 0, text, sizeof(text), NULL);
+				text[strcspn(text, "\r\n")] = '\0';
+#else
+				const int error = errno;
+				const char* text = strerror(error);
+#endif
+				FAILURE(Configuration, std::string(devid_string) + ": serial address " + host +
+					" port " + std::to_string(listenPort) + " " + operation + " failed: " + text +
+					" (error " + std::to_string(error) + ")");
+			};
+			const int64_t listener = socket(address->ai_family, SOCK_STREAM, IPPROTO_TCP);
+			if (listener == INVALID_SOCKET)
+				listener_failure("socket");
+			listenSockets.push_back(listener);
+			listenAddresses.push_back(host);
+#if !defined(_WIN32)
+			if (listener >= FD_SETSIZE)
+				FAILURE(Configuration, "Serial listener exceeds FD_SETSIZE");
+#endif
+#if defined(_WIN32)
+			u_long nonblocking = 1;
+			if (ioctlsocket(listener, FIONBIO, &nonblocking) != 0)
+#else
+			int nonblocking = 1;
+			if (ioctl(listener, FIONBIO, &nonblocking) != 0)
+#endif
+				listener_failure("nonblocking mode");
+			int optval = 1;
+#if defined(_WIN32)
+			const int reuse_option = SO_EXCLUSIVEADDRUSE;
+#else
+			const int reuse_option = SO_REUSEADDR;
+#endif
+			if (setsockopt(listener, SOL_SOCKET, reuse_option, (char*)&optval, sizeof(optval)) != 0)
+				listener_failure("setsockopt");
+			if (address->ai_family == AF_INET6 &&
+				setsockopt(listener, IPPROTO_IPV6, IPV6_V6ONLY, (char*)&optval, sizeof(optval)) != 0)
+				listener_failure("setsockopt(IPV6_V6ONLY)");
+			if (bind(listener, address->ai_addr, (socklen_t)address->ai_addrlen) != 0)
+				listener_failure("bind");
+			if (listen(listener, 8) != 0)
+				listener_failure("listen");
+			freeaddrinfo(address);
+			address = NULL;
+			printf("%s: Listening on [%s]:%d.\n", devid_string, host.c_str(), listenPort);
+		}
+		printf("%s: Waiting for connection on port %d.\n", devid_string, listenPort);
+		WaitForConnection();
 	}
-
-	int optval = 1;
-#if defined(_WIN32)
-	// Windows SO_REUSEADDR can share an occupied port with another listener.
-	const int reuse_option = SO_EXCLUSIVEADDRUSE;
-#else
-	const int reuse_option = SO_REUSEADDR;
-#endif
-	if (setsockopt(listenSocket, SOL_SOCKET, reuse_option, (char*)&optval,
-		sizeof(optval)) != 0)
-		listener_failure("setsockopt");
-	// Do not let listen() auto-bind an ephemeral port after a failed bind().
-	if (bind(listenSocket, (struct sockaddr*)&Address, sizeof(Address)) != 0)
-		listener_failure("bind");
-	if (listen(listenSocket, 8) != 0)
-		listener_failure("listen");
-
-	printf("%s: Waiting for connection on port %d.\n", devid_string, listenPort);
-
-	WaitForConnection();
+	catch (...)
+	{
+		if (address)
+			freeaddrinfo(address);
+		close_sockets();
+		throw;
+	}
 
 #if defined(IDB) && defined(LS_MASTER)
 	struct sockaddr_in  dest_addr;
@@ -488,6 +514,52 @@ void CSerial::stop_threads()
 CSerial::~CSerial()
 {
 	stop_threads();
+	close_sockets();
+}
+
+void CSerial::close_connection()
+{
+	if (connectSocket == INVALID_SOCKET)
+		return;
+#if defined(_WIN32)
+	closesocket(connectSocket);
+#else
+	close(connectSocket);
+#endif
+	connectSocket = INVALID_SOCKET;
+}
+
+void CSerial::close_sockets()
+{
+	close_connection();
+	for (int64_t listener : listenSockets)
+	{
+#if defined(_WIN32)
+		closesocket(listener);
+#else
+		close(listener);
+#endif
+	}
+	listenSockets.clear();
+	listenAddresses.clear();
+#if defined(IDB) && defined(LS_MASTER)
+	if (throughSocket != INVALID_SOCKET)
+	{
+#if defined(_WIN32)
+		closesocket(throughSocket);
+#else
+		close(throughSocket);
+#endif
+	}
+	throughSocket = INVALID_SOCKET;
+#endif
+#if defined(_WIN32)
+	if (winsock_started)
+	{
+		WSACleanup();
+		winsock_started = false;
+	}
+#endif
 }
 
 u64 CSerial::ReadMem(int index, u64 address, int dsize)
@@ -837,7 +909,11 @@ void CSerial::serial_menu()
 		FD_SET(connectSocket, &readset);
 		tv.tv_sec = 60;
 		tv.tv_usec = 0;
-		int ready = select(connectSocket + 1, &readset, NULL, NULL,
+#if defined(_WIN32)
+		int ready = select(0, &readset, NULL, NULL,
+#else
+		int ready = select((int)connectSocket + 1, &readset, NULL, NULL,
+#endif
 			waitForChoice ? NULL : &tv);
 		if (ready <= 0)
 		{
@@ -933,13 +1009,19 @@ void CSerial::serial_menu()
 // ---------------------------------------------------------------------------
 void CSerial::execute()
 {
+	// Resume an interrupted reconnect.
+	if (connectSocket == INVALID_SOCKET)
+	{
+		WaitForConnection();
+		return;
+	}
 	fd_set          readset;
 	unsigned char   raw[FIFO_SIZE + 16];
 	unsigned char   cbuffer[FIFO_SIZE + 1];
 	unsigned char*  b;
 	unsigned char*  c;
 	unsigned char*  end;
-	ssize_t         size;
+	int             size;
 	struct timeval  tv;
 
 	drain_staging();
@@ -963,7 +1045,11 @@ void CSerial::execute()
 		FD_SET(connectSocket, &readset);
 		tv.tv_sec = 0;
 		tv.tv_usec = 0;
-		if (select(connectSocket + 1, &readset, NULL, NULL, &tv) > 0)
+#if defined(_WIN32)
+		if (select(0, &readset, NULL, NULL, &tv) > 0)
+#else
+		if (select((int)connectSocket + 1, &readset, NULL, NULL, &tv) > 0)
+#endif
 		{
 			unsigned char* recv_buf = raw + iac_carry_len;
 
@@ -1239,8 +1325,9 @@ int CSerial::RestoreState(FILE* f)
 
 void CSerial::WaitForConnection()
 {
-	struct sockaddr_in  Address;
-	socklen_t           nAddressSize = sizeof(struct sockaddr_in);
+	close_connection();
+	if (listenSockets.empty() || StopThread)
+		return;
 	const char* telnet_options = "%c%c%c";
 	char                buffer[8];
 	char                s[1000];
@@ -1306,27 +1393,93 @@ void CSerial::WaitForConnection()
 #endif
 	}
 #endif
-	Address.sin_addr.s_addr = INADDR_ANY;
-	Address.sin_port = htons((u16)listenPort);
-	Address.sin_family = AF_INET;
-
-	//  Wait until we have a connection. Poll instead of blocking in accept()
-	//  so stop_threads() can interrupt us; otherwise shutdown hangs in join()
-	//  until a client connects (issue #158).
+	// Poll so stop_threads() can interrupt the wait.
 	fd_set          readset;
 	struct timeval  tv;
-	connectSocket = INVALID_SOCKET;
 	while (connectSocket == INVALID_SOCKET)
 	{
 		if (StopThread)
 			return;
 		FD_ZERO(&readset);
-		FD_SET(listenSocket, &readset);
+#if !defined(_WIN32)
+		int highest_socket = 0;
+#endif
+		for (int64_t listener : listenSockets)
+		{
+			FD_SET(listener, &readset);
+#if !defined(_WIN32)
+			if (listener > highest_socket)
+				highest_socket = (int)listener;
+#endif
+		}
 		tv.tv_sec = 0;
 		tv.tv_usec = 100000;
-		if (select(listenSocket + 1, &readset, NULL, NULL, &tv) > 0)
-			connectSocket = accept(listenSocket, (struct sockaddr*)&Address,
-				&nAddressSize);
+#if defined(_WIN32)
+		const int ready = select(0, &readset, NULL, NULL, &tv);
+#else
+		const int ready = select(highest_socket + 1, &readset, NULL, NULL, &tv);
+#endif
+		if (ready < 0)
+		{
+#if defined(_WIN32)
+			const int error = WSAGetLastError();
+			if (error == WSAEINTR)
+#else
+			const int error = errno;
+			if (error == EINTR)
+#endif
+				continue;
+			FAILURE_2(Runtime, "%s: serial listener select failed (error %d)", devid_string, error);
+		}
+		if (ready == 0 || StopThread)
+			continue;
+		for (size_t i = 0; i < listenSockets.size(); ++i)
+		{
+			if (!FD_ISSET(listenSockets[i], &readset))
+				continue;
+			connectSocket = accept(listenSockets[i], NULL, NULL);
+			if (connectSocket == INVALID_SOCKET)
+			{
+#if defined(_WIN32)
+				const int error = WSAGetLastError();
+				if (error == WSAEINTR || error == WSAEWOULDBLOCK ||
+					error == WSAECONNRESET || error == WSAECONNABORTED)
+					continue;
+#else
+				const int error = errno;
+				if (error == EINTR || error == EAGAIN || error == EWOULDBLOCK || error == ECONNABORTED)
+					continue;
+#if defined(__linux__)
+				if (error == ENETDOWN || error == EPROTO || error == ENOPROTOOPT ||
+					error == EHOSTDOWN || error == ENONET || error == EHOSTUNREACH ||
+					error == EOPNOTSUPP || error == ENETUNREACH)
+					continue;
+#endif
+#endif
+				FAILURE(Runtime, std::string(devid_string) + ": serial address " + listenAddresses[i] +
+					" accept failed (error " + std::to_string(error) + ")");
+			}
+#if !defined(_WIN32)
+			if (connectSocket >= FD_SETSIZE)
+			{
+				close_connection();
+				FAILURE(Runtime, "Accepted serial socket exceeds FD_SETSIZE");
+			}
+#endif
+#if defined(_WIN32)
+			u_long nonblocking = 0;
+			const int blocking_error = ioctlsocket(connectSocket, FIONBIO, &nonblocking);
+#else
+			int nonblocking = 0;
+			const int blocking_error = ioctl(connectSocket, FIONBIO, &nonblocking);
+#endif
+			if (blocking_error != 0)
+			{
+				close_connection();
+				FAILURE(Runtime, "Cannot set blocking mode on serial connection");
+			}
+			break;
+		}
 	}
 
 	iac_carry_len = 0;

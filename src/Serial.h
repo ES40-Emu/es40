@@ -99,6 +99,9 @@
 
 #include "SystemComponent.h"
 #include "network/telnet.h"
+#include <atomic>
+#include <string>
+#include <vector>
 
 class CAliM1543C;
 
@@ -144,9 +147,11 @@ private:
 
   void          serial_menu();
   void          drain_staging();
+  void          close_connection();
+  void          close_sockets();
 
   CThread* myThread = nullptr;
-  bool  StopThread = false;
+  std::atomic<bool> StopThread{false};
   bool  breakHit = false;
 
   unsigned char  iac_carry[8];          // Partial telnet sequence carried across recv() calls
@@ -178,19 +183,18 @@ private:
     int   iNumber;
     bool  thre_pending; /**< THRE interrupt latched (THR emptied, not yet acked by an IIR read) */
   } state;
-  int listenPort;
-  const char* listenAddress;
-  int64_t listenSocket;
-  int64_t connectSocket;
-  bool disabled = false;     ///< If true, port is not exposed to guest; reads return 0xff, writes ignored. Used to skip KDCOM probe on AXP64 2210 etc.
-  bool raw_mode = false;     ///< If true, skip telnet IAC processing and connect banner. Use for windbg/kgdb where the byte stream must be 8-bit clean.
-  bool null_attach = false;  ///< If true, port exists on the bus but no socket is opened and no I/O thread runs.
-                             ///< Guest sees a healthy idle 16550 (THRE/TSRE, CTS/DSR); TX bytes are silently
-                             ///< dropped; RX FIFO is permanently empty. MCR.LOOP self-test still works (no
-                             ///< socket touched). Use when the guest expects a UART to exist but you don't
-                             ///< want a telnet listener — bit-bucket semantics, like QEMU's -serial null.
+  int listenPort = 0;
+  std::vector<int64_t> listenSockets;
+  std::vector<std::string> listenAddresses;
+  int64_t connectSocket = INVALID_SOCKET;
+#if defined(_WIN32)
+  bool winsock_started = false;
+#endif
+  bool disabled = false;     ///< Hide the UART from the guest.
+  bool raw_mode = false;     ///< Skip telnet processing and the connection banner.
+  bool null_attach = false;  ///< Provide an idle UART without a listener or client.
 #if defined(IDB) && defined(LS_MASTER)
-  int throughSocket;
+  int throughSocket = INVALID_SOCKET;
 #endif
 };
 #endif // !defined(INCLUDED_SERIAL_H)

@@ -133,6 +133,7 @@ es40_SOURCES = AliM1543C.cpp \
        SCSIBus.cpp \
        SCSIDevice.cpp \
        Serial.cpp \
+       SerialListenAddress.h \
        StdAfx.cpp \
        LSI53C1020.cpp \
        Sym53C810.cpp \

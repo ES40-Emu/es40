@@ -199,7 +199,7 @@ list(APPEND ES40_CFG_SOURCES
     )
 
 if (WIN32)
-    list(APPEND ES40_CFG_LIBRARIES winmm)
+    list(APPEND ES40_CFG_LIBRARIES winmm ws2_32)
 endif()
 
 if (NOT ES40_DISABLE_NETWORKING)
@@ -280,7 +280,7 @@ if (ES40_ENABLE_CFG_TUI)
 	endif()
 
 	if (WIN32)
-	    list(APPEND ES40_CFG_TUI_LIBRARIES winmm)
+	    list(APPEND ES40_CFG_TUI_LIBRARIES winmm ws2_32)
 	endif()
 
 	# Curses config

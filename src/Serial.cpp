@@ -272,6 +272,7 @@ void CSerial::init()
 	raw_mode = myCfg->get_bool_value("raw_mode");
 	null_attach = myCfg->get_bool_value("null_attach");
 	listenPort = (int)myCfg->get_num_value("port", false, 8000 + state.iNumber);
+	listenAddress = myCfg->get_text_value("listen_address", "");
 
 	char    s[1000];
 	char* nargv = s;
@@ -377,6 +378,15 @@ void CSerial::init()
 	Address.sin_addr.s_addr = INADDR_ANY;
 	Address.sin_port = htons((u16)(listenPort));
 	Address.sin_family = AF_INET;
+
+	// Listen on one address only, if the config asks for it.
+	if (listenAddress[0])
+	{
+		Address.sin_addr.s_addr = inet_addr(listenAddress);
+		if (Address.sin_addr.s_addr == INADDR_NONE)
+			FAILURE_2(Configuration, "%s: listen_address \"%s\" is not an IPv4 address",
+				devid_string, listenAddress);
+	}
 
 	int optval = 1;
 #if defined(_WIN32)

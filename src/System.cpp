@@ -1610,14 +1610,20 @@ int CSystem::LoadROM()
 		{
 			if (feof(f))
 				break;
-			fread(&scratch, 1, 1, f);
+			auto r = fread(&scratch, 1, 1, f);
+			if (r != 1)
+				FAILURE_1(IO, "%s: unexpected end of file!\n", "ROM file");
 		}
 
 		if (feof(f))
 			FAILURE(Runtime, "File is too short to be a SRM ROM image");
 		buffer = PtrToMem(0x900000);
 		while (!feof(f))
-			fread(buffer++, 1, 1, f);
+		{
+			auto r = fread(buffer++, 1, 1, f);
+			if (r != 1)
+				FAILURE_1(IO, "%s: unexpected end of file!\n", "ROM file");
+		}
 		fclose(f);
 
 		printf("%%SYS-I-DECOMP: Decompressing ROM image.\n0%%");

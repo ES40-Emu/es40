@@ -110,7 +110,9 @@ CDiskRam::CDiskRam(CConfigurator* cfg, CSystem* sys, CDiskController* c,
 			auto original_ramdisk = ramdisk;
 			CHECK_REALLOCATION(ramdisk, realloc(ramdisk, (size_t)file_byte_size), char);
 			byte_size = file_byte_size;
-			fread(ramdisk, 1, (size_t)file_byte_size, handle);
+			auto r = fread(ramdisk, 1, (size_t)file_byte_size, handle);
+			if (r != (size_t)file_byte_size)
+				FAILURE_1(IO, "%s: unexpected end of file!\n", filename);
 			fclose(handle);
 
 			model_number = myCfg->get_text_value("model_number", filename);

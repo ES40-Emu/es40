@@ -313,10 +313,12 @@ int CAliM1543C_pmu::RestoreState(FILE* f)
 	if (r != 1) { printf("%s: unexpected end of file!\n", devid_string); return -1; }
 	if (m1 != pmu_magic1) { printf("%s: MAGIC 1 does not match!\n", devid_string); return -1; }
 
-	fread(&ss, sizeof(long), 1, f);
+	r = fread(&ss, sizeof(long), 1, f);
+	if (r != 1) { printf("%s: unexpected end of file!\n", devid_string); return -1; }
 	if (ss != sizeof(state)) { printf("%s: STRUCT SIZE does not match!\n", devid_string); return -1; }
 
-	fread(&state, sizeof(state), 1, f);
+	r = fread(&state, sizeof(state), 1, f);
+	if (r != 1) { printf("%s: unexpected end of file!\n", devid_string); return -1; }
 
 	r = fread(&m2, sizeof(u32), 1, f);
 	if (r != 1) { printf("%s: unexpected end of file!\n", devid_string); return -1; }

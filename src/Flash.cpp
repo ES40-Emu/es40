@@ -563,7 +563,9 @@ void CFlash::RestoreStateF(char* fn)
 	}
 
 	u32 header = 0;
-	fread(&header, sizeof(header), 1, ff);
+	auto r = fread(&header, sizeof(header), 1, ff);
+	if (r != 1)
+		FAILURE_1(IO, "%s: unexpected end of file!\n", fn);
 	fclose(ff);
 
 	if (header == flash_magic1)

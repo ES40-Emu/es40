@@ -192,6 +192,31 @@ static string trim_answer(const string& value)
 	return value.substr(first, last - first + 1);
 }
 
+static bool valid_listen_address(const string& address)
+{
+	if (address.empty())
+		return true;
+
+	size_t pos = 0;
+	for (int i = 0; i < 4; i++)
+	{
+		size_t start = pos;
+		unsigned int octet = 0;
+		while (pos < address.size() && address[pos] >= '0' && address[pos] <= '9')
+		{
+			octet = octet * 10 + (address[pos++] - '0');
+			if (octet > 255 || pos - start > 3)
+				return false;
+		}
+		// Avoid inet_addr() interpreting leading zeroes as octal.
+		if (pos == start || (pos - start > 1 && address[start] == '0'))
+			return false;
+		if (i < 3 && (pos == address.size() || address[pos++] != '.'))
+			return false;
+	}
+	return pos == address.size() && address != "255.255.255.255";
+}
+
 static string ask_hotkey_override(const SDLHotkeyPrompt& prompt)
 {
 	FreeTextQuestion hotkey_q;
@@ -827,12 +852,30 @@ int main(int argc, char* argv[])
 
 		if (is_null)
 		{
-			/* Bit-bucket port — skip the action/args prompts entirely. */
+			/* Bit-bucket port — skip the listener and action/args prompts. */
 			os << "  serial" << i << " = serial\n";
 			os << "  {\n";
 			os << "    null_attach = true;\n";
 			os << "  }\n\n";
 			continue;
+		}
+
+		FreeTextQuestion address_q;
+		address_q.setQuestion("What IPv4 address should serial " + i2s(i) + " listen on?");
+		address_q.setOptions("Enter for all addresses, 127.0.0.1 for local connections only");
+		address_q.setExplanation(
+			"Leave blank (or enter 0.0.0.0) to listen on all host IPv4 addresses. "
+			"Enter 127.0.0.1 to allow connections only from this host, or enter a "
+			"specific host IPv4 address in dotted-decimal form to use that interface. "
+			"Hostnames and IPv6 addresses are not supported.");
+		string listen_address;
+		for (;;)
+		{
+			listen_address = trim_answer(address_q.ask());
+			if (valid_listen_address(listen_address))
+				break;
+			cout << "\nPlease enter a dotted-decimal IPv4 address without leading zeroes, "
+				"or leave blank for all addresses.\n\n";
 		}
 
 		FreeTextQuestion exec_q;
@@ -862,7 +905,9 @@ int main(int argc, char* argv[])
 			arg_q.setExplanation("Enter the arguments the program needs.");
 			/* This is the argument format for PuTTy.
 			 */
-			arg_q.setDefault("telnet://localhost:" + port_q.getAnswer());
+			string connect_address = listen_address.empty() || listen_address == "0.0.0.0"
+				? "localhost" : listen_address;
+			arg_q.setDefault("telnet://" + connect_address + ":" + port_q.getAnswer());
 
 			arg_q.ask();
 		}
@@ -870,6 +915,8 @@ int main(int argc, char* argv[])
 		os << "  serial" << i << " = serial\n";
 		os << "  {\n";
 		os << "    port = " << port_q.getAnswer() << ";\n";
+		if (!listen_address.empty())
+			os << "    listen_address = \"" << listen_address << "\";\n";
 		if (exec_q.getAnswer() != "none")
 		{
 #if defined(_WIN32)

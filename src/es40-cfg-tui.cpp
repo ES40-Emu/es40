@@ -3220,11 +3220,55 @@ void validation_serial_port(FIELD *field)
     set_field_type(field, TYPE_INTEGER, 1, 1, USHRT_MAX);
 }
 
+static bool valid_listen_address(const string &address)
+{
+    if (address.empty())
+        return true;
+
+    size_t pos = 0;
+    for (int i = 0; i < 4; ++i)
+    {
+        size_t start = pos;
+        unsigned int octet = 0;
+        while (pos < address.size() && address[pos] >= '0' && address[pos] <= '9')
+        {
+            octet = octet * 10 + (address[pos++] - '0');
+            if (octet > 255 || pos - start > 3)
+                return false;
+        }
+        // Avoid inet_addr() interpreting leading zeroes as octal.
+        if (pos == start || (pos - start > 1 && address[start] == '0'))
+            return false;
+        if (i < 3 && (pos == address.size() || address[pos++] != '.'))
+            return false;
+    }
+    return pos == address.size() && address != "255.255.255.255";
+}
+
 bool check_serial(FormEntry_t entry[], int num_entries, FormValues_t values)
 {
     for (int i = 0; i < 2; ++i)
     {
-        string serial_program = "serial" + i2s(i) + "." + "program";
+        string serial_prefix = "serial" + i2s(i) + ".";
+        int disabled_idx = fentry_index(entry, num_entries, (serial_prefix + "disabled").c_str());
+        int null_idx = fentry_index(entry, num_entries, (serial_prefix + "null_attach").c_str());
+        if (!strcmp(values[disabled_idx], STR_YES) || !strcmp(values[null_idx], STR_YES))
+            continue;
+
+        int address_idx = fentry_index(entry, num_entries, (serial_prefix + "listen_address").c_str());
+        char *address = values[address_idx];
+        while (*address == ' ')
+            ++address;
+        memmove(values[address_idx], address, strlen(address) + 1);
+        if (!valid_listen_address(values[address_idx]))
+        {
+            string message = serial_prefix + "listen_address must be empty or a dotted-decimal IPv4 address.\n"
+                "Use 127.0.0.1 for local connections, or 0.0.0.0 for all interfaces.";
+            show_text("Error", message.c_str());
+            return FALSE;
+        }
+
+        string serial_program = serial_prefix + "program";
         int idx = fentry_index(entry, num_entries, serial_program.c_str());
         if (strchr(values[idx], '"'))
         {
@@ -3238,7 +3282,7 @@ bool check_serial(FormEntry_t entry[], int num_entries, FormValues_t values)
 // Form for serial lines
 void edit_serial(const char *title)
 {
-    const int num_attr = 6;
+    const int num_attr = 7;
     FormEntry_t entry[num_attr * 2];
 
     for (int i = 0; i < 2; ++i)
@@ -3269,6 +3313,15 @@ void edit_serial(const char *title)
             validation_serial_port};
 
         entry[num_attr * i + 3] = {
+            strdup((serial_prefix + "listen_address").c_str()), "", "listen_address",
+            "The local IPv4 address the serial device will listen on.\n"
+            "Leave empty, or use 0.0.0.0, to listen on all IPv4 interfaces.\n"
+            "Use 127.0.0.1 to allow connections only from this host.\n"
+            "Hostnames and IPv6 addresses are not supported.\n"
+            "If you choose another local address, use it in the program arguments too.",
+            NULL};
+
+        entry[num_attr * i + 4] = {
             strdup((serial_prefix + "raw_mode").c_str()), STR_NO, "raw_mode",
             "Pass the byte stream through unmodified: no Telnet protocol (IAC)\n"
             "processing and no throttling to emulated line speed. Required when\n"
@@ -3276,7 +3329,7 @@ void edit_serial(const char *title)
             "instead of a terminal session.",
             validation_yes_no};
 
-        entry[num_attr * i + 4] = {
+        entry[num_attr * i + 5] = {
             strdup((serial_prefix + "program").c_str()),
 #if defined(_WIN32)
             "C:\\Program Files\\Putty\\Putty.exe",
@@ -3292,9 +3345,11 @@ void edit_serial(const char *title)
             validation_file};
 
         const string arguments_value = "telnet://localhost:" + port_value;
-        entry[num_attr * i + 5] = {
+        entry[num_attr * i + 6] = {
             strdup((serial_prefix + "arguments").c_str()), strdup(arguments_value.c_str()), NULL,
-            "Arguments the program should use to connect to the serial port.",
+            "Arguments the program should use to connect to the serial port.\n"
+            "Connect to listen_address if set to an address other than 0.0.0.0;\n"
+            "otherwise connect to localhost.",
             NULL};
     }
     const int num_entries = ARRAY_SIZE(entry);
@@ -3338,13 +3393,16 @@ void edit_serial(const char *title)
             static char program[2][256], arguments[2][256];
             string action_str = action;
             string::size_type p1, p2, p3; // p1=start of program, p2=end of program, p3=after end of program
-            if ((p1 = action_str.find(dquotes)) != string::npos)
+            if (!action_str.empty() && action_str[0] == '"')
             {
-                p1 += 2;
-                p2 = action_str.find(dquotes, p1);
+                // Loaded values have single quotes; edits in this session use
+                // doubled quotes for write_configuration().
+                const string quote = action_str.compare(0, 2, dquotes) == 0 ? dquotes : "\"";
+                p1 = quote.length();
+                p2 = action_str.find(quote, p1);
                 if (p2 == string::npos)
                     FAILURE_1(Configuration, "No closing double quotes in %s", entry[k].label);
-                p3 = p2 + 2;
+                p3 = p2 + quote.length();
             }
             else
             {
@@ -3354,13 +3412,13 @@ void edit_serial(const char *title)
                     p2 = action_str.length();
                 p3 = p2;
             }
-            if (k % num_attr == 4)
+            if (k % num_attr == 5)
             {
                 memset(program[i], '\0', sizeof(program[i]));
                 strncpy(program[i], action_str.substr(p1, p2 - p1).c_str(), sizeof(program[i]) - 1);
                 preset[k] = program[i];
             }
-            else if (k % num_attr == 5)
+            else if (k % num_attr == 6)
             {
                 memset(arguments[i], '\0', sizeof(arguments[i]));
                 if (p3 < action_str.length())
@@ -3402,6 +3460,10 @@ void edit_serial(const char *title)
             idx = fentry_index(entry, num_entries, (serial_prefix + "port").c_str());
             c->set_value(strdup(entry[idx].name), strdup(values[idx]));
 
+            idx = fentry_index(entry, num_entries, (serial_prefix + "listen_address").c_str());
+            if (values[idx][0])
+                c->set_value(strdup(entry[idx].name), strdup(values[idx]));
+
             idx = fentry_index(entry, num_entries, (serial_prefix + "raw_mode").c_str());
             c->set_value(strdup(entry[idx].name), strdup(values[idx]));
 
@@ -3425,7 +3487,7 @@ void edit_serial(const char *title)
     for (int i = 0; i < num_entries; ++i)
     {
         free((void *)entry[i].label);
-        if (i % num_attr == 2 || i % num_attr == 5)
+        if (i % num_attr == 2 || i % num_attr == 6)
             free((void *)entry[i].preset);
     }
     free(preset);

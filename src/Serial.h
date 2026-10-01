@@ -179,6 +179,7 @@ private:
     bool  thre_pending; /**< THRE interrupt latched (THR emptied, not yet acked by an IIR read) */
   } state;
   int listenPort;
+  const char* listenAddress;
   int64_t listenSocket;
   int64_t connectSocket;
   bool disabled = false;     ///< If true, port is not exposed to guest; reads return 0xff, writes ignored. Used to skip KDCOM probe on AXP64 2210 etc.

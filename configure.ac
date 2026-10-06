@@ -65,8 +65,16 @@ AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_RANLIB
 
-# We need C++17.
-AX_CXX_COMPILE_STDCXX([17], [ext], [mandatory])
+# Allow enabling JIT for builds.
+AC_ARG_ENABLE([asmjit],
+  [AS_HELP_STRING([--enable-asmjit],[Enable AsmJit support])],
+  [enable_asmjit=yes],
+  [enable_asmjit=no])
+
+# We need C++17; AsmJit (v1.23+) needs C++20, matching its cxx_std_20 requirement in CMake.
+AS_IF([test "x$enable_asmjit" = "xyes"],
+  [AX_CXX_COMPILE_STDCXX([20], [ext], [mandatory])],
+  [AX_CXX_COMPILE_STDCXX([17], [ext], [mandatory])])
 
 case "$host_os" in
   darwin*)
@@ -286,12 +294,6 @@ AS_IF([test "x$enable_sdl" != "xno"], [
       AC_MSG_FAILURE([sdl3 >= 3.2.0 is required unless --disable-sdl is used])
     ])
 ])
-
-# Allow enabling JIT for builds.
-AC_ARG_ENABLE([asmjit],
-  [AS_HELP_STRING([--enable-asmjit],[Enable AsmJit support])],
-  [enable_asmjit=yes],
-  [enable_asmjit=no])
 
 AM_CONDITIONAL([ENABLE_ASMJIT], [test "x$enable_asmjit" = "xyes"])
 

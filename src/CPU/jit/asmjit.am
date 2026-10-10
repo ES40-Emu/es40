@@ -3,71 +3,67 @@ noinst_LIBRARIES = libasmjit.a
 
 # Absolute paths relative to the project root directory
 libasmjit_a_SOURCES = \
-    $(top_srcdir)/third_party/asmjit/asmjit/core/archtraits.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/axl/arena.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/axl/arena_bit_set.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/axl/arena_hash.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/axl/arena_vector.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/core/arch_traits.cpp \
     $(top_srcdir)/third_party/asmjit/asmjit/core/assembler.cpp \
     $(top_srcdir)/third_party/asmjit/asmjit/core/builder.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/core/codeholder.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/core/codewriter.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/core/code_holder.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/core/code_writer.cpp \
     $(top_srcdir)/third_party/asmjit/asmjit/core/compiler.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/core/constpool.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/core/cpuinfo.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/core/emithelper.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/core/const_pool.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/core/cpu_info.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/core/debug_utils.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/core/emit_helper.cpp \
     $(top_srcdir)/third_party/asmjit/asmjit/core/emitter.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/core/emitterutils.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/core/emitter_utils.cpp \
     $(top_srcdir)/third_party/asmjit/asmjit/core/environment.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/core/errorhandler.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/core/error.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/core/error_handler.cpp \
     $(top_srcdir)/third_party/asmjit/asmjit/core/formatter.cpp \
     $(top_srcdir)/third_party/asmjit/asmjit/core/func.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/core/funcargscontext.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/core/globals.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/core/func_args_context.cpp \
     $(top_srcdir)/third_party/asmjit/asmjit/core/inst.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/core/instdb.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/core/jitallocator.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/core/jitruntime.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/core/inst_db.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/core/jit_allocator.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/core/jit_runtime.cpp \
     $(top_srcdir)/third_party/asmjit/asmjit/core/logger.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/core/operand.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/core/osutils.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/core/ralocal.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/core/rapass.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/core/rastack.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/core/os_utils.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/core/pauth.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/core/ra_local.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/core/ra_pass.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/core/ra_stack.cpp \
     $(top_srcdir)/third_party/asmjit/asmjit/core/string.cpp \
     $(top_srcdir)/third_party/asmjit/asmjit/core/target.cpp \
     $(top_srcdir)/third_party/asmjit/asmjit/core/type.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/core/virtmem.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/support/arena.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/support/arenabitset.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/support/arenahash.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/support/arenalist.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/support/arenatree.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/support/arenavector.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/support/support.cpp
+    $(top_srcdir)/third_party/asmjit/asmjit/core/virt_mem.cpp
 
 # One backend per host (matches Makefile.am's ASMJIT_NO_X86 / ASMJIT_NO_AARCH64 split):
 # the a64 backend is scaffolding for a future ARM64 codegen -- nothing emits through it yet.
 if ES40_JIT_HOST_A64
 libasmjit_a_SOURCES += \
-    $(top_srcdir)/third_party/asmjit/asmjit/arm/a64assembler.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/arm/a64builder.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/arm/a64compiler.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/arm/a64emithelper.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/arm/a64formatter.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/arm/a64func.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/arm/a64instapi.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/arm/a64instdb.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/arm/a64operand.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/arm/a64rapass.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/arm/armformatter.cpp
+    $(top_srcdir)/third_party/asmjit/asmjit/arm/a64_assembler.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/arm/a64_builder.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/arm/a64_compiler.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/arm/a64_emit_helper.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/arm/a64_formatter.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/arm/a64_func.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/arm/a64_inst_api.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/arm/a64_inst_db.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/arm/a64_ra_pass.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/arm/arm_formatter.cpp
 else
 libasmjit_a_SOURCES += \
-    $(top_srcdir)/third_party/asmjit/asmjit/x86/x86assembler.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/x86/x86builder.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/x86/x86compiler.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/x86/x86emithelper.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/x86/x86formatter.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/x86/x86func.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/x86/x86instapi.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/x86/x86instdb.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/x86/x86operand.cpp \
-    $(top_srcdir)/third_party/asmjit/asmjit/x86/x86rapass.cpp
+    $(top_srcdir)/third_party/asmjit/asmjit/x86/x86_assembler.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/x86/x86_builder.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/x86/x86_compiler.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/x86/x86_emit_helper.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/x86/x86_formatter.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/x86/x86_func.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/x86/x86_inst_api.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/x86/x86_inst_db.cpp \
+    $(top_srcdir)/third_party/asmjit/asmjit/x86/x86_ra_pass.cpp
 endif
 

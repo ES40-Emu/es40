@@ -1223,6 +1223,10 @@ void CAlphaCPU::jit_run(int budget)
 		const u32 start_asn = (u32)state.asn;
 		const bool start_pal_shadow = (start_virt & 1) && state.sde;
 
+		// PAL reset-vector entry
+		if (start_virt == (state.pal_base | 1))
+			flush_icache();
+
 		// Host-side idle detection. If a dispatch runs its whole instruction
 		// budget and the next starts at an address just seen, several times
 		// over, the guest is going round in circles. This works with the JIT

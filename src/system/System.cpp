@@ -320,6 +320,9 @@
 #include "emu/PCIDevice.h"
 #include "graphics/VGA.h"
 #include "CPU/AlphaCPU.h"
+#ifdef ES40_JIT
+#include "CPU/jit/jitengine.h"
+#endif
 #include "network/lockstep.h"
 #include "DPR.h"
 #include "Flash.h"
@@ -1505,7 +1508,7 @@ static bool srm_decomp_chunk(CSystem* sys, CAlphaCPU* cpu)
 	(void)sys;
 	for (int i = 0; i < 90000; i++)
 	{
-		cpu->jit_step(2000);
+		cpu->jit_step((int) CJitEngine::kChainCeiling);
 		if (cpu->get_clean_pc() < U64(0x200000))
 			return true;
 	}

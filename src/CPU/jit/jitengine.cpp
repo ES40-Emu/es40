@@ -37,7 +37,9 @@
 #include <cstring>
 #include <chrono>   // note_exec times its own stats-print I/O (excluded from the wall-clock RPCC)
 #include <cstdlib>  // abort (fatal block/trace cache allocation failure)
+#ifndef ASMJIT_STATIC
 #define ASMJIT_STATIC
+#endif
 // The engine owns the executable-memory allocator (JitRuntime) for whichever backend is
 // built; only asmjit's core is needed here -- no instructions are emitted in this file.
 #include <asmjit/core.h>

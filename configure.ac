@@ -68,7 +68,7 @@ AC_PROG_RANLIB
 # Allow enabling JIT for builds.
 AC_ARG_ENABLE([asmjit],
   [AS_HELP_STRING([--enable-asmjit],[Enable AsmJit support])],
-  [enable_asmjit=yes],
+  [],
   [enable_asmjit=no])
 
 # We need C++17; AsmJit (v1.23+) needs C++20, matching its cxx_std_20 requirement in CMake.

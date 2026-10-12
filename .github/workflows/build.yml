@@ -645,7 +645,7 @@ jobs:
           fi
 
           configure_env=(
-            CXXFLAGS="${CXXFLAGS:+$CXXFLAGS }-g -O2 -fpermissive -std=c++17"
+            CXXFLAGS="${CXXFLAGS:+$CXXFLAGS }-g -O2 -fpermissive"
             CPPFLAGS="-I$PWD/src/emu"
           )
           # The configuration editor ships with every build, not as a separate download;
@@ -829,7 +829,7 @@ jobs:
           set -euo pipefail
 
           env \
-            CXXFLAGS="${CXXFLAGS:+$CXXFLAGS }-g -O2 -fpermissive -std=c++17" \
+            CXXFLAGS="${CXXFLAGS:+$CXXFLAGS }-g -O2 -fpermissive" \
             CPPFLAGS="-I$PWD/src/emu" \
             PKG_CONFIG_PATH="$PWD/.github/pkgconfig:/usr/local/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}" \
             ./configure --enable-asmjit --enable-pcap --enable-tui

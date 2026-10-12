@@ -39,7 +39,9 @@
 #include <initializer_list>
 #include <type_traits>
 #include <vector>
+#ifndef ASMJIT_STATIC
 #define ASMJIT_STATIC
+#endif
 #include <asmjit/a64.h>
 
 // Cross-op DPC reuse state (x64's dpc_live/base/disp)
@@ -84,7 +86,7 @@ struct CJitEngine::RegAlloc {
   static constexpr asmjit::a64::Gp kGuestPin5 = asmjit::a64::x28;
 
   static constexpr asmjit::RegMask kPersistentGpMask =
-      asmjit::Support::bit_mask<asmjit::RegMask>(
+      asmjit::axl::bit_mask<asmjit::RegMask>(
           kCpu.id(), kRegs.id(), kChainCount.id(), kNextPc.id(),
           kGuestPin0.id(), kGuestPin1.id(), kGuestPin2.id(),
           kGuestPin3.id(), kGuestPin4.id(), kGuestPin5.id());
@@ -146,11 +148,11 @@ static_assert(CJitEngine::RegAlloc::kGuestPin1.id()
               "A64 guest pin indices must map contiguously to x23-x28");
 
 static_assert((CJitEngine::RegAlloc::kPersistentGpMask
-               & asmjit::Support::bit_mask<asmjit::RegMask>(8, 16, 17,
+               & asmjit::axl::bit_mask<asmjit::RegMask>(8, 16, 17,
                      asmjit::a64::Gp::kIdOs, 29, 30, 31)) == 0,
               "A64 persistent registers must exclude ABI, linker, platform, frame, link, and stack registers");
 static_assert((CJitEngine::RegAlloc::kPersistentGpMask
-               & asmjit::Support::bit_mask<asmjit::RegMask>(
+               & asmjit::axl::bit_mask<asmjit::RegMask>(
                      CJitEngine::RegAlloc::kScratch0.id())) == 0,
               "A64 expansion scratch must not overlap persistent registers");
 static_assert(CJitEngine::RegAlloc::kScratch6.id()
@@ -6226,7 +6228,7 @@ static bool a64_abi_compatible(const asmjit::Environment& environment)
   const RegMask preserved = cc.preserved_regs(RegGroup::kGp);
   return (preserved & CJitEngine::RegAlloc::kPersistentGpMask)
           == CJitEngine::RegAlloc::kPersistentGpMask
-      && (preserved & Support::bit_mask<RegMask>(CJitEngine::RegAlloc::kScratch0.id())) == 0
+      && (preserved & axl::bit_mask<RegMask>(CJitEngine::RegAlloc::kScratch0.id())) == 0
       && cc.natural_stack_alignment() == 16;
 }
 #endif

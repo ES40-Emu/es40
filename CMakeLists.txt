@@ -503,6 +503,7 @@ endif()
 
 if (NOT ES40_DISABLE_ASMJIT)
     set(ASMJIT_NO_INSTALL ON)
+    set(ASMJIT_STATIC ON)
     # Build only the backend matching the target: x86-64 is the real codegen host; ARM64
     # (incl. Apple Silicon) builds the JIT scaffolding, which always falls back to the
     # interpreter (no a64 code is emitted yet -- see src/CPU/jit/jitengine_a64.cpp).

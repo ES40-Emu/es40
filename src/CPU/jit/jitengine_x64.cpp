@@ -39,7 +39,9 @@
 #include <cstddef>  // offsetof (chain guard)
 #include <initializer_list>
 #include <vector>   // deferred slow-path stubs (memop helper calls)
+#ifndef ASMJIT_STATIC
 #define ASMJIT_STATIC
+#endif
 // asmjit's x64 backend emits x86-64; asmjit's CallConv maps the host C ABI
 // (Microsoft x64 or System V) from the build env.
 #include <asmjit/x86.h>

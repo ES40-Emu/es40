@@ -1250,15 +1250,16 @@ void CAlphaCPU::jit_run(int budget)
 					}
 				if (!seen)
 				{
+					// A new address breaks the run of consecutive repeated PCs.
+					m_spin_hits = 0;
 					if (m_spin_set_n < kSpinSetMax)
 						m_spin_set[m_spin_set_n++] = start_virt;
 					else
 					{
 						m_spin_set_n = 0;        // too wide to be a loop: start over
-						m_spin_hits = 0;
 					}
 				}
-				if (++m_spin_hits >= idle_spin_count)
+				else if (++m_spin_hits >= idle_spin_count)
 				{
 					m_spin_hits = idle_spin_count;   // saturate
 					if (!m_spin_announced)

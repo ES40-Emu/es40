@@ -410,6 +410,7 @@ void CAlphaCPU::run()
 		cc_last_sync = start_time;
 		cc_large = 0;
 		state.instruction_count = 0;
+		reset_idle_detector();
 		prev_icount = 0;
 		prev_cc = 0;
 		prev_time = 0;
@@ -441,6 +442,18 @@ void CAlphaCPU::run()
 
 		// Let the thread die...
 	}
+}
+
+// Discard evidence from the previous execution history without changing guest state.
+void CAlphaCPU::reset_idle_detector()
+{
+	idle_spin_min_instr = 0;   // Relearn from the next dispatch's instruction budget.
+	m_spin_ic = state.instruction_count;
+	m_spin_hits = 0;
+	for (auto& pc : m_spin_set)
+		pc = 0;
+	m_spin_set_n = 0;
+	m_spin_announced = false;
 }
 
 /**
@@ -632,6 +645,7 @@ CAlphaCPU::CAlphaCPU(CConfigurator* cfg, CSystem* system, const AlphaCPUProfile&
 void CAlphaCPU::init()
 {
 	memset(&state, 0, sizeof(state));
+	reset_idle_detector();
 	last_dtb_virt[0] = last_dtb_virt[1] = 0;
 	cc_last_read = 0;   // rpcc_read floor state tracks state.cc -- reset together
 	cc_borrow = 0;
@@ -797,6 +811,7 @@ void CAlphaCPU::ResetForSystemReset()
 	const int savedProcNum = state.iProcNum;
 
 	memset(&state, 0, sizeof(state));
+	reset_idle_detector();
 	last_dtb_virt[0] = last_dtb_virt[1] = 0;
 	cc_last_read = 0;   // rpcc_read floor state tracks state.cc -- reset together
 	cc_borrow = 0;
@@ -4079,6 +4094,7 @@ int CAlphaCPU::RestoreState(FILE* f)
 		return -1;
 	}
 
+	reset_idle_detector();
 	printf("%s: %d bytes restored.\n", devid_string, (int)ss);
 	last_dtb_virt[0] = last_dtb_virt[1] = 0;
 	// RAM and TB state now belong to the restored state. Restored icache stays. Rest gets chucked.

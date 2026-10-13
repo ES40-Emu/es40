@@ -507,6 +507,7 @@ private:
   int                                   m_spin_set_n = 0;
   bool                                  m_spin_announced = false;
   bool                                  idle_announced = false;
+  void reset_idle_detector();
 
   // Wall-clock RPCC: state.cc advances by real elapsed time * cpu_hz so it tracks the configured
   // CPU frequency regardless of how fast/bursty the JIT runs. This is the last sync timestamp;

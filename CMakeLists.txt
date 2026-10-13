@@ -12,6 +12,7 @@ option(ES40_DISABLE_SDL "Disable SDL for headless builds" OFF)
 option(ES40_DISABLE_NETWORKING "Disable PCap/networking for networkless builds" OFF)
 option(ES40_DISABLE_TAP "Disable TAP networking even on platforms that support it (Linux/FreeBSD/NetBSD)" OFF)
 option(ES40_DISABLE_VMNET "Disable vmnet networking on macOS" OFF)
+option(ES40_DISABLE_SLIRP "Disable the Rust userspace (slirp) network backend" OFF)
 option(ES40_DISABLE_LSS_LSM "Disable LSS/LSM (lockstep) builds." OFF)
 option(ES40_DISABLE_IDB "Disable IDB (built-in debugger) builds." OFF)
 option(ES40_DISABLE_ASMJIT "Disable ASMJIT" ON)
@@ -48,6 +49,17 @@ endif()
 
 set(ES40_HAVE_PCAP FALSE)
 set(ES40_HAVE_TAP FALSE)
+set(ES40_HAVE_SLIRP FALSE)
+
+# The Rust userspace ("slirp") backend needs no host libraries, only cargo.
+if (NOT ES40_DISABLE_NETWORKING AND NOT ES40_DISABLE_SLIRP)
+    find_program(CARGO_EXECUTABLE cargo)
+    if (CARGO_EXECUTABLE)
+        set(ES40_HAVE_SLIRP TRUE)
+    else()
+        message(WARNING "cargo not found: the Rust \"slirp\" network backend will not be built. Configure with -DES40_DISABLE_SLIRP=ON to silence this warning.")
+    endif()
+endif()
 
 if (NOT ES40_DISABLE_NETWORKING)
     if (WIN32)
@@ -76,8 +88,48 @@ if (NOT ES40_DISABLE_NETWORKING)
             set(ES40_HAVE_VMNET TRUE)
         endif()
 
-        if (NOT ES40_HAVE_PCAP AND NOT ES40_HAVE_TAP AND NOT ES40_HAVE_VMNET)
-            message(FATAL_ERROR "Networking was requested (ES40_DISABLE_NETWORKING=OFF) but neither libpcap nor TAP nor vmnet support is available for this platform/build. Install libpcap, or configure with -DES40_DISABLE_NETWORKING=ON to build without networking.")
+        if (NOT ES40_HAVE_PCAP AND NOT ES40_HAVE_TAP AND NOT ES40_HAVE_VMNET AND NOT ES40_HAVE_SLIRP)
+            message(FATAL_ERROR "Networking was requested (ES40_DISABLE_NETWORKING=OFF) but neither libpcap nor TAP nor vmnet nor slirp support is available for this platform/build. Install libpcap, or configure with -DES40_DISABLE_NETWORKING=ON to build without networking.")
+        endif()
+    endif()
+endif()
+
+# --- Rust userspace ("slirp") backend -------------------------------------
+#
+# The backend itself is the Rust static library in src/network/slirp-rs,
+# built out-of-band by cargo. CMake only knows how to invoke cargo and where
+# the resulting archive lands; the C++ side sees the extern "C" API declared
+# in NetworkSlirp.cpp.
+if (ES40_HAVE_SLIRP)
+    set(ES40_SLIRP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/network/slirp-rs")
+    if (WIN32)
+        set(ES40_SLIRP_ARTIFACT "${ES40_SLIRP_DIR}/target/release/es40_slirp.lib")
+    else()
+        set(ES40_SLIRP_ARTIFACT "${ES40_SLIRP_DIR}/target/release/libes40_slirp.a")
+    endif()
+
+    add_custom_target(es40_slirp_rust ALL
+        COMMAND ${CARGO_EXECUTABLE} build --release
+        WORKING_DIRECTORY "${ES40_SLIRP_DIR}"
+        BYPRODUCTS "${ES40_SLIRP_ARTIFACT}"
+        COMMENT "Building the Rust slirp network backend"
+        VERBATIM)
+
+    add_library(es40_slirp STATIC IMPORTED GLOBAL)
+    set_target_properties(es40_slirp PROPERTIES
+        IMPORTED_LOCATION "${ES40_SLIRP_ARTIFACT}")
+
+    set(ES40_SLIRP_LINK_LIBRARIES es40_slirp)
+    if (WIN32)
+        # Native artifacts the Rust static library needs (see
+        # `cargo rustc -- --print native-static-libs`).
+        list(APPEND ES40_SLIRP_LINK_LIBRARIES ws2_32 dbghelp iphlpapi userenv ntdll)
+    else()
+        find_package(Threads REQUIRED)
+        list(APPEND ES40_SLIRP_LINK_LIBRARIES Threads::Threads ${CMAKE_DL_LIBS})
+        find_library(ES40_SLIRP_M_LIB m)
+        if (ES40_SLIRP_M_LIB)
+            list(APPEND ES40_SLIRP_LINK_LIBRARIES ${ES40_SLIRP_M_LIB})
         endif()
     endif()
 endif()
@@ -214,6 +266,9 @@ if (NOT ES40_DISABLE_NETWORKING)
     if (ES40_HAVE_TAP)
         list(APPEND ES40_CFG_DEFINITIONS HAVE_TAP_NET)
     endif()
+    if (ES40_HAVE_SLIRP)
+        list(APPEND ES40_CFG_DEFINITIONS HAVE_SLIRP)
+    endif()
 endif()
 
 if (NOT ES40_DISABLE_SDL)
@@ -268,6 +323,9 @@ if (ES40_ENABLE_CFG_TUI)
 		endif()
 		if (ES40_HAVE_TAP)
 			list(APPEND ES40_CFG_TUI_DEFINITIONS HAVE_TAP_NET)
+		endif()
+		if (ES40_HAVE_SLIRP)
+			list(APPEND ES40_CFG_TUI_DEFINITIONS HAVE_SLIRP)
 		endif()
 		if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 			list(APPEND ES40_CFG_TUI_DEFINITIONS HAVE_VMNET)
@@ -406,6 +464,7 @@ list(APPEND ES40_SOURCES
     src/network/NetworkTap.cpp
     src/network/NetworkVmnet.cpp
     src/network/NetworkVmnetIPC.cpp
+    src/network/NetworkSlirp.cpp
     src/emu/PCIDevice.cpp
     src/graphics/Permedia2.cpp
     src/io/Port80.cpp
@@ -445,17 +504,22 @@ if (NOT ES40_DISABLE_SDL)
         src/gui/sdl_media.cpp
         src/gui/sdl_media.h
         )
-    
-    if (WIN32)
-        list(APPEND ES40_SOURCES
-            src/gui/gui_win32.cpp
-            )
-        list(APPEND ES40_LIBRARIES winmm)
-    else()
+
+    if (NOT WIN32)
         list(APPEND ES40_SOURCES
             src/gui/gui_x11.cpp
             )
     endif()
+endif()
+
+# The native Win32 GUI is independent of SDL, and defines the win32 plugin
+# that Configurator always refers to under _WIN32, so it must be built on
+# Windows even when SDL is disabled.
+if (WIN32)
+    list(APPEND ES40_SOURCES
+        src/gui/gui_win32.cpp
+        )
+    list(APPEND ES40_LIBRARIES winmm)
 endif()
 
 if (NOT ES40_DISABLE_NETWORKING)
@@ -474,6 +538,10 @@ if (NOT ES40_DISABLE_NETWORKING)
         list(APPEND ES40_DEFINITIONS HAVE_VMNET)
         list(APPEND ES40_LIBRARIES $<LINK_LIBRARY:FRAMEWORK,vmnet>)
     endif()
+    if (ES40_HAVE_SLIRP)
+        list(APPEND ES40_DEFINITIONS HAVE_SLIRP)
+        list(APPEND ES40_LIBRARIES ${ES40_SLIRP_LINK_LIBRARIES})
+    endif()
 endif()
 
 if (NOT WIN32)
@@ -491,6 +559,10 @@ list(APPEND ES40_INCLUDES
     )
 
 add_executable(es40 ${ES40_SOURCES})
+# The Rust slirp static library must exist before any target links against it.
+if (ES40_HAVE_SLIRP)
+    add_dependencies(es40 es40_slirp_rust)
+endif()
 # The GPL/LGPL texts and third-party license notices required with the es40 binaries.
 add_custom_command(TARGET es40 POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -499,10 +571,17 @@ add_custom_command(TARGET es40 POST_BUILD
         ${CMAKE_CURRENT_SOURCE_DIR}/src/es40-NOTICES.txt $<TARGET_FILE_DIR:es40>)
 if (NOT ES40_DISABLE_IDB)
     add_executable(es40_idb ${ES40_SOURCES})
+    if (ES40_HAVE_SLIRP)
+        add_dependencies(es40_idb es40_slirp_rust)
+    endif()
 endif()
 if (NOT ES40_DISABLE_LSS_LSM)
     add_executable(es40_lss ${ES40_SOURCES})
     add_executable(es40_lsm ${ES40_SOURCES})
+    if (ES40_HAVE_SLIRP)
+        add_dependencies(es40_lss es40_slirp_rust)
+        add_dependencies(es40_lsm es40_slirp_rust)
+    endif()
 endif()
 
 if (NOT ES40_DISABLE_ASMJIT)

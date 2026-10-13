@@ -139,6 +139,7 @@ noinst_HEADERS += storage/Disk.h \
        network/DEC21143.h \
        network/DEC21143_mii.h \
        network/DEC21143_tulipreg.h \
+       network/NetworkSlirp.h \
        emu/SystemComponent.h \
        emu/PCIDevice.h \
        emu/address_map.h \
@@ -152,6 +153,38 @@ es40_cfg_LDADD = $(ES40_LIBS)
 es40_idb_LDADD = $(ASMJIT_LDADD) $(ES40_LIBS)
 es40_lss_LDADD = $(ASMJIT_LDADD) $(ES40_LIBS)
 es40_lsm_LDADD = $(ASMJIT_LDADD) $(ES40_LIBS)
+
+# The Rust userspace ("slirp") backend is a static library built by cargo.
+# It needs the C runtime plus the dynamic loader and libm on Unix.
+if HAVE_SLIRP
+SLIRP_RS_DIR = $(top_srcdir)/src/network/slirp-rs
+SLIRP_RS_LIB = $(SLIRP_RS_DIR)/target/release/libes40_slirp.a
+
+$(SLIRP_RS_LIB): $(SLIRP_RS_DIR)/Cargo.toml \
+                 $(SLIRP_RS_DIR)/src/lib.rs \
+                 $(SLIRP_RS_DIR)/src/dns.rs \
+                 $(SLIRP_RS_DIR)/src/icmp.rs
+	$(CARGO) build --release --manifest-path $(SLIRP_RS_DIR)/Cargo.toml
+
+SLIRP_RS_LDADD = $(SLIRP_RS_LIB) -ldl -lm
+es40_LDADD += $(SLIRP_RS_LDADD)
+es40_idb_LDADD += $(SLIRP_RS_LDADD)
+es40_lss_LDADD += $(SLIRP_RS_LDADD)
+es40_lsm_LDADD += $(SLIRP_RS_LDADD)
+es40_DEPENDENCIES = $(SLIRP_RS_LIB)
+es40_idb_DEPENDENCIES = $(SLIRP_RS_LIB)
+es40_lss_DEPENDENCIES = $(SLIRP_RS_LIB)
+es40_lsm_DEPENDENCIES = $(SLIRP_RS_LIB)
+endif
+
+# Sources of the Rust userspace ("slirp") backend, so a distribution tarball
+# can build it. It is only compiled when cargo is available (HAVE_SLIRP).
+EXTRA_DIST = \
+	network/slirp-rs/Cargo.toml \
+	network/slirp-rs/Cargo.lock \
+	network/slirp-rs/src/lib.rs \
+	network/slirp-rs/src/dns.rs \
+	network/slirp-rs/src/icmp.rs
 
 #       graphics/Cirrus.cpp  - readd this to the sources line below when it's fixed
 
@@ -189,6 +222,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        network/NetworkVmnet.cpp \
        network/NetworkVmnetIPC.cpp \
        network/NetworkVmnetIPC.h \
+       network/NetworkSlirp.cpp \
        emu/PCIDevice.cpp \
        io/Port80.cpp \
        graphics/S3Trio64.cpp \

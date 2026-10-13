@@ -1088,7 +1088,7 @@ int main(int argc, char* argv[])
 	card_q.setDefault("none");
 	card_q.setExplanation("Choose what PCI card you'd like to add. Choose none if you have no more cards to add.");
 	card_q.addAnswer("none", "", "No more cards to add");
-#if defined(HAVE_PCAP) || defined(HAVE_TAP_NET)
+#if defined(HAVE_PCAP) || defined(HAVE_TAP_NET) || defined(HAVE_SLIRP)
 	card_q.addAnswer("nic", "dec21143", "DEC 21143 Network Interface (1 max)");
 #endif
 	card_q.addAnswer("scsi", "sym53c810",
@@ -1133,29 +1133,91 @@ int main(int argc, char* argv[])
 			 */
 			card_q.dropChoice("nic");
 
-#if defined(HAVE_PCAP) || defined(HAVE_TAP_NET)
-			string nic_type = "pcap";
+#if defined(HAVE_PCAP) || defined(HAVE_TAP_NET) || defined(HAVE_SLIRP)
+			/* Pick a sensible default for this build; ask only when there
+			 * is more than one backend to choose from. */
+			string nic_type;
+#if defined(HAVE_PCAP)
+			nic_type = "pcap";
+#elif defined(HAVE_TAP_NET)
+			nic_type = "tap";
+#elif defined(HAVE_SLIRP)
+			nic_type = "slirp";
+#endif
 
-#if defined(HAVE_PCAP) && defined(HAVE_TAP_NET)
+#if (defined(HAVE_PCAP) + defined(HAVE_TAP_NET) + defined(HAVE_SLIRP)) > 1
+			const bool nic_type_choice = true;
 			MultipleChoiceQuestion type_q;
 			type_q.setQuestion("How should this NIC connect to the host network?");
-			type_q.setDefault("pcap");
+			type_q.setDefault(nic_type);
 			type_q.setExplanation(
 				"pcap captures/injects packets on an existing host adapter "
 				"(works everywhere, but usually requires a bridge/promiscuous "
 				"setup on the host to reach a wired LAN).\n"
 				"tap uses a TAP virtual network device (Linux/FreeBSD/NetBSD "
 				"only), which plays more nicely with host firewalling and "
-				"bridging.");
+				"bridging.\n"
+				"slirp gives the guest a private user-space network with NAT, "
+				"DHCP and DNS. It needs no host privileges and no pre-created "
+				"interface, but the guest is not reachable from the host LAN.");
+#if defined(HAVE_PCAP)
 			type_q.addAnswer("pcap", "pcap", "libpcap (default, all platforms)");
+#endif
+#if defined(HAVE_TAP_NET)
 			type_q.addAnswer("tap", "tap", "TAP device (Linux/FreeBSD/NetBSD)");
+#endif
+#if defined(HAVE_SLIRP)
+			type_q.addAnswer("slirp", "slirp", "User-space NAT (no privileges needed)");
+#endif
 			nic_type = type_q.ask();
-			os << "    type = \"" << nic_type << "\";\n";
-#elif defined(HAVE_TAP_NET)
-			nic_type = "tap";
+#else
+			const bool nic_type_choice = false;
 #endif
 
-			if (nic_type == "tap") {
+			/* pcap is the main program's default, so only spell out the
+			 * type when it differs or the user had a choice. */
+			if (nic_type_choice || nic_type != "pcap")
+				os << "    type = \"" << nic_type << "\";\n";
+
+			if (nic_type == "slirp") {
+#if defined(HAVE_SLIRP)
+				FreeTextQuestion network_q;
+				network_q.setQuestion("What private IPv4 network should the guest use?");
+				network_q.setExplanation("Format: address/prefix, for example 10.0.2.0/24.");
+				network_q.setDefault("10.0.2.0/24");
+				os << "    network = \"" << network_q.ask() << "\";\n";
+
+				FreeTextQuestion gateway_q;
+				gateway_q.setQuestion("What address should the guest use as its gateway?");
+				gateway_q.setExplanation("Must be inside the network above; this is the emulator itself.");
+				gateway_q.setDefault("10.0.2.2");
+				os << "    gateway = \"" << gateway_q.ask() << "\";\n";
+
+				FreeTextQuestion dhcp_start_q;
+				dhcp_start_q.setQuestion("First address of the guest DHCP pool?");
+				dhcp_start_q.setDefault("10.0.2.15");
+				os << "    dhcp_start = \"" << dhcp_start_q.ask() << "\";\n";
+
+				FreeTextQuestion dhcp_end_q;
+				dhcp_end_q.setQuestion("Last address of the guest DHCP pool?");
+				dhcp_end_q.setDefault("10.0.2.30");
+				os << "    dhcp_end = \"" << dhcp_end_q.ask() << "\";\n";
+
+				FreeTextQuestion dns_q;
+				dns_q.setQuestion("DNS servers to hand to the guest (comma separated)?");
+				dns_q.setExplanation("Leave empty to use the host's own resolvers.");
+				dns_q.setDefault("");
+				string dns = dns_q.ask();
+				if (dns != "")
+					os << "    dns = \"" << dns << "\";\n";
+
+				NumberQuestion lease_q;
+				lease_q.setQuestion("DHCP lease length, in seconds?");
+				lease_q.setRange(60, 2147483);
+				lease_q.setDefault("3600");
+				os << "    dhcp_lease = " << lease_q.ask() << ";\n";
+#endif
+			} else if (nic_type == "tap") {
 #if defined(HAVE_TAP_NET)
 				FreeTextQuestion tap_q;
 				tap_q.setQuestion("What should the TAP device be named?");

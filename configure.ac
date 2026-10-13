@@ -202,6 +202,12 @@ AC_ARG_ENABLE([vmnet],
   [],
   [enable_vmnet=yes])
 
+# Allow disabling the Rust userspace (slirp) backend independently.
+AC_ARG_ENABLE([slirp],
+  [AS_HELP_STRING([--disable-slirp],[Disable the Rust userspace (slirp) network backend])],
+  [],
+  [enable_slirp=yes])
+
 have_pcap=no
 AS_IF([test "x$enable_pcap" != "xno"], [
   case "$host_os" in
@@ -263,9 +269,30 @@ AS_IF([test "x$enable_vmnet" != "xno"], [
 
 AM_CONDITIONAL([HAVE_VMNET], [test "x$have_vmnet" = "xyes"])
 
+# Rust userspace ("slirp") backend: the only requirement is cargo. The stack
+# itself (pktkit) is pure Rust, so no host libraries beyond the C runtime are
+# needed.
+have_slirp=no
+AC_ARG_VAR([CARGO], [cargo executable used to build the slirp backend])
+AS_IF([test "x$enable_slirp" != "xno"], [
+  AS_IF([test -z "$CARGO"], [AC_PATH_PROG([CARGO], [cargo], [no])])
+  AS_IF([test "x$CARGO" != "xno" -a -n "$CARGO"], [
+    AC_DEFINE([HAVE_SLIRP],[1],[Use Rust userspace (slirp) networking])
+    CXXFLAGS="$CXXFLAGS -DHAVE_SLIRP"
+    have_slirp=yes
+  ], [
+    AS_IF([test "x$enable_slirp" = "xyes"], [
+      AC_MSG_WARN([cargo not found: the slirp network backend will not be built])
+    ])
+  ])
+])
+
+AM_CONDITIONAL([HAVE_SLIRP], [test "x$have_slirp" = "xyes"])
+
 AS_IF([test "x$enable_pcap" != "xno" -a "x$have_pcap" = "xno" \
-       -a "x$have_tap" = "xno" -a "x$have_vmnet" = "xno"], [
-  AC_MSG_FAILURE([libpcap >= 0.8 is required on this platform unless --disable-pcap is used (or, on Linux/FreeBSD/NetBSD, TAP support can be used instead: don't pass --disable-tap)])
+       -a "x$have_tap" = "xno" -a "x$have_vmnet" = "xno" \
+       -a "x$have_slirp" = "xno"], [
+  AC_MSG_FAILURE([libpcap >= 0.8 is required on this platform unless --disable-pcap is used (or, on Linux/FreeBSD/NetBSD, TAP support can be used instead: don't pass --disable-tap; alternatively install cargo for the slirp backend)])
 ])
 
 # Use our own method to search for X11

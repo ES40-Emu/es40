@@ -26,7 +26,7 @@
 
 #include "../StdAfx.h"
 
-#if defined(HAVE_PCAP) || defined(HAVE_TAP_NET) || defined(HAVE_VMNET)
+#if defined(HAVE_PCAP) || defined(HAVE_TAP_NET) || defined(HAVE_VMNET) || defined(HAVE_SLIRP)
 
 #include "NetworkBackend.h"
 #include "config/Configurator.h"
@@ -41,6 +41,10 @@
 
 #if defined(HAVE_VMNET)
 #include "NetworkVmnet.h"
+#endif
+
+#if defined(HAVE_SLIRP)
+#include "NetworkSlirp.h"
 #endif
 
 
@@ -77,11 +81,20 @@ CNetworkBackend* create_network_backend(const char *devid_string,
 #endif
 	}
 
+	if (!strcasecmp(type, "slirp")) {
+#if defined(HAVE_SLIRP)
+		return new CNetworkSlirp();
+#else
+		printf("%s: \"slirp\" support not compiled in.\n", devid_string);
+		return nullptr;
+#endif
+	}
+
 	printf("%s: Unknown network backend type \"%s\"; expected \"pcap\", "
-	       "\"tap\", or \"vmnet\".\n", devid_string, type);
+	       "\"tap\", \"vmnet\", or \"slirp\".\n", devid_string, type);
 
 	return nullptr;
 
 }
 
-#endif /* defined(HAVE_PCAP) || defined(HAVE_TAP_NET) || defined(HAVE_VMNET) */
+#endif /* defined(HAVE_PCAP) || defined(HAVE_TAP_NET) || defined(HAVE_VMNET) || defined(HAVE_SLIRP) */

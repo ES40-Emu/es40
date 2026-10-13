@@ -1,0 +1,32 @@
+[package]
+name = "es40-slirp"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.89"
+description = "Userspace (slirp) network backend for the ES40 emulator, built on pktkit"
+license = "GPL-2.0-or-later"
+publish = false
+
+[lib]
+name = "es40_slirp"
+# A static library linked straight into the es40 executable by CMake. The
+# C++ side only sees the extern "C" functions at the bottom of src/lib.rs.
+crate-type = ["staticlib"]
+
+[dependencies]
+# pktkit provides the pure-Rust userspace NAT stack (`slirp`), the L2 bridge
+# that terminates ARP/DHCP and frames IP onto Ethernet (`l2adapter`), and a
+# DHCP server for guest auto-configuration (`dhcp`).
+pktkit = { version = "0.1", default-features = false, features = [
+    "slirp",
+    "l2adapter",
+    "dhcp",
+] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+# Keep unwind so the FFI boundary can catch panics and return an error
+# instead of taking the whole emulator down.
+panic = "unwind"

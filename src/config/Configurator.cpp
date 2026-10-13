@@ -756,7 +756,8 @@ static const char* const kv_lsi53c1020[] = { "flash", "rom", "firmware", 0 };
 static const char* const kv_es1370[] = { "latency_ms", 0 };
 static const char* const kv_dec21143[] = {
   "adapter", "mac", "queue", "crc", "trace_packets",
-  "type", "autonegotiate_delay", "drop_privileges", 0 };
+  "type", "autonegotiate_delay", "drop_privileges",
+  "network", "gateway", "dhcp_start", "dhcp_end", "dns", "dhcp_lease", 0 };
 static const char* const kv_disk_file[] = {
   "file", "model_number", "serial_number", "serial_num", "rev_number",
   "rev_num", "read_only", "cdrom", "autocreate_size", 0 };
@@ -889,10 +890,10 @@ void CConfigurator::initialize()
 #endif
 	}
 
-#if !defined(HAVE_PCAP) && !defined(HAVE_TAP_NET)
+#if !defined(HAVE_PCAP) && !defined(HAVE_TAP_NET) && !defined(HAVE_VMNET) && !defined(HAVE_SLIRP)
 	if (myFlags & IS_NIC)
 		FAILURE_2(Configuration,
-			"Class %s for %s needs compilation with libpcap or TAP support", myValue,
+			"Class %s for %s needs compilation with libpcap, TAP, vmnet or slirp support", myValue,
 			myName);
 #endif
 	if (myFlags & IS_PCI)

@@ -33,6 +33,8 @@
  * Implementations:
  *  - CNetworkPcap  : libpcap / npcap (Windows, and any Unix with libpcap).
  *  - CNetworkTap   : TAP device (Linux, FreeBSD, NetBSD).
+ *  - CNetworkSlirp : Userspace NAT ("slirp") implemented in Rust; no host
+ *                    privileges or pre-created interface required.
  **/
 #if !defined(INCLUDED_NETWORK_BACKEND_H_)
 #define INCLUDED_NETWORK_BACKEND_H_

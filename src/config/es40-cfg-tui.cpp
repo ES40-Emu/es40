@@ -2661,6 +2661,9 @@ void validation_pci_dec21143_type(FIELD *field)
 #ifdef HAVE_VMNET
     choices.push_back("vmnet");
 #endif
+#ifdef HAVE_SLIRP
+    choices.push_back("slirp");
+#endif
     choices.push_back(NULL);
 
     set_field_type(field, TYPE_ENUM, choices.data(), FALSE, TRUE);
@@ -2705,7 +2708,7 @@ void validation_pci_dec21143_queue(FIELD *field)
 // Form for DEC21143 PCI NIC
 void edit_pci_dec21143(const char *title)
 {
-#if !defined(HAVE_PCAP) && !defined(HAVE_TAP_NET) && !defined(HAVE_VMNET)
+#if !defined(HAVE_PCAP) && !defined(HAVE_TAP_NET) && !defined(HAVE_VMNET) && !defined(HAVE_SLIRP)
     show_text("Error", "This program has been compiled with no network support.");
     return;
 #else
@@ -2728,6 +2731,8 @@ void edit_pci_dec21143(const char *title)
          "tap0",
 #elif defined(HAVE_VMNET)
          "vmnet",
+#elif defined(HAVE_SLIRP)
+         "slirp",
 #else
          "none",
 #endif
@@ -2749,6 +2754,12 @@ void edit_pci_dec21143(const char *title)
          "'vmnet' (MacOS only) uses the MacOS vmnet framework which uses\n"
          "a host's network interface as a bridge to effectively place\n"
          "the Alpha system on the same subnet as the host."
+#endif
+#ifdef HAVE_SLIRP
+         "\n"
+         "'slirp' gives the guest a private user-space network with NAT,\n"
+         "DHCP and DNS. Needs no host privileges and no pre-created\n"
+         "interface, but the guest is not reachable from the host LAN."
 #endif
          ,
          validation_pci_dec21143_type},
@@ -2776,6 +2787,32 @@ void edit_pci_dec21143(const char *title)
          "Dump every transmitted and received packet to the console,\n"
          "for network debugging. Very noisy.",
          validation_yes_no}
+#ifdef HAVE_SLIRP
+        ,
+        {"network", "10.0.2.0/24", "network",
+         "For type 'slirp': the private IPv4 subnet the guest lives on\n"
+         "(address/prefix, e.g. 10.0.2.0/24).",
+         NULL},
+        {"gateway", "10.0.2.2", "gateway",
+         "For type 'slirp': the address the guest uses as its gateway.\n"
+         "Must be inside the network above.",
+         NULL},
+        {"dhcp start", "10.0.2.15", "dhcp_start",
+         "For type 'slirp': first address handed out by the built-in\n"
+         "DHCP server.",
+         NULL},
+        {"dhcp end", "10.0.2.30", "dhcp_end",
+         "For type 'slirp': last address handed out by the built-in\n"
+         "DHCP server.",
+         NULL},
+        {"dns", "", "dns",
+         "For type 'slirp': comma-separated DNS servers handed to the\n"
+         "guest. Leave empty to use the host's own resolvers.",
+         NULL},
+        {"dhcp lease", "3600", "dhcp_lease",
+         "For type 'slirp': DHCP lease length, in seconds.",
+         NULL}
+#endif
     /*
     ,
     {"autonegotiate_delay?", STR_NO, "autonegotiate_delay",
@@ -2836,7 +2873,7 @@ void edit_pci_dec21143(const char *title)
     }
     free(preset);
     free(first_free_pcislot);
-#endif // defined(HAVE_PCAP) || defined(HAVE_TAP_NET) || defined(HAVE_VMNET)
+#endif // defined(HAVE_PCAP) || defined(HAVE_TAP_NET) || defined(HAVE_VMNET) || defined(HAVE_SLIRP)
 }
 
 // Form for Symbios 53c819 SCSI PCI card settings

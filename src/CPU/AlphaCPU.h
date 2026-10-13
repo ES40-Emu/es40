@@ -220,6 +220,7 @@
 
 #include <atomic>
 #include <thread>
+#include "base/HostWakeEvent.h"
 #include "idle_detect.h"
 #include <chrono>
 
@@ -265,6 +266,7 @@ public:
   void          irq_h(int number, bool assert, int delay);
   void          kick_int_if_pending();
   void          idle_nap();
+  void          wake_idle() { m_idle_wake.notify(); }
   enum class TickHold { Ticked, Expired, Doorbell };
   u64           tick_next_gap_ns(u64 period_ns);   // draws the modulated repay gap for the next fire
   TickHold      tick_hold(u64 period_ns);   // instruction-paced envelope full: wait for the wall-clock tick (jit_run)
@@ -340,7 +342,9 @@ private:
   const AlphaCPUProfile m_profile;
   CThread* myThread;
   CSemaphore mySemaphore;
-  bool            StopThread;
+  CHostWakeEvent m_idle_wake;  // Host scheduling only; outside saved/model state.
+  std::atomic<bool> StopThread{false};
+  void service_interval_timer(std::chrono::steady_clock::time_point now);
 
   int             get_icache(u64 address, u32* data);
   int             FindTBEntry(u64 virt, int flags);
@@ -490,7 +494,7 @@ private:
   // CALL_PAL WTINT idle nap: enabled by the cpu config, announced once
   bool                                  idle_nap_enabled = false;
   bool                                  m_unaligned_fixup = false;   // cpu.unaligned_fixup: do misaligned LD/ST in place instead of trapping to PAL UNALIGN
-  u32                                   idle_nap_poll_us = 1000; // idle_nap() wake granularity, us
+  u32                                   idle_nap_poll_us = 100; // portable wait fallback check interval, us
   // Host-side idle detection (idle_detect cfg). See idle_detect.h.
   int                                   idle_rule = RULE_NONE;   // EIdleRule, from idle_detect
   u32                                   idle_spin_count = 2;      // consecutive hits before napping
@@ -1110,6 +1114,7 @@ inline void CAlphaCPU::irq_h(int number, bool assert, int delay)
       state.check_int = true;
     }
 
+    wake_idle();
     return;
   }
 
@@ -1121,6 +1126,7 @@ inline void CAlphaCPU::irq_h(int number, bool assert, int delay)
     // interrupt was dispatched, and after its REI nothing re-polls.
     // Re-kick so it is picked up at the next dispatch boundary, matching real hardware.
     state.check_int = true;
+    wake_idle();
     return;
   }
 

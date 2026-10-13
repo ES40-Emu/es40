@@ -1177,7 +1177,8 @@ void CSystem::cchip_csr_write(u32 a, u64 data, CSystemComponent* source)
 	case 0x080: // MISC
 	{
 		// Serialize the MISC RMW + IPI delivery against other CPUs and against
-		// interrupt()/clear_clock_int(); irq_h() is lock-free and never re-enters here.
+		// interrupt()/clear_clock_int(); irq_h() may signal the host wait but never
+		// re-enters here. Host wait locks are released before timer service.
 		std::lock_guard<std::mutex> g(drir_lock);
 		state.cchip.misc |= (data & U64(0x00000f0000f00000));     // W1S
 		state.cchip.misc &= ~(data & U64(0x0000000010000ff0));    // W1C
@@ -1390,8 +1391,8 @@ void CSystem::interrupt(int number, bool assert)
 {
 	int i;
 
-	// Serialize drir RMW + delivery against other device threads; irq_h() is
-	// lock-free and never re-enters here, so this is deadlock-free.
+	// Serialize drir RMW + delivery against other device threads. irq_h() may
+	// signal the host wait, whose locks are released before timer service.
 	std::lock_guard<std::mutex> drirGuard(drir_lock);
 
 	if (number == -1)

@@ -893,6 +893,8 @@ void CSystem::CheckForShutdown() const
 void CSystem::RequestSystemReset()
 {
 	m_reset_requested.store(true, std::memory_order_release);
+	for (int cpu = 0; cpu < iNumCPUs; ++cpu)
+		acCPUs[cpu]->wake_idle();
 }
 
 bool CSystem::IsSystemResetRequested() const

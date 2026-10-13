@@ -733,7 +733,9 @@ static const char* const kv_tsunami[] = {
   "memory.bits", "rom.srm", "rom.flash", "rom.dpr", "rom.toy", "time",
   "arc_year_compat", "exit_on_pal_halt", "graphics.multihead", "debug.stop_on_decode_conflict",
   "debug.shared_read_policy", "debug.shared_read_claimant", 0 };
-static const char* const kv_ev68cb[] = { "speed", "palcode.vms.nohle", 0 };
+static const char* const kv_ev68cb[] = {
+  "speed", "palcode.vms.nohle", "idle_nap", "idle_detect",
+  "idle_spin_count", "idle_nap_poll_us", 0 };
 static const char* const kv_serial[] = {
   "port", "listen_address", "action", "disabled", "raw_mode", "null_attach", 0 };
 static const char* const kv_ali[] = { "vga_console", "lpt.outfile", 0 };

@@ -444,22 +444,10 @@ void CAlphaCPU::run()
 }
 
 /**
- * idle_nap: sleep the cpu thread while the guest idles.  
- * HIGHLY EXPERIMENTAL
- * Should be mostly-safe on Linux, but still can oversleep in various edge cases.
- * Cchip timer is checked at batch entry and after automatic idle detection naps.
- * Host scheduling can still carry a nap past next_timer_fire.
- * Various other guest-configurable aspects can also change these timelines
- * IPIs could be delayed in response from CPU0. This may or may not trigger
- * guest timeouts
- * FreeBSD is probably the safest host platform this code can run on. 
- * WTINT still resumes its current batch before servicing the Cchip timer.
- *
- * Intended operation of this function: 
- * Wakes on pending interrupt/timer, StopThread, or reset (100us poll, 1ms cap); 
- * CPU0 never sleeps past next_timer_fire, since its own loop fires the interval
- * tick.  No-op unless idle_nap = true in the cpu config, and on MP configs
- * (no cross-thread IPI wakeup here -- WTINT just returns immediately).
+ * Sleep an idle CPU until an interrupt, stop/reset request, or its deadline.
+ * WTINT and automatic detection share the host wait and post-wake timer check.
+ * The requested deadline is at most 1ms away and no later than CPU0's next
+ * interval tick; host scheduling can still return late. MP naps stay disabled.
  **/
 void CAlphaCPU::idle_nap()
 {
@@ -482,18 +470,51 @@ void CAlphaCPU::idle_nap()
 	if (state.iProcNum == 0 && next_timer_fire < deadline)
 		deadline = next_timer_fire;
 
-	while (!state.check_int && !state.check_timers && !StopThread
-		   && !(cSystem && cSystem->IsSystemResetRequested()))
+	for (;;)
 	{
-		const auto now = steady_clock::now();
-		if (now >= deadline)
+		// Register interest before checking work.
+		const auto generation = m_idle_wake.generation();
+		if (state.check_int || state.check_timers || StopThread
+			|| (cSystem && cSystem->IsSystemResetRequested()))
 			break;
-		auto nap = deadline - now;
-		// Each wake is a syscall round trip; at a 1024 Hz tick, 100us costs
-		// ~10k/sec of them. Default is the original 100us.
-		if (nap > microseconds(idle_nap_poll_us))
-			nap = microseconds(idle_nap_poll_us);
-		std::this_thread::sleep_for(nap);
+		if (steady_clock::now() >= deadline)
+			break;
+		if (m_idle_wake.wait_until(generation, deadline, microseconds(idle_nap_poll_us)))
+			break;
+	}
+	// The wait releases its host locks before entering the system interrupt path.
+	if (!StopThread && !(cSystem && cSystem->IsSystemResetRequested()))
+		service_interval_timer(steady_clock::now());
+}
+
+// System interval-timer policy shared by both execution engines and idle paths.
+void CAlphaCPU::service_interval_timer(std::chrono::steady_clock::time_point now)
+{
+	if (state.iProcNum == 0)
+	{
+		if (now >= next_timer_fire)
+		{
+			const u64 period_ns = theAli ? theAli->get_interval_period_ns() : 0;
+			if (period_ns)
+			{
+				// Count-preserving, paced catch-up.
+				if (now - tick_last_fire >= std::chrono::nanoseconds(tick_gap_ns))
+				{
+					cSystem->interrupt(-1, true);
+					tick_last_fire = now;
+					tick_gap_ns = tick_next_gap_ns(period_ns);
+					next_timer_fire += std::chrono::nanoseconds(period_ns);
+					if (now - next_timer_fire > std::chrono::seconds(1))
+						next_timer_fire = now;
+				}
+			}
+			else
+			{
+				cSystem->interrupt(-1, true);
+				tick_last_fire = now;
+				next_timer_fire = now + std::chrono::seconds(1);
+			}
+		}
 	}
 }
 
@@ -631,7 +652,9 @@ void CAlphaCPU::init()
 			idle_rule = RULE_NONE;
 		}
 		idle_spin_count = (u32) myCfg->get_num_value("idle_spin_count", false, 2);
-		idle_nap_poll_us = (u32) myCfg->get_num_value("idle_nap_poll_us", false, 1000);
+		idle_nap_poll_us = (u32) myCfg->get_num_value("idle_nap_poll_us", false, 100);
+		if (idle_nap_poll_us < 1)
+			idle_nap_poll_us = 1;
 		if (idle_spin_count < 1)
 			idle_spin_count = 1;
 	}
@@ -795,7 +818,9 @@ void CAlphaCPU::ResetForSystemReset()
 			idle_rule = RULE_NONE;
 		}
 		idle_spin_count = (u32) myCfg->get_num_value("idle_spin_count", false, 2);
-		idle_nap_poll_us = (u32) myCfg->get_num_value("idle_nap_poll_us", false, 1000);
+		idle_nap_poll_us = (u32) myCfg->get_num_value("idle_nap_poll_us", false, 100);
+		if (idle_nap_poll_us < 1)
+			idle_nap_poll_us = 1;
 		if (idle_spin_count < 1)
 			idle_spin_count = 1;
 	}
@@ -869,6 +894,7 @@ void CAlphaCPU::start_threads()
 void CAlphaCPU::stop_threads()
 {
 	StopThread = true;
+	wake_idle();
 	if (myThread)
 	{
 		try {
@@ -1147,45 +1173,6 @@ void CAlphaCPU::jit_run(int budget)
 	// too-low CPU speed (the 357MHz bug).
 	sync_cc_wallclock();
 
-	// Drive the Cchip interval timer at batch entry and after an automatic
-	// idle nap, before resuming guest execution (CPU0 only).
-	const auto service_interval_timer = [this](std::chrono::steady_clock::time_point now)
-	{
-		if (state.iProcNum == 0)
-		{
-			if (now >= next_timer_fire)
-			{
-				const u64 period_ns = theAli ? theAli->get_interval_period_ns() : 0;
-				if (period_ns)
-				{
-					// Count-preserving, paced catch-up: the schedule advances one period per
-					// fire so ticks lost to a busy/stalled CPU0 thread are repaid and the
-					// guests' tick-counted clocks (VMS never resyncs) stay true to wall time.
-					// Repay gaps are MODULATED so consecutive SRM cycles-per-tick windows
-					// (~100 ticks) never agree during a repay stretch. Per-fire noise alone
-					// averages out 1/sqrt(N) over a window; the triangle wave's ~2.8-window
-					// wavelength survives the averaging, and the noise breaks symmetric-
-					// alignment ties.
-					// Backlog beyond 1s (debugger pause, host sleep) is dropped.
-					if (now - tick_last_fire >= std::chrono::nanoseconds(tick_gap_ns))
-					{
-						cSystem->interrupt(-1, true);
-						tick_last_fire = now;
-						tick_gap_ns = tick_next_gap_ns(period_ns);
-						next_timer_fire += std::chrono::nanoseconds(period_ns);
-						if (now - next_timer_fire > std::chrono::seconds(1))
-							next_timer_fire = now;
-					}
-				}
-				else
-				{
-					cSystem->interrupt(-1, true);
-					tick_last_fire = now;
-					next_timer_fire = now + std::chrono::seconds(1);
-				}
-			}
-		}
-	};
 	service_interval_timer(batch_now);
 
 	// Instruction-paced interval-tick envelope, for EVERY CPU.
@@ -1274,7 +1261,6 @@ void CAlphaCPU::jit_run(int budget)
 						fflush(stdout);
 					}
 					idle_nap();
-					service_interval_timer(std::chrono::steady_clock::now());
 				}
 			}
 			else
@@ -2962,42 +2948,7 @@ void CAlphaCPU::execute()
 		// calibration measured that lag consistently and locked in a low CPU speed.
 		sync_cc_wallclock();
 
-		// Poll the wall-clock Cchip interval timer once per execute() batch
-		// (~512 instructions) rather than every 32;
-		if (state.iProcNum == 0)
-		{
-			if (now >= next_timer_fire)
-			{
-				const u64 period_ns = theAli ? theAli->get_interval_period_ns() : 0;
-				if (period_ns)
-				{
-					// Count-preserving, paced catch-up: the schedule advances one period per
-					// fire so ticks lost to a busy/stalled CPU0 thread are repaid and the
-					// guests' tick-counted clocks (VMS never resyncs) stay true to wall time.
-					// Repay gaps are MODULATED so consecutive SRM cycles-per-tick windows
-					// (~100 ticks) never agree during a repay stretch. Per-fire noise alone
-					// averages out 1/sqrt(N) over a window; the triangle wave's ~2.8-window
-					// wavelength survives the averaging, and the noise breaks symmetric-
-					// alignment ties. 
-					// Backlog beyond 1s (debugger pause, host sleep) is dropped.
-					if (now - tick_last_fire >= std::chrono::nanoseconds(tick_gap_ns))
-					{
-						cSystem->interrupt(-1, true);
-						tick_last_fire = now;
-						tick_gap_ns = tick_next_gap_ns(period_ns);
-						next_timer_fire += std::chrono::nanoseconds(period_ns);
-						if (now - next_timer_fire > std::chrono::seconds(1))
-							next_timer_fire = now;
-					}
-				}
-				else
-				{
-					cSystem->interrupt(-1, true);
-					tick_last_fire = now;
-					next_timer_fire = now + std::chrono::seconds(1);
-				}
-			}
-		}
+		service_interval_timer(now);
 	}
 
 _next_instruction:

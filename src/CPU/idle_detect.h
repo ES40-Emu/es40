@@ -2,12 +2,14 @@
  *
  * SPDX-License-Identifier: BSD-1-Clause
  *
- * A guest that spins instead of halting holds a host core at 100%. WTINT
- * covers guests that ask to sleep; this covers guests that never do, such as
- * HP OpenVMS Alpha 8.4.
+ * Optional JIT heuristics for guests that spin instead of issuing WTINT,
+ * such as HP OpenVMS Alpha 8.4. Disabled by default; repeated PCs alone do
+ * not establish that the guest is idle.
  *
- * You name the guest OS in the config; nothing is auto-detected, so naming one
- * that does not match the running guest simply never triggers.
+ * The configured OS name selects a heuristic, not an OS identity check.
+ * Selecting the wrong name can still trigger sleeps during useful work.
+ * With idle_detect="off" and idle_nap=false (both defaults), the shared
+ * idle wait returns without sleeping. Other timer pacing is independent.
  *
  * Prior art: SIMH "SET CPU IDLE=VMS" (MIT, Copyright (c) Robert M Supnik).
  * No code copied -- only the approach of testing processor state instead of
@@ -19,14 +21,14 @@
 #include <cstring>
 
 /* Internal rules. Several guest OSes can share one, and the user never names
- * a rule -- only their OS, so a rule can be improved without anyone's config
- * changing. Same split as SIMH's os_tab[].
+ * a rule -- only an OS label, so a rule can be improved without anyone's
+ * config changing. Same split as SIMH's os_tab[].
  */
 enum EIdleRule
 {
   RULE_NONE      = 0,
   RULE_SPIN      = 1,   // spinning within a small set of PCs
-  RULE_SPIN_IPL3 = 2    // ...and wholly at IPL 3
+  RULE_SPIN_IPL3 = 2    // ...and VMS PAL PS reports IPL 3 at each qualifying sample
 };
 
 struct SIdleMethod
@@ -36,17 +38,21 @@ struct SIdleMethod
   const char*  about;
 };
 
-/* One row per guest OS, the way SIMH's os_tab[] works. Idle host CPU measured
- * single CPU with the JIT on:
+/* One row per guest OS, the way SIMH's os_tab[] works. Historical idle host
+ * CPU measurements before interruptible waits, single CPU with the JIT on:
  *
  *   HP OpenVMS Alpha 8.4            101.2% -> 7.5%   vms
  *   Tru64 UNIX 5.1B-4               100.8% -> 9.4%   tru64
  *   NetBSD 10.1/alpha stock GENERIC 100.8% -> 20.7%  netbsd
  *
- * RULE_SPIN on its own cannot tell an idle loop from a tight compute loop and
- * sleeps in both: on OpenVMS it gives the same idle figure as RULE_SPIN_IPL3
- * but takes boot from 55s to 220s. tru64 and netbsd still use it because no
- * equivalent state check has been found for them.
+ * RULE_SPIN cannot distinguish idle loops from repetitive computation and
+ * can repeatedly sleep during useful work. tru64 and netbsd both select it:
+ * reduced host CPU use trades off against guest throughput and latency.
+ * RULE_SPIN_IPL3 additionally samples the VMS PAL PS layout in p22; it does
+ * not prove that an entire dispatch stayed at IPL 3 or did no useful work.
+ * Other CPU/PAL combinations need an appropriate state decoder and explicit
+ * eligibility before relying on this qualifier. These historical figures
+ * do not establish guest clock accuracy or active-workload performance.
  */
 static const SIdleMethod idle_methods[] =
 {

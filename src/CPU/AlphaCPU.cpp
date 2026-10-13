@@ -1233,12 +1233,13 @@ void CAlphaCPU::jit_run(int budget)
 		if (start_virt == (state.pal_base | 1))
 			flush_icache();
 
-		// Host-side idle detection. If a dispatch runs its whole instruction
-		// budget and the next starts at an address just seen, several times
-		// over, the guest is going round in circles. This works with the JIT
-		// on because a trace looping back to itself is what produces it.
-		// Getting it wrong costs one sleep: 1ms at most, never past the next
-		// timer tick, ended by any pending interrupt.
+		// Host-side idle detection (JIT only, off by default). A qualifying
+		// sample follows at least 3/4 of the initial dispatch budget's work;
+		// repeated PCs suggest a loop, but do not prove that it is idle.
+		// The VMS rule samples IPL here, not throughout the preceding work.
+		// False positives can repeatedly delay useful computation. Each nap
+		// requests at most 1ms, bounded by the next timer deadline, and is
+		// interruptible; host scheduling can still return late.
 		if (idle_rule != RULE_NONE)
 		{
 			const u64 _ic = state.instruction_count;

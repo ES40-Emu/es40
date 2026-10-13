@@ -501,7 +501,7 @@ private:
   u64                                   idle_spin_min_instr = 0;  // a dispatch must have run at least this many
   u64                                   m_spin_ic = 0;            // instruction count at that dispatch
   u32                                   m_spin_hits = 0;
-  // Working set of the current run of full-budget dispatches.
+  // Working set of consecutive samples meeting the instruction threshold.
   static const int                      kSpinSetMax = 8;
   u64                                   m_spin_set[kSpinSetMax] = { 0 };
   int                                   m_spin_set_n = 0;

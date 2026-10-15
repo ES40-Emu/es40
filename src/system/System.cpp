@@ -1879,7 +1879,7 @@ bool CSystem::RestoreState(const char* fn)
 {
 	std::lock_guard<std::recursive_mutex> bus_lock(device_bus_mutex);
 	SDeviceAccessScope time_scope(this);
-	std::unique_ptr<FILE, decltype(&fclose)> file(fopen(fn, "rb"), &fclose);
+	std::unique_ptr<FILE, int (*)(FILE*)> file(fopen(fn, "rb"), &fclose);
 	if (!file)
 	{
 		printf("%%SYS-F-NOFILE: Can't open restore file %s\n", fn);

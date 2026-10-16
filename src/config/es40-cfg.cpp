@@ -1489,7 +1489,7 @@ int main(int argc, char* argv[])
 	arc_compat_q.addAnswer("vms", "false", "Report the year as expected by OpenVMS, Tru64 UNIX, Linux and BSDs.");
 	arc_compat_q.setDefault("vms");
 	arc_compat_q.ask();
-	os << "\n  arc_year_compat = " << arc_compat_q.ask() << ";\n\n";
+	os << "\n  arc_year_compat = " << arc_compat_q.getAnswer() << ";\n\n";
 
 	MultipleChoiceQuestion time_q;
 	time_q.setQuestion("Do you want to set a fixed date and time when the VM starts?");

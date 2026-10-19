@@ -153,6 +153,10 @@ inline int es40_form_driver(FORM *form, int c)
 #define LOW_MEM_BITS 25 // 32MB
 #define HI_MEM_BITS 35  // 32GB
 
+// PCI bus ranges
+const int MAX_PCI_BUS = 2;
+const int MAX_PCI_SLOT[MAX_PCI_BUS] = {4, 6};
+
 // Internal PCI device slot names, plus a placeholder one
 #define PCI_SLOT_ALI "pci0.7"
 #define PCI_SLOT_IDE "pci0.15"
@@ -163,6 +167,10 @@ inline int es40_form_driver(FORM *form, int c)
 // Forms: Strings for negative and affirmative answer
 #define STR_NO "no"   // "no" , "false", "0"
 #define STR_YES "yes" // "yes", "true" , "1"
+
+// Menus: Return values for Exit, Quit
+#define MENU_SEL_EXIT -1
+#define MENU_SEL_QUIT -2
 
 // es40_banner: Time to wait for a keypress
 #define WAITSEC 5
@@ -648,14 +656,12 @@ int show_menu(
         case MYKEY_HELP:
             show_text(entry[cur_idx].text, entry[cur_idx].description);
             break;
-/*
         case MYKEY_QUIT:
-            cur_idx = -2;
+            cur_idx = MENU_SEL_QUIT;
             stay_in_loop = FALSE;
             break;
- */
         case MYKEY_EXIT:
-            cur_idx = -1;
+            cur_idx = MENU_SEL_EXIT;
             stay_in_loop = FALSE;
             break;
         case KEY_DOWN:
@@ -979,6 +985,7 @@ void show_help(const char *title)
         "<ENTER>: select item",
         "<" MYKEY_HELP_STR ">: Display item description",
         "<" MYKEY_EXIT_STR ">: exit menu.",
+        "<" MYKEY_QUIT_STR ">: quit menu.",
         "",
         "Before saving results at program exit, the consistency of data is checked.",
         "",
@@ -1093,6 +1100,14 @@ void es40_banner(const char *title)
 }
 
 /**
+ * Combine bus, slot to a PCI slot string
+ */
+inline string pcislot_str(int bus, int slot)
+{
+    return i2s(bus) + "." + i2s(slot);
+}
+
+/**
  * Return the config object in PCI slot "<bus>.<slot>",
  * or nullptr if there's no object in that slot.
  **/
@@ -1107,7 +1122,7 @@ CConfigurator *get_pcislot(const char *bus_slot)
  **/
 CConfigurator *get_pcislot(int bus, int slot)
 {
-    return get_pcislot((i2s(bus) + "." + i2s(slot)).c_str());
+    return get_pcislot(pcislot_str(bus, slot).c_str());
 }
 
 /**
@@ -1125,13 +1140,10 @@ bool is_pcislot_free(int bus, int slot)
  */
 char *find_first_free_pcislot(void)
 {
-    for (int bus = 0; bus <= 1; ++bus)
-        for (int slot = 1; slot < ((bus == 0) ? 4 : 6); ++slot)
+    for (int bus = 0; bus < MAX_PCI_BUS; ++bus)
+        for (int slot = 1; slot <= MAX_PCI_SLOT[bus]; ++slot)
             if (is_pcislot_free(bus, slot))
-            {
-                string bus_slot = i2s(bus) + "." + i2s(slot);
-                return strdup(bus_slot.c_str());
-            }
+                return strdup(pcislot_str(bus, slot).c_str());
     return NULL;
 }
 
@@ -1141,7 +1153,7 @@ char *find_first_free_pcislot(void)
  */
 char *device_in_pcislot(int bus, int slot)
 {
-    string pcislot = string("pci") + i2s(bus) + "." + i2s(slot);
+    string pcislot = string("pci") + pcislot_str(bus, slot);
     CConfigurator *c = sys0->find_child(pcislot.c_str());
     if (c == nullptr)
         return (char *)"-";
@@ -1200,13 +1212,10 @@ void validation_pcislot(FIELD *field)
     int mybus = 99, myslot = 99;
     sscanf(field_buffer(field, 0), "%d.%d", &mybus, &myslot);
     vector<char *> choices;
-    for (int bus = 0; bus <= 1; ++bus)
-        for (int slot = 1; slot <= ((bus == 0) ? 4 : 6); ++slot)
+    for (int bus = 0; bus < MAX_PCI_BUS; ++bus)
+        for (int slot = 1; slot <= MAX_PCI_SLOT[bus]; ++slot)
             if (is_pcislot_free(bus, slot) || (bus == mybus && slot == myslot))
-            {
-                string pcislot = i2s(bus) + "." + i2s(slot);
-                choices.push_back(strdup(pcislot.c_str()));
-            }
+                choices.push_back(strdup(pcislot_str(bus, slot).c_str()));
     choices.push_back(NULL);
 
     set_field_type(field, TYPE_ENUM, choices.data(), FALSE, TRUE);
@@ -2342,10 +2351,10 @@ void edit_ali(const char *title)
 void show_pcislots(const char *title)
 {
     string lines;
-    for (int bus = 0; bus <= 1; ++bus)
-        for (int slot = 1; slot <= ((bus == 0) ? 4 : 6); ++slot)
+    for (int bus = 0; bus < MAX_PCI_BUS; ++bus)
+        for (int slot = 1; slot <= MAX_PCI_SLOT[bus]; ++slot)
         {
-            string o = string("pci") + i2s(bus) + "." + i2s(slot) + ": " + device_in_pcislot(bus, slot);
+            string o = string("pci") + pcislot_str(bus, slot) + ": " + device_in_pcislot(bus, slot);
             lines.append(o);
             if (bus == 0 || slot < 6)
                 lines.append("\n");
@@ -2362,18 +2371,18 @@ bool check_pci_vga_s3(FormEntry_t entry[], int num_entries, FormValues_t values)
 // Form for S3 VGA PCI card
 void edit_pci_vga_s3(const char *title)
 {
-    char *first_free_pcislot = find_first_free_pcislot();
-    if (first_free_pcislot == NULL)
+    CConfigurator *c = sys0->find_child_myValue("s3");
+    char *slot = c ? strdup(c->get_myName() + strlen("pci")) : find_first_free_pcislot();
+    if (slot == NULL)
     {
         show_text(title, "No free PCI slots");
         return;
     }
 
     FormEntry_t entry[] = {
-        {"PCI slot", first_free_pcislot, NULL,
-         "Which PCI slot should the VGA card be on?\n"
-         "Only free PCI slots are listed.\n"
-         "AFAIK, VGA should always be on pci0.x",
+        {"PCI slot", slot, NULL,
+         "Which PCI slot should the S3 Tri64 card be on?\n"
+         "Use bus 0 for a firmware graphics console.",
          validation_pcislot},
         {"rom file",
 #if defined(_WIN32)
@@ -2390,11 +2399,9 @@ void edit_pci_vga_s3(const char *title)
          "This file is required.",
          validation_file}};
     int num_entries = ARRAY_SIZE(entry);
-    CConfigurator *c;
     FormValues_t preset;
     int idx;
 
-    c = sys0->find_child_myValue("s3");
     preset = (FormValues_t)calloc(num_entries, sizeof(char *));
 
     idx = fentry_index(entry, num_entries, "PCI slot");
@@ -2434,7 +2441,7 @@ void edit_pci_vga_s3(const char *title)
         free(values);
     }
     free(preset);
-    free(first_free_pcislot);
+    free(slot);
 }
 
 bool check_pci_vga_gloria(FormEntry_t entry[], int num_entries, FormValues_t values)
@@ -2765,15 +2772,16 @@ void edit_pci_dec21143(const char *title)
     show_text("Error", "This program has been compiled with no network support.");
     return;
 #else
-    char *first_free_pcislot = find_first_free_pcislot();
-    if (first_free_pcislot == NULL)
+    CConfigurator *c = sys0->find_child_myValue("dec21143");
+    char *slot = c ? strdup(c->get_myName() + strlen("pci")) : find_first_free_pcislot();
+    if (slot == NULL)
     {
         show_text(title, "No free PCI slots");
         return;
     }
 
     FormEntry_t entry[] = {
-        {"PCI slot", first_free_pcislot, NULL,
+        {"PCI slot", slot, NULL,
          "Which PCI slot should the NIC be on?\n"
          "Only free PCI slots are listed.",
          validation_pcislot},
@@ -2884,11 +2892,9 @@ void edit_pci_dec21143(const char *title)
 #endif
     };
     int num_entries = ARRAY_SIZE(entry);
-    CConfigurator *c;
     FormValues_t preset;
     int idx;
 
-    c = sys0->find_child_myValue("dec21143");
     preset = (FormValues_t)calloc(num_entries, sizeof(char *));
 
     idx = fentry_index(entry, num_entries, "PCI slot");
@@ -2925,7 +2931,7 @@ void edit_pci_dec21143(const char *title)
         free(values);
     }
     free(preset);
-    free(first_free_pcislot);
+    free(slot);
 #endif // defined(HAVE_PCAP) || defined(HAVE_TAP_NET) || defined(HAVE_VMNET) || defined(HAVE_SLIRP)
 }
 
@@ -3010,7 +3016,7 @@ void edit_pci_sym53c810(const char *title)
     {
         int sel = show_menu(title, entry, num_entries, MENU_3RD_LEVEL);
 
-        if (sel < 0)
+        if (sel == MENU_SEL_QUIT)
             break;
 
         check_failed = FALSE;
@@ -3028,6 +3034,9 @@ void edit_pci_sym53c810(const char *title)
                 c->remove_value((char *)"pci_slot");
             }
         }
+
+        if (sel == MENU_SEL_EXIT)
+            break;
     } while (check_failed);
 }
 
@@ -3206,7 +3215,7 @@ void edit_pci_lsi53c1020(const char *title)
     {
         int sel = show_menu(title, entry, num_entries, MENU_3RD_LEVEL);
 
-        if (sel < 0)
+        if (sel == MENU_SEL_QUIT)
             break;
 
         check_failed = FALSE;
@@ -3224,6 +3233,9 @@ void edit_pci_lsi53c1020(const char *title)
                 c->remove_value((char *)"pci_slot");
             }
         }
+
+        if (sel == MENU_SEL_EXIT)
+            break;
     } while (check_failed);
 }
 
@@ -3786,7 +3798,7 @@ bool main_menu(void)
         int sel = show_menu("Main menu", entry, num_entries, MENU_1ST_LEVEL);
 
         check_failed = FALSE;
-        save_results = (sel == -1 || sel == num_entries - 1);
+        save_results = (sel == MENU_SEL_EXIT || sel == num_entries - 1);
         if (save_results)
         {
             // Find any VGA card

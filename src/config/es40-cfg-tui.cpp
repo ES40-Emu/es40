@@ -465,13 +465,14 @@ bool tui_form(const char *title, FormEntry_t entry[], vector<EditorField>& field
         }
         set_field_back(f, rule.type == EditorField::Type::Choice ? A_NORMAL : A_UNDERLINE);
         set_field_status(f, TRUE);
-        mvwprintw(win, 2 * i + 1, 1, "%s", entry[i].label);
     }
     FORM *form = new_form(native.data());
     WINDOW *sub = derwin(win, nLines, nCols, 1, 1);
     set_form_win(form, win);
     set_form_sub(form, sub);
     post_form(form);
+    for (int i = 0; i < count; ++i)
+        mvwprintw(win, 2 * i + 1, 1, "%s", entry[i].label);
     form_driver(form, REQ_FIRST_FIELD);
     form_driver(form, REQ_END_FIELD);
     bool apply = false, done = false;

@@ -1417,6 +1417,18 @@ CConfigurator *CConfigurator::find_child_myValue(const char *myValue)
     return nullptr;
 }
 
+/**
+ * Return the list of all children with the given myValue.
+ */
+std::vector<CConfigurator *> CConfigurator::find_children_myValue(const char *myValue)
+{
+	std::vector<CConfigurator *> result;
+	for (int i = 0; i < iNumChildren; ++i)
+		if (!strcmp(pChildren[i]->myValue, myValue))
+			result.push_back(pChildren[i]);
+    return result;
+}
+
   /**
    * Remove a child with the given name.
    **/
@@ -1437,8 +1449,9 @@ void CConfigurator::remove_child(const char *name)
    */
 void CConfigurator::remove_all_children(void)
 {
-	for (int i = iNumChildren - 1; i >= 0; --i)
+	for (int i = 0; i < iNumChildren; ++i)
 		remove_child(pChildren[i]->myName);
+	iNumChildren = 0;
 }
 
   /**
@@ -1446,6 +1459,7 @@ void CConfigurator::remove_all_children(void)
    **/
 void CConfigurator::write_configuration(FILE *fp, int indent)
 {
+	const int indent_inc = 2;
 	char indent_str[80];
 
 	if (indent == 0)
@@ -1456,14 +1470,14 @@ void CConfigurator::write_configuration(FILE *fp, int indent)
 	if (myName != NULL)
 	{
 		fprintf(fp, "%s%s = %s\n%s{\n", indent_str, myName, myValue, indent_str);
-		indent += 2;
+		indent += indent_inc;
 	}
 
 	for (int i = 0; i < iNumValues; ++i)
-		fprintf(fp, "%s  %s = \"%s\";\n", indent_str, pValues[i].name, pValues[i].value);
+		fprintf(fp, "%s%*c%s = \"%s\";\n", indent_str, indent_inc, ' ', pValues[i].name, pValues[i].value);
 	for (int i = 0; i < iNumChildren; ++i)
 		pChildren[i]->write_configuration(fp, indent);
 	if (myName != NULL)
 		fprintf(fp, "%s}\n", indent_str);
 }
-#endif 
+#endif // CONFIGURATION_ONLY

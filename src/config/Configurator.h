@@ -86,6 +86,7 @@
 #define __CONFIGURATOR_H__
 
 #include <string>
+#include <vector>
 
 #define CFG_MAX_CHILDREN  25
 #define CFG_MAX_VALUES    50
@@ -185,6 +186,7 @@ public:
   void set_child(class CConfigurator *child);
   CConfigurator *find_child(const char *name);
   CConfigurator *find_child_myValue(const char *myValue);
+  std::vector<CConfigurator *> find_children_myValue(const char *myValue);
   void remove_child(const char *name);
   void remove_all_children(void);
   void write_configuration(FILE *fp, int indent = 0);

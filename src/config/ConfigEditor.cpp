@@ -1685,10 +1685,12 @@ void edit_pcicard(
     for (int i = 0; i < num_entries; ++i)
     {
         if (i == idx)
-            continue;
-
-        char *p = !is_new_card && entry[i].name ? c->get_text_value(entry[i].name) : NULL;
-        preset[i] = p ? p : (char *)entry[i].preset;
+            preset[i] = (char *)entry[i].preset;
+        else
+        {
+            char *p = !is_new_card && entry[i].name ? c->get_text_value(entry[i].name) : NULL;
+            preset[i] = p ? p : (char *)entry[i].preset;
+        }
     }
 
     FormValues_t values = show_form(title, entry, preset, num_entries, check_values);

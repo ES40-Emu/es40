@@ -1685,12 +1685,10 @@ void edit_pcicard(
     for (int i = 0; i < num_entries; ++i)
     {
         if (i == idx)
-            preset[i] = is_new_card ? (char *)entry[i].preset : c->get_myName() + strlen("pci");
-        else
-        {
-            char *p = !is_new_card && entry[i].name ? c->get_text_value(entry[i].name) : NULL;
-            preset[i] = p ? p : (char *)entry[i].preset;
-        }
+            continue;
+
+        char *p = !is_new_card && entry[i].name ? c->get_text_value(entry[i].name) : NULL;
+        preset[i] = p ? p : (char *)entry[i].preset;
     }
 
     FormValues_t values = show_form(title, entry, preset, num_entries, check_values);
@@ -1735,7 +1733,7 @@ void edit_pci_vga_s3(const char *title)
 {
     FormEntry_t entry[] = {
         {"PCI slot", NULL, NULL,
-         "Which PCI slot should the S3 Tri64 card be on?\n"
+         "Which PCI slot should the S3 Trio64 card be on?\n"
          "Use bus 0 for a firmware graphics console.",
          validation_pcislot},
         {"rom file",
@@ -1751,10 +1749,10 @@ void edit_pci_vga_s3(const char *title)
          "Real S3 Trio64 VGA BIOS images work, GNU vgabios project also works,\n"
          "but may not enable or support all S3 features.\n"
          "This file is required.",
-         validation_file}};
-    int num_entries = ARRAY_SIZE(entry);
+         validation_file}
+    };
 
-    edit_pcicard(title, "s3", entry, num_entries, check_pci_vga_s3);
+    edit_pcicard(title, "s3", entry, ARRAY_SIZE(entry), check_pci_vga_s3);
 }
 
 bool check_pci_vga_gloria(FormEntry_t entry[], int num_entries, FormValues_t values)
@@ -1781,8 +1779,9 @@ void edit_pci_vga_gloria(const char *title)
 {
     FormEntry_t entry[] = {
         {"PCI slot", NULL, NULL,
-         "Which PCI slot should the GLoria Synergy card be on?\n"
-         "Use bus 0 for a firmware graphics console.", validation_pcislot},
+         "Which PCI slot should the Gloria Synergy card be on?\n"
+         "Use bus 0 for a firmware graphics console.",
+         validation_pcislot},
         {"rom file", "rom/SYN80700.PAN", "rom",
          "Path to the PCI GLoria option ROM.\n"
          "AGP GLoria images are not supported by this PCI card model.",
@@ -1799,10 +1798,11 @@ void edit_pci_vga_gloria(const char *title)
         {"allow DMA?", STR_YES, "allow_dma",
          "Allow the graphics card to read commands and data from guest memory\n"
          "and transfer output data back to guest memory.\n"
-         "Transfers run when the guest enables PCI bus mastering.", validation_yes_no}};
-    const int num_entries = ARRAY_SIZE(entry);
+         "Transfers run when the guest enables PCI bus mastering.",
+         validation_yes_no}
+    };
 
-    edit_pcicard(title, "gloria", entry, num_entries, check_pci_vga_gloria);
+    edit_pcicard(title, "gloria", entry, ARRAY_SIZE(entry), check_pci_vga_gloria);
 }
 
 bool check_pci_vga_radeon(FormEntry_t entry[], int num_entries, FormValues_t values)
@@ -1839,10 +1839,10 @@ void edit_pci_vga_radeon(const char *title)
         {"ROM layout", "pad_ff", "rom_layout",
          "exact requires a power-of-two ROM dump.\n"
          "pad_ff pads a smaller image, such as a 48 KiB PCI ROM, with 0xFF.",
-         validation_radeon_rom_layout}};
-    const int num_entries = ARRAY_SIZE(entry);
+         validation_radeon_rom_layout}
+    };
 
-    edit_pcicard(title, "radeon", entry, num_entries, check_pci_vga_radeon);
+    edit_pcicard(title, "radeon", entry, ARRAY_SIZE(entry), check_pci_vga_radeon);
 }
 
 bool check_pci_vga_powerstorm(FormEntry_t entry[], int num_entries, FormValues_t values)
@@ -1876,7 +1876,8 @@ void edit_pci_vga_powerstorm(const char *title)
     FormEntry_t entry[] = {
         {"PCI slot", NULL, NULL,
          "Which PCI slot should the PowerStorm card be on?\n"
-         "Use bus 0 for a firmware graphics console.", validation_pcislot},
+         "Use bus 0 for a firmware graphics console.",
+         validation_pcislot},
         {"rom file", "rom/BIOS.BIN", "rom",
          "Path to the PowerStorm 300/350 (10BA:0304) option ROM.\n"
          "Standard VGA and native 24-bit 2D are supported.",
@@ -1889,10 +1890,10 @@ void edit_pci_vga_powerstorm(const char *title)
          "300: subsystem 0E11:4D31, 15 MiB framebuffer, 16 MiB texture.\n"
          "350: subsystem 1011:4D35, 30 MiB framebuffer, 32 MiB texture.\n"
          "Memory population and board straps follow the selected model.",
-         validation_powerstorm_model}};
-    const int num_entries = ARRAY_SIZE(entry);
+         validation_powerstorm_model}
+    };
 
-    edit_pcicard(title, "powerstorm", entry, num_entries, check_pci_vga_powerstorm);
+    edit_pcicard(title, "powerstorm", entry, ARRAY_SIZE(entry), check_pci_vga_powerstorm);
 }
 
 // Form for VGA PCI card
@@ -2101,9 +2102,8 @@ void edit_pci_dec21143(const char *title)
          validation_yes_no}
 #endif
     };
-    int num_entries = ARRAY_SIZE(entry);
 
-    edit_pcicard(title, "dec21143", entry, num_entries);
+    edit_pcicard(title, "dec21143", entry, ARRAY_SIZE(entry));
 #endif // defined(HAVE_PCAP) || defined(HAVE_TAP_NET) || defined(HAVE_VMNET) || defined(HAVE_SLIRP)
 }
 
@@ -2119,10 +2119,10 @@ void edit_pci_sym53c810(const char *title)
         {"PCI slot", NULL, NULL,
          "Which PCI slot should the Symbios 53C810 narrow SCSI controller be on?\n"
          "Only free PCI slots are listed.",
-         validation_pcislot}};
-    int num_entries = ARRAY_SIZE(entry);
+         validation_pcislot}
+    };
 
-    edit_pcicard(title, "sym53c810", entry, num_entries, NULL, set_pcicard_values_default, add_pci_sym53c810_disks);
+    edit_pcicard(title, "sym53c810", entry, ARRAY_SIZE(entry), NULL, set_pcicard_values_default, add_pci_sym53c810_disks);
 }
 
 bool check_pci_lsi53c1020_settings(FormEntry_t entry[], int num_entries, FormValues_t values)
@@ -2182,15 +2182,8 @@ void add_pci_lsi53c1020_disks(CConfigurator *c)
 // Form for LSI 53c1020 SCSI PCI card settings
 void edit_pci_lsi53c1020(const char *title)
 {
-    char *first_free_pcislot = find_first_free_pcislot();
-    if (first_free_pcislot == NULL)
-    {
-        show_text(title, "No free PCI slots");
-        return;
-    }
-
     FormEntry_t entry[] = {
-        {"PCI slot", first_free_pcislot, NULL,
+        {"PCI slot", NULL, NULL,
          "Which PCI slot should the LSI 53C1020 Fusion-MPT Ultra320 SCSI controller be on?\n"
          "Only free PCI slots are listed.",
          validation_pcislot},
@@ -2245,9 +2238,11 @@ void edit_pci_lsi53c1020(const char *title)
          "Use the supplied it_1030.fw compatibility image for the plain 53C1020;\n"
          "the T image is for 53C1020A/1030T controllers. The image is used only\n"
          "when initializing flash, and does not change the emulated card's 53C1020 identity.",
-         validation_file}};
+         validation_file}
+    };
 
-    edit_pcicard(title, "lsi53c1020", entry, ARRAY_SIZE(entry), check_pci_lsi53c1020_settings, set_pci_lsi53c1020_values, add_pci_sym53c810_disks);
+    edit_pcicard(title, "lsi53c1020", entry, ARRAY_SIZE(entry),
+        check_pci_lsi53c1020_settings, set_pci_lsi53c1020_values, add_pci_sym53c810_disks);
 }
 
 #ifdef HAVE_SDL
@@ -2258,7 +2253,8 @@ void edit_pci_es1370(const char *title)
         {"PCI slot", NULL, NULL,
          "Which PCI slot should the Ensoniq AudioPCI ES1370 sound card be on?\n"
          "Only free PCI slots are listed.",
-         validation_pcislot}};
+         validation_pcislot}
+    };
 
     edit_pcicard(title, "es1370", entry, ARRAY_SIZE(entry));
 }

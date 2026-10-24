@@ -527,6 +527,8 @@ CConfigurator::CConfigurator(class CConfigurator* parent, char* name,
  **/
 CConfigurator::~CConfigurator(void)
 {
+	for (int i = 0; i < iNumChildren; ++i)
+		delete pChildren[i];
 }
 
 /**

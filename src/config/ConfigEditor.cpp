@@ -2719,6 +2719,51 @@ void edit_mpu401(const char *title)
 #endif
 
 /**
+ * Menu to remove system components from the configuration
+ */
+void remove_component_add_choice(vector<MenuEntry_t> &choices, CConfigurator *c, string indent)
+{
+    char *myName = c->get_myName();
+    string text;
+    SelectFuncPtr remove_callback = NULL;
+    
+    if (!strcmp(myName, "sys0") || !strcmp(myName, "cpu0")) 
+        text = indent + "(" + myName + "=" + c->get_myValue() + ")";
+    else
+    {
+        text = indent + myName + "=" + c->get_myValue();
+        // ToDo: construct a remove_callback that removes c
+        // (capturing lambda doesn't work - std::function + std::bind ?)
+        auto doesnotwork = [c](const char *) {
+            c->get_myParent()->remove_child(c->get_myName());
+        };
+    }
+    choices.push_back({strdup(text.c_str()), "", remove_callback});
+    for (int i = 0; i < c->editor_child_count(); ++i)
+        remove_component_add_choice(choices, c->editor_child(i), indent + "  ");
+}
+
+void remove_component(const char *title)
+{
+    int sel;
+    do
+    {
+        vector<MenuEntry_t> choices;
+
+        CConfigurator *theGui = theConfig->find_child("gui");
+        if (theGui != nullptr)
+            remove_component_add_choice(choices, theGui, "");
+        remove_component_add_choice(choices, sys0, "");
+
+        sel = show_menu(title, choices.data(), choices.size(), MENU_2ND_LEVEL);
+
+        for (int i = 0; i < choices.size(); ++i)
+            free((char*)choices[i].text);
+        choices.clear();
+    } while (sel >= 0);
+}
+
+/**
  * Main menu
  *
  * Returns true is results are to be saved.
@@ -2726,23 +2771,28 @@ void edit_mpu401(const char *title)
 bool main_menu(void)
 {
     MenuEntry_t entry[] = {
-        {"GUI settings",
+        {"Edit GUI settings",
          "You need a GUI if you want to use an emulated graphics card.\n"
          "You don't need this for most OS'es. If you don't need this,\n"
          "we recommend that you select 'none'.",
          edit_gui},
-        {"System settings", "", edit_tsunami},
-        {"CPU settings", "", edit_ev68cb},
-        {"ALI 1543 settings", "", edit_ali},
-        {"PCI devices", "", edit_pci},
-        {"Serial devices", "", edit_serial},
-        {"Floppy devices", "", edit_floppy},
-        {"IDE devices", "", edit_ide}
+        {"Edit System settings", "", edit_tsunami},
+        {"Edit CPU settings", "", edit_ev68cb},
+        {"Edit ALI 1543 settings", "", edit_ali},
+        {"Edit PCI devices", "", edit_pci},
+        {"Edit Serial devices", "", edit_serial},
+        {"Edit Floppy devices", "", edit_floppy},
+        {"Edit IDE devices", "", edit_ide}
 #ifdef _WIN32
         ,
         {"MPU-401 device", "", edit_mpu401}
 #endif
         ,
+        {"Remove components",
+         "Remove system components from the configuration.\n"
+         "You can not remove the entries for sys0 or cpu0.\n"
+         "Warning: this is a dummy and does not yet work.",
+         remove_component},
         {NULL, NULL, NULL},
         {"Help", "Help with program usage", show_help},
         {"Quit", "Quit the program without writing to output file", NULL},

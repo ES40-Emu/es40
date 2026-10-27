@@ -84,8 +84,9 @@
 #include "SCSIDevice.h"
 #include "SCSIBus.h"
 
-#define DATO_BUFSZ  (256 * 1024)
-#define DATI_BUFSZ  (256 * 1024)
+// 4MB transfer buffers to support large multi-block I/O
+#define DATO_BUFSZ  (4096 * 1024)
+#define DATI_BUFSZ  (4096 * 1024)
 
   /**
    * \brief Abstract base class for disks (connects to a CDiskController)

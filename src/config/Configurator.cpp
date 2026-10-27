@@ -763,7 +763,8 @@ static const char* const kv_tsunami[] = {
   "debug.shared_read_policy", "debug.shared_read_claimant", 0 };
 static const char* const kv_ev68cb[] = {
   "speed", "palcode.vms.nohle", "idle_nap", "idle_detect",
-  "idle_spin_count", "idle_nap_poll_us", 0 };
+  "idle_spin_count", "idle_nap_poll_us", "unaligned_fixup",
+  "timer.max_instr_per_tick", 0 };
 static const char* const kv_serial[] = {
   "port", "listen_address", "action", "disabled", "raw_mode", "null_attach", 0 };
 static const char* const kv_ali[] = { "vga_console", "lpt.outfile", 0 };

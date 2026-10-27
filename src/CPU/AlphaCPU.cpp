@@ -456,23 +456,65 @@ void CAlphaCPU::reset_idle_detector()
 	m_spin_hits = 0;
 	for (auto& pc : m_spin_set)
 		pc = 0;
+	for (auto& v : m_spin_loop)
+		v = IDLE_LOOP_UNKNOWN;
 	m_spin_set_n = 0;
-	m_spin_announced = false;
+	m_spin_engaged_n = 0;
+	m_spin_rejected_n = 0;
+	m_ipl0_ier_known = false;
+}
+
+// Read the idle_detect settings; shared by init and system reset.
+void CAlphaCPU::load_idle_config()
+{
+	const char* _m = myCfg->get_text_value("idle_detect", "off");
+	idle_rule = idle_method_by_name(_m);
+	if (idle_rule < 0)
+	{
+		printf("*** CPU%d *** unknown idle_detect \"%s\" -- idle detection OFF. Known:", get_cpuid(), _m);
+		for (int _i = 0; idle_methods[_i].name; _i++)
+			printf(" %s", idle_methods[_i].name);
+		printf("\n");
+		idle_rule = RULE_NONE;
+	}
+	idle_spin_count = (u32) myCfg->get_num_value("idle_spin_count", false, 2);
+	idle_nap_poll_us = (u32) myCfg->get_num_value("idle_nap_poll_us", false, 100);
+	idle_mp_nap_us = (u32) myCfg->get_num_value("idle_mp_nap_us", false, 0);
+	idle_detect_debug = myCfg->get_bool_value("idle_detect_debug", false);
+	if (idle_nap_poll_us < 1)
+		idle_nap_poll_us = 1;
+	if (idle_spin_count < 1)
+		idle_spin_count = 1;
+
+	// Guest virtual addresses, so hex: get_num_value only takes decimal.
+	idle_pc_lo = strtoull(myCfg->get_text_value("idle_pc_lo", "0"), nullptr, 0);
+	idle_pc_hi = strtoull(myCfg->get_text_value("idle_pc_hi", "0"), nullptr, 0);
+	if (idle_pc_hi && idle_pc_hi <= idle_pc_lo)
+	{
+		printf("*** CPU%d *** idle_pc_hi must be above idle_pc_lo; idle PC window ignored\n", get_cpuid());
+		idle_pc_lo = idle_pc_hi = 0;
+	}
 }
 
 /**
  * Sleep an idle CPU until an interrupt, stop/reset request, or its deadline.
  * WTINT and automatic detection share the host wait and post-wake timer check.
  * The requested deadline is at most 1ms away and no later than CPU0's next
- * interval tick; host scheduling can still return late. MP naps stay disabled.
+ * interval tick; host scheduling can still return late.
+ *
+ * MP naps are disabled unless idle_mp_nap_us opts RULE_SPIN_KERNEL in: Mach
+ * dispatches to an idle CPU with a plain store to the word its idle loop
+ * polls, so no host wake event fires and each nap delays that dispatch.
  **/
-void CAlphaCPU::idle_nap()
+void CAlphaCPU::idle_nap(bool detected)
 {
 	using namespace std::chrono;
 
 	// Either route may nap: WTINT, or host-side detection.
-	if ((!idle_nap_enabled && idle_rule == RULE_NONE)
-		|| (cSystem && cSystem->get_cpu_num() > 1))
+	if (!idle_nap_enabled && idle_rule == RULE_NONE)
+		return;
+	const bool mp = cSystem && cSystem->get_cpu_num() > 1;
+	if (mp && !(detected && idle_rule == RULE_SPIN_KERNEL && idle_mp_nap_us))
 		return;
 
 	if (!idle_announced)
@@ -483,9 +525,12 @@ void CAlphaCPU::idle_nap()
 	}
 
 	
-	auto deadline = steady_clock::now() + milliseconds(1);
+	const auto start = steady_clock::now();
+	auto deadline = start + (mp ? microseconds(idle_mp_nap_us) : microseconds(1000));
 	if (state.iProcNum == 0 && next_timer_fire < deadline)
 		deadline = next_timer_fire;
+	if (deadline <= start)
+		m_idle_stat.late++;
 
 	for (;;)
 	{
@@ -493,12 +538,17 @@ void CAlphaCPU::idle_nap()
 		const auto generation = m_idle_wake.generation();
 		if (state.check_int || state.check_timers || StopThread
 			|| (cSystem && cSystem->IsSystemResetRequested()))
+		{
+			m_idle_stat.cut_int++;
 			break;
+		}
 		if (steady_clock::now() >= deadline)
 			break;
 		if (m_idle_wake.wait_until(generation, deadline, microseconds(idle_nap_poll_us)))
 			break;
 	}
+	if (idle_detect_debug)
+		m_idle_stat.slept_ns += (u64) duration_cast<nanoseconds>(steady_clock::now() - start).count();
 	// The wait releases its host locks before entering the system interrupt path.
 	if (!StopThread && !(cSystem && cSystem->IsSystemResetRequested()))
 		service_interval_timer(steady_clock::now());
@@ -659,24 +709,7 @@ void CAlphaCPU::init()
 	cpu_hz = myCfg->get_num_value("speed", true, 500000000);
 	idle_nap_enabled = myCfg->get_bool_value("idle_nap", false);
 	m_unaligned_fixup = myCfg->get_bool_value("unaligned_fixup", true);
-	{
-		const char* _m = myCfg->get_text_value("idle_detect", "off");
-		idle_rule = idle_method_by_name(_m);
-		if (idle_rule < 0)
-		{
-			printf("*** CPU%d *** unknown idle_detect \"%s\" -- idle detection OFF. Known:", get_cpuid(), _m);
-			for (int _i = 0; idle_methods[_i].name; _i++)
-				printf(" %s", idle_methods[_i].name);
-			printf("\n");
-			idle_rule = RULE_NONE;
-		}
-		idle_spin_count = (u32) myCfg->get_num_value("idle_spin_count", false, 2);
-		idle_nap_poll_us = (u32) myCfg->get_num_value("idle_nap_poll_us", false, 100);
-		if (idle_nap_poll_us < 1)
-			idle_nap_poll_us = 1;
-		if (idle_spin_count < 1)
-			idle_spin_count = 1;
-	}
+	load_idle_config();
 	exit_on_pal_halt = myCfg->get_myParent()->get_bool_value("exit_on_pal_halt", false);
 
 	// Instruction-paced interval-timer cap. 
@@ -824,24 +857,7 @@ void CAlphaCPU::ResetForSystemReset()
 	cpu_hz = myCfg->get_num_value("speed", true, 500000000);
 	idle_nap_enabled = myCfg->get_bool_value("idle_nap", false);
 	m_unaligned_fixup = myCfg->get_bool_value("unaligned_fixup", true);
-	{
-		const char* _m = myCfg->get_text_value("idle_detect", "off");
-		idle_rule = idle_method_by_name(_m);
-		if (idle_rule < 0)
-		{
-			printf("*** CPU%d *** unknown idle_detect \"%s\" -- idle detection OFF. Known:", get_cpuid(), _m);
-			for (int _i = 0; idle_methods[_i].name; _i++)
-				printf(" %s", idle_methods[_i].name);
-			printf("\n");
-			idle_rule = RULE_NONE;
-		}
-		idle_spin_count = (u32) myCfg->get_num_value("idle_spin_count", false, 2);
-		idle_nap_poll_us = (u32) myCfg->get_num_value("idle_nap_poll_us", false, 100);
-		if (idle_nap_poll_us < 1)
-			idle_nap_poll_us = 1;
-		if (idle_spin_count < 1)
-			idle_spin_count = 1;
-	}
+	load_idle_config();
 	exit_on_pal_halt = myCfg->get_myParent()->get_bool_value("exit_on_pal_halt", false);
 	m_max_instr_per_tick = myCfg->get_num_value("timer.max_instr_per_tick", false, 1250000);
 	if (const char* e = getenv("ES40_MAX_INSTR_PER_TICK"))
@@ -1278,22 +1294,58 @@ void CAlphaCPU::jit_run(int budget)
 			const u64 _ic = state.instruction_count;
 			const int _ipl = (int) ((state.r[32 + 22] >> 8) & 0x1f);   // VMS PALcode keeps PS in p22
 
-			if ((_ic - m_spin_ic) >= idle_spin_min_instr
-				&& (idle_rule != RULE_SPIN_IPL3 || _ipl == 3))
+			const bool _kernel = state.cm == 0 && !(start_virt & 1);   // IER_CM kernel, not PALmode
+			const bool _in_window = !idle_pc_hi
+				|| (start_virt >= idle_pc_lo && start_virt < idle_pc_hi);
+
+			// OSF user mode always runs at IPL 0, so its IER enables are the reference.
+			if (idle_rule == RULE_SPIN_KERNEL && state.cm != 0 && !(start_virt & 1))
 			{
-				bool seen = false;
+				m_ipl0_eien = state.eien;
+				m_ipl0_sien = state.sien;
+				m_ipl0_ier_known = true;
+			}
+			if (idle_detect_debug)
+			{
+				const bool _sample = (_ic - m_spin_ic) >= idle_spin_min_instr;
+				m_idle_stat.samples += _sample;
+				m_idle_stat.kernel += _sample && _kernel;
+				const auto _now = std::chrono::steady_clock::now();
+				if (_now >= m_idle_stat_next)
+				{
+					if (m_idle_stat_next.time_since_epoch().count())
+						printf("*** CPU%d *** idle stats 10s: samples=%llu kernel=%llu decided=%llu naps=%llu slept=%llums int_cut=%llu late=%llu last_reject=%s ***\n",
+							get_cpuid(), (unsigned long long) m_idle_stat.samples, (unsigned long long) m_idle_stat.kernel,
+							(unsigned long long) m_idle_stat.decided, (unsigned long long) m_idle_stat.naps,
+							(unsigned long long) (m_idle_stat.slept_ns / 1000000), (unsigned long long) m_idle_stat.cut_int,
+							(unsigned long long) m_idle_stat.late, m_idle_stat.why ? m_idle_stat.why : "-");
+					m_idle_stat = {};
+					m_idle_stat_next = _now + std::chrono::seconds(10);
+				}
+			}
+
+
+			if ((_ic - m_spin_ic) >= idle_spin_min_instr
+				&& (idle_rule != RULE_SPIN_IPL3 || _ipl == 3)
+				&& (idle_rule != RULE_SPIN_KERNEL || _kernel)
+				&& _in_window)
+			{
+				int _slot = -1;
 				for (int _i = 0; _i < m_spin_set_n; _i++)
 					if (m_spin_set[_i] == start_virt)
 					{
-						seen = true;
+						_slot = _i;
 						break;
 					}
-				if (!seen)
+				if (_slot < 0)
 				{
 					// A new address breaks the run of consecutive repeated PCs.
 					m_spin_hits = 0;
 					if (m_spin_set_n < kSpinSetMax)
+					{
+						m_spin_loop[m_spin_set_n] = IDLE_LOOP_UNKNOWN;
 						m_spin_set[m_spin_set_n++] = start_virt;
+					}
 					else
 					{
 						m_spin_set_n = 0;        // too wide to be a loop: start over
@@ -1302,14 +1354,83 @@ void CAlphaCPU::jit_run(int budget)
 				else if (++m_spin_hits >= idle_spin_count)
 				{
 					m_spin_hits = idle_spin_count;   // saturate
-					if (!m_spin_announced)
+
+					auto _read = [&](u64 va, u32* insn) {
+						const auto view = sources.view(va);
+						if (!view.contains(1))
+							return false;
+						*insn = view.word(0);
+						return true;
+					};
+					const char* _why = nullptr;
+					if (idle_rule == RULE_SPIN_KERNEL)
 					{
-						m_spin_announced = true;
-						printf("*** CPU%d *** idle_detect engaged at pc=%016llx ipl=%d ***\n",
-							get_cpuid(), (unsigned long long) start_virt, _ipl);
-						fflush(stdout);
+						if (!m_ipl0_ier_known)
+							_why = "no user-mode IPL 0 reference yet";
+						else if (state.eien != m_ipl0_eien || state.sien != m_ipl0_sien)
+							_why = "interrupt enables differ from IPL 0";
+						else
+						{
+							u8& _loop = m_spin_loop[_slot];
+							if (_loop == IDLE_LOOP_UNKNOWN)
+								_loop = (u8) idle_loop_check(start_virt, _read);
+							if (_loop == IDLE_LOOP_STORES)
+								_why = "loop writes memory or leaves";
+							else if (_loop == IDLE_LOOP_WALKS)
+								_why = "loop reads through an advancing address";
+							else if (_loop == IDLE_LOOP_CALLS)
+								_why = "loop calls a function on every pass";
+							else if (_loop == IDLE_LOOP_COMPUTES)
+								_why = "loop branches only on computed values";
+							else if (_loop == IDLE_LOOP_UNREADABLE)
+								_why = "no short loop at this pc";
+						}
 					}
-					idle_nap();
+
+					// Firmware and early boot spins are expected; don't log them.
+					m_idle_stat.decided++;
+					if (_why)
+						m_idle_stat.why = _why;
+					if (_why && m_ipl0_ier_known && idle_detect_debug)
+					{
+						bool _shown = false;
+						for (int _i = 0; _i < m_spin_rejected_n; _i++)
+							_shown |= m_spin_rejected[_i] == start_virt;
+						if (!_shown && m_spin_rejected_n < 64)
+						{
+							m_spin_rejected[m_spin_rejected_n++] = start_virt;
+							u64 _at = 0;
+							u32 _insn = 0;
+							const int _loop = m_spin_loop[_slot];
+							if (_loop != IDLE_LOOP_UNKNOWN && _loop != IDLE_LOOP_UNREADABLE)
+								idle_loop_check(start_virt, _read, &_at);   // again, for the deciding instruction
+							if (_at)
+								_read(_at, &_insn);
+							printf("*** CPU%d *** idle_detect rejected pc=%016llx: %s",
+								get_cpuid(), (unsigned long long) start_virt, _why);
+							if (_at)
+								printf(" at %016llx insn=%08x", (unsigned long long) _at, _insn);
+							printf(" (eien=%02x sien=%04x, IPL 0 eien=%02x sien=%04x) ***\n",
+								state.eien, state.sien, m_ipl0_eien, m_ipl0_sien);
+							fflush(stdout);
+						}
+					}
+					else if (!_why)
+					{
+						bool _shown = false;
+						for (int _i = 0; _i < m_spin_engaged_n; _i++)
+							_shown |= m_spin_engaged[_i] == start_virt;
+						if (!_shown && m_spin_engaged_n < (idle_detect_debug ? 8 : 1))
+						{
+							m_spin_engaged[m_spin_engaged_n++] = start_virt;
+							printf("*** CPU%d *** idle_detect engaged at pc=%016llx ipl=%d cm=%d eien=%02x sien=%04x ***\n",
+								get_cpuid(), (unsigned long long) start_virt, _ipl, state.cm,
+								state.eien, state.sien);
+							fflush(stdout);
+						}
+						m_idle_stat.naps++;
+						idle_nap(true);
+					}
 				}
 			}
 			else

@@ -269,7 +269,7 @@ public:
   virtual int   RestoreState(FILE* f);
   void          irq_h(int number, bool assert, int delay);
   void          kick_int_if_pending();
-  void          idle_nap();
+  void          idle_nap(bool detected = false);
   void          wake_idle() { m_idle_wake.notify(); }
   enum class TickHold { Ticked, Expired, Doorbell };
   u64           tick_next_gap_ns(u64 period_ns);   // draws the modulated repay gap for the next fire
@@ -516,16 +516,32 @@ private:
   // Host-side idle detection (idle_detect cfg). See idle_detect.h.
   int                                   idle_rule = RULE_NONE;   // EIdleRule, from idle_detect
   u32                                   idle_spin_count = 2;      // consecutive hits before napping
+  u64                                   idle_pc_lo = 0;           // optional [lo, hi) sample window
+  u64                                   idle_pc_hi = 0;           // 0 = no window
+  u32                                   idle_mp_nap_us = 0;       // detected-idle nap length on SMP guests, 0 = off
+  bool                                  idle_detect_debug = false; // print rejected idle candidates
+  // idle_detect_debug statistics, printed and cleared every 10 s.
+  struct { u64 samples, kernel, decided, naps, slept_ns, cut_int, late; const char* why; } m_idle_stat = {};
+  std::chrono::steady_clock::time_point m_idle_stat_next{};
   u64                                   idle_spin_min_instr = 0;  // a dispatch must have run at least this many
   u64                                   m_spin_ic = 0;            // instruction count at that dispatch
   u32                                   m_spin_hits = 0;
   // Working set of consecutive samples meeting the instruction threshold.
   static const int                      kSpinSetMax = 8;
   u64                                   m_spin_set[kSpinSetMax] = { 0 };
+  u8                                    m_spin_loop[kSpinSetMax] = { 0 };  // EIdleLoop verdict per entry
   int                                   m_spin_set_n = 0;
-  bool                                  m_spin_announced = false;
+  u64                                   m_spin_engaged[8] = { 0 };  // PCs already reported as napping
+  int                                   m_spin_engaged_n = 0;
+  u64                                   m_spin_rejected[64] = { 0 }; // PCs already reported as rejected
+  int                                   m_spin_rejected_n = 0;
+  // IER enables last sampled in user mode (IPL 0 under OSF).
+  bool                                  m_ipl0_ier_known = false;
+  int                                   m_ipl0_eien = 0;
+  int                                   m_ipl0_sien = 0;
   bool                                  idle_announced = false;
   void reset_idle_detector();
+  void load_idle_config();
 
   // Wall-clock RPCC: state.cc advances by real elapsed time * cpu_hz so it tracks the configured
   // CPU frequency regardless of how fast/bursty the JIT runs. This is the last sync timestamp;

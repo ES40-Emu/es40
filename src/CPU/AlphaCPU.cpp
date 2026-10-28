@@ -599,6 +599,216 @@ bool CAlphaCPU::idle_load_ram(u64 va, int bytes, u64* value, u64* phys)
 	return true;
 }
 
+// One idle_detect sample at a JIT dispatch, before the code at start_virt runs.
+void CAlphaCPU::idle_detect_sample(u64 start_virt, const AlphaInstructionSource& sources)
+{
+	const u64 _ic = state.instruction_count;
+	const int _ipl = (int) ((state.r[32 + 22] >> 8) & 0x1f);   // VMS PALcode keeps PS in p22
+
+	const bool _kernel = state.cm == 0 && !(start_virt & 1);   // IER_CM kernel, not PALmode
+	const bool _in_window = !idle_pc_hi
+		|| (start_virt >= idle_pc_lo && start_virt < idle_pc_hi);
+
+	// OSF user mode always runs at IPL 0, so its IER enables are the reference.
+	if (idle_rule == RULE_SPIN_KERNEL && state.cm != 0 && !(start_virt & 1))
+	{
+		m_ipl0_eien = state.eien;
+		m_ipl0_sien = state.sien;
+		m_ipl0_ier_known = true;
+	}
+	if (idle_detect_debug)
+	{
+		const bool _sample = (_ic - m_spin_ic) >= idle_spin_min_instr;
+		m_idle_stat.samples += _sample;
+		m_idle_stat.kernel += _sample && _kernel;
+		const auto _now = std::chrono::steady_clock::now();
+		if (_now >= m_idle_stat_next)
+		{
+			if (m_idle_stat_next.time_since_epoch().count())
+				printf("*** CPU%d *** idle stats 10s: samples=%llu kernel=%llu decided=%llu naps=%llu slept=%llums int_cut=%llu woke=%llu late=%llu last_reject=%s ***\n",
+					get_cpuid(), (unsigned long long) m_idle_stat.samples, (unsigned long long) m_idle_stat.kernel,
+					(unsigned long long) m_idle_stat.decided, (unsigned long long) m_idle_stat.naps,
+					(unsigned long long) (m_idle_stat.slept_ns / 1000000), (unsigned long long) m_idle_stat.cut_int,
+					(unsigned long long) m_idle_stat.woke,
+					(unsigned long long) m_idle_stat.late, m_idle_stat.why ? m_idle_stat.why : "-");
+			m_idle_stat = {};
+			m_idle_stat_next = _now + std::chrono::seconds(10);
+		}
+	}
+
+	if ((_ic - m_spin_ic) >= idle_spin_min_instr
+		&& (idle_rule != RULE_SPIN_IPL3 || _ipl == 3)
+		&& (idle_rule != RULE_SPIN_KERNEL || _kernel)
+		&& _in_window)
+	{
+		int _slot = -1;
+		for (int _i = 0; _i < m_spin_set_n; _i++)
+			if (m_spin_set[_i] == start_virt)
+			{
+				_slot = _i;
+				break;
+			}
+		if (_slot < 0)
+		{
+			// A new address breaks the run of consecutive repeated PCs.
+			m_spin_hits = 0;
+			if (m_spin_set_n < kSpinSetMax)
+			{
+				m_spin_loop[m_spin_set_n] = IDLE_LOOP_UNKNOWN;
+				m_spin_set[m_spin_set_n++] = start_virt;
+			}
+			else
+			{
+				m_spin_set_n = 0;        // too wide to be a loop: start over
+			}
+		}
+		else if (++m_spin_hits >= idle_spin_count)
+		{
+			m_spin_hits = idle_spin_count;   // saturate
+
+			auto _read = [&](u64 va, u32* insn) {
+				const auto view = sources.view(va);
+				if (!view.contains(1))
+					return false;
+				*insn = view.word(0);
+				return true;
+			};
+			const char* _why = nullptr;
+			if (idle_rule == RULE_SPIN_KERNEL)
+			{
+				if (!m_ipl0_ier_known)
+					_why = "no user-mode IPL 0 reference yet";
+				else if (state.eien != m_ipl0_eien || state.sien != m_ipl0_sien)
+					_why = "interrupt enables differ from IPL 0";
+				else
+				{
+					u8& _loop = m_spin_loop[_slot];
+					if (_loop == IDLE_LOOP_UNKNOWN)
+						_loop = (u8) idle_loop_check(start_virt, _read);
+					if (_loop == IDLE_LOOP_STORES)
+						_why = "loop writes memory or leaves";
+					else if (_loop == IDLE_LOOP_WALKS)
+						_why = "loop reads through an advancing address";
+					else if (_loop == IDLE_LOOP_CALLS)
+						_why = "loop calls a function on every pass";
+					else if (_loop == IDLE_LOOP_COMPUTES)
+						_why = "loop branches only on computed values";
+					else if (_loop == IDLE_LOOP_UNREADABLE)
+						_why = "no short loop at this pc";
+				}
+			}
+
+			// Firmware and early boot spins are expected; don't log them.
+			m_idle_stat.decided++;
+			if (_why)
+				m_idle_stat.why = _why;
+			if (_why && m_idle_armed)
+			{
+				cSystem->idle_watch_disarm(state.iProcNum);
+				m_idle_armed = false;
+			}
+			if (_why && m_ipl0_ier_known && idle_detect_debug)
+			{
+				bool _shown = false;
+				for (int _i = 0; _i < m_spin_rejected_n; _i++)
+					_shown |= m_spin_rejected[_i] == start_virt;
+				if (!_shown && m_spin_rejected_n < 64)
+				{
+					m_spin_rejected[m_spin_rejected_n++] = start_virt;
+					u64 _at = 0;
+					u32 _insn = 0;
+					const int _loop = m_spin_loop[_slot];
+					if (_loop != IDLE_LOOP_UNKNOWN && _loop != IDLE_LOOP_UNREADABLE)
+						idle_loop_check(start_virt, _read, &_at);   // again, for the deciding instruction
+					if (_at)
+						_read(_at, &_insn);
+					printf("*** CPU%d *** idle_detect rejected pc=%016llx: %s",
+						get_cpuid(), (unsigned long long) start_virt, _why);
+					if (_at)
+						printf(" at %016llx insn=%08x", (unsigned long long) _at, _insn);
+					printf(" (eien=%02x sien=%04x, IPL 0 eien=%02x sien=%04x) ***\n",
+						state.eien, state.sien, m_ipl0_eien, m_ipl0_sien);
+					fflush(stdout);
+				}
+			}
+			else if (!_why)
+			{
+				// SMP idle watch: arm on this sample and nap on the next, so the
+				// guest makes one pass that sees every store before the arm.
+				bool _nap = true;
+				if (idle_mp_wake && idle_rule == RULE_SPIN_KERNEL && !m_idle_armed
+					&& cSystem->get_cpu_num() > 1)
+				{
+					u64 _lines[CSystem::kIdleWatchLines], _at = 0;
+					auto _load = [&](u64 va, int bytes, u64* value, u64* phys) {
+						return idle_load_ram(va, bytes, value, phys);
+					};
+					const int _n = idle_loop_trace(start_virt, &state.r[0], _read, _load,
+						_lines, CSystem::kIdleWatchLines, &_at);
+					m_idle_armed = _n > 0 && cSystem->idle_watch_arm(state.iProcNum, _lines, _n);
+					_nap = !m_idle_armed;   // untraceable: timed nap if idle_mp_nap_us, else none
+					// A trace can fail once and succeed later (work dispatched
+					// mid-pass), so report the first of each outcome per PC.
+					const u64 _key = start_virt | (m_idle_armed ? 0 : 2);
+					bool _shown = false;
+					for (int _i = 0; _i < m_spin_traced_n; _i++)
+						_shown |= m_spin_traced[_i] == _key;
+					if (idle_detect_debug && !_shown && m_spin_traced_n < 16)
+					{
+						m_spin_traced[m_spin_traced_n++] = _key;
+						printf("*** CPU%d *** idle_detect pc=%016llx ", get_cpuid(), (unsigned long long) start_virt);
+						if (m_idle_armed)
+						{
+							printf("watches %d lines:", _n);
+							for (int _i = 0; _i < _n; _i++)
+								printf(" %llx", (unsigned long long) (_lines[_i] << 6));
+						}
+						else
+							printf("cannot watch its loop (trace stopped at %016llx, %d lines)",
+								(unsigned long long) _at, _n);
+						printf(" ***\n");
+						fflush(stdout);
+					}
+				}
+				bool _shown = false;
+				for (int _i = 0; _i < m_spin_engaged_n; _i++)
+					_shown |= m_spin_engaged[_i] == start_virt;
+				if (!_shown && m_spin_engaged_n < (idle_detect_debug ? 8 : 1))
+				{
+					m_spin_engaged[m_spin_engaged_n++] = start_virt;
+					// idle_nap's gate: with more than one CPU, only opted-in "tru64" naps.
+					const char* _mp_off = nullptr;
+					if (cSystem->get_cpu_num() > 1 && idle_rule != RULE_SPIN_KERNEL)
+						_mp_off = "this idle_detect mode naps only with one CPU";
+					else if (cSystem->get_cpu_num() > 1 && !idle_mp_wake && !idle_mp_nap_us)
+						_mp_off = "more than one CPU needs idle_mp_wake";
+					if (_mp_off)
+						printf("*** CPU%d *** idle_detect found idle at pc=%016llx, not napping: %s ***\n",
+							get_cpuid(), (unsigned long long) start_virt, _mp_off);
+					else
+						printf("*** CPU%d *** idle_detect engaged at pc=%016llx ipl=%d cm=%d eien=%02x sien=%04x ***\n",
+							get_cpuid(), (unsigned long long) start_virt, _ipl, state.cm,
+							state.eien, state.sien);
+					fflush(stdout);
+				}
+				if (_nap)
+					idle_nap(true);
+			}
+		}
+	}
+	else
+	{
+		m_spin_hits = 0;
+		m_spin_set_n = 0;
+		if (m_idle_armed && (_ic - m_spin_ic) >= idle_spin_min_instr)
+		{
+			cSystem->idle_watch_disarm(state.iProcNum);   // left the idle loop
+			m_idle_armed = false;
+		}
+	}
+	m_spin_ic = _ic;
+}
+
 // System interval-timer policy shared by both execution engines and idle paths.
 void CAlphaCPU::service_interval_timer(std::chrono::steady_clock::time_point now)
 {
@@ -1340,214 +1550,7 @@ void CAlphaCPU::jit_run(int budget)
 		// requests at most 1ms, bounded by the next timer deadline, and is
 		// interruptible; host scheduling can still return late.
 		if (idle_rule != RULE_NONE)
-		{
-			const u64 _ic = state.instruction_count;
-			const int _ipl = (int) ((state.r[32 + 22] >> 8) & 0x1f);   // VMS PALcode keeps PS in p22
-
-			const bool _kernel = state.cm == 0 && !(start_virt & 1);   // IER_CM kernel, not PALmode
-			const bool _in_window = !idle_pc_hi
-				|| (start_virt >= idle_pc_lo && start_virt < idle_pc_hi);
-
-			// OSF user mode always runs at IPL 0, so its IER enables are the reference.
-			if (idle_rule == RULE_SPIN_KERNEL && state.cm != 0 && !(start_virt & 1))
-			{
-				m_ipl0_eien = state.eien;
-				m_ipl0_sien = state.sien;
-				m_ipl0_ier_known = true;
-			}
-			if (idle_detect_debug)
-			{
-				const bool _sample = (_ic - m_spin_ic) >= idle_spin_min_instr;
-				m_idle_stat.samples += _sample;
-				m_idle_stat.kernel += _sample && _kernel;
-				const auto _now = std::chrono::steady_clock::now();
-				if (_now >= m_idle_stat_next)
-				{
-					if (m_idle_stat_next.time_since_epoch().count())
-						printf("*** CPU%d *** idle stats 10s: samples=%llu kernel=%llu decided=%llu naps=%llu slept=%llums int_cut=%llu woke=%llu late=%llu last_reject=%s ***\n",
-							get_cpuid(), (unsigned long long) m_idle_stat.samples, (unsigned long long) m_idle_stat.kernel,
-							(unsigned long long) m_idle_stat.decided, (unsigned long long) m_idle_stat.naps,
-							(unsigned long long) (m_idle_stat.slept_ns / 1000000), (unsigned long long) m_idle_stat.cut_int,
-							(unsigned long long) m_idle_stat.woke,
-							(unsigned long long) m_idle_stat.late, m_idle_stat.why ? m_idle_stat.why : "-");
-					m_idle_stat = {};
-					m_idle_stat_next = _now + std::chrono::seconds(10);
-				}
-			}
-
-
-			if ((_ic - m_spin_ic) >= idle_spin_min_instr
-				&& (idle_rule != RULE_SPIN_IPL3 || _ipl == 3)
-				&& (idle_rule != RULE_SPIN_KERNEL || _kernel)
-				&& _in_window)
-			{
-				int _slot = -1;
-				for (int _i = 0; _i < m_spin_set_n; _i++)
-					if (m_spin_set[_i] == start_virt)
-					{
-						_slot = _i;
-						break;
-					}
-				if (_slot < 0)
-				{
-					// A new address breaks the run of consecutive repeated PCs.
-					m_spin_hits = 0;
-					if (m_spin_set_n < kSpinSetMax)
-					{
-						m_spin_loop[m_spin_set_n] = IDLE_LOOP_UNKNOWN;
-						m_spin_set[m_spin_set_n++] = start_virt;
-					}
-					else
-					{
-						m_spin_set_n = 0;        // too wide to be a loop: start over
-					}
-				}
-				else if (++m_spin_hits >= idle_spin_count)
-				{
-					m_spin_hits = idle_spin_count;   // saturate
-
-					auto _read = [&](u64 va, u32* insn) {
-						const auto view = sources.view(va);
-						if (!view.contains(1))
-							return false;
-						*insn = view.word(0);
-						return true;
-					};
-					const char* _why = nullptr;
-					if (idle_rule == RULE_SPIN_KERNEL)
-					{
-						if (!m_ipl0_ier_known)
-							_why = "no user-mode IPL 0 reference yet";
-						else if (state.eien != m_ipl0_eien || state.sien != m_ipl0_sien)
-							_why = "interrupt enables differ from IPL 0";
-						else
-						{
-							u8& _loop = m_spin_loop[_slot];
-							if (_loop == IDLE_LOOP_UNKNOWN)
-								_loop = (u8) idle_loop_check(start_virt, _read);
-							if (_loop == IDLE_LOOP_STORES)
-								_why = "loop writes memory or leaves";
-							else if (_loop == IDLE_LOOP_WALKS)
-								_why = "loop reads through an advancing address";
-							else if (_loop == IDLE_LOOP_CALLS)
-								_why = "loop calls a function on every pass";
-							else if (_loop == IDLE_LOOP_COMPUTES)
-								_why = "loop branches only on computed values";
-							else if (_loop == IDLE_LOOP_UNREADABLE)
-								_why = "no short loop at this pc";
-						}
-					}
-
-					// Firmware and early boot spins are expected; don't log them.
-					m_idle_stat.decided++;
-					if (_why)
-						m_idle_stat.why = _why;
-					if (_why && m_idle_armed)
-					{
-						cSystem->idle_watch_disarm(state.iProcNum);
-						m_idle_armed = false;
-					}
-					if (_why && m_ipl0_ier_known && idle_detect_debug)
-					{
-						bool _shown = false;
-						for (int _i = 0; _i < m_spin_rejected_n; _i++)
-							_shown |= m_spin_rejected[_i] == start_virt;
-						if (!_shown && m_spin_rejected_n < 64)
-						{
-							m_spin_rejected[m_spin_rejected_n++] = start_virt;
-							u64 _at = 0;
-							u32 _insn = 0;
-							const int _loop = m_spin_loop[_slot];
-							if (_loop != IDLE_LOOP_UNKNOWN && _loop != IDLE_LOOP_UNREADABLE)
-								idle_loop_check(start_virt, _read, &_at);   // again, for the deciding instruction
-							if (_at)
-								_read(_at, &_insn);
-							printf("*** CPU%d *** idle_detect rejected pc=%016llx: %s",
-								get_cpuid(), (unsigned long long) start_virt, _why);
-							if (_at)
-								printf(" at %016llx insn=%08x", (unsigned long long) _at, _insn);
-							printf(" (eien=%02x sien=%04x, IPL 0 eien=%02x sien=%04x) ***\n",
-								state.eien, state.sien, m_ipl0_eien, m_ipl0_sien);
-							fflush(stdout);
-						}
-					}
-					else if (!_why)
-					{
-						// SMP idle watch: arm on this sample and nap on the next, so the
-						// guest makes one pass that sees every store before the arm.
-						bool _nap = true;
-						if (idle_mp_wake && idle_rule == RULE_SPIN_KERNEL && !m_idle_armed
-							&& cSystem->get_cpu_num() > 1)
-						{
-							u64 _lines[CSystem::kIdleWatchLines], _at = 0;
-							auto _load = [&](u64 va, int bytes, u64* value, u64* phys) {
-								return idle_load_ram(va, bytes, value, phys);
-							};
-							const int _n = idle_loop_trace(start_virt, &state.r[0], _read, _load,
-								_lines, CSystem::kIdleWatchLines, &_at);
-							m_idle_armed = _n > 0 && cSystem->idle_watch_arm(state.iProcNum, _lines, _n);
-							_nap = !m_idle_armed;   // untraceable: timed nap if idle_mp_nap_us, else none
-							// A trace can fail once and succeed later (work dispatched
-							// mid-pass), so report the first of each outcome per PC.
-							const u64 _key = start_virt | (m_idle_armed ? 0 : 2);
-							bool _shown = false;
-							for (int _i = 0; _i < m_spin_traced_n; _i++)
-								_shown |= m_spin_traced[_i] == _key;
-							if (idle_detect_debug && !_shown && m_spin_traced_n < 16)
-							{
-								m_spin_traced[m_spin_traced_n++] = _key;
-								printf("*** CPU%d *** idle_detect pc=%016llx ", get_cpuid(), (unsigned long long) start_virt);
-								if (m_idle_armed)
-								{
-									printf("watches %d lines:", _n);
-									for (int _i = 0; _i < _n; _i++)
-										printf(" %llx", (unsigned long long) (_lines[_i] << 6));
-								}
-								else
-									printf("cannot watch its loop (trace stopped at %016llx, %d lines)",
-										(unsigned long long) _at, _n);
-								printf(" ***\n");
-								fflush(stdout);
-							}
-						}
-						bool _shown = false;
-						for (int _i = 0; _i < m_spin_engaged_n; _i++)
-							_shown |= m_spin_engaged[_i] == start_virt;
-						if (!_shown && m_spin_engaged_n < (idle_detect_debug ? 8 : 1))
-						{
-							m_spin_engaged[m_spin_engaged_n++] = start_virt;
-							// idle_nap's gate: with more than one CPU, only opted-in "tru64" naps.
-							const char* _mp_off = nullptr;
-							if (cSystem->get_cpu_num() > 1 && idle_rule != RULE_SPIN_KERNEL)
-								_mp_off = "this idle_detect mode naps only with one CPU";
-							else if (cSystem->get_cpu_num() > 1 && !idle_mp_wake && !idle_mp_nap_us)
-								_mp_off = "more than one CPU needs idle_mp_wake";
-							if (_mp_off)
-								printf("*** CPU%d *** idle_detect found idle at pc=%016llx, not napping: %s ***\n",
-									get_cpuid(), (unsigned long long) start_virt, _mp_off);
-							else
-								printf("*** CPU%d *** idle_detect engaged at pc=%016llx ipl=%d cm=%d eien=%02x sien=%04x ***\n",
-									get_cpuid(), (unsigned long long) start_virt, _ipl, state.cm,
-									state.eien, state.sien);
-							fflush(stdout);
-						}
-						if (_nap)
-							idle_nap(true);
-					}
-				}
-			}
-			else
-			{
-				m_spin_hits = 0;
-				m_spin_set_n = 0;
-				if (m_idle_armed && (_ic - m_spin_ic) >= idle_spin_min_instr)
-				{
-					cSystem->idle_watch_disarm(state.iProcNum);   // left the idle loop
-					m_idle_armed = false;
-				}
-			}
-			m_spin_ic = _ic;
-		}
+			idle_detect_sample(start_virt, sources);
 
 		// Observe the family's mapping without fetching or faulting. The legacy JIT
 		// still uses the physical identity to validate its DRAM-backed compiled blocks.

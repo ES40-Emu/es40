@@ -53,9 +53,10 @@ struct SIdleMethod
  * CPU use trades off against guest throughput and latency.
  * RULE_SPIN_IPL3 additionally samples the VMS PAL PS layout in p22; it does
  * not prove that an entire dispatch stayed at IPL 3 or did no useful work.
- * RULE_SPIN_KERNEL is for Tru64, which idles in kernel mode at IPL 0. A sample must be in kernel mode, have the IER
- * enables last seen in user mode (always IPL 0 under OSF), and sit in a
- * loop that idle_loop_check accepts. A lock spin at IPL 0 can still pass.
+ * RULE_SPIN_KERNEL is for Tru64, which idles in kernel mode at IPL 0. A
+ * sample must be in kernel mode, have the IER enables last seen in user
+ * mode (always IPL 0 under OSF), and sit in a loop that idle_loop_check
+ * accepts. A lock spin at IPL 0 can still pass.
  * Other CPU/PAL combinations need an appropriate state decoder and explicit
  * eligibility before relying on this qualifier. These historical figures
  * do not establish guest clock accuracy or active-workload performance.

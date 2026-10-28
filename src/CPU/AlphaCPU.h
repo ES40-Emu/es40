@@ -533,8 +533,7 @@ private:
   u8                                    m_spin_loop[kSpinSetMax] = { 0 };  // EIdleLoop verdict per entry
   int                                   m_spin_set_n = 0;
   bool                                  m_idle_armed = false;     // CSystem idle watch armed by this CPU
-  bool                                  idle_load_ram(u64 va, int bytes, u64* value, u64* phys);
-  u64                                   m_spin_engaged[8] = { 0 };  // PCs already reported as napping
+  u64                                  m_spin_engaged[8] = { 0 };  // PCs already reported as napping
   int                                   m_spin_engaged_n = 0;
   u64                                   m_spin_rejected[64] = { 0 }; // PCs already reported as rejected
   int                                   m_spin_rejected_n = 0;
@@ -547,6 +546,8 @@ private:
   bool                                  idle_announced = false;
   void reset_idle_detector();
   void load_idle_config();
+  void idle_detect_sample(u64 start_virt, const AlphaInstructionSource& sources);
+  bool idle_load_ram(u64 va, int bytes, u64* value, u64* phys);
 
   // Wall-clock RPCC: state.cc advances by real elapsed time * cpu_hz so it tracks the configured
   // CPU frequency regardless of how fast/bursty the JIT runs. This is the last sync timestamp;

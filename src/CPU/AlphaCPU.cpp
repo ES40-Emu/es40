@@ -531,8 +531,8 @@ void CAlphaCPU::idle_nap(bool detected)
 		printf("*** CPU%d *** idle nap engaged ***\n", get_cpuid());
 		fflush(stdout);   // stdout is block-buffered when captured by a service manager
 	}
+	m_idle_stat.naps++;
 
-	
 	const auto start = steady_clock::now();
 	auto deadline = start + (mp && !watched ? microseconds(idle_mp_nap_us) : microseconds(1000));
 	if (state.iProcNum == 0)
@@ -1516,16 +1516,23 @@ void CAlphaCPU::jit_run(int budget)
 						if (!_shown && m_spin_engaged_n < (idle_detect_debug ? 8 : 1))
 						{
 							m_spin_engaged[m_spin_engaged_n++] = start_virt;
-							printf("*** CPU%d *** idle_detect engaged at pc=%016llx ipl=%d cm=%d eien=%02x sien=%04x ***\n",
-								get_cpuid(), (unsigned long long) start_virt, _ipl, state.cm,
-								state.eien, state.sien);
+							// idle_nap's gate: with more than one CPU, only opted-in "tru64" naps.
+							const char* _mp_off = nullptr;
+							if (cSystem->get_cpu_num() > 1 && idle_rule != RULE_SPIN_KERNEL)
+								_mp_off = "this idle_detect mode naps only with one CPU";
+							else if (cSystem->get_cpu_num() > 1 && !idle_mp_wake && !idle_mp_nap_us)
+								_mp_off = "more than one CPU needs idle_mp_wake";
+							if (_mp_off)
+								printf("*** CPU%d *** idle_detect found idle at pc=%016llx, not napping: %s ***\n",
+									get_cpuid(), (unsigned long long) start_virt, _mp_off);
+							else
+								printf("*** CPU%d *** idle_detect engaged at pc=%016llx ipl=%d cm=%d eien=%02x sien=%04x ***\n",
+									get_cpuid(), (unsigned long long) start_virt, _ipl, state.cm,
+									state.eien, state.sien);
 							fflush(stdout);
 						}
 						if (_nap)
-						{
-							m_idle_stat.naps++;
 							idle_nap(true);
-						}
 					}
 				}
 			}

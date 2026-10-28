@@ -627,7 +627,11 @@ private:
   static constexpr int kDpcBits    = 7;                  // 128 slots per mode bank (8KB pages -> 1 MB)
   // Page-indexed hint into state.tb[]: FindTBEntry and add_tb probe it before anything else.
   // Entries are validated on use, so a stale hint is harmless and nothing needs clearing.
-  u16 m_tb_idx[2][256] = {};
+  // Hashed by page number: Tru64 text (0x120000000) and data (0x140000000) pages share their
+  // low page bits, so a low-bits index made each alternation fall through to the linear scan.
+  static constexpr int kTbIdxBits = 10;
+  static inline u32 tb_idx_slot(u64 virt) { return ((u32)(virt >> 13) * 0x9E3779B1u) >> (32 - kTbIdxBits); }
+  u16 m_tb_idx[2][1 << kTbIdxBits] = {};
   inline void tb_index_clear(int t) { memset(m_tb_idx[t], 0, sizeof(m_tb_idx[t])); }
   static constexpr int kDpcEntries = 1 << kDpcBits;
   static constexpr u64 kDpcMask    = (u64) kDpcEntries - 1;

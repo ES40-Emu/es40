@@ -2988,12 +2988,19 @@ u64 CAlphaCPU::jit_stc(CAlphaCPU* cpu, u64 va, u64 descr, u64 value)
 		cpu->m_dpc_miss[dpc.virt_page == ~U64(0) ? 0 : (dpc.virt_page & ~kDpcLLWatchTag) != vp ? 1 : 2]++;
 #endif
 		const auto access = cpu->m_profile.mmu_address.access(*cpu, ACCESS_WRITE);
-		const int i = cpu->FindTBEntry(va, ACCESS_WRITE, access.asn);
-		if (i < 0) return U64(0x100);                                        // TB miss
-		const auto& e = cpu->state.tb[TB_INDEX_DATA][i];
-		if (!e.access[1][access.mode]) return U64(0x100);                     // protection (ACV)
-		if (e.fault[1]) return U64(0x100);                                   // fault-on-write (FOW)
-		phys = e.phys | (va & e.keep_mask);
+		const auto address = cpu->m_profile.mmu_address.map(*cpu, va, ACCESS_WRITE, access.mode);
+		if (address.kind == AlphaMMUAddressKind::Direct)
+			phys = address.phys;                                             // KSEG: never in the TB
+		else
+		{
+			if (address.kind != AlphaMMUAddressKind::TranslationBuffer) return U64(0x100);   // ACV
+			const int i = cpu->FindTBEntry(va, ACCESS_WRITE, access.asn);
+			if (i < 0) return U64(0x100);                                    // TB miss
+			const auto& e = cpu->state.tb[TB_INDEX_DATA][i];
+			if (!e.access[1][access.mode]) return U64(0x100);                 // protection (ACV)
+			if (e.fault[1]) return U64(0x100);                               // fault-on-write (FOW)
+			phys = e.phys | (va & e.keep_mask);
+		}
 		dpc.phys_base = phys & ~U64(0x1FFF);
 		dpc.host_bias = ((phys | U64(0x1FFF)) < cpu->dram_size)
 			? ((u64)cpu->dram_ptr + (phys & ~U64(0x1FFF)) - vp) : 0;

@@ -527,8 +527,15 @@ void CAlphaCPU::idle_nap(bool detected)
 	
 	const auto start = steady_clock::now();
 	auto deadline = start + (mp ? microseconds(idle_mp_nap_us) : microseconds(1000));
-	if (state.iProcNum == 0 && next_timer_fire < deadline)
-		deadline = next_timer_fire;
+	if (state.iProcNum == 0)
+	{
+		// A due tick still waits for the catch-up gap (service_interval_timer).
+		auto fire = next_timer_fire;
+		if (tick_last_fire + nanoseconds(tick_gap_ns) > fire)
+			fire = tick_last_fire + nanoseconds(tick_gap_ns);
+		if (fire < deadline)
+			deadline = fire;
+	}
 	if (deadline <= start)
 		m_idle_stat.late++;
 

@@ -1487,12 +1487,15 @@ void CAlphaCPU::jit_run(int budget)
 								_lines, CSystem::kIdleWatchLines, &_at);
 							m_idle_armed = _n > 0 && cSystem->idle_watch_arm(state.iProcNum, _lines, _n);
 							_nap = !m_idle_armed;   // untraceable: timed nap if idle_mp_nap_us, else none
+							// A trace can fail once and succeed later (work dispatched
+							// mid-pass), so report the first of each outcome per PC.
+							const u64 _key = start_virt | (m_idle_armed ? 0 : 2);
 							bool _shown = false;
 							for (int _i = 0; _i < m_spin_traced_n; _i++)
-								_shown |= m_spin_traced[_i] == start_virt;
+								_shown |= m_spin_traced[_i] == _key;
 							if (idle_detect_debug && !_shown && m_spin_traced_n < 16)
 							{
-								m_spin_traced[m_spin_traced_n++] = start_virt;
+								m_spin_traced[m_spin_traced_n++] = _key;
 								printf("*** CPU%d *** idle_detect pc=%016llx ", get_cpuid(), (unsigned long long) start_virt);
 								if (m_idle_armed)
 								{

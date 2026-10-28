@@ -538,7 +538,7 @@ private:
   int                                   m_spin_engaged_n = 0;
   u64                                   m_spin_rejected[64] = { 0 }; // PCs already reported as rejected
   int                                   m_spin_rejected_n = 0;
-  u64                                   m_spin_traced[16] = { 0 };   // PCs already reported by idle_mp_wake
+  u64                                   m_spin_traced[16] = { 0 };   // PCs already reported by idle_mp_wake, | 2 if not watched
   int                                   m_spin_traced_n = 0;
   // IER enables last sampled in user mode (IPL 0 under OSF).
   bool                                  m_ipl0_ier_known = false;

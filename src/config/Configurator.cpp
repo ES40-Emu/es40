@@ -764,7 +764,7 @@ static const char* const kv_tsunami[] = {
 static const char* const kv_ev68cb[] = {
   "speed", "palcode.vms.nohle", "idle_nap", "idle_detect",
   "idle_spin_count", "idle_nap_poll_us", "idle_pc_lo", "idle_pc_hi",
-  "idle_mp_nap_us", "idle_detect_debug", "unaligned_fixup",
+  "idle_mp_nap_us", "idle_mp_wake", "idle_detect_debug", "unaligned_fixup",
   "timer.max_instr_per_tick", 0 };
 static const char* const kv_serial[] = {
   "port", "listen_address", "action", "disabled", "raw_mode", "null_attach", 0 };

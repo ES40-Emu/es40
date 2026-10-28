@@ -519,9 +519,10 @@ private:
   u64                                   idle_pc_lo = 0;           // optional [lo, hi) sample window
   u64                                   idle_pc_hi = 0;           // 0 = no window
   u32                                   idle_mp_nap_us = 0;       // detected-idle nap length on SMP guests, 0 = off
+  bool                                  idle_mp_wake = false;     // SMP naps until another CPU stores to a polled line
   bool                                  idle_detect_debug = false; // print rejected idle candidates
   // idle_detect_debug statistics, printed and cleared every 10 s.
-  struct { u64 samples, kernel, decided, naps, slept_ns, cut_int, late; const char* why; } m_idle_stat = {};
+  struct { u64 samples, kernel, decided, naps, slept_ns, cut_int, late, woke; const char* why; } m_idle_stat = {};
   std::chrono::steady_clock::time_point m_idle_stat_next{};
   u64                                   idle_spin_min_instr = 0;  // a dispatch must have run at least this many
   u64                                   m_spin_ic = 0;            // instruction count at that dispatch
@@ -531,10 +532,14 @@ private:
   u64                                   m_spin_set[kSpinSetMax] = { 0 };
   u8                                    m_spin_loop[kSpinSetMax] = { 0 };  // EIdleLoop verdict per entry
   int                                   m_spin_set_n = 0;
+  bool                                  m_idle_armed = false;     // CSystem idle watch armed by this CPU
+  bool                                  idle_load_ram(u64 va, int bytes, u64* value, u64* phys);
   u64                                   m_spin_engaged[8] = { 0 };  // PCs already reported as napping
   int                                   m_spin_engaged_n = 0;
   u64                                   m_spin_rejected[64] = { 0 }; // PCs already reported as rejected
   int                                   m_spin_rejected_n = 0;
+  u64                                   m_spin_traced[16] = { 0 };   // PCs already reported by idle_mp_wake
+  int                                   m_spin_traced_n = 0;
   // IER enables last sampled in user mode (IPL 0 under OSF).
   bool                                  m_ipl0_ier_known = false;
   int                                   m_ipl0_eien = 0;

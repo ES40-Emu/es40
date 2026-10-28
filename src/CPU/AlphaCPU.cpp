@@ -459,8 +459,12 @@ void CAlphaCPU::reset_idle_detector()
 	for (auto& v : m_spin_loop)
 		v = IDLE_LOOP_UNKNOWN;
 	m_spin_set_n = 0;
+	if (m_idle_armed && cSystem)
+		cSystem->idle_watch_disarm(state.iProcNum);
+	m_idle_armed = false;
 	m_spin_engaged_n = 0;
 	m_spin_rejected_n = 0;
+	m_spin_traced_n = 0;
 	m_ipl0_ier_known = false;
 }
 
@@ -480,6 +484,7 @@ void CAlphaCPU::load_idle_config()
 	idle_spin_count = (u32) myCfg->get_num_value("idle_spin_count", false, 2);
 	idle_nap_poll_us = (u32) myCfg->get_num_value("idle_nap_poll_us", false, 100);
 	idle_mp_nap_us = (u32) myCfg->get_num_value("idle_mp_nap_us", false, 0);
+	idle_mp_wake = myCfg->get_bool_value("idle_mp_wake", false);
 	idle_detect_debug = myCfg->get_bool_value("idle_detect_debug", false);
 	if (idle_nap_poll_us < 1)
 		idle_nap_poll_us = 1;
@@ -502,9 +507,11 @@ void CAlphaCPU::load_idle_config()
  * The requested deadline is at most 1ms away and no later than CPU0's next
  * interval tick; host scheduling can still return late.
  *
- * MP naps are disabled unless idle_mp_nap_us opts RULE_SPIN_KERNEL in: Mach
- * dispatches to an idle CPU with a plain store to the word its idle loop
- * polls, so no host wake event fires and each nap delays that dispatch.
+ * MP naps need RULE_SPIN_KERNEL: Mach dispatches to an idle CPU with a plain
+ * store to the word its idle loop polls, so no interrupt arrives. With an
+ * armed idle watch (idle_mp_wake) another CPU's store to a polled line ends
+ * the nap. Without one, idle_mp_nap_us opts in to timed naps, and each nap
+ * can delay that dispatch by its full length.
  **/
 void CAlphaCPU::idle_nap(bool detected)
 {
@@ -514,7 +521,8 @@ void CAlphaCPU::idle_nap(bool detected)
 	if (!idle_nap_enabled && idle_rule == RULE_NONE)
 		return;
 	const bool mp = cSystem && cSystem->get_cpu_num() > 1;
-	if (mp && !(detected && idle_rule == RULE_SPIN_KERNEL && idle_mp_nap_us))
+	const bool watched = mp && detected && m_idle_armed;
+	if (mp && !(detected && idle_rule == RULE_SPIN_KERNEL && (watched || idle_mp_nap_us)))
 		return;
 
 	if (!idle_announced)
@@ -526,7 +534,7 @@ void CAlphaCPU::idle_nap(bool detected)
 
 	
 	const auto start = steady_clock::now();
-	auto deadline = start + (mp ? microseconds(idle_mp_nap_us) : microseconds(1000));
+	auto deadline = start + (mp && !watched ? microseconds(idle_mp_nap_us) : microseconds(1000));
 	if (state.iProcNum == 0)
 	{
 		// A due tick still waits for the catch-up gap (service_interval_timer).
@@ -539,26 +547,56 @@ void CAlphaCPU::idle_nap(bool detected)
 	if (deadline <= start)
 		m_idle_stat.late++;
 
-	for (;;)
+	// Asleep, this CPU stores nothing: don't hold up another CPU's first LDx_L watch.
 	{
-		// Register interest before checking work.
-		const auto generation = m_idle_wake.generation();
-		if (state.check_int || state.check_timers || StopThread
-			|| (cSystem && cSystem->IsSystemResetRequested()))
+		CSystem::JitExecutionPause pause(cSystem, state.iProcNum);
+		for (;;)
 		{
-			m_idle_stat.cut_int++;
-			break;
+			// Register interest before checking work.
+			const auto generation = m_idle_wake.generation();
+			if (state.check_int || state.check_timers || StopThread
+				|| (cSystem && cSystem->IsSystemResetRequested()))
+			{
+				m_idle_stat.cut_int++;
+				break;
+			}
+			if (watched && cSystem->idle_watch_fired(state.iProcNum))
+			{
+				m_idle_stat.woke++;
+				break;
+			}
+			if (steady_clock::now() >= deadline)
+				break;
+			if (m_idle_wake.wait_until(generation, deadline, microseconds(idle_nap_poll_us)))
+				break;
 		}
-		if (steady_clock::now() >= deadline)
-			break;
-		if (m_idle_wake.wait_until(generation, deadline, microseconds(idle_nap_poll_us)))
-			break;
+	}
+	// Rearm from a fresh pass: the guest must see whatever ended the nap.
+	if (watched)
+	{
+		cSystem->idle_watch_disarm(state.iProcNum);
+		m_idle_armed = false;
 	}
 	if (idle_detect_debug)
 		m_idle_stat.slept_ns += (u64) duration_cast<nanoseconds>(steady_clock::now() - start).count();
 	// The wait releases its host locks before entering the system interrupt path.
 	if (!StopThread && !(cSystem && cSystem->IsSystemResetRequested()))
 		service_interval_timer(steady_clock::now());
+}
+
+// Guest RAM behind a data read, for idle_loop_trace. Uses only existing
+// translations: no TB fill, fault or device access.
+bool CAlphaCPU::idle_load_ram(u64 va, int bytes, u64* value, u64* phys)
+{
+	u64 pa;
+	bool asm_bit;
+	if (virt2phys(va, &pa, ACCESS_READ | NO_CHECK | FAKE, &asm_bit, 0))
+		return false;
+	if (pa + (u64) bytes > (U64(1) << cSystem->get_memory_bits()))
+		return false;
+	*value = cSystem->ReadMem(pa, bytes * 8, this);
+	*phys = pa;
+	return true;
 }
 
 // System interval-timer policy shared by both execution engines and idle paths.
@@ -853,6 +891,9 @@ void CAlphaCPU::ResetForSystemReset()
 {
 	const int savedProcNum = state.iProcNum;
 
+	if (m_idle_armed)
+		cSystem->idle_watch_disarm(savedProcNum);   // the memset clears iProcNum
+	m_idle_armed = false;
 	memset(&state, 0, sizeof(state));
 	reset_idle_detector();
 	last_dtb_virt[0] = last_dtb_virt[1] = 0;
@@ -1282,6 +1323,8 @@ void CAlphaCPU::jit_run(int budget)
 	const auto sources = instruction_sources();
 	while (budget > 0)
 	{
+		// Wake CPUs napping on a line this CPU's last chain stored to.
+		cSystem->idle_watch_poll(state.iProcNum);
 		const u64 start_virt = state.pc;
 		const u32 start_asn = (u32)state.asn;
 		const bool start_pal_shadow = (start_virt & 1) && state.sde;
@@ -1321,10 +1364,11 @@ void CAlphaCPU::jit_run(int budget)
 				if (_now >= m_idle_stat_next)
 				{
 					if (m_idle_stat_next.time_since_epoch().count())
-						printf("*** CPU%d *** idle stats 10s: samples=%llu kernel=%llu decided=%llu naps=%llu slept=%llums int_cut=%llu late=%llu last_reject=%s ***\n",
+						printf("*** CPU%d *** idle stats 10s: samples=%llu kernel=%llu decided=%llu naps=%llu slept=%llums int_cut=%llu woke=%llu late=%llu last_reject=%s ***\n",
 							get_cpuid(), (unsigned long long) m_idle_stat.samples, (unsigned long long) m_idle_stat.kernel,
 							(unsigned long long) m_idle_stat.decided, (unsigned long long) m_idle_stat.naps,
 							(unsigned long long) (m_idle_stat.slept_ns / 1000000), (unsigned long long) m_idle_stat.cut_int,
+							(unsigned long long) m_idle_stat.woke,
 							(unsigned long long) m_idle_stat.late, m_idle_stat.why ? m_idle_stat.why : "-");
 					m_idle_stat = {};
 					m_idle_stat_next = _now + std::chrono::seconds(10);
@@ -1398,6 +1442,11 @@ void CAlphaCPU::jit_run(int budget)
 					m_idle_stat.decided++;
 					if (_why)
 						m_idle_stat.why = _why;
+					if (_why && m_idle_armed)
+					{
+						cSystem->idle_watch_disarm(state.iProcNum);
+						m_idle_armed = false;
+					}
 					if (_why && m_ipl0_ier_known && idle_detect_debug)
 					{
 						bool _shown = false;
@@ -1424,6 +1473,40 @@ void CAlphaCPU::jit_run(int budget)
 					}
 					else if (!_why)
 					{
+						// SMP idle watch: arm on this sample and nap on the next, so the
+						// guest makes one pass that sees every store before the arm.
+						bool _nap = true;
+						if (idle_mp_wake && idle_rule == RULE_SPIN_KERNEL && !m_idle_armed
+							&& cSystem->get_cpu_num() > 1)
+						{
+							u64 _lines[CSystem::kIdleWatchLines], _at = 0;
+							auto _load = [&](u64 va, int bytes, u64* value, u64* phys) {
+								return idle_load_ram(va, bytes, value, phys);
+							};
+							const int _n = idle_loop_trace(start_virt, &state.r[0], _read, _load,
+								_lines, CSystem::kIdleWatchLines, &_at);
+							m_idle_armed = _n > 0 && cSystem->idle_watch_arm(state.iProcNum, _lines, _n);
+							_nap = !m_idle_armed;   // untraceable: timed nap if idle_mp_nap_us, else none
+							bool _shown = false;
+							for (int _i = 0; _i < m_spin_traced_n; _i++)
+								_shown |= m_spin_traced[_i] == start_virt;
+							if (idle_detect_debug && !_shown && m_spin_traced_n < 16)
+							{
+								m_spin_traced[m_spin_traced_n++] = start_virt;
+								printf("*** CPU%d *** idle_detect pc=%016llx ", get_cpuid(), (unsigned long long) start_virt);
+								if (m_idle_armed)
+								{
+									printf("watches %d lines:", _n);
+									for (int _i = 0; _i < _n; _i++)
+										printf(" %llx", (unsigned long long) (_lines[_i] << 6));
+								}
+								else
+									printf("cannot watch its loop (trace stopped at %016llx, %d lines)",
+										(unsigned long long) _at, _n);
+								printf(" ***\n");
+								fflush(stdout);
+							}
+						}
 						bool _shown = false;
 						for (int _i = 0; _i < m_spin_engaged_n; _i++)
 							_shown |= m_spin_engaged[_i] == start_virt;
@@ -1435,8 +1518,11 @@ void CAlphaCPU::jit_run(int budget)
 								state.eien, state.sien);
 							fflush(stdout);
 						}
-						m_idle_stat.naps++;
-						idle_nap(true);
+						if (_nap)
+						{
+							m_idle_stat.naps++;
+							idle_nap(true);
+						}
 					}
 				}
 			}
@@ -1444,6 +1530,11 @@ void CAlphaCPU::jit_run(int budget)
 			{
 				m_spin_hits = 0;
 				m_spin_set_n = 0;
+				if (m_idle_armed && (_ic - m_spin_ic) >= idle_spin_min_instr)
+				{
+					cSystem->idle_watch_disarm(state.iProcNum);   // left the idle loop
+					m_idle_armed = false;
+				}
 			}
 			m_spin_ic = _ic;
 		}

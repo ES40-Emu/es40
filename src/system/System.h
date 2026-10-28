@@ -368,6 +368,19 @@ public:
     int cpuid;
   };
 
+  // A host wait inside that scope (idle nap) stores nothing, so a first LDx_L
+  // watch need not wait for it. Leaving re-enters through the freeze check.
+  class JitExecutionPause {
+  public:
+    JitExecutionPause(CSystem* system, int cpuid);
+    ~JitExecutionPause();
+    JitExecutionPause(const JitExecutionPause&) = delete;
+    JitExecutionPause& operator=(const JitExecutionPause&) = delete;
+  private:
+    CSystem* system;
+    int cpuid;
+  };
+
   // LDx_L and STx_C accept naturally aligned 32- or 64-bit accesses.
   u64           cpu_read_locked(int cpuid, u64 phys, int size_bits,
                                 CSystemComponent* source);   // LDx_L: read and reserve atomically
@@ -376,6 +389,20 @@ public:
   u64           cpu_stx_c(int cpuid, u64 phys, int size_bits, u64 value,
                           char* dram, u64 dram_sz, CSystemComponent* source);  // STx_C: 1 = success
   void          cpu_clear_lock(int cpuid);                     // exception/interrupt: drop the lock
+
+  // Detected-idle naps on SMP guests. A CPU arms the physical 64-byte lines
+  // its idle loop reads; a store to one changes that line's LL bucket
+  // sequence. Other CPUs compare sequences at each JIT chain boundary and wake
+  // the napper, so a dispatch by plain store (Tru64 thread_setrun) is seen
+  // without an IPI. Bucket aliases only cause early wakes.
+  static const int kIdleWatchLines = 16;
+  bool          idle_watch_arm(int cpuid, const u64* lines, int n);   // false: nothing armed
+  void          idle_watch_disarm(int cpuid);
+  bool          idle_watch_fired(int cpuid) const;  // a watched line was stored since arming
+  void          idle_watch_poll(int cpuid) {        // wake other CPUs whose lines were stored
+    if (m_idle_watchers.load(std::memory_order_acquire) & ~(1u << cpuid))
+      idle_watch_wake(cpuid);
+  }
   void          RequestSystemReset();
   bool          IsSystemResetRequested() const;
   bool          ProcessPendingReset();   // Returns true if a reset was performed.
@@ -485,6 +512,16 @@ private:
   LLJitCpu m_ll_jit_cpu[4];
   std::atomic<bool> m_ll_jit_freeze{false};
   std::mutex m_ll_watch_setup;
+  // Written by the owning CPU while its m_idle_watchers bit is clear. A reader
+  // racing a re-arm sees mixed entries, which can only cause an early wake.
+  struct alignas(64) IdleWatch {
+    std::atomic<int> n{0};
+    std::atomic<u32> bucket[kIdleWatchLines];
+    std::atomic<u64> sequence[kIdleWatchLines];
+  };
+  IdleWatch m_idle_watch[4];
+  std::atomic<u32> m_idle_watchers{0};   // bit per CPU with an armed watch
+  void idle_watch_wake(int cpuid);
   void allocate_ll_watch(); // called only when the RAM allocation changes
   void enter_ll_jit(int cpuid) noexcept;
   void watch_ll_line(int cpuid, u64 phys);

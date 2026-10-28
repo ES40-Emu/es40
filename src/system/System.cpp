@@ -1088,6 +1088,19 @@ CSystem::JitExecutionGuard::~JitExecutionGuard()
 		system->m_ll_jit_cpu[cpuid].active.store(false, std::memory_order_seq_cst);
 }
 
+CSystem::JitExecutionPause::JitExecutionPause(CSystem* sys, int cpu)
+	: system(sys && sys->iNumCPUs > 1 && sys->m_ll_jit_cpu[cpu].depth ? sys : nullptr), cpuid(cpu)
+{
+	if (system)
+		system->m_ll_jit_cpu[cpuid].active.store(false, std::memory_order_seq_cst);
+}
+
+CSystem::JitExecutionPause::~JitExecutionPause()
+{
+	if (system)
+		system->enter_ll_jit(cpuid);
+}
+
 void CSystem::watch_ll_line(int cpuid, u64 phys)
 {
 #ifndef ES40_JIT
@@ -1301,6 +1314,63 @@ u64 CSystem::cpu_stx_c(int cpuid, u64 phys, int size_bits, u64 value,
 void CSystem::cpu_clear_lock(int cpuid)
 {
 	m_ll_reservations[cpuid].valid = false;
+}
+
+bool CSystem::idle_watch_arm(int cpuid, const u64* lines, int n)
+{
+	idle_watch_disarm(cpuid);
+	if (iNumCPUs <= 1 || n <= 0 || n > kIdleWatchLines)
+		return false;
+	const u64 ram_lines = (U64(1) << iNumMemoryBits) >> 6;
+	for (int i = 0; i < n; ++i)
+		if (lines[i] >= ram_lines)
+			return false;
+	// JIT stores to an unwatched line skip the bucket, and its sequence.
+	for (int i = 0; i < n; ++i)
+		watch_ll_line(cpuid, lines[i] << 6);
+	IdleWatch& w = m_idle_watch[cpuid];
+	for (int i = 0; i < n; ++i)
+	{
+		const u32 b = (u32)(lines[i] & (kLLBuckets - 1));
+		w.bucket[i].store(b, std::memory_order_relaxed);
+		w.sequence[i].store(m_ll_buckets[b].sequence.load(std::memory_order_acquire),
+			std::memory_order_relaxed);
+	}
+	w.n.store(n, std::memory_order_relaxed);
+	m_idle_watchers.fetch_or(1u << cpuid, std::memory_order_seq_cst);
+	return true;
+}
+
+void CSystem::idle_watch_disarm(int cpuid)
+{
+	m_idle_watchers.fetch_and(~(1u << cpuid), std::memory_order_seq_cst);
+}
+
+// Also true once another CPU has disarmed this one to wake it.
+bool CSystem::idle_watch_fired(int cpuid) const
+{
+	if (!(m_idle_watchers.load(std::memory_order_seq_cst) & (1u << cpuid)))
+		return true;
+	const IdleWatch& w = m_idle_watch[cpuid];
+	const int n = w.n.load(std::memory_order_relaxed);
+	for (int i = 0; i < n && i < kIdleWatchLines; ++i)
+		if (m_ll_buckets[w.bucket[i].load(std::memory_order_relaxed)].sequence.load(std::memory_order_acquire)
+			!= w.sequence[i].load(std::memory_order_relaxed))
+			return true;
+	return false;
+}
+
+void CSystem::idle_watch_wake(int cpuid)
+{
+	u32 others = m_idle_watchers.load(std::memory_order_acquire) & ~(1u << cpuid);
+	for (int cpu = 0; others; ++cpu, others >>= 1)
+	{
+		if (!(others & 1) || !idle_watch_fired(cpu))
+			continue;
+		// Disarm first so later chains don't notify again before it runs.
+		if (m_idle_watchers.fetch_and(~(1u << cpu), std::memory_order_seq_cst) & (1u << cpu))
+			acCPUs[cpu]->wake_idle();
+	}
 }
 
 // Geometry only; called under device_bus_mutex whenever a range or owner link

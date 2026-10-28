@@ -295,6 +295,202 @@ int idle_loop_check(std::uint64_t pc, Read read, std::uint64_t* at = nullptr)
   return IDLE_LOOP_COMPUTES;
 }
 
+/* Which RAM does one pass of an accepted idle loop read?
+ *
+ * Runs the loop once from pc with the current registers r[0..31], following
+ * the branches the current memory selects, and collects the 64-byte physical
+ * lines its loads touch. Another path through the loop only runs after a
+ * value read on this one changes, so watching these lines is enough to see
+ * the store that ends the idle state (Tru64 thread_setrun stores
+ * processor->next_thread with no IPI).
+ * load(va, bytes, &value, &phys) reads guest RAM, zero-extended, and returns
+ * false if va has no RAM behind it. Returns the number of lines, or -1 if
+ * the pass calls, jumps, uses an unhandled instruction, reads a line it
+ * cannot resolve, needs more than max lines, or does not come back to pc.
+ * On -1, *at receives the deciding instruction's address.
+ */
+static const int kIdleTraceSteps = 2 * kIdleSpanMax;
+
+template <class Read, class Load>
+int idle_loop_trace(std::uint64_t pc, const std::uint64_t* regs, Read read, Load load,
+                    std::uint64_t* lines, int max, std::uint64_t* at = nullptr)
+{
+  std::uint64_t r[32];
+  std::memcpy(r, regs, sizeof r);
+  r[31] = 0;
+  int n = 0;
+  std::uint64_t va = pc;
+  auto fail = [&]() { if (at) *at = va; return -1; };
+  auto sext32 = [](std::uint64_t v) { return (std::uint64_t) (std::int64_t) (std::int32_t) v; };
+  for (int step = 0; step < kIdleTraceSteps; step++)
+  {
+    std::uint32_t insn;
+    if (!read(va, &insn))
+      return fail();
+    const std::uint32_t op = insn >> 26;
+    const std::uint32_t ra = (insn >> 21) & 31, rb = (insn >> 16) & 31, rc = insn & 31;
+    const std::uint32_t fn = (insn >> 5) & 0x7f;
+    const std::uint64_t a = r[ra];
+    const std::uint64_t b = (insn & 0x1000) ? (insn >> 13) & 0xff : r[rb];   // literal form
+    const std::int64_t mdisp = (std::int16_t) (insn & 0xffff);
+    std::uint64_t next = va + 4;
+    int dest = -1;
+    std::uint64_t val = 0;
+    switch (op)
+    {
+    case 0x08:                                    // LDA
+      dest = (int) ra; val = r[rb] + (std::uint64_t) mdisp;
+      break;
+    case 0x09:                                    // LDAH
+      dest = (int) ra; val = r[rb] + ((std::uint64_t) mdisp << 16);
+      break;
+    case 0x0a: case 0x0b: case 0x0c: case 0x28: case 0x29:   // LDBU, LDQ_U, LDWU, LDL, LDQ
+    {
+      if (ra == 31)
+        break;                                    // UNOP or prefetch: no architectural read
+      const int bytes = op == 0x0a ? 1 : op == 0x0c ? 2 : op == 0x28 ? 4 : 8;
+      std::uint64_t ea = r[rb] + (std::uint64_t) mdisp;
+      if (op == 0x0b)
+        ea &= ~(std::uint64_t) 7;
+      if (ea & (std::uint64_t) (bytes - 1))
+        return fail();                            // would trap to PAL
+      std::uint64_t phys = 0;
+      if (!load(ea, bytes, &val, &phys))
+        return fail();
+      if (op == 0x28)
+        val = sext32(val);
+      dest = (int) ra;
+      const std::uint64_t line = phys >> 6;
+      int k = 0;
+      while (k < n && lines[k] != line)
+        k++;
+      if (k == n)
+      {
+        if (n == max)
+          return fail();
+        lines[n++] = line;
+      }
+      break;
+    }
+    case 0x10:                                    // integer arithmetic
+      dest = (int) rc;
+      switch (fn)
+      {
+      case 0x00: case 0x40: val = sext32(a + b); break;            // ADDL(/V)
+      case 0x02: val = sext32(a * 4 + b); break;                    // S4ADDL
+      case 0x09: case 0x49: val = sext32(a - b); break;            // SUBL(/V)
+      case 0x0b: val = sext32(a * 4 - b); break;                    // S4SUBL
+      case 0x12: val = sext32(a * 8 + b); break;                    // S8ADDL
+      case 0x1b: val = sext32(a * 8 - b); break;                    // S8SUBL
+      case 0x1d: val = a < b; break;                                // CMPULT
+      case 0x20: case 0x60: val = a + b; break;                    // ADDQ(/V)
+      case 0x22: val = a * 4 + b; break;                            // S4ADDQ
+      case 0x29: case 0x69: val = a - b; break;                    // SUBQ(/V)
+      case 0x2b: val = a * 4 - b; break;                            // S4SUBQ
+      case 0x2d: val = a == b; break;                               // CMPEQ
+      case 0x32: val = a * 8 + b; break;                            // S8ADDQ
+      case 0x3b: val = a * 8 - b; break;                            // S8SUBQ
+      case 0x3d: val = a <= b; break;                               // CMPULE
+      case 0x4d: val = (std::int64_t) a < (std::int64_t) b; break;  // CMPLT
+      case 0x6d: val = (std::int64_t) a <= (std::int64_t) b; break; // CMPLE
+      default: return fail();
+      }
+      break;
+    case 0x11:                                    // logical and conditional move
+    {
+      dest = (int) rc;
+      bool cmov = true, take = false;             // CMOVxx: does rc receive b?
+      switch (fn)
+      {
+      case 0x00: cmov = false; val = a & b; break;     // AND
+      case 0x08: cmov = false; val = a & ~b; break;    // BIC
+      case 0x20: cmov = false; val = a | b; break;     // BIS
+      case 0x28: cmov = false; val = a | ~b; break;    // ORNOT
+      case 0x40: cmov = false; val = a ^ b; break;     // XOR
+      case 0x48: cmov = false; val = a ^ ~b; break;    // EQV
+      case 0x14: take = a & 1; break;             // CMOVLBS
+      case 0x16: take = !(a & 1); break;          // CMOVLBC
+      case 0x24: take = a == 0; break;            // CMOVEQ
+      case 0x26: take = a != 0; break;            // CMOVNE
+      case 0x44: take = (std::int64_t) a < 0; break;    // CMOVLT
+      case 0x46: take = (std::int64_t) a >= 0; break;   // CMOVGE
+      case 0x64: take = (std::int64_t) a <= 0; break;   // CMOVLE
+      case 0x66: take = (std::int64_t) a > 0; break;    // CMOVGT
+      default: return fail();
+      }
+      if (cmov)
+        val = take ? b : r[rc];
+      break;
+    }
+    case 0x12:                                    // shifts, byte manipulation
+    {
+      dest = (int) rc;
+      const unsigned sh = (unsigned) (b & 63), bo = (unsigned) (b & 7) * 8;
+      auto zapnot = [](std::uint64_t v, std::uint64_t mask) {
+        std::uint64_t m = 0;
+        for (int i = 0; i < 8; i++)
+          if (mask & (1u << i))
+            m |= (std::uint64_t) 0xff << (8 * i);
+        return v & m;
+      };
+      switch (fn)
+      {
+      case 0x06: val = (a >> bo) & 0xff; break;                     // EXTBL
+      case 0x16: val = (a >> bo) & 0xffff; break;                   // EXTWL
+      case 0x26: val = (a >> bo) & 0xffffffffu; break;              // EXTLL
+      case 0x36: val = a >> bo; break;                              // EXTQL
+      case 0x30: val = zapnot(a, ~b & 0xff); break;                 // ZAP
+      case 0x31: val = zapnot(a, b & 0xff); break;                  // ZAPNOT
+      case 0x34: val = a >> sh; break;                              // SRL
+      case 0x39: val = a << sh; break;                              // SLL
+      case 0x3c: val = (std::uint64_t) ((std::int64_t) a >> sh); break;  // SRA
+      default: return fail();
+      }
+      break;
+    }
+    case 0x13:                                    // integer multiply
+      dest = (int) rc;
+      if (fn == 0x00 || fn == 0x40)               // MULL(/V)
+        val = sext32(a * b);
+      else if (fn == 0x20 || fn == 0x60)          // MULQ(/V)
+        val = a * b;
+      else
+        return fail();
+      break;
+    case 0x30:                                    // BR
+    case 0x38: case 0x39: case 0x3a: case 0x3b:   // BLBC, BEQ, BLT, BLE
+    case 0x3c: case 0x3d: case 0x3e: case 0x3f:   // BLBS, BNE, BGE, BGT
+    {
+      const std::int64_t s = (std::int64_t) a;
+      bool taken;
+      switch (op)
+      {
+      case 0x30: taken = true; dest = (int) ra; val = va + 4; break;
+      case 0x38: taken = !(a & 1); break;
+      case 0x39: taken = a == 0; break;
+      case 0x3a: taken = s < 0; break;
+      case 0x3b: taken = s <= 0; break;
+      case 0x3c: taken = a & 1; break;
+      case 0x3d: taken = a != 0; break;
+      case 0x3e: taken = s >= 0; break;
+      default:   taken = s > 0; break;
+      }
+      if (taken)
+        next = va + 4 + (std::uint64_t) ((std::int64_t) ((std::int32_t) (insn << 11) >> 11) * 4);
+      break;
+    }
+    default:                                      // calls, jumps, PAL, FP, stores, LDx_L
+      return fail();
+    }
+    if (dest >= 0 && dest != 31)
+      r[dest] = val;
+    va = next;
+    if (va == pc)
+      return n;
+  }
+  return fail();
+}
+
 inline int idle_method_by_name(const char* n)
 {
   if (!n)

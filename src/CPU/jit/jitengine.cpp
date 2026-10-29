@@ -119,7 +119,6 @@ static asmjit::JitAllocator::CreateParams jit_rt_params()
 CJitEngine::CJitEngine(const AlphaCPUProfile& profile, int cpu_id)
   : m_profile(profile), m_cpu_id(cpu_id), m_recorded(0), m_code_bytes(0), m_rt(nullptr)
 {
-  m_active_links.reserve(4096);
   // flush() is lazy (gen bump), so the slots must start zeroed -- all big_alloc paths return
   // zeroed pages. Compiled code embeds absolute addresses into m_blocks..
   bool blk_lp = false, trc_lp = false;
@@ -642,17 +641,33 @@ void CJitEngine::patch_edge(void* tagged, uint64_t tag, uint64_t vgen_bits, void
       else if (empty < 0) empty = i;
     if (found >= 0) {
       lf[found] = snap;                            // already active and indexed by target page
-      if (global_src && !target_global) m_global_src_links.insert(key);
+      if (global_src && !target_global) m_global_src_links.add(key);
       return;
     }
     if (empty >= 0) lf[empty] = snap;
     else { for (int i = kLinkSlots - 1; i > 0; --i) lf[i] = lf[i - 1]; lf[0] = snap; }
     register_sets = !was_live;                       // a live array is already active
   }
-  if (register_sets) m_active_links.insert(key);
+  if (register_sets) m_active_links.add(key);
   // An already-live global-source array may acquire its first private target here.
-  if (global_src && !target_global) m_global_src_links.insert(key);
-  m_edges_by_page[translation_page_key(tag)].insert(key);
+  if (global_src && !target_global) m_global_src_links.add(key);
+  note_edge_page(translation_page_key(tag), key);
+}
+
+void CJitEngine::note_edge_page(uint64_t page, void* key)
+{
+  bool inserted;
+  int32_t& index = m_edge_entries.get(EdgeKey{ page, key }, inserted);
+  if (inserted) {
+    index = (int32_t) m_edges.size();
+    m_edges.push_back(EdgeEntry{ key, -1, false });
+  }
+  EdgeEntry& e = m_edges[index];
+  if (e.live) return;
+  int32_t& head = m_page_edges.get(page, inserted);   // -1 when new or cleared
+  e.live = true;
+  e.next = head;
+  head = index;
 }
 
 void CJitEngine::invalidate_links_page(uint64_t virt_page)
@@ -662,14 +677,19 @@ void CJitEngine::invalidate_links_page(uint64_t virt_page)
   for (int i = 0; i < kJumpCacheEntries; ++i)
     if (m_jcache[i].body && translation_page_key(m_jcache[i].tag) == page)
       m_jcache[i].body = nullptr, m_jcache[i].tag = ~uint64_t(0);
-  auto it = m_edges_by_page.find(page);
-  if (it == m_edges_by_page.end()) return;
+  int32_t* head = m_page_edges.find(page);
+  if (!head || *head < 0) return;
 #ifdef JIT_STATS
   m_page_clears++;
-  m_page_links_cleared += it->second.size();
 #endif
-  for (void* key : it->second) clear_edge(key);   // a cleared edge re-registers when re-patched
-  m_edges_by_page.erase(it);
+  for (int32_t i = *head; i >= 0; i = m_edges[i].next) {
+    m_edges[i].live = false;
+    clear_edge(m_edges[i].edge);   // a cleared edge re-registers when re-patched
+#ifdef JIT_STATS
+    m_page_links_cleared++;
+#endif
+  }
+  *head = -1;
 }
 
 void CJitEngine::invalidate_links(int cause)
@@ -683,10 +703,12 @@ void CJitEngine::invalidate_links(int cause)
   (void) cause;
 #endif
   ++m_jc_gen;
-  for (void* key : m_active_links) clear_edge(key);
+  m_active_links.for_each(clear_edge);
   m_active_links.clear();
   m_global_src_links.clear();
-  m_edges_by_page.clear();
+  m_page_edges.clear();
+  m_edge_entries.clear();
+  m_edges.clear();
 }
 
 // Native entry guards check CM. Traces have no such check, so their links
@@ -711,7 +733,7 @@ void CJitEngine::invalidate_links_global()
   m_asn_link_clears++;
   m_asn_links_cleared += m_global_src_links.size();
 #endif
-  for (void* key : m_global_src_links) clear_edge(key);
+  m_global_src_links.for_each(clear_edge);
   m_global_src_links.clear();
 }
 #ifdef JIT_VERIFY

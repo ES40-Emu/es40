@@ -511,6 +511,8 @@ public:
   void invalidate_links_global();   // only edges out of global-source blocks (ASN change)
   // Clear links and jump-cache entries targeting this translation page.
   void invalidate_links_page(uint64_t virt_page);
+  // Clear only the edges and jump-cache entry that reach an evicted block's code.
+  void unlink_block(const JitBlock& v);
 #ifdef JIT_STATS
   inline void note_interp_breaker(uint32_t ins) { m_rt_break_op[ins >> 26]++; }   // first interpreted op
 #else
@@ -642,7 +644,7 @@ private:
   uint64_t m_trace_formed, m_trace_entered, m_trace_exits, m_trace_stale;       // windowed: trace tier activity (M1+)
   uint64_t m_link_invalidations, m_links_cleared;      // windowed: epoch bumps / edges cleared
   uint64_t m_asn_link_clears, m_asn_links_cleared;     // windowed: ASN switches / global-source edges cleared
-  uint64_t m_evict_link_clears;                        // windowed: clears forced by cross-ASN evictions
+  uint64_t m_evict_link_clears, m_evict_links_cleared; // windowed: cross-ASN evictions unlinked / edges they cleared
   uint64_t m_bump_cause[kBumpCauses];                  // windowed: epoch bumps by cause
   uint64_t m_page_clears, m_page_links_cleared;        // windowed: single-page ITB invalidates / edges they cleared
   uint64_t m_direct_patches, m_patch_unreachable;      // windowed: sites patched / beyond rel32 reach

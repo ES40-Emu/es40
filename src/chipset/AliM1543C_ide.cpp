@@ -531,8 +531,15 @@ bool CAliM1543C_ide::decodes_memory_access(int index, u64 address, int dsize,
 	if (!CPCIDevice::decodes_memory_access(index, address, dsize, write))
 		return false;
 
-	// PCI IDE 1.0 section 2.4; M1543C section 4.2.3.4: each channel
-	// decodes either its fixed compatibility ports or its command/control BARs.
+	// PCI IDE 1.0 section 2.4; M1543C section 4.2.3.4: a channel in
+	// compatibility mode decodes its fixed legacy ports and interrupts
+	// through the ISA PIC; in native mode it uses its BARs and PCI INTA.
+	// The command/control BARs stay writable in compatibility mode and the
+	// M5229 answers at whatever they hold as well: SRM assigns them fresh
+	// addresses while sizing the bus, and OpenVMS's DQDRIVER then drives the
+	// channel through those BAR addresses while still in compatibility mode.
+	// Decoding only the legacy ports left VMS waiting on a port nobody
+	// answered (the secondary channel's status register read back 0xff).
 	const bool io_enabled = (endian_32(pci_state.config_data[0][1]) & 1U) != 0;
 	switch (index)
 	{
@@ -546,7 +553,7 @@ bool CAliM1543C_ide::decodes_memory_access(int index, u64 address, int dsize,
 
 	if (index >= PCI_RANGE_BASE + BAR_PRI_COMMAND &&
 		index <= PCI_RANGE_BASE + BAR_SEC_CONTROL)
-		return channel_is_native((index - PCI_RANGE_BASE) / 2);
+		return io_enabled;
 
 	return true;
 }

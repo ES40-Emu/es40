@@ -726,12 +726,18 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "AlphaServer ES40 emulator")
 # The CPU baseline is part of the package identity: an AVX2 build dies with
 # "Illegal instruction" on older hosts, so the file name and description say
 # which one this is. Build with -DES40_ARCH=SSE2 for a package that runs anywhere.
-string(TOLOWER "${ES40_ARCH}" ES40_ARCH_LOWER)
+if (CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64|amd64|i[3-6]86|x86")
+    string(TOLOWER "-${ES40_ARCH}" ES40_PACKAGE_SUFFIX)
+    set(ES40_PACKAGE_BASELINE "
+Built for the ${ES40_ARCH} x86 CPU baseline (ES40_ARCH=${ES40_ARCH}).")
+else()
+    set(ES40_PACKAGE_SUFFIX "")
+    set(ES40_PACKAGE_BASELINE "")
+endif()
 set(CPACK_PACKAGE_DESCRIPTION "ES40 emulates a Compaq/HP AlphaServer ES40 so that OpenVMS, Tru64 and other
 Alpha operating systems run on ordinary hardware. The package also contains the
-configuration tools: es40-cfg (guided setup) and the es40_cfg_* editors.
-Built for the ${ES40_ARCH} x86 CPU baseline (ES40_ARCH=${ES40_ARCH}).")
-set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${CMAKE_SYSTEM_PROCESSOR}-${ES40_ARCH_LOWER}")
+configuration tools: es40-cfg (guided setup) and the es40_cfg_* editors.${ES40_PACKAGE_BASELINE}")
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${CMAKE_SYSTEM_PROCESSOR}${ES40_PACKAGE_SUFFIX}")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 set(CPACK_STRIP_FILES ON)

@@ -293,6 +293,122 @@ jobs:
           path: ${{ runner.temp }}/${{ env.ARTIFACT_NAME }}/
           if-no-files-found: error
 
+  linux-package:
+    # Installable Linux packages: a .deb (with the setcap postinst for pcap
+    # networking) and a .tar.gz, built with CMake against a static SDL3 so the
+    # package depends only on distribution libraries. x86_64 ships two CPU
+    # baselines because an AVX2 build dies with "Illegal instruction" on older
+    # hosts; arm64 has no such switch.
+    name: Linux package (${{ matrix.arch }}${{ matrix.cpu != '' && format(', {0}', matrix.cpu) || '' }})
+    runs-on: ${{ matrix.runner }}
+    env:
+      PACKAGE_NAME: linux-package-${{ matrix.arch }}${{ matrix.cpu != '' && format('-{0}', matrix.cpu) || '' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            cpu: AVX2
+            runner: ubuntu-latest
+          - arch: x86_64
+            cpu: SSE2
+            runner: ubuntu-latest
+          - arch: arm64
+            cpu: ''
+            runner: ubuntu-24.04-arm
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          submodules: true
+
+      - name: Install Rust for the slirp backend
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install build dependencies
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake ninja-build build-essential pkg-config dpkg-dev \
+            libpcap-dev libncurses-dev libgtk-3-dev \
+            libx11-dev libxt-dev libxext-dev libxrandr-dev libxrender-dev libxfixes-dev \
+            libxi-dev libxcursor-dev libxinerama-dev libxkbcommon-dev libxss-dev libxtst-dev \
+            libwayland-dev wayland-protocols libegl1-mesa-dev libgl1-mesa-dev
+
+      - name: Build static SDL3
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          SDL_RELEASES_JSON="$(curl -fsSL -H 'User-Agent: github-actions' -H "Authorization: Bearer ${GH_TOKEN}" https://api.github.com/repos/libsdl-org/SDL/releases?per_page=10 || echo '[]')"
+          SDL3_URL="$(printf '%s' "$SDL_RELEASES_JSON" | python3 -c 'import sys,json,re; data=json.load(sys.stdin); data=[data] if isinstance(data,dict) else data; print(next((a.get("browser_download_url","") for rel in data for a in rel.get("assets",[]) if re.match(r"^SDL3-[0-9.]+\\.tar\\.gz$", a.get("name",""))), ""))')"
+
+          if [ -z "$SDL3_URL" ]; then
+            echo "Falling back to releases/latest redirect parsing for SDL3 tarball URL"
+            latest_loc="$(curl -fsSLI https://github.com/libsdl-org/SDL/releases/latest | tr -d '\r' | awk -F': ' 'tolower($1)=="location"{print $2}' | tail -n1)"
+            latest_tag="${latest_loc##*/}"
+            latest_ver="${latest_tag#release-}"
+            SDL3_URL="https://github.com/libsdl-org/SDL/releases/download/${latest_tag}/SDL3-${latest_ver}.tar.gz"
+          fi
+
+          SDL3_TARBALL="${SDL3_URL##*/}"
+          SDL3_SRC_DIR="${SDL3_TARBALL%.tar.gz}"
+
+          curl -fsSL "$SDL3_URL" -o "$SDL3_TARBALL"
+          tar -xzf "$SDL3_TARBALL"
+
+          # Static, into a private prefix: the package must not depend on an SDL3 the distribution does not ship.
+          cmake -S "$SDL3_SRC_DIR" -B sdl3-build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="$RUNNER_TEMP/sdl3-prefix" \
+            -DSDL_SHARED=OFF -DSDL_STATIC=ON \
+            -DSDL_X11_XSCRNSAVER=OFF
+          cmake --build sdl3-build
+          cmake --install sdl3-build
+
+      - name: Configure
+        run: |
+          set -euo pipefail
+          cpu="${{ matrix.cpu }}"
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/usr \
+            -DCMAKE_PREFIX_PATH="$RUNNER_TEMP/sdl3-prefix" \
+            ${cpu:+-DES40_ARCH=$cpu}
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Check the configuration editor leaves es40.cfg untouched
+        run: extras/tests/config-roundtrip.sh build/es40_cfg_gtk src/es40.cfg
+
+      - name: Package
+        run: |
+          set -euo pipefail
+          cd build
+          cpack -G "DEB;TGZ"
+          ls -l ./*.deb ./*.tar.gz
+
+      - name: Install the package and check it
+        run: |
+          set -euo pipefail
+          sudo apt-get install -y ./build/es40_*.deb
+          getcap /usr/bin/es40 | grep -q cap_net_raw
+          /usr/bin/es40_cfg_gtk --render src/es40.cfg | cmp - src/es40.cfg
+          /usr/bin/es40_cfg_tui -h | head -n1
+
+      - name: Upload package
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ env.PACKAGE_NAME }}
+          path: |
+            build/*.deb
+            build/*.tar.gz
+          if-no-files-found: error
+
   windows-build:
     name: Windows build (${{ matrix.configuration }}|x64)
     runs-on: windows-2025-vs2026

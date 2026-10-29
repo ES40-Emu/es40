@@ -278,6 +278,7 @@ void CSerial::init()
 	disabled = myCfg->get_bool_value("disabled");
 	raw_mode = myCfg->get_bool_value("raw_mode");
 	null_attach = myCfg->get_bool_value("null_attach");
+	wait_for_connection = myCfg->get_bool_value("wait_for_connection", true);
 	listenPort = (int)myCfg->get_num_value("port", false, 8000 + state.iNumber);
 
 	cSystem->RegisterMemory(this, 0,
@@ -423,8 +424,14 @@ void CSerial::init()
 			address = NULL;
 			printf("%s: Listening on [%s]:%d.\n", devid_string, host.c_str(), listenPort);
 		}
-		printf("%s: Waiting for connection on port %d.\n", devid_string, listenPort);
-		WaitForConnection();
+		if (wait_for_connection)
+		{
+			printf("%s: Waiting for connection on port %d.\n", devid_string, listenPort);
+			WaitForConnection();
+		}
+		else
+			// The receive thread accepts the client later; output until then is dropped.
+			printf("%s: Not waiting; connect to port %d at any time.\n", devid_string, listenPort);
 	}
 	catch (...)
 	{
@@ -787,8 +794,8 @@ void CSerial::eval_interrupts()
 
 void CSerial::write(const char* s, int dsize)
 {
-	if (disabled || null_attach)
-		return;  // null_attach: drop TX silently; no socket to send on
+	if (disabled || null_attach || connectSocket == INVALID_SOCKET)
+		return;  // null_attach or no client yet: drop TX silently; no socket to send on
 	int val = send(connectSocket, s, dsize, 0);
 }
 

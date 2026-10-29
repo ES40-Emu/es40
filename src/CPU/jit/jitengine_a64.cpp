@@ -6502,7 +6502,7 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
   b->code = nullptr;
   b->jit_body = nullptr;
   b->jit_body_same_page = nullptr;
-  b->exec_proof = nullptr;
+  set_exec_proof(*b, nullptr);
   b->prefix_len = 0;
   b->body_off = 0;
   b->src_sum = 0;
@@ -6786,10 +6786,9 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
   b->jit_body_same_page = pal_block ? nullptr : static_cast<void*>(
       reinterpret_cast<uint8_t*>(reinterpret_cast<void*>(fn))
       + code.label_offset(body_same_page));
-  if (!pal_block)
-    b->exec_proof = reinterpret_cast<NativeExecProof*>(
-        reinterpret_cast<uint8_t*>(reinterpret_cast<void*>(fn))
-        + code.label_offset(exec_proof));
+  set_exec_proof(*b, pal_block ? nullptr : reinterpret_cast<NativeExecProof*>(
+      reinterpret_cast<uint8_t*>(reinterpret_cast<void*>(fn))
+      + code.label_offset(exec_proof)));
   b->body_off = static_cast<uint32_t>(committed.body_off);
   b->src_sum = committed.source_hash;
   b->hash_len = committed.hash_len;

@@ -159,6 +159,26 @@ SDL's normal picker selection; Zenity is optional. An explicit
 rejects a process with pcap file capabilities, that error can still occur when
 Zenity is unavailable.
 
+# Firmware and ROM images
+
+The emulator needs the AlphaServer ES40 console firmware (SRM), which belongs to
+HP and is not part of this project. Everything else it needs is either created
+on first start (`flash.rom`, `dpr.rom`, `toy.rom`) or available as free software.
+
+| File | What it is | Where to get it |
+| --- | --- | --- |
+| `cl67srmrom.exe` | SRM firmware update image for the ES40 (`rom.srm`) | HP Alpha Systems Firmware Update CD V7.3, file `CL67SRMROM.EXE`. Only needed until the flash is programmed. |
+| `flash.rom` | The machine's 2 MB flash (`rom.flash`); once programmed it holds SRM | Programmed by the emulator from `cl67srmrom.exe` at first start, or ready-made: <https://archive.org/details/es40-flasher> (`flash-programmed.zip`, SRM V7.3-1) |
+| `vgabios.bin` | Video BIOS for the S3 Trio64 (`rom` in the `s3` section) | Free: GNU vgabios, Debian/Ubuntu package `vgabios` (`/usr/share/vgabios/vgabios.bin`, set `wake_on_reset = true`). Or a dump of a real S3 Trio64 BIOS such as `86c764x1.bin`. |
+| GLoria, Radeon, PowerStorm, LSI ROMs | Option ROMs of the experimental cards | Dumps of the real cards or the vendor firmware package; not needed for a normal machine. |
+
+The Linux configuration editor (`es40_cfg_gtk`) has an **Import firmware…**
+button on its System page: give it `cl67srmrom.exe`, a programmed `flash.rom`,
+or the `.zip`/`.iso` that contains one, and it places the file in the `rom`
+folder beside the machine and points the configuration at it (`.iso` and `.zip`
+reading uses `7z`, `unzip` or `isoinfo`, whichever is installed). The S3 card's
+page offers the installed GNU vgabios with one click.
+
 ------------------------------------------------------------------------  
   
 ## Status  

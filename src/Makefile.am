@@ -53,6 +53,9 @@ endif
 if BUILD_CFG_SDL
 bin_PROGRAMS += es40_cfg_sdl
 endif
+if BUILD_CFG_GTK
+bin_PROGRAMS += es40_cfg_gtk
+endif
 
 # Third-party license notices required with the es40 binaries.
 dist_doc_DATA = es40-NOTICES.txt
@@ -341,6 +344,15 @@ es40_cfg_tui_SOURCES = config/es40-cfg-tui.cpp \
 es40_cfg_sdl_CPPFLAGS = $(AM_CPPFLAGS) $(SDL_CFLAGS) -DCONFIGURATION_ONLY
 es40_cfg_sdl_LDADD = $(SDL_LIBS) $(PCAP_LIBS)
 es40_cfg_sdl_SOURCES = config/es40-cfg-sdl.cpp \
+    config/ConfigEditor.cpp \
+    config/ConfigDocument.cpp \
+    config/Configurator.cpp \
+    base/Exception.cpp
+
+# GTK 3 frontend: the native desktop editor on Linux/BSD, independent of curses and SDL.
+es40_cfg_gtk_CPPFLAGS = $(AM_CPPFLAGS) $(GTK3_CFLAGS) -DCONFIGURATION_ONLY
+es40_cfg_gtk_LDADD = $(GTK3_LIBS) $(PCAP_LIBS)
+es40_cfg_gtk_SOURCES = config/es40-cfg-gtk.cpp \
     config/ConfigEditor.cpp \
     config/ConfigDocument.cpp \
     config/Configurator.cpp \

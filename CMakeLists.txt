@@ -19,6 +19,13 @@ option(ES40_DISABLE_IDB "Disable IDB (built-in debugger) builds." OFF)
 option(ES40_DISABLE_ASMJIT "Disable ASMJIT" ON)
 option(ES40_ENABLE_CFG_TUI "Enable build of es40_cfg_tui" ON)
 option(ES40_ENABLE_CFG_SDL "Enable build of es40_cfg_sdl (requires SDL)" ON)
+# The GTK 3 editor is the native desktop frontend on Linux/BSD; elsewhere it is opt-in.
+if (UNIX AND NOT APPLE)
+    set(ES40_CFG_GTK_DEFAULT ON)
+else()
+    set(ES40_CFG_GTK_DEFAULT OFF)
+endif()
+option(ES40_ENABLE_CFG_GTK "Enable build of es40_cfg_gtk (requires GTK 3)" ${ES40_CFG_GTK_DEFAULT})
 
 # CPU baseline: AVX2 (default, Haswell+) for performance, or SSE2 for older-host compatibility.
 # Applied on x86 only (no-op on ARM / Apple Silicon). The JIT emits its own x86 and is unaffected;
@@ -317,9 +324,24 @@ set_property(TARGET es40-cfg PROPERTY CXX_STANDARD 17)
 
 ######################## Configuration editors ########################
 
+# GTK 3 is located through pkg-config. A missing SDK only skips the GTK editor so
+# headless and minimal builds keep working without extra configuration.
+set(ES40_HAVE_GTK3 OFF)
+if (ES40_ENABLE_CFG_GTK)
+    find_package(PkgConfig)
+    if (PkgConfig_FOUND)
+        pkg_check_modules(GTK3 IMPORTED_TARGET gtk+-3.0>=3.22)
+    endif()
+    if (GTK3_FOUND)
+        set(ES40_HAVE_GTK3 ON)
+    else()
+        message(WARNING "GTK 3 development files not found: es40_cfg_gtk will not be built. Configure with -DES40_ENABLE_CFG_GTK=OFF to silence this warning.")
+    endif()
+endif()
+
 # The option/workflow library has no curses or SDL dependency. All editors
 # inherit exactly the same feature defines and configuration implementation.
-if (WIN32 OR ES40_ENABLE_CFG_TUI OR (ES40_ENABLE_CFG_SDL AND NOT ES40_DISABLE_SDL))
+if (WIN32 OR ES40_ENABLE_CFG_TUI OR ES40_HAVE_GTK3 OR (ES40_ENABLE_CFG_SDL AND NOT ES40_DISABLE_SDL))
     add_library(es40_config_editor STATIC
         src/config/ConfigEditor.cpp src/config/ConfigDocument.cpp src/config/Configurator.cpp src/base/Exception.cpp)
     target_include_directories(es40_config_editor PUBLIC src/)
@@ -370,6 +392,11 @@ endif()
 if (ES40_ENABLE_CFG_SDL AND NOT ES40_DISABLE_SDL)
     add_executable(es40_cfg_sdl src/config/es40-cfg-sdl.cpp)
     target_link_libraries(es40_cfg_sdl PRIVATE es40_config_editor SDL3::SDL3)
+endif()
+
+if (ES40_HAVE_GTK3)
+    add_executable(es40_cfg_gtk src/config/es40-cfg-gtk.cpp)
+    target_link_libraries(es40_cfg_gtk PRIVATE es40_config_editor PkgConfig::GTK3)
 endif()
 
 ############################### ES40 ###############################
@@ -668,3 +695,66 @@ if (NOT ES40_DISABLE_LSS_LSM)
     set_property(TARGET es40_lss PROPERTY CXX_STANDARD 17)
     set_property(TARGET es40_lsm PROPERTY CXX_STANDARD 17)
 endif()
+
+############################ Install and package ############################
+
+# `cmake --install build` installs the emulator and whichever editors and tools
+# were built. `cpack -G DEB` in the build directory (or `cmake --build build
+# --target package`) produces a Debian package on Linux; TGZ works everywhere.
+include(GNUInstallDirs)
+set(CMAKE_INSTALL_DOCDIR "${CMAKE_INSTALL_DATAROOTDIR}/doc/es40") # package name, not the project name
+install(TARGETS es40 es40-cfg RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+foreach(optional_target es40_cfg_tui es40_cfg_sdl es40_cfg_gtk es40_cfg_win32 es40_idb es40_lss es40_lsm)
+    if (TARGET ${optional_target})
+        install(TARGETS ${optional_target} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+    endif()
+endforeach()
+install(FILES COPYING COPYING.LGPL README.md src/es40-NOTICES.txt DESTINATION ${CMAKE_INSTALL_DOCDIR})
+install(FILES src/es40.cfg DESTINATION ${CMAKE_INSTALL_DOCDIR}/examples)
+if (TARGET es40_cfg_gtk)
+    install(FILES extras/packaging/es40-cfg-gtk.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
+endif()
+
+set(ES40_PACKAGE_MAINTAINER "ES40 Emulator Project <https://github.com/ES40-Emu/es40>"
+    CACHE STRING "Maintainer recorded in generated packages")
+set(CPACK_PACKAGE_NAME "es40")
+set(CPACK_PACKAGE_VENDOR "ES40 Emulator Project")
+set(CPACK_PACKAGE_CONTACT "${ES40_PACKAGE_MAINTAINER}")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/ES40-Emu/es40")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "AlphaServer ES40 emulator")
+# The CPU baseline is part of the package identity: an AVX2 build dies with
+# "Illegal instruction" on older hosts, so the file name and description say
+# which one this is. Build with -DES40_ARCH=SSE2 for a package that runs anywhere.
+string(TOLOWER "${ES40_ARCH}" ES40_ARCH_LOWER)
+set(CPACK_PACKAGE_DESCRIPTION "ES40 emulates a Compaq/HP AlphaServer ES40 so that OpenVMS, Tru64 and other
+Alpha operating systems run on ordinary hardware. The package also contains the
+configuration tools: es40-cfg (guided setup) and the es40_cfg_* editors.
+Built for the ${ES40_ARCH} x86 CPU baseline (ES40_ARCH=${ES40_ARCH}).")
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${CMAKE_SYSTEM_PROCESSOR}-${ES40_ARCH_LOWER}")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+set(CPACK_STRIP_FILES ON)
+set(CPACK_SOURCE_IGNORE_FILES "/[.]git/" "/build/" "/docs/")
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(CPACK_GENERATOR "DEB;TGZ")
+    set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
+    set(CPACK_DEBIAN_PACKAGE_SECTION "otherosfs")
+    set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+    set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "${CPACK_PACKAGE_HOMEPAGE_URL}")
+    # dpkg-shlibdeps (package dpkg-dev) derives the Depends line from the linked libraries.
+    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+    # postinst grants es40 the raw-socket capability so pcap and tap networking
+    # work without root; setcap comes from libcap2-bin.
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libcap2-bin")
+    # vgabios: a free S3-compatible video BIOS the editor offers by default.
+    # 7zip: lets the editor import firmware straight from the HP update CD .iso or a .zip.
+    set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "vgabios, 7zip | p7zip-full")
+    set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_SOURCE_DIR}/extras/packaging/postinst")
+    set(CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION TRUE)
+elseif (WIN32)
+    set(CPACK_GENERATOR "ZIP")
+else()
+    set(CPACK_GENERATOR "TGZ")
+endif()
+include(CPack)

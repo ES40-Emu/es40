@@ -118,6 +118,8 @@ jobs:
             libgl1-mesa-dev
             # es40_cfg_tui: ncurses plus its form, menu and panel libraries.
             libncurses-dev
+            # es40_cfg_gtk: the GTK 3 desktop configuration editor.
+            libgtk-3-dev
           )
 
           if [[ "$is_no_network" -eq 0 ]]; then
@@ -246,7 +248,7 @@ jobs:
 
           make clean
 
-          targets=(es40 es40_cfg es40_cfg_tui)
+          targets=(es40 es40_cfg es40_cfg_tui es40_cfg_gtk)
           if [[ ! "${{ matrix.configuration }}" =~ (^|[[:space:]])NS($|[[:space:]]) ]]; then
             targets+=(es40_cfg_sdl)
           fi
@@ -261,7 +263,7 @@ jobs:
           rm -rf "$artifact_dir"
           mkdir -p "$artifact_dir"
 
-          for binary in es40 es40_cfg es40_cfg_tui es40_cfg_sdl; do
+          for binary in es40 es40_cfg es40_cfg_tui es40_cfg_sdl es40_cfg_gtk; do
             if [[ -f "src/$binary" ]]; then
               cp "src/$binary" "$artifact_dir/"
             fi

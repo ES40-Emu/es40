@@ -220,7 +220,7 @@ public:
   // JitBlock cache slot.
   struct NativeExecProof
   {
-    uint64_t epoch;      // last epoch authorized for mode_mask
+    uint64_t epoch;      // epoch of the last mode_mask change (JitBlock::exec_auth is current)
     uint32_t mode_mask;  // modes with execute access
     uint32_t guard_imm_back; // x64: bytes back from this proof to TEST's imm8; A64: zero
   };
@@ -246,6 +246,8 @@ public:
     void*    jit_body;    // chained re-entry point (after the prologue); null when not compiled
     void*    jit_body_same_page; // after native mode guard; only static same-page edges, null for PAL
     NativeExecProof* exec_proof; // embedded data for this code allocation; null for PAL
+    uint64_t exec_auth;   // copy of *exec_proof: epoch << 4 | mode_mask; set only via set_exec_proof
+    NativeExecProof* exec_proof_rw; // x64: writable alias of exec_proof, null until first authorized
     LinkSlot link[kLinkSlots];    // cached direct successors (poly-link, round-robin back-patched)
 #ifdef JIT_STATS
     uint32_t link_misses; // instrumentation: per-source link-miss count, cumulative (poly-link sizing)
@@ -471,6 +473,11 @@ public:
   // Native entry guards check CM; traces still need their links cleared.
   inline void     note_mode_change()    { ++m_vgen_cur; invalidate_links_mode(); }
   void authorize_native(JitBlock* block, uint32_t mode); // call after checking instruction access
+  // A new proof starts with no modes authorized (epoch 0 never matches m_exec_epoch).
+  static inline void set_exec_proof(JitBlock& b, NativeExecProof* proof)
+  {
+    b.exec_proof = proof; b.exec_auth = 0; b.exec_proof_rw = nullptr;
+  }
 #if defined(ES40_JIT_X64)
   static void serialize_code(); // after code writes or taking ownership of generated code
 #endif

@@ -3591,8 +3591,8 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
   b->src_sum  = source_hash;                                  // include every word the fusion depends on
   b->hash_len = hash_len;                                     // freeze the hash extent (n_instr drifts)
   b->prefix_len = plen;
-  b->exec_proof = pal_block ? nullptr
-      : reinterpret_cast<NativeExecProof*>((uint8_t*)(void*)fn + exec_proof_off);
+  set_exec_proof(*b, pal_block ? nullptr
+      : reinterpret_cast<NativeExecProof*>((uint8_t*)(void*)fn + exec_proof_off));
   b->jit_body_same_page = pal_block ? nullptr
       : static_cast<void*>((uint8_t*)(void*)fn + body_same_page_off);
   m_code_bytes += csz;   // track for the reclaim threshold (see flush())

@@ -284,7 +284,7 @@ CJitEngine::JitBlock* CJitEngine::record(uint64_t virt_pc, uint64_t phys_pc, uin
   b.code = nullptr;
   b.jit_body = nullptr;   // not compiled yet -> cached links to us must miss until compile
   b.jit_body_same_page = nullptr;
-  b.exec_proof = nullptr;
+  set_exec_proof(b, nullptr);
   for (int i = 0; i < kLinkSlots; ++i) {
     b.link[i].tag = ~uint64_t(0); b.link[i].vgen = 0; b.link[i].body = nullptr;
   }   // no cached successors yet
@@ -471,7 +471,7 @@ void CJitEngine::reclaim_code()
     m_blocks[i].code = nullptr;
     m_blocks[i].jit_body = nullptr;
     m_blocks[i].jit_body_same_page = nullptr;
-    m_blocks[i].exec_proof = nullptr;
+    set_exec_proof(m_blocks[i], nullptr);
     m_blocks[i].compiled = false;
     // Link snapshots hold raw body pointers into the runtime just freed. The epoch alone can't be
     // trusted.
@@ -553,42 +553,56 @@ void CJitEngine::authorize_native(JitBlock* block, uint32_t mode)
   if ((block->tag & 1) || !block->exec_proof) return;
   NativeExecProof* const proof = block->exec_proof;
   const uint32_t mode_bit = uint32_t{1} << (mode & 3);
-  if (proof->epoch == m_exec_epoch && (proof->mode_mask & mode_bit)) return;
+  // Test the block's copy: the proof itself sits in code memory and usually misses the cache.
+  const bool same_epoch = (block->exec_auth >> 4) == m_exec_epoch;
+  if (same_epoch && (block->exec_auth & mode_bit)) return;
   // Invalidation retires incoming links; callers recheck the live mapping.
-  const uint32_t mode_mask =
-      (proof->epoch == m_exec_epoch ? proof->mode_mask : 0) | mode_bit;
+  const uint32_t old_mask = (uint32_t) (block->exec_auth & 15);
+  const uint32_t mode_mask = (same_epoch ? old_mask : 0) | mode_bit;
+  // Compiled code reads only the mask (x64: TEST's imm8, A64: the proof). The block's copy
+  // is the epoch's only reader, so an unchanged mask needs no write to code memory.
+  if (mode_mask == old_mask) {
+    block->exec_auth = (m_exec_epoch << 4) | mode_mask;
+    return;
+  }
 #if defined(ES40_JIT_X64)
-  // The engine has one executing owner. Use the writable alias for this allocation.
-  asmjit::JitAllocator::Span span;
-  auto& allocator = static_cast<asmjit::JitRuntime*>(m_rt)->allocator();
-  if (!block->code || allocator.query(asmjit::Out(span),
-      reinterpret_cast<void*>(block->code)) != asmjit::Error::kOk || !span.rw())
-    abort();
-  const size_t proof_offset = static_cast<uint8_t*>(static_cast<void*>(proof))
-      - static_cast<uint8_t*>(span.rx());
   const uint32_t back = proof->guard_imm_back;
-  if (!back || back > proof_offset || proof_offset > span.size()
-      || span.size() - proof_offset < sizeof(*proof))
-    abort();
-  const size_t immediate_offset = proof_offset - back;
-  auto* const writable_proof = reinterpret_cast<NativeExecProof*>(
-      static_cast<uint8_t*>(span.rw()) + proof_offset);
-  auto* const immediate = static_cast<uint8_t*>(span.rw()) + immediate_offset;
-  const bool patch = proof->mode_mask != mode_mask;
+  NativeExecProof* writable_proof = block->exec_proof_rw;
+  if (!writable_proof) {
+    // The engine has one executing owner. Find the writable alias once per allocation.
+    asmjit::JitAllocator::Span span;
+    auto& allocator = static_cast<asmjit::JitRuntime*>(m_rt)->allocator();
+    if (!block->code || allocator.query(asmjit::Out(span),
+        reinterpret_cast<void*>(block->code)) != asmjit::Error::kOk || !span.rw())
+      abort();
+    const size_t proof_offset = static_cast<uint8_t*>(static_cast<void*>(proof))
+        - static_cast<uint8_t*>(span.rx());
+    if (!back || back > proof_offset || proof_offset > span.size()
+        || span.size() - proof_offset < sizeof(*proof))
+      abort();
+    writable_proof = reinterpret_cast<NativeExecProof*>(
+        static_cast<uint8_t*>(span.rw()) + proof_offset);
+    block->exec_proof_rw = writable_proof;
+  }
+  auto* const immediate = reinterpret_cast<uint8_t*>(writable_proof) - back;
   {
     asmjit::VirtMem::ProtectJitReadWriteScope scope(
-        static_cast<uint8_t*>(span.rx()) + immediate_offset, back + sizeof(*proof));
+        reinterpret_cast<uint8_t*>(proof) - back, back + sizeof(*proof));
     writable_proof->epoch = m_exec_epoch;
     writable_proof->mode_mask = mode_mask;
-    if (patch) *immediate = static_cast<uint8_t>(mode_mask);
+    *immediate = static_cast<uint8_t>(mode_mask);
   }
+  block->exec_auth = (m_exec_epoch << 4) | mode_mask;
   // The W^X scope has ended. CPUID serializes instruction fetch before any re-entry.
-  if (patch) serialize_code();
+  serialize_code();
 #else
-  // The permission mask is stored in JIT memory, so writes need the W^X scope.
-  asmjit::VirtMem::ProtectJitReadWriteScope scope(proof, sizeof(*proof));
-  proof->epoch = m_exec_epoch;
-  proof->mode_mask = mode_mask;
+  {
+    // The permission mask is stored in JIT memory, so writes need the W^X scope.
+    asmjit::VirtMem::ProtectJitReadWriteScope scope(proof, sizeof(*proof));
+    proof->epoch = m_exec_epoch;
+    proof->mode_mask = mode_mask;
+  }
+  block->exec_auth = (m_exec_epoch << 4) | mode_mask;
 #endif
 }
 

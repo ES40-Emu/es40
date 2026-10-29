@@ -119,7 +119,6 @@ static asmjit::JitAllocator::CreateParams jit_rt_params()
 CJitEngine::CJitEngine(const AlphaCPUProfile& profile, int cpu_id)
   : m_profile(profile), m_cpu_id(cpu_id), m_recorded(0), m_code_bytes(0), m_rt(nullptr)
 {
-  m_active_links.reserve(4096);
   // flush() is lazy (gen bump), so the slots must start zeroed -- all big_alloc paths return
   // zeroed pages. Compiled code embeds absolute addresses into m_blocks..
   bool blk_lp = false, trc_lp = false;
@@ -159,7 +158,7 @@ CJitEngine::CJitEngine(const AlphaCPUProfile& profile, int cpu_id)
   m_licm_same = m_licm_diff = 0; m_licm_next = 0;
   memset(m_licm_pool, 0, sizeof(m_licm_pool));
   m_link_invalidations = m_links_cleared = m_asn_link_clears = m_asn_links_cleared = 0;
-  m_evict_link_clears = m_reclaims = m_jmp_exits = m_jc_hits = m_mb_exec = 0;
+  m_evict_link_clears = m_evict_links_cleared = m_reclaims = m_jmp_exits = m_jc_hits = m_mb_exec = 0;
   memset(m_exit_kind, 0, sizeof(m_exit_kind));
   memset(m_bump_cause, 0, sizeof(m_bump_cause));
   m_direct_patches = m_patch_unreachable = 0;
@@ -248,13 +247,14 @@ CJitEngine::JitBlock* CJitEngine::record(uint64_t virt_pc, uint64_t phys_pc, uin
     }
   }
   // Old code still uses &link[]. If either block is global or the ASN changes,
-  // clear incoming links before reusing the array. Otherwise old code could
-  // follow the replacement's successors.
+  // make the old code unreachable before reusing the array. Otherwise old code
+  // could follow the replacement's successors.
   if (victim->code && (victim->asm_global || asm_global || victim->asn != asn)) {
 #ifdef JIT_STATS
     m_evict_link_clears++;
 #endif
-    invalidate_links(kBumpEvict);
+    if (m_traces_enabled) invalidate_links(kBumpEvict);   // trace code is not indexed by target page
+    else unlink_block(*victim);
   }
   JitBlock& b = *victim;
   b.vgen = m_vgen_cur;
@@ -284,7 +284,7 @@ CJitEngine::JitBlock* CJitEngine::record(uint64_t virt_pc, uint64_t phys_pc, uin
   b.code = nullptr;
   b.jit_body = nullptr;   // not compiled yet -> cached links to us must miss until compile
   b.jit_body_same_page = nullptr;
-  b.exec_proof = nullptr;
+  set_exec_proof(b, nullptr);
   for (int i = 0; i < kLinkSlots; ++i) {
     b.link[i].tag = ~uint64_t(0); b.link[i].vgen = 0; b.link[i].body = nullptr;
   }   // no cached successors yet
@@ -471,7 +471,7 @@ void CJitEngine::reclaim_code()
     m_blocks[i].code = nullptr;
     m_blocks[i].jit_body = nullptr;
     m_blocks[i].jit_body_same_page = nullptr;
-    m_blocks[i].exec_proof = nullptr;
+    set_exec_proof(m_blocks[i], nullptr);
     m_blocks[i].compiled = false;
     // Link snapshots hold raw body pointers into the runtime just freed. The epoch alone can't be
     // trusted.
@@ -531,6 +531,20 @@ static bool write_site(CJitEngine::PatchSite* s, const uint8_t* target)
 #endif
 }
 
+// Where a direct exit currently jumps (its stub while unpatched).
+static const uint8_t* site_target(const CJitEngine::PatchSite* s)
+{
+#if defined(ES40_JIT_A64)
+  uint32_t ins;
+  memcpy(&ins, s->site, sizeof(ins));
+  return s->site + (int64_t) ((int32_t) (ins << 6) >> 6) * 4;   // sign-extended imm26
+#else
+  int32_t r32;
+  memcpy(&r32, s->site + 1, sizeof(r32));
+  return s->site + 5 + r32;
+#endif
+}
+
 #if defined(ES40_JIT_X64)
 void CJitEngine::serialize_code()
 {
@@ -553,42 +567,56 @@ void CJitEngine::authorize_native(JitBlock* block, uint32_t mode)
   if ((block->tag & 1) || !block->exec_proof) return;
   NativeExecProof* const proof = block->exec_proof;
   const uint32_t mode_bit = uint32_t{1} << (mode & 3);
-  if (proof->epoch == m_exec_epoch && (proof->mode_mask & mode_bit)) return;
+  // Test the block's copy: the proof itself sits in code memory and usually misses the cache.
+  const bool same_epoch = (block->exec_auth >> 4) == m_exec_epoch;
+  if (same_epoch && (block->exec_auth & mode_bit)) return;
   // Invalidation retires incoming links; callers recheck the live mapping.
-  const uint32_t mode_mask =
-      (proof->epoch == m_exec_epoch ? proof->mode_mask : 0) | mode_bit;
+  const uint32_t old_mask = (uint32_t) (block->exec_auth & 15);
+  const uint32_t mode_mask = (same_epoch ? old_mask : 0) | mode_bit;
+  // Compiled code reads only the mask (x64: TEST's imm8, A64: the proof). The block's copy
+  // is the epoch's only reader, so an unchanged mask needs no write to code memory.
+  if (mode_mask == old_mask) {
+    block->exec_auth = (m_exec_epoch << 4) | mode_mask;
+    return;
+  }
 #if defined(ES40_JIT_X64)
-  // The engine has one executing owner. Use the writable alias for this allocation.
-  asmjit::JitAllocator::Span span;
-  auto& allocator = static_cast<asmjit::JitRuntime*>(m_rt)->allocator();
-  if (!block->code || allocator.query(asmjit::Out(span),
-      reinterpret_cast<void*>(block->code)) != asmjit::Error::kOk || !span.rw())
-    abort();
-  const size_t proof_offset = static_cast<uint8_t*>(static_cast<void*>(proof))
-      - static_cast<uint8_t*>(span.rx());
   const uint32_t back = proof->guard_imm_back;
-  if (!back || back > proof_offset || proof_offset > span.size()
-      || span.size() - proof_offset < sizeof(*proof))
-    abort();
-  const size_t immediate_offset = proof_offset - back;
-  auto* const writable_proof = reinterpret_cast<NativeExecProof*>(
-      static_cast<uint8_t*>(span.rw()) + proof_offset);
-  auto* const immediate = static_cast<uint8_t*>(span.rw()) + immediate_offset;
-  const bool patch = proof->mode_mask != mode_mask;
+  NativeExecProof* writable_proof = block->exec_proof_rw;
+  if (!writable_proof) {
+    // The engine has one executing owner. Find the writable alias once per allocation.
+    asmjit::JitAllocator::Span span;
+    auto& allocator = static_cast<asmjit::JitRuntime*>(m_rt)->allocator();
+    if (!block->code || allocator.query(asmjit::Out(span),
+        reinterpret_cast<void*>(block->code)) != asmjit::Error::kOk || !span.rw())
+      abort();
+    const size_t proof_offset = static_cast<uint8_t*>(static_cast<void*>(proof))
+        - static_cast<uint8_t*>(span.rx());
+    if (!back || back > proof_offset || proof_offset > span.size()
+        || span.size() - proof_offset < sizeof(*proof))
+      abort();
+    writable_proof = reinterpret_cast<NativeExecProof*>(
+        static_cast<uint8_t*>(span.rw()) + proof_offset);
+    block->exec_proof_rw = writable_proof;
+  }
+  auto* const immediate = reinterpret_cast<uint8_t*>(writable_proof) - back;
   {
     asmjit::VirtMem::ProtectJitReadWriteScope scope(
-        static_cast<uint8_t*>(span.rx()) + immediate_offset, back + sizeof(*proof));
+        reinterpret_cast<uint8_t*>(proof) - back, back + sizeof(*proof));
     writable_proof->epoch = m_exec_epoch;
     writable_proof->mode_mask = mode_mask;
-    if (patch) *immediate = static_cast<uint8_t>(mode_mask);
+    *immediate = static_cast<uint8_t>(mode_mask);
   }
+  block->exec_auth = (m_exec_epoch << 4) | mode_mask;
   // The W^X scope has ended. CPUID serializes instruction fetch before any re-entry.
-  if (patch) serialize_code();
+  serialize_code();
 #else
-  // The permission mask is stored in JIT memory, so writes need the W^X scope.
-  asmjit::VirtMem::ProtectJitReadWriteScope scope(proof, sizeof(*proof));
-  proof->epoch = m_exec_epoch;
-  proof->mode_mask = mode_mask;
+  {
+    // The permission mask is stored in JIT memory, so writes need the W^X scope.
+    asmjit::VirtMem::ProtectJitReadWriteScope scope(proof, sizeof(*proof));
+    proof->epoch = m_exec_epoch;
+    proof->mode_mask = mode_mask;
+  }
+  block->exec_auth = (m_exec_epoch << 4) | mode_mask;
 #endif
 }
 
@@ -642,17 +670,33 @@ void CJitEngine::patch_edge(void* tagged, uint64_t tag, uint64_t vgen_bits, void
       else if (empty < 0) empty = i;
     if (found >= 0) {
       lf[found] = snap;                            // already active and indexed by target page
-      if (global_src && !target_global) m_global_src_links.insert(key);
+      if (global_src && !target_global) m_global_src_links.add(key);
       return;
     }
     if (empty >= 0) lf[empty] = snap;
     else { for (int i = kLinkSlots - 1; i > 0; --i) lf[i] = lf[i - 1]; lf[0] = snap; }
     register_sets = !was_live;                       // a live array is already active
   }
-  if (register_sets) m_active_links.insert(key);
+  if (register_sets) m_active_links.add(key);
   // An already-live global-source array may acquire its first private target here.
-  if (global_src && !target_global) m_global_src_links.insert(key);
-  m_edges_by_page[translation_page_key(tag)].insert(key);
+  if (global_src && !target_global) m_global_src_links.add(key);
+  note_edge_page(translation_page_key(tag), key);
+}
+
+void CJitEngine::note_edge_page(uint64_t page, void* key)
+{
+  bool inserted;
+  int32_t& index = m_edge_entries.get(EdgeKey{ page, key }, inserted);
+  if (inserted) {
+    index = (int32_t) m_edges.size();
+    m_edges.push_back(EdgeEntry{ key, -1, false });
+  }
+  EdgeEntry& e = m_edges[index];
+  if (e.live) return;
+  int32_t& head = m_page_edges.get(page, inserted);   // -1 when new or cleared
+  e.live = true;
+  e.next = head;
+  head = index;
 }
 
 void CJitEngine::invalidate_links_page(uint64_t virt_page)
@@ -662,14 +706,55 @@ void CJitEngine::invalidate_links_page(uint64_t virt_page)
   for (int i = 0; i < kJumpCacheEntries; ++i)
     if (m_jcache[i].body && translation_page_key(m_jcache[i].tag) == page)
       m_jcache[i].body = nullptr, m_jcache[i].tag = ~uint64_t(0);
-  auto it = m_edges_by_page.find(page);
-  if (it == m_edges_by_page.end()) return;
+  int32_t* head = m_page_edges.find(page);
+  if (!head || *head < 0) return;
 #ifdef JIT_STATS
   m_page_clears++;
-  m_page_links_cleared += it->second.size();
 #endif
-  for (void* key : it->second) clear_edge(key);   // a cleared edge re-registers when re-patched
-  m_edges_by_page.erase(it);
+  for (int32_t i = *head; i >= 0; i = m_edges[i].next) {
+    m_edges[i].live = false;
+    clear_edge(m_edges[i].edge);   // a cleared edge re-registers when re-patched
+#ifdef JIT_STATS
+    m_page_links_cleared++;
+#endif
+  }
+  *head = -1;
+}
+
+// Every edge into a block's code is indexed under its tag's page, and the jump cache can
+// hold the tag in one slot only. Clearing those leaves the code unreachable; it stays
+// allocated until the next reclaim, so edges out of it remain safe to clear later.
+void CJitEngine::unlink_block(const JitBlock& v)
+{
+  const void* const body = (const uint8_t*) (const void*) v.code + v.body_off;
+  const void* const same_page = v.jit_body_same_page;
+  auto into_v = [&](const void* p) { return p && (p == body || p == same_page); };
+  JumpCacheEntry& jc = m_jcache[jcache_index(v.tag)];
+  if (into_v(jc.body)) jc.body = nullptr, jc.tag = ~uint64_t(0);
+  const int32_t* head = m_page_edges.find(translation_page_key(v.tag));
+  if (!head) return;
+  for (int32_t i = *head; i >= 0; i = m_edges[i].next) {
+    void* const key = m_edges[i].edge;
+    if ((uintptr_t) key & 2) {
+      PatchSite* s = (PatchSite*) ((uintptr_t) key & ~(uintptr_t) 3);
+      if (!into_v(site_target(s))) continue;
+      (void) write_site(s, s->stub);
+#ifdef JIT_STATS
+      m_evict_links_cleared++;
+#endif
+    } else {
+      LinkSlot* links = (LinkSlot*) key;
+      for (int sl = 0; sl < kLinkSlots; ++sl) {
+        if (!into_v(links[sl].body)) continue;
+        links[sl].tag = ~uint64_t(0);
+        links[sl].vgen = 0;
+        links[sl].body = nullptr;
+#ifdef JIT_STATS
+        m_evict_links_cleared++;
+#endif
+      }
+    }
+  }
 }
 
 void CJitEngine::invalidate_links(int cause)
@@ -683,10 +768,12 @@ void CJitEngine::invalidate_links(int cause)
   (void) cause;
 #endif
   ++m_jc_gen;
-  for (void* key : m_active_links) clear_edge(key);
+  m_active_links.for_each(clear_edge);
   m_active_links.clear();
   m_global_src_links.clear();
-  m_edges_by_page.clear();
+  m_page_edges.clear();
+  m_edge_entries.clear();
+  m_edges.clear();
 }
 
 // Native entry guards check CM. Traces have no such check, so their links
@@ -711,7 +798,7 @@ void CJitEngine::invalidate_links_global()
   m_asn_link_clears++;
   m_asn_links_cleared += m_global_src_links.size();
 #endif
-  for (void* key : m_global_src_links) clear_edge(key);
+  m_global_src_links.for_each(clear_edge);
   m_global_src_links.clear();
 }
 #ifdef JIT_VERIFY
@@ -873,10 +960,10 @@ uint64_t CJitEngine::note_exec(uint32_t native_instr, uint32_t interp_instr, uin
            m_cpu_id, (unsigned long long) m_licm_same, (unsigned long long) m_licm_diff,
            100.0 * (double) m_licm_same / (double) (m_licm_same + m_licm_diff));
   // Each cleared edge costs one dispatcher round trip to re-link.
-  if (m_link_invalidations || m_asn_link_clears)
-    printf("[JIT][STATS][CPU%d] link-churn: %llu epoch bumps cleared %llu edges (%llu from cross-ASN evictions) | %llu ASN switches cleared %llu global-source edges | %llu page invalidates cleared %llu edges | %llu reclaims total\n",
+  if (m_link_invalidations || m_asn_link_clears || m_evict_link_clears)
+    printf("[JIT][STATS][CPU%d] link-churn: %llu epoch bumps cleared %llu edges | %llu cross-ASN evictions cleared %llu edges | %llu ASN switches cleared %llu global-source edges | %llu page invalidates cleared %llu edges | %llu reclaims total\n",
            m_cpu_id, (unsigned long long) m_link_invalidations, (unsigned long long) m_links_cleared,
-           (unsigned long long) m_evict_link_clears,
+           (unsigned long long) m_evict_link_clears, (unsigned long long) m_evict_links_cleared,
            (unsigned long long) m_asn_link_clears, (unsigned long long) m_asn_links_cleared,
            (unsigned long long) m_page_clears, (unsigned long long) m_page_links_cleared,
            (unsigned long long) m_reclaims);
@@ -1003,7 +1090,7 @@ uint64_t CJitEngine::note_exec(uint32_t native_instr, uint32_t interp_instr, uin
   m_trace_formed = m_trace_entered = m_trace_exits = m_trace_stale = 0;
   m_licm_same = m_licm_diff = 0;
   m_link_invalidations = m_links_cleared = m_asn_link_clears = m_asn_links_cleared = 0;
-  m_evict_link_clears = m_jmp_exits = m_jc_hits = m_mb_exec = 0;
+  m_evict_link_clears = m_evict_links_cleared = m_jmp_exits = m_jc_hits = m_mb_exec = 0;
   memset(m_exit_kind, 0, sizeof(m_exit_kind));
   m_direct_patches = m_patch_unreachable = 0;
   m_page_clears = m_page_links_cleared = 0;

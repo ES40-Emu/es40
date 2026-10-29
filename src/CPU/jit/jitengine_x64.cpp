@@ -409,6 +409,14 @@ SafeOp classify(uint32_t ins, bool pal_block, const AlphaIPRReadPolicy& ipr_read
 struct CJitEngine::RegAlloc {
   int host[32];                                  // host x86 reg id for guest GPR r, or -1 (memory)
   int rax_holds;                                 // guest GPR whose value currently lives in rax (value-forward), or -1
+  // Write-through value cache: wt_guest[k] = unpinned guest GPR whose value kWtHost[k] also holds,
+  // or -1. The regs[] slot stays current, so exits and faults need no write-back. Like rax_holds it
+  // is dropped at every op; only the allow-listed emitters (wt_resume in emit_op) keep it.
+  int      wt_guest[2];
+  uint32_t wt_stamp[2];                          // LRU: last use, from wt_clock
+  uint32_t wt_clock;
+  bool     wt_on;                                // block-wide enable: non-PAL blocks, not Win64
+  bool     wt_insert;                            // this op's mov_to_reg may add its result
   int vol_bind;                                  // guest GPRs held in caller-saved R8/R9 (or -1);
   int vol_bind2;                                 // call sites spill/reload them around helpers
   bool dpc_live;                                 // previous guest op left RDX/R10/R11 = va/bias/slot
@@ -475,10 +483,20 @@ static uint32_t regprof_mask(const uint32_t* w, uint32_t n)
 }
 #endif
 
-// Callee-saved guest pins; R13 carries the chain instruction count. 
+// Callee-saved guest pins; R13 carries the chain instruction count.
 // Blocks also keep R22/R23 in volatile R8/R9..
 static const int kGlobalPins[2] = { 1, 16 };
 static const int kVolPins[2]    = { 22, 23 };   // caller-saved pins (r8/r9)
+
+// Write-through cache registers (RegAlloc::wt_guest). Free in System V code: caller-saved, unused
+// by the block convention, only clobbered as helper argument registers (emit_call and the cold
+// stubs reload them). Win64 pins R27/R0 there, so the cache is off on Windows.
+#ifndef _WIN32
+static constexpr bool kWtCache = true;
+#else
+static constexpr bool kWtCache = false;
+#endif
+static const int kWtHost[2] = { (int) asmjit::x86::Gp::kIdSi, (int) asmjit::x86::Gp::kIdDi };
 
 // regalloc: compile_trace binds the TRACE'S hottest guest GPRs to the pin registers instead
 // of the fixed global set, deleting their state.r[] traffic across the whole fused span.
@@ -587,6 +605,7 @@ struct ColdMemStub {
   int           ra;         // LOAD dest / STORE value guest reg
   int           pin;        // host reg id bound to `ra`, or -1 = the regs[] memory slot
   int           slot;       // PALshadow-adjusted regs[] index for `ra`
+  int           wt_guest[2] = { -1, -1 };   // write-through cache entries live at `join`: reload after the call
   uint32_t      i;          // op index in the block
   uint64_t      fault_pc;   // resume PC on fault
 };
@@ -710,7 +729,8 @@ static void emit_cold_mem_stub(asmjit::x86::Assembler& a, const uint8_t* gpa,
   a.mov(x86::r10, imm(s.fault_pc));
   a.mov(x86::qword_ptr(x86::rbp, off.state_current_pc), x86::r10);
   const bool val_in_vol = (s.vol_bind >= 0 && s.pin == s.vol_host)
-                       || (s.vol_bind2 >= 0 && s.pin == s.vol_host2);
+                       || (s.vol_bind2 >= 0 && s.pin == s.vol_host2)
+                       || s.pin == (int) aq(0).id() || s.pin == (int) aq(1).id();   // overwritten just below
   a.mov(aq(0), x86::rbp);                                       // cpu
   if (aq(1).id() != x86::rdx.id()) a.mov(aq(1), x86::rdx);      // va (precomputed in RDX)
   switch (s.kind) {
@@ -789,6 +809,9 @@ static void emit_cold_mem_stub(asmjit::x86::Assembler& a, const uint8_t* gpa,
     if (s.pin >= 0) a.mov(x86::gpq((uint32_t) s.pin), x86::rax);
     else            a.mov(x86::qword_ptr(x86::rbx, s.slot * 8), x86::rax);
   }
+  for (int k = 0; k < 2; ++k)    // the call clobbered the cache registers; regs[] is current
+    if (s.wt_guest[k] >= 0)
+      a.mov(x86::gpq((uint32_t) kWtHost[k]), x86::qword_ptr(x86::rbx, s.wt_guest[k] * 8));
   a.jmp(s.join);
 }
 
@@ -902,6 +925,36 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         const int prev_rax = regalloc.rax_holds;
         regalloc.rax_holds = -1;
 
+        // Write-through cache: default-invalidate the same way. An allow-listed emitter calls
+        // wt_resume() before its first operand read; it may then only write guest GPRs through
+        // mov_to_reg (or wt_drop the target) and must leave RSI/RDI alone outside emit_call.
+        const int prev_wt[2] = { regalloc.wt_guest[0], regalloc.wt_guest[1] };
+        regalloc.wt_guest[0] = regalloc.wt_guest[1] = -1;
+        regalloc.wt_insert = false;
+        const size_t op_start = a.offset();
+        auto wt_resume = [&](bool insert) {
+            if (!regalloc.wt_on || a.offset() != op_start) return;   // only before this op emits anything
+            regalloc.wt_guest[0] = prev_wt[0];
+            regalloc.wt_guest[1] = prev_wt[1];
+            regalloc.wt_insert = insert;
+            };
+        auto wt_host_of = [&](int r) -> int {     // host reg holding r, or -1; refreshes its LRU stamp
+            for (int k = 0; k < 2; ++k)
+                if (regalloc.wt_guest[k] == r) { regalloc.wt_stamp[k] = ++regalloc.wt_clock; return kWtHost[k]; }
+            return -1;
+            };
+        auto wt_drop = [&](int r) {
+            for (int k = 0; k < 2; ++k) if (regalloc.wt_guest[k] == r) regalloc.wt_guest[k] = -1;
+            };
+        auto wt_put = [&](int r, const x86::Gp& src) {   // after r's slot store: also keep it in a cache reg
+            if (src.id() == (uint32_t) kWtHost[0] || src.id() == (uint32_t) kWtHost[1]) return;
+            int k = (regalloc.wt_guest[0] < 0) ? 0 : (regalloc.wt_guest[1] < 0) ? 1
+                  : (regalloc.wt_stamp[0] <= regalloc.wt_stamp[1]) ? 0 : 1;
+            a.mov(x86::gpq((uint32_t) kWtHost[k]), src);
+            regalloc.wt_guest[k] = r;
+            regalloc.wt_stamp[k] = ++regalloc.wt_clock;
+            };
+
         auto reg = [&](int r) {
             // PALshadow (RREG, AlphaCPU.h): in a PALmode block with SDE set, R4-7 and R20-23 map to
             // the shadow bank r[r+32]. 
@@ -920,17 +973,23 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         auto mov_from_reg = [&](const x86::Gp& dst, int r) {        // dst is 64-bit
             int p = pin_id(r);
             if (p >= 0) a.mov(dst, x86::gpq((uint32_t)p));
+            else if ((p = wt_host_of(r)) >= 0) { if (dst.id() != (uint32_t)p) a.mov(dst, x86::gpq((uint32_t)p)); }
             else        a.mov(dst, reg(r));
             };
         auto mov_from_reg32 = [&](const x86::Gp& dst, int r) {      // dst is 32-bit
             int p = pin_id(r);
+            if (p < 0) p = wt_host_of(r);
             if (p >= 0) a.mov(dst, x86::gpd((uint32_t)p));
             else        a.mov(dst, reg32(r));
             };
         auto mov_to_reg = [&](int r, const x86::Gp& src) {          // src is 64-bit
             int p = pin_id(r);
             if (p >= 0) a.mov(x86::gpq((uint32_t)p), src);
-            else        a.mov(reg(r), src);
+            else {
+                a.mov(reg(r), src);
+                wt_drop(r);
+                if (regalloc.wt_insert && r != 31) wt_put(r, src);
+            }
             if (src.id() == x86::rax.id() && r != 31) regalloc.rax_holds = r;   // rax now mirrors r[r]; forward it
             };
         auto op1_rax = [&]() {
@@ -949,7 +1008,8 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                 if (low_bit) a.test(x86::al, imm(1)); else a.test(x86::rax, x86::rax);
                 return;
             }
-            const int p = pin_id(ra);
+            int p = pin_id(ra);
+            if (p < 0) p = wt_host_of(ra);
             if (p >= 0) {
                 const x86::Gp src = x86::gpq((uint32_t)p);
                 if (low_bit) a.test(src, imm(1)); else a.test(src, src);
@@ -963,6 +1023,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             if (islit)    return imm(lit);
             if (rb == 31) return imm(0);
             int p = pin_id(rb);
+            if (p < 0) p = wt_host_of(rb);
             if (p >= 0)   return x86::gpq((uint32_t) p);
             return reg(rb);
             };
@@ -1044,6 +1105,10 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                 a.mov(x86::qword_ptr(x86::rbx, vb2 * 8), x86::gpq((uint32_t) vh2));
                 regalloc.host[vb2] = -1;
             }
+            // The cache registers are System V argument registers: read arguments from regs[]
+            // (always current), and reload the cache after the call clobbers them.
+            const int wt_saved[2] = { regalloc.wt_guest[0], regalloc.wt_guest[1] };
+            regalloc.wt_guest[0] = regalloc.wt_guest[1] = -1;
             auto place = [&](int k, const JitArg& s) {
                 switch (s.k) {
                 case JA_CPU: a.mov(aq(k), x86::rbp);                              break;  // cpu
@@ -1065,6 +1130,9 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             else { a.mov(x86::rax, imm((uint64_t)fn)); a.call(x86::rax); }
             if (vb >= 0) { regalloc.host[vb] = vh; a.mov(x86::gpq((uint32_t) vh), x86::qword_ptr(x86::rbx, vb * 8)); }
             if (vb2 >= 0) { regalloc.host[vb2] = vh2; a.mov(x86::gpq((uint32_t) vh2), x86::qword_ptr(x86::rbx, vb2 * 8)); }
+            for (int k = 0; k < 2; ++k)
+                if ((regalloc.wt_guest[k] = wt_saved[k]) >= 0)
+                    a.mov(x86::gpq((uint32_t) kWtHost[k]), reg(wt_saved[k]));
             };
 
 #ifndef JIT_VERIFY
@@ -1118,6 +1186,9 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         // Memory-format loads: va = regs[Rb] + disp16.
         if (op == OP_LDQ || op == OP_LDL || op == OP_LDBU || op == OP_LDWU || op == OP_LDQ_U) {
             if (ra == 31) continue;            // LDx R31 is a NOP (interpreter skips the read)
+            // Keep the cache but don't add Ra: the cold stub joins past the fast path's store.
+            wt_resume(false);
+            wt_drop(ra);
             const int disp = (int)(int16_t)(ins & 0xFFFF);
             const int size_bits = (op == OP_LDQ || op == OP_LDQ_U) ? 64 : (op == OP_LDL) ? 32 : (op == OP_LDWU) ? 16 : 8;
             const int amask = (size_bits / 8) - 1;
@@ -1201,6 +1272,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                 s.ins = ins;
                 s.ra = ra;  s.pin = pin_id(ra);
                 s.slot = (b->pal_shadow && ((ra & 0xc) == 0x4)) ? ra + 32 : ra;   // PALshadow remap (see reg())
+                s.wt_guest[0] = regalloc.wt_guest[0]; s.wt_guest[1] = regalloc.wt_guest[1];
                 s.i = i;    s.fault_pc = b->tag + 4 * (uint64_t) i;
                 s.vol_bind = regalloc.vol_bind; s.vol_host = (s.vol_bind >= 0) ? regalloc.host[s.vol_bind] : -1;
                 s.vol_bind2 = regalloc.vol_bind2; s.vol_host2 = (s.vol_bind2 >= 0) ? regalloc.host[s.vol_bind2] : -1;
@@ -1221,6 +1293,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         // the page is writable); falls to jit_write on misalign / cache miss / MMIO. In verify the
         // helper is the only path -- it compares the store against the interpreter's recorded one.
         if (op == OP_STL || op == OP_STQ || op == OP_STB || op == OP_STW || op == OP_STQ_U) {
+            wt_resume(false);                  // stores write no guest GPR
             const int disp = (int)(int16_t)(ins & 0xFFFF);
             const int size_bits = (op == OP_STQ || op == OP_STQ_U) ? 64 : (op == OP_STL) ? 32 : (op == OP_STW) ? 16 : 8;
             const int amask = (size_bits / 8) - 1;
@@ -1282,7 +1355,8 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             a.mov(x86::r10, x86::qword_ptr(x86::rbp, x86::r11, 0,
                 m_off.dpc_write_row + m_off.dpc_host_bias));
             a.bind(dpc_ready);
-            const int sp = (ra == 31) ? -1 : pin_id(ra);
+            int sp = (ra == 31) ? -1 : pin_id(ra);
+            if (sp < 0 && ra != 31) sp = wt_host_of(ra);   // the cold stub reads regs[] if marshalling clobbers it
             const int slot = (b->pal_shadow && ((ra & 0xc) == 0x4)) ? ra + 32 : ra;
             // Plain tags need no LL/SC lock. The cold path also lands here for
             // unwatched lines on watched pages. First LL updates all page aliases
@@ -1299,6 +1373,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                 s.size_bits = size_bits;
                 s.ins = ins;
                 s.ra = ra;  s.pin = sp; s.slot = slot;
+                s.wt_guest[0] = regalloc.wt_guest[0]; s.wt_guest[1] = regalloc.wt_guest[1];
                 s.i = i;    s.fault_pc = b->tag + 4 * (uint64_t) i;
                 s.vol_bind = regalloc.vol_bind; s.vol_host = (s.vol_bind >= 0) ? regalloc.host[s.vol_bind] : -1;
                 s.vol_bind2 = regalloc.vol_bind2; s.vol_host2 = (s.vol_bind2 >= 0) ? regalloc.host[s.vol_bind2] : -1;
@@ -1608,6 +1683,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         // arithmetic. R31 dest discards the result (a NOP).
         if (op == OP_LDA || op == OP_LDAH) {
             if (ra == 31) continue;
+            wt_resume(true);
             int64_t d = (int64_t)(int16_t)(ins & 0xFFFF);
             if (op == OP_LDAH) d *= 65536;
             const int dp = pin_id(ra), bp = (rb == 31) ? -1 : pin_id(rb);
@@ -1618,6 +1694,10 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                     if (dp != bp) mov_from_reg(dst, rb);
                     if (d) a.add(dst, imm(d));
                 }
+            } else if (ra == rb && wt_host_of(ra) >= 0) {
+                // In-place on a cached register: update the copy, then the slot from it.
+                const x86::Gp h = x86::gpq((uint32_t) wt_host_of(ra));
+                if (d) { a.add(h, imm(d)); a.mov(reg(ra), h); }
             } else if (ra == rb) {
                 // The unpinned in-place form can update the canonical regs[] slot directly.
                 if (d) a.add(reg(ra), imm(d));
@@ -2295,6 +2375,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         // current Rc is read and kept otherwise. R31 dest discards the result.
         if (op == OP_CMOV) {
             if (rc == 31) continue;
+            wt_resume(true);
             const uint32_t f = (ins >> 5) & 0x7f;
             op2_rcx();                                  // rcx = op2 (Rb or literal -- the moved value)
             test_ra(f == 0x14 || f == 0x16);
@@ -2322,6 +2403,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         if (op == OP_EXTL || op == OP_EXTH || op == OP_INSL || op == OP_INSH
             || op == OP_MSKL || op == OP_MSKH || op == OP_ZAP) {
             if (rc == 31) continue;
+            wt_resume(true);
             const uint32_t f = (ins >> 5) & 0x7f;
             const int size = (f >> 4) & 3;
             const uint64_t mask = (size == 0) ? (uint64_t)0xff : (size == 1) ? (uint64_t)0xffff
@@ -2421,6 +2503,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             continue;
         }
 
+        wt_resume(true);   // integer operate: all GPR writes below go through mov_to_reg or wt_drop
         switch (op) {
         case OP_ADDQ:  emit_alu2(x86::Inst::kIdAdd); break;
         case OP_SUBQ:  emit_alu2(x86::Inst::kIdSub); break;
@@ -2437,8 +2520,10 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                     else if (pin_id(src) != dp) mov_from_reg(dst, src);
                 } else if (lit_src || src == 31) {
                     a.mov(reg(rc), imm(lit_src ? (uint64_t) lit : 0));
+                    wt_drop(rc);
                 } else if (pin_id(src) >= 0) {
                     a.mov(reg(rc), x86::gpq((uint32_t) pin_id(src)));
+                    wt_drop(rc);
                 } else {
                     mov_from_reg(x86::rax, src);
                     mov_to_reg(rc, x86::rax);
@@ -2539,7 +2624,8 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                     else if (pin_id(ra) != dp) mov_from_reg32(dd, ra);
                     if (islit) { if (issub) a.sub(dd, imm(lit)); else a.add(dd, imm(lit)); }
                     else if (rb != 31) {
-                        const int bp = pin_id(rb);
+                        int bp = pin_id(rb);
+                        if (bp < 0) bp = wt_host_of(rb);
                         const Operand o2 = (bp >= 0) ? Operand(x86::gpd((uint32_t) bp)) : Operand(reg32(rb));
                         a.emit(issub ? x86::Inst::kIdSub : x86::Inst::kIdAdd, dd, o2);
                     }
@@ -2888,6 +2974,10 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
   RegAlloc ra;
   for (int r = 0; r < 32; ++r) ra.host[r] = -1;
   ra.rax_holds = -1;
+  ra.wt_guest[0] = ra.wt_guest[1] = -1;
+  ra.wt_stamp[0] = ra.wt_stamp[1] = ra.wt_clock = 0;
+  ra.wt_on = kWtCache && !pal_block;   // PAL blocks remap R4-7/R20-23; keep them on the plain path
+  ra.wt_insert = false;
   ra.vol_bind = kVolPins[0];
   ra.vol_bind2 = kVolPins[1];
   ra.dpc_live = false;
@@ -3591,8 +3681,8 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
   b->src_sum  = source_hash;                                  // include every word the fusion depends on
   b->hash_len = hash_len;                                     // freeze the hash extent (n_instr drifts)
   b->prefix_len = plen;
-  b->exec_proof = pal_block ? nullptr
-      : reinterpret_cast<NativeExecProof*>((uint8_t*)(void*)fn + exec_proof_off);
+  set_exec_proof(*b, pal_block ? nullptr
+      : reinterpret_cast<NativeExecProof*>((uint8_t*)(void*)fn + exec_proof_off));
   b->jit_body_same_page = pal_block ? nullptr
       : static_cast<void*>((uint8_t*)(void*)fn + body_same_page_off);
   m_code_bytes += csz;   // track for the reclaim threshold (see flush())
@@ -3772,6 +3862,9 @@ void CJitEngine::compile_trace(TraceFragment* t, JitBlock** blocks, uint32_t n_b
   RegAlloc ra;
   for (int r = 0; r < 32; ++r) ra.host[r] = -1;
   ra.rax_holds = -1;
+  ra.wt_guest[0] = ra.wt_guest[1] = -1;   // write-through cache off: traces loop back to `body`
+  ra.wt_stamp[0] = ra.wt_stamp[1] = ra.wt_clock = 0;
+  ra.wt_on = ra.wt_insert = false;
   ra.vol_bind = kVolPins[0];
   ra.vol_bind2 = kVolPins[1];
   ra.dpc_live = false;

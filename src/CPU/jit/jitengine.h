@@ -45,8 +45,6 @@
 #include <cstdint>
 #include "../AlphaCPUProfile.h"
 #include <vector>
-#include <unordered_map>
-#include <unordered_set>
 #include "../../config_debug.h"   // JIT_VERIFY
 #ifdef JIT_STATS
 // host cycle counter for the JIT_STATS wall-time split: TSC on x86-64, CNTVCT_EL0 on ARM64
@@ -72,6 +70,70 @@ static inline uint64_t jit_rdtsc() { uint64_t v; __asm__ __volatile__("mrs %0, c
 #endif
 
 class CAlphaCPU;   // compiled blocks call back into the CPU for memory accesses
+
+static inline uint32_t jit_flat_hash(uint64_t x) { return (uint32_t) ((x * UINT64_C(0x9e3779b97f4a7c15)) >> 32); }
+static inline uint32_t jit_flat_hash(void* p) { return jit_flat_hash((uint64_t) (uintptr_t) p); }
+
+// Open-addressed key -> int32 index with no per-insert allocation. Links are wiped on every
+// exec and cross-ASN eviction, and std::unordered_set's node mallocs were ~30% of host time
+// in process-creation loads. clear() resets only the used slots, so capacity survives a wipe.
+// No erase: callers mark their own entries dead instead.
+template <class Key>
+class JitFlatIndex
+{
+public:
+  explicit JitFlatIndex(uint32_t capacity = 1024) { rebuild(capacity); }
+
+  // The value for key; a new key gets -1 and sets inserted.
+  int32_t& get(const Key& key, bool& inserted)
+  {
+    if ((m_used.size() + 1) * 2 > m_slots.size()) rebuild((uint32_t) m_slots.size() * 2);
+    uint32_t i = jit_flat_hash(key) & m_mask;
+    for (; m_slots[i].full; i = (i + 1) & m_mask)
+      if (m_slots[i].key == key) { inserted = false; return m_slots[i].val; }
+    m_slots[i].key = key; m_slots[i].val = -1; m_slots[i].full = true;
+    m_used.push_back(i);
+    inserted = true;
+    return m_slots[i].val;
+  }
+  void add(const Key& key) { bool inserted; (void) get(key, inserted); }
+  int32_t* find(const Key& key)
+  {
+    for (uint32_t i = jit_flat_hash(key) & m_mask; m_slots[i].full; i = (i + 1) & m_mask)
+      if (m_slots[i].key == key) return &m_slots[i].val;
+    return nullptr;
+  }
+  template <class F> void for_each(F f) const { for (uint32_t i : m_used) f(m_slots[i].key); }
+  size_t size() const { return m_used.size(); }
+  void clear()
+  {
+    for (uint32_t i : m_used) m_slots[i].full = false;
+    m_used.clear();
+  }
+
+private:
+  struct Slot { Key key; int32_t val; bool full; };
+  std::vector<Slot> m_slots;
+  std::vector<uint32_t> m_used;   // occupied slot indices, in insertion order
+  uint32_t m_mask = 0;
+
+  void rebuild(uint32_t capacity)   // capacity: a power of two
+  {
+    std::vector<Slot> old;
+    old.swap(m_slots);
+    std::vector<uint32_t> used;
+    used.swap(m_used);
+    m_slots.assign(capacity, Slot{});
+    m_used.reserve(capacity / 2);
+    m_mask = capacity - 1;
+    for (uint32_t o : used) {
+      uint32_t i = jit_flat_hash(old[o].key) & m_mask;
+      while (m_slots[i].full) i = (i + 1) & m_mask;
+      m_slots[i] = old[o];
+      m_used.push_back(i);
+    }
+  }
+};
 
 class CJitEngine
 {
@@ -158,7 +220,7 @@ public:
   // JitBlock cache slot.
   struct NativeExecProof
   {
-    uint64_t epoch;      // last epoch authorized for mode_mask
+    uint64_t epoch;      // epoch of the last mode_mask change (JitBlock::exec_auth is current)
     uint32_t mode_mask;  // modes with execute access
     uint32_t guard_imm_back; // x64: bytes back from this proof to TEST's imm8; A64: zero
   };
@@ -184,6 +246,8 @@ public:
     void*    jit_body;    // chained re-entry point (after the prologue); null when not compiled
     void*    jit_body_same_page; // after native mode guard; only static same-page edges, null for PAL
     NativeExecProof* exec_proof; // embedded data for this code allocation; null for PAL
+    uint64_t exec_auth;   // copy of *exec_proof: epoch << 4 | mode_mask; set only via set_exec_proof
+    NativeExecProof* exec_proof_rw; // x64: writable alias of exec_proof, null until first authorized
     LinkSlot link[kLinkSlots];    // cached direct successors (poly-link, round-robin back-patched)
 #ifdef JIT_STATS
     uint32_t link_misses; // instrumentation: per-source link-miss count, cumulative (poly-link sizing)
@@ -409,6 +473,11 @@ public:
   // Native entry guards check CM; traces still need their links cleared.
   inline void     note_mode_change()    { ++m_vgen_cur; invalidate_links_mode(); }
   void authorize_native(JitBlock* block, uint32_t mode); // call after checking instruction access
+  // A new proof starts with no modes authorized (epoch 0 never matches m_exec_epoch).
+  static inline void set_exec_proof(JitBlock& b, NativeExecProof* proof)
+  {
+    b.exec_proof = proof; b.exec_auth = 0; b.exec_proof_rw = nullptr;
+  }
 #if defined(ES40_JIT_X64)
   static void serialize_code(); // after code writes or taking ownership of generated code
 #endif
@@ -449,6 +518,8 @@ public:
   void invalidate_links_global();   // only edges out of global-source blocks (ASN change)
   // Clear links and jump-cache entries targeting this translation page.
   void invalidate_links_page(uint64_t virt_page);
+  // Clear only the edges and jump-cache entry that reach an evicted block's code.
+  void unlink_block(const JitBlock& v);
 #ifdef JIT_STATS
   inline void note_interp_breaker(uint32_t ins) { m_rt_break_op[ins >> 26]++; }   // first interpreted op
 #else
@@ -528,14 +599,31 @@ private:
 #ifdef JIT_REGPROF
   AlphaInstructionSource m_dbg_source; // Bound reader, never a borrowed source view.
 #endif
-  std::unordered_set<void*> m_active_links;     // patched edges, bit 1 = PatchSite
-  std::unordered_set<void*> m_global_src_links; // subset with global sources
+  JitFlatIndex<void*> m_active_links{8192};     // patched edges, bit 1 = PatchSite
+  JitFlatIndex<void*> m_global_src_links;       // subset with global sources
   // ITB matching ignores VA bits 63:48. Use the same mask for link lookup
   // and TBIS, including sign-extended aliases.
   static constexpr uint64_t translation_page_key(uint64_t address) {
     return (address & UINT64_C(0x0000ffffffffe000)) >> 13;
   }
-  std::unordered_map<uint64_t, std::unordered_set<void*>> m_edges_by_page;   // target page -> patched edges
+  // Target page -> patched edges: one chain per page through m_edges. A page clear marks its
+  // entries dead and a re-patch revives them, so m_edges only grows with distinct (page, edge)
+  // pairs and is emptied with the other link sets.
+  struct EdgeKey
+  {
+    uint64_t page;
+    void*    edge;
+    bool operator==(const EdgeKey& o) const { return page == o.page && edge == o.edge; }
+    friend uint32_t jit_flat_hash(const EdgeKey& k)
+    {
+      return jit_flat_hash(k.page * UINT64_C(0x100000001b3) ^ (uint64_t) (uintptr_t) k.edge);
+    }
+  };
+  struct EdgeEntry { void* edge; int32_t next; bool live; };
+  JitFlatIndex<uint64_t> m_page_edges{4096};    // target page -> first live m_edges entry, or -1
+  JitFlatIndex<EdgeKey>  m_edge_entries{8192};  // (page, edge) -> its m_edges entry
+  std::vector<EdgeEntry> m_edges;
+  void note_edge_page(uint64_t page, void* key);
   static void clear_edge(void* key);            // un-patch a site or empty a LinkSlot array
   uint64_t m_code_bytes;  // compiled bytes since last reclaim (see flush())
   bool     m_reclaim_pending = false;   // flush() hit kReclaimBytes; reclaim at the next dispatch boundary
@@ -563,7 +651,7 @@ private:
   uint64_t m_trace_formed, m_trace_entered, m_trace_exits, m_trace_stale;       // windowed: trace tier activity (M1+)
   uint64_t m_link_invalidations, m_links_cleared;      // windowed: epoch bumps / edges cleared
   uint64_t m_asn_link_clears, m_asn_links_cleared;     // windowed: ASN switches / global-source edges cleared
-  uint64_t m_evict_link_clears;                        // windowed: clears forced by cross-ASN evictions
+  uint64_t m_evict_link_clears, m_evict_links_cleared; // windowed: cross-ASN evictions unlinked / edges they cleared
   uint64_t m_bump_cause[kBumpCauses];                  // windowed: epoch bumps by cause
   uint64_t m_page_clears, m_page_links_cleared;        // windowed: single-page ITB invalidates / edges they cleared
   uint64_t m_direct_patches, m_patch_unreachable;      // windowed: sites patched / beyond rel32 reach

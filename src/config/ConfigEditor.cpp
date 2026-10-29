@@ -327,6 +327,49 @@ void write_configuration(const char *filename)
         }
     }
     save_config_file(destination, text);
+    // A session that keeps editing after this save compares its next save
+    // against the file it just wrote, not the one it originally loaded.
+    input_snapshot = read_config_file(destination.path, true);
+    output_snapshot.reset();
+}
+
+/**
+ * Start a new machine: the smallest configuration the emulator accepts.
+ */
+void new_configuration()
+{
+    char minimal_config[] = "sys0 = tsunami { cpu0 = ev68cb {} }";
+    theConfig = new CConfigurator(nullptr, NULL, NULL, minimal_config, strlen(minimal_config));
+    configuration_document.reset(new ConfigDocument(""));
+    configuration_document->bind(theConfig);
+}
+
+// Model access for frontends that edit the device tree directly instead of
+// walking the menus (es40_cfg_gtk). Errors arrive as std::exception.
+void editor_load(const char *filename)
+{
+    editor_release();
+    try { read_configuration(filename); }
+    catch (CException& e) { editor_release(); throw std::runtime_error(e.displayText()); }
+    sys0 = theConfig->find_child("sys0");
+    if (!sys0) { editor_release(); throw std::runtime_error("No 'sys0' in the configuration."); }
+}
+void editor_new()
+{
+    editor_release();
+    new_configuration();
+    sys0 = theConfig->find_child("sys0");
+}
+void editor_save(const char *filename)
+{
+    try { write_configuration(filename); }
+    catch (CException& e) { throw std::runtime_error(e.displayText()); }
+}
+void editor_release()
+{
+    delete theConfig;
+    theConfig = sys0 = nullptr;
+    configuration_document.reset(); input_snapshot.reset(); output_snapshot.reset();
 }
 
 // Keep extra attributes and nested blocks when editing an existing device.
@@ -561,10 +604,12 @@ bool check_add_disks(FormEntry_t entry[], int num_entries, FormValues_t values)
     int idx = fentry_index(entry, num_entries, "Type");
     char *disk_type = values[idx];
 
-    // FIXME: No check for non-empty file name for changeable media (floppy and cd-com drives)
+    // A file-backed CD-ROM may start empty; media is inserted from the GUI later.
+    const bool empty_cdrom = !strcmp(disk_type, "file") &&
+        !strcmp(values[fentry_index(entry, num_entries, "Harddisk or CD-ROM")], "cd-rom");
     idx = fentry_index(entry, num_entries, "File / Device name");
     if ((!strcmp(disk_type, "file") || !strcmp(disk_type, "device")) &&
-        !strcmp(values[idx], ""))
+        !strcmp(values[idx], "") && !empty_cdrom)
     {
         string msg = string("No ") + disk_type + " name has been specified.";
         show_text("Error", msg.c_str());
@@ -661,8 +706,7 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
 
         if (!strcmp(entry[i].label, "Harddisk or CD-ROM") && c != nullptr)
         {
-            bool is_cdrom = !strcmp(c->get_text_value(entry[i].name, STR_NO), STR_YES);
-            preset[i] = (char *)(is_cdrom ? "cd-rom" : "disk");
+            preset[i] = (char *)(c->get_bool_value(entry[i].name) ? "cd-rom" : "disk");
             continue;
         }
 
@@ -681,7 +725,7 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
             if (!strcmp(entry[i].label, "File / Device name"))
             {
                 if (!strcmp(disk_type, "file") || !strcmp(disk_type, "device"))
-                    preset[i] = c->get_text_value(disk_type, "?");
+                    preset[i] = c->get_text_value(disk_type, c->get_bool_value("cdrom") ? "" : "?");
                 else
                     preset[i] = (char *)entry[i].preset;
                 continue;
@@ -779,7 +823,10 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
 
             if (!strcmp(entry[i].label, "File / Device name") &&
                 (!strcmp(disk_type, "file") || !strcmp(disk_type, "device")))
-                set_form_value(c, i, disk_type, values[i], type_changed);
+            {
+                if (values[i][0]) set_form_value(c, i, disk_type, values[i], type_changed);
+                else c->remove_value((char *)disk_type); // Empty CD-ROM drive: no file key at all.
+            }
 
             if (!strcmp(entry[i].label, "Autocreate size"))
             {
@@ -1132,6 +1179,17 @@ void edit_gui(const char *title)
     {
         show_text(title, "No graphical output backend is available in this build.");
         return;
+    }
+
+    // Say which backend the configuration uses now; the menu itself cannot show it.
+    static std::string marked[ARRAY_SIZE(entry)];
+    CConfigurator *current = theConfig->find_child("gui");
+    const char *active = current ? current->get_myValue() : "none";
+    for (int i = 0; i < num_entries; ++i)
+    {
+        if (strcasecmp(entry[i].text, active)) continue;
+        marked[i] = std::string("Current choice.  ") + entry[i].description;
+        entry[i].description = marked[i].c_str();
     }
 
     int sel = show_menu(title, entry, num_entries, MENU_2ND_LEVEL);
@@ -1491,7 +1549,7 @@ void edit_ali(const char *title)
     char *p;
     idx = fentry_index(entry, num_entries, "Console Output"); // name == "vga_console"
     if (c != nullptr && (p = c->get_text_value(entry[idx].name)) != NULL)
-        preset[idx] = (char *)(!strcmp(p, STR_YES) ? "graphics" : "serial");
+        preset[idx] = (char *)(c->get_bool_value(entry[idx].name) ? "graphics" : "serial"); // true/yes/1 all mean graphics
     else
         preset[idx] = (char *)entry[idx].preset;
 
@@ -1685,7 +1743,13 @@ void edit_pci_vga_s3(const char *title)
          "Real S3 Trio64 VGA BIOS images work, GNU vgabios project also works,\n"
          "but may not enable or support all S3 features.\n"
          "This file is required.",
-         validation_file}
+         validation_file},
+        {"Wake card at reset?", STR_NO, "wake_on_reset",
+         "The Trio64 leaves reset asleep until its own S3 BIOS wakes it.\n"
+         "Answer yes with a generic VGA BIOS such as GNU vgabios\n"
+         "(Debian/Ubuntu package \"vgabios\", /usr/share/vgabios/vgabios.bin),\n"
+         "which never sends that wake-up sequence. Leave no with a real S3 BIOS.",
+         validation_yes_no}
     };
 
     edit_pcicard(title, "s3", entry, ARRAY_SIZE(entry), check_pci_vga_s3);
@@ -1920,6 +1984,17 @@ void validation_pci_dec21143_queue(EditorField *field)
     editor_number(field, EditorField::Type::Integer, 1, 1, INT_MAX);
 }
 
+// The emulator falls back to pcap, and to asking for an adapter on its
+// console, when a NIC has no type. Always write the type so the file says
+// what the user chose and the machine starts the same way from the editor,
+// a terminal or a service.
+void set_nic_values(CConfigurator *c, FormEntry_t entry[], int num_entries, FormValues_t values)
+{
+    set_pcicard_values_default(c, entry, num_entries, values);
+    int idx = fentry_index(entry, num_entries, "type");
+    set_form_value(c, idx, "type", values[idx], true);
+}
+
 // Form for DEC21143 PCI NIC
 void edit_pci_dec21143(const char *title)
 {
@@ -1933,14 +2008,16 @@ void edit_pci_dec21143(const char *title)
          "Only free PCI slots are listed.",
          validation_pcislot},
         {"type",
-#if defined(HAVE_PCAP)
+         // slirp first: it needs no privileges, no host interface and no
+         // console prompt, so a machine started from the editor just works.
+#if defined(HAVE_SLIRP)
+         "slirp",
+#elif defined(HAVE_PCAP)
          "pcap",
 #elif defined(HAVE_TAP_NET)
-         "tap0",
+         "tap",
 #elif defined(HAVE_VMNET)
          "vmnet",
-#elif defined(HAVE_SLIRP)
-         "slirp",
 #else
          "none",
 #endif
@@ -1973,8 +2050,11 @@ void edit_pci_dec21143(const char *title)
          validation_pci_dec21143_type},
 #if defined(HAVE_PCAP)
         {"adapter", "list", "adapter",
-         "What host network interface should we connect to?\n"
-         "Choose 'list' to get a list at run-time.",
+         "For type 'pcap' or 'tap': the host network interface to use.\n"
+         "'list' makes the emulator print the interfaces and ask on its\n"
+         "console at start-up; that needs a terminal, so pick a real\n"
+         "interface here when the machine is started from this editor.\n"
+         "Capturing on a host interface needs root or CAP_NET_RAW.",
          validation_pci_dec21143_adapter},
 #endif
         {"mac", "08-00-2B-E5-40-00", "mac",
@@ -2039,7 +2119,7 @@ void edit_pci_dec21143(const char *title)
 #endif
     };
 
-    edit_pcicard(title, "dec21143", entry, ARRAY_SIZE(entry));
+    edit_pcicard(title, "dec21143", entry, ARRAY_SIZE(entry), NULL, set_nic_values);
 #endif // defined(HAVE_PCAP) || defined(HAVE_TAP_NET) || defined(HAVE_VMNET) || defined(HAVE_SLIRP)
 }
 
@@ -2288,7 +2368,7 @@ bool check_serial(FormEntry_t entry[], int num_entries, FormValues_t values)
 // Form for serial lines
 void edit_serial(const char *title)
 {
-    const int num_attr = 7;
+    const int num_attr = 8;
     FormEntry_t entry[num_attr * 2];
 
     for (int i = 0; i < 2; ++i)
@@ -2336,6 +2416,14 @@ void edit_serial(const char *title)
             validation_yes_no};
 
         entry[num_attr * i + 5] = {
+            strdup((serial_prefix + "wait_for_connection").c_str()), STR_YES, "wait_for_connection",
+            "Hold the emulator at start-up until a telnet client connects to this port.\n"
+            "Choose 'no' for a machine whose console is the graphics window, or that\n"
+            "runs unattended: the port then accepts a client at any time and output\n"
+            "sent before one connects is dropped.",
+            validation_yes_no};
+
+        entry[num_attr * i + 6] = {
             strdup((serial_prefix + "program").c_str()),
 #if defined(_WIN32)
             "C:\\Program Files\\Putty\\Putty.exe",
@@ -2351,7 +2439,7 @@ void edit_serial(const char *title)
             validation_file};
 
         const string arguments_value = "telnet://localhost:" + port_value;
-        entry[num_attr * i + 6] = {
+        entry[num_attr * i + 7] = {
             strdup((serial_prefix + "arguments").c_str()), strdup(arguments_value.c_str()), NULL,
             "Client arguments. Choose one listen address.\n"
             "For wildcards, use localhost (IPv4) or [::1] (IPv6).\n"
@@ -2417,13 +2505,13 @@ void edit_serial(const char *title)
                     p2 = action_str.length();
                 p3 = p2;
             }
-            if (k % num_attr == 5)
+            if (k % num_attr == 6)
             {
                 memset(program[i], '\0', sizeof(program[i]));
                 strncpy(program[i], action_str.substr(p1, p2 - p1).c_str(), sizeof(program[i]) - 1);
                 preset[k] = program[i];
             }
-            else if (k % num_attr == 6)
+            else if (k % num_attr == 7)
             {
                 memset(arguments[i], '\0', sizeof(arguments[i]));
                 if (p3 < action_str.length())
@@ -2467,6 +2555,9 @@ void edit_serial(const char *title)
             idx = fentry_index(entry, num_entries, (serial_prefix + "raw_mode").c_str());
             set_form_value(c, idx, entry[idx].name, values[idx]);
 
+            idx = fentry_index(entry, num_entries, (serial_prefix + "wait_for_connection").c_str());
+            set_form_value(c, idx, entry[idx].name, values[idx]);
+
             idx = fentry_index(entry, num_entries, (serial_prefix + "program").c_str());
             if (strcmp(values[idx], ""))
             {
@@ -2488,7 +2579,7 @@ void edit_serial(const char *title)
     for (int i = 0; i < num_entries; ++i)
     {
         free((void *)entry[i].label);
-        if (i % num_attr == 2 || i % num_attr == 6)
+        if (i % num_attr == 2 || i % num_attr == 7)
             free((void *)entry[i].preset);
     }
     free(preset);
@@ -2573,20 +2664,42 @@ void edit_ide_settings(const char *title)
 }
 
 // Menu for IDE bus disks
+// One line saying what a disk slot holds, for slot menus.
+static std::string describe_disk_slot(CConfigurator *disk)
+{
+    if (!disk) return "empty";
+    const std::string type = disk->get_myValue() ? disk->get_myValue() : "";
+    if (type == "ramdisk") return std::string("RAM disk ") + disk->get_text_value("size", "");
+    const bool cdrom = disk->get_bool_value("cdrom");
+    const char *path = disk->get_text_value(type == "device" ? "device" : "file", "");
+    std::string result = cdrom ? "CD-ROM" : (type == "device" ? "host device" : "disk image");
+    result += path && *path ? std::string(": ") + path : (cdrom ? ", no media" : ", no file");
+    if (disk->get_bool_value("read_only")) result += " (read-only)";
+    return result;
+}
+
 void edit_ide_disks(const char *title)
 {
+    static const char *const slot_names[] = {"primary master", "primary slave", "secondary master", "secondary slave"};
+    static std::string descriptions[4];
     MenuEntry_t entry[] = {
-        {"empty", "Don't add disks to the IDE controller (recommended).", NULL},
-        {"disk0.0", "primary master", NULL},
-        {"disk0.1", "primary slave", NULL},
-        {"disk1.0", "secondary master", NULL},
-        {"disk1.1", "secondary slave", NULL}};
+        {"empty", "Remove all disks from the IDE controller.", NULL},
+        {"disk0.0", NULL, NULL},
+        {"disk0.1", NULL, NULL},
+        {"disk1.0", NULL, NULL},
+        {"disk1.1", NULL, NULL}};
     int num_entries = ARRAY_SIZE(entry);
 
     CConfigurator *c = sys0->find_child(PCI_SLOT_IDE);
 
     while (true)
     {
+        for (int i = 1; i < num_entries; ++i)
+        {
+            descriptions[i - 1] = std::string(slot_names[i - 1]) + " \xe2\x80\x94 " +
+                describe_disk_slot(c ? c->find_child(entry[i].text) : nullptr);
+            entry[i].description = descriptions[i - 1].c_str();
+        }
         int sel = show_menu(title, entry, num_entries, MENU_3RD_LEVEL);
 
         if (sel < 0)
@@ -2862,11 +2975,15 @@ int run_config_editor(int argc, char **argv, EditorUI& ui)
         }
         in_filename = argv[1];
     }
-    else if (FILE *existing = fopen("es40.cfg", "rb"))
+    else if (argc < 2)
     {
         // No input file given: edit the es40.cfg in the current directory.
-        fclose(existing);
-        in_filename = "es40.cfg";
+        // An explicit empty argument asks for a new machine instead.
+        if (FILE *existing = fopen("es40.cfg", "rb"))
+        {
+            fclose(existing);
+            in_filename = "es40.cfg";
+        }
     }
 
     if (in_filename != NULL)
@@ -2888,12 +3005,7 @@ int run_config_editor(int argc, char **argv, EditorUI& ui)
         }
     }
     else
-    {
-        char minimal_config[] = "sys0 = tsunami { cpu0 = ev68cb {} }";
-        theConfig = new CConfigurator(nullptr, NULL, NULL, minimal_config, strlen(minimal_config));
-        configuration_document.reset(new ConfigDocument(""));
-        configuration_document->bind(theConfig);
-    }
+        new_configuration();
     sys0 = theConfig->find_child("sys0");
     if (sys0 == nullptr)
     {
@@ -2917,6 +3029,7 @@ int run_config_editor(int argc, char **argv, EditorUI& ui)
 
     bool initialized = false;
     int result = 0;
+    std::string selected_output;
     try
     {
         initialized = true;
@@ -2925,9 +3038,21 @@ int run_config_editor(int argc, char **argv, EditorUI& ui)
 
         while (main_menu())
         {
-            OverwriteChoice choice = confirm_overwrite(out_filename);
+            OverwriteChoice choice;
+            if (ui.select_output(selected_output))
+            {
+                // The frontend confirmed any overwrite; drop a snapshot of an earlier target.
+                out_filename = selected_output.c_str();
+                output_snapshot.reset();
+                choice = OVERWRITE_YES;
+            }
+            else
+                choice = confirm_overwrite(out_filename);
             if (choice == OVERWRITE_YES)
+            {
                 write_configuration(out_filename);
+                if (ui.keep_editing_after_save()) continue;
+            }
             if (choice != OVERWRITE_BACK)
                 break;
             // Back: edits kept and the file untouched.

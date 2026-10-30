@@ -72,8 +72,28 @@ public:
     virtual int menu(const char *title, MenuEntry_t[], int count, int y, int x) = 0;
     // true applies the fields; false cancels. Field values survive validation retries.
     virtual bool form(const char *title, FormEntry_t[], std::vector<EditorField>&) = 0;
+    // Frontends with a file chooser may replace the output path when the user saves.
+    // Return true with `path` set to a file the user has already agreed to overwrite;
+    // the editor then writes it without asking again.
+    virtual bool select_output(std::string&) { return false; }
+    // Frontends with a persistent window may keep the session open after a
+    // successful save (e.g. to start the machine) instead of ending the editor.
+    virtual bool keep_editing_after_save() { return false; }
 };
 
 EditorField prepare_editor_field(const FormEntry_t&, const char *preset);
 bool validate_editor_field(EditorField&);
 int run_config_editor(int argc, char **argv, EditorUI&);
+
+// Direct model access for frontends that present the device tree themselves
+// (es40_cfg_gtk) instead of walking the menus. The model is the CConfigurator
+// tree rooted at theConfig, with the machine at sys0; saving patches the loaded
+// file so comments and untouched settings survive. Failures throw std::exception.
+class CConfigurator;
+extern CConfigurator *theConfig, *sys0;
+void editor_load(const char *filename);
+void editor_new();
+void editor_save(const char *filename);
+void editor_release();
+std::string memory_bits2size(int mem_bits);
+int memory_size2bits(char *mem_size);

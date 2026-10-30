@@ -1,0 +1,20 @@
+#!/bin/sh
+# Debian maintainer script for the es40 package.
+set -e
+
+# Let es40 capture on host interfaces (NIC type "pcap") and attach to tap
+# devices without running as root. File capabilities vanish whenever the
+# binary is replaced, so this runs on every install and upgrade.
+if [ "$1" = "configure" ]; then
+    if command -v setcap >/dev/null 2>&1; then
+        if ! setcap cap_net_raw,cap_net_admin+eip /usr/bin/es40; then
+            echo "es40: could not set capabilities on /usr/bin/es40; pcap networking needs root until you run:" >&2
+            echo "  sudo setcap cap_net_raw,cap_net_admin+eip /usr/bin/es40" >&2
+        fi
+    else
+        echo "es40: setcap not found (package libcap2-bin); pcap networking needs root until it is installed and you run:" >&2
+        echo "  sudo setcap cap_net_raw,cap_net_admin+eip /usr/bin/es40" >&2
+    fi
+fi
+
+exit 0

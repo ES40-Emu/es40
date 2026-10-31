@@ -2572,16 +2572,8 @@ void CCirrus::write_b_3d5(u8 value)
  **/
 u8 CCirrus::read_b_3c0()
 {
-	if (state.attribute_ctrl.flip_flop == 0)
-	{
-
-		//BX_INFO(("io read: 0x3c0: flip_flop = 0"));
-		return(state.attribute_ctrl.video_enabled << 5) | state.attribute_ctrl.address;
-	}
-	else
-	{
-		FAILURE(NotImplemented, "io read: 0x3c0: flip_flop != 0");
-	}
+	/* Always return the index register since the flip-flop only affects writes */
+	return (state.attribute_ctrl.video_enabled << 5) | state.attribute_ctrl.address;
 }
 
 /**

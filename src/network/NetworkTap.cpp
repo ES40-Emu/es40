@@ -37,6 +37,8 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <pwd.h>
+#include <unistd.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -96,11 +98,33 @@ bool CNetworkTap::tap_open(const char *devid_string, const char *name) {
 
 	memset(&ifr, 0, sizeof(ifr));
 	ifr.ifr_flags = IFF_TAP | IFF_NO_PI;
-	if (name && name[0])
+	/* The configuration editor writes adapter = "list" to mean "unset". */
+	const bool named = name && name[0] && strcasecmp(name, "list") != 0;
+	if (named)
 		strncpy(ifr.ifr_name, name, IFNAMSIZ - 1);
 
 	if (ioctl(tap_fd, TUNSETIFF, &ifr) < 0) {
-		printf("%s: TUNSETIFF failed for %s: %s\n", devid_string, name, strerror(errno));
+		const int error = errno;
+		const struct passwd *pw = getpwuid(getuid());
+		const char *user = pw ? pw->pw_name : "<you>";
+		const char *dev = named ? name : "tap0";
+		printf("%s: Cannot attach to TAP device %s: %s\n", devid_string,
+		       named ? name : "(none configured)", strerror(error));
+		if (!named)
+			printf("%s: type = \"tap\" needs adapter = \"<tap device>\"; without a "
+			       "name the kernel would create one, which needs root.\n",
+			       devid_string);
+		if (error == EPERM || error == EACCES || !named)
+			printf("%s: Create the device once, owned by the user running the "
+			       "emulator, and bridge or route it on the host:\n"
+			       "%s:   sudo ip tuntap add dev %s mode tap user %s\n"
+			       "%s:   sudo ip link set %s up\n"
+			       "%s: then set adapter = \"%s\" for this NIC.\n",
+			       devid_string, devid_string, dev, user, devid_string, dev,
+			       devid_string, dev);
+		else if (error == EBUSY)
+			printf("%s: %s is already attached to another process (another "
+			       "emulator instance?).\n", devid_string, name);
 		::close(tap_fd);
 		tap_fd = -1;
 		return false;

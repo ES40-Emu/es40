@@ -202,6 +202,7 @@ private:
   bool disabled = false;     ///< Hide the UART from the guest.
   bool raw_mode = false;     ///< Skip telnet processing and the connection banner.
   bool null_attach = false;  ///< Provide an idle UART without a listener or client.
+  bool wait_for_connection = true; ///< Block start-up until a telnet client connects.
 #if defined(IDB) && defined(LS_MASTER)
   int throughSocket = INVALID_SOCKET;
 #endif

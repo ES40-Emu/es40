@@ -4325,7 +4325,7 @@ int CAlphaCPU::FindTBEntry(u64 virt, int flags, int asn)
 #define TB_ASN_MATCH(entry) ((entry).asm_bit || (entry).asn == asn)
 
 	// Page-indexed hint first, then the last match, then the linear scan (which refills the hint).
-	const u32 h = (u32)(virt >> 13) & 255;
+	const u32 h = tb_idx_slot(virt);
 	int i = (int)m_tb_idx[t][h] - 1;
 	if (i >= 0 && state.tb[t][i].valid
 		&& !((state.tb[t][i].virt ^ virt) & state.tb[t][i].match_mask)
@@ -4559,7 +4559,7 @@ int CAlphaCPU::virt2phys(u64 virt, u64* phys, int flags, bool* asm_bit, u32 ins)
 #ifdef JIT_STATS
 				m_stat_tb[0]++;
 				{
-					const int h = (int)m_tb_idx[t][(virt >> 13) & 255] - 1;
+					const int h = (int)m_tb_idx[t][tb_idx_slot(virt)] - 1;
 					if (h >= 0) m_stat_tb[state.tb[t][h].valid ? 9 : 8]++;
 					const u64 pg = virt >> 13; const u32 sl = (u32)(pg * 0x9E3779B1u) >> 25;
 					if (m_stat_va[sl][0] != pg) { m_stat_va[sl][0] = pg; m_stat_va[sl][1] = 0; }
@@ -4836,7 +4836,7 @@ void CAlphaCPU::add_tb(u64 virt, u64 pte_phys, u64 pte_flags, int flags, int asn
 	// every invalidate scans the whole buffer.
 	i = -1;
 	{
-		const int h = (int)m_tb_idx[t][(fill.virt >> 13) & 255] - 1;
+		const int h = (int)m_tb_idx[t][tb_idx_slot(fill.virt)] - 1;
 		if (h >= 0 && state.tb[t][h].valid
 			&& !((state.tb[t][h].virt ^ fill.virt) & state.tb[t][h].match_mask)
 			&& (state.tb[t][h].asm_bit || state.tb[t][h].asn == asn))
@@ -4884,7 +4884,7 @@ void CAlphaCPU::add_tb(u64 virt, u64 pte_phys, u64 pte_flags, int flags, int asn
 	if (t == TB_INDEX_DATA) m_stat_tb[7]++;
 #endif
 	state.last_found_tb[t][rw] = i;
-	m_tb_idx[t][(fill.virt >> 13) & 255] = (u16)(i + 1);
+	m_tb_idx[t][tb_idx_slot(fill.virt)] = (u16)(i + 1);
 
 #ifdef ES40_JIT
 	if (itb_changed && m_jit) m_jit->note_itb_invalidate(CJitEngine::kBumpRemap);

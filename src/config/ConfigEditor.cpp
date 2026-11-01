@@ -2692,26 +2692,31 @@ void edit_mpu401(const char *title)
 /**
  * Menu to remove system components from the configuration
  */
-void remove_component_add_choice(vector<MenuEntry_t> &choices, CConfigurator *c, string indent)
+void remove_component_add_choice(
+    vector<MenuEntry_t> &choices,
+    vector<CConfigurator *> &configs,
+    CConfigurator *c,
+    string indent
+)
 {
     char *myName = c->get_myName();
     string text;
-    SelectFuncPtr remove_callback = NULL;
+    CConfigurator *rem_c;
     
-    if (!strcmp(myName, "sys0") || !strcmp(myName, "cpu0")) 
+    if (!strcmp(myName, "sys0") || !strcmp(myName, "cpu0"))
+    {
         text = indent + "(" + myName + "=" + c->get_myValue() + ")";
+        rem_c = nullptr;
+    }
     else
     {
         text = indent + myName + "=" + c->get_myValue();
-        // ToDo: construct a remove_callback that removes c
-        // (capturing lambda doesn't work - std::function + std::bind ?)
-        auto doesnotwork = [c](const char *) {
-            c->get_myParent()->remove_child(c->get_myName());
-        };
+        rem_c = c;
     }
-    choices.push_back({strdup(text.c_str()), "", remove_callback});
+    choices.push_back({strdup(text.c_str()), "", NULL});
+    configs.push_back(rem_c);
     for (int i = 0; i < c->editor_child_count(); ++i)
-        remove_component_add_choice(choices, c->editor_child(i), indent + "  ");
+        remove_component_add_choice(choices, configs, c->editor_child(i), indent + "  ");
 }
 
 void remove_component(const char *title)
@@ -2720,17 +2725,22 @@ void remove_component(const char *title)
     do
     {
         vector<MenuEntry_t> choices;
+        vector<CConfigurator *> configs;
 
         CConfigurator *theGui = theConfig->find_child("gui");
         if (theGui != nullptr)
-            remove_component_add_choice(choices, theGui, "");
-        remove_component_add_choice(choices, sys0, "");
+            remove_component_add_choice(choices, configs, theGui, "");
+        remove_component_add_choice(choices, configs, sys0, "");
 
         sel = show_menu(title, choices.data(), choices.size(), MENU_2ND_LEVEL);
+
+        if (sel >= 0 && configs[sel] != nullptr)
+            configs[sel]->get_myParent()->remove_child(configs[sel]->get_myName());
 
         for (int i = 0; i < choices.size(); ++i)
             free((char*)choices[i].text);
         choices.clear();
+        configs.clear();
     } while (sel >= 0);
 }
 
@@ -2761,8 +2771,7 @@ bool main_menu(void)
         ,
         {"Remove components",
          "Remove system components from the configuration.\n"
-         "You can not remove the entries for sys0 or cpu0.\n"
-         "Warning: this is a dummy and does not yet work.",
+         "You can not remove the entries for sys0 or cpu0.",
          remove_component},
         {NULL, NULL, NULL},
         {"Help", "Help with program usage", show_help},

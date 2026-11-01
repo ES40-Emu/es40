@@ -2181,12 +2181,14 @@ u32 bx_x11_gui_c::translate_key(KeySym keysym, KeySym sdl_symbol)
 #ifdef XK_Print
 
       case XK_Print:
+      case XK_Sys_Req:
         key_event = BX_KEY_PRINT;
         break;
 #endif
 #ifdef XK_Pause
 
       case XK_Pause:
+      case XK_Break:
         key_event = BX_KEY_PAUSE;
         break;
 #endif

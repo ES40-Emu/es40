@@ -214,8 +214,8 @@ SafeOp classify(uint32_t ins, bool pal_block, const AlphaIPRReadPolicy& ipr_read
       if (f14 == 0x024) return OP_ITOFT;
       return OP_NONE;
     }
-    case 0x17: {  // FLTL: all non-arithmetic (FPCR moves, sign-copies, FCMOVs, CVTLQ/QL) via
-      // jit_fltl; only the /V trap variants of CVTQL stay interpreted.
+    case 0x17: {  // FLTL non-arithmetic: sign-copies and FCMOVs inline, FPCR moves and CVTLQ/QL
+      // via jit_fltl; only the /V trap variants of CVTQL stay interpreted.
       const uint32_t f17 = (ins >> 5) & 0x7ff;
       const bool ok = f17 == 0x010 || (f17 >= 0x020 && f17 <= 0x022) || f17 == 0x024
                    || f17 == 0x025 || (f17 >= 0x02a && f17 <= 0x02f) || f17 == 0x030;
@@ -414,6 +414,11 @@ struct CJitEngine::RegAlloc {
   bool dpc_live;                                 // previous guest op left RDX/R10/R11 = va/bias/slot
   int dpc_base, dpc_disp;
   bool dpc_write, dpc_force_align;
+  // Facts proved by an earlier successful inline T operation in this straight-line span.
+  bool fp_t_guarded = false;                     // FP enabled and FPCR.INE set
+  bool fp_t_exc_zero = false;                    // FPSTART's exception-summary clear is still live
+  bool fp_t_nearest = false;                     // dynamic FPCR rounding was checked as nearest
+  uint32_t fp_t_non_denormal = 0;                // FP registers holding checked arithmetic results
   // Direct exits: the terminator leaves its condition in FLAGS; exit_kind 1 = conditional, 2 = BR/BSR.
   bool     direct_exits;
   int      exit_kind;
@@ -844,6 +849,52 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
     uint32_t lit = (ins >> 13) & 0xFF;
     SafeOp op = classify(ins, pal_block, m_profile.ipr_read, m_profile.ipr_write,
         m_profile.pal, m_profile.hw_load, m_profile.hw_store);
+
+    const bool prev_fp_t_guarded = regalloc.fp_t_guarded;
+    const bool prev_fp_t_exc_zero = regalloc.fp_t_exc_zero;
+    const bool prev_fp_t_nearest = regalloc.fp_t_nearest;
+    const uint32_t prev_fp_t_non_denormal = regalloc.fp_t_non_denormal;
+    regalloc.fp_t_guarded = regalloc.fp_t_exc_zero = regalloc.fp_t_nearest = false;
+    regalloc.fp_t_non_denormal = 0;
+    // Helper-free integer operations preserve all facts. Other FP operations can
+    // overwrite a known result or FPCR; most memory/helper paths are also barriers.
+    // 
+    // We can shortcut here because of some of these facts. 
+    // 
+    // Branches also reset the facts before trace/chain boundary bookkeeping.
+    switch (op) {
+    case OP_NOP: case OP_MFENCE: case OP_LDA: case OP_LDAH:
+    case OP_ADDL: case OP_SUBL: case OP_ADDQ: case OP_SUBQ:
+    case OP_S4ADDL: case OP_S8ADDL: case OP_S4SUBL: case OP_S8SUBL:
+    case OP_S4ADDQ: case OP_S8ADDQ: case OP_S4SUBQ: case OP_S8SUBQ:
+    case OP_AND: case OP_BIS: case OP_XOR: case OP_BIC: case OP_ORNOT: case OP_EQV:
+    case OP_CMOV: case OP_AMASK: case OP_IMPLVER:
+    case OP_MULQ: case OP_MULL: case OP_UMULH:
+    case OP_SLL: case OP_SRL: case OP_SRA: case OP_SEXTB: case OP_SEXTW:
+    case OP_CTPOP: case OP_CTLZ: case OP_CTTZ:
+    case OP_CMPEQ: case OP_CMPLT: case OP_CMPLE: case OP_CMPULT: case OP_CMPULE:
+    case OP_CMPBGE:
+    case OP_EXTL: case OP_EXTH: case OP_INSL: case OP_INSH:
+    case OP_MSKL: case OP_MSKH: case OP_ZAP:
+        regalloc.fp_t_guarded = prev_fp_t_guarded;
+        regalloc.fp_t_exc_zero = prev_fp_t_exc_zero;
+        regalloc.fp_t_nearest = prev_fp_t_nearest;
+        regalloc.fp_t_non_denormal = prev_fp_t_non_denormal;
+        break;
+    case OP_LDT: case OP_STT:
+        // Successful raw FP memory helpers preserve FPEN/FPCR and all FPRs except
+        // LDT's destination. Retain existing proofs only. 
+        // 
+        // A successful VMS DTB refill can still write EXC_SUM after FPSTART,  Thereby 
+        // the next T operation must clear it at that operation's original position, 
+        // not in this helper.
+        regalloc.fp_t_guarded = prev_fp_t_guarded;
+        regalloc.fp_t_nearest = prev_fp_t_nearest;
+        regalloc.fp_t_non_denormal = op == OP_LDT
+            ? prev_fp_t_non_denormal & ~(uint32_t{1} << ra) : prev_fp_t_non_denormal;
+        break;
+    default: break;
+    }
 
     // A nearby ordinary memory op can reuse the previous op's translated page.
     const bool prev_dpc_live = regalloc.dpc_live;
@@ -1380,11 +1431,13 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             const Label raw_store = a.new_label();
             a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0));                          a.je(slow);   // fpen==0 -> FEN trap
             a.mov(x86::qword_ptr(x86::rbp, m_off.exc_sum), imm(0));                                    // exc_sum = 0
-            a.test(x86::dl, imm(7));                                                     a.jnz(slow);  // 8-byte aligned
             emit_dpc_offset();
             const int dpc_row = isload ? 0 : (int)m_off.dpc_write_row;
             a.mov(x86::r10, x86::rdx);
-            a.and_(x86::r10, imm(-0x2000));
+            // Page tags have zero alignment bits, including watched tags (marker bit 3).
+            // 
+            // Retaining bits 0..2 makes an unaligned address miss both tag comparisons.
+            a.and_(x86::r10, imm(-0x2000 | 7));
             a.cmp(x86::qword_ptr(x86::rbp, x86::r11, 0, dpc_row + (int)m_off.dpc_virt_page), x86::r10);
             a.jne(!isload && m_smp_memory ? watched_page : slow);
             a.mov(x86::r10, x86::qword_ptr(x86::rbp, x86::r11, 0, dpc_row + (int)m_off.dpc_host_bias));
@@ -1627,6 +1680,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                 else { mov_from_reg(x86::rax, rb); if (d) a.add(x86::rax, imm(d)); }
                 mov_to_reg(ra, x86::rax);
             }
+            if (ra != prev_dpc_base) preserve_dpc();
             continue;
         }
 
@@ -1751,18 +1805,25 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                 a.shl(x86::rax, imm(12)); a.jnz(bail);                       // exp == 0, mantissa != 0 -> denormal
                 a.bind(ok);
                 };
-            a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0)); a.je(bail);          // FPSTART: FP disabled -> FEN trap
-            a.mov(x86::qword_ptr(x86::rbp, m_off.exc_sum), imm(0));
-            a.bt(x86::qword_ptr(x86::rbp, m_off.fpcr), imm(56)); a.jnc(bail);        // INE clear -> first inexact traps
-            if (dyn) {                                                              // dynamic rounding: SSE gives nearest
+            if (!prev_fp_t_guarded) {
+                a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0)); a.je(bail);      // FPSTART: FP disabled -> FEN trap
+            }
+            if (!prev_fp_t_exc_zero)
+                a.mov(x86::qword_ptr(x86::rbp, m_off.exc_sum), imm(0));
+            if (!prev_fp_t_guarded) {
+                a.bt(x86::qword_ptr(x86::rbp, m_off.fpcr), imm(56)); a.jnc(bail);    // INE clear -> first inexact traps
+            }
+            if (dyn && !prev_fp_t_nearest) {                                         // dynamic rounding: SSE gives nearest
                 a.mov(x86::rax, x86::qword_ptr(x86::rbp, m_off.fpcr));
                 a.shr(x86::rax, imm(58)); a.and_(x86::eax, imm(3));
                 a.cmp(x86::eax, imm(2)); a.jne(bail);
             }
             a.movq(x86::xmm0, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)ra));   // f[Fa]
             a.movq(x86::xmm1, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rb));   // f[Fb]
-            class_bail(x86::xmm0, false);                                           // denormal operand -> interp (DNZ/trap)
-            class_bail(x86::xmm1, false);
+            if (!(prev_fp_t_non_denormal & (uint32_t{1} << ra)))
+                class_bail(x86::xmm0, false);                                       // denormal operand -> interp (DNZ/trap)
+            if (!(prev_fp_t_non_denormal & (uint32_t{1} << rb)))
+                class_bail(x86::xmm1, false);
             switch (op) {
             case OP_ADDT: a.addsd(x86::xmm0, x86::xmm1); break;
             case OP_SUBT: a.subsd(x86::xmm0, x86::xmm1); break;
@@ -1803,6 +1864,12 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             set_pc(b->tag + 4 * (uint64_t)i);
             JIT_STAT_EXIT(5); a.mov(x86::eax, imm(i)); a.add(x86::eax, x86::r13d); a.jmp(done);
             a.bind(cont);
+            // Only successful execution reaches the following instruction. Result
+            // and complete-underflow checks above remain mandatory for every op.
+            regalloc.fp_t_guarded = true;
+            regalloc.fp_t_exc_zero = true;
+            regalloc.fp_t_nearest = prev_fp_t_nearest || dyn;
+            regalloc.fp_t_non_denormal = prev_fp_t_non_denormal | (uint32_t{1} << rc);
             continue;
         }
 
@@ -2044,7 +2111,62 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             continue;
         }
 
-        // FLTL non-arithmetic (0x17): all effects in state.f / fpcr via jit_fltl(cpu, ins).
+        // FLTL sign copies and conditional moves operate on the raw register bits. 
+        // 
+        // Keep their FPSTART gate inline; 
+        // no rounding, exception processing, or helper call is needed, 
+        // even for NaNs and denormals.
+        const uint32_t fltl_func = (ins >> 5) & 0x7ff;
+        if (op == OP_FLTL && ((fltl_func >= 0x020 && fltl_func <= 0x022)
+            || (fltl_func >= 0x02a && fltl_func <= 0x02f))) {
+            Label bail = a.new_label(), cont = a.new_label();
+            a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0));
+            a.je(bail);
+            a.mov(x86::qword_ptr(x86::rbp, m_off.exc_sum), imm(0));
+            a.mov(x86::rax, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)ra));
+            if (fltl_func <= 0x022) {
+                // Identical sources are a raw move (or a sign flip for CPYSN).
+                if (ra != rb) {
+                    a.mov(x86::rcx, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rb));
+                    if (fltl_func == 0x022) {                    // CPYSE: sign and exponent from Fa
+                        a.shr(x86::rax, imm(52)); a.shl(x86::rax, imm(52));
+                        a.shl(x86::rcx, imm(12)); a.shr(x86::rcx, imm(12));
+                    } else {                                    // CPYS/CPYSN: sign from Fa
+                        a.shr(x86::rax, imm(63)); a.shl(x86::rax, imm(63));
+                        a.btr(x86::rcx, imm(63));
+                    }
+                    a.or_(x86::rax, x86::rcx);
+                }
+                if (fltl_func == 0x021) a.btc(x86::rax, imm(63));  // CPYSN: invert the copied sign
+                a.mov(x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rc), x86::rax);
+            } else {
+                Label skip = a.new_label(), copy = a.new_label();
+                // CF = sign, ZF = magnitude is zero. Both signed zeros compare equal;
+                // all other encodings (including NaNs) retain the helper's bit tests.
+                a.add(x86::rax, x86::rax);
+                switch (fltl_func) {
+                case 0x02a: a.jnz(skip); break;                  // FCMOVEQ
+                case 0x02b: a.jz(skip); break;                   // FCMOVNE
+                case 0x02c: a.jnc(skip); a.jz(skip); break;      // FCMOVLT
+                case 0x02d: a.jnc(copy); a.jnz(skip); break;     // FCMOVGE
+                case 0x02e: a.jc(copy); a.jnz(skip); break;      // FCMOVLE
+                default:    a.jc(skip); a.jz(skip); break;       // FCMOVGT
+                }
+                a.bind(copy);
+                a.mov(x86::rax, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rb));
+                a.mov(x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rc), x86::rax);
+                a.bind(skip);
+            }
+            a.jmp(cont);
+            a.bind(bail);
+            set_pc(b->tag + 4 * (uint64_t)i);                      // FEN trap: retry in the interpreter
+            a.mov(x86::eax, imm(i)); a.add(x86::eax, x86::r13d); a.jmp(done);
+            a.bind(cont);
+            preserve_dpc();                                      // only RAX/RCX were used on the live path
+            continue;
+        }
+
+        // Remaining FLTL operations retain their FPCR/conversion helper semantics.
         if (op == OP_FLTL) {
             emit_call(fltl_helper, { {JA_CPU, 0}, {JA_I32, (uint64_t)ins} });  // jit_fltl(cpu, ins)
             Label ok = a.new_label();
@@ -2566,10 +2688,30 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         }
 
         if (rc != 31 && !result_in_dest) mov_to_reg(rc, x86::rax);
-        if ((op == OP_ADDL || op == OP_SUBL || op == OP_ADDQ || op == OP_SUBQ
-             || op == OP_AND || op == OP_BIS || op == OP_XOR)
-            && rc != prev_dpc_base)
-            preserve_dpc();
+        // These integer emitters leave the cached VA, page slot and host bias in
+        // RDX/R11/R10 intact. Keep them available to the next memory operation
+        // unless this instruction changed its address base. 
+        // 
+        // That next operation still checks the page tag and alignment, 
+        // including after a slow helper.
+        // 
+        // UMULH uses RDX and CTTZ uses R10, so neither belongs in this list.
+        if (rc != prev_dpc_base) {
+            switch (op) {
+            case OP_ADDL: case OP_SUBL: case OP_ADDQ: case OP_SUBQ:
+            case OP_S4ADDL: case OP_S8ADDL: case OP_S4SUBL: case OP_S8SUBL:
+            case OP_S4ADDQ: case OP_S8ADDQ: case OP_S4SUBQ: case OP_S8SUBQ:
+            case OP_AND: case OP_BIS: case OP_XOR: case OP_BIC: case OP_ORNOT: case OP_EQV:
+            case OP_MULQ: case OP_MULL:
+            case OP_SLL: case OP_SRL: case OP_SRA: case OP_SEXTB: case OP_SEXTW:
+            case OP_CTPOP: case OP_CTLZ: case OP_AMASK: case OP_IMPLVER:
+            case OP_CMPEQ: case OP_CMPLT: case OP_CMPLE: case OP_CMPULT: case OP_CMPULE:
+            case OP_CMPBGE:
+                preserve_dpc();
+                break;
+            default: break;
+            }
+        }
     } while (0);
 }
 
@@ -3815,6 +3957,8 @@ void CJitEngine::compile_trace(TraceFragment* t, JitBlock** blocks, uint32_t n_b
     JitBlock* b = blocks[o.blk];
     switch (o.kind) {
     case RegionOp::BLOCK_ENTER:
+      ra.fp_t_guarded = ra.fp_t_exc_zero = ra.fp_t_nearest = false;
+      ra.fp_t_non_denormal = 0;
       // Default R10 + state.pc = this block's sequential next (the fall-through exit). emit_op's branch/jump
       // terminator overwrites both with its target; a fault bail writes the fault PC. For an intermediate
       // block this also makes the guard below see R10 == the sequential successor when it falls through.
@@ -3848,6 +3992,8 @@ void CJitEngine::compile_trace(TraceFragment* t, JitBlock** blocks, uint32_t n_b
   }
   if (!RegionIR) {
     for (uint32_t bi = 0; bi < n_blocks; ++bi) {
+      ra.fp_t_guarded = ra.fp_t_exc_zero = ra.fp_t_nearest = false;
+      ra.fp_t_non_denormal = 0;
       JitBlock* b = blocks[bi];
       const uint32_t plen = source_desc[bi].n_instr;
       const uint32_t* words = source_words[bi].data();

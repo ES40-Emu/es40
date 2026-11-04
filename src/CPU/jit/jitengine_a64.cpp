@@ -53,6 +53,16 @@ struct A64DpcState {
   int32_t  disp = 0;
 };
 
+// facts on the successful straight-line path, not host-register caches.
+// 
+// Every block starts with no facts, including when entered through a chain.
+struct A64FpTState {
+  bool guarded = false;       // FP enabled and FPCR.INE set
+  bool exc_zero = false;      // EXC_SUM is zero at this point
+  bool nearest = false;       // dynamic rounding was checked as round-to-nearest
+  uint32_t non_denormal = 0;  // FPRs holding checked T arithmetic results
+};
+
 // register convention for both block and trace codegen:
 //   x9-x15 = transient expansion/tail scratch; x19 = CAlphaCPU*, x20 = state.r[] base,
 //   x21 = completed-instruction count, x22 = next guest PC / chain target,
@@ -61,6 +71,7 @@ struct CJitEngine::RegAlloc {
   static constexpr uint32_t kGuestPinCount = 6;
   A64DpcState dpc{};
   int8_t fwd_reg = -1;   // guest GPR whose value kScratch2 still mirrors (x64 rax_holds)
+  A64FpTState fp_t{};
 
   static constexpr asmjit::a64::Gp kArgCpu = asmjit::a64::x0;
   static constexpr asmjit::a64::Gp kArgRegs = asmjit::a64::x1;
@@ -228,7 +239,7 @@ enum class A64OpKind : uint8_t {
   kHwSt,          // HW_ST (0x1f): physical DRAM inline, MMIO/verify via jit_write_phys
   kIntm,          // INTM (0x13) MULQ/MULL/UMULH -> mul / mul+sxtw / umulh
   kFpMem,         // FP memory (0x20-0x27): f[Fa] <-> MEM via jit_fp_read/jit_fp_write
-  kFltl,          // FLTL (0x17) non-arithmetic via jit_fltl (0/1 = FEN retry)
+  kFltl,          // FLTL (0x17): raw copies/conditional moves inline, other forms via helper
   kFltv,          // FLTV (0x15) VAX arith via jit_fltv (0/1 FEN retry/2 arith trap)
   kItof,          // ITFP ITOFS/ITOFF/ITOFT via jit_itof (0/1 = FEN retry)
   kBranchFp,      // FP branches (0x31-0x37): FPSTART gate + sign-magnitude compare
@@ -2709,6 +2720,7 @@ struct A64EmitContext {
   asmjit::Label direct_taken{};
   uint64_t direct_target = 0;
   uint64_t direct_fall = 0;
+  A64FpTState prev_fp_t{};                    // semantic facts entering the current op
 };
 
 // Rc = Ra <logical> op2 -- each of the six is one A64 register-form op. The 8-bit
@@ -4788,6 +4800,7 @@ static asmjit::Error emit_a64_load_f_bits(A64EmitContext& c,
                                           const asmjit::a64::Gp& x, uint32_t freg);
 static asmjit::Error emit_a64_store_f_bits(A64EmitContext& c,
                                            const asmjit::a64::Gp& x, uint32_t freg);
+static asmjit::Error emit_a64_fp_start(A64EmitContext& c, const asmjit::Label& bail);
 
 // FP-memory helper sequence. Production carries the instruction in descr[63:32]
 // so a fault can enter PAL without retrying the instruction in the interpreter.
@@ -4904,12 +4917,63 @@ static asmjit::Error emit_a64_retry_bail(A64EmitContext& context, uint32_t index
   return err != Error::kOk ? err : a.b(context.done);
 }
 
-// FLTL non-arithmetic: jit_fltl(cpu, ins) does all effects in f[]/fpcr
+// Raw FLTL copies and conditional moves use integer bits, including NaNs and -0.
+// 
+// FPCR access and conversions retain the helper's architectural behavior.
 static A64OpEmitReceipt emit_a64_fltl(A64EmitContext& context,
                                       const A64DecodedOp& op, uint32_t index)
 {
+  using RA = CJitEngine::RegAlloc;
   using namespace asmjit;
   a64::Assembler& a = context.assembler;
+  const uint32_t fn = (op.ins >> 5) & 0x7ffu;
+  if ((fn >= 0x020 && fn <= 0x022) || (fn >= 0x02a && fn <= 0x02f)) {
+    const Label bail = a.new_label(), cont = a.new_label();
+    Error err = emit_a64_fp_start(context, bail);
+    if (err == Error::kOk) err = emit_a64_load_f_bits(context, RA::kScratch0, op.ra);
+    if (fn <= 0x022) {
+      if (op.ra != op.rb) {
+        const uint64_t mask = fn == 0x022 ? 0xfff0000000000000ull : 0x8000000000000000ull;
+        if (err == Error::kOk) err = emit_a64_load_f_bits(context, RA::kScratch1, op.rb);
+        if (err == Error::kOk) err = a.and_(RA::kScratch0, RA::kScratch0, imm(mask));
+        if (err == Error::kOk) err = a.and_(RA::kScratch1, RA::kScratch1, imm(~mask));
+        if (err == Error::kOk) err = a.orr(RA::kScratch0, RA::kScratch0, RA::kScratch1);
+      }
+      if (err == Error::kOk && fn == 0x021)
+        err = a.eor(RA::kScratch0, RA::kScratch0, imm(0x8000000000000000ull));
+    } else {
+      // Shifting away the sign tests either signed zero without interpreting FP bits.
+      if (err == Error::kOk) err = a.lsl(RA::kScratch1, RA::kScratch0, imm(1));
+      if (err != Error::kOk) return a64_completed_op_receipt(op, err);
+      switch (fn) {
+        case 0x02a: err = a.cbnz(RA::kScratch1, cont); break;   // EQ
+        case 0x02b: err = a.cbz(RA::kScratch1, cont); break;    // NE
+        case 0x02c:                                           // LT
+          err = a.tbz(RA::kScratch0, imm(63), cont);
+          if (err == Error::kOk) err = a.cbz(RA::kScratch1, cont);
+          break;
+        case 0x02d: case 0x02e: {                             // GE / LE
+          const Label move = a.new_label();
+          err = fn == 0x02d ? a.tbz(RA::kScratch0, imm(63), move)
+                            : a.tbnz(RA::kScratch0, imm(63), move);
+          if (err == Error::kOk) err = a.cbnz(RA::kScratch1, cont);
+          if (err == Error::kOk) err = a.bind(move);
+          break;
+        }
+        case 0x02f:                                           // GT
+          err = a.tbnz(RA::kScratch0, imm(63), cont);
+          if (err == Error::kOk) err = a.cbz(RA::kScratch1, cont);
+          break;
+      }
+      if (err == Error::kOk) err = emit_a64_load_f_bits(context, RA::kScratch0, op.rb);
+    }
+    if (err == Error::kOk) err = emit_a64_store_f_bits(context, RA::kScratch0, op.rc);
+    if (err == Error::kOk) err = a.b(cont);
+    if (err == Error::kOk) err = a.bind(bail);
+    if (err == Error::kOk) err = emit_a64_retry_bail(context, index);
+    if (err == Error::kOk) err = a.bind(cont);
+    return a64_completed_op_receipt(op, err);
+  }
   Error err = emit_a64_helper_call(a, context.offsets, context.helpers,
       context.regs, context.pal_shadow, context.helpers.fltl_helper,
       {{A64CallArgKind::kCpu, 0}, {A64CallArgKind::kImm32, op.ins}});
@@ -5177,13 +5241,25 @@ static A64OpEmitReceipt emit_a64_flti_arith(A64EmitContext& context,
   const uint32_t k = baseop & 3u;   // 0=add 1=sub 2=mul 3=div
 
   const Label bail = a.new_label(), cont = a.new_label();
-  Error err = emit_a64_fp_start(context, bail);
-  if (err == Error::kOk) err = emit_a64_fp_ine_gate(context, bail);
-  if (err == Error::kOk && dyn) err = emit_a64_fp_dyn_gate(context, bail);
+  const A64FpTState prev = sgl ? A64FpTState{} : context.prev_fp_t;
+  Error err = Error::kOk;
+  if (!prev.guarded) {
+    err = emit_a64_load_cpu_u8(a, RA::kScratch3.w(), context.offsets.fpen, false);
+    if (err == Error::kOk) err = a.cbz(RA::kScratch3.w(), bail);
+  }
+  if (err == Error::kOk && !prev.exc_zero) {
+    err = emit_a64_mov_u64(a, RA::kScratch0, 0);
+    if (err == Error::kOk)
+      err = emit_a64_store_cpu_u64(a, RA::kScratch0, context.offsets.exc_sum);
+  }
+  if (err == Error::kOk && !prev.guarded) err = emit_a64_fp_ine_gate(context, bail);
+  if (err == Error::kOk && dyn && !prev.nearest) err = emit_a64_fp_dyn_gate(context, bail);
   if (err == Error::kOk) err = emit_a64_load_f(context, a64::d16, op.ra);
   if (err == Error::kOk) err = emit_a64_load_f(context, a64::d17, op.rb);
-  if (err == Error::kOk) err = emit_a64_dbl_class_bail(context, a64::d16, false, bail);
-  if (err == Error::kOk) err = emit_a64_dbl_class_bail(context, a64::d17, false, bail);
+  if (err == Error::kOk && !(prev.non_denormal & (uint32_t{1} << op.ra)))
+    err = emit_a64_dbl_class_bail(context, a64::d16, false, bail);
+  if (err == Error::kOk && !(prev.non_denormal & (uint32_t{1} << op.rb)))
+    err = emit_a64_dbl_class_bail(context, a64::d17, false, bail);
   if (err != Error::kOk) return a64_completed_op_receipt(op, err);
 
   if (sgl) {
@@ -5239,6 +5315,12 @@ static A64OpEmitReceipt emit_a64_flti_arith(A64EmitContext& context,
   if (err == Error::kOk) err = a.bind(bail);
   if (err == Error::kOk) err = emit_a64_retry_bail(context, index);
   if (err == Error::kOk) err = a.bind(cont);
+  if (err == Error::kOk && !sgl) {
+    context.regs.fp_t.guarded = true;
+    context.regs.fp_t.exc_zero = true;
+    context.regs.fp_t.nearest = prev.nearest || dyn;
+    context.regs.fp_t.non_denormal = prev.non_denormal | (uint32_t{1} << op.rc);
+  }
   return a64_completed_op_receipt(op, err);
 }
 
@@ -5570,10 +5652,45 @@ static A64OpEmitReceipt emit_a64_dispatch_op(A64EmitContext& context,
   return {};
 }
 
-// Wrap the dispatch with the cross-op DPC-reuse.
+// Wrap dispatch with cross-op caches and conservative architectural FP facts.
 static A64OpEmitReceipt emit_a64_planned_op(A64EmitContext& context,
     const A64DecodedOp& op, uint32_t index)
 {
+  context.prev_fp_t = context.regs.fp_t;
+  context.regs.fp_t = {};
+  // Only explicit helper-free integer operations preserve every FP fact. 
+  // 
+  // Branches, other FP writers and all other helpers/memory accesses are barriers.
+  switch (op.kind) {
+    case A64OpKind::kIntlLogical: case A64OpKind::kIntsShift: case A64OpKind::kIntsZap:
+    case A64OpKind::kIntlCmov:    case A64OpKind::kIntlProbe: case A64OpKind::kIntsByte:
+    case A64OpKind::kFptiInt:     case A64OpKind::kIntm:      case A64OpKind::kInta:
+    case A64OpKind::kLoadAddress:
+      context.regs.fp_t = context.prev_fp_t;
+      break;
+    case A64OpKind::kMisc:
+      switch (op.ins & 0xffffu) {
+        case 0x0000: case 0x0400: case 0x4000: case 0x4400:
+        case 0x8000: case 0xA000: case 0xE800: case 0xF800: case 0xFC00:
+          context.regs.fp_t = context.prev_fp_t;
+          break;
+        default: break;
+      }
+      break;
+    case A64OpKind::kFpMem:
+      if (op.opcode == 0x23 || op.opcode == 0x27) {
+        // Successful raw LDT/STT helpers preserve FPEN/FPCR and other FPRs, but
+        // a successful VMS DTB refill can write EXC_SUM after FPSTART. 
+        // 
+        // Retain existing proofs only; clear EXC_SUM at the next T op's original site.
+        context.regs.fp_t = context.prev_fp_t;
+        context.regs.fp_t.exc_zero = false;
+        if (op.opcode == 0x23)
+          context.regs.fp_t.non_denormal &= ~(uint32_t{1} << op.ra);
+      }
+      break;
+    default: break;
+  }
   context.prev_dpc = context.regs.dpc;
   context.prev_fwd = context.regs.fwd_reg;
   if (!kA64DpcReuse) context.prev_dpc.live = false;   // kill-switches: bisect aids

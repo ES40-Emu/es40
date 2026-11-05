@@ -409,6 +409,25 @@ AC_ARG_ENABLE([cfg-sdl],
   [], [enable_cfg_sdl=yes])
 AM_CONDITIONAL([BUILD_CFG_SDL], [test "x$enable_sdl" != "xno" -a "x$enable_cfg_sdl" != "xno"])
 
+# es40_cfg_gtk, the GTK 3 desktop editor for Linux/BSD. Checked after LIBS is
+# cleared so es40 itself never links GTK.
+AC_ARG_ENABLE([cfg-gtk],
+  [AS_HELP_STRING([--enable-cfg-gtk@<:@=yes|no|auto@:>@],
+    [build es40_cfg_gtk, the GTK 3 configuration editor (default: auto)])],
+  [],
+  [enable_cfg_gtk=auto])
+
+have_cfg_gtk=no
+AS_IF([test "x$enable_cfg_gtk" != "xno"], [
+  PKG_CHECK_MODULES([GTK3], [gtk+-3.0 >= 3.22], [have_cfg_gtk=yes], [have_cfg_gtk=no])
+  AS_IF([test "x$enable_cfg_gtk" = "xyes" -a "x$have_cfg_gtk" = "xno"], [
+    AC_MSG_FAILURE([--enable-cfg-gtk requires the GTK 3 development files])
+  ])
+])
+AC_SUBST([GTK3_CFLAGS])
+AC_SUBST([GTK3_LIBS])
+AM_CONDITIONAL([BUILD_CFG_GTK], [test "x$have_cfg_gtk" = "xyes"])
+
 # Generate the various makefiles.
 AC_CONFIG_FILES([Makefile m4/Makefile src/Makefile])
 AC_OUTPUT

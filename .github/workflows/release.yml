@@ -76,9 +76,9 @@ jobs:
 
           mkdir -p assets
           for d in dist/*/; do
-            # Prebuilt packages (only .tar.gz inside) ship as-is; re-zipping drops the exec bit.
-            if compgen -G "$d*.tar.gz" > /dev/null && [ -z "$(find "$d" -type f ! -name '*.tar.gz' -print -quit)" ]; then
-              cp "$d"*.tar.gz assets/
+            # Prebuilt packages (only .tar.gz / .deb inside) ship as-is; re-zipping drops the exec bit.
+            if [ -n "$(find "$d" -type f -print -quit)" ] && [ -z "$(find "$d" -type f ! -name '*.tar.gz' ! -name '*.deb' -print -quit)" ]; then
+              find "$d" -type f \( -name '*.tar.gz' -o -name '*.deb' \) -exec cp {} assets/ \;
               continue
             fi
             name="$(basename "$d")"

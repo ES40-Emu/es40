@@ -25,6 +25,7 @@
 #include "ConfigDocument.h"
 #include "Configurator.h"
 #include <algorithm>
+#include <cstring>
 #include <fcntl.h>
 #include <random>
 #include <set>
@@ -60,6 +61,18 @@ static bool bare(const std::string& value)
         { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
                  (c >= '0' && c <= '9') || c == '_' || c == '.'; });
 }
+// Numbers, sizes (2G) and booleans are written bare like the shipped es40.cfg does; anything else is quoted.
+static bool plain_value(const std::string& value)
+{
+    if (value.empty() || value.size() > 20) return false;
+    std::string lowered;
+    for (unsigned char c : value) lowered += (char)tolower(c);
+    if (lowered == "true" || lowered == "false" || lowered == "yes" || lowered == "no") return true;
+    size_t digits = 0;
+    while (digits < value.size() && value[digits] >= '0' && value[digits] <= '9') ++digits;
+    if (!digits) return false;
+    return digits == value.size() || (digits == value.size() - 1 && strchr("KkMmGg", value.back()));
+}
 static std::string encode_value(const std::string& value)
 {
     std::string result = "\"";
@@ -72,6 +85,7 @@ static std::string encode_value(const std::string& value)
     }
     return result + "\"";
 }
+static std::string plain_or_quoted(const std::string& value) { return plain_value(value) ? value : encode_value(value); }
 static std::string replacement(const ConfigDocumentToken& old, const std::string& value, const std::string& source)
 {
     return source[old.begin] != '"' && bare(value) ? value : encode_value(value);
@@ -294,9 +308,23 @@ struct ConfigDocument::Impl
         std::string value = node->get_myValue();
         std::string result = padding + node->get_myName() + " = " + (bare(value) ? value : encode_value(value)) + newline + padding + "{" + newline;
         for (int i = 0; i < node->editor_value_count(); ++i)
-            result += padding + "  " + node->editor_value_name(i) + " = " + encode_value(node->editor_value(i)) + ";" + newline;
+            result += padding + "  " + node->editor_value_name(i) + " = " + plain_or_quoted(node->editor_value(i)) + ";" + newline;
         for (int i = 0; i < node->editor_child_count(); ++i) result += serialize(node->editor_child(i), padding + "  ");
         return result + padding + "}" + newline;
+    }
+    // A removed entry takes its whole line when nothing else shares it, so no blank indented line stays behind.
+    ConfigDocumentPatch removal(size_t begin, size_t end) const
+    {
+        size_t line = begin;
+        while (line > 0 && (text[line - 1] == ' ' || text[line - 1] == '\t')) --line;
+        const bool starts_line = line == 0 || text[line - 1] == '\n' || text[line - 1] == '\r';
+        size_t after = end;
+        while (after < text.size() && (text[after] == ' ' || text[after] == '\t')) ++after;
+        const bool ends_line = after >= text.size() || text[after] == '\n' || text[after] == '\r';
+        if (!starts_line || !ends_line) return {begin, end, ""};
+        if (after < text.size() && text[after] == '\r') ++after;
+        if (after < text.size() && text[after] == '\n') ++after;
+        return {line, after, ""};
     }
     void insert(const ConfigDocumentEntry& entry, const std::string& content, std::vector<ConfigDocumentPatch>& patches) const
     {
@@ -329,7 +357,7 @@ struct ConfigDocument::Impl
                 int match = -1;
                 for (int i = 0; i < node->editor_value_count(); ++i)
                     if (!values.count(i) && child.name.value == node->editor_value_name(i)) { match = i; break; }
-                if (match < 0) patches.push_back({child.name.begin, child.end, ""});
+                if (match < 0) patches.push_back(removal(child.name.begin, child.end));
                 else
                 {
                     values.insert(match);
@@ -345,14 +373,14 @@ struct ConfigDocument::Impl
                 if (match < 0)
                     for (int i = 0; i < node->editor_child_count(); ++i)
                         if (!children.count(i) && !original_children.count(node->editor_child(i)) && child.name.value == node->editor_child(i)->get_myName()) { match = i; break; }
-                if (match < 0) patches.push_back({child.name.begin, child.end, ""});
+                if (match < 0) patches.push_back(removal(child.name.begin, child.end));
                 else { children.insert(match); render(child, node->editor_child(match), patches); }
             }
         }
         std::string added;
         const auto padding = child_indent(entry);
         for (int i = 0; i < node->editor_value_count(); ++i)
-            if (!values.count(i)) added += padding + node->editor_value_name(i) + " = " + encode_value(node->editor_value(i)) + ";" + newline;
+            if (!values.count(i)) added += padding + node->editor_value_name(i) + " = " + plain_or_quoted(node->editor_value(i)) + ";" + newline;
         std::vector<int> order;
         for (int i = 0; i < node->editor_child_count(); ++i) order.push_back(i);
         if (&entry == &root)

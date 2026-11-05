@@ -32,6 +32,13 @@
 
 #include "NetworkPcap.h"
 #include "config/Configurator.h"
+#if defined(_WIN32)
+#include <io.h>
+#define isatty _isatty
+#define fileno _fileno
+#else
+#include <unistd.h>
+#endif
 
 #ifdef _WIN32
 /* Pointers to the real functions, resolved at runtime from wpcap.dll. */
@@ -141,8 +148,19 @@ bool CNetworkPcap::init(const char *devid_string, CConfigurator *cfg)
 	char errbuf[PCAP_ERRBUF_SIZE];
 
 	char *adapter = cfg->get_text_value("adapter");
+	/* The configuration editor writes adapter = "list" to mean "ask". */
+	if (adapter && !strcasecmp(adapter, "list"))
+		adapter = NULL;
 	bool  from_menu = (adapter == NULL);
 	if (!adapter) {
+		if (!isatty(fileno(stdin))) {
+			printf("%s: No adapter configured and no terminal to choose one on "
+			       "(started from a GUI or as a service?).\n"
+			       "%s: Set adapter = \"<host interface>\" for this NIC, or use "
+			       "type = \"slirp\", which needs neither.\n",
+			       devid_string, devid_string);
+			return false;
+		}
 		printf("\n%s: Choose a network adapter to connect to:\n", devid_string);
 		if (pcap_findalldevs(&alldevs, errbuf) == -1) {
 			printf("%s: Error in pcap_findalldevs: %s\n", devid_string, errbuf);
@@ -231,6 +249,14 @@ bool CNetworkPcap::init(const char *devid_string, CConfigurator *cfg)
 #endif
 	{
 		printf("%s: Error opening adapter %s:\n %s\n", devid_string, adapter, errbuf);
+#if !defined(WIN32)
+		if (strstr(errbuf, "permission") || strstr(errbuf, "Permission"))
+			printf("%s: Capturing needs raw-socket rights. Either run the emulator "
+			       "as root, or grant them once with:\n"
+			       "%s:   sudo setcap cap_net_raw,cap_net_admin+eip $(command -v es40)\n"
+			       "%s: (repeat after reinstalling the package), or use type = "
+			       "\"tap\" or \"slirp\".\n", devid_string, devid_string, devid_string);
+#endif
 		return false;
 	}
 

@@ -2370,6 +2370,7 @@ void CS3Trio64::init()
 {
 	// Register PCI device
 	add_function(0, s3_cfg_data, s3_cfg_mask);
+	m_wake_on_reset = myCfg->get_bool_value("wake_on_reset", false);
 
 	// Make the 21272/21274 PCI config window visible for this device now.
 	// NetBSD reads PCI_ID_REG at 0/1/0 during console bring-up; without this
@@ -2398,6 +2399,9 @@ void CS3Trio64::init()
 	add_legacy_io(8, 0x3d4, 2);
 	add_legacy_io(9, 0x3da, 1);
 	add_legacy_io(32, 0x102, 1);
+	// GNU vgabios prints its banner and errors to port 0x500; log them instead
+	// of reporting each byte as an unknown port write.
+	add_legacy_io(7, 0x500, 1);
 
 	// Register CRTC address-map handlers.  Must be called before any
 	// m_crtc_map.write_byte() so that writes dispatch through handlers
@@ -3113,6 +3117,15 @@ void CS3Trio64::ResetPCI()
 	m_setup_option_select_0102 = 0;
 	s3.cr65 = 0;
 	CPCIDevice::ResetPCI();
+	if (m_wake_on_reset)
+	{
+		// The state the card's own BIOS leaves behind: setup mode left with
+		// the subsystem enabled (46E8 bit 3), 0102 bit 0 set, and COMMAND
+		// I/O and memory space enabled (DB014-B 6.1.2, 14-47/48).
+		m_video_subsys_enable = 0x08;
+		m_setup_option_select_0102 = 0x01;
+		pci_state.config_data[0][1] |= endian_32(0x3U);
+	}
 }
 
 bool CS3Trio64::normal_access_enabled() const noexcept
@@ -3319,6 +3332,11 @@ u32 CS3Trio64::ReadMem_Legacy(int index, u32 address, int dsize)
 		data = legacy_read(address, dsize);
 		break;
 
+		// BIOS message port (0x500): write-only
+	case 7:
+		data = 0xff;
+		break;
+
 		// IO Port 0x3d4
 	case 8:
 		data = io_read(address + 0x3d4, dsize);
@@ -3388,6 +3406,21 @@ void CS3Trio64::WriteMem_Legacy(int index, u32 address, int dsize, u32 data)
 		// VGA Memory
 	case 4:
 		legacy_write(address, dsize, data);
+		return;
+
+		// BIOS message port (0x500)
+	case 7:
+		if ((data & 0xff) == 0x0a || (data & 0xff) == 0x0d)
+		{
+			if (bios_message_size > 0)
+			{
+				bios_message[bios_message_size] = '\0';
+				printf("%%VGA-I-BIOS: %s: %s\n", devid_string, bios_message);
+			}
+			bios_message_size = 0;
+		}
+		else if (bios_message_size < (int)sizeof(bios_message) - 1)
+			bios_message[bios_message_size++] = (char)(data & 0xff);
 		return;
 
 		// IO Port 0x3d4

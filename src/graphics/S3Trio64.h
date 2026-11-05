@@ -295,6 +295,13 @@ private:
   // its option byte. Both power on with CPU display access disabled.
   u8 m_video_subsys_enable = 0x00;
   u8 m_setup_option_select_0102 = 0x00;
+  // Configuration "wake_on_reset": leave reset with the video subsystem
+  // enabled and PCI I/O and memory decoding on, as the S3 BIOS would set up.
+  // Generic VGA BIOS images (GNU vgabios) never touch the S3 setup registers.
+  bool m_wake_on_reset = false;
+  // Text the VGA BIOS writes to port 0x500 (Bochs/GNU vgabios convention), one line at a time.
+  char bios_message[200] = {};
+  int bios_message_size = 0;
   bool normal_access_enabled() const noexcept;
   bool io_access_enabled(u32 port, bool write) const noexcept;
 

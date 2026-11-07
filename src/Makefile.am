@@ -221,6 +221,8 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        CPU/AlphaCPU_vaxfloat.cpp \
        CPU/AlphaCPU_vmspal.cpp \
        AlphaSim.cpp \
+       graphics/Cirrus.cpp \
+       graphics/Cirrus.h \
        config/Configurator.cpp \
        network/DEC21143.cpp \
        storage/Disk.cpp \

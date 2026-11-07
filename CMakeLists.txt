@@ -432,7 +432,7 @@ list(APPEND ES40_SOURCES
     src/CPU/AlphaHWStore.h
     src/CPU/Ev68HWStore.h
     src/AlphaSim.cpp
-    # src/graphics/Cirrus.cpp
+    src/graphics/Cirrus.cpp
     src/config/Configurator.cpp
     src/network/DEC21143.cpp
     src/storage/Disk.cpp

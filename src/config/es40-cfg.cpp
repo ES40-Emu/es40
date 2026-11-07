@@ -1121,7 +1121,7 @@ int main(int argc, char* argv[])
 		vga_q.setExplanation("Functionality of the different cards is pretty much the same; some OS'es seem to have a preference, though.");
 		vga_q.setDefault("S3");
 		vga_q.addAnswer("none", "", "No graphics card");
-		//vga_q.addAnswer("Cirrus", "cirrus", "Cirrus CL-GD something");
+		vga_q.addAnswer("Cirrus", "cirrus", "Cirrus Logic / Acumos VGA");
 		vga_q.addAnswer("S3", "s3", "S3 Trio 64");
 		vga_q.addAnswer("Gloria", "gloria", "ELSA GLoria Synergy (Permedia 2)");
 		vga_q.addAnswer("Radeon", "radeon", "ATI Radeon 7500 (RV200)");
@@ -1169,6 +1169,18 @@ int main(int argc, char* argv[])
 			layout_q.addAnswer("pad_ff", "pad_ff", "Pad the image to a power of two with 0xFF");
 			layout_q.setDefault("pad_ff");
 			os << "    rom_layout = \"" << layout_q.ask() << "\";\n";
+		}
+		if (vga_q.getAnswer() == "cirrus")
+		{
+			MultipleChoiceQuestion model_q;
+			model_q.setQuestion("Which Cirrus model should be emulated?");
+			model_q.addAnswer("GD5401", "GD5401", "Cirrus Logic GD5401");
+			model_q.addAnswer("GD5428", "GD5428", "Cirrus Logic GD5428");
+			model_q.addAnswer("GD5430", "GD5430", "Cirrus Logic GD5430");
+			model_q.addAnswer("GD5446", "GD5446", "Cirrus Logic GD5446");
+			model_q.addAnswer("AVGA1", "AVGA1", "Acumos AVGA1 (GD5401)");
+			model_q.setDefault("GD5430");
+			os << "    model = \"" << model_q.ask() << "\";\n";
 		}
 		os << "  }\n\n";
 	}

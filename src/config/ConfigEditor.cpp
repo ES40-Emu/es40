@@ -334,8 +334,8 @@ static CConfigurator *edit_node(CConfigurator *parent, CConfigurator *node,
                                 const std::string& name, const char *type)
 {
     if (!node) return new CConfigurator(parent, (char *)name.c_str(), (char *)type);
-    node->set_myName((char *)name.c_str());
-    node->set_myValue(type);
+    if (strcasecmp(node->get_myName(), name.c_str())) node->set_myName((char *)name.c_str());
+    if (strcasecmp(node->get_myValue(), type)) node->set_myValue(type);
     return node;
 }
 
@@ -563,7 +563,7 @@ bool check_add_disks(FormEntry_t entry[], int num_entries, FormValues_t values)
 
     // FIXME: No check for non-empty file name for changeable media (floppy and cd-com drives)
     idx = fentry_index(entry, num_entries, "File / Device name");
-    if ((!strcmp(disk_type, "file") || !strcmp(disk_type, "device")) &&
+    if ((!strcasecmp(disk_type, "file") || !strcasecmp(disk_type, "device")) &&
         !strcmp(values[idx], ""))
     {
         string msg = string("No ") + disk_type + " name has been specified.";
@@ -572,7 +572,7 @@ bool check_add_disks(FormEntry_t entry[], int num_entries, FormValues_t values)
     }
 
     idx = fentry_index(entry, num_entries, "Autocreate size");
-    if (!strcmp(disk_type, "ramdisk") && !strcmp(values[idx], ""))
+    if (!strcasecmp(disk_type, "ramdisk") && !strcmp(values[idx], ""))
     {
         show_text("Error", "Autocreate size can't be empty for type 'ramdisk'.");
         return false;
@@ -581,7 +581,7 @@ bool check_add_disks(FormEntry_t entry[], int num_entries, FormValues_t values)
     const char *format = values[fentry_index(entry, num_entries, "Image format (auto, raw, qcow2)")];
     const char *create_format = values[fentry_index(entry, num_entries, "Autocreate format (raw, qcow2)")];
     const bool non_raw = (strcmp(format, "auto") && strcmp(format, "raw")) || strcmp(create_format, "raw");
-    if (non_raw && (strcmp(disk_type, "file") ||
+    if (non_raw && (strcasecmp(disk_type, "file") ||
         !strcmp(values[fentry_index(entry, num_entries, "Harddisk or CD-ROM")], "cd-rom")))
     {
         show_text("Error", "Non-raw image formats require a file-backed hard disk.");
@@ -684,7 +684,7 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
         {
             if (!strcmp(entry[i].label, "File / Device name"))
             {
-                if (!strcmp(disk_type, "file") || !strcmp(disk_type, "device"))
+                if (!strcasecmp(disk_type, "file") || !strcasecmp(disk_type, "device"))
                     preset[i] = c->get_text_value(disk_type, "?");
                 else
                     preset[i] = (char *)entry[i].preset;
@@ -692,9 +692,9 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
             }
             if (!strcmp(entry[i].label, "Autocreate size"))
             {
-                if (!strcmp(disk_type, "ramdisk"))
+                if (!strcasecmp(disk_type, "ramdisk"))
                     preset[i] = c->get_text_value("size", "?");
-                else if (!strcmp(disk_type, "file"))
+                else if (!strcasecmp(disk_type, "file"))
                     preset[i] = c->get_text_value("autocreate_size", "");
                 else
                     preset[i] = (char *)entry[i].preset;
@@ -713,11 +713,11 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
     {
         idx = fentry_index(entry, num_entries, "Type");
         disk_type = values[idx];
-        bool is_ramdisk = !strcmp(disk_type, "ramdisk");
+        bool is_ramdisk = !strcasecmp(disk_type, "ramdisk");
 
         idx = fentry_index(entry, num_entries, "Harddisk or CD-ROM");
         bool is_cdrom = !strcmp(values[idx], "cd-rom");
-        bool is_floppy = !strcmp(parent->get_myName(), "fdc0");
+        bool is_floppy = !strcasecmp(parent->get_myName(), "fdc0");
         const char *format = values[fentry_index(entry, num_entries, "Image format (auto, raw, qcow2)")];
         const char *create_format = values[fentry_index(entry, num_entries, "Autocreate format (raw, qcow2)")];
         if (is_floppy && ((strcmp(format, "auto") && strcmp(format, "raw")) ||
@@ -750,13 +750,13 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
 
         // Preserve a manually configured overlay without exposing it in the form.
         const std::string overlay_file = c ? c->get_text_value("overlay_file", "") : "";
-        const bool type_changed = c && strcmp(c->get_myValue(), disk_type);
+        const bool type_changed = c && strcasecmp(c->get_myValue(), disk_type);
         c = edit_node(parent, c, disk_name, disk_type);
         if (type_changed)
             for (const char *key : {"file", "device", "size", "autocreate_size", "format", "autocreate_format"})
                 c->remove_value((char *)key);
-        if (strcmp(disk_type, "file") || is_cdrom || is_floppy) c->remove_value((char *)"overlay_file");
-        if (!overlay_file.empty() && !strcmp(disk_type, "file") && !is_cdrom && !is_floppy)
+        if (strcasecmp(disk_type, "file") || is_cdrom || is_floppy) c->remove_value((char *)"overlay_file");
+        if (!overlay_file.empty() && !strcasecmp(disk_type, "file") && !is_cdrom && !is_floppy)
             c->set_value(strdup("overlay_file"), strdup(overlay_file.c_str()));
 
         for (int i = 0; i < num_entries; ++i)
@@ -774,7 +774,7 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
             {
                 if ((!strcmp(entry[i].name, "format") ||
                      !strcmp(entry[i].name, "autocreate_format")) &&
-                    strcmp(disk_type, "file"))
+                    strcasecmp(disk_type, "file"))
                     continue;
                 set_form_value(c, i, entry[i].name, values[i], type_changed ||
                     (!strcmp(entry[i].name, "read_only") && changed_fields[fentry_index(entry, num_entries, "Harddisk or CD-ROM")]));
@@ -782,7 +782,7 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
             }
 
             if (!strcmp(entry[i].label, "File / Device name") &&
-                (!strcmp(disk_type, "file") || !strcmp(disk_type, "device")))
+                (!strcasecmp(disk_type, "file") || !strcasecmp(disk_type, "device")))
                 set_form_value(c, i, disk_type, values[i], type_changed);
 
             if (!strcmp(entry[i].label, "Autocreate size"))
@@ -791,7 +791,7 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
                 if (length) values[i][length - 1] = (char)toupper((unsigned char)values[i][length - 1]);
                 if (is_ramdisk)
                     set_form_value(c, i, "size", values[i], type_changed);
-                if (!strcmp(disk_type, "file"))
+                if (!strcasecmp(disk_type, "file"))
                 {
                     if (strcmp(values[i], "")) set_form_value(c, i, "autocreate_size", values[i], type_changed);
                     else if (changed_fields[i]) c->remove_value((char *)"autocreate_size");
@@ -1066,12 +1066,12 @@ void edit_gui_video(const char *title)
     FormValues_t preset;
 
     c = theConfig->find_child("gui");
-    if (c != nullptr && !strcmp(c->get_myValue(), "win32"))
+    if (c != nullptr && !strcasecmp(c->get_myValue(), "win32"))
         entry.push_back({"workstation on startup", "disable", "workstation",
                          "enable opens ES40 Workstation before emulation starts.\n"
                          "disable keeps the traditional Win32 window. --run bypasses this setting.\n"
                          "This applies to standard Windows emulator builds.", validation_gui_workstation});
-    if (c != nullptr && !strcmp(c->get_myValue(), "X11"))
+    if (c != nullptr && !strcasecmp(c->get_myValue(), "X11"))
         entry.push_back({"private colormap?", STR_YES, "private_colormap",
                          "Use a private X11 colormap.", validation_yes_no});
     const int num_entries = static_cast<int>(entry.size());
@@ -1583,7 +1583,7 @@ void set_pcicard_values_default(CConfigurator *c, FormEntry_t entry[], int num_e
 {
     int idx = fentry_index(entry, num_entries, "PCI slot");
     string name = string("pci") + values[idx];
-    c->set_myName((char*)name.c_str());
+    if (strcasecmp(c->get_myName(), name.c_str())) c->set_myName((char*)name.c_str());
 
     for (int i = 0; i < num_entries; ++i)
         if (i != idx && entry[i].name != NULL)
@@ -1851,6 +1851,44 @@ void edit_pci_vga_powerstorm(const char *title)
     edit_pcicard(title, "powerstorm", entry, ARRAY_SIZE(entry), check_pci_vga_powerstorm);
 }
 
+bool check_pci_vga_cirrus(FormEntry_t entry[], int num_entries, FormValues_t values)
+{
+    if (!strcmp(values[fentry_index(entry, num_entries, "rom file")], ""))
+        return false;
+    CConfigurator *occupant = get_pcislot(values[fentry_index(entry, num_entries, "PCI slot")]);
+    if (occupant && occupant != sys0->find_child_myValue("cirrus"))
+    {
+        show_text("Error", "That PCI slot belongs to another device. Choose a free slot.");
+        return false;
+    }
+    return true;
+}
+
+void validation_cirrus_model(EditorField *field)
+{
+    const char *choices[] = {"GD5401", "GD5428", "GD5430", "GD5446", "AVGA1", NULL};
+    editor_choices(field, choices);
+}
+
+void edit_pci_vga_cirrus(const char *title)
+{
+    FormEntry_t entry[] = {
+        {"PCI slot", NULL, NULL,
+         "Which PCI slot should the Cirrus card be on?\n"
+         "Use bus 0 for a firmware graphics console.",
+         validation_pcislot},
+        {"rom file", "vgabios.bin", "rom",
+         "Path to the VGA BIOS image for the selected Cirrus model.",
+         validation_file},
+        {"model", "GD5430", "model",
+         "Select GD5401, GD5428, GD5430, GD5446, or AVGA1.\n"
+         "AVGA1 uses the GD5401 implementation.",
+         validation_cirrus_model}
+    };
+
+    edit_pcicard(title, "cirrus", entry, ARRAY_SIZE(entry), check_pci_vga_cirrus);
+}
+
 // Form for VGA PCI card
 void edit_pci_vga(const char *title)
 {
@@ -1860,10 +1898,10 @@ void edit_pci_vga(const char *title)
         {"gloria", "ELSA GLoria Synergy (Permedia 2)", edit_pci_vga_gloria},
         {"radeon", "ATI Radeon 7500 (RV200)", edit_pci_vga_radeon},
         {"powerstorm", "Digital PowerStorm 300/350 (REALimage 2100)", edit_pci_vga_powerstorm}
-#if 0 && defined(HAVE_CIRRUS)
+//#if 0 && defined(HAVE_CIRRUS)
         ,
-        {"cirrus", "Cirrus CL-GD542x", edit_pci_vga_cirrus}
-#endif
+        {"cirrus", "Cirrus Logic / Acumos VGA", edit_pci_vga_cirrus}
+//#endif
     };
     int num_entries = ARRAY_SIZE(entry);
 
@@ -2703,7 +2741,7 @@ void remove_component_add_choice(
     string text;
     CConfigurator *rem_c;
     
-    if (!strcmp(myName, "sys0") || !strcmp(myName, "cpu0"))
+    if (!strcasecmp(myName, "sys0") || !strcasecmp(myName, "cpu0"))
     {
         text = indent + "(" + myName + "=" + c->get_myValue() + ")";
         rem_c = nullptr;
@@ -2799,10 +2837,10 @@ bool main_menu(void)
                 vgacard = sys0->find_child_myValue("radeon");
             if (vgacard == nullptr)
                 vgacard = sys0->find_child_myValue("powerstorm");
-#if defined(HAVE_CIRRUS)
+//#if defined(HAVE_CIRRUS)
             if (vgacard == nullptr)
                 vgacard = sys0->find_child_myValue("cirrus");
-#endif
+//#endif
 
             c = sys0->find_child(PCI_SLOT_ALI);
             if (c != nullptr)

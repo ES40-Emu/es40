@@ -150,9 +150,9 @@
 #include "graphics/GloriaSynergy.h"
 #include "graphics/Radeon7500.h"
 #include "graphics/PowerStorm3xx.h"
-#ifdef HAVE_CIRRUS
+//#ifdef HAVE_CIRRUS
 #include "graphics/Cirrus.h" // to be re-added and fixed in the future
-#endif
+//#endif
 #include "storage/FloppyController.h"
 #include "gui/plugin.h"
 #if defined(HAVE_PCAP) || defined(HAVE_TAP_NET) || defined(HAVE_VMNET) || defined(HAVE_SLIRP)
@@ -516,8 +516,8 @@ bool CConfigurator::win32_workstation_enabled() const
 	for (int i = 0; i < iNumChildren; ++i)
 	{
 		auto* child = pChildren[i];
-		if (!strcmp(child->myName, "gui") && !strcmp(child->myValue, "win32"))
-			return !strcmp(child->get_text_value("workstation", "disable"), "enable");
+		if (!strcasecmp(child->myName, "gui") && !strcasecmp(child->myValue, "win32"))
+			return !strcasecmp(child->get_text_value("workstation", "disable"), "enable");
 	}
 	return false;
 }
@@ -595,7 +595,7 @@ char* CConfigurator::get_text_value(const char* n, const char* def)
 	int i;
 	for (i = 0; i < iNumValues; i++)
 	{
-		if (!strcmp(pValues[i].name, n))
+		if (!strcasecmp(pValues[i].name, n))
 			return pValues[i].value;
 	}
 
@@ -620,7 +620,7 @@ bool CConfigurator::get_bool_value(const char* n, bool def)
 	int i;
 	for (i = 0; i < iNumValues; i++)
 	{
-		if (!strcmp(pValues[i].name, n))
+		if (!strcasecmp(pValues[i].name, n))
 		{
 			switch (pValues[i].value[0])
 			{
@@ -658,7 +658,7 @@ u64 CConfigurator::get_num_value(const char* n, bool decimal, u64 def)
 	u64 multiplier = decimal ? 1000 : 1024;
 	for (i = 0; i < iNumValues; i++)
 	{
-		if (!strcmp(pValues[i].name, n))
+		if (!strcasecmp(pValues[i].name, n))
 		{
 			u64     retval = 0;
 			u64     partval = 0;
@@ -675,15 +675,19 @@ u64 CConfigurator::get_num_value(const char* n, bool decimal, u64 def)
 
 				switch (val[j])
 				{
+				case 't':
 				case 'T':
 					partval *= multiplier;
 					[[fallthrough]];
+				case 'g':
 				case 'G':
 					partval *= multiplier;
 					[[fallthrough]];
+				case 'm':
 				case 'M':
 					partval *= multiplier;
 					[[fallthrough]];
+				case 'k':
 				case 'K':
 					retval += partval * multiplier;
 					partval = 0;
@@ -752,6 +756,7 @@ static const char* const kv_serial[] = {
 static const char* const kv_ali[] = { "vga_console", "lpt.outfile", 0 };
 static const char* const kv_ali_ide[] = { "dma", 0 };
 static const char* const kv_vga[] = { "rom", 0 };
+static const char* const kv_cirrus[] = { "rom", "model", 0 };
 static const char* const kv_gloria[] = {
   "rom", "rom_layout", "subsystem_from_rom", "vendor", "device", "revision",
   "subsystem_vendor", "subsystem_device", "chip_config", "mem_control",
@@ -813,7 +818,7 @@ classinfo classes[] = {
   {"gloria", c_gloria, IS_PCI | ON_GUI, kv_gloria},
   {"radeon", c_radeon, IS_PCI | ON_GUI, kv_radeon},
   {"powerstorm", c_powerstorm, IS_PCI | ON_GUI, kv_powerstorm},
-  //{"cirrus", c_cirrus, IS_PCI | ON_GUI, kv_vga},
+  {"cirrus", c_cirrus, IS_PCI | ON_GUI, kv_cirrus},
   {"dec21143", c_dec21143, IS_PCI | IS_NIC, kv_dec21143},
   {"lsi53c1020", c_lsi53c1020, IS_PCI | HAS_DISK, kv_lsi53c1020},
   {"sym53c895", c_sym53c895, IS_PCI | HAS_DISK, kv_none},
@@ -836,7 +841,7 @@ const char* CConfigurator::get_gui_name() const
 #if defined(_WIN32) && !defined(CONFIGURATION_ONLY)
     // Audio follows the active GUI.
     const char* requested_gui = getenv("ES40_GUI");
-    if (requested_gui && !strcmp(requested_gui, "win32")) return "win32";
+    if (requested_gui && !strcasecmp(requested_gui, "win32")) return "win32";
 #endif
     const CConfigurator* root = this;
     while (root->pParent) root = root->pParent;
@@ -844,7 +849,7 @@ const char* CConfigurator::get_gui_name() const
         const CConfigurator* child = root->pChildren[i];
         for (const auto& entry : classes)
             if ((entry.flags & IS_GUI) && child->myValue &&
-                !strcmp(child->myValue, entry.name)) return child->myValue;
+                !strcasecmp(child->myValue, entry.name)) return entry.name;
     }
     return nullptr;
 }
@@ -860,13 +865,13 @@ void CConfigurator::initialize()
 #if defined(_WIN32) && !defined(CONFIGURATION_ONLY)
 		// Serial-only children still need a shutdown endpoint.
 		const char* managed_gui = getenv("ES40_GUI");
-		if (managed_gui && !strcmp(managed_gui, "win32"))
+		if (managed_gui && !strcasecmp(managed_gui, "win32"))
 		{
 			bool has_gui = false;
 			for (int i = 0; i < iNumChildren; ++i)
 			{
 				const char* value = pChildren[i]->get_myValue();
-				if (!strcmp(value, "sdl") || !strcmp(value, "win32") || !strcmp(value, "X11"))
+				if (!strcasecmp(value, "sdl") || !strcasecmp(value, "win32") || !strcasecmp(value, "X11"))
 					has_gui = true;
 			}
 			if (!has_gui)
@@ -899,7 +904,7 @@ void CConfigurator::initialize()
 
 	for (i = 0; classes[i].id != c_none; i++)
 	{
-		if (!strcmp(myValue, classes[i].name))
+		if (!strcasecmp(myValue, classes[i].name))
 		{
 			myClassId = classes[i].id;
 			myFlags = classes[i].flags;
@@ -913,7 +918,7 @@ void CConfigurator::initialize()
 #if defined(_WIN32) && !defined(CONFIGURATION_ONLY)
 	// Override the GUI in memory.
 	const char* requested_gui = getenv("ES40_GUI");
-	if ((myFlags & IS_GUI) && requested_gui && !strcmp(requested_gui, "win32"))
+	if ((myFlags & IS_GUI) && requested_gui && !strcasecmp(requested_gui, "win32"))
 	{
 		for (i = 0; classes[i].id != c_none; ++i)
 			if (classes[i].id == c_win32) break;
@@ -931,7 +936,7 @@ void CConfigurator::initialize()
 			bool recognized = false;
 			for (const char* const* k = classes[i].known_values; *k; k++)
 			{
-				if (!strcmp(pValues[v].name, *k))
+				if (!strcasecmp(pValues[v].name, *k))
 				{
 					recognized = true;
 					break;
@@ -984,7 +989,7 @@ void CConfigurator::initialize()
 #endif
 	if (myFlags & IS_PCI)
 	{
-		if (strncmp(myName, "pci", 3))
+		if (strncasecmp(myName, "pci", 3))
 			FAILURE_2(Configuration,
 				"Name %s for class %s should be pci<bus>.<device>", myName,
 				myValue);
@@ -1034,7 +1039,7 @@ void CConfigurator::initialize()
 
 	if (myClassId == c_floppy)
 	{
-		if (strncmp(myName, "fdc", 3))
+		if (strncasecmp(myName, "fdc", 3))
 			FAILURE_2(Configuration,
 				"Name %s for class %s should be fdc<bus>", myName,
 				myValue);
@@ -1045,7 +1050,7 @@ void CConfigurator::initialize()
 
 	if (myFlags & IS_DISK)
 	{
-		if (strncmp(myName, "disk", 4))
+		if (strncasecmp(myName, "disk", 4))
 			FAILURE_2(Configuration,
 				"Name %s for class %s should be disk<bus>.<device>", myName,
 				myValue);
@@ -1143,10 +1148,10 @@ void CConfigurator::initialize()
 		break;
 
 		// i broke this, my bad. To be restored in the future. 
-//	case c_cirrus:
-//		myDevice = new CCirrus(this, (CSystem*)pParent->get_device(), pcibus,
-//			pcidev);
-//		break;
+	case c_cirrus:
+		myDevice = new CCirrus(this, (CSystem*)pParent->get_device(), pcibus,
+			pcidev, bx_gui->display_for_output(get_device_path(), 0));
+		break;
 	case c_es1370:
 		myDevice = new CES1370(this, (CSystem*)pParent->get_device(), pcibus,
 			pcidev);
@@ -1211,7 +1216,7 @@ void CConfigurator::initialize()
 
 	case c_serial:
 		number = 0;
-		if (!strncmp(myName, "serial", 6))
+		if (!strncasecmp(myName, "serial", 6))
 		{
 			pt = &myName[6];
 			number = atoi(pt);
@@ -1265,7 +1270,9 @@ void CConfigurator::initialize()
 			int disk_bus;
 			int disk_device;
 			char trailing;
-			if (sscanf(pChildren[i]->get_myName(), "disk%d.%d%c",
+			const char* disk_name = pChildren[i]->get_myName();
+			if (!strncasecmp(disk_name, "disk", 4) &&
+				sscanf(disk_name + 4, "%d.%d%c",
 				&disk_bus, &disk_device, &trailing) == 2 &&
 				disk_bus == 0 && disk_device == 0)
 			{
@@ -1309,20 +1316,20 @@ void CConfigurator::initialize()
 		bool have_fdc0 = false;
 		for (i = 0; i < iNumChildren; i++)
 		{
-			if (!strcmp(pChildren[i]->get_myValue(), "serial"))
+			if (!strcasecmp(pChildren[i]->get_myValue(), "serial"))
 			{
 				number = 0;
-				if (!strncmp(pChildren[i]->get_myName(), "serial", 6))
+				if (!strncasecmp(pChildren[i]->get_myName(), "serial", 6))
 					number = atoi(&pChildren[i]->get_myName()[6]);
 				if (number >= 0 && number < 2)
 					have_serial[number] = true;
 			}
-			else if (!strcmp(pChildren[i]->get_myValue(), "ali_ide"))
+			else if (!strcasecmp(pChildren[i]->get_myValue(), "ali_ide"))
 			{
 				have_ide = true;
 			}
-			else if (!strcmp(pChildren[i]->get_myValue(), "floppy") &&
-				!strncmp(pChildren[i]->get_myName(), "fdc", 3) &&
+			else if (!strcasecmp(pChildren[i]->get_myValue(), "floppy") &&
+				!strncasecmp(pChildren[i]->get_myName(), "fdc", 3) &&
 				atoi(&pChildren[i]->get_myName()[3]) == 0)
 			{
 				have_fdc0 = true;
@@ -1429,7 +1436,7 @@ CConfigurator::CConfigurator(class CConfigurator* parent, char* name, char* valu
 void CConfigurator::set_value(char *name, char *value)
 {
 	for (int i = 0; i < iNumValues; ++i)
-		if (!strcmp(pValues[i].name, name))
+		if (!strcasecmp(pValues[i].name, name))
 		{
 			pValues[i].value = value;
 			return;
@@ -1443,7 +1450,7 @@ void CConfigurator::set_value(char *name, char *value)
 void CConfigurator::remove_value(char *name)
 {
 	for (int i = 0; i < iNumValues; ++i)
-		if (!strcmp(pValues[i].name, name))
+		if (!strcasecmp(pValues[i].name, name))
 		{
 			for (int j = i; j < iNumValues - 1; ++j)
 				pValues[j] = pValues[j + 1];
@@ -1461,7 +1468,7 @@ void CConfigurator::set_child(CConfigurator *child)
 		FAILURE(Configuration, "Child already has a parent");
 
 	for (int i = 0; i < iNumChildren; ++i)
-		if (!strcmp(pChildren[i]->myName, child->myName))
+		if (!strcasecmp(pChildren[i]->myName, child->myName))
 		{
 			pChildren[i] = child;
 			return;
@@ -1478,7 +1485,7 @@ void CConfigurator::set_child(CConfigurator *child)
    **/
 CConfigurator *CConfigurator::find_child(const char *name)
 {
-	if (myName != NULL && !strcmp(myName, name))
+	if (myName != NULL && !strcasecmp(myName, name))
 		return this;
 	for (int i = 0; i < iNumChildren; ++i)
 	{
@@ -1497,7 +1504,7 @@ CConfigurator *CConfigurator::find_child(const char *name)
 CConfigurator *CConfigurator::find_child_myValue(const char *myValue)
 {
 	for (int i = 0; i < iNumChildren; ++i)
-		if (!strcmp(pChildren[i]->myValue, myValue))
+		if (!strcasecmp(pChildren[i]->myValue, myValue))
 			return pChildren[i];
     return nullptr;
 }
@@ -1509,7 +1516,7 @@ std::vector<CConfigurator *> CConfigurator::find_children_myValue(const char *my
 {
 	std::vector<CConfigurator *> result;
 	for (int i = 0; i < iNumChildren; ++i)
-		if (!strcmp(pChildren[i]->myValue, myValue))
+		if (!strcasecmp(pChildren[i]->myValue, myValue))
 			result.push_back(pChildren[i]);
     return result;
 }
@@ -1520,7 +1527,7 @@ std::vector<CConfigurator *> CConfigurator::find_children_myValue(const char *my
 void CConfigurator::remove_child(const char *name)
 {
 	for (int i = 0; i < iNumChildren; ++i)
-		if (!strcmp(pChildren[i]->myName, name))
+		if (!strcasecmp(pChildren[i]->myName, name))
 		{
 			pChildren[i]->remove_all_children();
 			for (int j = i; j < iNumChildren - 1; ++j)

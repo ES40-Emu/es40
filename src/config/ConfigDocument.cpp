@@ -357,15 +357,15 @@ struct ConfigDocument::Impl
         for (int i = 0; i < node->editor_child_count(); ++i) order.push_back(i);
         if (&entry == &root)
             std::stable_sort(order.begin(), order.end(), [&](int a, int b)
-            { return std::string(node->editor_child(a)->get_myName()) == "gui" && std::string(node->editor_child(b)->get_myName()) != "gui"; });
+            { return !strcasecmp(node->editor_child(a)->get_myName(), "gui") && strcasecmp(node->editor_child(b)->get_myName(), "gui"); });
         for (int i : order)
             if (!children.count(i))
             {
                 auto child = node->editor_child(i);
-                if (&entry == &root && std::string(child->get_myName()) == "gui")
+                if (&entry == &root && !strcasecmp(child->get_myName(), "gui"))
                 {
                     // The emulator initializes top-level devices in file order.
-                    auto system = std::find_if(entry.entries.begin(), entry.entries.end(), [](const ConfigDocumentEntry& e) { return e.block && e.name.value == "sys0"; });
+                    auto system = std::find_if(entry.entries.begin(), entry.entries.end(), [](const ConfigDocumentEntry& e) { return e.block && !strcasecmp(e.name.value.c_str(), "sys0"); });
                     if (system != entry.entries.end())
                     {
                         const size_t position = system->name.begin - indent(system->name.begin).size();

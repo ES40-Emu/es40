@@ -246,8 +246,6 @@ protected:
 
   void init_maps();
 
-  void attribute_map(address_map& map);
-
 private:
   enum class Model : u32 { GD5401, GD5428, GD5430, GD5446, AVGA1 };
   Model m_model = Model::GD5430;

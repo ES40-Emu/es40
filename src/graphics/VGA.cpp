@@ -1200,41 +1200,41 @@ void CVGA::sequencer_map(address_map &map)
  * ---x xxxx index register
  *
  */
-// void vga_device::attribute_map(address_map &map)
-// {
-// 	map.global_mask(0x3f);
-// 	map.unmap_value_high();
-// 	map(0x00, 0x0f).lrw8(
-// 		NAME([this] (offs_t offset) { return vga.attribute.data[ offset & 0x1f]; }),
-// 		NAME([this] (offs_t offset, u8 data) { vga.attribute.data[offset & 0x1f] = data & 0x3f; })
-// 	);
-// 	map(0x20, 0x2f).noprw();
-// 	// Mode Control
-// 	map(0x10, 0x10).mirror(0x20).lrw8(
-// 		NAME([this] (offs_t offset) { return vga.attribute.data[ 0x10 ]; }),
-// 		NAME([this] (offs_t offset, u8 data) { vga.attribute.data[ 0x10 ] = data & 0x3f; })
-// 	);
-// 	// Overscan Color
-// 	map(0x11, 0x11).mirror(0x20).lrw8(
-// 		NAME([this] (offs_t offset) { return vga.attribute.data[ 0x11 ]; }),
-// 		NAME([this] (offs_t offset, u8 data) { vga.attribute.data[ 0x11 ] = data & 0x3f; })
-// 	);
-// 	// Color Plane Enable
-// 	map(0x12, 0x12).mirror(0x20).lrw8(
-// 		NAME([this] (offs_t offset) { return vga.attribute.data[ 0x12 ]; }),
-// 		NAME([this] (offs_t offset, u8 data) { vga.attribute.data[ 0x12 ] = data & 0x3f; })
-// 	);
-// 	// Horizontal PEL shift
-// 	map(0x13, 0x13).mirror(0x20).lrw8(
-// 		NAME([this] (offs_t offset) { return vga.attribute.data[ 0x13 ]; }),
-// 		NAME([this] (offs_t offset, u8 data) { vga.attribute.pel_shift_latch = vga.attribute.data[ 0x13 ] = data & 0xf; })
-// 	);
-// 	// Color Select
-// 	map(0x14, 0x14).mirror(0x20).lrw8(
-// 		NAME([this] (offs_t offset) { return vga.attribute.data[ 0x14 ]; }),
-// 		NAME([this] (offs_t offset, u8 data) { vga.attribute.pel_shift_latch = vga.attribute.data[ 0x14 ] = data & 0xf; })
-// 	);
-// }
+void CVGA::attribute_map(address_map &map)
+{
+	map.global_mask(0x3f);
+	map.unmap_value_high();
+	map(0x00, 0x0f).lrw8(
+		NAME([this] (offs_t offset) { return vga.attribute.data[ offset & 0x1f]; }),
+		NAME([this] (offs_t offset, u8 data) { vga.attribute.data[offset & 0x1f] = data & 0x3f; })
+	);
+	map(0x20, 0x2f).noprw();
+	// Mode Control
+	map(0x10, 0x10).mirror(0x20).lrw8(
+		NAME([this] (offs_t offset) { return vga.attribute.data[ 0x10 ]; }),
+		NAME([this] (offs_t offset, u8 data) { vga.attribute.data[ 0x10 ] = data & 0x3f; })
+	);
+	// Overscan Color
+	map(0x11, 0x11).mirror(0x20).lrw8(
+		NAME([this] (offs_t offset) { return vga.attribute.data[ 0x11 ]; }),
+		NAME([this] (offs_t offset, u8 data) { vga.attribute.data[ 0x11 ] = data & 0x3f; })
+	);
+	// Color Plane Enable
+	map(0x12, 0x12).mirror(0x20).lrw8(
+		NAME([this] (offs_t offset) { return vga.attribute.data[ 0x12 ]; }),
+		NAME([this] (offs_t offset, u8 data) { vga.attribute.data[ 0x12 ] = data & 0x3f; })
+	);
+	// Horizontal PEL shift
+	map(0x13, 0x13).mirror(0x20).lrw8(
+		NAME([this] (offs_t offset) { return vga.attribute.data[ 0x13 ]; }),
+		NAME([this] (offs_t offset, u8 data) { vga.attribute.pel_shift_latch = vga.attribute.data[ 0x13 ] = data & 0xf; })
+	);
+	// Color Select
+	map(0x14, 0x14).mirror(0x20).lrw8(
+		NAME([this] (offs_t offset) { return vga.attribute.data[ 0x14 ]; }),
+		NAME([this] (offs_t offset, u8 data) { vga.attribute.pel_shift_latch = vga.attribute.data[ 0x14 ] = data & 0xf; })
+	);
+}
 
 /**************************************
  *

@@ -2240,14 +2240,10 @@ void CS3Trio64::recompute_params()
 
 void CS3Trio64::attribute_map(address_map& map)
 {
-	map.global_mask(0x3f);
-	map.unmap_value_high();
+	CVGA::attribute_map(map);
 
 	// Palette Index Registers 0x00..0x0f
-	map(0x00, 0x0f).lrw8(
-		NAME([this](offs_t offset) {
-			return vga.attribute.data[offset & 0x1f];
-			}),
+	map(0x00, 0x0f).lw8(
 		NAME([this](offs_t offset, u8 data) {
 			// CR33 bit6: Lock Palette/Overscan Registers
 			if (m_crtc_map.read_byte(0x33) & 0x40)
@@ -2260,15 +2256,11 @@ void CS3Trio64::attribute_map(address_map& map)
 			})
 	);
 
-	// 0x20-0x2f mirrors — NOP (MAME: map(0x20, 0x2f).noprw())
-	// Our address_map doesn't have noprw(); unmap_value_high covers reads.
-	// Writes to this range are simply ignored by having no handler installed.
+	// Preserve ES40's existing 0xff readback here; writes retain the base no-op.
+	map(0x20, 0x2f).lr8(NAME([](offs_t) { return u8(0xff); }));
 
 	// Mode Control (index 0x10, mirrored at 0x30)
-	map(0x10, 0x10).mirror(0x20).lrw8(
-		NAME([this](offs_t offset) {
-			return vga.attribute.data[0x10];
-			}),
+	map(0x10, 0x10).mirror(0x20).lw8(
 		NAME([this](offs_t offset, u8 data) {
 			const u8 prev = vga.attribute.data[0x10];
 			vga.attribute.data[0x10] = data & 0x3f; // MAME canonical
@@ -2288,10 +2280,7 @@ void CS3Trio64::attribute_map(address_map& map)
 	);
 
 	// Overscan Color (index 0x11, mirrored at 0x31)
-	map(0x11, 0x11).mirror(0x20).lrw8(
-		NAME([this](offs_t offset) {
-			return vga.attribute.data[0x11];
-			}),
+	map(0x11, 0x11).mirror(0x20).lw8(
 		NAME([this](offs_t offset, u8 data) {
 			// CR33 bit6: Lock Palette/Overscan Registers
 			if (m_crtc_map.read_byte(0x33) & 0x40)
@@ -2301,10 +2290,7 @@ void CS3Trio64::attribute_map(address_map& map)
 	);
 
 	// Color Plane Enable (index 0x12, mirrored at 0x32)
-	map(0x12, 0x12).mirror(0x20).lrw8(
-		NAME([this](offs_t offset) {
-			return vga.attribute.data[0x12];
-			}),
+	map(0x12, 0x12).mirror(0x20).lw8(
 		NAME([this](offs_t offset, u8 data) {
 			vga.attribute.data[0x12] = data & 0x3f; // MAME canonical
 			redraw_area(0, 0, old_iWidth, old_iHeight);
@@ -2312,10 +2298,7 @@ void CS3Trio64::attribute_map(address_map& map)
 	);
 
 	// Horizontal PEL Shift (index 0x13, mirrored at 0x33)
-	map(0x13, 0x13).mirror(0x20).lrw8(
-		NAME([this](offs_t offset) {
-			return vga.attribute.data[0x13];
-			}),
+	map(0x13, 0x13).mirror(0x20).lw8(
 		NAME([this](offs_t offset, u8 data) {
 			vga.attribute.pel_shift_latch = data & 0xf; // MAME canonical
 			vga.attribute.data[0x13] = data & 0xf;      // MAME canonical
@@ -2324,10 +2307,7 @@ void CS3Trio64::attribute_map(address_map& map)
 	);
 
 	// Color Select (index 0x14, mirrored at 0x34)
-	map(0x14, 0x14).mirror(0x20).lrw8(
-		NAME([this](offs_t offset) {
-			return vga.attribute.data[0x14];
-			}),
+	map(0x14, 0x14).mirror(0x20).lw8(
 		NAME([this](offs_t offset, u8 data) {
 			vga.attribute.pel_shift_latch = data & 0xf; // MAME canonical (yes, same field)
 			vga.attribute.data[0x14] = data & 0xf;      // MAME canonical

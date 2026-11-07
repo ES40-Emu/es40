@@ -195,69 +195,20 @@ void CGloriaSynergy::gc_map(address_map& map)
 
 void CGloriaSynergy::attribute_map(address_map& map)
 {
-	map.global_mask(0x3f);
 	unimplemented_map(map, "VGA attribute register");
-	map(0x00, 0x0f)
-		.lrw8(
-			NAME([this](offs_t offset) {
-				return vga.attribute.data[offset];
-			}),
-			NAME([this](offs_t offset, u8 data) {
-				vga.attribute.data[offset] = data & 0x3f;
-			}));
-	// PAS (index bit 5) disables palette writes; control registers remain mapped.
-	map(0x20, 0x2f)
-		.lrw8(
-			NAME([this](offs_t offset) {
-				return vga.attribute.data[offset];
-			}),
-			NAME([](offs_t, u8) {}));
-	map(0x10, 0x10)
-		.mirror(0x20)
-		.lrw8(
-			NAME([this](offs_t) {
-				return vga.attribute.data[0x10];
-			}),
-			NAME([this](offs_t, u8 data) {
-				vga.attribute.data[0x10] = data & 0xef;
-			}));
-	map(0x11, 0x11)
-		.mirror(0x20)
-		.lrw8(
-			NAME([this](offs_t) {
-				return vga.attribute.data[0x11];
-			}),
-			NAME([this](offs_t, u8 data) {
-				vga.attribute.data[0x11] = data & 0x3f;
-			}));
-	map(0x12, 0x12)
-		.mirror(0x20)
-		.lrw8(
-			NAME([this](offs_t) {
-				return vga.attribute.data[0x12];
-			}),
-			NAME([this](offs_t, u8 data) {
-				vga.attribute.data[0x12] = data & 0x3f;
-			}));
-	map(0x13, 0x13)
-		.mirror(0x20)
-		.lrw8(
-			NAME([this](offs_t) {
-				return vga.attribute.data[0x13];
-			}),
-			NAME([this](offs_t, u8 data) {
-				vga.attribute.data[0x13] = data & 0xf;
-				vga.attribute.pel_shift_latch = data & 0xf;
-			}));
-	map(0x14, 0x14)
-		.mirror(0x20)
-		.lrw8(
-			NAME([this](offs_t) {
-				return vga.attribute.data[0x14];
-			}),
-			NAME([this](offs_t, u8 data) {
-				vga.attribute.data[0x14] = data & 0xf;
-			}));
+	CVGA::attribute_map(map);
+	// Palette reads remain available when PAS disables CPU writes.
+	map(0x20, 0x2f).lr8(NAME([this](offs_t offset) {
+		return vga.attribute.data[offset];
+	}));
+	// These frontends retain mode-control bits 6/7 and mask reserved bit 4.
+	map(0x10, 0x10).mirror(0x20).lw8(NAME([this](offs_t, u8 data) {
+		vga.attribute.data[0x10] = data & 0xef;
+	}));
+	// Color select does not change the pending horizontal panning value.
+	map(0x14, 0x14).mirror(0x20).lw8(NAME([this](offs_t, u8 data) {
+		vga.attribute.data[0x14] = data & 0xf;
+	}));
 }
 
 address_map& CGloriaSynergy::space(int spacenum)

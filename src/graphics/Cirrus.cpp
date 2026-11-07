@@ -597,41 +597,7 @@ void CCirrus::gc_map(address_map &map)
 
 void CCirrus::sequencer_map(address_map &map)
 {
-	//svga_device::sequencer_map(map);
-	// TODO: legacy fallback trick
-	map(0x00, 0xff).lr8(
-		NAME([this] (offs_t offset) {
-			const u8 res = vga.sequencer.data[offset];
-			if (!machine().side_effects_disabled())
-				LOGMASKED(LOG_REGS, "Reading unmapped sequencer read register [%02x] -> %02x (SVGA?)\n", offset, res);
-			return res;
-		})
-	);
-//  map(0x00, 0x00) Reset Register
-//  map(0x01, 0x01) Clocking Mode Register
-	map(0x02, 0x02).lw8(
-		NAME([this] (offs_t offset, u8 data) {
-			vga.sequencer.map_mask = data & 0xf;
-		})
-	);
-	map(0x03, 0x03).lw8(
-		NAME([this] (offs_t offset, u8 data) {
-			/* --2- 84-- character select A
-			   ---2 --84 character select B */
-			vga.sequencer.char_sel.A = (((data & 0xc) >> 2) << 1) | ((data & 0x20) >> 5);
-			vga.sequencer.char_sel.B = (((data & 0x3) >> 0) << 1) | ((data & 0x10) >> 4);
-			// optimization for screen update inner loop
-			vga.sequencer.char_sel.base[0] = 0x20000 + (vga.sequencer.char_sel.B * 0x2000);
-			vga.sequencer.char_sel.base[1] = 0x20000 + (vga.sequencer.char_sel.A * 0x2000);
-			//if(data)
-			//  popmessage("Char SEL checker (%02x %02x)\n",vga.sequencer.char_sel.A,vga.sequencer.char_sel.B);
-		})
-	);
-	// Sequencer Memory Mode Register
-//  map(0x04, 0x04)
-	// (undocumented) Sequencer Horizontal Character Counter Reset
-	// Any write strobe to this register will lock the character generator until another write to other regs happens.
-//  map(0x07, 0x07)
+	CVGA::sequencer_map(map);
 
 	if (is_avga())
 		return;

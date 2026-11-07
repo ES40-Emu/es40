@@ -35,6 +35,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 
@@ -141,31 +142,19 @@ void CRadeon7500::crtc_map(address_map& map)
 void CRadeon7500::sequencer_map(address_map& map)
 {
 	unimplemented_map(map, "VGA sequencer register");
-	map(0x00, 0x04).lr8(NAME([this](offs_t offset) {
-		return vga.sequencer.data[offset];
-	}));
-	map(0x00, 0x00).lw8(NAME([this](offs_t, u8 data) {
-		vga.sequencer.data[0] = data & 3;
-	}));
-	map(0x01, 0x01).lw8(NAME([this](offs_t, u8 data) {
-		vga.sequencer.data[1] = data & 0x3f;
-	}));
-	map(0x02, 0x02).lw8(NAME([this](offs_t, u8 data) {
-		vga.sequencer.data[2] = data & 0xf;
-		vga.sequencer.map_mask = data & 0xf;
-	}));
-	map(0x03, 0x03).lw8(NAME([this](offs_t, u8 data) {
-		vga.sequencer.data[3] = data & 0x3f;
-		vga.sequencer.char_sel.A = ((data & 0xc) >> 1) | ((data & 0x20) >> 5);
-		vga.sequencer.char_sel.B = ((data & 3) << 1) | ((data & 0x10) >> 4);
-		vga.sequencer.char_sel.base[0] =
-			0x20000 + vga.sequencer.char_sel.B * 0x2000;
-		vga.sequencer.char_sel.base[1] =
-			0x20000 + vga.sequencer.char_sel.A * 0x2000;
-	}));
-	map(0x04, 0x04).lw8(NAME([this](offs_t, u8 data) {
-		vga.sequencer.data[4] = data & 0xe;
-	}));
+	// These frontends mask stored bytes, including direct snapshot writes.
+	// Limit the canonical map to SR00-04 so unknown indices keep diagnostics.
+	auto standard = std::make_shared<address_map>(5);
+	CVGA::sequencer_map(*standard);
+	map(0x00, 0x04).lrw8(
+		NAME([standard](offs_t index) {
+			return standard->read_byte(index);
+		}),
+		NAME(([this, standard](offs_t index, u8 data) {
+			static constexpr u8 masks[] = {0x03, 0x3f, 0x0f, 0x3f, 0x0e};
+			vga.sequencer.data[index] = data & masks[index];
+			standard->write_byte(index, data);
+		})));
 }
 
 void CRadeon7500::gc_map(address_map& map)

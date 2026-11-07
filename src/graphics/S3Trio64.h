@@ -238,7 +238,7 @@ protected:
   }
 
   void crtc_map(address_map& map) override;
-  void sequencer_map(address_map& map);
+  void sequencer_map(address_map& map) override;
   void gc_map(address_map& map) override;
   void attribute_map(address_map& map);
 

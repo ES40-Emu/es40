@@ -185,8 +185,8 @@ protected:
 
   // TODO: MAME pc_vga.h has these here
   virtual void crtc_map(address_map& map);
-  //virtual void sequencer_map(address_map& map) ATTR_COLD;
   virtual void gc_map(address_map& map);
+  virtual void sequencer_map(address_map& map);
   //virtual void attribute_map(address_map& map) ATTR_COLD;
 
   // NOTE: do not use the subclassed result when determining pitch in SVGA modes.

@@ -1058,15 +1058,7 @@ void CS3Trio64::crtc_map(address_map& map)
 
 void CS3Trio64::sequencer_map(address_map& map)
 {
-	// TODO: legacy fallback trick
-	map(0x00, 0xff).lr8(
-		NAME([this](offs_t offset) {
-			const u8 res = vga.sequencer.data[offset];
-			if (!machine().side_effects_disabled())
-				LOGREGS("%s: Reading unmapped sequencer read register [%02x] -> %02x (SVGA?)\n", devid_string, offset, res);
-			return res;
-			})
-	);
+	CVGA::sequencer_map(map);
 	//  map(0x00, 0x00) Reset Register
 	map(0x00, 0x00).lw8( // es40 deviation
 		NAME([this](offs_t offset, u8 data) {
@@ -1097,23 +1089,6 @@ void CS3Trio64::sequencer_map(address_map& map)
 			})
 	);
 
-	map(0x02, 0x02).lw8(
-		NAME([this](offs_t offset, u8 data) {
-			vga.sequencer.map_mask = data & 0xf;
-			})
-	);
-	// SR03: Character Map Select
-	map(0x03, 0x03).lw8(
-		NAME([this](offs_t offset, u8 data) {
-			/* --2- 84-- character select A
-			   ---2 --84 character select B */
-			vga.sequencer.char_sel.A = (((data & 0xc) >> 2) << 1) | ((data & 0x20) >> 5);
-			vga.sequencer.char_sel.B = (((data & 0x3) >> 0) << 1) | ((data & 0x10) >> 4);
-			// optimization for screen update inner loop
-			vga.sequencer.char_sel.base[0] = 0x20000 + (vga.sequencer.char_sel.B * 0x2000);
-			vga.sequencer.char_sel.base[1] = 0x20000 + (vga.sequencer.char_sel.A * 0x2000);
-			})
-	);
 	// Sequencer Memory Mode Register
 //  map(0x04, 0x04)
 	map(0x04, 0x04).lw8(

@@ -565,6 +565,7 @@ try
 	sequencer_map(m_seq_map);
 	gc_map(m_gc_map);
 	attribute_map(m_atc_map);
+	init_io_maps();
 	add_legacy_io(LegacyIO, 0x3b0, 0x30);
 	add_legacy_mem(LegacyMemory, 0xa0000, 0x20000);
 	m_profile.vendor = gloria_setting16(cfg, "vendor", m_profile.vendor);
@@ -1335,12 +1336,6 @@ u8 CGloriaSynergy::io_read_b(u32 port)
 	}
 	switch (port)
 	{
-	case 0x3b4:
-	case 0x3d4:
-		return crtc_address_r(0);
-	case 0x3b5:
-	case 0x3d5:
-		return crtc_data_r(0);
 	case 0x3ba:
 	case 0x3da:
 	{
@@ -1358,27 +1353,14 @@ u8 CGloriaSynergy::io_read_b(u32 port)
 			((line > vga.crtc.vert_disp_end || (m_access_count & 7) == 0) ? 1
 																		  : 0));
 	}
-	case 0x3c0:
-		return atc_address_r(0);
-	case 0x3c1:
-		return atc_data_r(0);
-	case 0x3c2:
-		return input_status_0_r(0);
-	case 0x3c4:
-		return sequencer_address_r(0);
-	case 0x3c5:
-		return sequencer_data_r(0);
-	case 0x3ca:
-		return feature_control_r(0);
-	case 0x3cc:
-		return miscellaneous_output_r(0);
-	case 0x3ce:
-		return gc_address_r(0);
-	case 0x3cf:
-		return gc_data_r(0);
 	default:
+	{
+		u8 data;
+		if (vga_io_read(port, data))
+			return data;
 		report_unimplemented("VGA port", port, 0, false);
 		return 0xff;
+	}
 	}
 }
 
@@ -1401,42 +1383,8 @@ void CGloriaSynergy::io_write_b(u32 port, u8 data)
 			vga.dac.read = 0;
 		return;
 	}
-	switch (port)
-	{
-	case 0x3b4:
-	case 0x3d4:
-		crtc_address_w(0, data);
-		break;
-	case 0x3b5:
-	case 0x3d5:
-		crtc_data_w(0, data);
-		break;
-	case 0x3ba:
-	case 0x3da:
-		feature_control_w(0, data);
-		break;
-	case 0x3c0:
-		atc_address_data_w(0, data);
-		break;
-	case 0x3c2:
-		miscellaneous_output_w(0, data);
-		break;
-	case 0x3c4:
-		sequencer_address_w(0, data);
-		break;
-	case 0x3c5:
-		sequencer_data_w(0, data);
-		break;
-	case 0x3ce:
-		gc_address_w(0, data);
-		break;
-	case 0x3cf:
-		gc_data_w(0, data);
-		break;
-	default:
+	if (!vga_io_write(port, data))
 		report_unimplemented("VGA port", port, data, true);
-		break;
-	}
 }
 
 void CGloriaSynergy::tick()

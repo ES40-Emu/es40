@@ -249,6 +249,7 @@ protected:
     sequencer_map(m_seq_map);
     gc_map(m_gc_map);
     attribute_map(m_atc_map);
+    init_io_maps();
   }
 
   // Video mode detection (MAME: svga_device::pc_vga_choosevideomode)

@@ -123,7 +123,7 @@ protected:
 	virtual uint16_t offset() override;
 	virtual uint32_t latch_start_addr() override;
 
-	//virtual void io_3cx_map(address_map &map) override ATTR_COLD;
+	virtual void io_3cx_map(address_map &map) override ATTR_COLD;
 
 	u8 ramdac_hidden_mask_r(offs_t offset);
 	void ramdac_hidden_mask_w(offs_t offset, u8 data);

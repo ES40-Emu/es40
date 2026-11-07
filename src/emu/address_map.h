@@ -37,6 +37,9 @@
  * address_map for ES40 VGA register dispatch.
  * Adapted from MAME for code re-use compatibility in VGA/S3 Implementation
  *
+ *     map(lo, hi).rw(FUNC(device_class::read), FUNC(device_class::write))
+ *     map(lo, hi).r(FUNC(device_class::read))
+ *     map(lo, hi).w(FUNC(device_class::write))
  *     map(lo, hi).lrw8(NAME(read_lambda), NAME(write_lambda))
  *     map(lo, hi).lr8(NAME(read_lambda))
  *     map(lo, hi).lw8(NAME(write_lambda))
@@ -56,6 +59,8 @@
 #include <functional>
 #include <memory>
 #include <cstdint>
+#include <type_traits>
+#include <utility>
 #include <vector>
 #include "mame_shims.h"
 
@@ -69,16 +74,56 @@ using u64 = uint64_t;
 #define NAME(x) x, #x
 #endif
 
+// MAME addrmap.h binds member handlers through device_t and rw_delegate.
+// ES40 byte maps have no device_t owner, so FUNC binds the current object.
+// Typed invocation retains virtual dispatch and base adjustments.
+template <typename Owner, typename Member>
+auto bind_map_member(Owner* owner, Member member)
+{
+  static_assert(std::is_member_function_pointer_v<Member>,
+    "FUNC requires a member function");
+  return [owner, member](auto&&... args) -> decltype(auto) {
+    return std::invoke(member, owner, std::forward<decltype(args)>(args)...);
+  };
+}
+
+// Map-only compatibility: use inside the owning object's map method.
+// Upstream emucore.h: #define FUNC(x) &x, #x
+#ifndef FUNC
+#define FUNC(x) ::bind_map_member(this, &x), #x
+#endif
+
 class address_map;
 
 
-// address_map_entry — returned by map(lo, hi), chains .lr8/.lw8/.lrw8/.mirror
+// address_map_entry — returned by map(lo, hi), chains handler bindings/.mirror
 
 class address_map_entry
 {
 public:
   address_map_entry(address_map& parent, unsigned lo, unsigned hi)
     : m_map(parent), m_lo(lo), m_hi(hi), m_mirror(0), m_select(0) {
+  }
+
+  // Byte member handlers use the same dispatch and offset rules as lambdas.
+  template <typename T>
+  address_map_entry& r(T&& read_fn, const char* name)
+  {
+    return lr8(std::forward<T>(read_fn), name);
+  }
+
+  template <typename T>
+  address_map_entry& w(T&& write_fn, const char* name)
+  {
+    return lw8(std::forward<T>(write_fn), name);
+  }
+
+  template <typename T, typename U>
+  address_map_entry& rw(T&& read_fn, const char* read_name,
+    U&& write_fn, const char* write_name)
+  {
+    return lrw8(std::forward<T>(read_fn), read_name,
+      std::forward<U>(write_fn), write_name);
   }
 
   /// .lrw8(read_fn, read_name, write_fn, write_name)
@@ -176,6 +221,18 @@ public:
     if (m_globalmask) addr &= m_globalmask;
     if (addr >= m_size) return false;
     return m_slots[addr].read_fn || m_slots[addr].write_fn;
+  }
+
+  bool has_read_handler(unsigned addr) const
+  {
+    if (m_globalmask) addr &= m_globalmask;
+    return addr < m_size && bool(m_slots[addr].read_fn);
+  }
+
+  bool has_write_handler(unsigned addr) const
+  {
+    if (m_globalmask) addr &= m_globalmask;
+    return addr < m_size && bool(m_slots[addr].write_fn);
   }
 
   const char* debug_name(unsigned addr) const

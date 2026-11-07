@@ -121,13 +121,22 @@ enum
 
 // MAME FUNCTIONS - not all present yet
 
-//s3vision864_vga_device::s3vision864_vga_device(const machine_config& mconfig, const char* tag, device_t* owner, uint32_t clock)
-//	: s3vision864_vga_device(mconfig, S3_VISION864_VGA, tag, owner, clock)
-
-//s3vision864_vga_device::s3vision864_vga_device(const machine_config& mconfig, device_type type, const char* tag, device_t* owner, uint32_t clock)
-//	: svga_device(mconfig, type, tag, owner, clock)
-
+// s3vision864_vga_device::s3vision864_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
+// 	: s3vision864_vga_device(mconfig, S3_VISION864_VGA, tag, owner, clock)
+// {
+// }
+//
+// s3vision864_vga_device::s3vision864_vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock)
+// 	: svga_device(mconfig, type, tag, owner, clock)
+// {
+// 	m_crtc_space_config = address_space_config("crtc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(s3vision864_vga_device::crtc_map), this));
+// 	m_seq_space_config = address_space_config("sequencer_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(s3vision864_vga_device::sequencer_map), this));
+// }
+//
 // void s3vision864_vga_device::device_add_mconfig(machine_config &config)
+// {
+// 	IBM8514A(config, "8514a").set_vga_owner();
+// }
 
 uint32_t CS3Trio64::latch_start_addr()
 {
@@ -4022,20 +4031,8 @@ u32 CS3Trio64::io_read(u32 address, int dsize)
 
 	switch (address)
 	{
-	case 0x3c0:
-		data = atc_address_r(0);
-		break;
-
-	case 0x3c1:
-		data = atc_data_r(0);
-		break;
-
 	case 0x3c2:
 		data = read_b_3c2();
-		break;
-
-	case 0x3c4:
-		data = sequencer_address_r(0);
 		break;
 
 	case 0x3c5:
@@ -4043,18 +4040,6 @@ u32 CS3Trio64::io_read(u32 address, int dsize)
 			data = vga.sequencer.data[vga.sequencer.index];
 		else
 			data = sequencer_data_r(0);
-		break;
-
-	case 0x3c6:
-		data = ramdac_mask_r(0);
-		break;
-
-	case 0x3c7:
-		data = ramdac_state_r(0);
-		break;
-
-	case 0x3c8:
-		data = ramdac_write_index_r(0);
 		break;
 
 	case 0x3c9:
@@ -4066,28 +4051,6 @@ u32 CS3Trio64::io_read(u32 address, int dsize)
 
 	case 0x3ca:
 		data = read_b_3ca();
-		break;
-
-	case 0x3cc:
-		data = miscellaneous_output_r(0);
-		break;
-
-	case 0x3ce:
-		data = gc_address_r(0);
-		break;
-
-	case 0x3cf:
-		data = gc_data_r(0);
-		break;
-
-	case 0x3b4:
-	case 0x3d4:
-		data = crtc_address_r(0);
-		break;
-
-	case 0x3b5:
-	case 0x3d5:
-		data = crtc_data_r(0);
 		break;
 
 	case 0x3ba:
@@ -4117,7 +4080,12 @@ u32 CS3Trio64::io_read(u32 address, int dsize)
 		break;
 
 	default:
+	{
+		u8 value;
+		if (vga_io_read(address, value))
+			return value;
 		printf("%s: Unhandled I/O port %x read.\n", devid_string, address);
+	}
 	}
 
 	return data;
@@ -4257,10 +4225,6 @@ void CS3Trio64::io_write_b(u32 address, u8 data)
 		m_video_subsys_enable = data & 0x18;
 		break;
 
-	case 0x3c4:
-		sequencer_address_w(0, data);
-		break;
-
 	case 0x3c5:
 		// PLL lock gate: SR09+ requires SR08 == 0x06
 		if (vga.sequencer.index > 0x08 && vga.sequencer.data[0x08] != 0x06)
@@ -4280,27 +4244,9 @@ void CS3Trio64::io_write_b(u32 address, u8 data)
 			ramdac_write_b(address, data);
 		break;
 
-	case 0x3ce:
-		gc_address_w(0, data);
-		break;
-
-	case 0x3cf:
-		gc_data_w(0, data);
-		break;
-
-	case 0x3ba:
-	case 0x3da:
-		feature_control_w(0, data);
-		break;
-
 	case 0x3b4:
 	case 0x3d4:
 		vga.crtc.index = data & 0x7f;
-		break;
-
-	case 0x3b5:
-	case 0x3d5:
-		crtc_data_w(0, data);
 		break;
 
 	case 0x3bb:
@@ -4323,6 +4269,8 @@ void CS3Trio64::io_write_b(u32 address, u8 data)
 		break;
 
 	default:
+		if (vga_io_write(address, data))
+			break;
 #ifdef DEBUG_VGA
 		printf("%s: Unhandled I/O write port=%04x data=%02x\n", devid_string, address, data);
 #endif

@@ -294,6 +294,8 @@ CVGA::~CVGA(void)
 
 // A bare minimum VGA installs 3 main I/O areas, a fixed one at $3c0 and a moveable one at $3b0-$3bb
 // (for MDA compatibility) and $3d0-$3df. $3bc-$3bf is canonically assigned to LPT3 in an IBM machine.
+// ES40 retains PCI decode and byte-lane handling in each frontend; applying
+// this outer map as well would add a second mono/colour gate to those accesses.
 // void vga_device::io_map(address_map &map)
 // {
 // 	map.unmap_value_high();
@@ -334,11 +336,12 @@ CVGA::~CVGA(void)
 // 	);
 // }
 
-// void vga_device::io_3bx_3dx_map(address_map &map)
-// {
-// 	map(0x04, 0x04).rw(FUNC(vga_device::crtc_address_r), FUNC(vga_device::crtc_address_w));
-// 	map(0x05, 0x05).rw(FUNC(vga_device::crtc_data_r), FUNC(vga_device::crtc_data_w));
-// 	map(0x0a, 0x0a).rw(FUNC(vga_device::input_status_1_r), FUNC(vga_device::feature_control_w));
+void CVGA::io_3bx_3dx_map(address_map &map)
+{
+	map(0x04, 0x04).rw(FUNC(CVGA::crtc_address_r), FUNC(CVGA::crtc_address_w));
+	map(0x05, 0x05).rw(FUNC(CVGA::crtc_data_r), FUNC(CVGA::crtc_data_w));
+	map(0x0a, 0x0a).rw(FUNC(CVGA::input_status_1_r), FUNC(CVGA::feature_control_w));
+	// ES40 leaves these legacy probes to each card's existing fallback.
 // 	// TODO: move these to indicated subclasses
 // 	map(0x08, 0x08).lr8(
 // 		NAME([this] (offs_t offset) {
@@ -356,24 +359,25 @@ CVGA::~CVGA(void)
 // 			return 0x80;
 // 		})
 // 	);
-// }
+}
 
-// void vga_device::io_3cx_map(address_map &map)
-// {
-// 	map(0x00, 0x00).rw(FUNC(vga_device::atc_address_r), FUNC(vga_device::atc_address_data_w));
-// 	map(0x01, 0x01).r(FUNC(vga_device::atc_data_r));
-// 	map(0x02, 0x02).rw(FUNC(vga_device::input_status_0_r), FUNC(vga_device::miscellaneous_output_w));
-// //  map(0x03, 0x03).w(FUNC(vga_device::wakeup_w));
-// 	map(0x04, 0x04).rw(FUNC(vga_device::sequencer_address_r), FUNC(vga_device::sequencer_address_w));
-// 	map(0x05, 0x05).rw(FUNC(vga_device::sequencer_data_r), FUNC(vga_device::sequencer_data_w));
-// 	map(0x06, 0x06).rw(FUNC(vga_device::ramdac_mask_r), FUNC(vga_device::ramdac_mask_w));
-// 	map(0x07, 0x07).rw(FUNC(vga_device::ramdac_state_r), FUNC(vga_device::ramdac_read_index_w));
-// 	map(0x08, 0x08).rw(FUNC(vga_device::ramdac_write_index_r), FUNC(vga_device::ramdac_write_index_w));
-// 	map(0x09, 0x09).rw(FUNC(vga_device::ramdac_data_r), FUNC(vga_device::ramdac_data_w));
-// 	map(0x0a, 0x0a).r(FUNC(vga_device::feature_control_r));
-// 	map(0x0c, 0x0c).r(FUNC(vga_device::miscellaneous_output_r));
-// 	map(0x0e, 0x0e).rw(FUNC(vga_device::gc_address_r), FUNC(vga_device::gc_address_w));
-// 	map(0x0f, 0x0f).rw(FUNC(vga_device::gc_data_r), FUNC(vga_device::gc_data_w));
+void CVGA::io_3cx_map(address_map &map)
+{
+	map(0x00, 0x00).rw(FUNC(CVGA::atc_address_r), FUNC(CVGA::atc_address_data_w));
+	map(0x01, 0x01).r(FUNC(CVGA::atc_data_r));
+	map(0x02, 0x02).rw(FUNC(CVGA::input_status_0_r), FUNC(CVGA::miscellaneous_output_w));
+//  map(0x03, 0x03).w(FUNC(vga_device::wakeup_w));
+	map(0x04, 0x04).rw(FUNC(CVGA::sequencer_address_r), FUNC(CVGA::sequencer_address_w));
+	map(0x05, 0x05).rw(FUNC(CVGA::sequencer_data_r), FUNC(CVGA::sequencer_data_w));
+	map(0x06, 0x06).rw(FUNC(CVGA::ramdac_mask_r), FUNC(CVGA::ramdac_mask_w));
+	map(0x07, 0x07).rw(FUNC(CVGA::ramdac_state_r), FUNC(CVGA::ramdac_read_index_w));
+	map(0x08, 0x08).rw(FUNC(CVGA::ramdac_write_index_r), FUNC(CVGA::ramdac_write_index_w));
+	map(0x09, 0x09).rw(FUNC(CVGA::ramdac_data_r), FUNC(CVGA::ramdac_data_w));
+	map(0x0a, 0x0a).r(FUNC(CVGA::feature_control_r));
+	map(0x0c, 0x0c).r(FUNC(CVGA::miscellaneous_output_r));
+	map(0x0e, 0x0e).rw(FUNC(CVGA::gc_address_r), FUNC(CVGA::gc_address_w));
+	map(0x0f, 0x0f).rw(FUNC(CVGA::gc_data_r), FUNC(CVGA::gc_data_w));
+	// ES40 cards supply their own VGA-enable/Oak handling at 0x3c3.
 // 	// TODO: doesn't belong here
 // 	map(0x03, 0x03).lrw8(
 // 		NAME([this] (offs_t offset) {
@@ -383,7 +387,7 @@ CVGA::~CVGA(void)
 // 			vga.oak.reg = data;
 // 		})
 // 	);
-// }
+}
 
 /**************************************
  *
@@ -2294,6 +2298,45 @@ uint32_t CVGA::screen_update(bitmap_rgb32& bitmap, const rectangle& cliprect)
 	return 0;
 }
 
+
+// ES40 port dispatch uses the shared MAME submaps after frontend access checks.
+void CVGA::init_io_maps()
+{
+	io_3bx_3dx_map(m_main_if_map);
+	io_3cx_map(m_3cx_map);
+}
+
+address_map* CVGA::io_port_map(u32 port)
+{
+	switch (port & ~0xfU)
+	{
+	case 0x3b0:
+	case 0x3d0:
+		return &m_main_if_map;
+	case 0x3c0:
+		return &m_3cx_map;
+	default:
+		return nullptr;
+	}
+}
+
+bool CVGA::vga_io_read(u32 port, u8& data)
+{
+	address_map* map = io_port_map(port);
+	if (!map || !map->has_read_handler(port & 0xf))
+		return false;
+	data = map->read_byte(port & 0xf);
+	return true;
+}
+
+bool CVGA::vga_io_write(u32 port, u8 data)
+{
+	address_map* map = io_port_map(port);
+	if (!map || !map->has_write_handler(port & 0xf))
+		return false;
+	map->write_byte(port & 0xf, data);
+	return true;
+}
 
 // es40 specific: unimplemented register reporting
 

@@ -113,6 +113,13 @@ protected:
   void report_unimplemented(const char* what, u32 index, u32 value, bool write);
   // Catch-all for indices no entry claims; install before the real entries.
   void unimplemented_map(address_map& map, const char* what);
+  // Call after the card's register maps are installed. PCI decode, access
+  // widths and card-specific port effects remain in the frontend.
+  void init_io_maps();
+  bool vga_io_read(u32 port, u8& data);
+  bool vga_io_write(u32 port, u8 data);
+  address_map m_main_if_map{16};
+  address_map m_3cx_map{16};
   virtual void trace_unimplemented(const std::string&) {}
   std::set<std::tuple<std::string, u32, bool>> m_unimplemented_seen;
   unsigned m_unimplemented_printed = 0;
@@ -148,7 +155,7 @@ protected:
 
   //virtual space_config_vector memory_space_config() const override;
 
-  //virtual void io_3bx_3dx_map(address_map& map) ATTR_COLD;
+  virtual void io_3bx_3dx_map(address_map& map);
 
   u8 crtc_address_r(offs_t offset);
   void crtc_address_w(offs_t offset, u8 data);
@@ -157,7 +164,7 @@ protected:
   u8 input_status_1_r(offs_t offset);
   void feature_control_w(offs_t offset, u8 data);
 
-  //virtual void io_3cx_map(address_map& map) ATTR_COLD;
+  virtual void io_3cx_map(address_map& map);
 
   u8 atc_address_r(offs_t offset);
   void atc_address_data_w(offs_t offset, u8 data);
@@ -399,6 +406,7 @@ protected:
   } svga;
   //---- end svga device specifics ---
 private:
+  address_map* io_port_map(u32 port);
   uint32_t start_addr();
 };
 

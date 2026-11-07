@@ -151,12 +151,19 @@ void CCirrus::gd5401_recompute_params()
 //	m_seq_space_config = address_space_config("sequencer_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5446_vga_device::sequencer_map), this));
 //}
 
-//void cirrus_gd5428_vga_device::io_3cx_map(address_map &map)
-//{
-//	svga_device::io_3cx_map(map);
-//	map(0x06, 0x06).rw(FUNC(cirrus_gd5428_vga_device::ramdac_hidden_mask_r), FUNC(cirrus_gd5428_vga_device::ramdac_hidden_mask_w));
-//	map(0x09, 0x09).rw(FUNC(cirrus_gd5428_vga_device::ramdac_overlay_r), FUNC(cirrus_gd5428_vga_device::ramdac_overlay_w));
-//}
+void CCirrus::io_3cx_map(address_map &map)
+{
+	CVGA::io_3cx_map(map);
+	// ES40 retains the existing Oak register readback and storage.
+	map(0x03, 0x03).lrw8(
+		NAME([this](offs_t) { return vga.oak.reg; }),
+		NAME([this](offs_t, u8 data) { vga.oak.reg = data; })
+	);
+	if (is_avga())
+		return;
+	map(0x06, 0x06).rw(FUNC(CCirrus::ramdac_hidden_mask_r), FUNC(CCirrus::ramdac_hidden_mask_w));
+	map(0x09, 0x09).rw(FUNC(CCirrus::ramdac_overlay_r), FUNC(CCirrus::ramdac_overlay_w));
+}
 
 u8 CCirrus::ramdac_hidden_mask_r(offs_t offset)
 {
@@ -1836,6 +1843,7 @@ void CCirrus::init_maps()
 		break;
 	}
 	attribute_map(m_atc_map);
+	init_io_maps();
 }
 
 /**
@@ -2231,76 +2239,13 @@ u32 CCirrus::io_read(u32 address, int dsize)
 		u8 value = 0xff;
 		switch (address)
 		{
-		case 0x3c0:
-			value = atc_address_r(0);
-			break;
-
-		case 0x3c1:
-			value = atc_data_r(0);
-			break;
-
-		case 0x3c2:
-			value = input_status_0_r(0);
-			break;
-
-		case 0x3c3:
-			value = vga.oak.reg;
-			break;
-
-		case 0x3c4:
-			value = sequencer_address_r(0);
-			break;
-
-		case 0x3c5:
-			value = sequencer_data_r(0);
-			break;
-
-		case 0x3c6:
-			value = is_avga() ? ramdac_mask_r(0) : ramdac_hidden_mask_r(0);
-			break;
-
-		case 0x3c7:
-			value = ramdac_state_r(0);
-			break;
-
-		case 0x3c8:
-			value = ramdac_write_index_r(0);
-			break;
-
-		case 0x3c9:
-			value = is_avga() ? ramdac_data_r(0) : ramdac_overlay_r(0);
-			break;
-
-		case 0x3ca:
-			value = feature_control_r(0);
-			break;
-
-		case 0x3cc:
-			value = miscellaneous_output_r(0);
-			break;
-
-		case 0x3ce:
-			value = gc_address_r(0);
-			break;
-
-		case 0x3cf:
-			value = gc_data_r(0);
-			break;
-
-		case 0x3b4:
-		case 0x3d4:
-			value = crtc_address_r(0);
-			break;
-
-		case 0x3b5:
-		case 0x3d5:
-			value = crtc_data_r(0);
-			break;
-
 		case 0x3ba:
 		case 0x3da:
 			value = scan_status(cSystem->device_access_time());
 			vga.attribute.state = 0;  // ATC flip-flop reset
+			break;
+		default:
+			vga_io_read(address, value);
 			break;
 		}
 		data |= (u32)value << (byte * 8);
@@ -2354,73 +2299,7 @@ void CCirrus::io_write_b(u32 address, u8 data)
 	if (address == 0x3c2 || address == 0x3c5 ||
 		address == 0x3b5 || address == 0x3d5)
 		advance_scan(cSystem->device_access_time());
-	switch (address)
-	{
-	case 0x3c0:
-		atc_address_data_w(0, data);
-		break;
-
-	case 0x3c2:
-		miscellaneous_output_w(0, data);
-		break;
-
-	case 0x3c3:
-		vga.oak.reg = data;
-		break;
-
-	case 0x3c4:
-		sequencer_address_w(0, data);
-		break;
-
-	case 0x3c5:
-		sequencer_data_w(0, data);
-		break;
-
-	case 0x3c6:
-		if (is_avga())
-			ramdac_mask_w(0, data);
-		else
-			ramdac_hidden_mask_w(0, data);
-		break;
-
-	case 0x3c7:
-		ramdac_read_index_w(0, data);
-		break;
-
-	case 0x3c8:
-		ramdac_write_index_w(0, data);
-		break;
-
-	case 0x3c9:
-		if (is_avga())
-			ramdac_data_w(0, data);
-		else
-			ramdac_overlay_w(0, data);
-		break;
-
-	case 0x3ce:
-		gc_address_w(0, data);
-		break;
-
-	case 0x3cf:
-		gc_data_w(0, data);
-		break;
-
-	case 0x3ba:
-	case 0x3da:
-		feature_control_w(0, data);
-		break;
-
-	case 0x3b4:
-	case 0x3d4:
-		crtc_address_w(0, data);
-		break;
-
-	case 0x3b5:
-	case 0x3d5:
-		crtc_data_w(0, data);
-		break;
-	}
+	vga_io_write(address, data);
 }
 
 #define LINES ((vga.crtc.vert_disp_end + 1) * (get_interlace_mode() + 1))

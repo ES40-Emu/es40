@@ -154,10 +154,6 @@ private:
   void trace_unimplemented(const std::string& text) override;
 
   CDisplayOutput m_output;
-  address_map m_crtc_map{256};
-  address_map m_seq_map{256};
-  address_map m_gc_map{256};
-  address_map m_atc_map{64};
   CRealImage2100 m_realimage;
   PCIConfig m_profile;
   std::vector<u8> m_rom;

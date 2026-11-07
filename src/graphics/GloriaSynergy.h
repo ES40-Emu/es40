@@ -141,10 +141,6 @@ private:
   void trace_unimplemented(const std::string& text) override;
 
   CDisplayOutput m_output;
-  address_map m_crtc_map{256};
-  address_map m_seq_map{256};
-  address_map m_gc_map{256};
-  address_map m_atc_map{64};
   CPermedia2 m_permedia2;
   // Host scanout storage is shared only by the display and frame-file paths.
   // Acquire this mutex before the device bus; native conversion releases the bus.

@@ -215,14 +215,12 @@ address_map& CGloriaSynergy::space(int spacenum)
 {
 	switch (spacenum)
 	{
+	case MAIN_IF_REG:
 	case CRTC_REG:
-		return m_crtc_map;
 	case SEQ_REG:
-		return m_seq_map;
 	case GC_REG:
-		return m_gc_map;
 	case ATC_REG:
-		return m_atc_map;
+		return CVGA::space(spacenum);
 	default:
 		throw std::invalid_argument("Invalid GLoria VGA register space");
 	}

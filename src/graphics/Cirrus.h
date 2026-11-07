@@ -253,22 +253,6 @@ private:
   bool is_pci() const noexcept { return m_model == Model::GD5430 || m_model == Model::GD5446; }
   // Cirrus has one modeled output.
   CDisplayOutput m_output;
-  address_map m_crtc_map{ 256 };
-  address_map m_seq_map{ 256 };
-  address_map m_gc_map{ 256 };
-  address_map m_atc_map{ 64 };
-  address_map& space(int spacenum) override
-  {
-    switch (spacenum) {
-    case CRTC_REG: return m_crtc_map;
-    case GC_REG:   return m_gc_map;
-    case SEQ_REG:  return m_seq_map;
-    case ATC_REG:  return m_atc_map;
-    default:
-      FAILURE_1(NotImplemented, "Unknown register space %d", spacenum);
-      //return m_crtc_map; // unreachable
-    }
-  }
   // ATC index 0x00..0x0F: Palette registers
   inline u8  atc_palette(u8 idx) const { return vga.attribute.data[idx & 0x0f]; }
 

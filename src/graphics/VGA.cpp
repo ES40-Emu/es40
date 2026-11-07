@@ -1944,6 +1944,22 @@ void CVGA::mem_linear_w(offs_t offset, uint8_t data)
 // 	}
 // }
 
+// ES40 register spaces stand in for MAME's device memory interface.
+address_map& CVGA::space(int spacenum)
+{
+	switch (spacenum)
+	{
+	case MAIN_IF_REG: return m_main_if_map;
+	case CRTC_REG: return m_crtc_map;
+	case GC_REG: return m_gc_map;
+	case SEQ_REG: return m_seq_map;
+	case ATC_REG: return m_atc_map;
+	default:
+		FAILURE_1(NotImplemented, "Unknown register space %d", spacenum);
+		//return m_crtc_map; // unreachable
+	}
+}
+
 // ES40 port dispatch uses the shared MAME submaps after frontend access checks.
 void CVGA::init_io_maps()
 {

@@ -219,24 +219,6 @@ protected:
   virtual void palette_update() override;
   virtual void s3_define_video_mode(void);
 
-  address_map m_crtc_map{ 256 };
-  address_map m_seq_map{ 256 };
-  address_map m_gc_map{ 256 };
-  address_map m_atc_map{ 64 };
-
-  address_map& space(int spacenum) override
-  {
-    switch (spacenum) {
-    case CRTC_REG: return m_crtc_map;
-    case GC_REG:   return m_gc_map;
-    case SEQ_REG:  return m_seq_map;
-    case ATC_REG:  return m_atc_map;
-    default:
-      FAILURE_1(NotImplemented, "Unknown register space %d", spacenum);
-      //return m_crtc_map; // unreachable
-    }
-  }
-
   void crtc_map(address_map& map) override;
   void sequencer_map(address_map& map) override;
   void gc_map(address_map& map) override;

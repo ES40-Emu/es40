@@ -119,6 +119,10 @@ protected:
   bool vga_io_write(u32 port, u8 data);
   address_map m_main_if_map{16};
   address_map m_3cx_map{16};
+  address_map m_crtc_map{256};
+  address_map m_seq_map{256};
+  address_map m_gc_map{256};
+  address_map m_atc_map{64};
   virtual void trace_unimplemented(const std::string&) {}
   std::set<std::tuple<std::string, u32, bool>> m_unimplemented_seen;
   unsigned m_unimplemented_printed = 0;
@@ -369,7 +373,7 @@ protected:
     EXT_REG
   };
 
-  virtual address_map& space(int spacenum) = 0; // ES40 trickery
+  virtual address_map& space(int spacenum); // ES40 register-space adapter
 
   //address_space_config m_main_if_space_config;
   //address_space_config m_crtc_space_config;

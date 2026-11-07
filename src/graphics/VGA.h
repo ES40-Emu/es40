@@ -148,7 +148,9 @@ protected:
   void vga_vh_cga(bitmap_rgb32& bitmap, const rectangle& cliprect);
   void vga_vh_mono(bitmap_rgb32& bitmap, const rectangle& cliprect);
   uint8_t pc_vga_choosevideomode();
-  //void recompute_params_clock(int divisor, int xtal);
+  // ES40 keeps timing storage in each card; false means incomplete CRTC geometry.
+  bool recompute_params_clock(int divisor, int xtal,
+    double& vrefresh_hz, uint64_t& refresh_interval_ms);
   virtual void recompute_params();
   uint8_t vga_vblank();
   //virtual void enter_setup_mode();

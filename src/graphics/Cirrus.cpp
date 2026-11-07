@@ -2406,39 +2406,8 @@ void CCirrus::recompute_params_clock(int divisor, int xtal)
 	const int seq_div = ((vga.sequencer.data[1] & 0x08) >> 3) + 1;
 	timing.pixel_clock_hz = (seq_div > 0) ? (xtal / seq_div) : xtal;
 
-	int vblank_period, hblank_period;
-	//attoseconds_t refresh;
-	uint8_t hclock_m = (!GRAPHIC_MODE) ? VGA_CH_WIDTH : 8;
-	int pixel_clock;
-
-	/* safety check */
-	if (!vga.crtc.horz_disp_end || !vga.crtc.vert_disp_end || !vga.crtc.horz_total) // check needs 'vga.crtc.vert_total' but we don't implement.... yet
-		return;
-
-	const u8 is_interlace_mode = get_interlace_mode() + 1;
-	//const int display_lines = vga.crtc.vert_disp_end * is_interlace_mode;
-
-	//rectangle visarea(0, ((vga.crtc.horz_disp_end + 1) * ((float)(hclock_m) / divisor)) - 1, 0, display_lines);
-
-	vblank_period = (vga.crtc.vert_total + 2) * is_interlace_mode;
-	hblank_period = ((vga.crtc.horz_total + 5) * ((float)(hclock_m) / divisor));
-
-	// TODO: improve/complete clocking modes
-	pixel_clock = xtal / (((vga.sequencer.data[1]&8) >> 3) + 1);
-
-	//refresh = HZ_TO_ATTOSECONDS(pixel_clock) * (hblank_period)*vblank_period;
-	//screen().configure((hblank_period), (vblank_period), visarea, refresh);
-	//m_vblank_timer->adjust(screen().time_until_pos(vga.crtc.vert_blank_start + vga.crtc.vert_blank_end));
-
-	if (hblank_period > 0 && vblank_period > 0 && pixel_clock > 0)
-	{
-		timing.vrefresh_hz = (double)pixel_clock / ((double)hblank_period * (double)vblank_period);
-		// Clamp to sane range
-		if (timing.vrefresh_hz < 1.0)   timing.vrefresh_hz = 1.0;
-		if (timing.vrefresh_hz > 240.0) timing.vrefresh_hz = 240.0;
-		timing.refresh_interval_ms = (uint64_t)(1000.0 / timing.vrefresh_hz);
-		if (timing.refresh_interval_ms < 4) timing.refresh_interval_ms = 4;  // cap at ~250Hz
-	}
+	CVGA::recompute_params_clock(divisor, xtal,
+		timing.vrefresh_hz, timing.refresh_interval_ms);
 }
 
 u8 CCirrus::get_actl_palette_idx(u8 index)

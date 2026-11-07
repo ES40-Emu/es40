@@ -60,11 +60,6 @@ static constexpr unsigned vga_log_mask = 0
 #define LOGREGS(...) LOGMASKED(LOG_REGS, __VA_ARGS__)
 #define LOGCRTC(...) LOGMASKED(LOG_CRTC, __VA_ARGS__)
 
-// Function order follows MAME pc_vga.cpp (a10f63aa21298f6afed078fa85398abb8a539199).
-// Unused MAME facilities remain commented out in place. CVGA combines the
-// VGA and SVGA classes; its active mode selection and screen update follow
-// the SVGA versions below. ES40 lifecycle and diagnostic helpers are separate.
-
 /***************************************************************************
 
     Generic VGA
@@ -1669,31 +1664,49 @@ void CVGA::palette_update()
  *************************************/
 
 // void vga_device::recompute_params_clock(int divisor, int xtal)
-// {
-// 	int vblank_period, hblank_period;
-// 	// if not in graphic mode and not Clocking Mode bit 0 select 9 dots per charset
-// 	uint8_t hclock_m = !vga.gc.alpha_dis && !BIT(vga.sequencer.data[1], 0) ? 9 : 8;
-// 	int pixel_clock;
-//
-// 	/* safety check */
+bool CVGA::recompute_params_clock(int divisor, int xtal,
+	double& vrefresh_hz, uint64_t& refresh_interval_ms)
+{
+	int vblank_period, hblank_period;
+	// if not in graphic mode and not Clocking Mode bit 0 select 9 dots per charset
+	uint8_t hclock_m = !vga.gc.alpha_dis && !BIT(vga.sequencer.data[1], 0) ? 9 : 8;
+	int pixel_clock;
+
+	/* safety check */
 // 	if(!vga.crtc.horz_disp_end || !vga.crtc.vert_disp_end || !vga.crtc.horz_total || !vga.crtc.vert_total)
-// 		return;
-//
-// 	const u8 is_interlace_mode = get_interlace_mode() + 1;
+	// ES40 preserves updates with vert_total == 0 while registers are programmed.
+	if (!vga.crtc.horz_disp_end || !vga.crtc.vert_disp_end || !vga.crtc.horz_total)
+		return false;
+
+	const u8 is_interlace_mode = get_interlace_mode() + 1;
 // 	const int display_lines = vga.crtc.vert_disp_end * is_interlace_mode;
-//
+
 // 	rectangle visarea(0, ((vga.crtc.horz_disp_end + 1) * ((float)(hclock_m)/divisor))-1, 0, display_lines);
-//
-// 	vblank_period = (vga.crtc.vert_total + 2) * is_interlace_mode;
-// 	hblank_period = ((vga.crtc.horz_total + 5) * ((float)(hclock_m)/divisor));
-//
-// 	// TODO: improve/complete clocking modes
-// 	pixel_clock = xtal / (((vga.sequencer.data[1]&8) >> 3) + 1);
-//
+
+	vblank_period = (vga.crtc.vert_total + 2) * is_interlace_mode;
+	hblank_period = ((vga.crtc.horz_total + 5) * ((float)(hclock_m)/divisor));
+
+	// TODO: improve/complete clocking modes
+	pixel_clock = xtal / (((vga.sequencer.data[1]&8) >> 3) + 1);
+
 // 	attotime refresh  = attotime::from_ticks(hblank_period * vblank_period, pixel_clock);
 // 	screen().configure((hblank_period), (vblank_period), visarea, refresh );
 // 	m_vblank_timer->adjust( screen().time_until_pos(vga.crtc.vert_blank_start + vga.crtc.vert_blank_end) );
-// }
+
+	// ES40 schedules redraws from these caller-owned values instead of screen().
+	if (hblank_period > 0 && vblank_period > 0 && pixel_clock > 0)
+	{
+		vrefresh_hz = (double)pixel_clock / ((double)hblank_period * (double)vblank_period);
+		// Clamp to sane range
+		if (vrefresh_hz < 1.0)   vrefresh_hz = 1.0;
+		if (vrefresh_hz > 240.0) vrefresh_hz = 240.0;
+		refresh_interval_ms = (uint64_t)(1000.0 / vrefresh_hz);
+		if (refresh_interval_ms < 4) refresh_interval_ms = 4;  // cap at ~250Hz
+	}
+
+	// A valid CRTC still permits card-specific updates when refresh is unchanged.
+	return true;
+}
 
 // TODO: rename me
 void CVGA::recompute_params()

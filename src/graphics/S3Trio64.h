@@ -58,7 +58,7 @@
  *   (http://home.worldonline.dk/~finth/)
  *  .
  **/
-class CS3Trio64 : public CVGA, public CRunnable, public mame_machine_provider,
+class CS3Trio64 : public CVGA, public CRunnable,
   public CDisplayOutputProvider
 {
 public:
@@ -219,8 +219,6 @@ protected:
   virtual void palette_update() override;
   virtual void s3_define_video_mode(void);
 
-  nop_callback m_vsync_cb;
-
   address_map m_crtc_map{ 256 };
   address_map m_seq_map{ 256 };
   address_map m_gc_map{ 256 };
@@ -239,7 +237,7 @@ protected:
     }
   }
 
-  void crtc_map(address_map& map);
+  void crtc_map(address_map& map) override;
   void sequencer_map(address_map& map);
   void gc_map(address_map& map);
   void attribute_map(address_map& map);

@@ -54,7 +54,7 @@
 #include "emu/mame_shims.h"
 #include "emu/address_map.h"
 
-class CCirrus : public CVGA, public CRunnable, public mame_machine_provider,
+class CCirrus : public CVGA, public CRunnable,
   public CDisplayOutputProvider
 {
 public:
@@ -187,7 +187,7 @@ protected:
 
 	virtual uint8_t vga_latch_write(int offs, uint8_t data) override;
 
-	virtual void crtc_map(address_map &map) ATTR_COLD;
+	virtual void crtc_map(address_map &map) override ATTR_COLD;
 	virtual void gc_map(address_map &map) ATTR_COLD;
 	virtual void sequencer_map(address_map &map) ATTR_COLD;
 

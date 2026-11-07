@@ -113,7 +113,7 @@ public:
 
 protected:
   address_map& space(int spacenum) override;
-  void crtc_map(address_map& map);
+  void crtc_map(address_map& map) override;
   void sequencer_map(address_map& map);
   void gc_map(address_map& map);
   void attribute_map(address_map& map);

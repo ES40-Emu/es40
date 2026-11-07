@@ -52,7 +52,7 @@ using offs_t = uint32_t;
 /**
  * \brief Abstract base class for PCI VGA cards.
  **/
-class CVGA : public CPCIDevice
+class CVGA : public CPCIDevice, public mame_machine_provider
 {
   friend class ibm8514a_device;
 public:
@@ -184,7 +184,7 @@ protected:
   virtual void gc_data_w(offs_t offset, u8 data);
 
   // TODO: MAME pc_vga.h has these here
-  //virtual void crtc_map(address_map& map) ATTR_COLD;
+  virtual void crtc_map(address_map& map);
   //virtual void sequencer_map(address_map& map) ATTR_COLD;
   //virtual void gc_map(address_map& map) ATTR_COLD;
   //virtual void attribute_map(address_map& map) ATTR_COLD;
@@ -371,7 +371,8 @@ protected:
 
   bool m_ioas = false;
 
-  //devcb_write_line m_vsync_cb;
+  // ES40 has no VGA retrace IRQ callback yet.
+  nop_callback m_vsync_cb;
 
   //----- these belong in mame's SVGA device but we don't use that yet. 
   // TODO: Implement SVGA class for extension for better code re-use

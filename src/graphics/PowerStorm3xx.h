@@ -27,7 +27,7 @@
 #if !defined(INCLUDED_PowerStorm3xx_H_)
 #define INCLUDED_PowerStorm3xx_H_
 
-#include "VGA.h"
+#include "SVGA.h"
 #include "REALimage2100.h"
 #include "base/Runnable.h"
 #include "gui/gui.h"
@@ -39,7 +39,7 @@
 
 // PowerStorm 300/350 PCI board with VGA and REALimage 2100 native display.
 class CPowerStorm3xx :
-  public CVGA,
+  public CSVGA,
   public CRunnable,
   public CDisplayOutputProvider
 {

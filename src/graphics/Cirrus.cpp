@@ -89,7 +89,7 @@
  * Bind the card's sole display output; device initialization is done by init().
  **/
 CCirrus::CCirrus(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
-	bx_gui_c& display) : CVGA(cfg, c, pcibus, pcidev), m_output(0, display)
+	bx_gui_c& display) : CSVGA(cfg, c, pcibus, pcidev), m_output(0, display)
 {
 	memset(&vga, 0, sizeof(vga));
 	memset(&svga, 0, sizeof(svga));
@@ -153,7 +153,7 @@ void CCirrus::gd5401_recompute_params()
 
 void CCirrus::io_3cx_map(address_map &map)
 {
-	CVGA::io_3cx_map(map);
+	CSVGA::io_3cx_map(map);
 	// ES40 retains the existing Oak register readback and storage.
 	map(0x03, 0x03).lrw8(
 		NAME([this](offs_t) { return vga.oak.reg; }),
@@ -262,7 +262,7 @@ void CCirrus::ramdac_overlay_w(offs_t offset, u8 data)
 
 void CCirrus::crtc_map(address_map &map)
 {
-	CVGA::crtc_map(map);
+	CSVGA::crtc_map(map);
 
 	if (is_avga())
 		return;
@@ -326,7 +326,7 @@ void CCirrus::crtc_map(address_map &map)
 
 void CCirrus::gc_map(address_map &map)
 {
-	CVGA::gc_map(map);
+	CSVGA::gc_map(map);
 
 	if (is_avga())
 		return;
@@ -604,7 +604,7 @@ void CCirrus::gc_map(address_map &map)
 
 void CCirrus::sequencer_map(address_map &map)
 {
-	CVGA::sequencer_map(map);
+	CSVGA::sequencer_map(map);
 
 	if (is_avga())
 		return;
@@ -824,7 +824,7 @@ void CCirrus::gd5428_device_reset()
 uint32_t CCirrus::screen_update(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
 	uint32_t ptr = (vga.svga_intf.vram_size - 0x4000);  // cursor patterns are stored in the last 16kB of VRAM
-	CVGA::screen_update(screen, bitmap, cliprect);
+	CSVGA::screen_update(screen, bitmap, cliprect);
 
 	if(cirrus.m_cursor_attr & 0x01)  // hardware cursor enabled
 	{
@@ -989,7 +989,7 @@ uint16_t CCirrus::offset()
 	// TODO: check true enable condition
 	if (svga.rgb8_en || svga.rgb15_en || svga.rgb16_en || svga.rgb24_en || svga.rgb32_en)
 		return vga.crtc.offset << 3;
-	return CVGA::offset();
+	return CSVGA::offset();
 }
 
 uint32_t CCirrus::latch_start_addr()
@@ -1350,7 +1350,7 @@ uint8_t CCirrus::gd5428_mem_r(offs_t offset)
 	// NOTE: bebox also wants this
 	if(vga.sequencer.data[0x07] & 0xf0)
 	{
-		return CVGA::mem_linear_r((offset & 0xffff) + bank * 0x10000);
+		return CSVGA::mem_linear_r((offset & 0xffff) + bank * 0x10000);
 	}
 
 	if(cirrus.gc_locked || offset >= 0x10000 || cur_mode == TEXT_MODE || cur_mode == SCREEN_OFF)
@@ -1519,7 +1519,7 @@ void CCirrus::gd5428_mem_w(offs_t offset, uint8_t data)
 	// TODO: as above
 	if(vga.sequencer.data[0x07] & 0xf0)
 	{
-		CVGA::mem_linear_w((offset + bank * 0x10000), data);
+		CSVGA::mem_linear_w((offset + bank * 0x10000), data);
 		return;
 	}
 

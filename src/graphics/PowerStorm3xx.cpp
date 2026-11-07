@@ -318,7 +318,7 @@ CRealImage2100::Frame CPowerStorm3xx::render_frame(CRealImage2100::Frame frame)
 	vga.crtc.start_addr = latch_start_addr();
 	vga.attribute.pel_shift = vga.attribute.pel_shift_latch;
 	palette_update();
-	CVGA::screen_update(
+	CSVGA::screen_update(
 		screen(), m_render_bitmap, rectangle(0, frame.width - 1, 0, frame.height - 1));
 	frame.argb.assign(
 		m_render_bitmap.raw(),
@@ -500,7 +500,7 @@ CPowerStorm3xx::OptionROM CPowerStorm3xx::OptionROM::parse(
 
 CPowerStorm3xx::CPowerStorm3xx(
 	CConfigurator* cfg, CSystem* sys, int bus, int dev, bx_gui_c& display)
-try : CVGA(cfg, sys, bus, dev), m_output(0, display)
+try : CSVGA(cfg, sys, bus, dev), m_output(0, display)
 {
 	reset_vga();
 }

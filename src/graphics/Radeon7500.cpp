@@ -318,7 +318,7 @@ CRV200::Frame CRadeon7500::render_frame()
 	vga.crtc.start_addr = latch_start_addr();
 	vga.attribute.pel_shift = vga.attribute.pel_shift_latch;
 	palette_update();
-	CVGA::screen_update(
+	CSVGA::screen_update(
 		screen(), m_render_bitmap, rectangle(0, frame.width - 1, 0, frame.height - 1));
 	frame.argb.assign(
 		m_render_bitmap.raw(),
@@ -495,7 +495,7 @@ CRadeon7500::OptionROM CRadeon7500::OptionROM::parse(
 CRadeon7500::CRadeon7500(
 	CConfigurator* cfg, CSystem* sys, int bus, int dev, bx_gui_c& display)
 try
-	: CVGA(cfg, sys, bus, dev), m_output(0, display),
+	: CSVGA(cfg, sys, bus, dev), m_output(0, display),
 	  m_rv200(radeon_options(cfg))
 {
 	reset_vga();

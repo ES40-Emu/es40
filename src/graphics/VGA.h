@@ -382,30 +382,6 @@ protected:
   // ES40 has no VGA retrace IRQ callback yet.
   nop_callback m_vsync_cb;
 
-  //----- these belong in mame's SVGA device but we don't use that yet. 
-  // TODO: Implement SVGA class for extension for better code re-use
-  // svga also has a screen_update but let's not worry about that yet
-  void svga_vh_rgb8(bitmap_rgb32& bitmap, const rectangle& cliprect);
-  void svga_vh_rgb15(bitmap_rgb32& bitmap, const rectangle& cliprect);
-  void svga_vh_rgb16(bitmap_rgb32& bitmap, const rectangle& cliprect);
-  void svga_vh_rgb24(bitmap_rgb32& bitmap, const rectangle& cliprect);
-  void svga_vh_rgb32(bitmap_rgb32& bitmap, const rectangle& cliprect);
-  //virtual uint8_t pc_vga_choosevideomode() override;
-  //virtual void device_start() override ATTR_COLD;
-  virtual u16 line_compare_mask();
-
-  struct
-  {
-    uint8_t bank_r, bank_w;
-    uint8_t rgb8_en;
-    uint8_t rgb15_en;
-    uint8_t rgb16_en;
-    uint8_t rgb24_en;
-    uint8_t rgb32_en;
-    uint8_t id;
-    bool ignore_chain4;
-  } svga;
-  //---- end svga device specifics ---
 private:
   address_map* io_port_map(u32 port);
   uint32_t start_addr();

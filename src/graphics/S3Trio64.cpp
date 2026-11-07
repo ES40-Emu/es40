@@ -241,7 +241,7 @@ void CS3Trio64::refresh_pitch_offset()
 
 void CS3Trio64::crtc_map(address_map& map)
 {
-	CVGA::crtc_map(map);
+	CSVGA::crtc_map(map);
 
 	// ES40 redraw notifications for the text cursor and display start.
 	map(0x0a, 0x0a).lw8(
@@ -1067,7 +1067,7 @@ void CS3Trio64::crtc_map(address_map& map)
 
 void CS3Trio64::sequencer_map(address_map& map)
 {
-	CVGA::sequencer_map(map);
+	CSVGA::sequencer_map(map);
 	//  map(0x00, 0x00) Reset Register
 	map(0x00, 0x00).lw8( // es40 deviation
 		NAME([this](offs_t offset, u8 data) {
@@ -1520,7 +1520,7 @@ void CS3Trio64::mem_w(offs_t offset, uint8_t data)
 
 uint32_t CS3Trio64::screen_update(screen_device& screen, bitmap_rgb32& bitmap, const rectangle& cliprect)
 {
-	CVGA::screen_update(screen, bitmap, cliprect);
+	CSVGA::screen_update(screen, bitmap, cliprect);
 
 	uint8_t cur_mode = pc_vga_choosevideomode();
 
@@ -1836,7 +1836,7 @@ static u32                 s3_cfg_mask[64] = {
  * Bind the card's sole display output; device initialization is done by init().
  **/
 CS3Trio64::CS3Trio64(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
-	bx_gui_c& display) : CVGA(cfg, c, pcibus, pcidev), m_output(0, display)
+	bx_gui_c& display) : CSVGA(cfg, c, pcibus, pcidev), m_output(0, display)
 {
 	// PCI setup consults linear-enable state before the accelerator starts.
 	m_8514.ibm8514.advfunction_ctrl = 0;

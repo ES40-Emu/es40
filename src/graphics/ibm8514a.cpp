@@ -39,7 +39,7 @@
 
 #include "emu.h"
 #include "ibm8514a.h"   
-#include "VGA.h" // es40 req
+#include "SVGA.h" // es40 req
 
 #ifdef DEBUG_VGA_NOISY
 #define VERBOSE (LOG_GENERAL)

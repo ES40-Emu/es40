@@ -282,6 +282,8 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        SnapshotFile.h \
        CPU/TraceEngine.cpp \
        graphics/VGA.cpp \
+       graphics/SVGA.cpp \
+       graphics/SVGA.h \
        system/i2c_spd.cpp \
 	base/ThreadTLS.cpp \
        gui/gui.cpp \

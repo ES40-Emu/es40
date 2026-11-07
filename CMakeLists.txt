@@ -486,6 +486,7 @@ list(APPEND ES40_SOURCES
     src/emu/SystemComponent.cpp
     src/CPU/TraceEngine.cpp
     src/graphics/VGA.cpp
+    src/graphics/SVGA.cpp
     src/CPU/jit/jitengine.cpp
     src/CPU/jit/jitengine_x64.cpp
     src/CPU/jit/jitengine_a64.cpp

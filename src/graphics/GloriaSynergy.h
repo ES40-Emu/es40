@@ -27,7 +27,7 @@
 #if !defined(INCLUDED_GloriaSynergy_H_)
 #define INCLUDED_GloriaSynergy_H_
 
-#include "VGA.h"
+#include "SVGA.h"
 #include "Permedia2.h"
 #include "base/Runnable.h"
 #include "gui/gui.h"
@@ -40,7 +40,7 @@
 
 /** ELSA GLoria Synergy PCI video card with a Permedia 2 graphics processor. */
 class CGloriaSynergy :
-  public CVGA,
+  public CSVGA,
   public CRunnable,
   public CDisplayOutputProvider
 {

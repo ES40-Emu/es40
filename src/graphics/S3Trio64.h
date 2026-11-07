@@ -36,7 +36,7 @@
 #if !defined(INCLUDED_S3Trio64_H_)
 #define INCLUDED_S3Trio64_H_
 
-#include "VGA.h"
+#include "SVGA.h"
 #include "gui/gui.h"
 #include <atomic>
 #include "emu/coretmpl.h"
@@ -58,7 +58,7 @@
  *   (http://home.worldonline.dk/~finth/)
  *  .
  **/
-class CS3Trio64 : public CVGA, public CRunnable,
+class CS3Trio64 : public CSVGA, public CRunnable,
   public CDisplayOutputProvider
 {
 public:

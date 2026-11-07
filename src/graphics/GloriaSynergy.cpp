@@ -366,7 +366,7 @@ CPermedia2::Frame CGloriaSynergy::render_frame()
 	vga.crtc.start_addr = latch_start_addr();
 	vga.attribute.pel_shift = vga.attribute.pel_shift_latch;
 	palette_update();
-	CVGA::screen_update(
+	CSVGA::screen_update(
 		screen(), m_render_bitmap, rectangle(0, frame.width - 1, 0, frame.height - 1));
 	frame.argb.assign(
 		m_render_bitmap.raw(),
@@ -540,7 +540,7 @@ CGloriaSynergy::OptionROM CGloriaSynergy::OptionROM::parse(
 CGloriaSynergy::CGloriaSynergy(
 	CConfigurator* cfg, CSystem* sys, int bus, int dev, bx_gui_c& display)
 try
-	: CVGA(cfg, sys, bus, dev), m_output(0, display),
+	: CSVGA(cfg, sys, bus, dev), m_output(0, display),
 	  m_permedia2(gloria_options(cfg)), m_rom(65536, 0xff)
 {
 	reset_vga();

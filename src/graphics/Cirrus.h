@@ -45,7 +45,7 @@
 
 #pragma once
 
-#include "VGA.h"
+#include "SVGA.h"
 #include "gui/gui.h"
 #include <atomic>
 #include <chrono>
@@ -54,7 +54,7 @@
 #include "emu/mame_shims.h"
 #include "emu/address_map.h"
 
-class CCirrus : public CVGA, public CRunnable,
+class CCirrus : public CSVGA, public CRunnable,
   public CDisplayOutputProvider
 {
 public:

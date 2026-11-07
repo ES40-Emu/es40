@@ -78,7 +78,7 @@ class address_map_entry
 {
 public:
   address_map_entry(address_map& parent, unsigned lo, unsigned hi)
-    : m_map(parent), m_lo(lo), m_hi(hi), m_mirror(0) {
+    : m_map(parent), m_lo(lo), m_hi(hi), m_mirror(0), m_select(0) {
   }
 
   /// .lrw8(read_fn, read_name, write_fn, write_name)
@@ -104,7 +104,24 @@ public:
     return *this;
   }
 
+  address_map_entry& select(unsigned bits)
+  {
+    m_select = bits;
+    return *this;
+  }
+
 private:
+  offs_t handler_mask() const
+  {
+    offs_t changing_bits = m_lo ^ m_hi;
+    changing_bits |= changing_bits >> 1;
+    changing_bits |= changing_bits >> 2;
+    changing_bits |= changing_bits >> 4;
+    changing_bits |= changing_bits >> 8;
+    changing_bits |= changing_bits >> 16;
+    return changing_bits | m_select;
+  }
+
   /// Expand mirror bits and call fn for each effective address
   void for_each_addr(std::function<void(unsigned)> fn) const;
 
@@ -112,6 +129,7 @@ private:
   unsigned      m_lo;
   unsigned      m_hi;
   unsigned      m_mirror;
+  unsigned      m_select;
 };
 
 
@@ -225,7 +243,8 @@ private:
 
 inline void address_map_entry::for_each_addr(std::function<void(unsigned)> fn) const
 {
-  if (m_mirror == 0)
+  const unsigned expanded_bits = m_mirror | m_select;
+  if (expanded_bits == 0)
   {
     for (unsigned a = m_lo; a <= m_hi; ++a)
       fn(a);
@@ -236,7 +255,7 @@ inline void address_map_entry::for_each_addr(std::function<void(unsigned)> fn) c
     // any mirror bit can be 0 or 1 independently... i think
     std::vector<unsigned> mirror_bits;
     for (unsigned b = 0; b < 32; ++b)
-      if (m_mirror & (1u << b))
+      if (expanded_bits & (1u << b))
         mirror_bits.push_back(1u << b);
 
     unsigned combos = 1u << mirror_bits.size();
@@ -263,10 +282,11 @@ address_map_entry& address_map_entry::lrw8(T&& read_fn, const char* read_name,
   auto rfn = std::make_shared<std::function<u8(offs_t)>>(std::forward<T>(read_fn));
   auto wfn = std::make_shared<std::function<void(offs_t, u8)>>(std::forward<U>(write_fn));
   unsigned base = m_lo;
+  const offs_t mask = handler_mask();
 
   for_each_addr([&](unsigned addr) {
-    m_map.install_read(addr, [rfn](offs_t off) { return (*rfn)(off); }, base, read_name);
-    m_map.install_write(addr, [wfn](offs_t off, u8 d) { (*wfn)(off, d); }, base, write_name);
+    m_map.install_read(addr, [rfn, mask](offs_t off) { return (*rfn)(off & mask); }, base, read_name);
+    m_map.install_write(addr, [wfn, mask](offs_t off, u8 d) { (*wfn)(off & mask, d); }, base, write_name);
     });
   return *this;
 }
@@ -276,9 +296,10 @@ address_map_entry& address_map_entry::lr8(T&& read_fn, const char* name)
 {
   auto rfn = std::make_shared<std::function<u8(offs_t)>>(std::forward<T>(read_fn));
   unsigned base = m_lo;
+  const offs_t mask = handler_mask();
 
   for_each_addr([&](unsigned addr) {
-    m_map.install_read(addr, [rfn](offs_t off) { return (*rfn)(off); }, base, name);
+    m_map.install_read(addr, [rfn, mask](offs_t off) { return (*rfn)(off & mask); }, base, name);
     });
   return *this;
 }
@@ -288,9 +309,10 @@ address_map_entry& address_map_entry::lw8(T&& write_fn, const char* name)
 {
   auto wfn = std::make_shared<std::function<void(offs_t, u8)>>(std::forward<T>(write_fn));
   unsigned base = m_lo;
+  const offs_t mask = handler_mask();
 
   for_each_addr([&](unsigned addr) {
-    m_map.install_write(addr, [wfn](offs_t off, u8 d) { (*wfn)(off, d); }, base, name);
+    m_map.install_write(addr, [wfn, mask](offs_t off, u8 d) { (*wfn)(off & mask, d); }, base, name);
     });
   return *this;
 }

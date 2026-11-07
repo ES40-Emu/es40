@@ -252,9 +252,6 @@ protected:
     init_io_maps();
   }
 
-  // Video mode detection (MAME: svga_device::pc_vga_choosevideomode)
-  uint8_t get_video_depth();
-
   // SVGA-aware banked memory access (MAME: s3vision864_vga_device::mem_r/w)
   uint8_t  mem_r(uint32_t offset) override;
   void     mem_w(uint32_t offset, uint8_t data) override;

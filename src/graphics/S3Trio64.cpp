@@ -4473,20 +4473,6 @@ void CS3Trio64::palette_update()
 	}
 }
 
-uint8_t CS3Trio64::get_video_depth()
-{
-	switch (pc_vga_choosevideomode())
-	{
-	case VGA_MODE:
-	case RGB8_MODE:    return 8;
-	case RGB15_MODE:
-	case RGB16_MODE:   return 16;
-	case RGB24_MODE:
-	case RGB32_MODE:   return 32;
-	default:           return 0;
-	}
-}
-
 void CS3Trio64::mem_linear_w(uint32_t offset, uint8_t data)
 {
 	CVGA::mem_linear_w(offset, data);

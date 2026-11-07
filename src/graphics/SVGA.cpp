@@ -372,22 +372,22 @@ uint8_t CSVGA::pc_vga_choosevideomode()
 	return SCREEN_OFF;
 }
 
-// uint8_t svga_device::get_video_depth()
-// {
-// 	switch(pc_vga_choosevideomode())
-// 	{
-// 		case VGA_MODE:
-// 		case RGB8_MODE:
-// 			return 8;
-// 		case RGB15_MODE:
-// 		case RGB16_MODE:
-// 			return 16;
-// 		case RGB24_MODE:
-// 		case RGB32_MODE:
-// 			return 32;
-// 	}
-// 	return 0;
-// }
+uint8_t CSVGA::get_video_depth()
+{
+	switch(pc_vga_choosevideomode())
+	{
+		case VGA_MODE:
+		case RGB8_MODE:
+			return 8;
+		case RGB15_MODE:
+		case RGB16_MODE:
+			return 16;
+		case RGB24_MODE:
+		case RGB32_MODE:
+			return 32;
+	}
+	return 0;
+}
 
 // TODO: inherit from base class
 uint32_t CSVGA::screen_update(screen_device& screen, bitmap_rgb32& bitmap, const rectangle& cliprect)

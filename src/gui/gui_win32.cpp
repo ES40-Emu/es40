@@ -111,6 +111,9 @@ static unsigned win32_key_scan(unsigned key, unsigned scan, bool extended)
 	const unsigned prefix = scan & 0xff00;
 	const unsigned make = scan & 0x7f;
 	extended = extended || prefix == 0xe000;
+	// Windows appears to make right shift extended even if the native is
+	// plain 0x36 during capture, both must identify the same to the guest
+	if (key == VK_RSHIFT || (key == VK_SHIFT && make == 0x36)) return 0x36;
 	// Keep Pause/Break's E1 sequence distinct from Control and NumLock.
 	if (key == VK_SNAPSHOT) return win32_print_screen_scan;
 	if (key == VK_NUMLOCK) return 0x145;

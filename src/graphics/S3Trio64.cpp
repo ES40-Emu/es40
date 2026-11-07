@@ -2369,72 +2369,9 @@ void CS3Trio64::attribute_map(address_map& map)
 
 void CS3Trio64::gc_map(address_map& map)
 {
-	map.unmap_value_high();
-	map(0x00, 0x00).lrw8(
-		NAME([this](offs_t offset) {
-			return vga.gc.set_reset & 0xf;
-			}),
-		NAME([this](offs_t offset, u8 data) {
-			vga.gc.set_reset = data & 0xf;
-			})
-	);
-	map(0x01, 0x01).lrw8(
-		NAME([this](offs_t offset) {
-			return vga.gc.enable_set_reset & 0xf;
-			}),
-		NAME([this](offs_t offset, u8 data) {
-			vga.gc.enable_set_reset = data & 0xf;
-			})
-	);
-	map(0x02, 0x02).lrw8(
-		NAME([this](offs_t offset) {
-			return vga.gc.color_compare & 0xf;
-			}),
-		NAME([this](offs_t offset, u8 data) {
-			vga.gc.color_compare = data & 0xf;
-			})
-	);
-	map(0x03, 0x03).lrw8(
-		NAME([this](offs_t offset) {
-			return ((vga.gc.logical_op & 3) << 3) | (vga.gc.rotate_count & 7);
-			}),
-		NAME([this](offs_t offset, u8 data) {
-			vga.gc.logical_op = (data & 0x18) >> 3;
-			vga.gc.rotate_count = data & 7;
-			})
-	);
-	map(0x04, 0x04).lrw8(
-		NAME([this](offs_t offset) {
-			return vga.gc.read_map_sel & 3;
-			}),
-		NAME([this](offs_t offset, u8 data) {
-			vga.gc.read_map_sel = data & 3;
-			})
-	);
-	map(0x05, 0x05).lrw8(
-		NAME([this](offs_t offset) {
-			u8 res = (vga.gc.shift256 & 1) << 6;
-			res |= (vga.gc.shift_reg & 1) << 5;
-			res |= (vga.gc.host_oe & 1) << 4;
-			res |= (vga.gc.read_mode & 1) << 3;
-			res |= (vga.gc.write_mode & 3);
-			return res;
-			}),
-		NAME([this](offs_t offset, u8 data) {
-			vga.gc.shift256 = BIT(data, 6);
-			vga.gc.shift_reg = BIT(data, 5);
-			vga.gc.host_oe = BIT(data, 4);
-			vga.gc.read_mode = BIT(data, 3);
-			vga.gc.write_mode = data & 3;
-			})
-	);
-	map(0x06, 0x06).lrw8(
-		NAME([this](offs_t offset) {
-			u8 res = (vga.gc.memory_map_sel & 3) << 2;
-			res |= (vga.gc.chain_oe & 1) << 1;
-			res |= (vga.gc.alpha_dis & 1);
-			return res;
-			}),
+	CVGA::gc_map(map);
+	// Preserve ES40 redraw and dimension-cache updates for VGA mode changes.
+	map(0x06, 0x06).lw8(
 		NAME([this](offs_t offset, u8 data) {
 			u8 prev_memory_mapping = vga.gc.memory_map_sel; //es40ism
 			bool prev_alpha_dis = vga.gc.alpha_dis; // es40ism
@@ -2449,22 +2386,6 @@ void CS3Trio64::gc_map(address_map& map)
 				redraw_area(0, 0, old_iWidth, old_iHeight);
 				old_iHeight = 0;
 			}
-			})
-	);
-	map(0x07, 0x07).lrw8(
-		NAME([this](offs_t offset) {
-			return vga.gc.color_dont_care & 0xf;
-			}),
-		NAME([this](offs_t offset, u8 data) {
-			vga.gc.color_dont_care = data & 0xf;
-			})
-	);
-	map(0x08, 0x08).lrw8(
-		NAME([this](offs_t offset) {
-			return vga.gc.bit_mask & 0xff;
-			}),
-		NAME([this](offs_t offset, u8 data) {
-			vga.gc.bit_mask = data & 0xff;
 			})
 	);
 }

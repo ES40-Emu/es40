@@ -239,7 +239,7 @@ protected:
 
   void crtc_map(address_map& map) override;
   void sequencer_map(address_map& map);
-  void gc_map(address_map& map);
+  void gc_map(address_map& map) override;
   void attribute_map(address_map& map);
 
   void recompute_params() override;

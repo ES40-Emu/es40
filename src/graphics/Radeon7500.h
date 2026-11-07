@@ -115,7 +115,7 @@ protected:
   address_map& space(int spacenum) override;
   void crtc_map(address_map& map) override;
   void sequencer_map(address_map& map);
-  void gc_map(address_map& map);
+  void gc_map(address_map& map) override;
   void attribute_map(address_map& map);
   void palette_update() override;
   void recompute_params() override;

@@ -188,7 +188,7 @@ protected:
 	virtual uint8_t vga_latch_write(int offs, uint8_t data) override;
 
 	virtual void crtc_map(address_map &map) override ATTR_COLD;
-	virtual void gc_map(address_map &map) ATTR_COLD;
+	virtual void gc_map(address_map &map) override ATTR_COLD;
 	virtual void sequencer_map(address_map &map) ATTR_COLD;
 
 	virtual bool get_interlace_mode() override { return BIT(cirrus.m_cr1a, 0); }

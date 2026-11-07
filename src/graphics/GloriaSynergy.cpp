@@ -367,7 +367,7 @@ CPermedia2::Frame CGloriaSynergy::render_frame()
 	vga.attribute.pel_shift = vga.attribute.pel_shift_latch;
 	palette_update();
 	CVGA::screen_update(
-		m_render_bitmap, rectangle(0, frame.width - 1, 0, frame.height - 1));
+		screen(), m_render_bitmap, rectangle(0, frame.width - 1, 0, frame.height - 1));
 	frame.argb.assign(
 		m_render_bitmap.raw(),
 		m_render_bitmap.raw() + size_t(frame.width) * frame.height);

@@ -2289,7 +2289,7 @@ uint8_t CVGA::pc_vga_choosevideomode()
 // }
 
 // TODO: inherit from base class
-uint32_t CVGA::screen_update(bitmap_rgb32& bitmap, const rectangle& cliprect)
+uint32_t CVGA::screen_update(screen_device& screen, bitmap_rgb32& bitmap, const rectangle& cliprect)
 {
 	uint8_t cur_mode = pc_vga_choosevideomode();
 

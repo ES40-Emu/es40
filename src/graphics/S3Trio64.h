@@ -94,7 +94,7 @@ public:
   //virtual uint8_t mem_r(offs_t offset) override;
   //virtual void mem_w(offs_t offset, uint8_t data) override;
 
-  uint32_t screen_update(bitmap_rgb32& bitmap, const rectangle& cliprect) override;
+  uint32_t screen_update(screen_device& screen, bitmap_rgb32& bitmap, const rectangle& cliprect) override;
 
   ibm8514a_device* get_8514() { return &m_8514; }
 

@@ -1518,9 +1518,9 @@ void CS3Trio64::mem_w(offs_t offset, uint8_t data)
 		CVGA::mem_w(offset, data);
 }
 
-uint32_t CS3Trio64::screen_update(bitmap_rgb32& bitmap, const rectangle& cliprect)
+uint32_t CS3Trio64::screen_update(screen_device& screen, bitmap_rgb32& bitmap, const rectangle& cliprect)
 {
-	CVGA::screen_update(bitmap, cliprect);
+	CVGA::screen_update(screen, bitmap, cliprect);
 
 	uint8_t cur_mode = pc_vga_choosevideomode();
 
@@ -4417,7 +4417,7 @@ void CS3Trio64::update(void)
 
 	// Render via MAME's screen_update pipeline
 	rectangle clip = m_render_bitmap.cliprect();
-	screen_update(m_render_bitmap, clip);
+	screen_update(screen(), m_render_bitmap, clip);
 
 	// Tick the frame counter (for cursor blink)
 	screen().tick_frame();

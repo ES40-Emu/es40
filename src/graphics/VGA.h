@@ -67,8 +67,7 @@ public:
   //vga_device(const machine_config& mconfig, const char* tag, device_t* owner, uint32_t clock);
 
   //virtual void zero();
-  //virtual uint32_t screen_update(screen_device& screen, bitmap_rgb32& bitmap, const rectangle& cliprect);
-  virtual uint32_t screen_update(bitmap_rgb32& bitmap, const rectangle& cliprect); // this is a MAME deviation, no screen_device technically
+  virtual uint32_t screen_update(screen_device& screen, bitmap_rgb32& bitmap, const rectangle& cliprect);
 
   //void io_map(address_map& map) ATTR_COLD;
 
@@ -147,7 +146,7 @@ protected:
   void vga_vh_vga(bitmap_rgb32& bitmap, const rectangle& cliprect);
   void vga_vh_cga(bitmap_rgb32& bitmap, const rectangle& cliprect);
   void vga_vh_mono(bitmap_rgb32& bitmap, const rectangle& cliprect);
-  uint8_t pc_vga_choosevideomode();
+  virtual uint8_t pc_vga_choosevideomode();
   // ES40 keeps timing storage in each card; false means incomplete CRTC geometry.
   bool recompute_params_clock(int divisor, int xtal,
     double& vrefresh_hz, uint64_t& refresh_interval_ms);

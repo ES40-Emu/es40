@@ -112,7 +112,7 @@ public:
 	virtual uint8_t gd5428_mem_r(offs_t offset);
 	virtual void gd5428_mem_w(offs_t offset, uint8_t data);
 
-	virtual uint32_t screen_update(bitmap_rgb32 &bitmap, const rectangle &cliprect) override;
+	virtual uint32_t screen_update(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect) override;
 
 protected:
 	//cirrus_gd5428_vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock);

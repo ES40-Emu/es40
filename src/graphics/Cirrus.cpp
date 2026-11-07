@@ -821,10 +821,10 @@ void CCirrus::gd5428_device_reset()
 	cirrus.m_hidden_dac_mode = 0;
 }
 
-uint32_t CCirrus::screen_update(bitmap_rgb32 &bitmap, const rectangle &cliprect)
+uint32_t CCirrus::screen_update(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
 	uint32_t ptr = (vga.svga_intf.vram_size - 0x4000);  // cursor patterns are stored in the last 16kB of VRAM
-	CVGA::screen_update(bitmap, cliprect);
+	CVGA::screen_update(screen, bitmap, cliprect);
 
 	if(cirrus.m_cursor_attr & 0x01)  // hardware cursor enabled
 	{
@@ -2448,7 +2448,7 @@ void CCirrus::update(void)
 
 	// Render via MAME's screen_update pipeline
 	rectangle clip = m_render_bitmap.cliprect();
-	screen_update(m_render_bitmap, clip);
+	screen_update(screen(), m_render_bitmap, clip);
 
 	// Tick the frame counter (for cursor blink)
 	screen().tick_frame();

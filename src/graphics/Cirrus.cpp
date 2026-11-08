@@ -267,7 +267,6 @@ void cirrus_gd5428_vga_device::ramdac_overlay_w(offs_t offset, u8 data)
 void cirrus_gd5428_vga_device::crtc_map(address_map &map)
 {
 	svga_device::crtc_map(map);
-
 	// VGA Vertical Blank end
 	// some SVGA chipsets use all 8 bits, and this is one of them (according to MFGTST CRTC tests)
 	map(0x16, 0x16).lrw8(
@@ -328,7 +327,6 @@ void cirrus_gd5428_vga_device::crtc_map(address_map &map)
 void cirrus_gd5428_vga_device::gc_map(address_map &map)
 {
 	svga_device::gc_map(map);
-
 	map(0x00, 0x00).lrw8(
 		NAME([this](offs_t offset) {
 			return vga.gc.set_reset & ((gc_mode_ext & 0x04) ? 0xff : 0x0f);
@@ -603,7 +601,6 @@ void cirrus_gd5428_vga_device::gc_map(address_map &map)
 void cirrus_gd5428_vga_device::sequencer_map(address_map &map)
 {
 	svga_device::sequencer_map(map);
-
 	map(0x02, 0x02).lrw8(
 		NAME([this] (offs_t offset) {
 			return vga.sequencer.map_mask & ((gc_mode_ext & 0x08) ? 0xff : 0x0f);
@@ -761,9 +758,9 @@ void cirrus_gd5428_vga_device::device_start()
 	//memset(&vga.memory[0], 0, vga.svga_intf.vram_size);
 
 	//save_pointer(NAME(vga.memory), vga.svga_intf.vram_size);
-	//save_pointer(vga.crtc.data,"CRTC Registers",0x100);
-	//save_pointer(vga.sequencer.data,"Sequencer Registers",0x100);
-	//save_pointer(vga.attribute.data,"Attribute Registers", 0x15);
+	save_pointer(vga.crtc.data,"CRTC Registers",0x100);
+	save_pointer(vga.sequencer.data,"Sequencer Registers",0x100);
+	save_pointer(vga.attribute.data,"Attribute Registers", 0x15);
 	save_item(NAME(m_chip_id));
 	save_item(NAME(m_hidden_dac_phase));
 	save_item(NAME(m_hidden_dac_mode));
@@ -2739,6 +2736,12 @@ int CCirrus::RestoreState(FILE* f)
 	{
 		printf("%s: Could not restore registered chipset state.\n", devid_string);
 		return -1;
+	}
+	if (!is_avga())
+	{
+		memcpy(saved_vga.crtc.data, vga.crtc.data, sizeof(saved_vga.crtc.data));
+		memcpy(saved_vga.sequencer.data, vga.sequencer.data, sizeof(saved_vga.sequencer.data));
+		memcpy(saved_vga.attribute.data, vga.attribute.data, sizeof(saved_vga.attribute.data));
 	}
 	saved_vga.memory = vga.memory;
 	vga = saved_vga;

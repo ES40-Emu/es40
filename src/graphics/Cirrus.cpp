@@ -777,7 +777,7 @@ void CCirrus::sequencer_map(address_map &map)
 void CCirrus::device_start()
 {
 	//svga_device::device_start();
-	//zero();
+	zero();
 
 	for (int i = 0; i < 0x100; i++)
 		set_pen_color(i, 0, 0, 0);

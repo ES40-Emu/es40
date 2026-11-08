@@ -114,18 +114,18 @@ CVGA::~CVGA(void)
 }
 
 // zero everything, keep vtbls
-// void vga_device::zero()
-// {
-// 	memset(vga.pens, 0, sizeof(vga.pens));
-// 	vga.miscellaneous_output = 0;
-// 	vga.feature_control = 0;
-// 	memset(&vga.sequencer, 0, sizeof(vga.sequencer));
-// 	memset(&vga.crtc, 0, sizeof(vga.crtc));
-// 	memset(&vga.gc, 0, sizeof(vga.gc));
-// 	memset(&vga.attribute, 0, sizeof(vga.attribute));
-// 	memset(&vga.dac, 0, sizeof(vga.dac));
-// 	memset(&vga.oak, 0, sizeof(vga.oak));
-// }
+void CVGA::zero()
+{
+	memset(vga.pens, 0, sizeof(vga.pens));
+	vga.miscellaneous_output = 0;
+	vga.feature_control = 0;
+	memset(&vga.sequencer, 0, sizeof(vga.sequencer));
+	memset(&vga.crtc, 0, sizeof(vga.crtc));
+	memset(&vga.gc, 0, sizeof(vga.gc));
+	memset(&vga.attribute, 0, sizeof(vga.attribute));
+	memset(&vga.dac, 0, sizeof(vga.dac));
+	memset(&vga.oak, 0, sizeof(vga.oak));
+}
 
 // device_memory_interface::space_config_vector vga_device::memory_space_config() const
 // {

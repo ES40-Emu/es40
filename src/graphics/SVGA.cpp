@@ -53,11 +53,11 @@ CSVGA::CSVGA(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev)
 {
 }
 
-// void svga_device::zero()
-// {
-// 	vga_device::zero();
-// 	memset(&svga, 0, sizeof(svga));
-// }
+void CSVGA::zero()
+{
+	CVGA::zero();
+	memset(&svga, 0, sizeof(svga));
+}
 
 // void svga_device::device_start()
 // {

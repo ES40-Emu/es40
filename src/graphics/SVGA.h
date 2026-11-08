@@ -46,7 +46,7 @@
 class CSVGA : public CVGA
 {
 public:
-  //virtual void zero() override;
+  virtual void zero() override;
   virtual uint32_t screen_update(screen_device& screen, bitmap_rgb32& bitmap, const rectangle& cliprect) override;
   virtual uint8_t get_video_depth();
 

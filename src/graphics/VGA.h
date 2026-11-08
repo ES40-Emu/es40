@@ -66,7 +66,7 @@ public:
   // construction/destruction
   //vga_device(const machine_config& mconfig, const char* tag, device_t* owner, uint32_t clock);
 
-  //virtual void zero();
+  virtual void zero();
   virtual uint32_t screen_update(screen_device& screen, bitmap_rgb32& bitmap, const rectangle& cliprect);
 
   //void io_map(address_map& map) ATTR_COLD;

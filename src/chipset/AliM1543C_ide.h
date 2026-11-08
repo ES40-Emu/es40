@@ -180,6 +180,7 @@ public:
 
   bool decodes_memory_access(int index, u64 address, int dsize,
     bool write) const noexcept override;
+  u32 config_read_custom(int func, u32 address, int dsize, u32 data) override;
 
   virtual void  WriteMem_Legacy(int index, u32 address, int dsize, u32 data);
   virtual u32   ReadMem_Legacy(int index, u32 address, int dsize);

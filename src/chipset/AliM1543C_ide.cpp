@@ -294,7 +294,9 @@ u32 AliM1543C_ide_cfg_mask[64] = {
 	/*34*/ 0x00000000,  // CCAP: capabilities pointer
 	/*38*/ 0x00000000,
 	/*3c*/ 0x000000ff,  // CFIT: interrupt configuration
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	/*40*/ 0, 0, 0, 0,
+	/*50*/ 0x08000000,  // 53h.3: mask compatibility BAR readback
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
@@ -518,6 +520,10 @@ int CAliM1543C_ide::RestoreState(FILE* f)
 		return -1;
 	}
 
+	// Older snapshots saved this configuration bit as read-only. Keep the
+	// restored register value, but apply the current hardware write mask.
+	pci_state.config_mask[0][0x50 / 4] |= endian_32(0x08000000);
+
 	printf("%s: %d bytes restored.\n", devid_string, (int)ss);
 	return 0;
 }
@@ -531,15 +537,10 @@ bool CAliM1543C_ide::decodes_memory_access(int index, u64 address, int dsize,
 	if (!CPCIDevice::decodes_memory_access(index, address, dsize, write))
 		return false;
 
-	// PCI IDE 1.0 section 2.4; M1543C section 4.2.3.4: a channel in
-	// compatibility mode decodes its fixed legacy ports and interrupts
-	// through the ISA PIC; in native mode it uses its BARs and PCI INTA.
-	// The command/control BARs stay writable in compatibility mode and the
-	// M5229 answers at whatever they hold as well: SRM assigns them fresh
-	// addresses while sizing the bus, and OpenVMS's DQDRIVER then drives the
-	// channel through those BAR addresses while still in compatibility mode.
-	// Decoding only the legacy ports left VMS waiting on a port nobody
-	// answered (the secondary channel's status register read back 0xff).
+	// M1543C section 4.2.3.4: compatibility channels use fixed legacy
+	// ports; native channels use the command/control BARs. A programmed
+	// BAR must not create an alias while its channel is in compatibility
+	// mode: the default control BARs otherwise steal the floppy ports.
 	const bool io_enabled = (endian_32(pci_state.config_data[0][1]) & 1U) != 0;
 	switch (index)
 	{
@@ -553,9 +554,36 @@ bool CAliM1543C_ide::decodes_memory_access(int index, u64 address, int dsize,
 
 	if (index >= PCI_RANGE_BASE + BAR_PRI_COMMAND &&
 		index <= PCI_RANGE_BASE + BAR_SEC_CONTROL)
-		return io_enabled;
+	{
+		const int bar = index - PCI_RANGE_BASE;
+		if (!io_enabled || !channel_is_native(bar / 2))
+			return false;
+		// Register 50h.5 narrows native control BARs to their third byte.
+		const bool third_byte_only =
+			(endian_32(pci_state.config_data[0][0x50 / 4]) & 0x20) != 0;
+		return !(bar == BAR_PRI_CONTROL || bar == BAR_SEC_CONTROL) ||
+			!third_byte_only || address == 2;
+	}
 
 	return true;
+}
+
+u32 CAliM1543C_ide::config_read_custom(int func, u32 address, int dsize, u32 data)
+{
+	// M1543C 53h.3 masks the visible BAR contents in compatibility mode;
+	// it does not clear their programmed addresses or change I/O decoding.
+	if (func == 0 &&
+		(endian_32(pci_state.config_data[0][0x50 / 4]) & 0x08000000))
+	{
+		for (u32 byte = 0; byte < (u32)dsize / 8 && byte < 4; ++byte)
+		{
+			const u32 offset = address + byte;
+			if (offset >= 0x10 && offset < 0x20 &&
+				!channel_is_native((offset - 0x10) / 8))
+				data &= ~(0xffU << (byte * 8));
+		}
+	}
+	return data;
 }
 
 u32 CAliM1543C_ide::ReadMem_Legacy(int index, u32 address, int dsize)

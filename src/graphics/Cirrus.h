@@ -172,8 +172,6 @@ protected:
 
 	virtual bool get_interlace_mode() override { return BIT(cirrus.m_cr1a, 0); }
 
-	uint8_t offset_select(offs_t offset);
-
 private:
   Model m_model;
   bool is_avga() const noexcept { return m_model == Model::GD5401 || m_model == Model::AVGA1; }
@@ -349,7 +347,7 @@ protected:
 
 //	virtual bool get_interlace_mode() override { return BIT(m_cr1a, 0); }
 
-//	uint8_t offset_select(offs_t offset);
+	uint8_t offset_select(offs_t offset);
 	virtual void recompute_params() override;
 
 private:

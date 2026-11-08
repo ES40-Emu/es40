@@ -1333,7 +1333,7 @@ uint8_t CCirrus::vga_latch_write(int offs, uint8_t data)
 // 0xa8000-0xaffff offset 1 (if enabled with GRB bit 0)
 // notice that "offset" in this context doesn't mean pitch like everything else in the
 // (S)VGA realm but it's really intended as a window bank base here.
-uint8_t CCirrus::offset_select(offs_t offset)
+uint8_t cirrus_gd5428_vga_device::offset_select(offs_t offset)
 {
 	const uint8_t sa15 = BIT(offset, 15);
 	return cirrus.gc_bank[sa15 & BIT(cirrus.gc_mode_ext, 0)];

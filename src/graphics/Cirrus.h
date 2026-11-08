@@ -56,7 +56,7 @@
 
 // ES40 adapter: frontend integration, compatibility behavior and snapshot state.
 // Active declarations below retain their existing ownership and access.
-class CCirrus : public CSVGA, public CRunnable,
+class CCirrus : public svga_device, public CRunnable,
   public CDisplayOutputProvider
 {
 public:

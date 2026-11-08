@@ -209,7 +209,7 @@ public:
 
   const std::vector<uint8_t>& vram() const { return m_vram; }
 
-  // Borrowed by CVGA; RestoreState replaces the allocation.
+  // Borrowed by vga_device; RestoreState replaces the allocation.
   uint8_t* vram_data() { return m_vram.data(); }
 
   uint32_t peek(uint32_t address) const

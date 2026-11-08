@@ -40,7 +40,7 @@
 
 /** ELSA GLoria Synergy PCI video card with a Permedia 2 graphics processor. */
 class CGloriaSynergy :
-  public CSVGA,
+  public svga_device,
   public CRunnable,
   public CDisplayOutputProvider
 {

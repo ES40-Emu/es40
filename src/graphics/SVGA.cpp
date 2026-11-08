@@ -48,14 +48,14 @@
 
 // svga_device::svga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock)
 // 	: vga_device(mconfig, type, tag, owner, clock)
-CSVGA::CSVGA(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev)
-	: CVGA(cfg, c, pcibus, pcidev)
+svga_device::svga_device(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev)
+	: vga_device(cfg, c, pcibus, pcidev)
 {
 }
 
-void CSVGA::zero()
+void svga_device::zero()
 {
-	CVGA::zero();
+	vga_device::zero();
 	memset(&svga, 0, sizeof(svga));
 }
 
@@ -74,12 +74,12 @@ void CSVGA::zero()
 // 	save_item(NAME(svga.id));
 // }
 
-u16 CSVGA::line_compare_mask()
+u16 svga_device::line_compare_mask()
 {
 	return 0x3ff;
 }
 
-void CSVGA::svga_vh_rgb8(bitmap_rgb32& bitmap, const rectangle& cliprect)
+void svga_device::svga_vh_rgb8(bitmap_rgb32& bitmap, const rectangle& cliprect)
 {
 	const int height = vga.crtc.maximum_scan_line * (vga.crtc.scan_doubling + 1);
 
@@ -129,7 +129,7 @@ void CSVGA::svga_vh_rgb8(bitmap_rgb32& bitmap, const rectangle& cliprect)
 	}
 }
 
-void CSVGA::svga_vh_rgb15(bitmap_rgb32& bitmap, const rectangle& cliprect)
+void svga_device::svga_vh_rgb15(bitmap_rgb32& bitmap, const rectangle& cliprect)
 {
 	constexpr uint32_t IV = 0xff000000;
 	const unsigned height = vga.crtc.maximum_scan_line * (vga.crtc.scan_doubling + 1);
@@ -172,7 +172,7 @@ void CSVGA::svga_vh_rgb15(bitmap_rgb32& bitmap, const rectangle& cliprect)
 	}
 }
 
-void CSVGA::svga_vh_rgb16(bitmap_rgb32& bitmap, const rectangle& cliprect)
+void svga_device::svga_vh_rgb16(bitmap_rgb32& bitmap, const rectangle& cliprect)
 {
 	constexpr uint32_t IV = 0xff000000;
 	const unsigned height = vga.crtc.maximum_scan_line * (vga.crtc.scan_doubling + 1);
@@ -215,7 +215,7 @@ void CSVGA::svga_vh_rgb16(bitmap_rgb32& bitmap, const rectangle& cliprect)
 	}
 }
 
-void CSVGA::svga_vh_rgb24(bitmap_rgb32& bitmap, const rectangle& cliprect)
+void svga_device::svga_vh_rgb24(bitmap_rgb32& bitmap, const rectangle& cliprect)
 {
 	constexpr uint32_t ID = 0xff000000;
 	const int height = vga.crtc.maximum_scan_line * (vga.crtc.scan_doubling + 1);
@@ -256,7 +256,7 @@ void CSVGA::svga_vh_rgb24(bitmap_rgb32& bitmap, const rectangle& cliprect)
 	}
 }
 
-void CSVGA::svga_vh_rgb32(bitmap_rgb32& bitmap, const rectangle& cliprect)
+void svga_device::svga_vh_rgb32(bitmap_rgb32& bitmap, const rectangle& cliprect)
 {
 	constexpr uint32_t ID = 0xff000000;
 	const int height = vga.crtc.maximum_scan_line * (vga.crtc.scan_doubling + 1);
@@ -297,7 +297,7 @@ void CSVGA::svga_vh_rgb32(bitmap_rgb32& bitmap, const rectangle& cliprect)
 }
 
 // TODO: inherit from base class
-uint8_t CSVGA::pc_vga_choosevideomode()
+uint8_t svga_device::pc_vga_choosevideomode()
 {
 	if (vga.crtc.sync_en)
 	{
@@ -369,7 +369,7 @@ uint8_t CSVGA::pc_vga_choosevideomode()
 	return SCREEN_OFF;
 }
 
-uint8_t CSVGA::get_video_depth()
+uint8_t svga_device::get_video_depth()
 {
 	switch(pc_vga_choosevideomode())
 	{
@@ -387,7 +387,7 @@ uint8_t CSVGA::get_video_depth()
 }
 
 // TODO: inherit from base class
-uint32_t CSVGA::screen_update(screen_device& screen, bitmap_rgb32& bitmap, const rectangle& cliprect)
+uint32_t svga_device::screen_update(screen_device& screen, bitmap_rgb32& bitmap, const rectangle& cliprect)
 {
 	uint8_t cur_mode = pc_vga_choosevideomode();
 

@@ -45,9 +45,7 @@
 //#include "video/pc_vga.h"
 #include "emu/mame_shims.h" // ES40 adaptation
 
-//class svga_device;
-class CSVGA;
-using svga_device = CSVGA;
+class svga_device;
 
 class ibm8514a_device : public device_t
 {

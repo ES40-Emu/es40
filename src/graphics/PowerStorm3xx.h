@@ -39,7 +39,7 @@
 
 // PowerStorm 300/350 PCI board with VGA and REALimage 2100 native display.
 class CPowerStorm3xx :
-  public CSVGA,
+  public svga_device,
   public CRunnable,
   public CDisplayOutputProvider
 {

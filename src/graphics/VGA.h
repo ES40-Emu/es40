@@ -52,12 +52,12 @@ using offs_t = uint32_t;
 /**
  * \brief Abstract base class for PCI VGA cards.
  **/
-class CVGA : public CPCIDevice, public mame_machine_provider
+class vga_device : public CPCIDevice, public mame_machine_provider
 {
   friend class ibm8514a_device;
 public:
-  CVGA(class CConfigurator* cfg, class CSystem* c, int pcibus, int pcidev);
-  ~CVGA(void);
+  vga_device(class CConfigurator* cfg, class CSystem* c, int pcibus, int pcidev);
+  ~vga_device(void);
 
   virtual u8    get_actl_palette_idx(u8 index) = 0;
   virtual void  redraw_area(unsigned x0, unsigned y0, unsigned width,
@@ -403,5 +403,5 @@ private:
   uint32_t start_addr();
 };
 
-extern CVGA* theVGA;
+extern vga_device* theVGA;
 #endif

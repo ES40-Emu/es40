@@ -58,7 +58,7 @@
  *   (http://home.worldonline.dk/~finth/)
  *  .
  **/
-class CS3Trio64 : public CSVGA, public CRunnable,
+class CS3Trio64 : public svga_device, public CRunnable,
   public CDisplayOutputProvider
 {
 public:

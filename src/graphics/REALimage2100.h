@@ -241,7 +241,7 @@ public:
   void set_dma_reader(DMAReader fn) { m_dma_reader = std::move(fn); }
   void set_dma_completer(DMACompleter fn) { m_dma_completer = std::move(fn); }
 
-  // Borrowed by CVGA. No claim that native BAR1 aliases this storage.
+  // Borrowed by vga_device. No claim that native BAR1 aliases this storage.
   uint8_t* vram_data() { return m_vga_memory.data(); }
 
   const std::vector<uint8_t>& vram() const { return m_vga_memory; }

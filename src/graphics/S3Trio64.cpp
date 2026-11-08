@@ -164,7 +164,7 @@ uint16_t CS3Trio64::offset()
 {
 	if (s3.memory_config & 0x08)
 		return vga.crtc.offset << 3;
-	return CVGA::offset();
+	return vga_device::offset();
 }
 
 void CS3Trio64::s3_define_video_mode()
@@ -241,7 +241,7 @@ void CS3Trio64::refresh_pitch_offset()
 
 void CS3Trio64::crtc_map(address_map& map)
 {
-	CSVGA::crtc_map(map);
+	svga_device::crtc_map(map);
 
 	// ES40 redraw notifications for the text cursor and display start.
 	map(0x0a, 0x0a).lw8(
@@ -1067,7 +1067,7 @@ void CS3Trio64::crtc_map(address_map& map)
 
 void CS3Trio64::sequencer_map(address_map& map)
 {
-	CSVGA::sequencer_map(map);
+	svga_device::sequencer_map(map);
 	//  map(0x00, 0x00) Reset Register
 	map(0x00, 0x00).lw8( // es40 deviation
 		NAME([this](offs_t offset, u8 data) {
@@ -1234,7 +1234,7 @@ uint8_t CS3Trio64::mem_r(uint32_t offset)
 
 	// Standard VGA fallback — full read-mode/latch pipeline via base class
 	if ((offset + (svga.bank_r * 0x10000)) < vga.svga_intf.vram_size)
-		return CVGA::mem_r(offset);
+		return vga_device::mem_r(offset);
 	return 0xff;
 }
 
@@ -1515,12 +1515,12 @@ void CS3Trio64::mem_w(offs_t offset, uint8_t data)
 	}
 
 	if ((offset + (svga.bank_w * 0x10000)) < vga.svga_intf.vram_size)
-		CVGA::mem_w(offset, data);
+		vga_device::mem_w(offset, data);
 }
 
 uint32_t CS3Trio64::screen_update(screen_device& screen, bitmap_rgb32& bitmap, const rectangle& cliprect)
 {
-	CSVGA::screen_update(screen, bitmap, cliprect);
+	svga_device::screen_update(screen, bitmap, cliprect);
 
 	uint8_t cur_mode = pc_vga_choosevideomode();
 
@@ -1836,7 +1836,7 @@ static u32                 s3_cfg_mask[64] = {
  * Bind the card's sole display output; device initialization is done by init().
  **/
 CS3Trio64::CS3Trio64(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
-	bx_gui_c& display) : CSVGA(cfg, c, pcibus, pcidev), m_output(0, display)
+	bx_gui_c& display) : svga_device(cfg, c, pcibus, pcidev), m_output(0, display)
 {
 	// PCI setup consults linear-enable state before the accelerator starts.
 	m_8514.ibm8514.advfunction_ctrl = 0;
@@ -2251,7 +2251,7 @@ void CS3Trio64::recompute_params()
 
 void CS3Trio64::attribute_map(address_map& map)
 {
-	CVGA::attribute_map(map);
+	vga_device::attribute_map(map);
 
 	// Palette Index Registers 0x00..0x0f
 	map(0x00, 0x0f).lw8(
@@ -2335,7 +2335,7 @@ void CS3Trio64::attribute_map(address_map& map)
 
 void CS3Trio64::gc_map(address_map& map)
 {
-	CVGA::gc_map(map);
+	vga_device::gc_map(map);
 	// Preserve ES40 redraw and dimension-cache updates for VGA mode changes.
 	map(0x06, 0x06).lw8(
 		NAME([this](offs_t offset, u8 data) {
@@ -2523,7 +2523,7 @@ void CS3Trio64::recompute_params_clock(int divisor, int xtal)
 	timing.divisor = divisor;
 	// es40 specific end
 
-	if (!CVGA::recompute_params_clock(divisor, xtal,
+	if (!vga_device::recompute_params_clock(divisor, xtal,
 		timing.vrefresh_hz, timing.refresh_interval_ms))
 		return;
 
@@ -3400,7 +3400,7 @@ void CS3Trio64::WriteMem_Bar(int func, int bar, u32 address, int dsize, u32 data
 	}
 }
 
-// --- Only include LFB here; legacy VGA paths fall through to CVGA ---
+// --- Only include LFB here; legacy VGA paths fall through to vga_device ---
 u64 CS3Trio64::ReadMem(int index, u64 address, int dsize)
 {
 	if (index == DEV_LFB_IDX && !normal_access_enabled())
@@ -3466,7 +3466,7 @@ u64 CS3Trio64::ReadMem(int index, u64 address, int dsize)
 	}
 
 	// Everything else (all legacy VGA ports & A0000 region, option ROM, etc.)
-	return CVGA::ReadMem(index, address, dsize);
+	return vga_device::ReadMem(index, address, dsize);
 }
 
 void CS3Trio64::WriteMem(int index, u64 address, int dsize, u64 data)
@@ -3521,7 +3521,7 @@ void CS3Trio64::WriteMem(int index, u64 address, int dsize, u64 data)
 		return;
 	}
 
-	CVGA::WriteMem(index, address, dsize, data);
+	vga_device::WriteMem(index, address, dsize, data);
 }
 
 
@@ -3791,7 +3791,7 @@ int CS3Trio64::RestoreState(FILE* f)
 	if (m_gui_initialized)
 		palette_update();
 	else
-		CVGA::palette_update();
+		vga_device::palette_update();
 	on_crtc_linear_regs_changed();
 	state.last_bpp = 0;
 	state.vga_mem_updated = true;
@@ -4460,7 +4460,7 @@ inline uint32_t CS3Trio64::s3_vram_mask() const
 
 void CS3Trio64::palette_update()
 {
-	CVGA::palette_update();
+	vga_device::palette_update();
 
 	for (int i = 0; i < 256; i++) {
 		// pal6bit: expand 6-bit color to 8-bit
@@ -4477,7 +4477,7 @@ void CS3Trio64::palette_update()
 
 void CS3Trio64::mem_linear_w(uint32_t offset, uint8_t data)
 {
-	CVGA::mem_linear_w(offset, data);
+	vga_device::mem_linear_w(offset, data);
 	state.vga_mem_updated = 1;
 }
 

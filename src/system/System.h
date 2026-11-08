@@ -161,7 +161,7 @@
 #define INCLUDED_SYSTEM_H
 
 class CDisplayOutput;
-class CVGA;
+class vga_device;
 
 #if defined(PROFILE)
 #define PROFILE_FROM      U64(0x8000)
@@ -279,10 +279,10 @@ public:
   void          UnregisterComponent(CSystemComponent* component);
   int           RegisterCPU(class CAlphaCPU* cpu);
 
-  bool has_vga_device(const CVGA* exclude = nullptr) const noexcept;
+  bool has_vga_device(const vga_device* exclude = nullptr) const noexcept;
   bool graphics_multihead_enabled() const noexcept { return graphics_multihead; }
   // Unambiguous fallback for missing firmware metadata; null for zero/many.
-  const CVGA* get_sole_vga_device() const noexcept;
+  const vga_device* get_sole_vga_device() const noexcept;
 
   struct SDisplayOutput
   {

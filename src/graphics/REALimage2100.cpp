@@ -4313,7 +4313,7 @@ void CRealImage2100::RestoreState(std::istream& in)
 	}
 	if (!p || p.peek() != std::char_traits<char>::eof())
 		throw std::runtime_error("Invalid REALimage snapshot payload");
-	// Commit only after validation; keep the storage CVGA borrows in place.
+	// Commit only after validation; keep the storage vga_device borrows in place.
 	std::copy(memory.begin(), memory.end(), m_vga_memory.begin());
 	m_palette = pal;
 	m_dac_regs.swap(dac_regs);

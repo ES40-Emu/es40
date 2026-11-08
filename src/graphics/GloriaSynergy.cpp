@@ -139,12 +139,12 @@ static bool gloria_vga_window_offset(u32& address, unsigned selection)
 
 // VGA register maps
 
-// CVGA's indexed port handlers dispatch here for both legacy I/O and the
+// vga_device's indexed port handlers dispatch here for both legacy I/O and the
 // region-zero VGA aliases. Display invalidation is handled by the card worker.
 void CGloriaSynergy::crtc_map(address_map& map)
 {
 	unimplemented_map(map, "VGA CRTC register");
-	CVGA::crtc_map(map);
+	vga_device::crtc_map(map);
 }
 
 void CGloriaSynergy::sequencer_map(address_map& map)
@@ -153,7 +153,7 @@ void CGloriaSynergy::sequencer_map(address_map& map)
 	// These frontends mask stored bytes, including direct snapshot writes.
 	// Limit the canonical map to SR00-04 so unknown indices keep diagnostics.
 	auto standard = std::make_shared<address_map>(5);
-	CVGA::sequencer_map(*standard);
+	vga_device::sequencer_map(*standard);
 	map(0x00, 0x04).lrw8(
 		NAME([standard](offs_t index) {
 			return standard->read_byte(index);
@@ -178,7 +178,7 @@ void CGloriaSynergy::sequencer_map(address_map& map)
 void CGloriaSynergy::gc_map(address_map& map)
 {
 	unimplemented_map(map, "VGA graphics controller register");
-	CVGA::gc_map(map);
+	vga_device::gc_map(map);
 	// TVP4020 HRM section 3.5.4, p.62. The display-start extension is write-only.
 	map(0x09, 0x09)
 		.lrw8(
@@ -196,7 +196,7 @@ void CGloriaSynergy::gc_map(address_map& map)
 void CGloriaSynergy::attribute_map(address_map& map)
 {
 	unimplemented_map(map, "VGA attribute register");
-	CVGA::attribute_map(map);
+	vga_device::attribute_map(map);
 	// Palette reads remain available when PAS disables CPU writes.
 	map(0x20, 0x2f).lr8(NAME([this](offs_t offset) {
 		return vga.attribute.data[offset];
@@ -220,7 +220,7 @@ address_map& CGloriaSynergy::space(int spacenum)
 	case SEQ_REG:
 	case GC_REG:
 	case ATC_REG:
-		return CVGA::space(spacenum);
+		return vga_device::space(spacenum);
 	default:
 		throw std::invalid_argument("Invalid GLoria VGA register space");
 	}
@@ -240,14 +240,14 @@ u8 CGloriaSynergy::mem_r(offs_t address)
 	unsigned selected = vga.gc.read_map_sel & 3;
 	if (vga.sequencer.data[4] & 8)
 	{
-		// Keep packed chain-four bytes in the layout consumed by CVGA scanout.
+		// Keep packed chain-four bytes in the layout consumed by vga_device scanout.
 		for (unsigned plane = 0; plane < 4; ++plane)
 			vga.gc.latch[plane] = vga.memory[bank + (address & ~3u) + plane];
 		selected = address & 3;
 	}
 	else if (!(vga.sequencer.data[4] & 4) && vga.gc.host_oe)
 	{
-		// CVGA text stores character/attribute pairs together; fonts stay planar.
+		// vga_device text stores character/attribute pairs together; fonts stay planar.
 		vga.gc.latch[0] = vga.memory[bank + (address & ~1u)];
 		vga.gc.latch[1] = vga.memory[bank + (address & ~1u) + 1];
 		for (unsigned plane = 2; plane < 4; ++plane)
@@ -344,7 +344,7 @@ CPermedia2::Frame CGloriaSynergy::render_frame()
 		bus_guard.unlock();
 		return CPermedia2::scanout(m_scanout);
 	}
-	// CVGA renders live CRTC state and updates text-cursor/palette state.
+	// vga_device renders live CRTC state and updates text-cursor/palette state.
 	// Keep that legacy path serialized until it has its own captured renderer.
 	if (!vga.crtc.sync_en || (vga.sequencer.data[0] & 3) != 3 ||
 		(vga.sequencer.data[1] & 0x20) || !(vga.attribute.index & 0x20) ||
@@ -356,7 +356,7 @@ CPermedia2::Frame CGloriaSynergy::render_frame()
 	frame.height = vga.crtc.vert_disp_end + 1;
 	if (!frame.width || frame.width > 4096 || frame.height > 2048)
 		return {};
-	// CVGA can write the final repeated scanline past the visible-area bottom.
+	// vga_device can write the final repeated scanline past the visible-area bottom.
 	// Reserve one full character row; only the visible rectangle is submitted.
 	m_render_bitmap.resize(frame.width, frame.height + 64);
 	screen().set_visible_area(frame.width, frame.height);
@@ -364,7 +364,7 @@ CPermedia2::Frame CGloriaSynergy::render_frame()
 	vga.crtc.start_addr = latch_start_addr();
 	vga.attribute.pel_shift = vga.attribute.pel_shift_latch;
 	palette_update();
-	CSVGA::screen_update(
+	svga_device::screen_update(
 		screen(), m_render_bitmap, rectangle(0, frame.width - 1, 0, frame.height - 1));
 	frame.argb.assign(
 		m_render_bitmap.raw(),
@@ -538,7 +538,7 @@ CGloriaSynergy::OptionROM CGloriaSynergy::OptionROM::parse(
 CGloriaSynergy::CGloriaSynergy(
 	CConfigurator* cfg, CSystem* sys, int bus, int dev, bx_gui_c& display)
 try
-	: CSVGA(cfg, sys, bus, dev), m_output(0, display),
+	: svga_device(cfg, sys, bus, dev), m_output(0, display),
 	  m_permedia2(gloria_options(cfg)), m_rom(65536, 0xff)
 {
 	reset_vga();
@@ -759,7 +759,7 @@ void CGloriaSynergy::reset_vga()
 {
 	vga = {};
 	svga = {};
-	CVGA::device_reset();
+	vga_device::device_reset();
 	vga.gc.memory_map_sel = 0; // Preserve the native VGA aperture selection.
 	vga.memory = m_permedia2.vram_data();
 	vga.svga_intf.vram_size = CPermedia2::VramSize;

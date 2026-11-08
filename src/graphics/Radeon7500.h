@@ -38,7 +38,7 @@
 #include <vector>
 
 /** ATI Radeon 7500 PCI video card with an RV200 graphics processor. */
-class CRadeon7500 : public CSVGA, public CRunnable, public CDisplayOutputProvider
+class CRadeon7500 : public svga_device, public CRunnable, public CDisplayOutputProvider
 {
 public:
   // Board identity is owned by the card, not the chip. HP 3X-PBXGG-AA is the

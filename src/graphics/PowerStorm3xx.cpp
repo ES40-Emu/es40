@@ -116,7 +116,7 @@ static bool powerstorm_vga_window_offset(u32& address, unsigned selection)
 void CPowerStorm3xx::crtc_map(address_map& map)
 {
 	unimplemented_map(map, "VGA CRTC register");
-	CVGA::crtc_map(map);
+	vga_device::crtc_map(map);
 	// ROM 0x3641..0x3649 stores its I/O base here; 0x3657..0x366d reads it back.
 	map(0x1c, 0x1d)
 		.lrw8(
@@ -142,7 +142,7 @@ void CPowerStorm3xx::sequencer_map(address_map& map)
 	// These frontends mask stored bytes, including direct snapshot writes.
 	// Limit the canonical map to SR00-04 so unknown indices keep diagnostics.
 	auto standard = std::make_shared<address_map>(5);
-	CVGA::sequencer_map(*standard);
+	vga_device::sequencer_map(*standard);
 	map(0x00, 0x04).lrw8(
 		NAME([standard](offs_t index) {
 			return standard->read_byte(index);
@@ -157,13 +157,13 @@ void CPowerStorm3xx::sequencer_map(address_map& map)
 void CPowerStorm3xx::gc_map(address_map& map)
 {
 	unimplemented_map(map, "VGA graphics controller register");
-	CVGA::gc_map(map);
+	vga_device::gc_map(map);
 }
 
 void CPowerStorm3xx::attribute_map(address_map& map)
 {
 	unimplemented_map(map, "VGA attribute register");
-	CVGA::attribute_map(map);
+	vga_device::attribute_map(map);
 	// Palette reads remain available when PAS disables CPU writes.
 	map(0x20, 0x2f).lr8(NAME([this](offs_t offset) {
 		return vga.attribute.data[offset];
@@ -187,7 +187,7 @@ address_map& CPowerStorm3xx::space(int spacenum)
 	case SEQ_REG:
 	case GC_REG:
 	case ATC_REG:
-		return CVGA::space(spacenum);
+		return vga_device::space(spacenum);
 	default:
 		throw std::invalid_argument("Invalid PowerStorm VGA register space");
 	}
@@ -202,14 +202,14 @@ u8 CPowerStorm3xx::mem_r(offs_t address)
 	unsigned selected = vga.gc.read_map_sel & 3;
 	if (vga.sequencer.data[4] & 8)
 	{
-		// Keep packed chain-four bytes in the layout consumed by CVGA scanout.
+		// Keep packed chain-four bytes in the layout consumed by vga_device scanout.
 		for (unsigned plane = 0; plane < 4; ++plane)
 			vga.gc.latch[plane] = vga.memory[(address & ~3u) + plane];
 		selected = address & 3;
 	}
 	else if (!(vga.sequencer.data[4] & 4) && vga.gc.host_oe)
 	{
-		// CVGA text stores character/attribute pairs together; fonts stay planar.
+		// vga_device text stores character/attribute pairs together; fonts stay planar.
 		vga.gc.latch[0] = vga.memory[address & ~1u];
 		vga.gc.latch[1] = vga.memory[(address & ~1u) + 1];
 		for (unsigned plane = 2; plane < 4; ++plane)
@@ -309,14 +309,14 @@ CRealImage2100::Frame CPowerStorm3xx::render_frame(CRealImage2100::Frame frame)
 	frame.height = vga.crtc.vert_disp_end + 1;
 	if (!frame.width || frame.width > 4096 || frame.height > 1024)
 		return {};
-	// Allow CVGA double-scan and one extra character row below the visible area.
+	// Allow vga_device double-scan and one extra character row below the visible area.
 	m_render_bitmap.resize(frame.width, frame.height * 2 + 64);
 	screen().set_visible_area(frame.width, frame.height);
 	screen().tick_frame();
 	vga.crtc.start_addr = latch_start_addr();
 	vga.attribute.pel_shift = vga.attribute.pel_shift_latch;
 	palette_update();
-	CSVGA::screen_update(
+	svga_device::screen_update(
 		screen(), m_render_bitmap, rectangle(0, frame.width - 1, 0, frame.height - 1));
 	frame.argb.assign(
 		m_render_bitmap.raw(),
@@ -498,7 +498,7 @@ CPowerStorm3xx::OptionROM CPowerStorm3xx::OptionROM::parse(
 
 CPowerStorm3xx::CPowerStorm3xx(
 	CConfigurator* cfg, CSystem* sys, int bus, int dev, bx_gui_c& display)
-try : CSVGA(cfg, sys, bus, dev), m_output(0, display)
+try : svga_device(cfg, sys, bus, dev), m_output(0, display)
 {
 	reset_vga();
 	m_crtc_space_config = address_space_config("crtc_regs", ENDIANNESS_LITTLE, 8, 8, 0,
@@ -668,7 +668,7 @@ void CPowerStorm3xx::reset_vga()
 	// A blank VGA initialization, not a measured board reset dump.
 	vga = {};
 	svga = {};
-	CVGA::device_reset();
+	vga_device::device_reset();
 	vga.gc.memory_map_sel = 0; // Preserve the native VGA aperture selection.
 	vga.memory = m_realimage.vram_data();
 	vga.svga_intf.vram_size = CRealImage2100::VGAMemorySize;

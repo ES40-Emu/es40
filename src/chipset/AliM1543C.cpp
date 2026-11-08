@@ -2776,7 +2776,7 @@ void CAliM1543C::check_state()
 	static bool ctb_fixed = false;
 
 	// Without a firmware card identity, repair is unambiguous only with one VGA.
-	const CVGA* console = !ctb_fixed ? cSystem->get_sole_vga_device() : nullptr;
+	const vga_device* console = !ctb_fixed ? cSystem->get_sole_vga_device() : nullptr;
 	if (console)
 	{
 		const u64 HWRPB_BASE = U64(0x2000);

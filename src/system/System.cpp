@@ -573,23 +573,23 @@ void CSystem::UnregisterComponent(CSystemComponent* component)
 	}
 }
 
-bool CSystem::has_vga_device(const CVGA* exclude) const noexcept
+bool CSystem::has_vga_device(const vga_device* exclude) const noexcept
 {
 	for (const CSystemComponent* component : acComponents)
 	{
-		const auto* card = dynamic_cast<const CVGA*>(component);
+		const auto* card = dynamic_cast<const vga_device*>(component);
 		if (card && card != exclude)
 			return true;
 	}
 	return false;
 }
 
-const CVGA* CSystem::get_sole_vga_device() const noexcept
+const vga_device* CSystem::get_sole_vga_device() const noexcept
 {
-	const CVGA* console = nullptr;
+	const vga_device* console = nullptr;
 	for (const CSystemComponent* component : acComponents)
 	{
-		const auto* card = dynamic_cast<const CVGA*>(component);
+		const auto* card = dynamic_cast<const vga_device*>(component);
 		if (!card)
 			continue;
 		if (console)

@@ -90,7 +90,7 @@
  **/
 CCirrus::CCirrus(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
 	bx_gui_c& display, Model model)
-	: CSVGA(cfg, c, pcibus, pcidev), m_model(model), m_output(0, display)
+	: svga_device(cfg, c, pcibus, pcidev), m_model(model), m_output(0, display)
 {
 	memset(&vga, 0, sizeof(vga));
 	memset(&svga, 0, sizeof(svga));
@@ -177,7 +177,7 @@ cirrus_gd5446_vga_device::cirrus_gd5446_vga_device(CConfigurator* cfg, CSystem* 
 
 void CCirrus::io_3cx_map(address_map &map)
 {
-	CSVGA::io_3cx_map(map);
+	svga_device::io_3cx_map(map);
 	// ES40 retains the existing Oak register readback and storage.
 	map(0x03, 0x03).lrw8(
 		NAME([this](offs_t) { return vga.oak.reg; }),
@@ -204,7 +204,7 @@ u8 CCirrus::ramdac_hidden_mask_r(offs_t offset)
 		return res;
 	}
 
-	return CVGA::ramdac_mask_r(0);
+	return vga_device::ramdac_mask_r(0);
 }
 
 void CCirrus::ramdac_hidden_mask_w(offs_t offset, u8 data)
@@ -220,13 +220,13 @@ void CCirrus::ramdac_hidden_mask_w(offs_t offset, u8 data)
 		return;
 	}
 
-	CVGA::ramdac_mask_w(0, data);
+	vga_device::ramdac_mask_w(0, data);
 }
 
 u8 CCirrus::ramdac_overlay_r(offs_t offset)
 {
 	if(!cirrus.m_ext_palette_enabled)
-		return CVGA::ramdac_data_r(0);
+		return vga_device::ramdac_data_r(0);
 
 	u8 res = 0xff;
 	if (vga.dac.read && !machine().side_effects_disabled())
@@ -258,7 +258,7 @@ void CCirrus::ramdac_overlay_w(offs_t offset, u8 data)
 {
 	if(!cirrus.m_ext_palette_enabled)
 	{
-		CVGA::ramdac_data_w(0, data);
+		vga_device::ramdac_data_w(0, data);
 		return;
 	}
 
@@ -286,7 +286,7 @@ void CCirrus::ramdac_overlay_w(offs_t offset, u8 data)
 
 void CCirrus::crtc_map(address_map &map)
 {
-	CSVGA::crtc_map(map);
+	svga_device::crtc_map(map);
 
 	if (is_avga())
 		return;
@@ -350,7 +350,7 @@ void CCirrus::crtc_map(address_map &map)
 
 void CCirrus::gc_map(address_map &map)
 {
-	CSVGA::gc_map(map);
+	svga_device::gc_map(map);
 
 	if (is_avga())
 		return;
@@ -628,7 +628,7 @@ void CCirrus::gc_map(address_map &map)
 
 void CCirrus::sequencer_map(address_map &map)
 {
-	CSVGA::sequencer_map(map);
+	svga_device::sequencer_map(map);
 
 	if (is_avga())
 		return;
@@ -821,7 +821,7 @@ void cirrus_gd5446_vga_device::device_start()
 
 void cirrus_gd5428_vga_device::device_reset()
 {
-	CSVGA::device_reset();
+	svga_device::device_reset();
 	cirrus.gc_locked = (cirrus.m_chip_id < 0x9c);
 	cirrus.gc_mode_ext = 0;
 	cirrus.gc_bank[0] = cirrus.gc_bank[1] = 0;
@@ -848,7 +848,7 @@ void cirrus_gd5428_vga_device::device_reset()
 uint32_t CCirrus::screen_update(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
 	uint32_t ptr = (vga.svga_intf.vram_size - 0x4000);  // cursor patterns are stored in the last 16kB of VRAM
-	CSVGA::screen_update(screen, bitmap, cliprect);
+	svga_device::screen_update(screen, bitmap, cliprect);
 
 	if(cirrus.m_cursor_attr & 0x01)  // hardware cursor enabled
 	{
@@ -1013,7 +1013,7 @@ uint16_t CCirrus::offset()
 	// TODO: check true enable condition
 	if (svga.rgb8_en || svga.rgb15_en || svga.rgb16_en || svga.rgb24_en || svga.rgb32_en)
 		return vga.crtc.offset << 3;
-	return CSVGA::offset();
+	return svga_device::offset();
 }
 
 uint32_t CCirrus::latch_start_addr()
@@ -1337,7 +1337,7 @@ uint8_t CCirrus::vga_latch_write(int offs, uint8_t data)
 	case 1:
 	case 2:
 	case 3:
-		res = CVGA::vga_latch_write(offs, data);
+		res = vga_device::vga_latch_write(offs, data);
 		break;
 	case 4:
 		res = vga.gc.latch[offs];
@@ -1374,12 +1374,12 @@ uint8_t cirrus_gd5428_vga_device::mem_r(offs_t offset)
 	// NOTE: bebox also wants this
 	if(vga.sequencer.data[0x07] & 0xf0)
 	{
-		return CSVGA::mem_linear_r((offset & 0xffff) + bank * 0x10000);
+		return svga_device::mem_linear_r((offset & 0xffff) + bank * 0x10000);
 	}
 
 	if(cirrus.gc_locked || offset >= 0x10000 || cur_mode == TEXT_MODE || cur_mode == SCREEN_OFF)
 	{
-		return CVGA::mem_r(offset & 0x1ffff);
+		return vga_device::mem_r(offset & 0x1ffff);
 	}
 
 	if(cirrus.gc_mode_ext & 0x20)  // 16kB bank granularity
@@ -1543,13 +1543,13 @@ void cirrus_gd5428_vga_device::mem_w(offs_t offset, uint8_t data)
 	// TODO: as above
 	if(vga.sequencer.data[0x07] & 0xf0)
 	{
-		CSVGA::mem_linear_w((offset + bank * 0x10000), data);
+		svga_device::mem_linear_w((offset + bank * 0x10000), data);
 		return;
 	}
 
 	if(cirrus.gc_locked || offset >= 0x10000 || cur_mode == TEXT_MODE || cur_mode == SCREEN_OFF)
 	{
-		CVGA::mem_w(offset & 0x1ffff,data);
+		vga_device::mem_w(offset & 0x1ffff,data);
 		return;
 	}
 
@@ -2377,7 +2377,7 @@ void CCirrus::recompute_params_clock(int divisor, int xtal)
 	const int seq_div = ((vga.sequencer.data[1] & 0x08) >> 3) + 1;
 	timing.pixel_clock_hz = (seq_div > 0) ? (xtal / seq_div) : xtal;
 
-	CVGA::recompute_params_clock(divisor, xtal,
+	vga_device::recompute_params_clock(divisor, xtal,
 		timing.vrefresh_hz, timing.refresh_interval_ms);
 }
 
@@ -2702,7 +2702,7 @@ int CCirrus::RestoreState(FILE* f)
 	// Rebuild host rendering caches from the restored registers.
 	recompute_params();
 	vga.dac.dirty = 1;
-	CVGA::palette_update();
+	vga_device::palette_update();
 	old_iWidth = old_iHeight = 0;
 	m_last_refresh_time = std::chrono::steady_clock::time_point{};
 	printf("%s: Graphics registers and %u bytes of VRAM restored.\n",

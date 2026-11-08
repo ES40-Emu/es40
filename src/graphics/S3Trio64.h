@@ -226,14 +226,6 @@ protected:
 
   void recompute_params() override;
 
-  void init_maps() {
-    crtc_map(m_crtc_map);
-    sequencer_map(m_seq_map);
-    gc_map(m_gc_map);
-    attribute_map(m_atc_map);
-    init_io_maps();
-  }
-
   // SVGA-aware banked memory access (MAME: s3vision864_vga_device::mem_r/w)
   uint8_t  mem_r(uint32_t offset) override;
   void     mem_w(uint32_t offset, uint8_t data) override;

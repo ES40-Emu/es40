@@ -497,6 +497,14 @@ try
 	  m_rv200(radeon_options(cfg))
 {
 	reset_vga();
+	m_crtc_space_config = address_space_config("crtc_regs", ENDIANNESS_LITTLE, 8, 8, 0,
+		address_map_constructor(FUNC(CRadeon7500::crtc_map), this));
+	m_gc_space_config = address_space_config("gc_regs", ENDIANNESS_LITTLE, 8, 8, 0,
+		address_map_constructor(FUNC(CRadeon7500::gc_map), this));
+	m_seq_space_config = address_space_config("sequencer_regs", ENDIANNESS_LITTLE, 8, 8, 0,
+		address_map_constructor(FUNC(CRadeon7500::sequencer_map), this));
+	m_atc_space_config = address_space_config("attribute_regs", ENDIANNESS_LITTLE, 8, 8, 0,
+		address_map_constructor(FUNC(CRadeon7500::attribute_map), this));
 }
 catch (const CException&)
 {
@@ -514,11 +522,7 @@ try
 	if (m_initialized)
 		return;
 	CConfigurator* cfg = myCfg;
-	crtc_map(m_crtc_map);
-	sequencer_map(m_seq_map);
-	gc_map(m_gc_map);
-	attribute_map(m_atc_map);
-	init_io_maps();
+	init_maps();
 	add_legacy_io(LegacyIO, 0x3b0, 0x30);
 	add_legacy_mem(LegacyMemory, 0xa0000, 0x20000);
 	m_profile.revision =

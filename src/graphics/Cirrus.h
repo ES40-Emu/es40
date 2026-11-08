@@ -237,8 +237,6 @@ protected:
 //};
 
 
-  void init_maps();
-
 private:
   Model m_model;
   bool is_avga() const noexcept { return m_model == Model::GD5401 || m_model == Model::AVGA1; }

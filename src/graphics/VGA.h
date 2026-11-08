@@ -112,6 +112,8 @@ protected:
   void report_unimplemented(const char* what, u32 index, u32 value, bool write);
   // Catch-all for indices no entry claims; install before the real entries.
   void unimplemented_map(address_map& map, const char* what);
+  // Called from each card's init(); construction only stores map callbacks.
+  void init_maps();
   // Call after the card's register maps are installed. PCI decode, access
   // widths and card-specific port effects remain in the frontend.
   void init_io_maps();
@@ -375,11 +377,11 @@ protected:
 
   virtual address_map& space(int spacenum); // ES40 register-space adapter
 
-  //address_space_config m_main_if_space_config;
-  //address_space_config m_crtc_space_config;
-  //address_space_config m_gc_space_config;
-  //address_space_config m_seq_space_config;
-  //address_space_config m_atc_space_config;
+  address_space_config m_main_if_space_config;
+  address_space_config m_crtc_space_config;
+  address_space_config m_gc_space_config;
+  address_space_config m_seq_space_config;
+  address_space_config m_atc_space_config;
 
   bool m_ioas = false;
 

@@ -36,6 +36,9 @@
 #include <algorithm>
 #include <functional>
 #include <cmath>
+#include <cstddef>
+#include <type_traits>
+#include <utility>
 
 // useful soon for MAME code re-use
 #ifndef ATTR_COLD
@@ -273,17 +276,57 @@ private:
 
 enum endianness_t { ENDIANNESS_LITTLE, ENDIANNESS_BIG };
 
-using address_map_constructor = std::function<void(class address_map&)>;
+class address_map;
+
+class address_map_constructor
+{
+public:
+  address_map_constructor() = default;
+  address_map_constructor(std::nullptr_t) {}
+
+  template <typename Callable, typename = std::enable_if_t<
+    !std::is_same_v<std::decay_t<Callable>, address_map_constructor>>>
+  address_map_constructor(Callable&& callback)
+    : m_callback(std::forward<Callable>(callback)) {
+  }
+
+  // ES40's FUNC already binds the typed owner; keep MAME's constructor syntax.
+  template <typename Callable, typename Owner>
+  address_map_constructor(Callable&& callback, const char* /*name*/, Owner* /*owner*/)
+    : address_map_constructor(std::forward<Callable>(callback)) {
+  }
+
+  bool isnull() const { return !m_callback; }
+  explicit operator bool() const { return bool(m_callback); }
+  void operator()(address_map& map) const { m_callback(map); }
+
+private:
+  std::function<void(address_map&)> m_callback;
+};
 
 struct address_space_config
 {
   const char* m_name = nullptr;
+  endianness_t m_endianness = ENDIANNESS_LITTLE;
+  int m_data_width = 0;
+  int m_addr_width = 0;
+  int m_addr_shift = 0;
+  address_map_constructor m_internal_map;
 
   address_space_config() = default;
-  address_space_config(const char* name, endianness_t, int, int, int,
-    address_map_constructor = {})
-    : m_name(name) {
+  address_space_config(const char* name, endianness_t endian,
+    int datawidth, int addrwidth, int addrshift = 0,
+    address_map_constructor internal = {})
+    : m_name(name), m_endianness(endian), m_data_width(datawidth),
+      m_addr_width(addrwidth), m_addr_shift(addrshift),
+      m_internal_map(std::move(internal)) {
   }
+
+  const char* name() const { return m_name; }
+  endianness_t endianness() const { return m_endianness; }
+  int data_width() const { return m_data_width; }
+  int addr_width() const { return m_addr_width; }
+  int addr_shift() const { return m_addr_shift; }
 };
 
 struct feature {

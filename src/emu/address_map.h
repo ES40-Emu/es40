@@ -87,7 +87,7 @@ auto bind_map_member(Owner* owner, Member member)
   };
 }
 
-// Map-only compatibility: use inside the owning object's map method.
+// Map compatibility: use inside the owning object's methods or constructors.
 // Upstream emucore.h: #define FUNC(x) &x, #x
 #ifndef FUNC
 #define FUNC(x) ::bind_map_member(this, &x), #x

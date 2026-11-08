@@ -132,9 +132,9 @@ cirrus_gd5428_vga_device::cirrus_gd5428_vga_device(CConfigurator* cfg, CSystem* 
 	int pcibus, int pcidev, bx_gui_c& display)
 	: cirrus_gd5428_vga_device(cfg, c, pcibus, pcidev, display, Model::GD5428)
 {
-//	m_crtc_space_config = address_space_config("crtc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5428_vga_device::crtc_map), this));
-//	m_gc_space_config = address_space_config("gc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5428_vga_device::gc_map), this));
-//	m_seq_space_config = address_space_config("sequencer_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5428_vga_device::sequencer_map), this));
+	m_crtc_space_config = address_space_config("crtc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5428_vga_device::crtc_map), this));
+	m_gc_space_config = address_space_config("gc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5428_vga_device::gc_map), this));
+	m_seq_space_config = address_space_config("sequencer_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5428_vga_device::sequencer_map), this));
 }
 
 //cirrus_gd5428_vga_device::cirrus_gd5428_vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock)
@@ -151,9 +151,9 @@ cirrus_gd5430_vga_device::cirrus_gd5430_vga_device(CConfigurator* cfg, CSystem* 
 	int pcibus, int pcidev, bx_gui_c& display)
 	: cirrus_gd5430_vga_device(cfg, c, pcibus, pcidev, display, Model::GD5430)
 {
-//	m_crtc_space_config = address_space_config("crtc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5430_vga_device::crtc_map), this));
-//	m_gc_space_config = address_space_config("gc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5430_vga_device::gc_map), this));
-//	m_seq_space_config = address_space_config("sequencer_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5430_vga_device::sequencer_map), this));
+	m_crtc_space_config = address_space_config("crtc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5430_vga_device::crtc_map), this));
+	m_gc_space_config = address_space_config("gc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5430_vga_device::gc_map), this));
+	m_seq_space_config = address_space_config("sequencer_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5430_vga_device::sequencer_map), this));
 }
 
 //cirrus_gd5430_vga_device::cirrus_gd5430_vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock)
@@ -170,9 +170,9 @@ cirrus_gd5446_vga_device::cirrus_gd5446_vga_device(CConfigurator* cfg, CSystem* 
 	int pcibus, int pcidev, bx_gui_c& display)
 	: cirrus_gd5430_vga_device(cfg, c, pcibus, pcidev, display, Model::GD5446)
 {
-//	m_crtc_space_config = address_space_config("crtc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5446_vga_device::crtc_map), this));
-//	m_gc_space_config = address_space_config("gc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5446_vga_device::gc_map), this));
-//	m_seq_space_config = address_space_config("sequencer_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5446_vga_device::sequencer_map), this));
+	m_crtc_space_config = address_space_config("crtc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5446_vga_device::crtc_map), this));
+	m_gc_space_config = address_space_config("gc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5446_vga_device::gc_map), this));
+	m_seq_space_config = address_space_config("sequencer_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5446_vga_device::sequencer_map), this));
 }
 
 void CCirrus::io_3cx_map(address_map &map)
@@ -1842,15 +1842,6 @@ void cirrus_gd5446_vga_device::gc_map(address_map &map)
 void cirrus_gd5446_vga_device::sequencer_map(address_map &map)
 {
 	cirrus_gd5430_vga_device::sequencer_map(map);
-}
-
-void CCirrus::init_maps()
-{
-	crtc_map(m_crtc_map);
-	sequencer_map(m_seq_map);
-	gc_map(m_gc_map);
-	attribute_map(m_atc_map);
-	init_io_maps();
 }
 
 /**

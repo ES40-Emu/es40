@@ -101,6 +101,12 @@ CVGA::CVGA(class CConfigurator* cfg, class CSystem* c, int pcibus, int pcidev) :
 	if (another_vga && !c->graphics_multihead_enabled())
 		FAILURE(Configuration,
 			"Multiple VGA cards require graphics.multihead=true in the system configuration");
+	// Store MAME's map callbacks here; ES40 installs them later in init_maps().
+	m_main_if_space_config = address_space_config("io_regs", ENDIANNESS_LITTLE, 8, 4, 0, address_map_constructor(FUNC(CVGA::io_3bx_3dx_map), this));
+	m_crtc_space_config = address_space_config("crtc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(CVGA::crtc_map), this));
+	m_gc_space_config = address_space_config("gc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(CVGA::gc_map), this));
+	m_seq_space_config = address_space_config("sequencer_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(CVGA::sequencer_map), this));
+	m_atc_space_config = address_space_config("attribute_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(CVGA::attribute_map), this));
 	// The X11 single-display backend still uses this alias. It does not select
 	// a firmware console when multiple cards are present.
 	theVGA = another_vga ? nullptr : this;
@@ -1960,10 +1966,21 @@ address_map& CVGA::space(int spacenum)
 	}
 }
 
+// Keep ES40's handler installation order and existing map capacities, including
+// the 64-entry ATC map. Configurations select callbacks without allocating spaces.
+void CVGA::init_maps()
+{
+	m_crtc_space_config.m_internal_map(m_crtc_map);
+	m_seq_space_config.m_internal_map(m_seq_map);
+	m_gc_space_config.m_internal_map(m_gc_map);
+	m_atc_space_config.m_internal_map(m_atc_map);
+	init_io_maps();
+}
+
 // ES40 port dispatch uses the shared MAME submaps after frontend access checks.
 void CVGA::init_io_maps()
 {
-	io_3bx_3dx_map(m_main_if_map);
+	m_main_if_space_config.m_internal_map(m_main_if_map);
 	io_3cx_map(m_3cx_map);
 }
 

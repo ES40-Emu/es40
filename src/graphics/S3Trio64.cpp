@@ -1843,6 +1843,8 @@ CS3Trio64::CS3Trio64(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
 	// The first PCI reset precedes init()'s full graphics-state initialization.
 	s3.cr59 = 0;
 	s3.cr5a = 0;
+	m_crtc_space_config = address_space_config("crtc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(CS3Trio64::crtc_map), this));
+	m_seq_space_config = address_space_config("sequencer_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(CS3Trio64::sequencer_map), this));
 }
 
 // --- S3 CR36 -----------------------------------------------------------------

@@ -175,21 +175,14 @@ cirrus_gd5446_vga_device::cirrus_gd5446_vga_device(CConfigurator* cfg, CSystem* 
 	m_seq_space_config = address_space_config("sequencer_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5446_vga_device::sequencer_map), this));
 }
 
-void CCirrus::io_3cx_map(address_map &map)
+void cirrus_gd5428_vga_device::io_3cx_map(address_map &map)
 {
 	svga_device::io_3cx_map(map);
-	// ES40 retains the existing Oak register readback and storage.
-	map(0x03, 0x03).lrw8(
-		NAME([this](offs_t) { return vga.oak.reg; }),
-		NAME([this](offs_t, u8 data) { vga.oak.reg = data; })
-	);
-	if (is_avga())
-		return;
-	map(0x06, 0x06).rw(FUNC(CCirrus::ramdac_hidden_mask_r), FUNC(CCirrus::ramdac_hidden_mask_w));
-	map(0x09, 0x09).rw(FUNC(CCirrus::ramdac_overlay_r), FUNC(CCirrus::ramdac_overlay_w));
+	map(0x06, 0x06).rw(FUNC(cirrus_gd5428_vga_device::ramdac_hidden_mask_r), FUNC(cirrus_gd5428_vga_device::ramdac_hidden_mask_w));
+	map(0x09, 0x09).rw(FUNC(cirrus_gd5428_vga_device::ramdac_overlay_r), FUNC(cirrus_gd5428_vga_device::ramdac_overlay_w));
 }
 
-u8 CCirrus::ramdac_hidden_mask_r(offs_t offset)
+u8 cirrus_gd5428_vga_device::ramdac_hidden_mask_r(offs_t offset)
 {
 	if (!machine().side_effects_disabled())
 		cirrus.m_hidden_dac_phase ++;
@@ -207,7 +200,7 @@ u8 CCirrus::ramdac_hidden_mask_r(offs_t offset)
 	return vga_device::ramdac_mask_r(0);
 }
 
-void CCirrus::ramdac_hidden_mask_w(offs_t offset, u8 data)
+void cirrus_gd5428_vga_device::ramdac_hidden_mask_w(offs_t offset, u8 data)
 {
 	if (cirrus.m_hidden_dac_phase >= 4)
 	{
@@ -223,7 +216,7 @@ void CCirrus::ramdac_hidden_mask_w(offs_t offset, u8 data)
 	vga_device::ramdac_mask_w(0, data);
 }
 
-u8 CCirrus::ramdac_overlay_r(offs_t offset)
+u8 cirrus_gd5428_vga_device::ramdac_overlay_r(offs_t offset)
 {
 	if(!cirrus.m_ext_palette_enabled)
 		return vga_device::ramdac_data_r(0);
@@ -254,7 +247,7 @@ u8 CCirrus::ramdac_overlay_r(offs_t offset)
 	return res;
 }
 
-void CCirrus::ramdac_overlay_w(offs_t offset, u8 data)
+void cirrus_gd5428_vga_device::ramdac_overlay_w(offs_t offset, u8 data)
 {
 	if(!cirrus.m_ext_palette_enabled)
 	{
@@ -1836,6 +1829,11 @@ void CCirrus::init()
 		m_model == Model::GD5446 ? 4u * 1024u * 1024u : 2u * 1024u * 1024u;
 	vga.svga_intf.vram_size = vram_size;
 	init_maps();
+	// ES40 retains the existing Oak register readback and storage.
+	m_3cx_map(0x03, 0x03).lrw8(
+		NAME([this](offs_t) { return vga.oak.reg; }),
+		NAME([this](offs_t, u8 data) { vga.oak.reg = data; })
+	);
 	device_start();
 	device_reset();
 

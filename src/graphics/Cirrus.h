@@ -112,12 +112,6 @@ protected:
 	virtual uint16_t offset() override;
 	virtual uint32_t latch_start_addr() override;
 
-	virtual void io_3cx_map(address_map &map) override ATTR_COLD;
-
-	u8 ramdac_hidden_mask_r(offs_t offset);
-	void ramdac_hidden_mask_w(offs_t offset, u8 data);
-	u8 ramdac_overlay_r(offs_t offset);
-	void ramdac_overlay_w(offs_t offset, u8 data);
   struct {
     u8 m_hidden_dac_mode = 0;
     u8 m_hidden_dac_phase = 0;
@@ -297,12 +291,12 @@ protected:
 //	virtual uint16_t offset() override;
 //	virtual uint32_t latch_start_addr() override;
 
-//	virtual void io_3cx_map(address_map &map) override ATTR_COLD;
+	virtual void io_3cx_map(address_map &map) override ATTR_COLD;
 
-//	u8 ramdac_hidden_mask_r(offs_t offset);
-//	void ramdac_hidden_mask_w(offs_t offset, u8 data);
-//	u8 ramdac_overlay_r(offs_t offset);
-//	void ramdac_overlay_w(offs_t offset, u8 data);
+	u8 ramdac_hidden_mask_r(offs_t offset);
+	void ramdac_hidden_mask_w(offs_t offset, u8 data);
+	u8 ramdac_overlay_r(offs_t offset);
+	void ramdac_overlay_w(offs_t offset, u8 data);
 //	u8 m_hidden_dac_mode = 0;
 //	u8 m_hidden_dac_phase = 0;
 //	uint8_t m_chip_id;

@@ -110,7 +110,6 @@ protected:
 
 	// device-level overrides
 	virtual void device_start() ATTR_COLD;
-	virtual void gd5428_device_reset() ATTR_COLD;
 	virtual uint16_t offset() override;
 	virtual uint32_t latch_start_addr() override;
 
@@ -193,12 +192,6 @@ protected:
 	void blit_dword();
 	void blit_byte();  // used for colour expanded system-to-vram bitblts
 	void copy_pixel(uint8_t src, uint8_t dst, bool foreground = true, unsigned dst_byte_offset = 0);
-
-public:
-
-protected:
-
-	virtual void device_reset() ATTR_COLD;
 
 private:
   Model m_model;
@@ -307,7 +300,7 @@ protected:
 
 	// device-level overrides
 //	virtual void device_start() override ATTR_COLD;
-//	virtual void device_reset() override ATTR_COLD;
+	virtual void device_reset() override ATTR_COLD;
 //	virtual uint16_t offset() override;
 //	virtual uint32_t latch_start_addr() override;
 
@@ -405,7 +398,7 @@ protected:
 		bx_gui_c& display, Model model);
 
 	virtual void device_start() override ATTR_COLD;
-//	virtual void device_reset() override ATTR_COLD;
+	virtual void device_reset() override ATTR_COLD;
 
 	virtual void crtc_map(address_map &map) override ATTR_COLD;
 	virtual void gc_map(address_map &map) override ATTR_COLD;

@@ -249,35 +249,35 @@ void CVGA::zero()
 // 	m_vblank_timer = timer_alloc(FUNC(vga_device::vblank_timer_cb), this);
 // }
 
-// void vga_device::device_reset()
-// {
-// 	/* clear out the VGA structure */
-// 	memset(vga.pens, 0, sizeof(vga.pens));
-// 	vga.miscellaneous_output = 0;
-// 	m_ioas = false;
-// 	vga.feature_control = 0;
-// 	vga.sequencer.index = 0;
-// 	memset(vga.sequencer.data, 0, sizeof(vga.sequencer.data));
-// 	vga.crtc.index = 0;
-// 	memset(vga.crtc.data, 0, sizeof(vga.crtc.data));
-// 	vga.gc.index = 0;
-// 	memset(vga.gc.latch, 0, sizeof(vga.gc.latch));
-// 	memset(&vga.attribute, 0, sizeof(vga.attribute));
-// 	memset(&vga.dac, 0, sizeof(vga.dac));
-// 	memset(&vga.cursor, 0, sizeof(vga.cursor));
-// 	memset(&vga.oak, 0, sizeof(vga.oak));
-//
-// 	vga.gc.memory_map_sel = 0x3; /* prevent xtbios excepting vga ram as system ram */
-// /* amstrad pc1640 bios relies on the position of
-//    the video memory area,
-//    so I introduced the reset to switch to b8000 area */
-// 	vga.sequencer.data[4] = 0;
-//
-// 	/* TODO: real defaults */
-// 	vga.crtc.line_compare = 0x3ff;
-// 	/* skeleton/indiana.cpp boot PROM doesn't set this and assumes it's 0xff */
-// 	vga.dac.mask = 0xff;
-// }
+void CVGA::device_reset()
+{
+	/* clear out the VGA structure */
+	memset(vga.pens, 0, sizeof(vga.pens));
+	vga.miscellaneous_output = 0;
+	m_ioas = false;
+	vga.feature_control = 0;
+	vga.sequencer.index = 0;
+	memset(vga.sequencer.data, 0, sizeof(vga.sequencer.data));
+	vga.crtc.index = 0;
+	memset(vga.crtc.data, 0, sizeof(vga.crtc.data));
+	vga.gc.index = 0;
+	memset(vga.gc.latch, 0, sizeof(vga.gc.latch));
+	memset(&vga.attribute, 0, sizeof(vga.attribute));
+	memset(&vga.dac, 0, sizeof(vga.dac));
+	memset(&vga.cursor, 0, sizeof(vga.cursor));
+	memset(&vga.oak, 0, sizeof(vga.oak));
+
+	vga.gc.memory_map_sel = 0x3; /* prevent xtbios excepting vga ram as system ram */
+/* amstrad pc1640 bios relies on the position of
+   the video memory area,
+   so I introduced the reset to switch to b8000 area */
+	vga.sequencer.data[4] = 0;
+
+	/* TODO: real defaults */
+	vga.crtc.line_compare = 0x3ff;
+	/* skeleton/indiana.cpp boot PROM doesn't set this and assumes it's 0xff */
+	vga.dac.mask = 0xff;
+}
 
 /**************************************
  *

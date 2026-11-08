@@ -668,15 +668,14 @@ void CPowerStorm3xx::reset_vga()
 	// A blank VGA initialization, not a measured board reset dump.
 	vga = {};
 	svga = {};
+	CVGA::device_reset();
+	vga.gc.memory_map_sel = 0; // Preserve the native VGA aperture selection.
 	vga.memory = m_realimage.vram_data();
 	vga.svga_intf.vram_size = CRealImage2100::VGAMemorySize;
 	vga.crtc.maximum_scan_line = 1;
-	vga.crtc.line_compare = 0x3ff;
 	vga.gc.bit_mask = 0xff;
 	vga.sequencer.char_sel.base[0] = vga.sequencer.char_sel.base[1] = 0x20000;
-	vga.dac.mask = 0xff;
 	vga.dac.dirty = 1;
-	m_ioas = false;
 	m_vga_enable = 1;
 	m_vga_scanline = m_vga_status_phase = 0;
 	m_crtc_io_base = 0;

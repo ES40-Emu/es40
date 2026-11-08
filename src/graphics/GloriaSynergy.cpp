@@ -759,16 +759,15 @@ void CGloriaSynergy::reset_vga()
 {
 	vga = {};
 	svga = {};
+	CVGA::device_reset();
+	vga.gc.memory_map_sel = 0; // Preserve the native VGA aperture selection.
 	vga.memory = m_permedia2.vram_data();
 	vga.svga_intf.vram_size = CPermedia2::VramSize;
 	vga.crtc.maximum_scan_line = 1;
-	vga.crtc.line_compare = 0x3ff;
 	vga.gc.bit_mask = 0xff;
 	vga.sequencer.char_sel.base[0] = vga.sequencer.char_sel.base[1] = 0x20000;
 	vga.sequencer.data[5] = 0x4b; // HRM VGAControlReg reset
-	vga.dac.mask = 0xff;
 	vga.dac.dirty = 1;
-	m_ioas = false;
 	m_mode640 = 0;
 }
 

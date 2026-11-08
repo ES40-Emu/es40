@@ -819,9 +819,9 @@ void cirrus_gd5446_vga_device::device_start()
 }
 
 
-void CCirrus::gd5428_device_reset()
+void cirrus_gd5428_vga_device::device_reset()
 {
-	//svga_device::device_reset();
+	CSVGA::device_reset();
 	cirrus.gc_locked = (cirrus.m_chip_id < 0x9c);
 	cirrus.gc_mode_ext = 0;
 	cirrus.gc_bank[0] = cirrus.gc_bank[1] = 0;
@@ -1685,14 +1685,10 @@ void cirrus_gd5428_vga_device::mem_w(offs_t offset, uint8_t data)
  * CL-GD5430 overrides
  */
 
-void CCirrus::device_reset()
+void cirrus_gd5430_vga_device::device_reset()
 {
-	if (is_avga())
-		return;
-
-	CCirrus::gd5428_device_reset();
-	if (is_pci())
-		cirrus.m_sr17 = 1;
+	cirrus_gd5428_vga_device::device_reset();
+	cirrus.m_sr17 = 1;
 }
 
 uint8_t cirrus_gd5430_vga_device::mem_r(offs_t offset)

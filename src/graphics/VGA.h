@@ -145,7 +145,17 @@ protected:
     RGB32_MODE
   };
 
-  // some stuff skipped
+  //vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock);
+
+  //TIMER_CALLBACK_MEMBER(vblank_timer_cb);
+
+  // device-level overrides
+  //virtual void device_start() override ATTR_COLD;
+  virtual void device_reset() ATTR_COLD;
+  //virtual ioport_constructor device_input_ports() const override ATTR_COLD;
+
+  // device_palette_interface overrides
+  //virtual uint32_t palette_entries() const noexcept override { return 0x100; }
 
   void vga_vh_text(bitmap_rgb32& bitmap, const rectangle& cliprect);
   void vga_vh_ega(bitmap_rgb32& bitmap, const rectangle& cliprect);

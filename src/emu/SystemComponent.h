@@ -85,7 +85,13 @@
 #define INCLUDED_SYSTEMCOMPONENT_H
 
 #include "config/Configurator.h"
+#include <functional>
+#include <limits>
+#include <memory>
+#include <stdexcept>
+#include <type_traits>
 #include <typeinfo>
+#include <vector>
 
 class CAliM1543C;
 
@@ -95,8 +101,8 @@ class CAliM1543C;
 class CSystemComponent
 {
 public:
-  virtual int   RestoreState(FILE* f) = 0;
-  virtual int   SaveState(FILE* f) = 0;
+  virtual int   RestoreState(FILE* f);
+  virtual int   SaveState(FILE* f);
   virtual void  prepare_snapshot() {}
   virtual void  flush_storage() {}
   // Commit persistent side effects only after every device restored successfully.
@@ -166,7 +172,94 @@ public:
 
   char* devid_string;
 protected:
+  // Registered references must remain valid for the device lifetime.
+  template <typename ItemType>
+  void save_item(ItemType& value, const char* valname, int index = 0)
+  {
+    register_state<ItemType>(valname, index,
+      [&value]() -> void* { return std::addressof(value); }, 1, sizeof(ItemType));
+  }
+
+  template <typename ItemType, typename StructType, typename ElementType>
+  void save_item(ItemType& value, ElementType StructType::*element,
+    const char* valname, int index = 0)
+  {
+    using object_type = std::remove_all_extents_t<ItemType>;
+    static_assert(std::is_base_of_v<StructType, object_type>,
+      "Saved member must belong to the registered object type");
+    register_state<ElementType>(valname, index, [&value, element]() -> void* {
+      auto* objects = reinterpret_cast<object_type*>(std::addressof(value));
+      return std::addressof(objects[0].*element);
+    }, sizeof(ItemType) / sizeof(object_type), sizeof(object_type));
+  }
+
+  template <typename ItemType>
+  void save_pointer(ItemType&& value, const char* valname, u32 count, int index = 0)
+  {
+    using storage_type = std::remove_reference_t<ItemType>;
+    static_assert(std::is_lvalue_reference_v<ItemType>,
+      "Saved storage must outlive its registration");
+    if constexpr (std::is_array_v<storage_type>)
+    {
+      if (count > std::extent_v<storage_type>)
+        throw std::invalid_argument("Saved array count exceeds its extent");
+    }
+    using element_type = std::remove_reference_t<decltype(value[0])>;
+    // Follow buffer reallocations after registration.
+    register_state<element_type>(valname, index, [&value]() -> void* {
+      if constexpr (std::is_array_v<storage_type> || std::is_pointer_v<storage_type>)
+        return value;
+      else
+        return value.get();
+    }, count, sizeof(element_type));
+  }
+
+  using RegisteredState = std::vector<std::vector<u8>>;
+  bool save_registered_state(FILE* f) const;
+  bool read_registered_state(FILE* f, RegisteredState& saved) const;
+  bool commit_registered_state(const RegisteredState& saved) const;
+  void reset_state_registration();
+
   class CSystem* cSystem;
   class CConfigurator* myCfg;
+
+private:
+  struct StateField
+  {
+    std::string name;
+    s32 index;
+    u32 type;
+    u32 element_size;
+    u32 count;
+    size_t block_size;
+    size_t stride;
+    u32 blocks;
+    std::function<void*()> address;
+    size_t size() const { return size_t(element_size) * count; }
+  };
+
+  template <typename ItemType>
+  void register_state(const char* name, int index, std::function<void*()> address,
+    size_t blocks, size_t stride)
+  {
+    using atom_type = std::remove_all_extents_t<ItemType>;
+    static_assert(!std::is_const_v<atom_type> &&
+      (std::is_arithmetic_v<atom_type> || std::is_enum_v<atom_type>),
+      "Register scalar values, arrays, or individual structure members");
+    constexpr bool boolean = std::is_same_v<atom_type, bool>;
+    constexpr u32 element_size = boolean ? 1 : sizeof(atom_type);
+    constexpr size_t elements = sizeof(ItemType) / sizeof(atom_type);
+    if (blocks > (std::numeric_limits<u32>::max)() / elements ||
+        blocks > (std::numeric_limits<size_t>::max)() / elements / element_size)
+      throw std::invalid_argument("Saved array is too large");
+    const u32 type = boolean ? 1 : std::is_enum_v<atom_type> ? 5 :
+      std::is_floating_point_v<atom_type> ? 4 : std::is_signed_v<atom_type> ? 2 : 3;
+    add_state_field({ name ? name : "", s32(index), type, element_size,
+      u32(blocks * elements), sizeof(ItemType), stride, u32(blocks), std::move(address) });
+  }
+
+  void add_state_field(StateField field);
+  std::vector<StateField> m_state_fields;
+  mutable bool m_state_registration_closed = false;
 };
 #endif // !defined(INCLUDED_SYSTEMCOMPONENT_H)

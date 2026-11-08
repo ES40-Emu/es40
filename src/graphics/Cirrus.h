@@ -49,7 +49,6 @@
 #include "gui/gui.h"
 #include <atomic>
 #include <chrono>
-#include <vector>
 #include "emu/coretmpl.h"
 #include "emu/attotime.h"
 #include "emu/mame_shims.h"
@@ -104,12 +103,7 @@ protected:
   void recompute_params_clock(int divisor, int xtal);
 
 private:
-  struct StateField {
-    void* data;
-    size_t size;
-    bool boolean;
-  };
-  std::vector<StateField> chipset_state_fields();
+  void register_chipset_state();
 
   Model m_model;
   bool is_avga() const noexcept { return m_model == Model::GD5401 || m_model == Model::AVGA1; }

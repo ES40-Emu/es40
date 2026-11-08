@@ -764,11 +764,11 @@ void cirrus_gd5428_vga_device::device_start()
 	//save_pointer(vga.crtc.data,"CRTC Registers",0x100);
 	//save_pointer(vga.sequencer.data,"Sequencer Registers",0x100);
 	//save_pointer(vga.attribute.data,"Attribute Registers", 0x15);
-	//save_item(NAME(m_chip_id));
-	//save_item(NAME(m_hidden_dac_phase));
-	//save_item(NAME(m_hidden_dac_mode));
-	//save_pointer(NAME(gc_bank), 2);
-	//save_item(NAME(m_blt_write_mask));
+	save_item(NAME(m_chip_id));
+	save_item(NAME(m_hidden_dac_phase));
+	save_item(NAME(m_hidden_dac_mode));
+	save_pointer(NAME(gc_bank), 2);
+	save_item(NAME(m_blt_write_mask));
 
 	//m_vblank_timer = timer_alloc(FUNC(cirrus_gd5428_vga_device::vblank_timer_cb), this);
 
@@ -779,7 +779,7 @@ void cirrus_gd5430_vga_device::device_start()
 {
 	cirrus_gd5428_vga_device::device_start();
 	m_chip_id = 0xa0;  // GD5430 - Rev 0
-	//save_item(NAME(m_sr17));
+	save_item(NAME(m_sr17));
 }
 
 void cirrus_gd5446_vga_device::device_start()
@@ -1828,6 +1828,7 @@ void CCirrus::init()
 {
 	if (vga.memory)
 		return;
+	reset_state_registration();
 	const char* model = myCfg->get_text_value("model", "GD5430");
 
 	const u32 vram_size = is_avga() ? 256u * 1024u :
@@ -1840,6 +1841,7 @@ void CCirrus::init()
 		NAME([this](offs_t, u8 data) { vga.oak.reg = data; })
 	);
 	device_start();
+	register_chipset_state();
 	device_reset();
 
 	vga.crtc.line_compare = 1023;
@@ -2581,68 +2583,54 @@ void CCirrus::check_state()
 		FAILURE(Thread, "Cirrus thread has died");
 }
 
-// Current ES40 chipset payload; only fields owned by this model are included.
-std::vector<CCirrus::StateField> CCirrus::chipset_state_fields()
+// Fields not registered by upstream device_start().
+void CCirrus::register_chipset_state()
 {
-	std::vector<StateField> fields;
-	auto add = [&fields](auto& value) {
-		using value_type = std::remove_reference_t<decltype(value)>;
-		static_assert(std::is_trivially_copyable<value_type>::value,
-			"Saved graphics fields must be trivially copyable");
-		constexpr bool boolean = std::is_same<value_type, bool>::value;
-		fields.push_back({ &value, boolean ? 1 : sizeof(value), boolean });
-	};
 	if (auto* gd5428 = dynamic_cast<cirrus_gd5428_vga_device*>(this))
 	{
-		add(gd5428->m_hidden_dac_mode);
-		add(gd5428->m_hidden_dac_phase);
-		add(gd5428->m_chip_id);
-		add(gd5428->gc_mode_ext);
-		add(gd5428->gc_bank);
-		add(gd5428->gc_locked);
-		add(gd5428->m_lock_reg);
-		add(gd5428->m_gr10);
-		add(gd5428->m_gr11);
-		add(gd5428->m_cr19);
-		add(gd5428->m_cr1a);
-		add(gd5428->m_cr1b);
-		add(gd5428->m_cursor_x);
-		add(gd5428->m_cursor_y);
-		add(gd5428->m_cursor_addr);
-		add(gd5428->m_cursor_attr);
-		add(gd5428->m_ext_palette_enabled);
-		add(gd5428->m_ext_palette);
-		add(gd5428->m_blt_status);
-		add(gd5428->m_blt_rop);
-		add(gd5428->m_blt_mode);
-		add(gd5428->m_blt_write_mask);
-		add(gd5428->m_blt_source);
-		add(gd5428->m_blt_dest);
-		add(gd5428->m_blt_source_pitch);
-		add(gd5428->m_blt_dest_pitch);
-		add(gd5428->m_blt_height);
-		add(gd5428->m_blt_width);
-		add(gd5428->m_blt_source_current);
-		add(gd5428->m_blt_dest_current);
-		add(gd5428->m_blt_trans_colour);
-		add(gd5428->m_blt_trans_colour_mask);
-		add(gd5428->m_blt_system_transfer);
-		add(gd5428->m_blt_system_count);
-		add(gd5428->m_blt_system_buffer);
-		add(gd5428->m_blt_pixel_count);
-		add(gd5428->m_blt_scan_count);
-		add(gd5428->m_scratchpad1);
-		add(gd5428->m_scratchpad2);
-		add(gd5428->m_scratchpad3);
-		add(gd5428->m_vclk_num);
-		add(gd5428->m_vclk_denom);
+		save_item(gd5428->gc_mode_ext, "gc_mode_ext");
+		save_item(gd5428->gc_locked, "gc_locked");
+		save_item(gd5428->m_lock_reg, "m_lock_reg");
+		save_item(gd5428->m_gr10, "m_gr10");
+		save_item(gd5428->m_gr11, "m_gr11");
+		save_item(gd5428->m_cr19, "m_cr19");
+		save_item(gd5428->m_cr1a, "m_cr1a");
+		save_item(gd5428->m_cr1b, "m_cr1b");
+		save_item(gd5428->m_cursor_x, "m_cursor_x");
+		save_item(gd5428->m_cursor_y, "m_cursor_y");
+		save_item(gd5428->m_cursor_addr, "m_cursor_addr");
+		save_item(gd5428->m_cursor_attr, "m_cursor_attr");
+		save_item(gd5428->m_ext_palette_enabled, "m_ext_palette_enabled");
+		using palette_entry = std::remove_reference_t<decltype(gd5428->m_ext_palette[0])>;
+		save_item(gd5428->m_ext_palette, &palette_entry::red, "m_ext_palette.red");
+		save_item(gd5428->m_ext_palette, &palette_entry::green, "m_ext_palette.green");
+		save_item(gd5428->m_ext_palette, &palette_entry::blue, "m_ext_palette.blue");
+		save_item(gd5428->m_blt_status, "m_blt_status");
+		save_item(gd5428->m_blt_rop, "m_blt_rop");
+		save_item(gd5428->m_blt_mode, "m_blt_mode");
+		save_item(gd5428->m_blt_source, "m_blt_source");
+		save_item(gd5428->m_blt_dest, "m_blt_dest");
+		save_item(gd5428->m_blt_source_pitch, "m_blt_source_pitch");
+		save_item(gd5428->m_blt_dest_pitch, "m_blt_dest_pitch");
+		save_item(gd5428->m_blt_height, "m_blt_height");
+		save_item(gd5428->m_blt_width, "m_blt_width");
+		save_item(gd5428->m_blt_source_current, "m_blt_source_current");
+		save_item(gd5428->m_blt_dest_current, "m_blt_dest_current");
+		save_item(gd5428->m_blt_trans_colour, "m_blt_trans_colour");
+		save_item(gd5428->m_blt_trans_colour_mask, "m_blt_trans_colour_mask");
+		save_item(gd5428->m_blt_system_transfer, "m_blt_system_transfer");
+		save_item(gd5428->m_blt_system_count, "m_blt_system_count");
+		save_item(gd5428->m_blt_system_buffer, "m_blt_system_buffer");
+		save_item(gd5428->m_blt_pixel_count, "m_blt_pixel_count");
+		save_item(gd5428->m_blt_scan_count, "m_blt_scan_count");
+		save_item(gd5428->m_scratchpad1, "m_scratchpad1");
+		save_item(gd5428->m_scratchpad2, "m_scratchpad2");
+		save_item(gd5428->m_scratchpad3, "m_scratchpad3");
+		save_item(gd5428->m_vclk_num, "m_vclk_num");
+		save_item(gd5428->m_vclk_denom, "m_vclk_denom");
 	}
 	if (auto* gd5430 = dynamic_cast<cirrus_gd5430_vga_device*>(this))
-	{
-		add(gd5430->m_cr1d);
-		add(gd5430->m_sr17);
-	}
-	return fields;
+		save_item(gd5430->m_cr1d, "m_cr1d");
 }
 
 template <typename T>
@@ -2665,22 +2653,7 @@ static bool cirrus_read_record(FILE* f, T& value)
 		fread(&value, sizeof(value), 1, f) == 1;
 }
 
-// CLV1: direct model fields, with booleans encoded as 0/1 bytes.
-static constexpr u32 cirrus_video_magic = 0x31564c43;
-
-static bool cirrus_write_record(FILE* f, const std::vector<u8>& value)
-{
-	const u32 size = (u32)value.size();
-	return fwrite(&size, sizeof(size), 1, f) == 1 &&
-		(!size || fwrite(value.data(), size, 1, f) == 1);
-}
-
-static bool cirrus_read_record(FILE* f, std::vector<u8>& value)
-{
-	u32 size = 0;
-	return fread(&size, sizeof(size), 1, f) == 1 && size == value.size() &&
-		(!size || fread(value.data(), size, 1, f) == 1);
-}
+static constexpr u32 cirrus_video_magic = 0x32564c43; // CLV2
 
 /**
  * Save state to a Virtual Machine State file.
@@ -2700,22 +2673,10 @@ int CCirrus::SaveState(FILE* f)
 	const u8 io_state[] = { (u8)m_ioas };
 	const u32 vram_size = (u32)vga.svga_intf.vram_size;
 	const u32 model = static_cast<u32>(m_model);
-	const auto fields = chipset_state_fields();
-	std::vector<u8> saved_cirrus;
-	for (const auto& field : fields)
-	{
-		if (field.boolean)
-			saved_cirrus.push_back(*static_cast<const bool*>(field.data) ? 1 : 0);
-		else
-		{
-			const auto* bytes = static_cast<const u8*>(field.data);
-			saved_cirrus.insert(saved_cirrus.end(), bytes, bytes + field.size);
-		}
-	}
 
 	if (fwrite(&cirrus_video_magic, sizeof(cirrus_video_magic), 1, f) != 1 ||
 		!cirrus_write_record(f, model) || !cirrus_write_record(f, saved_vga) ||
-		!cirrus_write_record(f, saved_cirrus) || !cirrus_write_record(f, svga) ||
+		!save_registered_state(f) || !cirrus_write_record(f, svga) ||
 		!cirrus_write_record(f, io_state) ||
 		!cirrus_write_record(f, m_scan) ||
 		fwrite(&vram_size, sizeof(vram_size), 1, f) != 1 ||
@@ -2743,21 +2704,7 @@ int CCirrus::RestoreState(FILE* f)
 
 	// Stage the complete graphics section so a short read or layout mismatch can't corrupt state.
 	decltype(vga) saved_vga{};
-	const auto fields = chipset_state_fields();
-	size_t chipset_size = 0;
-	for (const auto& field : fields)
-		chipset_size += field.size;
-	std::vector<u8> saved_cirrus(chipset_size);
-	auto valid_chipset_state = [&]() {
-		size_t offset = 0;
-		for (const auto& field : fields)
-		{
-			if (field.boolean && saved_cirrus[offset] > 1)
-				return false;
-			offset += field.size;
-		}
-		return true;
-	};
+	RegisteredState saved_cirrus;
 	decltype(svga) saved_svga{};
 	u8 io_state[1]{};
 	ScanPosition saved_scan{};
@@ -2765,7 +2712,7 @@ int CCirrus::RestoreState(FILE* f)
 	if (fread(&magic, sizeof(magic), 1, f) != 1 || magic != cirrus_video_magic ||
 		!cirrus_read_record(f, model) || model != static_cast<u32>(m_model) ||
 		!cirrus_read_record(f, saved_vga) ||
-		!cirrus_read_record(f, saved_cirrus) || !valid_chipset_state() ||
+		!read_registered_state(f, saved_cirrus) ||
 		!cirrus_read_record(f, saved_svga) ||
 		!cirrus_read_record(f, io_state) ||
 		!cirrus_read_record(f, saved_scan) ||
@@ -2788,17 +2735,13 @@ int CCirrus::RestoreState(FILE* f)
 		return -1;
 	}
 
+	if (!commit_registered_state(saved_cirrus))
+	{
+		printf("%s: Could not restore registered chipset state.\n", devid_string);
+		return -1;
+	}
 	saved_vga.memory = vga.memory;
 	vga = saved_vga;
-	size_t chipset_offset = 0;
-	for (const auto& field : fields)
-	{
-		if (field.boolean)
-			*static_cast<bool*>(field.data) = saved_cirrus[chipset_offset] != 0;
-		else
-			memcpy(field.data, saved_cirrus.data() + chipset_offset, field.size);
-		chipset_offset += field.size;
-	}
 	svga = saved_svga;
 	m_ioas = io_state[0] != 0;
 	m_scan = saved_scan;

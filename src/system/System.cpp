@@ -2076,7 +2076,8 @@ static const u32 system_state_magic = 0xa1fae540;
 // 2.8 preserves the Trio64 scan-counter phase.
 // 2.9 uses the EV68 128-entry instruction and data translation buffers.
 // 2.10 persists injected disk offline conditions.
-static const u32 system_state_version = 0x0002000a;
+// 2.11 uses registered Cirrus chipset state.
+static const u32 system_state_version = 0x0002000b;
 static const u32 snapshot_identity_limit = 65536;
 
 void CSystem::flush_storage()
@@ -2189,7 +2190,7 @@ bool CSystem::RestoreState(const char* fn)
 	if (version != system_state_version)
 	{
 		printf("%%SYS-I-VERSION: State file %s is incompatible; "
-			"version 2.9 is required.\n", fn);
+			"version 2.11 is required.\n", fn);
 		return false;
 	}
 	if (fread(&memory_size, sizeof(memory_size), 1, f) != 1 ||

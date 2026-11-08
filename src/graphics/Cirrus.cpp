@@ -284,12 +284,9 @@ void CCirrus::ramdac_overlay_w(offs_t offset, u8 data)
 	}
 }
 
-void CCirrus::crtc_map(address_map &map)
+void cirrus_gd5428_vga_device::crtc_map(address_map &map)
 {
 	svga_device::crtc_map(map);
-
-	if (is_avga())
-		return;
 
 	// VGA Vertical Blank end
 	// some SVGA chipsets use all 8 bits, and this is one of them (according to MFGTST CRTC tests)
@@ -348,12 +345,9 @@ void CCirrus::crtc_map(address_map &map)
 	);
 }
 
-void CCirrus::gc_map(address_map &map)
+void cirrus_gd5428_vga_device::gc_map(address_map &map)
 {
 	svga_device::gc_map(map);
-
-	if (is_avga())
-		return;
 
 	map(0x00, 0x00).lrw8(
 		NAME([this](offs_t offset) {
@@ -626,12 +620,9 @@ void CCirrus::gc_map(address_map &map)
 	);
 }
 
-void CCirrus::sequencer_map(address_map &map)
+void cirrus_gd5428_vga_device::sequencer_map(address_map &map)
 {
 	svga_device::sequencer_map(map);
-
-	if (is_avga())
-		return;
 
 	map(0x02, 0x02).lrw8(
 		NAME([this] (offs_t offset) {

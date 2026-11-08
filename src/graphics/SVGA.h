@@ -61,7 +61,7 @@ protected:
   void svga_vh_rgb24(bitmap_rgb32& bitmap, const rectangle& cliprect);
   void svga_vh_rgb32(bitmap_rgb32& bitmap, const rectangle& cliprect);
   virtual uint8_t pc_vga_choosevideomode() override;
-  //virtual void device_start() override ATTR_COLD;
+  virtual void device_start() override ATTR_COLD;
   virtual u16 line_compare_mask();
 
   struct

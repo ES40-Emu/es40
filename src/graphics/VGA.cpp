@@ -138,17 +138,17 @@ void vga_device::zero()
 // 	};
 // }
 
-// void vga_device::device_start()
-// {
-// 	zero();
-//
-// 	for (int i = 0; i < 0x100; i++)
-// 		set_pen_color(i, 0, 0, 0);
-//
-// 	// Avoid an infinite loop when displaying.  0 is not possible anyway.
-// 	vga.crtc.maximum_scan_line = 1;
-//
-// 	// copy over interfaces
+void vga_device::device_start()
+{
+	zero();
+
+	for (int i = 0; i < 0x100; i++)
+		set_pen_color(i, 0, 0, 0);
+
+	// Avoid an infinite loop when displaying.  0 is not possible anyway.
+	vga.crtc.maximum_scan_line = 1;
+
+	// copy over interfaces
 // 	vga.memory = std::make_unique<uint8_t []>(vga.svga_intf.vram_size);
 // 	memset(&vga.memory[0], 0, vga.svga_intf.vram_size);
 // 	save_pointer(NAME(vga.memory), vga.svga_intf.vram_size);
@@ -247,7 +247,7 @@ void vga_device::zero()
 // 	save_item(NAME(vga.dac.loading));
 //
 // 	m_vblank_timer = timer_alloc(FUNC(vga_device::vblank_timer_cb), this);
-// }
+}
 
 void vga_device::device_reset()
 {

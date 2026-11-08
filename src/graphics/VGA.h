@@ -150,7 +150,7 @@ protected:
   //TIMER_CALLBACK_MEMBER(vblank_timer_cb);
 
   // device-level overrides
-  //virtual void device_start() override ATTR_COLD;
+  virtual void device_start() ATTR_COLD;
   virtual void device_reset() ATTR_COLD;
   //virtual ioport_constructor device_input_ports() const override ATTR_COLD;
 

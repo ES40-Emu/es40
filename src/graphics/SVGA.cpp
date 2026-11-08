@@ -59,11 +59,11 @@ void svga_device::zero()
 	memset(&svga, 0, sizeof(svga));
 }
 
-// void svga_device::device_start()
-// {
-// 	vga_device::device_start();
-// 	memset(&svga, 0, sizeof(svga));
-//
+void svga_device::device_start()
+{
+	vga_device::device_start();
+	memset(&svga, 0, sizeof(svga));
+
 // 	save_item(NAME(svga.bank_r));
 // 	save_item(NAME(svga.bank_w));
 // 	save_item(NAME(svga.rgb8_en));
@@ -72,7 +72,7 @@ void svga_device::zero()
 // 	save_item(NAME(svga.rgb24_en));
 // 	save_item(NAME(svga.rgb32_en));
 // 	save_item(NAME(svga.id));
-// }
+}
 
 u16 svga_device::line_compare_mask()
 {

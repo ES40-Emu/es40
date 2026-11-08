@@ -109,7 +109,6 @@ public:
 protected:
 
 	// device-level overrides
-	virtual void device_start() ATTR_COLD;
 	virtual uint16_t offset() override;
 	virtual uint32_t latch_start_addr() override;
 
@@ -297,7 +296,7 @@ protected:
 		bx_gui_c& display, Model model);
 
 	// device-level overrides
-//	virtual void device_start() override ATTR_COLD;
+	virtual void device_start() override ATTR_COLD;
 	virtual void device_reset() override ATTR_COLD;
 //	virtual uint16_t offset() override;
 //	virtual uint32_t latch_start_addr() override;

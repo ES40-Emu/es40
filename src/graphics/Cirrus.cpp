@@ -774,9 +774,9 @@ void CCirrus::sequencer_map(address_map &map)
 	);
 }
 
-void CCirrus::device_start()
+void cirrus_gd5428_vga_device::device_start()
 {
-	//svga_device::device_start();
+	svga_device::device_start();
 	zero();
 
 	for (int i = 0; i < 0x100; i++)
@@ -801,8 +801,7 @@ void CCirrus::device_start()
 
 	//m_vblank_timer = timer_alloc(FUNC(cirrus_gd5428_vga_device::vblank_timer_cb), this);
 
-	if (!is_avga())
-		cirrus.m_chip_id = 0x98;  // GD5428 - Rev 0
+	cirrus.m_chip_id = 0x98;  // GD5428 - Rev 0
 }
 
 void cirrus_gd5430_vga_device::device_start()

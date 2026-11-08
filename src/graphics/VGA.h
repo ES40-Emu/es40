@@ -403,5 +403,4 @@ private:
   uint32_t start_addr();
 };
 
-extern vga_device* theVGA;
 #endif

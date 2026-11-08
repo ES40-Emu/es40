@@ -94,9 +94,6 @@ vga_device::vga_device(class CConfigurator* cfg, class CSystem* c, int pcibus, i
 	m_gc_space_config = address_space_config("gc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(vga_device::gc_map), this));
 	m_seq_space_config = address_space_config("sequencer_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(vga_device::sequencer_map), this));
 	m_atc_space_config = address_space_config("attribute_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(vga_device::attribute_map), this));
-	// The X11 single-display backend still uses this alias. It does not select
-	// a firmware console when multiple cards are present.
-	theVGA = another_vga ? nullptr : this;
 }
 
 // vga_device::vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
@@ -109,8 +106,6 @@ vga_device::vga_device(class CConfigurator* cfg, class CSystem* c, int pcibus, i
  **/
 vga_device::~vga_device(void)
 {
-	if (theVGA == this)
-		theVGA = nullptr;
 }
 
 // zero everything, keep vtbls
@@ -2042,8 +2037,3 @@ void vga_device::unimplemented_map(address_map& map, const char* what)
 			report_unimplemented(what, index, data, true);
 			})));
 }
-
-/**
- * Variable pointer to the one and only VGA card.
- **/
-vga_device* theVGA = 0;

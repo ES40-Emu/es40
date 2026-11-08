@@ -726,8 +726,8 @@ uint32_t CRealImage2100::ReadMem(uint32_t a, int bits)
 	{
 		if (bits == 32)
 			return host_read();
-		unimplemented_once("REALimage host readback", a, 0, false);
-		return 0;
+		const uint32_t value = readback_pixel(m_readback.word);
+		return (value >> ((a & 3) * 8)) & width_mask(bits);
 	}
 	const auto it = m_shadow.find(a & ~3u);
 	const uint32_t value = it == m_shadow.end() ? 0 : it->second;

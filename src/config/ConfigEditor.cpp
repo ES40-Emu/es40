@@ -2345,7 +2345,7 @@ bool check_serial(FormEntry_t entry[], int num_entries, FormValues_t values)
 // Form for serial lines
 void edit_serial(const char *title)
 {
-    const int num_attr = 7;
+    const int num_attr = 8;
     FormEntry_t entry[num_attr * 2];
 
     for (int i = 0; i < 2; ++i)
@@ -2414,6 +2414,14 @@ void edit_serial(const char *title)
             "For wildcards, use localhost (IPv4) or [::1] (IPv6).\n"
             "Bracket IPv6 URL hosts, e.g. telnet://[::1]:21264.",
             NULL};
+
+        entry[num_attr * i + 7] = {
+            strdup((serial_prefix + "wait_for_connection").c_str()), STR_YES, "wait_for_connection",
+            "Wait for a client before starting the emulator (default: yes).\n"
+            "Choose no for unattended startup or a graphical console.\n"
+            "Clients can still connect later; output while disconnected is discarded.\n"
+            "The client program still launches. Ignored when disabled or null_attach is enabled.",
+            validation_yes_no};
     }
     const int num_entries = ARRAY_SIZE(entry);
     CConfigurator *c;
@@ -2522,6 +2530,9 @@ void edit_serial(const char *title)
             else if (changed_fields[idx]) c->remove_value((char *)entry[idx].name);
 
             idx = fentry_index(entry, num_entries, (serial_prefix + "raw_mode").c_str());
+            set_form_value(c, idx, entry[idx].name, values[idx]);
+
+            idx = fentry_index(entry, num_entries, (serial_prefix + "wait_for_connection").c_str());
             set_form_value(c, idx, entry[idx].name, values[idx]);
 
             idx = fentry_index(entry, num_entries, (serial_prefix + "program").c_str());

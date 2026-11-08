@@ -99,6 +99,7 @@
 
 #include "emu/SystemComponent.h"
 #include "network/telnet.h"
+#include <array>
 #include <atomic>
 #include <mutex>
 #include <string>
@@ -158,6 +159,22 @@ private:
   void          drain_staging();
   void          close_connection();
   void          close_sockets();
+  void          start_connection_action();
+  bool          accept_connection(int timeout_us);
+  bool          initialize_connection(int64_t connection);
+  void          queue_output(const char* data, size_t size);
+  void          flush_output_locked(int64_t connection);
+  bool          flush_output();
+
+  // Worker (or paused menu) owns RX and replacement; lock TX and publication.
+  // Never hold this lock during accept waits or with m_register_mutex.
+  std::mutex m_connection_mutex;
+  // Host output is bounded and belongs only to the current connection.
+  std::array<char, 64 * 1024> tx_buffer;
+  size_t tx_head = 0;
+  size_t tx_size = 0;
+  bool tx_failed = false;
+  bool connection_action_started = false;
 
   CThread* myThread = nullptr;
   std::atomic<bool> StopThread{false};
@@ -202,6 +219,7 @@ private:
   bool disabled = false;     ///< Hide the UART from the guest.
   bool raw_mode = false;     ///< Skip telnet processing and the connection banner.
   bool null_attach = false;  ///< Provide an idle UART without a listener or client.
+  bool wait_for_connection = true; ///< Wait for the initial client.
 #if defined(IDB) && defined(LS_MASTER)
   int throughSocket = INVALID_SOCKET;
 #endif

@@ -221,6 +221,7 @@
 
 #include "network/lockstep.h"
 #include <algorithm>
+#include <chrono>
 #if defined(__VMS)
 #include <ioctl.h>
 #elif !defined(_WIN32)
@@ -278,6 +279,7 @@ void CSerial::init()
 	disabled = myCfg->get_bool_value("disabled");
 	raw_mode = myCfg->get_bool_value("raw_mode");
 	null_attach = myCfg->get_bool_value("null_attach");
+	wait_for_connection = myCfg->get_bool_value("wait_for_connection", true);
 	listenPort = (int)myCfg->get_num_value("port", false, 8000 + state.iNumber);
 
 	cSystem->RegisterMemory(this, 0,
@@ -423,8 +425,15 @@ void CSerial::init()
 			address = NULL;
 			printf("%s: Listening on [%s]:%d.\n", devid_string, host.c_str(), listenPort);
 		}
-		printf("%s: Waiting for connection on port %d.\n", devid_string, listenPort);
-		WaitForConnection();
+		start_connection_action();
+		if (wait_for_connection)
+		{
+			printf("%s: Waiting for connection on port %d.\n", devid_string, listenPort);
+			WaitForConnection();
+		}
+		else
+			printf("%s: Continuing without a client on port %d; disconnected output is discarded.\n",
+				devid_string, listenPort);
 	}
 	catch (...)
 	{
@@ -519,6 +528,9 @@ CSerial::~CSerial()
 
 void CSerial::close_connection()
 {
+	std::lock_guard<std::mutex> lock(m_connection_mutex);
+	tx_head = tx_size = 0;
+	tx_failed = false;
 	if (connectSocket == INVALID_SOCKET)
 		return;
 #if defined(_WIN32)
@@ -527,6 +539,7 @@ void CSerial::close_connection()
 	close(connectSocket);
 #endif
 	connectSocket = INVALID_SOCKET;
+	connection_action_started = false;
 }
 
 void CSerial::close_sockets()
@@ -680,8 +693,7 @@ void CSerial::WriteMem(int index, u64 address, int dsize, u64 data)
 			}
 			else
 			{
-				// Socket output can block. Let host RX progress while the device
-				// bus still serializes guest accesses, then complete TX below.
+				// Keep the UART lock separate from the output queue lock.
 				lock.unlock();
 				write((const char*)&d, 1);
 				lock.lock();
@@ -785,11 +797,79 @@ void CSerial::eval_interrupts()
 	theAli->pic_set_line(0, 4 - state.iNumber, (iir & 0x01) == 0);
 }
 
+static bool serial_io_retryable()
+{
+#if defined(_WIN32)
+	const int error = WSAGetLastError();
+	return error == WSAEWOULDBLOCK || error == WSAEINTR;
+#else
+	return errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR;
+#endif
+}
+
+// Caller holds m_connection_mutex. Overflow ends this client's session.
+void CSerial::queue_output(const char* data, size_t size)
+{
+	if (tx_failed)
+		return;
+	if (size > tx_buffer.size() - tx_size)
+	{
+		tx_failed = true;
+		return;
+	}
+	const size_t tail = (tx_head + tx_size) % tx_buffer.size();
+	const size_t first = (std::min)(size, tx_buffer.size() - tail);
+	memcpy(tx_buffer.data() + tail, data, first);
+	memcpy(tx_buffer.data(), data + first, size - first);
+	tx_size += size;
+}
+
+// Nonblocking, with at most two sends per call. Caller holds the TX lock.
+void CSerial::flush_output_locked(int64_t connection)
+{
+	if (connection == INVALID_SOCKET || tx_failed)
+		return;
+	for (int attempt = 0; attempt < 2 && tx_size != 0; ++attempt)
+	{
+		int flags = 0;
+#if defined(MSG_NOSIGNAL)
+		flags |= MSG_NOSIGNAL;
+#endif
+		const size_t size = (std::min)(tx_size, tx_buffer.size() - tx_head);
+		const int sent = send(connection, tx_buffer.data() + tx_head, (int)size, flags);
+		if (sent < 0)
+		{
+			if (!serial_io_retryable())
+				tx_failed = true;
+			return;
+		}
+		if (sent == 0)
+		{
+			tx_failed = true;
+			return;
+		}
+		tx_head = (tx_head + sent) % tx_buffer.size();
+		tx_size -= sent;
+	}
+}
+
+bool CSerial::flush_output()
+{
+	std::lock_guard<std::mutex> lock(m_connection_mutex);
+	flush_output_locked(connectSocket);
+	return !tx_failed;
+}
+
 void CSerial::write(const char* s, int dsize)
 {
-	if (disabled || null_attach)
-		return;  // null_attach: drop TX silently; no socket to send on
-	int val = send(connectSocket, s, dsize, 0);
+	if (disabled || null_attach || dsize <= 0)
+		return;
+	std::lock_guard<std::mutex> lock(m_connection_mutex);
+	if (connectSocket == INVALID_SOCKET || tx_failed)
+		return;
+	flush_output_locked(connectSocket);
+	queue_output(s, (size_t)dsize);
+	flush_output_locked(connectSocket);
 }
 
 void CSerial::write_cstr(const char* s)
@@ -899,6 +979,7 @@ void CSerial::check_state()
 void CSerial::serial_menu()
 {
 	fd_set          readset;
+	fd_set          writeset;
 	unsigned char   buffer[FIFO_SIZE + 1];
 	int             size;
 	struct timeval  tv;
@@ -906,6 +987,7 @@ void CSerial::serial_menu()
 	bool            waitForChoice = false;
 
 	cSystem->stop_threads();
+	auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(60);
 
 	write_cstr("\r\n<BREAK> received. What do you want to do?\r\n");
 	write_cstr("     0. Continue\r\n");
@@ -920,35 +1002,58 @@ void CSerial::serial_menu()
 #endif
 	while (!exitLoop)
 	{
+		// The worker is stopped; the menu must drain its own output.
+		if (connectSocket == INVALID_SOCKET || !flush_output())
+		{
+			close_connection();
+			printf("%%SRL-W-DISCONNECT: Serial menu connection unavailable. Continuing emulation.\n");
+			break;
+		}
+		const auto remaining = std::chrono::duration_cast<std::chrono::microseconds>(
+			deadline - std::chrono::steady_clock::now()).count();
+		if (!waitForChoice && remaining <= 0)
+		{
+			write_cstr("%SRL-I-TIMEOUT: no timely answer received. Continuing emulation.\r\n");
+			break;
+		}
 		FD_ZERO(&readset);
+		FD_ZERO(&writeset);
 		FD_SET(connectSocket, &readset);
-		tv.tv_sec = 60;
-		tv.tv_usec = 0;
+		if (tx_size != 0)
+			FD_SET(connectSocket, &writeset);
+		tv.tv_sec = waitForChoice ? 0 : (long)(remaining / 1000000);
+		tv.tv_usec = waitForChoice ? 0 : (long)(remaining % 1000000);
 #if defined(_WIN32)
-		int ready = select(0, &readset, NULL, NULL,
+		int ready = select(0, &readset, &writeset, NULL,
 #else
-		int ready = select((int)connectSocket + 1, &readset, NULL, NULL,
+		int ready = select((int)connectSocket + 1, &readset, &writeset, NULL,
 #endif
 			waitForChoice ? NULL : &tv);
-		if (ready <= 0)
+		if (ready < 0)
 		{
-			if (ready < 0)
-				printf("%%SRL-W-DISCONNECT: Serial menu connection failed. Continuing emulation.\n");
-			else
-				write_cstr("%SRL-I-TIMEOUT: no timely answer received. Continuing emulation.\r\n");
-			break;  // leave loop
+			if (serial_io_retryable())
+				continue;
+			close_connection();
+			printf("%%SRL-W-DISCONNECT: Serial menu connection failed. Continuing emulation.\n");
+			break;
 		}
+		if (ready == 0 || !FD_ISSET(connectSocket, &readset))
+			continue;
 
 #if defined(_WIN32) || defined(__VMS)
 		size = recv(connectSocket, (char*)buffer, FIFO_SIZE, 0);
 #else
 		size = read(connectSocket, &buffer, FIFO_SIZE);
 #endif
+		if (size < 0 && serial_io_retryable())
+			continue;
 		if (size <= 0)
 		{
+			close_connection();
 			printf("%%SRL-W-DISCONNECT: Serial menu connection closed or failed. Continuing emulation.\n");
 			break;
 		}
+		deadline = std::chrono::steady_clock::now() + std::chrono::seconds(60);
 		switch (buffer[0])
 		{
 		case '0':
@@ -1024,10 +1129,17 @@ void CSerial::serial_menu()
 // ---------------------------------------------------------------------------
 void CSerial::execute()
 {
-	// Resume an interrupted reconnect.
+	if (!flush_output())
+	{
+		printf("%%SRL-W-DISCONNECT: Serial output failed or queue full on port %d.\n", state.iNumber);
+		close_connection();
+	}
+	// Poll for clients without suspending UART processing.
 	if (connectSocket == INVALID_SOCKET)
 	{
-		WaitForConnection();
+		start_connection_action();
+		accept_connection(0);
+		eval_interrupts();
 		return;
 	}
 	fd_set          readset;
@@ -1074,6 +1186,12 @@ void CSerial::execute()
 			size = read(connectSocket, recv_buf, FIFO_SIZE);
 #endif
 
+			if (size < 0 && serial_io_retryable())
+			{
+				state.serial_cycles = 0;
+				eval_interrupts();
+				return;
+			}
 			extern int  got_sigint;
 			if (size <= 0 && !got_sigint)
 			{
@@ -1081,7 +1199,7 @@ void CSerial::execute()
 					state.iNumber);
 				printf("-SRL-I-WAITFOR: Waiting for a new connection on port %d.\n",
 					listenPort);
-				WaitForConnection();
+				close_connection();
 				return;
 			}
 
@@ -1340,16 +1458,25 @@ int CSerial::RestoreState(FILE* f)
 
 void CSerial::WaitForConnection()
 {
-	close_connection();
-	if (listenSockets.empty() || StopThread)
+	// Only startup waits; preserve any existing connection.
+	if (listenSockets.empty())
 		return;
-	const char* telnet_options = "%c%c%c";
-	char                buffer[8];
+	while (!StopThread && connectSocket == INVALID_SOCKET)
+	{
+		start_connection_action();
+		accept_connection(100000);
+	}
+}
+
+void CSerial::start_connection_action()
+{
+	if (connection_action_started || StopThread || listenSockets.empty())
+		return;
+	connection_action_started = true;
+#if !defined(LS_SLAVE)
 	char                s[1000];
 	char* nargv = s;
 	int                 i = 0;
-
-#if !defined(LS_SLAVE)
 	char                s2[200];
 	char* argv[20];
 
@@ -1408,128 +1535,144 @@ void CSerial::WaitForConnection()
 #endif
 	}
 #endif
-	// Poll so stop_threads() can interrupt the wait.
+}
+
+bool CSerial::accept_connection(int timeout_us)
+{
+	if (connectSocket != INVALID_SOCKET)
+		return true;
+	if (listenSockets.empty() || StopThread)
+		return false;
 	fd_set          readset;
 	struct timeval  tv;
-	while (connectSocket == INVALID_SOCKET)
+	FD_ZERO(&readset);
+#if !defined(_WIN32)
+	int highest_socket = 0;
+#endif
+	for (int64_t listener : listenSockets)
 	{
-		if (StopThread)
-			return;
-		FD_ZERO(&readset);
+		FD_SET(listener, &readset);
 #if !defined(_WIN32)
-		int highest_socket = 0;
+		if (listener > highest_socket)
+			highest_socket = (int)listener;
 #endif
-		for (int64_t listener : listenSockets)
-		{
-			FD_SET(listener, &readset);
-#if !defined(_WIN32)
-			if (listener > highest_socket)
-				highest_socket = (int)listener;
-#endif
-		}
-		tv.tv_sec = 0;
-		tv.tv_usec = 100000;
+	}
+	tv.tv_sec = 0;
+	tv.tv_usec = timeout_us;
 #if defined(_WIN32)
-		const int ready = select(0, &readset, NULL, NULL, &tv);
+	const int ready = select(0, &readset, NULL, NULL, &tv);
 #else
-		const int ready = select(highest_socket + 1, &readset, NULL, NULL, &tv);
+	const int ready = select(highest_socket + 1, &readset, NULL, NULL, &tv);
 #endif
-		if (ready < 0)
+	if (ready < 0)
+	{
+#if defined(_WIN32)
+		const int error = WSAGetLastError();
+		if (error == WSAEINTR)
+#else
+		const int error = errno;
+		if (error == EINTR)
+#endif
+			return false;
+		FAILURE_2(Runtime, "%s: serial listener select failed (error %d)", devid_string, error);
+	}
+	if (ready == 0 || StopThread)
+		return false;
+	for (size_t i = 0; i < listenSockets.size(); ++i)
+	{
+		if (!FD_ISSET(listenSockets[i], &readset))
+			continue;
+		const int64_t connection = accept(listenSockets[i], NULL, NULL);
+		if (connection == INVALID_SOCKET)
 		{
 #if defined(_WIN32)
 			const int error = WSAGetLastError();
-			if (error == WSAEINTR)
+			if (error == WSAEINTR || error == WSAEWOULDBLOCK ||
+				error == WSAECONNRESET || error == WSAECONNABORTED)
+				continue;
 #else
 			const int error = errno;
-			if (error == EINTR)
-#endif
+			if (error == EINTR || error == EAGAIN || error == EWOULDBLOCK || error == ECONNABORTED)
 				continue;
-			FAILURE_2(Runtime, "%s: serial listener select failed (error %d)", devid_string, error);
-		}
-		if (ready == 0 || StopThread)
-			continue;
-		for (size_t i = 0; i < listenSockets.size(); ++i)
-		{
-			if (!FD_ISSET(listenSockets[i], &readset))
-				continue;
-			connectSocket = accept(listenSockets[i], NULL, NULL);
-			if (connectSocket == INVALID_SOCKET)
-			{
-#if defined(_WIN32)
-				const int error = WSAGetLastError();
-				if (error == WSAEINTR || error == WSAEWOULDBLOCK ||
-					error == WSAECONNRESET || error == WSAECONNABORTED)
-					continue;
-#else
-				const int error = errno;
-				if (error == EINTR || error == EAGAIN || error == EWOULDBLOCK || error == ECONNABORTED)
-					continue;
 #if defined(__linux__)
-				if (error == ENETDOWN || error == EPROTO || error == ENOPROTOOPT ||
-					error == EHOSTDOWN || error == ENONET || error == EHOSTUNREACH ||
-					error == EOPNOTSUPP || error == ENETUNREACH)
-					continue;
+			if (error == ENETDOWN || error == EPROTO || error == ENOPROTOOPT ||
+				error == EHOSTDOWN || error == ENONET || error == EHOSTUNREACH ||
+				error == EOPNOTSUPP || error == ENETUNREACH)
+				continue;
 #endif
 #endif
-				FAILURE(Runtime, std::string(devid_string) + ": serial address " + listenAddresses[i] +
-					" accept failed (error " + std::to_string(error) + ")");
-			}
+			FAILURE(Runtime, std::string(devid_string) + ": serial address " + listenAddresses[i] +
+				" accept failed (error " + std::to_string(error) + ")");
+		}
+		// Queue telnet setup ahead of guest TX before publishing the socket.
+		const auto close_pending = [connection]()
+		{
+#if defined(_WIN32)
+			closesocket(connection);
+#else
+			close(connection);
+#endif
+		};
+		try
+		{
 #if !defined(_WIN32)
-			if (connectSocket >= FD_SETSIZE)
-			{
-				close_connection();
+			if (connection >= FD_SETSIZE)
 				FAILURE(Runtime, "Accepted serial socket exceeds FD_SETSIZE");
-			}
 #endif
 #if defined(_WIN32)
-			u_long nonblocking = 0;
-			const int blocking_error = ioctlsocket(connectSocket, FIONBIO, &nonblocking);
+			u_long nonblocking = 1;
+			const int mode_error = ioctlsocket(connection, FIONBIO, &nonblocking);
 #else
-			int nonblocking = 0;
-			const int blocking_error = ioctl(connectSocket, FIONBIO, &nonblocking);
+			int nonblocking = 1;
+			const int mode_error = ioctl(connection, FIONBIO, &nonblocking);
 #endif
-			if (blocking_error != 0)
+			if (mode_error != 0)
+				FAILURE(Runtime, "Cannot set nonblocking mode on serial connection");
+#if defined(SO_NOSIGPIPE)
+			const int no_sigpipe = 1;
+			if (setsockopt(connection, SOL_SOCKET, SO_NOSIGPIPE,
+				(const char*)&no_sigpipe, sizeof(no_sigpipe)) != 0)
+				FAILURE(Runtime, "Cannot disable SIGPIPE on serial connection");
+#endif
+			std::lock_guard<std::mutex> lock(m_connection_mutex);
+			if (StopThread || !initialize_connection(connection))
 			{
-				close_connection();
-				FAILURE(Runtime, "Cannot set blocking mode on serial connection");
+				close_pending();
+				continue;
 			}
-			break;
+			iac_carry_len = 0;
+			in_subneg = false;
+			stageLen = 0;
+			state.serial_cycles = 0;
+			connectSocket = connection;
+			return true;
+		}
+		catch (...)
+		{
+			close_pending();
+			throw;
 		}
 	}
+	return false;
+}
 
-	iac_carry_len = 0;
-	in_subneg = false;
-	stageLen = 0;
-
-	state.serial_cycles = 0;
-
-
+bool CSerial::initialize_connection(int64_t connection)
+{
+	tx_head = tx_size = 0;
+	tx_failed = false;
 	if (state.iNumber != 1 && !raw_mode) // skip for kgdb-default port and any raw-mode port
 	{
-		// Send some control characters to the telnet client to handle
-		// character-at-a-time mode.
-		sprintf(buffer, telnet_options, IAC, DO, TELOPT_ECHO);
-		write_cstr(buffer);
-
-		sprintf(buffer, telnet_options, IAC, DO, TELOPT_NAWS);
-		write_cstr(buffer);
-
-		sprintf(buffer, telnet_options, IAC, DO, TELOPT_LFLOW);
-		write_cstr(buffer);
-
-		sprintf(buffer, telnet_options, IAC, WILL, TELOPT_ECHO);
-		write_cstr(buffer);
-
-		sprintf(buffer, telnet_options, IAC, WILL, TELOPT_SGA);
-		write_cstr(buffer);
-
-		// we do these two to avoid a weird character spam in the client
-		unsigned char opt_do_binary[3] = { IAC, DO,   TELOPT_BINARY }; // tell client to send raw
-		unsigned char opt_will_binary[3] = { IAC, WILL, TELOPT_BINARY }; // tell client to receive raw
-		write((const char*)opt_do_binary, 3);
-		write((const char*)opt_will_binary, 3);
-
-		sprintf(s, "This is serial port #%d on ES40 Emulator\r\n", state.iNumber);
-		write_cstr(s);
+		// Use explicit lengths: TELOPT_BINARY is zero.
+		const unsigned char options[] = {
+			IAC, DO, TELOPT_ECHO, IAC, DO, TELOPT_NAWS, IAC, DO, TELOPT_LFLOW,
+			IAC, WILL, TELOPT_ECHO, IAC, WILL, TELOPT_SGA,
+			IAC, DO, TELOPT_BINARY, IAC, WILL, TELOPT_BINARY
+		};
+		char banner[100];
+		snprintf(banner, sizeof(banner), "This is serial port #%d on ES40 Emulator\r\n", state.iNumber);
+		queue_output((const char*)options, sizeof(options));
+		queue_output(banner, strlen(banner));
+		flush_output_locked(connection);
 	}
+	return !tx_failed;
 }

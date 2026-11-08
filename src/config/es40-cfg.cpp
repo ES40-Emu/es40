@@ -969,6 +969,16 @@ int main(int argc, char* argv[])
 			}
 		}
 
+		MultipleChoiceQuestion wait_q;
+		wait_q.setQuestion("Wait for a client on serial " + i2s(i) + " before starting the emulator?");
+		wait_q.setExplanation("Choose no for unattended startup or a graphical console. "
+			"Clients can still connect later, but output while disconnected is discarded. "
+			"A configured client program still launches.");
+		wait_q.addAnswer("yes", "true", "Wait for a client before startup");
+		wait_q.addAnswer("no", "false", "Start without a client");
+		wait_q.setDefault("yes");
+		wait_q.ask();
+
 		FreeTextQuestion exec_q;
 		exec_q.setQuestion("What program should be started automatically for serial " + i2s(i) + "?");
 #if defined(_WIN32)
@@ -1014,6 +1024,8 @@ int main(int argc, char* argv[])
 		os << "    port = " << port_q.getAnswer() << ";\n";
 		if (!listen_address.empty())
 			os << "    listen_address = \"" << listen_address << "\";\n";
+		if (wait_q.getAnswer() == "false")
+			os << "    wait_for_connection = false;\n";
 		if (exec_q.getAnswer() != "none")
 		{
 #if defined(_WIN32)

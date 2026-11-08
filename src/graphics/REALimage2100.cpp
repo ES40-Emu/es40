@@ -682,12 +682,12 @@ uint32_t CRealImage2100::status_read()
 	m_status_phase = (phase + 1) % StatusFrameReads;
 	if (m_status_phase == 0)
 		advance_frame();
-	uint32_t v = 0;
+	uint32_t live = 0;
 	if (phase >= StatusFrameReads - 8)
-		v |= StatusVBlank;
+		live |= StatusVBlank;
 	if (phase >= StatusFrameReads - 6 && phase < StatusFrameReads - 2)
-		v |= StatusVRetrace;
-	return v;
+		live |= StatusVRetrace;
+	return live & m_status_mask;
 }
 
 uint32_t CRealImage2100::ReadMem(uint32_t a, int bits)
@@ -808,11 +808,14 @@ void CRealImage2100::WriteMem(uint32_t a, int bits, uint32_t v)
 	}
 	if (key == Status)
 	{
-		// OpenVMS writes the upper status mask after idle; timing reads remain live.
+		// Upper field (bits 23..31) is a software visibility mask. Timing bits
+		// continue to track the phase counter.
+		// Writes outside that field are not a decoded profile.
 		const uint32_t written = (v << shift) & lanes;
-		if (written && written != (StatusVBlank & lanes) &&
-			written != (0xff800000u & lanes))
+		if (written & ~StatusUpperWritable)
 			unimplemented_once("REALimage status register", a, v, true);
+		else if (written)
+			m_status_mask = (m_status_mask & ~StatusUpperWritable) | written;
 		return;
 	}
 	// Whole-longword Alpha miniport writes leave counter and strap bytes unchanged.
@@ -3927,6 +3930,7 @@ void CRealImage2100::reset(bool clear)
 	m_unit_reset = m_interrupt_enable = m_display_control = 0;
 	m_vga_control = VGAControlVGA;
 	m_status_phase = 0;
+	m_status_mask = ~0u;
 	m_frame_counter = 0;
 	m_board_control = m_board_timing = 0;
 	m_board_io = 0;
@@ -4334,6 +4338,7 @@ void CRealImage2100::RestoreState(std::istream& in)
 	m_vga_control = vga_control;
 	m_display_control = display_control;
 	m_status_phase = status_phase;
+	m_status_mask = ~0u;
 	m_frame_counter = uint16_t(frame_counter);
 	m_board_control = uint8_t(board_control);
 	m_board_io = board_io;

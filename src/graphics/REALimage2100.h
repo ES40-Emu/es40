@@ -461,6 +461,7 @@ private:
   uint32_t m_unit_reset = 0, m_interrupt_enable = 0,
            m_vga_control = VGAControlVGA, m_display_control = 0;
   uint32_t m_status_phase = 0;
+  uint32_t m_status_mask = ~0u;
   uint16_t m_frame_counter = 0;
   uint8_t m_board_control = 0, m_board_timing = 0;
   uint32_t m_board_io = 0;

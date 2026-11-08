@@ -89,13 +89,22 @@
  * Bind the card's sole display output; device initialization is done by init().
  **/
 CCirrus::CCirrus(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
-	bx_gui_c& display) : CSVGA(cfg, c, pcibus, pcidev), m_output(0, display)
+	bx_gui_c& display, Model model)
+	: CSVGA(cfg, c, pcibus, pcidev), m_model(model), m_output(0, display)
 {
 	memset(&vga, 0, sizeof(vga));
 	memset(&svga, 0, sizeof(svga));
 	memset(&pci_state, 0, sizeof(pci_state));
 	memset(std_config_data, 0, sizeof(std_config_data));
 	memset(std_config_mask, 0, sizeof(std_config_mask));
+}
+
+//cirrus_gd5401_vga_device::cirrus_gd5401_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
+//	: vga_device(mconfig, CIRRUS_GD5401_VGA, tag, owner, clock)
+cirrus_gd5401_vga_device::cirrus_gd5401_vga_device(CConfigurator* cfg, CSystem* c,
+	int pcibus, int pcidev, bx_gui_c& display, bool avga1)
+	: CCirrus(cfg, c, pcibus, pcidev, display, avga1 ? Model::AVGA1 : Model::GD5401)
+{
 }
 
 // TODO: also can select external video clock modes thru strapped CF(5) = 0
@@ -119,37 +128,52 @@ void CCirrus::gd5401_recompute_params()
 
 //cirrus_gd5428_vga_device::cirrus_gd5428_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
 //	: cirrus_gd5428_vga_device(mconfig, CIRRUS_GD5428_VGA, tag, owner, clock)
-//{
+cirrus_gd5428_vga_device::cirrus_gd5428_vga_device(CConfigurator* cfg, CSystem* c,
+	int pcibus, int pcidev, bx_gui_c& display)
+	: cirrus_gd5428_vga_device(cfg, c, pcibus, pcidev, display, Model::GD5428)
+{
 //	m_crtc_space_config = address_space_config("crtc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5428_vga_device::crtc_map), this));
 //	m_gc_space_config = address_space_config("gc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5428_vga_device::gc_map), this));
 //	m_seq_space_config = address_space_config("sequencer_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5428_vga_device::sequencer_map), this));
-//}
+}
 
 //cirrus_gd5428_vga_device::cirrus_gd5428_vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock)
 //	: svga_device(mconfig, type, tag, owner, clock)
-//{
-//}
+cirrus_gd5428_vga_device::cirrus_gd5428_vga_device(CConfigurator* cfg, CSystem* c,
+	int pcibus, int pcidev, bx_gui_c& display, Model model)
+	: CCirrus(cfg, c, pcibus, pcidev, display, model)
+{
+}
 
 //cirrus_gd5430_vga_device::cirrus_gd5430_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
 //	: cirrus_gd5430_vga_device(mconfig, CIRRUS_GD5430_VGA, tag, owner, clock)
-//{
+cirrus_gd5430_vga_device::cirrus_gd5430_vga_device(CConfigurator* cfg, CSystem* c,
+	int pcibus, int pcidev, bx_gui_c& display)
+	: cirrus_gd5430_vga_device(cfg, c, pcibus, pcidev, display, Model::GD5430)
+{
 //	m_crtc_space_config = address_space_config("crtc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5430_vga_device::crtc_map), this));
 //	m_gc_space_config = address_space_config("gc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5430_vga_device::gc_map), this));
 //	m_seq_space_config = address_space_config("sequencer_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5430_vga_device::sequencer_map), this));
-//}
+}
 
 //cirrus_gd5430_vga_device::cirrus_gd5430_vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock)
 //	: cirrus_gd5428_vga_device(mconfig, type, tag, owner, clock)
-//{
-//}
+cirrus_gd5430_vga_device::cirrus_gd5430_vga_device(CConfigurator* cfg, CSystem* c,
+	int pcibus, int pcidev, bx_gui_c& display, Model model)
+	: cirrus_gd5428_vga_device(cfg, c, pcibus, pcidev, display, model)
+{
+}
 
 //cirrus_gd5446_vga_device::cirrus_gd5446_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
 //	: cirrus_gd5430_vga_device(mconfig, CIRRUS_GD5446_VGA, tag, owner, clock)
-//{
+cirrus_gd5446_vga_device::cirrus_gd5446_vga_device(CConfigurator* cfg, CSystem* c,
+	int pcibus, int pcidev, bx_gui_c& display)
+	: cirrus_gd5430_vga_device(cfg, c, pcibus, pcidev, display, Model::GD5446)
+{
 //	m_crtc_space_config = address_space_config("crtc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5446_vga_device::crtc_map), this));
 //	m_gc_space_config = address_space_config("gc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5446_vga_device::gc_map), this));
 //	m_seq_space_config = address_space_config("sequencer_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5446_vga_device::sequencer_map), this));
-//}
+}
 
 void CCirrus::io_3cx_map(address_map &map)
 {
@@ -781,16 +805,16 @@ void CCirrus::device_start()
 		cirrus.m_chip_id = 0x98;  // GD5428 - Rev 0
 }
 
-void CCirrus::gd5430_device_start()
+void cirrus_gd5430_vga_device::device_start()
 {
-	CCirrus::device_start();
+	cirrus_gd5428_vga_device::device_start();
 	cirrus.m_chip_id = 0xa0;  // GD5430 - Rev 0
 	//save_item(NAME(m_sr17));
 }
 
-void CCirrus::gd5446_device_start()
+void cirrus_gd5446_vga_device::device_start()
 {
-	CCirrus::gd5430_device_start();
+	cirrus_gd5430_vga_device::device_start();
 	cirrus.m_chip_id = 0xb8;  // GD5446
 }
 
@@ -1759,9 +1783,9 @@ void CCirrus::mmio_w(offs_t offset, u8 data)
 		space(GC_REG).write_byte(index, data);
 }
 
-void CCirrus::gd5430_crtc_map(address_map &map)
+void cirrus_gd5430_vga_device::crtc_map(address_map &map)
 {
-	CCirrus::crtc_map(map);
+	cirrus_gd5428_vga_device::crtc_map(map);
 	map(0x1d, 0x1d).lrw8(
 		NAME([this] (offs_t offset) {
 			return cirrus.m_cr1d;
@@ -1775,9 +1799,9 @@ void CCirrus::gd5430_crtc_map(address_map &map)
 	);
 }
 
-void CCirrus::gd5430_gc_map(address_map &map)
+void cirrus_gd5430_vga_device::gc_map(address_map &map)
 {
-	CCirrus::gc_map(map);
+	cirrus_gd5428_vga_device::gc_map(map);
 	map(0x2f, 0x2f).lrw8(
 		NAME([this](offs_t offset) {
 			return cirrus.m_blt_write_mask;
@@ -1788,9 +1812,9 @@ void CCirrus::gd5430_gc_map(address_map &map)
 	);
 }
 
-void CCirrus::gd5430_sequencer_map(address_map &map)
+void cirrus_gd5430_vga_device::sequencer_map(address_map &map)
 {
-	CCirrus::sequencer_map(map);
+	cirrus_gd5428_vga_device::sequencer_map(map);
 	map(0x17, 0x17).lrw8(
 		NAME([this](offs_t offset) {
 			return cirrus.m_sr17;
@@ -1805,43 +1829,26 @@ void CCirrus::gd5430_sequencer_map(address_map &map)
  * CL-GD5446 overrides
  */
 
-void CCirrus::gd5446_crtc_map(address_map &map)
+void cirrus_gd5446_vga_device::crtc_map(address_map &map)
 {
-	CCirrus::gd5430_crtc_map(map);
+	cirrus_gd5430_vga_device::crtc_map(map);
 }
 
-void CCirrus::gd5446_gc_map(address_map &map)
+void cirrus_gd5446_vga_device::gc_map(address_map &map)
 {
-	CCirrus::gd5430_gc_map(map);
+	cirrus_gd5430_vga_device::gc_map(map);
 }
 
-void CCirrus::gd5446_sequencer_map(address_map &map)
+void cirrus_gd5446_vga_device::sequencer_map(address_map &map)
 {
-	CCirrus::gd5430_sequencer_map(map);
+	cirrus_gd5430_vga_device::sequencer_map(map);
 }
 
 void CCirrus::init_maps()
 {
-	switch (m_model)
-	{
-	case Model::GD5401:
-	case Model::AVGA1:
-	case Model::GD5428:
-		crtc_map(m_crtc_map);
-		sequencer_map(m_seq_map);
-		gc_map(m_gc_map);
-		break;
-	case Model::GD5430:
-		gd5430_crtc_map(m_crtc_map);
-		gd5430_sequencer_map(m_seq_map);
-		gd5430_gc_map(m_gc_map);
-		break;
-	case Model::GD5446:
-		gd5446_crtc_map(m_crtc_map);
-		gd5446_sequencer_map(m_seq_map);
-		gd5446_gc_map(m_gc_map);
-		break;
-	}
+	crtc_map(m_crtc_map);
+	sequencer_map(m_seq_map);
+	gc_map(m_gc_map);
 	attribute_map(m_atc_map);
 	init_io_maps();
 }
@@ -1862,26 +1869,12 @@ void CCirrus::init()
 	if (vga.memory)
 		return;
 	const char* model = myCfg->get_text_value("model", "GD5430");
-	if (!strcasecmp(model, "GD5401")) m_model = Model::GD5401;
-	else if (!strcasecmp(model, "GD5428")) m_model = Model::GD5428;
-	else if (!strcasecmp(model, "GD5430")) m_model = Model::GD5430;
-	else if (!strcasecmp(model, "GD5446")) m_model = Model::GD5446;
-	else if (!strcasecmp(model, "AVGA1")) m_model = Model::AVGA1;
-	else FAILURE_1(Configuration,
-		"cirrus model must be GD5401, GD5428, GD5430, GD5446 or AVGA1 (got %s)", model);
 
 	const u32 vram_size = is_avga() ? 256u * 1024u :
 		m_model == Model::GD5446 ? 4u * 1024u * 1024u : 2u * 1024u * 1024u;
 	vga.svga_intf.vram_size = vram_size;
 	init_maps();
-	switch (m_model)
-	{
-	case Model::GD5401:
-	case Model::AVGA1:
-	case Model::GD5428: device_start(); break;
-	case Model::GD5430: gd5430_device_start(); break;
-	case Model::GD5446: gd5446_device_start(); break;
-	}
+	device_start();
 	device_reset();
 
 	vga.crtc.line_compare = 1023;

@@ -58,9 +58,6 @@ class CCirrus : public CSVGA, public CRunnable,
   public CDisplayOutputProvider
 {
 public:
-  CCirrus(CConfigurator* cfg, class CSystem* c, int pcibus, int pcidev,
-    bx_gui_c& display);
-
   virtual int   SaveState(FILE* f) override;
   virtual int   RestoreState(FILE* f) override;
   virtual void  check_state() override;
@@ -97,6 +94,10 @@ public:
   virtual void  stop_threads() override;
 
 protected:
+  enum class Model : u32 { GD5401, GD5428, GD5430, GD5446, AVGA1 };
+  CCirrus(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
+    bx_gui_c& display, Model model);
+
 	virtual void gd5401_recompute_params();
 //};
 
@@ -217,12 +218,8 @@ public:
 protected:
 	//cirrus_gd5430_vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock);
 
-	virtual void gd5430_device_start() ATTR_COLD;
 	virtual void device_reset() ATTR_COLD;
 
-	virtual void gd5430_crtc_map(address_map &map) ATTR_COLD;
-	virtual void gd5430_gc_map(address_map &map) ATTR_COLD;
-	virtual void gd5430_sequencer_map(address_map &map) ATTR_COLD;
 //private:
 	static u8 mmio_register(offs_t offset);
 	u8 mmio_r(offs_t offset);
@@ -236,19 +233,14 @@ protected:
 	//cirrus_gd5446_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock = 0);
 
 //protected:
-	virtual void gd5446_device_start() ATTR_COLD;
 
-	virtual void gd5446_crtc_map(address_map &map) ATTR_COLD;
-	virtual void gd5446_gc_map(address_map &map) ATTR_COLD;
-	virtual void gd5446_sequencer_map(address_map &map) ATTR_COLD;
 //};
 
 
   void init_maps();
 
 private:
-  enum class Model : u32 { GD5401, GD5428, GD5430, GD5446, AVGA1 };
-  Model m_model = Model::GD5430;
+  Model m_model;
   bool is_avga() const noexcept { return m_model == Model::GD5401 || m_model == Model::AVGA1; }
   bool is_pci() const noexcept { return m_model == Model::GD5430 || m_model == Model::GD5446; }
   // Cirrus has one modeled output.
@@ -315,6 +307,55 @@ private:
   // screen refresh stuff
   std::chrono::steady_clock::time_point m_last_refresh_time{};
 
+};
+
+// ES40 keeps shared frontend state and GD5428 algorithms in CCirrus.
+// GD5401/AVGA1 retain the existing SVGA-backed compatibility behavior.
+class cirrus_gd5401_vga_device : public CCirrus
+{
+public:
+  cirrus_gd5401_vga_device(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
+    bx_gui_c& display, bool avga1 = false);
+};
+
+class cirrus_gd5428_vga_device : public CCirrus
+{
+public:
+  cirrus_gd5428_vga_device(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
+    bx_gui_c& display);
+
+protected:
+  cirrus_gd5428_vga_device(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
+    bx_gui_c& display, Model model);
+};
+
+class cirrus_gd5430_vga_device : public cirrus_gd5428_vga_device
+{
+public:
+  cirrus_gd5430_vga_device(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
+    bx_gui_c& display);
+
+protected:
+  cirrus_gd5430_vga_device(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
+    bx_gui_c& display, Model model);
+
+  virtual void device_start() override ATTR_COLD;
+  virtual void crtc_map(address_map& map) override ATTR_COLD;
+  virtual void gc_map(address_map& map) override ATTR_COLD;
+  virtual void sequencer_map(address_map& map) override ATTR_COLD;
+};
+
+class cirrus_gd5446_vga_device : public cirrus_gd5430_vga_device
+{
+public:
+  cirrus_gd5446_vga_device(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
+    bx_gui_c& display);
+
+protected:
+  virtual void device_start() override ATTR_COLD;
+  virtual void crtc_map(address_map& map) override ATTR_COLD;
+  virtual void gc_map(address_map& map) override ATTR_COLD;
+  virtual void sequencer_map(address_map& map) override ATTR_COLD;
 };
 
 // device type definition

@@ -1149,9 +1149,24 @@ void CConfigurator::initialize()
 
 		// i broke this, my bad. To be restored in the future. 
 	case c_cirrus:
-		myDevice = new CCirrus(this, (CSystem*)pParent->get_device(), pcibus,
-			pcidev, bx_gui->display_for_output(get_device_path(), 0));
+	{
+		CSystem* const system = (CSystem*)pParent->get_device();
+		bx_gui_c& display = bx_gui->display_for_output(get_device_path(), 0);
+		const char* model = get_text_value("model", "GD5430");
+		if (!strcasecmp(model, "GD5401"))
+			myDevice = new cirrus_gd5401_vga_device(this, system, pcibus, pcidev, display);
+		else if (!strcasecmp(model, "GD5428"))
+			myDevice = new cirrus_gd5428_vga_device(this, system, pcibus, pcidev, display);
+		else if (!strcasecmp(model, "GD5430"))
+			myDevice = new cirrus_gd5430_vga_device(this, system, pcibus, pcidev, display);
+		else if (!strcasecmp(model, "GD5446"))
+			myDevice = new cirrus_gd5446_vga_device(this, system, pcibus, pcidev, display);
+		else if (!strcasecmp(model, "AVGA1"))
+			myDevice = new cirrus_gd5401_vga_device(this, system, pcibus, pcidev, display, true);
+		else FAILURE_1(Configuration,
+			"cirrus model must be GD5401, GD5428, GD5430, GD5446 or AVGA1 (got %s)", model);
 		break;
+	}
 	case c_es1370:
 		myDevice = new CES1370(this, (CSystem*)pParent->get_device(), pcibus,
 			pcidev);

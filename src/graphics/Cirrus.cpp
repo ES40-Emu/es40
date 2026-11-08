@@ -1007,7 +1007,7 @@ uint32_t CCirrus::latch_start_addr()
 	return vga.crtc.start_addr_latch;
 }
 
-void CCirrus::start_bitblt()
+void cirrus_gd5428_vga_device::start_bitblt()
 {
 	uint32_t x,y;
 
@@ -1076,7 +1076,7 @@ void CCirrus::start_bitblt()
 	cirrus.m_blt_status &= ~0x09;
 }
 
-void CCirrus::start_reverse_bitblt()
+void cirrus_gd5428_vga_device::start_reverse_bitblt()
 {
 	uint32_t x,y;
 
@@ -1153,7 +1153,7 @@ void CCirrus::start_reverse_bitblt()
 	cirrus.m_blt_status &= ~0x09;
 }
 
-void CCirrus::start_system_bitblt()
+void cirrus_gd5428_vga_device::start_system_bitblt()
 {
 	LOGMASKED(LOG_BLIT, "CL: BitBLT from system memory started: Src: %06x Dst: %06x Width: %i Height %i ROP: %02x Mode: %02x\n",cirrus.m_blt_source,cirrus.m_blt_dest,cirrus.m_blt_width,cirrus.m_blt_height,cirrus.m_blt_rop,cirrus.m_blt_mode);
 	cirrus.m_blt_system_transfer = true;
@@ -1166,7 +1166,7 @@ void CCirrus::start_system_bitblt()
 }
 
 // non colour-expanded BitBLTs from system memory must be doubleword sized, extra bytes are ignored
-void CCirrus::blit_dword()
+void cirrus_gd5428_vga_device::blit_dword()
 {
 	// TODO: add support for reverse direction
 	uint8_t x,pixel;
@@ -1193,7 +1193,7 @@ void CCirrus::blit_dword()
 }
 
 // colour-expanded BitBLTs from system memory are on a byte boundary, unused bits are ignored
-void CCirrus::blit_byte()
+void cirrus_gd5428_vga_device::blit_byte()
 {
 	// Width is stored as a byte count minus one.  Each source bit expands
 	// to one pixel; GR10/11 supply the second byte only in 16-bit mode.
@@ -1224,7 +1224,7 @@ void CCirrus::blit_byte()
 	}
 }
 
-void CCirrus::copy_pixel(uint8_t src, uint8_t dst, bool foreground, unsigned dst_byte_offset)
+void cirrus_gd5428_vga_device::copy_pixel(uint8_t src, uint8_t dst, bool foreground, unsigned dst_byte_offset)
 {
 	// GR2F suppresses the first n pixels on each expanded or pattern scan line.
 	if ((cirrus.m_blt_mode & 0xc0) && dst_byte_offset < cirrus.m_blt_write_mask * (BIT(cirrus.m_blt_mode, 4) ? 2 : 1))

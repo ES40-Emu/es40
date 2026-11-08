@@ -174,13 +174,6 @@ protected:
 
 	uint8_t offset_select(offs_t offset);
 
-	void start_bitblt();
-	void start_reverse_bitblt();
-	void start_system_bitblt();
-	void blit_dword();
-	void blit_byte();  // used for colour expanded system-to-vram bitblts
-	void copy_pixel(uint8_t src, uint8_t dst, bool foreground = true, unsigned dst_byte_offset = 0);
-
 private:
   Model m_model;
   bool is_avga() const noexcept { return m_model == Model::GD5401 || m_model == Model::AVGA1; }
@@ -361,12 +354,12 @@ protected:
 
 private:
 
-//	void start_bitblt();
-//	void start_reverse_bitblt();
-//	void start_system_bitblt();
-//	void blit_dword();
-//	void blit_byte();  // used for colour expanded system-to-vram bitblts
-//	void copy_pixel(uint8_t src, uint8_t dst, bool foreground = true, unsigned dst_byte_offset = 0);
+	void start_bitblt();
+	void start_reverse_bitblt();
+	void start_system_bitblt();
+	void blit_dword();
+	void blit_byte();  // used for colour expanded system-to-vram bitblts
+	void copy_pixel(uint8_t src, uint8_t dst, bool foreground = true, unsigned dst_byte_offset = 0);
 };
 
 class cirrus_gd5430_vga_device :  public cirrus_gd5428_vga_device

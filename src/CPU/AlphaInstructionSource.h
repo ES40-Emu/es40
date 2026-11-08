@@ -70,6 +70,18 @@ struct AlphaInstructionSource
     return query ? query(context, pc) : AlphaInstructionSourceView{};
   }
 
+  // Copy a candidate word before another query or instruction can change the view.
+  // A failed observation leaves the caller's word unchanged.
+  bool read_word(std::uint64_t pc, std::uint64_t identity, bool asm_global,
+                 std::uint32_t index, std::uint32_t& word) const
+  {
+    const auto current = view(pc);
+    if (current.identity != identity || current.asm_global != asm_global
+      || !current.contains(1) || index >= current.word_count) return false;
+    word = current.word(index);
+    return true;
+  }
+
   bool matches(std::uint64_t pc, std::uint64_t identity, bool asm_global,
                const std::uint32_t* words, std::uint32_t count) const
   {

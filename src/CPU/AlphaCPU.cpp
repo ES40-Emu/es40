@@ -1688,9 +1688,10 @@ void CAlphaCPU::jit_run(int budget)
 				// containing calls close (the common real-world hot-loop shape).
 				static constexpr bool TraceLinkFusion = true;
 				for (CJitEngine::JitBlock* cur = b; nb < CJitEngine::kMaxTraceSegs; ) {
-				  // Legacy backend source view, gated by supports_legacy_jit at CPU init.
-				  const u32* aw = (const u32*)((const u8*)dram_ptr + cur->phys);
-				  const u32 lop = aw[cur->prefix_len - 1]; const u32 lopc = lop >> 26;
+				  u32 lop;
+				  if (!cur->prefix_len || !sources.read_word(cur->tag, cur->phys,
+				      cur->asm_global, cur->prefix_len - 1, lop)) break;
+				  const u32 lopc = lop >> 26;
 				  u64 spc = 0;
 				  if (lopc >= 0x38 && lopc <= 0x3f) {
 				    // A conditional's static target is often the loop exit.
@@ -1801,15 +1802,15 @@ void CAlphaCPU::jit_run(int budget)
 			u64 bnd_r[CJitEngine::kMaxTraceSegs][64];     // GPRs incl. PALshadow bank
 			u64 bnd_f[CJitEngine::kMaxTraceSegs][64];     // FP file
 			u64 bnd_ipr[CJitEngine::kMaxTraceSegs][27];   // cap_iprs set
-			// Legacy backend candidate bytes; peek_cached_instruction supplies the
-			// family's current cached override before classifying a reference step.
-			const u32* vw = (const u32*)((const u8*)dram_ptr + b->phys);
+			u32 source_words[16] = {};   // observed backing words, copied before execution
 			u32 verify_words[16] = {};   // actual reference instructions for mismatch diagnostics
 			u32 vn = 0;   // loads recorded for replay
 			u32 sn = 0;   // stores recorded for the compiled-pass compare
 			u64 vpc = start_virt;
 			u32 cur_len = b->prefix_len;   // current interpreted block's length + start tag; step 3
 			u64 cur_tag = b->tag;          // advances these per segment across a fused trace
+			u64 cur_source = b->phys;
+			bool cur_asm = b->asm_global;
 				u32 n_interp = 0;              // ops the interp ran over the trace's fused span (vs t->code's done)
 			bool clean = true;
 			CJitEngine::TraceFragment* vtr = m_jit->traces_enabled() ? m_jit->trace_lookup(start_virt, start_asn) : nullptr;
@@ -1817,7 +1818,7 @@ void CAlphaCPU::jit_run(int budget)
 				const u32 nseg = vtr ? vtr->n_segs : 1;   // interp the trace's full fused span; else just block b
 				for (u32 seg = 0; seg < nseg && clean; ++seg) {
 				if (vtr) { cur_len = vtr->segs[seg].n_instr; cur_tag = vtr->segs[seg].guest_pc;
-				           vw = (const u32*)((const u8*)dram_ptr + vtr->segs[seg].phys_pc); vpc = cur_tag; }
+				           cur_source = vtr->segs[seg].phys_pc; cur_asm = vtr->segs[seg].asm_global; vpc = cur_tag; }
 				for (u32 k = 0; k < cur_len; ++k)
 			{
 				// Compute the load's effective address from the live registers BEFORE
@@ -1826,7 +1827,17 @@ void CAlphaCPU::jit_run(int budget)
 				// icache until IMB. Classify the word execute() will fetch, not the changed
 				// DRAM word, or a cached HW_ST can disappear from the reference store log.
 				// This is a read-only peek: a miss is still fetched/translated by execute().
-				u32 ins = vw[k];
+				u32 ins;
+				if (!sources.read_word(cur_tag, cur_source, cur_asm, k, ins))
+				{
+					// No reliable candidate to classify. Preserve interpreted progress,
+					// including a first-step fetch fault, and skip this comparison.
+					execute();
+					--budget;
+					clean = false;
+					break;
+				}
+				if (n_interp + k < 16) source_words[n_interp + k] = ins;
 				peek_cached_instruction(&ins);
 				if (n_interp + k < 16) verify_words[n_interp + k] = ins;
 				const u32 opc = ins >> 26;
@@ -1999,19 +2010,16 @@ void CAlphaCPU::jit_run(int budget)
 				{
 					if (state.pc != interp_pc) {
 						m_jit_vmismatch = true;
-						// Legacy EV68 diagnostic: dump the JIT's source (DRAM at b->phys, vw[]) vs the icache (what the
-						// interpreter actually fetches), word by word. If the middle words differ
-						// the icache holds a stale/different version the JIT never compiled.
-						const int icl = (int)((start_virt >> 11) & (ICACHE_ENTRIES - 1));
-						const u32 wb = (u32)((start_virt >> 2) & ICACHE_INDEX_MASK);
+						// Compare the observed source with the words classified for the
+						// reference pass, including any family-provided cached overrides.
 						printf("[JIT][VERIFY] PC MISMATCH at %016llx: interp=%016llx jit=%016llx plen=%u\n",
 							(unsigned long long) start_virt, (unsigned long long) interp_pc,
 							(unsigned long long) state.pc, b->prefix_len);
-						printf("   dram:");
-						for (u32 w = 0; w < b->prefix_len && w < 16; ++w) printf(" %08x", vw[w]);
-						printf("\n   icch:");
+						printf("   source:");
+						for (u32 w = 0; w < b->prefix_len && w < 16; ++w) printf(" %08x", source_words[w]);
+						printf("\n   reference:");
 						for (u32 w = 0; w < b->prefix_len && w < 16; ++w)
-							printf(" %08x", endian_32(state.icache[icl].data[(wb + w) & ICACHE_INDEX_MASK]));
+							printf(" %08x", verify_words[w]);
 						printf("\n   r1 i=%016llx j=%016llx  r2 i=%016llx j=%016llx  r5 snap=%016llx\n",
 							(unsigned long long) state.r[1], (unsigned long long) jr[1],
 							(unsigned long long) state.r[2], (unsigned long long) jr[2],
@@ -2242,8 +2250,12 @@ void CAlphaCPU::jit_run(int budget)
 		m_link_from = nullptr;
 #ifdef JIT_STATS
 		// Compiled with no code: the first op is a runtime breaker.
-		if (have_phys && b && b->compiled && !b->code && start_phys + 4 <= dram_size)
-			m_jit->note_interp_breaker(*(const u32*)((const u8*)dram_ptr + start_phys));
+		if (have_phys && b && b->compiled && !b->code)
+		{
+			u32 breaker;
+			if (sources.read_word(start_virt, start_phys, start_asm, 0, breaker))
+				m_jit->note_interp_breaker(breaker);
+		}
 #endif
 		u32 n = 0;
 		u64 expected = start_virt;

@@ -41,8 +41,8 @@ public:
   static bool can_chain(const CAlphaCPU& cpu, std::uint64_t target);
   static AlphaInstructionSourceView source(CAlphaCPU& cpu, std::uint64_t pc);
 
-  // Dispatcher/verifier candidate reads still assume EV68 RAM/cache sources.
-  // Keep admission exact until those remaining consumers use the bounded source.
+  // Keep admission exact until cache-backed dispatch and JIT invalidation have
+  // been qualified together for a different family's source policy.
   static constexpr bool supports_legacy_jit(const AlphaInstructionFetchPolicy& policy)
   {
     return policy.fetch == &fetch && policy.prepare_dispatch == &prepare_dispatch

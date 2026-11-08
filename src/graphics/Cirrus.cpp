@@ -109,7 +109,7 @@ cirrus_gd5401_vga_device::cirrus_gd5401_vga_device(CConfigurator* cfg, CSystem* 
 
 // TODO: also can select external video clock modes thru strapped CF(5) = 0
 // cfr. page 63
-void CCirrus::gd5401_recompute_params()
+void cirrus_gd5401_vga_device::recompute_params()
 {
 	u8 xtal_select = (vga.miscellaneous_output & 0x0c) >> 2;
 	int xtal;
@@ -918,14 +918,8 @@ uint32_t CCirrus::screen_update(screen_device &screen, bitmap_rgb32 &bitmap, con
 	return 0;
 }
 
-void CCirrus::recompute_params()
+void cirrus_gd5428_vga_device::recompute_params()
 {
-	if (is_avga())
-	{
-		gd5401_recompute_params();
-		return;
-	}
-
 	uint8_t divisor = 1;
 	float clock;
 	// TODO: coming from OSC, expose as this->clock()

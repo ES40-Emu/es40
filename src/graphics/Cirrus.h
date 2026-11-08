@@ -100,7 +100,7 @@ protected:
   CCirrus(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
     bx_gui_c& display, Model model);
 
-	virtual void gd5401_recompute_params();
+  void recompute_params_clock(int divisor, int xtal);
 
 public:
 
@@ -184,7 +184,6 @@ protected:
 	virtual bool get_interlace_mode() override { return BIT(cirrus.m_cr1a, 0); }
 
 	uint8_t offset_select(offs_t offset);
-	virtual void recompute_params() override;
 
 	void start_bitblt();
 	void start_reverse_bitblt();
@@ -202,7 +201,6 @@ private:
   // ATC index 0x00..0x0F: Palette registers
   inline u8  atc_palette(u8 idx) const { return vga.attribute.data[idx & 0x0f]; }
 
-  void recompute_params_clock(int divisor, int xtal);
   void  get_display_size(unsigned& width, unsigned& height);
   u32   io_read(u32 address, int dsize);
   void  io_write(u32 address, int dsize, u32 data);
@@ -274,7 +272,7 @@ public:
 		bx_gui_c& display, bool avga1 = false);
 
 protected:
-//	virtual void recompute_params() override;
+	virtual void recompute_params() override;
 };
 
 class cirrus_gd5428_vga_device :  public CCirrus
@@ -370,7 +368,7 @@ protected:
 //	virtual bool get_interlace_mode() override { return BIT(m_cr1a, 0); }
 
 //	uint8_t offset_select(offs_t offset);
-//	virtual void recompute_params() override;
+	virtual void recompute_params() override;
 
 private:
 

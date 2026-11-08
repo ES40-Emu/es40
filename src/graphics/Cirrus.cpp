@@ -1362,7 +1362,7 @@ uint8_t CCirrus::offset_select(offs_t offset)
 	return cirrus.gc_bank[sa15 & BIT(cirrus.gc_mode_ext, 0)];
 }
 
-uint8_t CCirrus::gd5428_mem_r(offs_t offset)
+uint8_t cirrus_gd5428_vga_device::mem_r(offs_t offset)
 {
 	uint32_t addr;
 	uint8_t cur_mode = pc_vga_choosevideomode();
@@ -1510,7 +1510,7 @@ uint8_t CCirrus::gd5428_mem_r(offs_t offset)
 	}
 }
 
-void CCirrus::gd5428_mem_w(offs_t offset, uint8_t data)
+void cirrus_gd5428_vga_device::mem_w(offs_t offset, uint8_t data)
 {
 	uint32_t addr;
 	uint8_t cur_mode = pc_vga_choosevideomode();
@@ -1695,32 +1695,23 @@ void CCirrus::device_reset()
 		cirrus.m_sr17 = 1;
 }
 
-uint8_t CCirrus::mem_r(offs_t offset)
+uint8_t cirrus_gd5430_vga_device::mem_r(offs_t offset)
 {
-	if (is_avga())
-		return CVGA::mem_r(offset);
-
-	if (is_pci() && BIT(cirrus.m_sr17, 2) && (!BIT(cirrus.m_sr17, 6) || !(vga.sequencer.data[7] & 0xf0)) && (offset & 0x18000) == 0x18000)
+	if (BIT(cirrus.m_sr17, 2) && (!BIT(cirrus.m_sr17, 6) || !(vga.sequencer.data[7] & 0xf0)) && (offset & 0x18000) == 0x18000)
 		return mmio_r(offset & 0xff);
 
-	return CCirrus::gd5428_mem_r(offset);
+	return cirrus_gd5428_vga_device::mem_r(offset);
 }
 
-void CCirrus::mem_w(offs_t offset, uint8_t data)
+void cirrus_gd5430_vga_device::mem_w(offs_t offset, uint8_t data)
 {
-	if (is_avga())
-	{
-		CVGA::mem_w(offset, data);
-		return;
-	}
-
-	if (is_pci() && BIT(cirrus.m_sr17, 2) && (!BIT(cirrus.m_sr17, 6) || !(vga.sequencer.data[7] & 0xf0)) && (offset & 0x18000) == 0x18000)
+	if (BIT(cirrus.m_sr17, 2) && (!BIT(cirrus.m_sr17, 6) || !(vga.sequencer.data[7] & 0xf0)) && (offset & 0x18000) == 0x18000)
 	{
 		mmio_w(offset & 0xff, data);
 		return;
 	}
 
-	CCirrus::gd5428_mem_w(offset, data);
+	cirrus_gd5428_vga_device::mem_w(offset, data);
 }
 
 /*
@@ -1752,7 +1743,7 @@ void CCirrus::mem_w(offs_t offset, uint8_t data)
  *   lambdas with named handlers shared by indexed and MMIO maps, allowing
  *   each chip to define its register set and MMIO access permissions.
  */
-u8 CCirrus::mmio_register(offs_t offset)
+u8 cirrus_gd5430_vga_device::mmio_register(offs_t offset)
 {
 	if ((offset >= 0x08 && offset <= 0x12) ||
 		(offset >= 0x14 && offset <= 0x18) || offset == 0x1a)
@@ -1769,14 +1760,14 @@ u8 CCirrus::mmio_register(offs_t offset)
 	}
 }
 
-u8 CCirrus::mmio_r(offs_t offset)
+u8 cirrus_gd5430_vga_device::mmio_r(offs_t offset)
 {
 	// Only start/status is readable;
 	// the remaining MMIO registers are write-only.
 	return offset == 0x40 ? space(GC_REG).read_byte(0x31) : 0xff;
 }
 
-void CCirrus::mmio_w(offs_t offset, u8 data)
+void cirrus_gd5430_vga_device::mmio_w(offs_t offset, u8 data)
 {
 	const u8 index = mmio_register(offset);
 	if (index != 0xff)

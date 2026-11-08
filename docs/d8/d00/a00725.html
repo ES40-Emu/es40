@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: CConfigurationException Class Reference</title>
+<title>ES40: system/System.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,64 +109,605 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d8/d00/a00725.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">CConfigurationException Class Reference</div></div>
+  <div class="headertitle"><div class="title">System.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p><code>#include &lt;<a class="el" href="../../d3/d00/a00023_source.html">Exception.h</a>&gt;</code></p>
-<div class="dynheader">
-Inheritance diagram for CConfigurationException:</div>
+<p>Contains the definitions for the emulated Typhoon Chipset devices.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d6/d00/a00356_source.html">emu/SystemComponent.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../de/d00/a00323_source.html">CPU/TraceEngine.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dd/d00/a00719_source.html">i2c_spd.h</a>&quot;</code><br />
+<code>#include &lt;atomic&gt;</code><br />
+<code>#include &lt;chrono&gt;</code><br />
+<code>#include &lt;cstddef&gt;</code><br />
+<code>#include &lt;memory&gt;</code><br />
+<code>#include &lt;mutex&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
+<code>#include &lt;type_traits&gt;</code><br />
+<code>#include &lt;unordered_map&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
+</div><div class="textblock"><div class="dynheader">
+Include dependency graph for System.h:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../d0/d00/a00724.png" border="0" usemap="#a_c_configuration_exception_inherit__map" loading="lazy" alt="Inheritance graph"/></div>
-<map name="a_c_configuration_exception_inherit__map" id="a_c_configuration_exception_inherit__map">
-<area shape="rect" title=" " alt="" coords="5,155,172,181"/>
-<area shape="rect" href="../../d8/d00/a00669.html" title=" " alt="" coords="44,80,133,107"/>
-<area shape="poly" title=" " alt="" coords="90,121,91,155,86,153,87,124"/>
-<area shape="rect" title=" " alt="" coords="37,5,140,32"/>
-<area shape="poly" title=" " alt="" coords="90,45,91,80,86,79,87,50"/>
+<div class="center"><img src="../../d6/d00/a00726.png" border="0" usemap="#asystem_2_system_8h" loading="lazy" alt=""/></div>
+<map name="asystem_2_system_8h" id="asystem_2_system_8h">
+<area shape="rect" title="Contains the definitions for the emulated Typhoon Chipset devices." alt="" coords="581,5,705,32"/>
+<area shape="rect" href="../../d6/d00/a00356.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="84,80,258,107"/>
+<area shape="poly" title=" " alt="" coords="579,32,269,80,268,75,582,27"/>
+<area shape="rect" title=" " alt="" coords="60,229,114,256"/>
+<area shape="poly" title=" " alt="" coords="578,21,459,27,310,36,170,54,115,67,74,82,42,102,19,124,12,136,8,149,9,164,15,180,30,202,51,219,46,222,26,205,10,183,4,165,3,149,7,134,15,121,39,98,71,78,113,61,170,49,310,31,458,22,583,20"/>
+<area shape="rect" title=" " alt="" coords="266,229,324,256"/>
+<area shape="poly" title=" " alt="" coords="578,24,510,32,433,43,365,59,340,70,322,82,303,112,294,147,291,183,293,215,289,212,286,183,288,146,298,110,319,78,337,65,363,54,432,38,509,27,583,23"/>
+<area shape="rect" href="../../de/d00/a00323.html" title="Contains the definitions for the CPU tracing engine." alt="" coords="333,80,471,107"/>
+<area shape="poly" title=" " alt="" coords="599,33,459,78,457,73,604,32"/>
+<area shape="rect" href="../../dd/d00/a00719.html" title=" " alt="" coords="495,80,572,107"/>
+<area shape="poly" title=" " alt="" coords="626,31,566,74,564,69,622,34"/>
+<area shape="rect" title=" " alt="" coords="585,155,653,181"/>
+<area shape="poly" title=" " alt="" coords="643,31,626,141,621,138,639,34"/>
+<area shape="rect" title=" " alt="" coords="648,80,708,107"/>
+<area shape="poly" title=" " alt="" coords="650,30,668,67,663,65,648,35"/>
+<area shape="rect" title=" " alt="" coords="732,80,792,107"/>
+<area shape="poly" title=" " alt="" coords="664,30,731,72,726,71,663,35"/>
+<area shape="rect" title=" " alt="" coords="816,80,881,107"/>
+<area shape="poly" title=" " alt="" coords="679,30,804,75,799,76,679,35"/>
+<area shape="rect" title=" " alt="" coords="905,80,962,107"/>
+<area shape="poly" title=" " alt="" coords="699,30,892,79,887,80,699,35"/>
+<area shape="rect" title=" " alt="" coords="986,80,1068,107"/>
+<area shape="poly" title=" " alt="" coords="706,28,974,79,968,80,706,33"/>
+<area shape="rect" title=" " alt="" coords="1092,80,1202,107"/>
+<area shape="poly" title=" " alt="" coords="706,25,1079,79,1074,80,706,30"/>
+<area shape="rect" href="../../d4/d00/a00116.html" title="Contains the definitions for the configuration file interpreter." alt="" coords="116,155,258,181"/>
+<area shape="poly" title=" " alt="" coords="175,105,184,140,178,139,173,110"/>
+<area shape="rect" title=" " alt="" coords="24,155,91,181"/>
+<area shape="poly" title=" " alt="" coords="150,109,92,148,89,144,153,105"/>
+<area shape="poly" title=" " alt="" coords="172,181,118,222,116,218,167,183"/>
+<area shape="poly" title=" " alt="" coords="207,179,266,220,261,220,205,184"/>
+<area shape="rect" href="../../d8/d00/a00326.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="336,155,425,181"/>
+<area shape="poly" title=" " alt="" coords="400,105,390,142,386,138,396,109"/>
+<area shape="poly" title=" " alt="" coords="525,106,488,145,439,184,389,210,339,230,338,225,386,205,436,179,485,141,520,109"/>
+<area shape="rect" title=" " alt="" coords="501,155,561,181"/>
+<area shape="poly" title=" " alt="" coords="535,105,534,141,530,137,532,109"/>
+<area shape="poly" title=" " alt="" coords="549,105,596,145,590,144,548,110"/>
 </map>
-<center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
-<div class="dynheader">
-Collaboration diagram for CConfigurationException:</div>
+</div>
+</div><div class="textblock"><div class="dynheader">
+This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../de/d00/a00723.png" border="0" usemap="#a_c_configuration_exception_coll__map" loading="lazy" alt="Collaboration graph"/></div>
-<map name="a_c_configuration_exception_coll__map" id="a_c_configuration_exception_coll__map">
-<area shape="rect" title=" " alt="" coords="5,155,172,181"/>
-<area shape="rect" href="../../d8/d00/a00669.html" title=" " alt="" coords="44,80,133,107"/>
-<area shape="poly" title=" " alt="" coords="90,121,91,155,86,153,87,124"/>
-<area shape="rect" title=" " alt="" coords="37,5,140,32"/>
-<area shape="poly" title=" " alt="" coords="90,45,91,80,86,79,87,50"/>
+<div class="center"><img src="../../dc/d00/a00727.png" border="0" usemap="#asystem_2_system_8hdep" loading="lazy" alt=""/></div>
+<map name="asystem_2_system_8hdep" id="asystem_2_system_8hdep">
+<area shape="rect" title="Contains the definitions for the emulated Typhoon Chipset devices." alt="" coords="3824,5,3948,32"/>
+<area shape="rect" href="../../d7/d00/a00002.html" title="Defines the entry point for the application." alt="" coords="1428,80,1530,107"/>
+<area shape="poly" title=" " alt="" coords="3806,20,3369,26,2713,35,2038,53,1755,66,1542,83,1531,84,1530,79,1542,77,1755,61,2038,48,2713,30,3369,21,3811,20"/>
+<area shape="rect" href="../../de/d00/a00185.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="1554,80,1682,107"/>
+<area shape="poly" title=" " alt="" coords="3805,21,2987,39,2392,57,1781,83,1682,89,1682,84,1780,77,2392,52,2987,34,3811,21"/>
+<area shape="rect" href="../../dd/d00/a00320.html" title="Contains the code for the CPU tracing engine." alt="" coords="1542,155,1694,181"/>
+<area shape="poly" title=" " alt="" coords="3806,20,3441,26,2909,35,2367,52,2141,66,1970,83,1882,98,1795,118,1658,157,1657,151,1794,113,1881,93,1969,77,2140,60,2367,47,2909,29,3441,20,3811,20"/>
+<area shape="rect" href="../../d3/d00/a00113.html" title="Contains the code for the configuration file interpreter." alt="" coords="2589,155,2745,181"/>
+<area shape="poly" title=" " alt="" coords="3805,20,3467,25,3006,34,2782,41,2591,52,2454,65,2413,73,2393,82,2388,93,2393,105,2417,116,2466,129,2591,155,2586,155,2465,134,2416,121,2389,109,2383,93,2389,78,2411,68,2454,60,2591,46,2782,36,3006,29,3467,20,3811,20"/>
+<area shape="rect" href="../../d4/d00/a00704.html" title="Contains the code for the emulated Dual Port Ram and RMC devices." alt="" coords="1718,155,1840,181"/>
+<area shape="poly" title=" " alt="" coords="3805,20,3463,26,2969,34,2468,52,2259,66,2101,83,2020,98,1941,118,1816,157,1815,151,1940,113,2019,93,2100,77,2258,60,2467,47,2969,29,3463,20,3811,20"/>
+<area shape="rect" href="../../d4/d00/a00710.html" title="Contains the code for the emulated Flash ROM devices." alt="" coords="1864,155,1990,181"/>
+<area shape="poly" title=" " alt="" coords="3805,20,3483,26,3024,34,2560,52,2367,66,2221,83,2147,98,2075,118,1960,157,1959,151,2073,113,2146,93,2220,77,2366,60,2560,47,3024,29,3483,20,3811,20"/>
+<area shape="rect" href="../../db/d00/a00722.html" title="Contains the code for the emulated Typhoon Chipset devices." alt="" coords="2014,155,2152,181"/>
+<area shape="poly" title=" " alt="" coords="3805,20,3500,24,3069,31,2844,38,2635,49,2454,64,2318,83,2259,98,2200,118,2109,157,2108,152,2199,113,2257,93,2317,77,2454,58,2634,44,2844,33,3069,25,3500,18,3811,20"/>
+<area shape="rect" href="../../df/d00/a00728.html" title="ES40 (Clipper) board: TIGbus registers and DIMM topology." alt="" coords="2176,155,2350,181"/>
+<area shape="poly" title=" " alt="" coords="3805,20,3479,25,3030,34,2806,41,2609,52,2457,65,2404,73,2369,82,2340,98,2314,118,2274,157,2272,152,2310,114,2337,93,2368,78,2403,68,2457,60,2609,46,2806,36,3029,29,3479,20,3810,20"/>
+<area shape="rect" href="../../df/d00/a00731.html" title="Tsunami/Typhoon chipset (Cchip, Dchip, Pchip) CSRs, interrupt delivery and PCI window translation." alt="" coords="2374,155,2566,181"/>
+<area shape="poly" title=" " alt="" coords="3805,20,3465,25,3000,34,2775,41,2582,52,2444,65,2402,73,2382,82,2377,91,2376,100,2389,119,2414,137,2443,155,2438,153,2411,142,2385,123,2371,101,2372,90,2379,78,2401,68,2443,60,2582,46,2775,36,3000,28,3465,20,3811,20"/>
+<area shape="rect" href="../../d4/d00/a00008.html" title=" " alt="" coords="2402,80,2516,107"/>
+<area shape="poly" title=" " alt="" coords="3805,20,3589,25,3272,33,2904,51,2714,65,2529,83,2516,84,2516,79,2528,77,2714,60,2904,46,3272,28,3589,20,3811,20"/>
+<area shape="rect" href="../../d2/d00/a00014.html" title=" " alt="" coords="2540,80,2653,107"/>
+<area shape="poly" title=" " alt="" coords="3806,21,3609,26,3325,35,2998,53,2665,83,2654,84,2653,79,2664,77,2997,48,3325,30,3608,21,3811,20"/>
+<area shape="rect" href="../../d0/d00/a00071.html" title="Contains the code for the emulated Ali M1543C chipset devices." alt="" coords="2677,80,2833,107"/>
+<area shape="poly" title=" " alt="" coords="3811,22,3397,43,3123,60,2845,83,2834,84,2833,78,2844,77,3122,55,3396,38,3806,23"/>
+<area shape="rect" href="../../d1/d00/a00077.html" title="Contains the code for the emulated Ali M1543C IDE chipset part." alt="" coords="2857,80,3037,107"/>
+<area shape="poly" title=" " alt="" coords="3811,24,3478,48,3049,83,3038,84,3038,78,3048,77,3477,43,3806,24"/>
+<area shape="rect" href="../../d2/d00/a00083.html" title="Stub PMU/ACPI device at PCI 0:17:0 for the ALi M1543C bridge." alt="" coords="3061,80,3249,107"/>
+<area shape="poly" title=" " alt="" coords="3811,27,3262,83,3250,84,3250,79,3262,77,3805,27"/>
+<area shape="rect" href="../../db/d00/a00089.html" title="Contains the code for the emulated Ali M1543C IDE chipset part." alt="" coords="3274,80,3458,107"/>
+<area shape="poly" title=" " alt="" coords="3811,31,3457,82,3457,77,3805,31"/>
+<area shape="rect" href="../../d9/d00/a00095.html" title="Contains the code for the emulated DMA controller." alt="" coords="3482,80,3604,107"/>
+<area shape="poly" title=" " alt="" coords="3814,35,3604,82,3603,77,3808,36"/>
+<area shape="rect" href="../../d1/d00/a00347.html" title="Contains the code for the PCI device class." alt="" coords="3628,80,3768,107"/>
+<area shape="poly" title=" " alt="" coords="3842,37,3731,82,3730,77,3836,38"/>
+<area shape="rect" href="../../db/d00/a00353.html" title="Contains code for the base class for devices that connect to the chipset." alt="" coords="3792,80,3980,107"/>
+<area shape="poly" title=" " alt="" coords="3888,46,3888,81,3884,78,3884,50"/>
+<area shape="rect" href="../../d6/d00/a00371.html" title=" " alt="" coords="4004,80,4138,107"/>
+<area shape="poly" title=" " alt="" coords="3933,35,4041,80,4036,79,3932,41"/>
+<area shape="rect" href="../../d4/d00/a00377.html" title=" " alt="" coords="4162,80,4343,107"/>
+<area shape="poly" title=" " alt="" coords="3963,33,4191,80,4186,79,3963,38"/>
+<area shape="rect" href="../../db/d00/a00395.html" title=" " alt="" coords="4367,80,4559,107"/>
+<area shape="poly" title=" " alt="" coords="3963,27,4369,80,4364,80,3963,32"/>
+<area shape="rect" href="../../d7/d00/a00401.html" title=" " alt="" coords="4584,80,4756,107"/>
+<area shape="poly" title=" " alt="" coords="3964,23,4233,45,4571,77,4586,81,4581,81,4571,83,4232,51,3963,29"/>
+<area shape="rect" href="../../d3/d00/a00419.html" title=" " alt="" coords="4780,80,4931,107"/>
+<area shape="poly" title=" " alt="" coords="3964,21,4313,40,4540,57,4769,77,4782,81,4776,81,4768,83,4539,62,4312,46,3964,26"/>
+<area shape="rect" href="../../df/d00/a00431.html" title=" " alt="" coords="4956,80,5083,107"/>
+<area shape="poly" title=" " alt="" coords="3964,19,4382,35,4661,52,4943,77,4958,82,4952,81,4943,83,4661,58,4382,41,3964,24"/>
+<area shape="rect" href="../../d1/d00/a00452.html" title="Contains the code for the bx_keymap_c class used for keyboard interfacing with SDL and other device i..." alt="" coords="5106,80,5220,107"/>
+<area shape="poly" title=" " alt="" coords="3963,18,4161,21,4442,30,4766,48,5095,77,5109,82,5103,81,5095,83,4766,53,4442,36,4161,27,3963,23"/>
+<area shape="rect" href="../../d7/d00/a00467.html" title="Contains the code for the bx_sdl_gui_c class used for interfacing with SDL." alt="" coords="5244,80,5328,107"/>
+<area shape="poly" title=" " alt="" coords="3964,19,4599,38,4965,55,5117,66,5233,77,5246,82,5241,82,5232,83,5117,71,4965,60,4598,43,3964,24"/>
+<area shape="rect" href="../../d9/d00/a00476.html" title=" " alt="" coords="5352,80,5478,107"/>
+<area shape="poly" title=" " alt="" coords="3963,17,4197,20,4537,28,4935,46,5140,60,5341,77,5354,81,5349,81,5340,83,5140,65,4935,51,4537,33,4197,25,3963,23"/>
+<area shape="rect" href="../../d5/d00/a00518.html" title="Contains the code for the emulated Keyboard and mouse devices and controller." alt="" coords="5503,80,5618,107"/>
+<area shape="poly" title=" " alt="" coords="3964,17,4218,17,4595,24,5038,42,5266,57,5490,77,5505,82,5500,81,5490,83,5266,63,5037,48,4595,29,4218,22,3964,22"/>
+<area shape="rect" href="../../d9/d00/a00524.html" title="Contains the code for the emulated Port 80 device." alt="" coords="5642,80,5740,107"/>
+<area shape="poly" title=" " alt="" coords="3964,18,4783,35,5272,53,5476,64,5630,77,5644,82,5639,81,5630,83,5475,69,5272,58,4783,41,3964,24"/>
+<area shape="rect" href="../../da/d00/a00530.html" title="Contains the code for the emulated Serial Port devices." alt="" coords="5764,80,5858,107"/>
+<area shape="poly" title=" " alt="" coords="3964,18,4323,23,4841,33,5367,51,5587,63,5753,77,5767,82,5761,81,5752,83,5586,68,5366,56,4840,39,4323,28,3964,23"/>
+<area shape="rect" href="../../d0/d00/a00542.html" title="Contains the code for the emulated DEC 21143 NIC device." alt="" coords="5882,80,6042,107"/>
+<area shape="poly" title=" " alt="" coords="3964,17,4270,18,4739,25,5297,43,5587,58,5870,77,5884,81,5879,81,5870,83,5586,63,5297,48,4739,30,4270,23,3964,22"/>
+<area shape="rect" href="../../d0/d00/a00668.html" title="Contains the code for the emulated Floppy Controller devices." alt="" coords="6065,80,6253,107"/>
+<area shape="poly" title=" " alt="" coords="3964,17,4294,18,4808,25,5423,44,5741,58,6054,77,6067,81,6062,81,6054,83,5741,63,5422,49,4808,31,4294,24,3964,22"/>
+<area shape="rect" href="../../d8/d00/a00674.html" title="Contains the code for the emulated LSI Logic 53C1020 controller." alt="" coords="6278,80,6443,107"/>
+<area shape="poly" title=" " alt="" coords="3963,18,5075,36,5761,54,6049,65,6266,77,6280,81,6275,81,6266,83,6048,70,5761,59,5074,42,3963,24"/>
+<area shape="rect" href="../../d0/d00/a00692.html" title="Contains the code for the emulated Symbios SCSI controller." alt="" coords="6467,80,6632,107"/>
+<area shape="poly" title=" " alt="" coords="3963,18,5161,35,5906,53,6219,64,6455,77,6469,81,6464,81,6455,83,6219,69,5906,58,5161,40,3963,23"/>
+<area shape="rect" href="../../df/d00/a00698.html" title="Contains the code for the emulated Symbios SCSI controller." alt="" coords="6656,80,6822,107"/>
+<area shape="poly" title=" " alt="" coords="3963,18,5247,34,6052,52,6390,63,6645,77,6659,81,6653,81,6644,83,6390,69,6052,57,5247,39,3963,23"/>
+<area shape="rect" href="../../d7/d00/a00182.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="936,155,1078,181"/>
+<area shape="poly" title=" " alt="" coords="1542,107,1313,134,1090,157,1079,159,1078,153,1090,152,1313,129,1536,107"/>
+<area shape="rect" href="../../d9/d00/a00191.html" title="Contains IEEE floating point code for the Alpha CPU." alt="" coords="1102,155,1299,181"/>
+<area shape="poly" title=" " alt="" coords="1541,108,1274,157,1273,151,1536,109"/>
+<area shape="rect" href="../../dc/d00/a00194.html" title="Contains VAX floating point code for the Alpha CPU." alt="" coords="1323,155,1518,181"/>
+<area shape="poly" title=" " alt="" coords="1572,112,1456,157,1455,151,1566,113"/>
+<area shape="rect" href="../../de/d00/a00197.html" title="Contains routines that replace parts of the VMS PALcode for the emulated DecChip 21264CB EV68 Alpha p..." alt="" coords="5,155,196,181"/>
+<area shape="poly" title=" " alt="" coords="1541,107,1336,126,1164,134,872,138,580,139,409,145,207,157,196,158,196,153,207,152,409,140,580,134,872,133,1164,129,1336,120,1536,107"/>
+<area shape="rect" href="../../d2/d00/a00281.html" title=" " alt="" coords="220,155,352,181"/>
+<area shape="poly" title=" " alt="" coords="1541,107,1360,124,1208,131,950,134,693,136,542,143,365,157,353,159,352,153,364,152,542,138,693,131,950,128,1208,126,1360,119,1536,107"/>
+<area shape="rect" href="../../d3/d00/a00275.html" title=" " alt="" coords="376,155,580,181"/>
+<area shape="poly" title=" " alt="" coords="1541,107,1272,130,1064,137,856,142,591,157,580,158,580,153,591,152,856,137,1064,132,1272,125,1536,107"/>
+<area shape="rect" href="../../d6/d00/a00287.html" title=" " alt="" coords="603,155,744,181"/>
+<area shape="poly" title=" " alt="" coords="1541,107,1318,128,1146,134,975,140,757,157,745,159,745,153,756,152,974,135,1146,129,1318,122,1536,107"/>
+<area shape="rect" href="../../db/d00/a00296.html" title=" " alt="" coords="768,155,913,181"/>
+<area shape="poly" title=" " alt="" coords="1541,107,1365,126,1230,134,1096,142,925,157,914,159,913,153,924,152,1095,136,1230,129,1365,121,1536,107"/>
+<area shape="poly" title=" " alt="" coords="1620,121,1620,156,1616,152,1616,124"/>
+<area shape="poly" title=" " alt="" coords="1697,95,2077,114,2326,131,2578,152,2591,156,2586,156,2578,157,2326,136,2077,119,1697,100"/>
+<area shape="poly" title=" " alt="" coords="1660,111,1753,154,1748,154,1659,116"/>
+<area shape="poly" title=" " alt="" coords="1687,108,1876,154,1870,154,1687,113"/>
+<area shape="poly" title=" " alt="" coords="1697,104,2016,156,2011,156,1697,110"/>
+<area shape="poly" title=" " alt="" coords="1697,100,2165,152,2179,156,2173,156,2164,157,1697,106"/>
+<area shape="poly" title=" " alt="" coords="1697,98,1990,120,2362,152,2377,156,2371,156,2362,157,1990,125,1697,103"/>
+<area shape="poly" title=" " alt="" coords="2510,109,2633,154,2628,154,2509,115"/>
+<area shape="rect" href="../../dd/d00/a00005.html" title=" " alt="" coords="2769,155,2896,181"/>
+<area shape="poly" title=" " alt="" coords="2532,106,2771,155,2766,154,2531,111"/>
+<area shape="poly" title=" " alt="" coords="2620,115,2657,155,2653,153,2618,120"/>
+<area shape="rect" href="../../da/d00/a00011.html" title=" " alt="" coords="2921,155,3048,181"/>
+<area shape="poly" title=" " alt="" coords="2669,105,2923,155,2918,155,2668,111"/>
 </map>
-<center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
+</div>
+</div>
+<p><a href="../../d8/d00/a00725_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
-Public Member Functions</h2></td></tr>
-<tr class="memitem:abf07e44a478527a66113f86b5d75d827" id="r_abf07e44a478527a66113f86b5d75d827"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#abf07e44a478527a66113f86b5d75d827">CConfigurationException</a> (int code=0)</td></tr>
-<tr class="memitem:a4c9276cfd8e005b8d1d861ae2ca45efc" id="r_a4c9276cfd8e005b8d1d861ae2ca45efc"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a4c9276cfd8e005b8d1d861ae2ca45efc">CConfigurationException</a> (const std::string &amp;msg, int code=0)</td></tr>
-<tr class="memitem:a656ea9d3d5f66b527504b391c906df79" id="r_a656ea9d3d5f66b527504b391c906df79"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a656ea9d3d5f66b527504b391c906df79">CConfigurationException</a> (const std::string &amp;msg, const std::string &amp;arg, int code=0)</td></tr>
-<tr class="memitem:a3d039b36bdb26d006283eca38309273c" id="r_a3d039b36bdb26d006283eca38309273c"><td class="memItemLeft">const char *&#160;</td><td class="memItemRight"><a class="el" href="#a3d039b36bdb26d006283eca38309273c">name</a> () const noexcept override</td></tr>
-<tr class="inherit_header pub_methods_a00669"><td colspan="2">Public Member Functions inherited from <a class="el" href="../../d8/d00/a00669.html">CException</a></td></tr>
-<tr class="memitem:a947b1b444c8587e9781ca93f41dc12aa pub_methods_a00669" id="r_a947b1b444c8587e9781ca93f41dc12aa"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="../../d8/d00/a00669.html#a947b1b444c8587e9781ca93f41dc12aa">CException</a> (const std::string &amp;msg, int code=0)</td></tr>
-<tr class="memitem:a4fa0cd8bfaa59be1c3bf9e2b3310c39d pub_methods_a00669" id="r_a4fa0cd8bfaa59be1c3bf9e2b3310c39d"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="../../d8/d00/a00669.html#a4fa0cd8bfaa59be1c3bf9e2b3310c39d">CException</a> (const std::string &amp;msg, const std::string &amp;arg, int code=0)</td></tr>
-<tr class="memitem:aba07bf76827e8594fab6676f76d0a741 pub_methods_a00669" id="r_aba07bf76827e8594fab6676f76d0a741"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="../../d8/d00/a00669.html#aba07bf76827e8594fab6676f76d0a741">CException</a> (const <a class="el" href="../../d8/d00/a00669.html">CException</a> &amp;other)</td></tr>
-<tr class="memitem:a5c43a08b1a8302b7863336d274ac7f02 pub_methods_a00669" id="r_a5c43a08b1a8302b7863336d274ac7f02"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="../../d8/d00/a00669.html#a5c43a08b1a8302b7863336d274ac7f02">~CException</a> () noexcept override</td></tr>
-<tr class="memitem:aa52550c39e43229b4487575ae13ae30c pub_methods_a00669" id="r_aa52550c39e43229b4487575ae13ae30c"><td class="memItemLeft"><a class="el" href="../../d8/d00/a00669.html">CException</a> &amp;&#160;</td><td class="memItemRight"><a class="el" href="../../d8/d00/a00669.html#aa52550c39e43229b4487575ae13ae30c">operator=</a> (const <a class="el" href="../../d8/d00/a00669.html">CException</a> &amp;other)</td></tr>
-<tr class="memitem:a07b5e388ef0deeb7804f9778a77caa45 pub_methods_a00669" id="r_a07b5e388ef0deeb7804f9778a77caa45"><td class="memItemLeft">const char *&#160;</td><td class="memItemRight"><a class="el" href="../../d8/d00/a00669.html#a07b5e388ef0deeb7804f9778a77caa45">what</a> () const noexcept override</td></tr>
-<tr class="memitem:adfcabf400c62ad42f0f4ac2d89fd256a pub_methods_a00669" id="r_adfcabf400c62ad42f0f4ac2d89fd256a"><td class="memItemLeft">const std::string &amp;&#160;</td><td class="memItemRight"><a class="el" href="../../d8/d00/a00669.html#adfcabf400c62ad42f0f4ac2d89fd256a">message</a> () const noexcept</td></tr>
-<tr class="memitem:a5da38e77adfd1dd37b00506c5a618deb pub_methods_a00669" id="r_a5da38e77adfd1dd37b00506c5a618deb"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="../../d8/d00/a00669.html#a5da38e77adfd1dd37b00506c5a618deb">code</a> () const noexcept</td></tr>
-<tr class="memitem:aa7330dfcfcd119e8b934be57d22311b4 pub_methods_a00669" id="r_aa7330dfcfcd119e8b934be57d22311b4"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="../../d8/d00/a00669.html#aa7330dfcfcd119e8b934be57d22311b4">displayText</a> () const</td></tr>
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Data Structures</h2></td></tr>
+<tr class="memitem:MPDState" id="r_MPDState"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d4/d00/a02097.html">MPDState</a></td></tr>
+<tr class="memitem:SMemoryUser" id="r_SMemoryUser"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../da/d00/a02101.html">SMemoryUser</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structure used for mapping memory ranges to devices.  <a href="../../da/d00/a02101.html#details">More...</a><br /></td></tr>
+<tr class="memitem:SConfig" id="r_SConfig"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../db/d00/a02105.html">SConfig</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structure used for configuration values.  <a href="../../db/d00/a02105.html#details">More...</a><br /></td></tr>
+<tr class="memitem:CSystem" id="r_CSystem"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../d7/d00/a02109.html">CSystem</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emulated Typhoon 21272 chipset.  <a href="../../d7/d00/a02109.html#details">More...</a><br /></td></tr>
+<tr class="memitem:CSystem_3A_3ASDisplayOutput" id="r_CSystem_3A_3ASDisplayOutput"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d8/d00/a02113.html">CSystem::SDisplayOutput</a></td></tr>
+<tr class="memitem:CSystem_3A_3ASDimmLayout" id="r_CSystem_3A_3ASDimmLayout"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d0/d00/a02117.html">CSystem::SDimmLayout</a></td></tr>
+<tr class="memitem:CSystem_3A_3ALLBucket" id="r_CSystem_3A_3ALLBucket"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d6/d00/a02121.html">CSystem::LLBucket</a></td></tr>
+<tr class="memitem:CSystem_3A_3AJitExecutionGuard" id="r_CSystem_3A_3AJitExecutionGuard"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../d8/d00/a02125.html">CSystem::JitExecutionGuard</a></td></tr>
+<tr class="memitem:CSystem_3A_3AJitExecutionPause" id="r_CSystem_3A_3AJitExecutionPause"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../db/d00/a02129.html">CSystem::JitExecutionPause</a></td></tr>
+<tr class="memitem:CSystem_3A_3ASDeviceAccessScope" id="r_CSystem_3A_3ASDeviceAccessScope"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../da/d00/a02133.html">CSystem::SDeviceAccessScope</a></td></tr>
+<tr class="memitem:CSystem_3A_3ASDecodeClaims" id="r_CSystem_3A_3ASDecodeClaims"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../de/d00/a02137.html">CSystem::SDecodeClaims</a></td></tr>
+<tr class="memitem:CSystem_3A_3ALLReservation" id="r_CSystem_3A_3ALLReservation"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a02141.html">CSystem::LLReservation</a></td></tr>
+<tr class="memitem:CSystem_3A_3ALLJitCpu" id="r_CSystem_3A_3ALLJitCpu"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d7/d00/a02145.html">CSystem::LLJitCpu</a></td></tr>
+<tr class="memitem:CSystem_3A_3AIdleWatch" id="r_CSystem_3A_3AIdleWatch"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d2/d00/a02149.html">CSystem::IdleWatch</a></td></tr>
+<tr class="memitem:CSystem_3A_3ACLLRAMGuard" id="r_CSystem_3A_3ACLLRAMGuard"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../df/d00/a02153.html">CSystem::CLLRAMGuard</a></td></tr>
+<tr class="memitem:CSystem_3A_3ASSys_5Fstate" id="r_CSystem_3A_3ASSys_5Fstate"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../db/d00/a02157.html">CSystem::SSys_state</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The state structure contains all elements that need to be saved to the statefile.  <a href="../../db/d00/a02157.html#details">More...</a><br /></td></tr>
+<tr class="memitem:CSystem_3A_3ASSys_5Fstate_3A_3ASSys_5Ftig" id="r_CSystem_3A_3ASSys_5Fstate_3A_3ASSys_5Ftig"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../df/d00/a02161.html">CSystem::SSys_state::SSys_tig</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">TIGbus state data.  <a href="../../df/d00/a02161.html#details">More...</a><br /></td></tr>
+<tr class="memitem:CSystem_3A_3ASSys_5Fstate_3A_3ASSys_5Fcchip" id="r_CSystem_3A_3ASSys_5Fstate_3A_3ASSys_5Fcchip"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d7/d00/a02165.html">CSystem::SSys_state::SSys_cchip</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">CCHIP state data.  <a href="../../d7/d00/a02165.html#details">More...</a><br /></td></tr>
+<tr class="memitem:CSystem_3A_3ASSys_5Fstate_3A_3ASSys_5Fdchip" id="r_CSystem_3A_3ASSys_5Fstate_3A_3ASSys_5Fdchip"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../de/d00/a02169.html">CSystem::SSys_state::SSys_dchip</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">DCHIP state data.  <a href="../../de/d00/a02169.html#details">More...</a><br /></td></tr>
+<tr class="memitem:CSystem_3A_3ASSys_5Fstate_3A_3ASSys_5Fpchip" id="r_CSystem_3A_3ASSys_5Fstate_3A_3ASSys_5Fpchip"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d4/d00/a02173.html">CSystem::SSys_state::SSys_pchip</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">PCHIP state data.  <a href="../../d4/d00/a02173.html#details">More...</a><br /></td></tr>
+<tr class="memitem:CSystem_3A_3ASPioTrace" id="r_CSystem_3A_3ASPioTrace"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d3/d00/a02177.html">CSystem::SPioTrace</a></td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-inherited" class="groupheader"><a id="inherited" name="inherited"></a>
-Additional Inherited Members</h2></td></tr>
-<tr class="inherit_header pro_methods_a00669"><td colspan="2">Protected Member Functions inherited from <a class="el" href="../../d8/d00/a00669.html">CException</a></td></tr>
-<tr class="memitem:ad827dfd4fca1ff02515645ec57ed44e9 pro_methods_a00669" id="r_ad827dfd4fca1ff02515645ec57ed44e9"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="../../d8/d00/a00669.html#ad827dfd4fca1ff02515645ec57ed44e9">CException</a> (int code=0)</td></tr>
+<tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:ac0229041b76cf2ce9939eaba4f46117b" id="r_ac0229041b76cf2ce9939eaba4f46117b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac0229041b76cf2ce9939eaba4f46117b">PANIC_NOSHUTDOWN</a>&#160;&#160;&#160;0</td></tr>
+<tr class="memitem:ab5f5466a39bf4fa6d4ce07f7e6423b46" id="r_ab5f5466a39bf4fa6d4ce07f7e6423b46"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab5f5466a39bf4fa6d4ce07f7e6423b46">PANIC_SHUTDOWN</a>&#160;&#160;&#160;1</td></tr>
+<tr class="memitem:a3ad46d233f4ed929ca28890e51c706a0" id="r_a3ad46d233f4ed929ca28890e51c706a0"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a3ad46d233f4ed929ca28890e51c706a0">PANIC_ASKSHUTDOWN</a>&#160;&#160;&#160;2</td></tr>
+<tr class="memitem:aa3badb247d3b2bad1d70de1452d61f41" id="r_aa3badb247d3b2bad1d70de1452d61f41"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aa3badb247d3b2bad1d70de1452d61f41">PANIC_LISTING</a>&#160;&#160;&#160;4</td></tr>
+<tr class="memitem:a61cdd5f9411ad5696d7d8f87664ede9d" id="r_a61cdd5f9411ad5696d7d8f87664ede9d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a61cdd5f9411ad5696d7d8f87664ede9d">PCI_PCTL_HOLE</a>&#160;&#160;&#160;<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000000000000020)</td></tr>
+<tr class="memitem:a7e316023a6e748ca9ec195aac7c6e378" id="r_a7e316023a6e748ca9ec195aac7c6e378"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a7e316023a6e748ca9ec195aac7c6e378">PCI_PCTL_HOLE_START</a>&#160;&#160;&#160;0x00080000</td></tr>
+<tr class="memitem:ad7b669fabfe6a535506aaae958e49a09" id="r_ad7b669fabfe6a535506aaae958e49a09"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad7b669fabfe6a535506aaae958e49a09">PCI_PCTL_HOLE_END</a>&#160;&#160;&#160;0x000fffff</td></tr>
+<tr class="memitem:a79eec04a8535a5e26019a19778995eea" id="r_a79eec04a8535a5e26019a19778995eea"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a79eec04a8535a5e26019a19778995eea">PCI_WSM_MASK</a>&#160;&#160;&#160;<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000000fff00000)</td></tr>
+<tr class="memitem:a9b451fe8dc579463fa53103057417669" id="r_a9b451fe8dc579463fa53103057417669"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9b451fe8dc579463fa53103057417669">PCI_ADD_MASK</a>&#160;&#160;&#160;<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000000000fffff)</td></tr>
+<tr class="memitem:a81397ad7fad3e004fa30db2477b1cdd9" id="r_a81397ad7fad3e004fa30db2477b1cdd9"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a81397ad7fad3e004fa30db2477b1cdd9">PCI_TBA_MASK</a>&#160;&#160;&#160;<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000007fff00000)</td></tr>
+<tr class="memitem:a9db0752e6406d2c45fd8bd9bf074c6c4" id="r_a9db0752e6406d2c45fd8bd9bf074c6c4"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9db0752e6406d2c45fd8bd9bf074c6c4">PCI_PTE_ADD_MASK</a>&#160;&#160;&#160;<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000000000fe000)</td></tr>
+<tr class="memitem:a2d01e575fb6c80c6bad3536a1791108c" id="r_a2d01e575fb6c80c6bad3536a1791108c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a2d01e575fb6c80c6bad3536a1791108c">PCI_PTE_ADD_SHIFT</a>&#160;&#160;&#160;10</td></tr>
+<tr class="memitem:a4657d69318b955395871b0031a6dc793" id="r_a4657d69318b955395871b0031a6dc793"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a4657d69318b955395871b0031a6dc793">PCI_PTE_TBA_MASK</a>&#160;&#160;&#160;<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000007fffffc00)</td></tr>
+<tr class="memitem:a3d69f4af6d2b683ac00e511dae9b7294" id="r_a3d69f4af6d2b683ac00e511dae9b7294"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a3d69f4af6d2b683ac00e511dae9b7294">PCI_PTE_MASK</a>&#160;&#160;&#160;<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000007ffffe000)</td></tr>
+<tr class="memitem:ae4941d8181d01d01c8e971edfad3391c" id="r_ae4941d8181d01d01c8e971edfad3391c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae4941d8181d01d01c8e971edfad3391c">PCI_PTE_SHIFT</a>&#160;&#160;&#160;12</td></tr>
+<tr class="memitem:aba17c30b6d715644298f125ace93e7a4" id="r_aba17c30b6d715644298f125ace93e7a4"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aba17c30b6d715644298f125ace93e7a4">PCI_PTE_ADD2_MASK</a>&#160;&#160;&#160;<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000000000001fff)</td></tr>
+<tr class="memitem:ab52460ff37e4ece400e2610033ff4463" id="r_ab52460ff37e4ece400e2610033ff4463"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab52460ff37e4ece400e2610033ff4463">PCI_PTE_PEER_BIT</a>&#160;&#160;&#160;<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000000090000000)</td></tr>
+<tr class="memitem:ac681ab4da5839185a147e0ab83c5619c" id="r_ac681ab4da5839185a147e0ab83c5619c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac681ab4da5839185a147e0ab83c5619c">PHYS_PIO_ACCESS</a>&#160;&#160;&#160;<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000080000000000)</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:abc293cf295b84b4862942d89d8c97be5" id="r_abc293cf295b84b4862942d89d8c97be5"><td class="memItemLeft">char *&#160;</td><td class="memItemRight"><a class="el" href="#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a></td></tr>
+<tr class="memitem:aafe688c41067fa06cca88b7b1281ec2f" id="r_aafe688c41067fa06cca88b7b1281ec2f"><td class="memItemLeft"><a class="el" href="../../d7/d00/a02109.html">CSystem</a> *&#160;</td><td class="memItemRight"><a class="el" href="#aafe688c41067fa06cca88b7b1281ec2f">theSystem</a></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00023_source.html#l00086">86</a> of file <a class="el" href="../../d3/d00/a00023_source.html">Exception.h</a>.</p>
-</div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="abf07e44a478527a66113f86b5d75d827" name="abf07e44a478527a66113f86b5d75d827"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abf07e44a478527a66113f86b5d75d827">&#9670;&#160;</a></span>CConfigurationException() <span class="overload">[1/3]</span></h2>
+<div class="textblock"><p>Contains the definitions for the emulated Typhoon Chipset devices. </p>
+<p>$Id$</p>
+<p>X-1.34 Camiel Vanderhoeven 26-MAR-2008 Fix compiler warnings.</p>
+<p>X-1.33 Camiel Vanderhoeven 14-MAR-2008 Formatting.</p>
+<p>X-1.32 Camiel Vanderhoeven 14-MAR-2008</p><ol type="1">
+<li>More meaningful exceptions replace throwing (int) 1.</li>
+<li>U64 macro replaces X64 macro.</li>
+</ol>
+<p>X-1.31 Camiel Vanderhoeven 13-MAR-2008 Create init(), start_threads() and stop_threads() functions.</p>
+<p>X-1.30 Camiel Vanderhoeven 11-MAR-2008 Named, debuggable mutexes.</p>
+<p>X-1.29 Camiel Vanderhoeven 05-MAR-2008 Multi-threading version.</p>
+<p>X-1.28 Camiel Vanderhoeven 04-MAR-2008 Support some basic MP features. (CPUID read from C-Chip MISC register, inter-processor interrupts)</p>
+<p>X-1.27 Camiel Vanderhoeven 26-FEB-2008 Added CF8/CFC method for getting at PCI config space.</p>
+<p>X-1.26 Camiel Vanderhoeven 08-FEB-2008 Show originating device name on memory errors.</p>
+<p>X-1.25 Camiel Vanderhoeven 04-FEB-2008 Corrected a typo in the definition of PTE_SHIFT (2 should be 12) that caused an OpenVMS procgone bugcheck.</p>
+<p>X-1.24 Camiel Vanderhoeven 01-FEB-2008 Avoid unnecessary shift-operations to calculate constant values.</p>
+<p>X-1.23 Camiel Vanderhoeven 08-JAN-2008 Layout of comments.</p>
+<p>X-1.22 Camiel Vanderhoeven 08-JAN-2008 Split out chipset registers.</p>
+<p>X-1.21 Camiel Vanderhoeven 07-JAN-2008 DMA scatter/gather access. Split out some things.</p>
+<p>X-1.20 Camiel Vanderhoeven 02-JAN-2008 Comments.</p>
+<p>X-1.19 Camiel Vanderhoeven 10-DEC-2007 Added get_cpu</p>
+<p>X-1.18 Camiel Vanderhoeven 10-DEC-2007 Use configurator.</p>
+<p>X-1.17 Camiel Vanderhoeven 2-DEC-2007 Added support for code profiling, and for direct operations on the Tsunami/Typhoon's interrupt registers.</p>
+<p>X-1.16 Brian Wheeler 1-DEC-2007 Added panic.</p>
+<p>X-1.15 Camiel Vanderhoeven 16-NOV-2007 Replaced PCI_ReadMem and PCI_WriteMem with PCI_Phys.</p>
+<p>X-1.14 Camiel Vanderhoeven 18-APR-2007 Faster lockstep mechanism (send info 50 cpu cycles at a time)</p>
+<p>X-1.13 Camiel Vanderhoeven 11-APR-2007 Moved all data that should be saved to a state file to a structure "state".</p>
+<p>X-1.12 Camiel Vanderhoeven 10-APR-2007 Replaced LoadROM(...) and SelectROM() calls with a single LoadROM() call. (See <a class="el" href="../../db/d00/a00722.html" title="Contains the code for the emulated Typhoon Chipset devices.">System.cpp</a>, X-1.23).</p>
+<p>X-1.11 Camiel Vanderhoeven 10-APR-2007 Removed obsolete ROM-handling code.</p>
+<p>X-1.10 Camiel Vanderhoeven 30-MAR-2007 Added old changelog comments.</p>
+<p>X-1.9 Camiel Vanderhoeven 1-MAR-2007 Removes $-sign from variable names. The Sun C-compiler can't handle these.</p>
+<p>X-1.8 Camiel Vanderhoeven 18-FEB-2007 Added iSSCycles variable to handle cycle-counting/slow-clocking in single-step mode.</p>
+<p>X-1.7 Camiel Vanderhoeven 16-FEB-2007 a) Replaced DoClock with run and single_step. b) Added support for slow-clocked devices.</p>
+<p>X-1.6 Camiel Vanderhoeven 12-FEB-2007 Added comments.</p>
+<p>X-1.5 Brian Wheeler 7-FEB-2007 <a class="el" href="../../d7/d00/a02109.html" title="Emulated Typhoon 21272 chipset.">CSystem</a> constructor takes filename of configuration file as an argument.</p>
+<p>X-1.4 Camiel Vanderhoeven 7-FEB-2007 Added trace (pointer to <a class="el" href="../../d9/d00/a01289.html" title="CPU tracing engine.">CTraceEngine</a>)</p>
+<p>X-1.3 Brian Wheeler 3-FEB-2007 Formatting.</p>
+<p>X-1.2 Brian Wheeler 3-FEB-2007 Add support for configuration file.</p>
+<p>X-1.1 Camiel Vanderhoeven 19-JAN-2007 Initial version in CVS.</p>
+<dl class="section author"><dt>Author</dt><dd>Camiel Vanderhoeven </dd></dl>
+
+<p class="definition">Definition in file <a class="el" href="../../d8/d00/a00725_source.html">System.h</a>.</p>
+</div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
+<a id="a3ad46d233f4ed929ca28890e51c706a0" name="a3ad46d233f4ed929ca28890e51c706a0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ad46d233f4ed929ca28890e51c706a0">&#9670;&#160;</a></span>PANIC_ASKSHUTDOWN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PANIC_ASKSHUTDOWN&#160;&#160;&#160;2</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00725_source.html#l00330">330</a> of file <a class="el" href="../../d8/d00/a00725_source.html">System.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../db/d00/a00722_source.html#l02308">CSystem::panic()</a>.</p>
+
+</div>
+</div>
+<a id="aa3badb247d3b2bad1d70de1452d61f41" name="aa3badb247d3b2bad1d70de1452d61f41"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3badb247d3b2bad1d70de1452d61f41">&#9670;&#160;</a></span>PANIC_LISTING</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PANIC_LISTING&#160;&#160;&#160;4</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00725_source.html#l00331">331</a> of file <a class="el" href="../../d8/d00/a00725_source.html">System.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../db/d00/a00722_source.html#l02308">CSystem::panic()</a>.</p>
+
+</div>
+</div>
+<a id="ac0229041b76cf2ce9939eaba4f46117b" name="ac0229041b76cf2ce9939eaba4f46117b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac0229041b76cf2ce9939eaba4f46117b">&#9670;&#160;</a></span>PANIC_NOSHUTDOWN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PANIC_NOSHUTDOWN&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00725_source.html#l00328">328</a> of file <a class="el" href="../../d8/d00/a00725_source.html">System.h</a>.</p>
+
+</div>
+</div>
+<a id="ab5f5466a39bf4fa6d4ce07f7e6423b46" name="ab5f5466a39bf4fa6d4ce07f7e6423b46"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5f5466a39bf4fa6d4ce07f7e6423b46">&#9670;&#160;</a></span>PANIC_SHUTDOWN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PANIC_SHUTDOWN&#160;&#160;&#160;1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00725_source.html#l00329">329</a> of file <a class="el" href="../../d8/d00/a00725_source.html">System.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../db/d00/a00722_source.html#l02308">CSystem::panic()</a>.</p>
+
+</div>
+</div>
+<a id="a9b451fe8dc579463fa53103057417669" name="a9b451fe8dc579463fa53103057417669"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b451fe8dc579463fa53103057417669">&#9670;&#160;</a></span>PCI_ADD_MASK</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PCI_ADD_MASK&#160;&#160;&#160;<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000000000fffff)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00725_source.html#l00805">805</a> of file <a class="el" href="../../d8/d00/a00725_source.html">System.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00731_source.html#l01643">CSystem::PCI_Phys_direct_mapped()</a>.</p>
+
+</div>
+</div>
+<a id="a61cdd5f9411ad5696d7d8f87664ede9d" name="a61cdd5f9411ad5696d7d8f87664ede9d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61cdd5f9411ad5696d7d8f87664ede9d">&#9670;&#160;</a></span>PCI_PCTL_HOLE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PCI_PCTL_HOLE&#160;&#160;&#160;<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000000000000020)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00725_source.html#l00799">799</a> of file <a class="el" href="../../d8/d00/a00725_source.html">System.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00731_source.html#l01545">CSystem::PCI_Phys()</a>.</p>
+
+</div>
+</div>
+<a id="ad7b669fabfe6a535506aaae958e49a09" name="ad7b669fabfe6a535506aaae958e49a09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7b669fabfe6a535506aaae958e49a09">&#9670;&#160;</a></span>PCI_PCTL_HOLE_END</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PCI_PCTL_HOLE_END&#160;&#160;&#160;0x000fffff</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00725_source.html#l00801">801</a> of file <a class="el" href="../../d8/d00/a00725_source.html">System.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00731_source.html#l01545">CSystem::PCI_Phys()</a>.</p>
+
+</div>
+</div>
+<a id="a7e316023a6e748ca9ec195aac7c6e378" name="a7e316023a6e748ca9ec195aac7c6e378"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e316023a6e748ca9ec195aac7c6e378">&#9670;&#160;</a></span>PCI_PCTL_HOLE_START</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PCI_PCTL_HOLE_START&#160;&#160;&#160;0x00080000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00725_source.html#l00800">800</a> of file <a class="el" href="../../d8/d00/a00725_source.html">System.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00731_source.html#l01545">CSystem::PCI_Phys()</a>.</p>
+
+</div>
+</div>
+<a id="aba17c30b6d715644298f125ace93e7a4" name="aba17c30b6d715644298f125ace93e7a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aba17c30b6d715644298f125ace93e7a4">&#9670;&#160;</a></span>PCI_PTE_ADD2_MASK</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PCI_PTE_ADD2_MASK&#160;&#160;&#160;<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000000000001fff)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00725_source.html#l00812">812</a> of file <a class="el" href="../../d8/d00/a00725_source.html">System.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00731_source.html#l01722">CSystem::PCI_Phys_scatter_gather()</a>.</p>
+
+</div>
+</div>
+<a id="a9db0752e6406d2c45fd8bd9bf074c6c4" name="a9db0752e6406d2c45fd8bd9bf074c6c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9db0752e6406d2c45fd8bd9bf074c6c4">&#9670;&#160;</a></span>PCI_PTE_ADD_MASK</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PCI_PTE_ADD_MASK&#160;&#160;&#160;<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000000000fe000)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00725_source.html#l00807">807</a> of file <a class="el" href="../../d8/d00/a00725_source.html">System.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00731_source.html#l01722">CSystem::PCI_Phys_scatter_gather()</a>.</p>
+
+</div>
+</div>
+<a id="a2d01e575fb6c80c6bad3536a1791108c" name="a2d01e575fb6c80c6bad3536a1791108c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d01e575fb6c80c6bad3536a1791108c">&#9670;&#160;</a></span>PCI_PTE_ADD_SHIFT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PCI_PTE_ADD_SHIFT&#160;&#160;&#160;10</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00725_source.html#l00808">808</a> of file <a class="el" href="../../d8/d00/a00725_source.html">System.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00731_source.html#l01722">CSystem::PCI_Phys_scatter_gather()</a>.</p>
+
+</div>
+</div>
+<a id="a3d69f4af6d2b683ac00e511dae9b7294" name="a3d69f4af6d2b683ac00e511dae9b7294"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d69f4af6d2b683ac00e511dae9b7294">&#9670;&#160;</a></span>PCI_PTE_MASK</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PCI_PTE_MASK&#160;&#160;&#160;<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000007ffffe000)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00725_source.html#l00810">810</a> of file <a class="el" href="../../d8/d00/a00725_source.html">System.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00731_source.html#l01722">CSystem::PCI_Phys_scatter_gather()</a>.</p>
+
+</div>
+</div>
+<a id="ab52460ff37e4ece400e2610033ff4463" name="ab52460ff37e4ece400e2610033ff4463"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab52460ff37e4ece400e2610033ff4463">&#9670;&#160;</a></span>PCI_PTE_PEER_BIT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PCI_PTE_PEER_BIT&#160;&#160;&#160;<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000000090000000)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00725_source.html#l00813">813</a> of file <a class="el" href="../../d8/d00/a00725_source.html">System.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00731_source.html#l01722">CSystem::PCI_Phys_scatter_gather()</a>.</p>
+
+</div>
+</div>
+<a id="ae4941d8181d01d01c8e971edfad3391c" name="ae4941d8181d01d01c8e971edfad3391c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae4941d8181d01d01c8e971edfad3391c">&#9670;&#160;</a></span>PCI_PTE_SHIFT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PCI_PTE_SHIFT&#160;&#160;&#160;12</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00725_source.html#l00811">811</a> of file <a class="el" href="../../d8/d00/a00725_source.html">System.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00731_source.html#l01722">CSystem::PCI_Phys_scatter_gather()</a>.</p>
+
+</div>
+</div>
+<a id="a4657d69318b955395871b0031a6dc793" name="a4657d69318b955395871b0031a6dc793"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4657d69318b955395871b0031a6dc793">&#9670;&#160;</a></span>PCI_PTE_TBA_MASK</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PCI_PTE_TBA_MASK&#160;&#160;&#160;<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000007fffffc00)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00725_source.html#l00809">809</a> of file <a class="el" href="../../d8/d00/a00725_source.html">System.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00731_source.html#l01722">CSystem::PCI_Phys_scatter_gather()</a>.</p>
+
+</div>
+</div>
+<a id="a81397ad7fad3e004fa30db2477b1cdd9" name="a81397ad7fad3e004fa30db2477b1cdd9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81397ad7fad3e004fa30db2477b1cdd9">&#9670;&#160;</a></span>PCI_TBA_MASK</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PCI_TBA_MASK&#160;&#160;&#160;<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000007fff00000)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00725_source.html#l00806">806</a> of file <a class="el" href="../../d8/d00/a00725_source.html">System.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00731_source.html#l01643">CSystem::PCI_Phys_direct_mapped()</a>.</p>
+
+</div>
+</div>
+<a id="a79eec04a8535a5e26019a19778995eea" name="a79eec04a8535a5e26019a19778995eea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a79eec04a8535a5e26019a19778995eea">&#9670;&#160;</a></span>PCI_WSM_MASK</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PCI_WSM_MASK&#160;&#160;&#160;<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000000fff00000)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00725_source.html#l00804">804</a> of file <a class="el" href="../../d8/d00/a00725_source.html">System.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00731_source.html#l01643">CSystem::PCI_Phys_direct_mapped()</a>, and <a class="el" href="../../df/d00/a00731_source.html#l01722">CSystem::PCI_Phys_scatter_gather()</a>.</p>
+
+</div>
+</div>
+<a id="ac681ab4da5839185a147e0ab83c5619c" name="ac681ab4da5839185a147e0ab83c5619c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac681ab4da5839185a147e0ab83c5619c">&#9670;&#160;</a></span>PHYS_PIO_ACCESS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PHYS_PIO_ACCESS&#160;&#160;&#160;<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000080000000000)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00725_source.html#l00815">815</a> of file <a class="el" href="../../d8/d00/a00725_source.html">System.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00731_source.html#l01722">CSystem::PCI_Phys_scatter_gather()</a>.</p>
+
+</div>
+</div>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="abc293cf295b84b4862942d89d8c97be5" name="abc293cf295b84b4862942d89d8c97be5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc293cf295b84b4862942d89d8c97be5">&#9670;&#160;</a></span>dbg_strptr</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -175,53 +716,24 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">CConfigurationException::CConfigurationException </td>
-          <td>(</td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>code</em></span><span class="paramdefsep"> = </span><span class="paramdefval">0</span></td><td>)</td>
-          <td></td>
+          <td class="memname">char* dbg_strptr</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00023_source.html#l00086">86</a> of file <a class="el" href="../../d3/d00/a00023_source.html">Exception.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d00/a00722_source.html#l00348">348</a> of file <a class="el" href="../../db/d00/a00722_source.html">System.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d3/d00/a00023_source.html#l00086">CConfigurationException()</a>, <a class="el" href="../../db/d00/a00020_source.html#l00031">CException::CException()</a>, and <a class="el" href="../../d3/d00/a00023_source.html#l00058">ES40_DECLARE_EXCEPTION</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d3/d00/a00023_source.html#l00086">CConfigurationException()</a>, and <a class="el" href="../../db/d00/a00020_source.html#l00077">name()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d8/d00/a00725_abf07e44a478527a66113f86b5d75d827_cgraph.png" border="0" usemap="#ad8/d00/a00725_abf07e44a478527a66113f86b5d75d827_cgraph" loading="lazy" alt=""/></div>
-<map name="ad8/d00/a00725_abf07e44a478527a66113f86b5d75d827_cgraph" id="ad8/d00/a00725_abf07e44a478527a66113f86b5d75d827_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,180,72"/>
-<area shape="poly" title=" " alt="" coords="51,28,49,19,56,10,71,5,93,3,116,5,131,13,126,14,114,10,92,8,72,10,59,15,55,21,56,29"/>
-<area shape="rect" href="../../d8/d00/a00669.html#a947b1b444c8587e9781ca93f41dc12aa" title=" " alt="" coords="228,37,393,64"/>
-<area shape="poly" title=" " alt="" coords="180,48,215,50,210,51,180,53"/>
-<area shape="rect" href="../../d8/d00/a00669.html#a5da38e77adfd1dd37b00506c5a618deb" title=" " alt="" coords="441,37,566,64"/>
-<area shape="poly" title=" " alt="" coords="394,48,428,51,423,51,394,53"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d8/d00/a00725_abf07e44a478527a66113f86b5d75d827_icgraph.png" border="0" usemap="#ad8/d00/a00725_abf07e44a478527a66113f86b5d75d827_icgraph" loading="lazy" alt=""/></div>
-<map name="ad8/d00/a00725_abf07e44a478527a66113f86b5d75d827_icgraph" id="ad8/d00/a00725_abf07e44a478527a66113f86b5d75d827_icgraph">
-<area shape="rect" title=" " alt="" coords="220,29,394,72"/>
-<area shape="poly" title=" " alt="" coords="341,13,329,10,307,8,286,10,274,15,269,21,270,30,266,27,264,19,271,10,285,5,307,3,330,5,346,14"/>
-<area shape="rect" href="../../d8/d00/a00725.html#a3d039b36bdb26d006283eca38309273c" title=" " alt="" coords="5,29,172,72"/>
-<area shape="poly" title=" " alt="" coords="201,51,172,53,172,48,207,50"/>
-</map>
-</div>
+<p class="reference">Referenced by <a class="el" href="../../d7/d00/a00182_source.html#l03232">CAlphaCPU::execute()</a>, <a class="el" href="../../d7/d00/a00182_source.html#l01275">handle_debug_string()</a>, and <a class="el" href="../../db/d00/a00722_source.html#l01005">CSystem::SingleStep()</a>.</p>
 
 </div>
 </div>
-<a id="a4c9276cfd8e005b8d1d861ae2ca45efc" name="a4c9276cfd8e005b8d1d861ae2ca45efc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4c9276cfd8e005b8d1d861ae2ca45efc">&#9670;&#160;</a></span>CConfigurationException() <span class="overload">[2/3]</span></h2>
+<a id="aafe688c41067fa06cca88b7b1281ec2f" name="aafe688c41067fa06cca88b7b1281ec2f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aafe688c41067fa06cca88b7b1281ec2f">&#9670;&#160;</a></span>theSystem</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -230,114 +742,22 @@ Here is the caller graph for this function:</div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">CConfigurationException::CConfigurationException </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>msg</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>code</em></span><span class="paramdefsep"> = </span><span class="paramdefval">0</span>&#160;)</td>
+          <td class="memname"><a class="el" href="../../d7/d00/a02109.html">CSystem</a>* theSystem</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00023_source.html#l00086">86</a> of file <a class="el" href="../../d3/d00/a00023_source.html">Exception.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d00/a00722_source.html#l02412">2412</a> of file <a class="el" href="../../db/d00/a00722_source.html">System.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00476_source.html#l00892">activate_selection()</a>, <a class="el" href="../../db/d00/a00722_source.html#l00383">CSystem::CSystem()</a>, <a class="el" href="../../d7/d00/a00467_source.html#l01346">sdl_event_dispatcher::dispatch()</a>, <a class="el" href="../../d3/d00/a00113_source.html#l00861">CConfigurator::initialize()</a>, <a class="el" href="../../dd/d00/a00320_source.html#l01767">CTraceEngine::list_all()</a>, <a class="el" href="../../d7/d00/a00002_source.html#l00308">main()</a>, <a class="el" href="../../dd/d00/a00320_source.html#l00888">CTraceEngine::parse()</a>, <a class="el" href="../../d7/d00/a00002_source.html#l00585">run_emulator()</a>, and <a class="el" href="../../dd/d00/a00320_source.html#l00791">CTraceEngine::run_script()</a>.</p>
 
 </div>
 </div>
-<a id="a656ea9d3d5f66b527504b391c906df79" name="a656ea9d3d5f66b527504b391c906df79"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a656ea9d3d5f66b527504b391c906df79">&#9670;&#160;</a></span>CConfigurationException() <span class="overload">[3/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">CConfigurationException::CConfigurationException </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>msg</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>arg</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>code</em></span><span class="paramdefsep"> = </span><span class="paramdefval">0</span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00023_source.html#l00086">86</a> of file <a class="el" href="../../d3/d00/a00023_source.html">Exception.h</a>.</p>
-
-</div>
-</div>
-<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="a3d039b36bdb26d006283eca38309273c" name="a3d039b36bdb26d006283eca38309273c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3d039b36bdb26d006283eca38309273c">&#9670;&#160;</a></span>name()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char * CConfigurationException::name </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span><span class="mlabel noexcept">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Reimplemented from <a class="el" href="../../d8/d00/a00669.html#aee465d122ea9ae75c8e5b85ab824b028">CException</a>.</p>
-
-<p class="definition">Definition at line <a class="el" href="../../db/d00/a00020_source.html#l00077">77</a> of file <a class="el" href="../../db/d00/a00020_source.html">Exception.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d3/d00/a00023_source.html#l00086">CConfigurationException()</a>, and <a class="el" href="../../d3/d00/a00023_source.html#l00068">ES40_IMPLEMENT_EXCEPTION</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d8/d00/a00725_a3d039b36bdb26d006283eca38309273c_cgraph.png" border="0" usemap="#ad8/d00/a00725_a3d039b36bdb26d006283eca38309273c_cgraph" loading="lazy" alt=""/></div>
-<map name="ad8/d00/a00725_a3d039b36bdb26d006283eca38309273c_cgraph" id="ad8/d00/a00725_a3d039b36bdb26d006283eca38309273c_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,172,72"/>
-<area shape="rect" href="../../d8/d00/a00725.html#abf07e44a478527a66113f86b5d75d827" title=" " alt="" coords="220,29,394,72"/>
-<area shape="poly" title=" " alt="" coords="172,48,207,50,201,51,172,53"/>
-<area shape="poly" title=" " alt="" coords="266,27,264,19,271,10,285,5,307,3,330,5,346,14,340,13,329,10,307,8,286,10,274,15,269,21,270,30"/>
-<area shape="rect" href="../../d8/d00/a00669.html#a947b1b444c8587e9781ca93f41dc12aa" title=" " alt="" coords="442,37,607,64"/>
-<area shape="poly" title=" " alt="" coords="394,48,429,51,424,51,395,53"/>
-<area shape="rect" href="../../d8/d00/a00669.html#a5da38e77adfd1dd37b00506c5a618deb" title=" " alt="" coords="655,37,781,64"/>
-<area shape="poly" title=" " alt="" coords="608,48,643,51,637,51,608,53"/>
-</map>
-</div>
-
-</div>
-</div>
-<hr/>The documentation for this class was generated from the following files:<ul>
-<li>base/<a class="el" href="../../d3/d00/a00023_source.html">Exception.h</a></li>
-<li>base/<a class="el" href="../../db/d00/a00020_source.html">Exception.cpp</a></li>
-</ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
@@ -351,7 +771,7 @@ Here is the call graph for this function:</div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../d8/d00/a00725.html">CConfigurationException</a></li>
+    <li class="navelem"><a href="../../dir_e8522150b400a43ebfdbd1fed060b8e2.html">system</a></li><li class="navelem"><a href="../../d8/d00/a00725.html">System.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: config.h File Reference</title>
+<title>ES40: config/es40-cfg.cpp File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,1222 +109,699 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d1/d00/a00128.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">config.h File Reference</div></div>
+  <div class="headertitle"><div class="title">es40-cfg.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
+<p>Configuration file creator.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d6/d00/a00626_source.html">StdAfx.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dd/d00/a00041_source.html">banner.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d00/a00536_source.html">io/SerialListenAddress.h</a>&quot;</code><br />
+<code>#include &lt;string&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
+<code>#include &lt;iostream&gt;</code><br />
+<code>#include &lt;fstream&gt;</code><br />
+<code>#include &lt;sstream&gt;</code><br />
+<code>#include &lt;algorithm&gt;</code><br />
+<code>#include &lt;pcap.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="../../d5/d00/a00140_source.html">Question.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/d00/a00131_source.html">FreeTextQuestion.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d2/d00/a00137_source.html">NumberQuestion.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../de/d00/a00134_source.html">MultipleChoiceQuestion.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/d00/a00143_source.html">ShrinkingChoiceQuestion.h</a>&quot;</code><br />
+</div><div class="textblock"><div class="dynheader">
+Include dependency graph for es40-cfg.cpp:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d9/d00/a00129.png" border="0" usemap="#aconfig_2es40-cfg_8cpp" loading="lazy" alt=""/></div>
+<map name="aconfig_2es40-cfg_8cpp" id="aconfig_2es40-cfg_8cpp">
+<area shape="rect" title="Configuration file creator." alt="" coords="2259,5,2394,32"/>
+<area shape="rect" href="../../d6/d00/a00626.html" title="Standard includes." alt="" coords="1154,80,1227,107"/>
+<area shape="poly" title=" " alt="" coords="2256,25,1242,91,1242,86,2261,23"/>
+<area shape="rect" title=" " alt="" coords="1172,229,1225,256"/>
+<area shape="poly" title=" " alt="" coords="2256,21,2148,28,2005,38,1846,55,1687,83,1575,112,1469,157,1447,171,1425,184,1376,201,1335,211,1240,231,1239,226,1334,206,1374,196,1423,179,1445,166,1467,152,1574,107,1686,77,1845,50,2005,33,2148,23,2261,21"/>
+<area shape="rect" title=" " alt="" coords="1342,229,1410,256"/>
+<area shape="poly" title=" " alt="" coords="2256,23,2121,36,1936,58,1834,75,1730,97,1626,124,1526,157,1461,189,1406,223,1404,218,1458,184,1524,152,1625,119,1729,92,1833,70,1936,53,2120,30,2261,22"/>
+<area shape="rect" href="../../dd/d00/a00041.html" title="Startup banner shared by the es40 and es40&#45;cfg executables." alt="" coords="2195,80,2266,107"/>
+<area shape="poly" title=" " alt="" coords="2312,32,2260,73,2258,68,2307,34"/>
+<area shape="rect" href="../../d4/d00/a00536.html" title="Serial listener address parsing." alt="" coords="1957,80,2120,107"/>
+<area shape="poly" title=" " alt="" coords="2279,32,2104,78,2103,73,2274,33"/>
+<area shape="rect" title=" " alt="" coords="1857,155,1932,181"/>
+<area shape="poly" title=" " alt="" coords="2256,24,2176,33,2085,44,2002,60,1970,71,1947,82,1933,94,1921,109,1905,142,1901,138,1917,107,1929,91,1944,78,1968,66,2001,55,2084,39,2176,28,2261,23"/>
+<area shape="rect" title=" " alt="" coords="2202,155,2259,181"/>
+<area shape="poly" title=" " alt="" coords="2261,31,2217,52,2199,65,2185,81,2180,97,2184,112,2207,146,2202,143,2179,115,2175,96,2180,79,2196,61,2215,47,2256,32"/>
+<area shape="rect" title=" " alt="" coords="2291,80,2362,107"/>
+<area shape="poly" title=" " alt="" coords="2328,31,2329,66,2324,63,2325,35"/>
+<area shape="rect" title=" " alt="" coords="2386,80,2451,107"/>
+<area shape="poly" title=" " alt="" coords="2343,30,2393,71,2388,70,2342,35"/>
+<area shape="rect" title=" " alt="" coords="2475,80,2535,107"/>
+<area shape="poly" title=" " alt="" coords="2358,30,2463,74,2458,74,2357,35"/>
+<area shape="rect" href="../../d5/d00/a00140.html" title="Question class for Configuration file creator." alt="" coords="2559,80,2643,107"/>
+<area shape="poly" title=" " alt="" coords="2375,30,2546,77,2541,77,2374,35"/>
+<area shape="rect" href="../../d7/d00/a00131.html" title="FreeTextQuestion class for Configuration file creator." alt="" coords="2667,80,2802,107"/>
+<area shape="poly" title=" " alt="" coords="2395,29,2654,77,2649,77,2395,35"/>
+<area shape="rect" href="../../d2/d00/a00137.html" title="NumberQuestion class for Configuration file creator." alt="" coords="2827,80,2957,107"/>
+<area shape="poly" title=" " alt="" coords="2395,25,2814,79,2808,80,2394,30"/>
+<area shape="rect" href="../../de/d00/a00134.html" title="MultipleChoiceQuestion class for Configuration file creator." alt="" coords="2981,80,3152,107"/>
+<area shape="poly" title=" " alt="" coords="2395,23,2642,45,2969,80,2963,80,2642,50,2395,28"/>
+<area shape="rect" href="../../d7/d00/a00143.html" title="Configuration file creator." alt="" coords="3176,80,3355,107"/>
+<area shape="poly" title=" " alt="" coords="2394,21,2720,42,3163,80,3157,80,2720,47,2394,26"/>
+<area shape="rect" href="../../d7/d00/a00173.html" title=" " alt="" coords="1302,155,1412,181"/>
+<area shape="poly" title=" " alt="" coords="1220,105,1317,148,1311,148,1219,110"/>
+<area shape="rect" href="../../d8/d00/a00326.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="920,155,1010,181"/>
+<area shape="poly" title=" " alt="" coords="1156,106,1020,152,1018,147,1151,107"/>
+<area shape="rect" title=" " alt="" coords="1212,155,1279,181"/>
+<area shape="poly" title=" " alt="" coords="1201,105,1229,143,1224,141,1199,110"/>
+<area shape="rect" href="../../d6/d00/a00047.html" title=" " alt="" coords="645,155,768,181"/>
+<area shape="poly" title=" " alt="" coords="1152,100,784,157,783,152,1157,99"/>
+<area shape="rect" href="../../dc/d00/a00053.html" title=" " alt="" coords="1687,229,1787,256"/>
+<area shape="poly" title=" " alt="" coords="1227,94,1324,99,1449,110,1570,128,1619,139,1656,152,1676,165,1695,182,1723,218,1718,216,1691,185,1673,170,1653,157,1618,144,1569,133,1448,116,1324,105,1227,99"/>
+<area shape="rect" href="../../de/d00/a00065.html" title=" " alt="" coords="792,155,896,181"/>
+<area shape="poly" title=" " alt="" coords="1157,102,912,155,911,150,1151,103"/>
+<area shape="rect" href="../../d9/d00/a00056.html" title=" " alt="" coords="1060,229,1148,256"/>
+<area shape="poly" title=" " alt="" coords="1156,102,1111,123,1091,138,1075,156,1071,170,1072,185,1086,218,1082,215,1067,187,1066,170,1071,153,1087,134,1108,119,1151,103"/>
+<area shape="rect" href="../../df/d00/a00062.html" title=" " alt="" coords="5,229,136,256"/>
+<area shape="poly" title=" " alt="" coords="1151,99,934,123,634,157,394,192,152,231,151,226,393,187,633,152,933,117,1157,98"/>
+<area shape="rect" href="../../d3/d00/a00059.html" title=" " alt="" coords="1719,155,1833,181"/>
+<area shape="poly" title=" " alt="" coords="1227,96,1429,118,1700,152,1706,155,1701,155,1699,157,1428,123,1227,101"/>
+<area shape="rect" href="../../dd/d00/a00365.html" title="Contains macro&#39;s and prototypes for debugging." alt="" coords="1085,155,1187,181"/>
+<area shape="poly" title=" " alt="" coords="1183,106,1156,144,1153,140,1179,109"/>
+<area shape="rect" href="../../d8/d00/a00368.html" title="Contains byte&#45;order conversion helpers." alt="" coords="1538,155,1643,181"/>
+<area shape="poly" title=" " alt="" coords="1227,99,1525,154,1520,155,1227,104"/>
+<area shape="rect" title=" " alt="" coords="160,229,237,256"/>
+<area shape="poly" title=" " alt="" coords="642,177,470,200,256,232,253,233,251,227,255,227,469,195,647,175"/>
+<area shape="poly" title=" " alt="" coords="768,177,780,179,885,191,968,198,1051,207,1159,229,1154,229,1050,213,967,204,884,197,779,184,768,182"/>
+<area shape="rect" title=" " alt="" coords="296,304,354,331"/>
+<area shape="poly" title=" " alt="" coords="1689,250,1624,259,1244,283,875,301,370,318,369,312,875,295,1244,278,1624,253,1684,250"/>
+<area shape="rect" title=" " alt="" coords="1010,304,1070,331"/>
+<area shape="poly" title=" " alt="" coords="1689,253,1668,259,1334,295,1085,316,1085,310,1334,290,1667,253,1684,253"/>
+<area shape="rect" title=" " alt="" coords="1748,304,1806,331"/>
+<area shape="poly" title=" " alt="" coords="1745,254,1765,292,1761,289,1743,259"/>
+<area shape="rect" title=" " alt="" coords="1668,304,1724,331"/>
+<area shape="poly" title=" " alt="" coords="1732,255,1712,293,1709,288,1728,258"/>
+<area shape="rect" title=" " alt="" coords="1265,304,1343,331"/>
+<area shape="poly" title=" " alt="" coords="1689,253,1668,259,1359,310,1358,305,1667,253,1684,253"/>
+<area shape="poly" title=" " alt="" coords="897,177,1160,229,1154,229,896,182"/>
+<area shape="poly" title=" " alt="" coords="789,180,780,184,683,189,557,190,494,193,436,200,387,213,352,231,342,243,335,258,328,290,324,287,330,256,337,240,349,227,385,208,435,195,493,188,557,185,683,183,780,179,794,179"/>
+<area shape="poly" title=" " alt="" coords="851,179,872,216,887,236,904,254,949,282,997,304,992,303,947,287,901,258,883,240,867,219,848,184"/>
+<area shape="poly" title=" " alt="" coords="879,179,998,227,1023,242,1049,253,1149,277,1235,288,1312,291,1386,289,1539,284,1629,288,1736,304,1730,304,1629,293,1539,289,1386,295,1312,297,1235,294,1148,282,1047,259,1021,246,996,232,879,184"/>
+<area shape="poly" title=" " alt="" coords="866,179,946,223,1005,253,1062,266,1139,277,1325,295,1655,315,1650,315,1324,300,1138,283,1061,271,1003,259,943,228,865,184"/>
+<area shape="poly" title=" " alt="" coords="856,179,898,217,925,237,954,254,1031,281,1112,298,1187,308,1252,315,1246,315,1186,313,1111,303,1030,286,952,258,922,242,894,221,854,184"/>
+<area shape="rect" title=" " alt="" coords="1434,229,1494,256"/>
+<area shape="poly" title=" " alt="" coords="896,177,908,179,1050,193,1163,199,1276,206,1421,229,1416,229,1275,211,1162,204,1050,199,907,184,897,182"/>
+<area shape="poly" title=" " alt="" coords="897,177,908,179,1024,193,1117,200,1209,208,1329,229,1324,229,1209,214,1116,205,1024,198,907,184,897,182"/>
+<area shape="rect" title=" " alt="" coords="137,304,262,331"/>
+<area shape="poly" title=" " alt="" coords="789,180,780,184,711,192,652,194,550,193,502,194,451,199,394,211,329,232,300,245,272,262,226,296,223,291,269,257,297,240,327,227,393,206,450,194,501,189,550,188,652,189,711,186,779,179,794,179"/>
+<area shape="rect" title=" " alt="" coords="363,229,431,256"/>
+<area shape="poly" title=" " alt="" coords="789,180,780,184,615,206,541,215,447,232,446,226,540,210,614,201,779,179,794,179"/>
+<area shape="rect" title=" " alt="" coords="456,229,552,256"/>
+<area shape="poly" title=" " alt="" coords="794,180,568,231,567,225,788,181"/>
+<area shape="poly" title=" " alt="" coords="889,179,1048,225,1043,225,889,185"/>
+<area shape="rect" title=" " alt="" coords="576,229,651,256"/>
+<area shape="poly" title=" " alt="" coords="806,181,667,227,665,222,801,182"/>
+<area shape="rect" title=" " alt="" coords="676,229,743,256"/>
+<area shape="poly" title=" " alt="" coords="823,181,747,224,745,219,818,183"/>
+<area shape="rect" title=" " alt="" coords="767,229,833,256"/>
+<area shape="poly" title=" " alt="" coords="838,180,817,218,814,214,834,183"/>
+<area shape="poly" title=" " alt="" coords="115,254,283,302,280,306,114,259"/>
+<area shape="poly" title=" " alt="" coords="136,252,148,253,398,277,643,294,997,314,992,315,643,299,398,282,148,259,137,257"/>
+<area shape="poly" title=" " alt="" coords="136,252,148,253,410,276,615,285,819,291,1083,301,1252,313,1247,313,1082,307,819,296,614,290,410,281,148,259,137,257"/>
+<area shape="poly" title=" " alt="" coords="94,254,166,295,162,297,92,259"/>
+<area shape="rect" title=" " alt="" coords="38,304,103,331"/>
+<area shape="poly" title=" " alt="" coords="72,255,73,289,68,288,69,259"/>
+<area shape="poly" title=" " alt="" coords="1771,180,1752,218,1749,213,1767,183"/>
+<area shape="poly" title=" " alt="" coords="1758,181,1682,228,1625,258,1577,270,1515,280,1362,297,1086,316,1086,311,1362,292,1514,275,1576,265,1623,254,1679,223,1753,182"/>
+<area shape="poly" title=" " alt="" coords="1833,177,1950,201,1999,215,2024,227,2033,241,2036,253,2034,264,2028,273,2006,289,1975,300,1897,313,1822,318,1822,313,1896,308,1974,295,2004,284,2024,270,2029,262,2030,253,2028,243,2021,231,1997,220,1949,206,1833,182"/>
+<area shape="poly" title=" " alt="" coords="1831,179,1923,204,1961,216,1980,228,1987,243,1981,257,1955,283,1929,297,1903,304,1875,305,1813,301,1778,302,1740,306,1739,301,1778,296,1813,296,1875,300,1902,299,1927,292,1952,278,1976,255,1981,243,1977,231,1958,221,1922,209,1830,185"/>
+<area shape="poly" title=" " alt="" coords="1787,179,1807,217,1810,238,1802,258,1779,270,1737,280,1615,297,1476,309,1359,316,1359,311,1475,304,1614,292,1736,275,1777,265,1798,254,1805,238,1802,218,1784,184"/>
+<area shape="poly" title=" " alt="" coords="1721,181,1510,231,1509,226,1716,182"/>
+<area shape="rect" title=" " alt="" coords="1863,229,1966,256"/>
+<area shape="poly" title=" " alt="" coords="1801,179,1879,222,1874,221,1799,184"/>
+<area shape="rect" title=" " alt="" coords="1250,229,1318,256"/>
+<area shape="poly" title=" " alt="" coords="1162,179,1247,222,1242,222,1161,184"/>
+<area shape="rect" href="../../db/d00/a00164.html" title=" " alt="" coords="1518,229,1612,256"/>
+<area shape="poly" title=" " alt="" coords="1588,180,1576,217,1573,212,1584,183"/>
+<area shape="rect" title=" " alt="" coords="2283,155,2343,181"/>
+<area shape="poly" title=" " alt="" coords="2246,105,2290,145,2285,144,2244,110"/>
+<area shape="rect" title=" " alt="" coords="2368,155,2432,181"/>
+<area shape="poly" title=" " alt="" coords="2260,105,2359,148,2353,148,2260,110"/>
+<area shape="poly" title=" " alt="" coords="2032,106,1997,147,1973,168,1945,184,1881,202,1799,213,1706,219,1605,221,1404,222,1315,225,1241,232,1240,227,1315,220,1404,217,1605,215,1705,213,1799,208,1880,197,1943,179,1970,163,1994,143,2027,108"/>
+<area shape="poly" title=" " alt="" coords="2016,106,1934,150,1933,145,2011,108"/>
+<area shape="poly" title=" " alt="" coords="2072,105,2190,151,2185,150,2072,110"/>
+<area shape="rect" title=" " alt="" coords="2007,155,2089,181"/>
+<area shape="poly" title=" " alt="" coords="2042,105,2046,141,2042,138,2038,109"/>
+<area shape="rect" title=" " alt="" coords="2113,155,2177,181"/>
+<area shape="poly" title=" " alt="" coords="2058,105,2117,146,2111,145,2056,110"/>
+</map>
+</div>
+</div>
 <p><a href="../../d1/d00/a00128_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:ac6931830ac92c816233daa3effba94f3" id="r_ac6931830ac92c816233daa3effba94f3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac6931830ac92c816233daa3effba94f3">ES40_GIT_COMMIT</a>&#160;&#160;&#160;&quot;unknown&quot;</td></tr>
-<tr class="memitem:a777e1baef81548a6bd84c0da28443435" id="r_a777e1baef81548a6bd84c0da28443435"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a777e1baef81548a6bd84c0da28443435">HAVE_ALARM</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a7d1a71461e07569d0c9003da24c30a59" id="r_a7d1a71461e07569d0c9003da24c30a59"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a7d1a71461e07569d0c9003da24c30a59">HAVE_ARPA_INET_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:ab7193a1e959e1b4cfdba7551718be0eb" id="r_ab7193a1e959e1b4cfdba7551718be0eb"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab7193a1e959e1b4cfdba7551718be0eb">HAVE_ARPA_TELNET_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:ac4faa6cee576eede96dd582213f19b78" id="r_ac4faa6cee576eede96dd582213f19b78"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac4faa6cee576eede96dd582213f19b78">HAVE_ATEXIT</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:abd3c4aff90801d067f0dd1d176a0d1ac" id="r_abd3c4aff90801d067f0dd1d176a0d1ac"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#abd3c4aff90801d067f0dd1d176a0d1ac">HAVE_CTYPE_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a88edf98b6b270a8e6fbc057c86ca4ba2" id="r_a88edf98b6b270a8e6fbc057c86ca4ba2"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a88edf98b6b270a8e6fbc057c86ca4ba2">HAVE_CXX17</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:ae655a511fd230d2fd6b99ff2801df201" id="r_ae655a511fd230d2fd6b99ff2801df201"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae655a511fd230d2fd6b99ff2801df201">HAVE_ERRNO_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a765d75020849aa0a9b6becd9a5b7a193" id="r_a765d75020849aa0a9b6becd9a5b7a193"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a765d75020849aa0a9b6becd9a5b7a193">HAVE_FCNTL_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:ae66ae9e7dd3317575c065cfee95af9af" id="r_ae66ae9e7dd3317575c065cfee95af9af"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae66ae9e7dd3317575c065cfee95af9af">HAVE_FOPEN</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:ae98c32abae3d92397968014cad3dfb39" id="r_ae98c32abae3d92397968014cad3dfb39"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae98c32abae3d92397968014cad3dfb39">HAVE_FOPEN64</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:af5eda00981183c9820f5930f0933c293" id="r_af5eda00981183c9820f5930f0933c293"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af5eda00981183c9820f5930f0933c293">HAVE_FORK</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:aa3f9bf1a577dac0b2776294ceceef0a0" id="r_aa3f9bf1a577dac0b2776294ceceef0a0"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aa3f9bf1a577dac0b2776294ceceef0a0">HAVE_FSEEK</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a15584f56d115b955377103a0cca9ead1" id="r_a15584f56d115b955377103a0cca9ead1"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a15584f56d115b955377103a0cca9ead1">HAVE_FSEEKO</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:ab57ffb2eb44926eb8af7a29a5902263d" id="r_ab57ffb2eb44926eb8af7a29a5902263d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab57ffb2eb44926eb8af7a29a5902263d">HAVE_FSEEKO64</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:ab96b8c4b3c1b32bf3e6447d72fe7528d" id="r_ab96b8c4b3c1b32bf3e6447d72fe7528d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab96b8c4b3c1b32bf3e6447d72fe7528d">HAVE_FTELL</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a0a0949840371d3f948f1a3c5d2046c6e" id="r_a0a0949840371d3f948f1a3c5d2046c6e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0a0949840371d3f948f1a3c5d2046c6e">HAVE_FTELLO</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a472e51100021983aca24308a748cc784" id="r_a472e51100021983aca24308a748cc784"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a472e51100021983aca24308a748cc784">HAVE_FTELLO64</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:ad719da5884fb483b57d9d1ccdea9ec10" id="r_ad719da5884fb483b57d9d1ccdea9ec10"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad719da5884fb483b57d9d1ccdea9ec10">HAVE_INET_ATON</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:ab90a030ff2790ebdc176660a6dd2a478" id="r_ab90a030ff2790ebdc176660a6dd2a478"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab90a030ff2790ebdc176660a6dd2a478">HAVE_INTTYPES_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a95e96283574b8b96b6cd1659f9788307" id="r_a95e96283574b8b96b6cd1659f9788307"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a95e96283574b8b96b6cd1659f9788307">HAVE_ISBLANK</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a14503280ca0cb757db915eea09282bfc" id="r_a14503280ca0cb757db915eea09282bfc"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a14503280ca0cb757db915eea09282bfc">HAVE_MALLOC</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a7981d8bf53b0cb48f41ab0e4ddb7c629" id="r_a7981d8bf53b0cb48f41ab0e4ddb7c629"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a7981d8bf53b0cb48f41ab0e4ddb7c629">HAVE_MALLOC_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a3df52e9809253860c385be6f3a160607" id="r_a3df52e9809253860c385be6f3a160607"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a3df52e9809253860c385be6f3a160607">HAVE_MEMSET</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a0938658b988a082864efcee2d1b2bfd2" id="r_a0938658b988a082864efcee2d1b2bfd2"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0938658b988a082864efcee2d1b2bfd2">HAVE_NETINET_IN_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:aac699f6be8f38e3c8a5f375df9a12aaf" id="r_aac699f6be8f38e3c8a5f375df9a12aaf"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aac699f6be8f38e3c8a5f375df9a12aaf">HAVE_PTHREAD</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:acf71b36fdd29bd9ef6709cecac0536d2" id="r_acf71b36fdd29bd9ef6709cecac0536d2"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#acf71b36fdd29bd9ef6709cecac0536d2">HAVE_PTHREAD_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a428591e6b13dacf3451dc891e385f51b" id="r_a428591e6b13dacf3451dc891e385f51b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a428591e6b13dacf3451dc891e385f51b">HAVE_PTHREAD_PRIO_INHERIT</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a0302094a0ee567c610a36c63104ebda5" id="r_a0302094a0ee567c610a36c63104ebda5"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0302094a0ee567c610a36c63104ebda5">HAVE_REALLOC</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:ac3e242ca294a803a12a79779c84d1f4a" id="r_ac3e242ca294a803a12a79779c84d1f4a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac3e242ca294a803a12a79779c84d1f4a">HAVE_SDL</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:aee3a7313d861afa18971031528fd0cd5" id="r_aee3a7313d861afa18971031528fd0cd5"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aee3a7313d861afa18971031528fd0cd5">HAVE_SELECT</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a494d1ecf5a4567ccbf7901e3be337bc7" id="r_a494d1ecf5a4567ccbf7901e3be337bc7"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a494d1ecf5a4567ccbf7901e3be337bc7">HAVE_SIGNAL_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a4cd6234bfe3f7c10968a1151f43ce280" id="r_a4cd6234bfe3f7c10968a1151f43ce280"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a4cd6234bfe3f7c10968a1151f43ce280">HAVE_SOCKET</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a8c3fa1b2f1be8c6f6929548c548cf50a" id="r_a8c3fa1b2f1be8c6f6929548c548cf50a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a8c3fa1b2f1be8c6f6929548c548cf50a">HAVE_STDBOOL_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:ab6cd6d1c63c1e26ea2d4537b77148354" id="r_ab6cd6d1c63c1e26ea2d4537b77148354"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab6cd6d1c63c1e26ea2d4537b77148354">HAVE_STDINT_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:ae021ce4fe74984428cc97427b7358fda" id="r_ae021ce4fe74984428cc97427b7358fda"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae021ce4fe74984428cc97427b7358fda">HAVE_STDIO_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a9e0e434ec1a6ddbd97db12b5a32905e0" id="r_a9e0e434ec1a6ddbd97db12b5a32905e0"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9e0e434ec1a6ddbd97db12b5a32905e0">HAVE_STDLIB_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a1569275063253ce85180e755a82e536d" id="r_a1569275063253ce85180e755a82e536d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a1569275063253ce85180e755a82e536d">HAVE_STRCASECMP</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a37eb0020e42f0ebb6cba24c2888cc48b" id="r_a37eb0020e42f0ebb6cba24c2888cc48b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a37eb0020e42f0ebb6cba24c2888cc48b">HAVE_STRCHR</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a41b838eb3b86a0ebbd0981e92a759c0f" id="r_a41b838eb3b86a0ebbd0981e92a759c0f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a41b838eb3b86a0ebbd0981e92a759c0f">HAVE_STRDUP</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a405d10d46190bcb0320524c54eafc850" id="r_a405d10d46190bcb0320524c54eafc850"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a405d10d46190bcb0320524c54eafc850">HAVE_STRINGS_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:ad4c234dd1625255dc626a15886306e7d" id="r_ad4c234dd1625255dc626a15886306e7d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad4c234dd1625255dc626a15886306e7d">HAVE_STRING_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a6b9c27181277250e218629da3b335a16" id="r_a6b9c27181277250e218629da3b335a16"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6b9c27181277250e218629da3b335a16">HAVE_STRNCASECMP</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:aecb4dff1de46336ff30ad7a3a6743cc5" id="r_aecb4dff1de46336ff30ad7a3a6743cc5"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aecb4dff1de46336ff30ad7a3a6743cc5">HAVE_STRSPN</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a05aa9fc25e1231d8eb347390558e4e22" id="r_a05aa9fc25e1231d8eb347390558e4e22"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a05aa9fc25e1231d8eb347390558e4e22">HAVE_SYS_PARAM_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a927b0f172f6c47a024166a841f261bb7" id="r_a927b0f172f6c47a024166a841f261bb7"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a927b0f172f6c47a024166a841f261bb7">HAVE_SYS_SELECT_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:afb96c2bc08ebf33cca68c714f624a58d" id="r_afb96c2bc08ebf33cca68c714f624a58d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#afb96c2bc08ebf33cca68c714f624a58d">HAVE_SYS_SOCKET_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:ace156430ba007d19b4348a950d0c692b" id="r_ace156430ba007d19b4348a950d0c692b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ace156430ba007d19b4348a950d0c692b">HAVE_SYS_STAT_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a2aae46056558e9d6fef6380f9678ffe3" id="r_a2aae46056558e9d6fef6380f9678ffe3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a2aae46056558e9d6fef6380f9678ffe3">HAVE_SYS_TIME_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a69dc70bea5d1f8bd2be9740e974fa666" id="r_a69dc70bea5d1f8bd2be9740e974fa666"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a69dc70bea5d1f8bd2be9740e974fa666">HAVE_SYS_TYPES_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:af249315f5939884ce5b4585ca81a1e39" id="r_af249315f5939884ce5b4585ca81a1e39"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af249315f5939884ce5b4585ca81a1e39">HAVE_SYS_WAIT_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:aaa08455fea9b4846d99d5dc9ce69b342" id="r_aaa08455fea9b4846d99d5dc9ce69b342"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aaa08455fea9b4846d99d5dc9ce69b342">HAVE_TAP_NET</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a219b06937831d0da94d801ab13987639" id="r_a219b06937831d0da94d801ab13987639"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a219b06937831d0da94d801ab13987639">HAVE_UNISTD_H</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a6e660eb97fa8ec4462facdd5d3721aed" id="r_a6e660eb97fa8ec4462facdd5d3721aed"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6e660eb97fa8ec4462facdd5d3721aed">HAVE_VFORK</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:ac5b8a9a863350e942e04a4ad13fe905a" id="r_ac5b8a9a863350e942e04a4ad13fe905a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac5b8a9a863350e942e04a4ad13fe905a">HAVE_WORKING_FORK</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a3f110f0b36f0c6ef25501e5a10e9a0de" id="r_a3f110f0b36f0c6ef25501e5a10e9a0de"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a3f110f0b36f0c6ef25501e5a10e9a0de">HAVE_WORKING_VFORK</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a862ffdbac7ac8323712310a418b7d9a3" id="r_a862ffdbac7ac8323712310a418b7d9a3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a862ffdbac7ac8323712310a418b7d9a3">HAVE__BOOL</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:aca8570fb706c81df371b7f9bc454ae03" id="r_aca8570fb706c81df371b7f9bc454ae03"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aca8570fb706c81df371b7f9bc454ae03">PACKAGE</a>&#160;&#160;&#160;&quot;es40&quot;</td></tr>
-<tr class="memitem:a1d1d2d7f8d2f95b376954d649ab03233" id="r_a1d1d2d7f8d2f95b376954d649ab03233"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a1d1d2d7f8d2f95b376954d649ab03233">PACKAGE_BUGREPORT</a>&#160;&#160;&#160;&quot;https://github.com/ES40-Emu/es40/issues/new&quot;</td></tr>
-<tr class="memitem:a1c0439e4355794c09b64274849eb0279" id="r_a1c0439e4355794c09b64274849eb0279"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a1c0439e4355794c09b64274849eb0279">PACKAGE_NAME</a>&#160;&#160;&#160;&quot;es40&quot;</td></tr>
-<tr class="memitem:ac73e6f903c16eca7710f92e36e1c6fbf" id="r_ac73e6f903c16eca7710f92e36e1c6fbf"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac73e6f903c16eca7710f92e36e1c6fbf">PACKAGE_STRING</a>&#160;&#160;&#160;&quot;es40 0.84&quot;</td></tr>
-<tr class="memitem:af415af6bfede0e8d5453708afe68651c" id="r_af415af6bfede0e8d5453708afe68651c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af415af6bfede0e8d5453708afe68651c">PACKAGE_TARNAME</a>&#160;&#160;&#160;&quot;es40&quot;</td></tr>
-<tr class="memitem:a5c93853116d5a50307b6744f147840aa" id="r_a5c93853116d5a50307b6744f147840aa"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5c93853116d5a50307b6744f147840aa">PACKAGE_URL</a>&#160;&#160;&#160;&quot;https://github.com/ES40-Emu/es40/issues&quot;</td></tr>
-<tr class="memitem:aa326a05d5e30f9e9a4bb0b4469d5d0c0" id="r_aa326a05d5e30f9e9a4bb0b4469d5d0c0"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aa326a05d5e30f9e9a4bb0b4469d5d0c0">PACKAGE_VERSION</a>&#160;&#160;&#160;&quot;0.84&quot;</td></tr>
-<tr class="memitem:adbe5dcee9c146b338794974137c55e70" id="r_adbe5dcee9c146b338794974137c55e70"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#adbe5dcee9c146b338794974137c55e70">RETSIGTYPE</a>&#160;&#160;&#160;void</td></tr>
-<tr class="memitem:a9f4c30db127f8c10d9b4f0eaed1d6e8f" id="r_a9f4c30db127f8c10d9b4f0eaed1d6e8f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9f4c30db127f8c10d9b4f0eaed1d6e8f">SELECT_TYPE_ARG1</a>&#160;&#160;&#160;int</td></tr>
-<tr class="memitem:a2c1fd0e84b7aaf9617b67596ef9b274f" id="r_a2c1fd0e84b7aaf9617b67596ef9b274f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a2c1fd0e84b7aaf9617b67596ef9b274f">SELECT_TYPE_ARG234</a>&#160;&#160;&#160;(fd_set *)</td></tr>
-<tr class="memitem:af3f6c94b1def9d6d936270c458f586a0" id="r_af3f6c94b1def9d6d936270c458f586a0"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af3f6c94b1def9d6d936270c458f586a0">SELECT_TYPE_ARG5</a>&#160;&#160;&#160;(struct timeval *)</td></tr>
-<tr class="memitem:a550e5c272cc3cf3814651721167dcd23" id="r_a550e5c272cc3cf3814651721167dcd23"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a550e5c272cc3cf3814651721167dcd23">STDC_HEADERS</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a2b44ef64cf38e064ef11e11f35271380" id="r_a2b44ef64cf38e064ef11e11f35271380"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a2b44ef64cf38e064ef11e11f35271380">TIME_WITH_SYS_TIME</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a1c6d5de492ac61ad29aec7aa9a436bbf" id="r_a1c6d5de492ac61ad29aec7aa9a436bbf"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a1c6d5de492ac61ad29aec7aa9a436bbf">VERSION</a>&#160;&#160;&#160;&quot;0.84&quot;</td></tr>
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Data Structures</h2></td></tr>
+<tr class="memitem:GUIHotkeyPrompt" id="r_GUIHotkeyPrompt"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../de/d00/a01101.html">GUIHotkeyPrompt</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a49fe56c9967ff7bc117c46e3c5731d28" id="r_a49fe56c9967ff7bc117c46e3c5731d28"><td class="memItemLeft">static string&#160;</td><td class="memItemRight"><a class="el" href="#a49fe56c9967ff7bc117c46e3c5731d28">trim_answer</a> (const string &amp;value)</td></tr>
+<tr class="memitem:af654c080e1f2899e44cae4afc8cda239" id="r_af654c080e1f2899e44cae4afc8cda239"><td class="memItemLeft">static string&#160;</td><td class="memItemRight"><a class="el" href="#af654c080e1f2899e44cae4afc8cda239">ask_hotkey_override</a> (const <a class="el" href="../../de/d00/a01101.html">GUIHotkeyPrompt</a> &amp;prompt)</td></tr>
+<tr class="memitem:adb7fd98aad769c408f50ad78587767b5" id="r_adb7fd98aad769c408f50ad78587767b5"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#adb7fd98aad769c408f50ad78587767b5">add_disks</a> (<a class="el" href="../../d6/d00/a01125.html">ShrinkingChoiceQuestion</a> *disk_q, ostream *os, bool floppy=false)</td></tr>
+<tr class="memdesc:adb7fd98aad769c408f50ad78587767b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add disks for a controller to the configuration file.  <br /></td></tr>
+<tr class="memitem:a0ddf1224851353fc92bfbff6f499fa97" id="r_a0ddf1224851353fc92bfbff6f499fa97"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a0ddf1224851353fc92bfbff6f499fa97">main</a> (int argc, char *argv[])</td></tr>
+<tr class="memdesc:a0ddf1224851353fc92bfbff6f499fa97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Main program entry point.  <br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a1395871239d0eb401560f43391ee5a68" id="r_a1395871239d0eb401560f43391ee5a68"><td class="memItemLeft">static const <a class="el" href="../../de/d00/a01101.html">GUIHotkeyPrompt</a>&#160;</td><td class="memItemRight"><a class="el" href="#a1395871239d0eb401560f43391ee5a68">gui_hotkey_prompts</a> []</td></tr>
 </table>
-<a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
-<a id="ac6931830ac92c816233daa3effba94f3" name="ac6931830ac92c816233daa3effba94f3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac6931830ac92c816233daa3effba94f3">&#9670;&#160;</a></span>ES40_GIT_COMMIT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ES40_GIT_COMMIT&#160;&#160;&#160;&quot;unknown&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00005">5</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a862ffdbac7ac8323712310a418b7d9a3" name="a862ffdbac7ac8323712310a418b7d9a3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a862ffdbac7ac8323712310a418b7d9a3">&#9670;&#160;</a></span>HAVE__BOOL</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE__BOOL&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00214">214</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a777e1baef81548a6bd84c0da28443435" name="a777e1baef81548a6bd84c0da28443435"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a777e1baef81548a6bd84c0da28443435">&#9670;&#160;</a></span>HAVE_ALARM</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_ALARM&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00008">8</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a7d1a71461e07569d0c9003da24c30a59" name="a7d1a71461e07569d0c9003da24c30a59"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7d1a71461e07569d0c9003da24c30a59">&#9670;&#160;</a></span>HAVE_ARPA_INET_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_ARPA_INET_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00011">11</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="ab7193a1e959e1b4cfdba7551718be0eb" name="ab7193a1e959e1b4cfdba7551718be0eb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab7193a1e959e1b4cfdba7551718be0eb">&#9670;&#160;</a></span>HAVE_ARPA_TELNET_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_ARPA_TELNET_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00014">14</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="ac4faa6cee576eede96dd582213f19b78" name="ac4faa6cee576eede96dd582213f19b78"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac4faa6cee576eede96dd582213f19b78">&#9670;&#160;</a></span>HAVE_ATEXIT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_ATEXIT&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00017">17</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="abd3c4aff90801d067f0dd1d176a0d1ac" name="abd3c4aff90801d067f0dd1d176a0d1ac"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abd3c4aff90801d067f0dd1d176a0d1ac">&#9670;&#160;</a></span>HAVE_CTYPE_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_CTYPE_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00020">20</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a88edf98b6b270a8e6fbc057c86ca4ba2" name="a88edf98b6b270a8e6fbc057c86ca4ba2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a88edf98b6b270a8e6fbc057c86ca4ba2">&#9670;&#160;</a></span>HAVE_CXX17</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_CXX17&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00023">23</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="ae655a511fd230d2fd6b99ff2801df201" name="ae655a511fd230d2fd6b99ff2801df201"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae655a511fd230d2fd6b99ff2801df201">&#9670;&#160;</a></span>HAVE_ERRNO_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_ERRNO_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00026">26</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a765d75020849aa0a9b6becd9a5b7a193" name="a765d75020849aa0a9b6becd9a5b7a193"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a765d75020849aa0a9b6becd9a5b7a193">&#9670;&#160;</a></span>HAVE_FCNTL_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_FCNTL_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00029">29</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="ae66ae9e7dd3317575c065cfee95af9af" name="ae66ae9e7dd3317575c065cfee95af9af"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae66ae9e7dd3317575c065cfee95af9af">&#9670;&#160;</a></span>HAVE_FOPEN</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_FOPEN&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00032">32</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="ae98c32abae3d92397968014cad3dfb39" name="ae98c32abae3d92397968014cad3dfb39"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae98c32abae3d92397968014cad3dfb39">&#9670;&#160;</a></span>HAVE_FOPEN64</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_FOPEN64&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00035">35</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="af5eda00981183c9820f5930f0933c293" name="af5eda00981183c9820f5930f0933c293"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af5eda00981183c9820f5930f0933c293">&#9670;&#160;</a></span>HAVE_FORK</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_FORK&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00038">38</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="aa3f9bf1a577dac0b2776294ceceef0a0" name="aa3f9bf1a577dac0b2776294ceceef0a0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa3f9bf1a577dac0b2776294ceceef0a0">&#9670;&#160;</a></span>HAVE_FSEEK</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_FSEEK&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00041">41</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a15584f56d115b955377103a0cca9ead1" name="a15584f56d115b955377103a0cca9ead1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a15584f56d115b955377103a0cca9ead1">&#9670;&#160;</a></span>HAVE_FSEEKO</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_FSEEKO&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00044">44</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="ab57ffb2eb44926eb8af7a29a5902263d" name="ab57ffb2eb44926eb8af7a29a5902263d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab57ffb2eb44926eb8af7a29a5902263d">&#9670;&#160;</a></span>HAVE_FSEEKO64</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_FSEEKO64&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00047">47</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="ab96b8c4b3c1b32bf3e6447d72fe7528d" name="ab96b8c4b3c1b32bf3e6447d72fe7528d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab96b8c4b3c1b32bf3e6447d72fe7528d">&#9670;&#160;</a></span>HAVE_FTELL</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_FTELL&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00050">50</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a0a0949840371d3f948f1a3c5d2046c6e" name="a0a0949840371d3f948f1a3c5d2046c6e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0a0949840371d3f948f1a3c5d2046c6e">&#9670;&#160;</a></span>HAVE_FTELLO</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_FTELLO&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00053">53</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a472e51100021983aca24308a748cc784" name="a472e51100021983aca24308a748cc784"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a472e51100021983aca24308a748cc784">&#9670;&#160;</a></span>HAVE_FTELLO64</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_FTELLO64&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00056">56</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="ad719da5884fb483b57d9d1ccdea9ec10" name="ad719da5884fb483b57d9d1ccdea9ec10"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad719da5884fb483b57d9d1ccdea9ec10">&#9670;&#160;</a></span>HAVE_INET_ATON</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_INET_ATON&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00062">62</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="ab90a030ff2790ebdc176660a6dd2a478" name="ab90a030ff2790ebdc176660a6dd2a478"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab90a030ff2790ebdc176660a6dd2a478">&#9670;&#160;</a></span>HAVE_INTTYPES_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_INTTYPES_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00068">68</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a95e96283574b8b96b6cd1659f9788307" name="a95e96283574b8b96b6cd1659f9788307"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a95e96283574b8b96b6cd1659f9788307">&#9670;&#160;</a></span>HAVE_ISBLANK</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_ISBLANK&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00074">74</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a14503280ca0cb757db915eea09282bfc" name="a14503280ca0cb757db915eea09282bfc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a14503280ca0cb757db915eea09282bfc">&#9670;&#160;</a></span>HAVE_MALLOC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_MALLOC&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00078">78</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a7981d8bf53b0cb48f41ab0e4ddb7c629" name="a7981d8bf53b0cb48f41ab0e4ddb7c629"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7981d8bf53b0cb48f41ab0e4ddb7c629">&#9670;&#160;</a></span>HAVE_MALLOC_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_MALLOC_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00081">81</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a3df52e9809253860c385be6f3a160607" name="a3df52e9809253860c385be6f3a160607"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3df52e9809253860c385be6f3a160607">&#9670;&#160;</a></span>HAVE_MEMSET</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_MEMSET&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00084">84</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a0938658b988a082864efcee2d1b2bfd2" name="a0938658b988a082864efcee2d1b2bfd2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0938658b988a082864efcee2d1b2bfd2">&#9670;&#160;</a></span>HAVE_NETINET_IN_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_NETINET_IN_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00087">87</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="aac699f6be8f38e3c8a5f375df9a12aaf" name="aac699f6be8f38e3c8a5f375df9a12aaf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aac699f6be8f38e3c8a5f375df9a12aaf">&#9670;&#160;</a></span>HAVE_PTHREAD</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_PTHREAD&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00099">99</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="acf71b36fdd29bd9ef6709cecac0536d2" name="acf71b36fdd29bd9ef6709cecac0536d2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acf71b36fdd29bd9ef6709cecac0536d2">&#9670;&#160;</a></span>HAVE_PTHREAD_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_PTHREAD_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00102">102</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a428591e6b13dacf3451dc891e385f51b" name="a428591e6b13dacf3451dc891e385f51b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a428591e6b13dacf3451dc891e385f51b">&#9670;&#160;</a></span>HAVE_PTHREAD_PRIO_INHERIT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_PTHREAD_PRIO_INHERIT&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00105">105</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a0302094a0ee567c610a36c63104ebda5" name="a0302094a0ee567c610a36c63104ebda5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0302094a0ee567c610a36c63104ebda5">&#9670;&#160;</a></span>HAVE_REALLOC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_REALLOC&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00109">109</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="ac3e242ca294a803a12a79779c84d1f4a" name="ac3e242ca294a803a12a79779c84d1f4a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac3e242ca294a803a12a79779c84d1f4a">&#9670;&#160;</a></span>HAVE_SDL</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_SDL&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00112">112</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="aee3a7313d861afa18971031528fd0cd5" name="aee3a7313d861afa18971031528fd0cd5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aee3a7313d861afa18971031528fd0cd5">&#9670;&#160;</a></span>HAVE_SELECT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_SELECT&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00115">115</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a494d1ecf5a4567ccbf7901e3be337bc7" name="a494d1ecf5a4567ccbf7901e3be337bc7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a494d1ecf5a4567ccbf7901e3be337bc7">&#9670;&#160;</a></span>HAVE_SIGNAL_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_SIGNAL_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00118">118</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a4cd6234bfe3f7c10968a1151f43ce280" name="a4cd6234bfe3f7c10968a1151f43ce280"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4cd6234bfe3f7c10968a1151f43ce280">&#9670;&#160;</a></span>HAVE_SOCKET</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_SOCKET&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00121">121</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a8c3fa1b2f1be8c6f6929548c548cf50a" name="a8c3fa1b2f1be8c6f6929548c548cf50a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8c3fa1b2f1be8c6f6929548c548cf50a">&#9670;&#160;</a></span>HAVE_STDBOOL_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_STDBOOL_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00130">130</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="ab6cd6d1c63c1e26ea2d4537b77148354" name="ab6cd6d1c63c1e26ea2d4537b77148354"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab6cd6d1c63c1e26ea2d4537b77148354">&#9670;&#160;</a></span>HAVE_STDINT_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_STDINT_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00133">133</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="ae021ce4fe74984428cc97427b7358fda" name="ae021ce4fe74984428cc97427b7358fda"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae021ce4fe74984428cc97427b7358fda">&#9670;&#160;</a></span>HAVE_STDIO_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_STDIO_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00136">136</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a9e0e434ec1a6ddbd97db12b5a32905e0" name="a9e0e434ec1a6ddbd97db12b5a32905e0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9e0e434ec1a6ddbd97db12b5a32905e0">&#9670;&#160;</a></span>HAVE_STDLIB_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_STDLIB_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00139">139</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a1569275063253ce85180e755a82e536d" name="a1569275063253ce85180e755a82e536d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1569275063253ce85180e755a82e536d">&#9670;&#160;</a></span>HAVE_STRCASECMP</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_STRCASECMP&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00142">142</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a37eb0020e42f0ebb6cba24c2888cc48b" name="a37eb0020e42f0ebb6cba24c2888cc48b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a37eb0020e42f0ebb6cba24c2888cc48b">&#9670;&#160;</a></span>HAVE_STRCHR</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_STRCHR&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00145">145</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a41b838eb3b86a0ebbd0981e92a759c0f" name="a41b838eb3b86a0ebbd0981e92a759c0f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a41b838eb3b86a0ebbd0981e92a759c0f">&#9670;&#160;</a></span>HAVE_STRDUP</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_STRDUP&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00148">148</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="ad4c234dd1625255dc626a15886306e7d" name="ad4c234dd1625255dc626a15886306e7d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad4c234dd1625255dc626a15886306e7d">&#9670;&#160;</a></span>HAVE_STRING_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_STRING_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00154">154</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a405d10d46190bcb0320524c54eafc850" name="a405d10d46190bcb0320524c54eafc850"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a405d10d46190bcb0320524c54eafc850">&#9670;&#160;</a></span>HAVE_STRINGS_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_STRINGS_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00151">151</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a6b9c27181277250e218629da3b335a16" name="a6b9c27181277250e218629da3b335a16"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6b9c27181277250e218629da3b335a16">&#9670;&#160;</a></span>HAVE_STRNCASECMP</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_STRNCASECMP&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00157">157</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="aecb4dff1de46336ff30ad7a3a6743cc5" name="aecb4dff1de46336ff30ad7a3a6743cc5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aecb4dff1de46336ff30ad7a3a6743cc5">&#9670;&#160;</a></span>HAVE_STRSPN</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_STRSPN&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00160">160</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a05aa9fc25e1231d8eb347390558e4e22" name="a05aa9fc25e1231d8eb347390558e4e22"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a05aa9fc25e1231d8eb347390558e4e22">&#9670;&#160;</a></span>HAVE_SYS_PARAM_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_SYS_PARAM_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00163">163</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a927b0f172f6c47a024166a841f261bb7" name="a927b0f172f6c47a024166a841f261bb7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a927b0f172f6c47a024166a841f261bb7">&#9670;&#160;</a></span>HAVE_SYS_SELECT_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_SYS_SELECT_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00166">166</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="afb96c2bc08ebf33cca68c714f624a58d" name="afb96c2bc08ebf33cca68c714f624a58d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afb96c2bc08ebf33cca68c714f624a58d">&#9670;&#160;</a></span>HAVE_SYS_SOCKET_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_SYS_SOCKET_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00169">169</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="ace156430ba007d19b4348a950d0c692b" name="ace156430ba007d19b4348a950d0c692b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ace156430ba007d19b4348a950d0c692b">&#9670;&#160;</a></span>HAVE_SYS_STAT_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_SYS_STAT_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00172">172</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a2aae46056558e9d6fef6380f9678ffe3" name="a2aae46056558e9d6fef6380f9678ffe3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2aae46056558e9d6fef6380f9678ffe3">&#9670;&#160;</a></span>HAVE_SYS_TIME_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_SYS_TIME_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00175">175</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a69dc70bea5d1f8bd2be9740e974fa666" name="a69dc70bea5d1f8bd2be9740e974fa666"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a69dc70bea5d1f8bd2be9740e974fa666">&#9670;&#160;</a></span>HAVE_SYS_TYPES_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_SYS_TYPES_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00178">178</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="af249315f5939884ce5b4585ca81a1e39" name="af249315f5939884ce5b4585ca81a1e39"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af249315f5939884ce5b4585ca81a1e39">&#9670;&#160;</a></span>HAVE_SYS_WAIT_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_SYS_WAIT_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00181">181</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="aaa08455fea9b4846d99d5dc9ce69b342" name="aaa08455fea9b4846d99d5dc9ce69b342"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaa08455fea9b4846d99d5dc9ce69b342">&#9670;&#160;</a></span>HAVE_TAP_NET</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_TAP_NET&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00184">184</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a219b06937831d0da94d801ab13987639" name="a219b06937831d0da94d801ab13987639"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a219b06937831d0da94d801ab13987639">&#9670;&#160;</a></span>HAVE_UNISTD_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_UNISTD_H&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00187">187</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a6e660eb97fa8ec4462facdd5d3721aed" name="a6e660eb97fa8ec4462facdd5d3721aed"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6e660eb97fa8ec4462facdd5d3721aed">&#9670;&#160;</a></span>HAVE_VFORK</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_VFORK&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00190">190</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="ac5b8a9a863350e942e04a4ad13fe905a" name="ac5b8a9a863350e942e04a4ad13fe905a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac5b8a9a863350e942e04a4ad13fe905a">&#9670;&#160;</a></span>HAVE_WORKING_FORK</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_WORKING_FORK&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00205">205</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a3f110f0b36f0c6ef25501e5a10e9a0de" name="a3f110f0b36f0c6ef25501e5a10e9a0de"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3f110f0b36f0c6ef25501e5a10e9a0de">&#9670;&#160;</a></span>HAVE_WORKING_VFORK</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define HAVE_WORKING_VFORK&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00208">208</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="aca8570fb706c81df371b7f9bc454ae03" name="aca8570fb706c81df371b7f9bc454ae03"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aca8570fb706c81df371b7f9bc454ae03">&#9670;&#160;</a></span>PACKAGE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PACKAGE&#160;&#160;&#160;&quot;es40&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00232">232</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a1d1d2d7f8d2f95b376954d649ab03233" name="a1d1d2d7f8d2f95b376954d649ab03233"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1d1d2d7f8d2f95b376954d649ab03233">&#9670;&#160;</a></span>PACKAGE_BUGREPORT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PACKAGE_BUGREPORT&#160;&#160;&#160;&quot;https://github.com/ES40-Emu/es40/issues/new&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00235">235</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a1c0439e4355794c09b64274849eb0279" name="a1c0439e4355794c09b64274849eb0279"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1c0439e4355794c09b64274849eb0279">&#9670;&#160;</a></span>PACKAGE_NAME</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PACKAGE_NAME&#160;&#160;&#160;&quot;es40&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00238">238</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="ac73e6f903c16eca7710f92e36e1c6fbf" name="ac73e6f903c16eca7710f92e36e1c6fbf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac73e6f903c16eca7710f92e36e1c6fbf">&#9670;&#160;</a></span>PACKAGE_STRING</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PACKAGE_STRING&#160;&#160;&#160;&quot;es40 0.84&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00241">241</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="af415af6bfede0e8d5453708afe68651c" name="af415af6bfede0e8d5453708afe68651c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af415af6bfede0e8d5453708afe68651c">&#9670;&#160;</a></span>PACKAGE_TARNAME</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PACKAGE_TARNAME&#160;&#160;&#160;&quot;es40&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00244">244</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a5c93853116d5a50307b6744f147840aa" name="a5c93853116d5a50307b6744f147840aa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5c93853116d5a50307b6744f147840aa">&#9670;&#160;</a></span>PACKAGE_URL</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PACKAGE_URL&#160;&#160;&#160;&quot;https://github.com/ES40-Emu/es40/issues&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00247">247</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="aa326a05d5e30f9e9a4bb0b4469d5d0c0" name="aa326a05d5e30f9e9a4bb0b4469d5d0c0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa326a05d5e30f9e9a4bb0b4469d5d0c0">&#9670;&#160;</a></span>PACKAGE_VERSION</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PACKAGE_VERSION&#160;&#160;&#160;&quot;0.84&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00250">250</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="adbe5dcee9c146b338794974137c55e70" name="adbe5dcee9c146b338794974137c55e70"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adbe5dcee9c146b338794974137c55e70">&#9670;&#160;</a></span>RETSIGTYPE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define RETSIGTYPE&#160;&#160;&#160;void</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00259">259</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a9f4c30db127f8c10d9b4f0eaed1d6e8f" name="a9f4c30db127f8c10d9b4f0eaed1d6e8f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9f4c30db127f8c10d9b4f0eaed1d6e8f">&#9670;&#160;</a></span>SELECT_TYPE_ARG1</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define SELECT_TYPE_ARG1&#160;&#160;&#160;int</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00262">262</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a2c1fd0e84b7aaf9617b67596ef9b274f" name="a2c1fd0e84b7aaf9617b67596ef9b274f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2c1fd0e84b7aaf9617b67596ef9b274f">&#9670;&#160;</a></span>SELECT_TYPE_ARG234</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define SELECT_TYPE_ARG234&#160;&#160;&#160;(fd_set *)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00265">265</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="af3f6c94b1def9d6d936270c458f586a0" name="af3f6c94b1def9d6d936270c458f586a0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af3f6c94b1def9d6d936270c458f586a0">&#9670;&#160;</a></span>SELECT_TYPE_ARG5</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define SELECT_TYPE_ARG5&#160;&#160;&#160;(struct timeval *)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00268">268</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a550e5c272cc3cf3814651721167dcd23" name="a550e5c272cc3cf3814651721167dcd23"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a550e5c272cc3cf3814651721167dcd23">&#9670;&#160;</a></span>STDC_HEADERS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define STDC_HEADERS&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00273">273</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a2b44ef64cf38e064ef11e11f35271380" name="a2b44ef64cf38e064ef11e11f35271380"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2b44ef64cf38e064ef11e11f35271380">&#9670;&#160;</a></span>TIME_WITH_SYS_TIME</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TIME_WITH_SYS_TIME&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00278">278</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-</div>
-</div>
-<a id="a1c6d5de492ac61ad29aec7aa9a436bbf" name="a1c6d5de492ac61ad29aec7aa9a436bbf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1c6d5de492ac61ad29aec7aa9a436bbf">&#9670;&#160;</a></span>VERSION</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define VERSION&#160;&#160;&#160;&quot;0.84&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00284">284</a> of file <a class="el" href="../../d1/d00/a00128_source.html">config.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d2/d00/a00083_source.html#l01029">es40_banner()</a>, <a class="el" href="../../d7/d00/a00002_source.html#l00305">main()</a>, and <a class="el" href="../../d4/d00/a00017_source.html#l00061">print_es40_banner()</a>.</p>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Configuration file creator. </p>
+<p>$Id$</p>
+<p>X-1.7 Camiel Vanderhoeven 29-APR-2008 Added floppy configuration.</p>
+<p>X-1.6 Camiel Vanderhoeven 29-MAR-2008 Replaced SDL with sdl.</p>
+<p>X-1.5 Camiel Vanderhoeven 29-MAR-2008 Fix VGA console value.</p>
+<p>X-1.4 Camiel Vanderhoeven 29-MAR-2008 Fill in NIC section.</p>
+<p>X-1.3 Camiel Vanderhoeven 28-MAR-2008 Fixed CD-ROM question behaviour.</p>
+<p>X-1.2 Camiel Vanderhoeven 28-MAR-2008 Properly capitalized "StdAfx.h".</p>
+<p>X-1.1 Camiel Vanderhoeven 28-MAR-2008 File created. </p>
+
+<p class="definition">Definition in file <a class="el" href="../../d1/d00/a00128_source.html">es40-cfg.cpp</a>.</p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="adb7fd98aad769c408f50ad78587767b5" name="adb7fd98aad769c408f50ad78587767b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb7fd98aad769c408f50ad78587767b5">&#9670;&#160;</a></span>add_disks()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void add_disks </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="../../d6/d00/a01125.html">ShrinkingChoiceQuestion</a> *</td>          <td class="paramname"><span class="paramname"><em>disk_q</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ostream *</td>          <td class="paramname"><span class="paramname"><em>os</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>floppy</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Add disks for a controller to the configuration file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">disk_q</td><td>A <a class="el" href="../../d6/d00/a01125.html" title="Question class implementing a &quot;Shrinking Choice&quot; question.">ShrinkingChoiceQuestion</a> that contains all allowed disk names for this controller, and a special answer "none" with a value of "". </td></tr>
+    <tr><td class="paramname">os</td><td>Output stream for the configuration file. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00227">227</a> of file <a class="el" href="../../d1/d00/a00128_source.html">es40-cfg.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../df/d00/a00107_source.html#l00597">add_disks()</a>, <a class="el" href="../../de/d00/a00134_source.html#l00112">MultipleChoiceQuestion::addAnswer()</a>, <a class="el" href="../../d7/d00/a00131_source.html#l00054">FreeTextQuestion::ask()</a>, <a class="el" href="../../de/d00/a00134_source.html#l00154">MultipleChoiceQuestion::ask()</a>, <a class="el" href="../../d2/d00/a00137_source.html#l00087">NumberQuestion::ask()</a>, <a class="el" href="../../de/d00/a00134_source.html#l00146">MultipleChoiceQuestion::countAnswers()</a>, <a class="el" href="../../de/d00/a00134_source.html#l00120">MultipleChoiceQuestion::explain()</a>, <a class="el" href="../../d5/d00/a00140_source.html#l00045">Question::getAnswer()</a>, <a class="el" href="../../d5/d00/a00140_source.html#l00053">Question::setAnswer()</a>, <a class="el" href="../../d5/d00/a00140_source.html#l00079">Question::setDefault()</a>, <a class="el" href="../../d5/d00/a00140_source.html#l00062">Question::setExplanation()</a>, <a class="el" href="../../d5/d00/a00140_source.html#l00070">Question::setQuestion()</a>, and <a class="el" href="../../d2/d00/a00137_source.html#l00071">NumberQuestion::setRange()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d1/d00/a00128_adb7fd98aad769c408f50ad78587767b5_cgraph.png" border="0" usemap="#ad1/d00/a00128_adb7fd98aad769c408f50ad78587767b5_cgraph" loading="lazy" alt=""/></div>
+<map name="ad1/d00/a00128_adb7fd98aad769c408f50ad78587767b5_cgraph" id="ad1/d00/a00128_adb7fd98aad769c408f50ad78587767b5_cgraph">
+<area shape="rect" title="Add disks for a controller to the configuration file." alt="" coords="5,1600,86,1627"/>
+<area shape="rect" href="../../df/d00/a00107.html#a30ce9217e2f73c216badd694b03bd399" title="Add disk &#39;disk_name&#39; to the controller &#39;parent&#39; of the configuration." alt="" coords="188,619,268,645"/>
+<area shape="poly" title=" " alt="" coords="47,1599,219,660,224,661,52,1600"/>
+<area shape="rect" href="../../d8/d00/a01113.html#aa4773c34891246ce027ce92d7e13b1d7" title="Add an answer to the set of allowed answers." alt="" coords="148,1277,308,1320"/>
+<area shape="poly" title=" " alt="" coords="46,1599,53,1556,68,1494,94,1425,111,1391,132,1360,148,1342,171,1326,168,1331,152,1346,136,1363,115,1394,98,1427,73,1495,58,1557,51,1600"/>
+<area shape="rect" href="../../de/d00/a01105.html#a4e0ee1b8945023966643623f7d5fb2ef" title="Ask the question, and return the answer." alt="" coords="396,1525,550,1552"/>
+<area shape="poly" title=" " alt="" coords="51,1598,82,1553,105,1529,133,1511,183,1495,225,1495,269,1503,322,1511,392,1521,387,1523,322,1516,268,1508,225,1500,184,1500,135,1516,108,1533,86,1556,56,1600"/>
+<area shape="rect" href="../../d8/d00/a01113.html#a98a7fffbb7b45cbb4ff3b6200a881575" title="Ask the question." alt="" coords="134,1373,322,1400"/>
+<area shape="poly" title=" " alt="" coords="46,1599,53,1562,68,1511,94,1457,111,1432,132,1410,140,1406,137,1411,135,1414,115,1435,98,1459,73,1513,58,1563,51,1600"/>
+<area shape="rect" href="../../d6/d00/a01117.html#adf24984c09bf926b3c13347aa8bd5112" title="Ask the question and return the answer." alt="" coords="154,1424,302,1451"/>
+<area shape="poly" title=" " alt="" coords="49,1599,77,1536,101,1499,132,1467,154,1455,151,1460,135,1471,105,1503,82,1539,54,1601"/>
+<area shape="rect" href="../../d8/d00/a01113.html#a58a2015f7dce182742c284ba5a8bad0f" title="Get the number of answers in the answer set." alt="" coords="148,1592,308,1635"/>
+<area shape="poly" title=" " alt="" coords="85,1611,135,1612,131,1615,88,1616"/>
+<area shape="rect" href="../../d8/d00/a01113.html#a22fccc34db142fd474274e39fc183a87" title="Explain the question." alt="" coords="148,1525,308,1568"/>
+<area shape="poly" title=" " alt="" coords="81,1597,133,1578,153,1572,149,1576,135,1582,84,1601"/>
+<area shape="rect" href="../../dd/d00/a01121.html#af3f8d8834e22610c573b8b8d79d906d4" title="Return the answer previously given." alt="" coords="156,1659,300,1685"/>
+<area shape="poly" title=" " alt="" coords="80,1625,135,1644,160,1653,155,1655,133,1649,82,1630"/>
+<area shape="rect" href="../../dd/d00/a01121.html#ab3ba7fba02239fbda45f38474b7f5a46" title="Set the answer." alt="" coords="156,1709,300,1736"/>
+<area shape="poly" title=" " alt="" coords="57,1624,91,1660,112,1679,135,1695,148,1702,143,1704,132,1700,108,1683,87,1664,57,1629"/>
+<area shape="rect" href="../../dd/d00/a01121.html#a0ed619ad6e54a96912a7c2586f4c1e58" title="Define a default value to use when the question is answered with a &lt;return&gt;." alt="" coords="157,1760,298,1787"/>
+<area shape="poly" title=" " alt="" coords="52,1625,83,1684,106,1718,135,1746,146,1754,141,1755,132,1750,102,1721,78,1687,52,1630"/>
+<area shape="rect" href="../../dd/d00/a01121.html#ab228fc4ead58d9dd06a047b5dd8d73d6" title="Define an explanation for the question, that will be shown when the question is answered with &#39;?" alt="" coords="144,1811,312,1837"/>
+<area shape="poly" title=" " alt="" coords="49,1624,60,1661,75,1707,100,1755,116,1777,135,1797,142,1802,136,1803,132,1801,112,1781,96,1758,71,1709,55,1662,49,1630"/>
+<area shape="rect" href="../../dd/d00/a01121.html#a4523526a84111bf252fa61aa56e13051" title="Define the question to ask." alt="" coords="152,1861,304,1888"/>
+<area shape="poly" title=" " alt="" coords="48,1624,56,1669,69,1729,94,1793,113,1822,136,1847,142,1854,136,1854,132,1851,108,1825,90,1795,64,1731,50,1670,48,1630"/>
+<area shape="rect" href="../../d6/d00/a01117.html#a136873986a087e3e3169db4d3d9002dc" title="Define the allowable range for the answer." alt="" coords="136,1912,320,1939"/>
+<area shape="poly" title=" " alt="" coords="47,1624,52,1678,63,1751,73,1791,89,1830,109,1866,136,1898,139,1903,134,1902,132,1902,105,1869,84,1832,68,1792,58,1752,46,1678,46,1630"/>
+<area shape="poly" title=" " alt="" coords="196,619,191,610,195,600,207,594,228,592,250,595,262,602,258,605,248,600,228,597,209,599,199,604,196,609,201,618"/>
+<area shape="rect" href="../../df/d00/a00107.html#aaa8db5e66842a2cfeb529810e494547a" title=" " alt="" coords="412,693,534,720"/>
+<area shape="poly" title=" " alt="" coords="267,642,414,687,410,690,269,646"/>
+<area shape="rect" href="../../df/d00/a00107.html#acb6f07703c72f2f1170ceaf34a20b718" title="General helper routines." alt="" coords="674,744,766,771"/>
+<area shape="poly" title=" " alt="" coords="242,643,297,688,332,711,371,729,446,749,524,759,597,762,661,761,656,764,597,767,523,764,445,755,369,735,330,716,294,692,244,648"/>
+<area shape="rect" href="../../df/d00/a00107.html#a0ee632ae84a429268b46ea0dfa3acbb3" title=" " alt="" coords="679,669,761,696"/>
+<area shape="poly" title=" " alt="" coords="267,631,405,639,577,655,666,670,662,673,576,660,405,644,270,636"/>
+<area shape="rect" href="../../df/d00/a00107.html#abcfdd36790109e61c1a7080098d5a862" title=" " alt="" coords="434,869,512,896"/>
+<area shape="poly" title=" " alt="" coords="236,643,288,727,327,778,372,825,398,844,427,861,422,863,395,849,368,829,323,781,284,729,237,649"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a3f177a1c477285fec97e62585c6cd799" title=" " alt="" coords="1094,837,1222,880"/>
+<area shape="poly" title=" " alt="" coords="238,643,291,706,328,740,371,767,467,783,664,806,1080,850,1076,853,663,812,467,788,369,772,325,744,287,709,239,649"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a646e11c13c5a706a8389b898992ee012" title=" " alt="" coords="1094,1099,1222,1141"/>
+<area shape="poly" title=" " alt="" coords="231,643,244,705,268,795,286,844,309,893,338,939,372,981,409,1014,450,1043,494,1068,540,1088,637,1118,736,1135,835,1143,927,1143,1010,1138,1080,1132,1075,1134,1010,1143,927,1148,834,1148,736,1141,635,1123,538,1093,491,1072,447,1048,406,1018,368,985,333,943,304,896,281,846,263,796,239,706,231,648"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a36498889497191fbc49ebf533c0d3d36" title=" " alt="" coords="1094,1195,1222,1237"/>
+<area shape="poly" title=" " alt="" coords="229,643,232,727,237,786,247,852,264,921,289,989,325,1051,347,1079,372,1105,411,1135,453,1162,498,1184,544,1202,642,1228,741,1242,839,1246,930,1244,1011,1237,1080,1230,1076,1232,1011,1242,930,1249,839,1252,741,1247,641,1233,543,1207,496,1189,451,1166,408,1140,368,1109,343,1083,320,1054,284,991,259,922,242,853,231,787,227,727,228,649"/>
+<area shape="rect" href="../../df/d00/a00107.html#adc7032b62f5a776228d8b51b076c99e4" title=" " alt="" coords="418,944,528,971"/>
+<area shape="poly" title=" " alt="" coords="233,643,250,693,278,762,318,838,343,874,372,906,393,922,417,937,412,938,390,927,368,910,339,877,313,841,273,765,245,695,233,649"/>
+<area shape="rect" href="../../df/d00/a00107.html#a7ae42d86f470ff6fd3f8110e5a6fc078" title=" " alt="" coords="430,568,516,595"/>
+<area shape="poly" title=" " alt="" coords="266,622,417,591,414,595,270,626"/>
+<area shape="rect" href="../../df/d00/a00107.html#aa9ba707e5bf3ce7299a639424db452c6" title=" " alt="" coords="386,253,561,296"/>
+<area shape="poly" title=" " alt="" coords="228,618,240,561,264,477,282,432,305,386,334,343,368,306,375,303,372,307,372,310,338,347,310,389,287,434,269,479,245,562,234,619"/>
+<area shape="rect" href="../../df/d00/a00107.html#aea360290a299efa384c56028ccf2dc36" title=" " alt="" coords="370,493,576,520"/>
+<area shape="poly" title=" " alt="" coords="242,617,296,573,331,550,369,530,388,523,385,527,371,534,334,554,299,578,247,620"/>
+<area shape="rect" href="../../df/d00/a00107.html#a264183cbb9b3bfa3ac16eb56a0b29445" title=" " alt="" coords="408,344,539,371"/>
+<area shape="poly" title=" " alt="" coords="230,617,245,571,272,507,313,439,339,408,368,380,394,368,391,372,372,385,342,411,317,442,277,510,250,573,235,619"/>
+<area shape="rect" href="../../df/d00/a00107.html#ac16a12235ca9f0836e87924bb0995d2a" title=" " alt="" coords="398,419,549,445"/>
+<area shape="poly" title=" " alt="" coords="234,617,253,584,283,540,322,494,369,455,385,448,381,452,371,460,325,498,287,543,257,586,239,619"/>
+<area shape="rect" href="../../df/d00/a00107.html#ab6afc3e179771d380b73b469ef50968d" title=" " alt="" coords="398,29,548,56"/>
+<area shape="poly" title=" " alt="" coords="228,618,242,510,270,344,290,257,312,177,338,111,353,85,368,66,386,55,383,59,372,70,357,88,343,113,317,178,295,258,276,345,247,511,233,619"/>
+<area shape="rect" href="../../df/d00/a00107.html#a09b0a4efec84ec436a2b892a1f6ef2a8" title="Routine for adding disks." alt="" coords="404,104,543,131"/>
+<area shape="poly" title=" " alt="" coords="226,618,227,536,232,476,242,408,259,336,285,265,320,199,343,168,368,141,391,127,388,132,372,145,347,172,325,202,290,267,264,338,247,409,237,476,232,536,231,619"/>
+<area shape="rect" href="../../df/d00/a00107.html#af0ea0eb071d132df8d1a4e10242be776" title=" " alt="" coords="410,179,536,205"/>
+<area shape="poly" title=" " alt="" coords="227,618,232,547,239,495,251,438,269,378,293,319,326,263,368,215,397,200,394,204,372,219,331,267,298,321,274,380,256,439,244,496,237,547,232,618"/>
+<area shape="poly" title=" " alt="" coords="432,693,425,685,430,675,446,669,473,667,503,669,519,677,515,680,501,674,473,672,447,674,433,679,430,684,437,692"/>
+<area shape="poly" title=" " alt="" coords="534,717,661,743,656,746,536,722"/>
+<area shape="poly" title=" " alt="" coords="533,698,666,686,662,690,536,703"/>
+<area shape="poly" title=" " alt="" coords="682,744,676,735,680,725,695,719,720,717,746,720,762,728,757,730,745,725,720,723,697,725,684,729,681,735,687,743"/>
+<area shape="poly" title=" " alt="" coords="682,669,676,661,680,651,695,645,720,643,746,645,762,653,757,655,745,650,720,648,697,650,684,655,681,660,687,669"/>
+<area shape="rect" href="../../d0/d00/a01077.html#a4131d737198fc768a6e436ca55b4d813" title=" " alt="" coords="893,669,992,696"/>
+<area shape="poly" title=" " alt="" coords="760,680,880,681,875,684,762,685"/>
+<area shape="poly" title=" " alt="" coords="905,669,899,661,904,651,919,645,942,643,968,645,983,653,978,655,966,650,942,648,920,650,908,655,905,660,911,669"/>
+<area shape="poly" title=" " alt="" coords="432,869,425,861,430,851,446,845,473,843,503,845,519,854,514,855,501,850,473,848,447,850,433,855,430,860,437,868"/>
+<area shape="rect" href="../../d2/d00/a01085.html#afe0ca9e6f3009dcedfbf6eb256f77083" title="Constructor." alt="" coords="624,971,816,997"/>
+<area shape="poly" title=" " alt="" coords="511,887,577,905,635,932,686,961,681,963,633,937,575,911,513,892"/>
+<area shape="poly" title=" " alt="" coords="511,879,1080,859,1076,863,513,884"/>
+<area shape="poly" title=" " alt="" coords="511,882,546,889,578,906,590,918,597,932,603,957,609,983,615,995,626,1007,656,1031,683,1048,709,1060,735,1067,864,1089,975,1107,1080,1117,1075,1118,975,1112,863,1095,734,1072,707,1065,680,1053,653,1036,622,1011,611,998,604,985,598,959,592,933,586,922,575,910,545,894,513,887"/>
+<area shape="poly" title=" " alt="" coords="682,970,676,962,680,952,695,946,720,944,746,947,762,955,757,956,745,952,720,949,697,951,684,956,681,961,687,970"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a1e8dc1a28e0fee9755d1ce03025eaa6f" title="Add a value to our list of values." alt="" coords="877,896,1008,939"/>
+<area shape="poly" title=" " alt="" coords="766,968,864,940,860,943,769,972"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a92e6679588d861939dd3da4ebeadd4c7" title="Determine what device this configurator represents, and instantiate it; then call initialize for our ..." alt="" coords="864,1053,1021,1080"/>
+<area shape="poly" title=" " alt="" coords="743,995,871,1047,866,1049,744,1001"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a64025ff01cec4be17ab802bf98f3b814" title="Reduce a quoted string to it&#39;s real value." alt="" coords="875,963,1010,1005"/>
+<area shape="poly" title=" " alt="" coords="815,982,862,983,857,985,817,986"/>
+<area shape="poly" title=" " alt="" coords="917,1054,794,1005,794,1000,922,1052"/>
+<area shape="poly" title=" " alt="" coords="905,1053,899,1045,904,1035,919,1029,942,1027,968,1029,983,1038,978,1039,966,1034,942,1032,920,1034,908,1039,905,1044,911,1053"/>
+<area shape="rect" href="../../df/d00/a00949.html#ac122c7fac7b90bc5fd33d89946152083" title="Constructor." alt="" coords="1069,1048,1246,1075"/>
+<area shape="poly" title=" " alt="" coords="1021,1062,1056,1063,1051,1065,1023,1067"/>
+<area shape="poly" title=" " alt="" coords="968,1051,1019,1015,1082,952,1130,894,1134,891,1086,955,1023,1019,971,1055"/>
+<area shape="poly" title=" " alt="" coords="998,1078,1081,1100,1076,1101,999,1083"/>
+<area shape="poly" title=" " alt="" coords="963,1078,1116,1185,1110,1186,963,1083"/>
+<area shape="poly" title=" " alt="" coords="1117,1193,1115,1185,1122,1176,1136,1170,1158,1168,1181,1170,1196,1179,1191,1179,1179,1176,1158,1173,1137,1175,1125,1180,1120,1186,1122,1195"/>
+<area shape="poly" title=" " alt="" coords="432,944,425,935,430,925,446,919,473,917,503,920,519,928,514,930,501,925,473,923,447,925,433,929,430,935,437,943"/>
+<area shape="poly" title=" " alt="" coords="515,590,577,611,682,661,677,663,575,616,517,595"/>
+<area shape="poly" title=" " alt="" coords="432,568,425,559,430,549,446,543,473,541,503,544,519,552,515,554,501,549,473,547,447,549,433,553,430,559,437,567"/>
+<area shape="rect" href="../../d0/d00/a01077.html#a4fd6f2c0d67cbe4a8e5715eecabe3cef" title=" " alt="" coords="668,371,772,397"/>
+<area shape="poly" title=" " alt="" coords="514,567,546,552,574,530,586,515,592,499,596,469,601,438,609,423,623,407,655,391,652,395,626,411,614,426,607,440,602,470,597,501,590,517,578,534,549,557,518,571"/>
+<area shape="rect" href="../../df/d00/a00107.html#a8d5fa8245da1dc2a73d10537d871ca41" title=" " alt="" coords="653,445,787,472"/>
+<area shape="poly" title=" " alt="" coords="509,566,542,550,575,530,589,517,598,505,607,493,623,482,640,475,637,479,626,486,611,497,602,509,592,521,578,534,545,554,512,569"/>
+<area shape="rect" href="../../df/d00/a00107.html#a7cd0fe5a5b77e59d770395e284132a50" title=" " alt="" coords="643,520,797,547"/>
+<area shape="poly" title=" " alt="" coords="515,571,635,548,631,552,518,575"/>
+<area shape="rect" href="../../df/d00/a00107.html#a099af5613659165f75daa532140c487f" title=" " alt="" coords="652,595,788,621"/>
+<area shape="poly" title=" " alt="" coords="515,584,639,598,634,601,518,588"/>
+<area shape="poly" title=" " alt="" coords="682,445,676,437,680,427,695,421,720,419,746,421,762,429,757,431,745,426,720,424,697,426,684,431,681,436,687,445"/>
+<area shape="poly" title=" " alt="" coords="682,520,676,511,680,501,695,495,720,493,746,496,762,504,757,506,745,501,720,499,697,501,684,505,681,511,687,519"/>
+<area shape="poly" title=" " alt="" coords="682,594,676,586,680,576,695,570,720,568,746,571,762,579,757,580,745,576,720,573,697,575,684,580,681,585,687,594"/>
+<area shape="poly" title=" " alt="" coords="427,253,425,243,433,234,449,229,473,227,499,229,516,237,512,239,498,234,473,232,450,234,436,239,430,245,432,253"/>
+<area shape="rect" href="../../df/d00/a00107.html#a15797575efb188d191015d35ac9b7b79" title=" " alt="" coords="667,179,773,205"/>
+<area shape="poly" title=" " alt="" coords="537,251,665,209,661,213,541,255"/>
+<area shape="poly" title=" " alt="" coords="682,179,676,170,680,160,695,154,720,152,746,155,762,162,757,164,745,160,720,157,697,159,684,164,681,169,687,178"/>
+<area shape="poly" title=" " alt="" coords="432,493,425,485,430,475,446,469,473,467,503,469,519,477,515,480,501,474,473,472,447,474,433,479,430,484,437,492"/>
+<area shape="rect" href="../../df/d00/a00107.html#ab1c1345ba13574bc01f0c6ee792c2b31" title=" " alt="" coords="670,320,770,347"/>
+<area shape="poly" title=" " alt="" coords="517,491,547,476,574,456,591,431,597,406,603,381,623,357,657,340,653,344,626,361,608,384,602,407,596,433,578,459,550,480,521,495"/>
+<area shape="poly" title=" " alt="" coords="682,320,676,311,680,301,695,295,720,293,746,296,762,304,757,306,745,301,720,299,697,301,684,305,681,311,687,319"/>
+<area shape="poly" title=" " alt="" coords="432,344,425,335,430,325,446,319,473,317,503,320,519,328,515,330,501,325,473,323,447,325,433,329,430,335,437,343"/>
+<area shape="poly" title=" " alt="" coords="517,416,547,401,574,381,592,357,600,334,607,310,622,282,655,245,691,213,688,218,658,248,627,286,612,312,605,336,597,360,578,385,550,406,521,420"/>
+<area shape="poly" title=" " alt="" coords="432,419,425,410,430,400,446,394,473,392,503,395,519,403,515,405,501,400,473,397,447,399,433,404,430,409,437,418"/>
+<area shape="poly" title=" " alt="" coords="547,54,578,66,614,88,647,114,699,166,694,167,643,118,610,92,575,70,549,59"/>
+<area shape="poly" title=" " alt="" coords="432,30,425,21,430,11,446,5,473,3,503,5,519,13,515,16,501,10,473,8,447,10,433,15,430,20,437,28"/>
+<area shape="poly" title=" " alt="" coords="533,129,577,140,670,172,665,174,576,145,536,134"/>
+<area shape="poly" title=" " alt="" coords="432,104,425,95,430,85,446,79,473,77,503,80,519,88,515,90,501,85,473,83,447,85,433,89,430,95,437,103"/>
+<area shape="poly" title=" " alt="" coords="535,190,654,190,650,194,538,194"/>
+<area shape="poly" title=" " alt="" coords="432,179,425,170,430,160,446,154,473,152,503,155,519,163,515,165,501,160,473,157,447,159,433,164,430,169,437,178"/>
+<area shape="rect" href="../../d8/d00/a01109.html#ac05029eaab6bad31d4cc602f70d70943" title="Constructor." alt="" coords="414,1256,532,1283"/>
+<area shape="poly" title=" " alt="" coords="307,1287,401,1276,397,1280,309,1291"/>
+<area shape="rect" href="../../dd/d00/a01121.html#a22c5dcad982785f032635566f0829a05" title="Display the explanation." alt="" coords="659,1557,781,1584"/>
+<area shape="poly" title=" " alt="" coords="550,1546,646,1560,641,1562,551,1551"/>
+<area shape="poly" title=" " alt="" coords="303,1398,324,1410,336,1423,343,1436,348,1462,354,1488,361,1500,372,1511,385,1521,380,1522,368,1515,356,1503,349,1490,343,1463,338,1438,331,1426,320,1414,304,1403"/>
+<area shape="rect" href="../../d8/d00/a01113.html#ad10c9a14e4b91a1da05a4e90b665cda3" title="Override this to do something special with the answer received." alt="" coords="394,1307,553,1349"/>
+<area shape="poly" title=" " alt="" coords="285,1371,380,1349,376,1352,288,1375"/>
+<area shape="rect" href="../../de/d00/a01105.html#a4e1a1941a1ba2242a267f9ee21adb69e" title="Define a list of options to show following the question, to show the user what values are acceptable." alt="" coords="376,1373,571,1400"/>
+<area shape="poly" title=" " alt="" coords="321,1384,362,1385,358,1388,324,1389"/>
+<area shape="poly" title=" " alt="" coords="281,1449,323,1467,338,1479,348,1490,357,1501,371,1511,386,1519,381,1520,369,1516,353,1505,344,1493,335,1482,321,1472,282,1454"/>
+<area shape="poly" title=" " alt="" coords="295,1421,392,1402,388,1405,297,1426"/>
+<area shape="rect" href="../../d2/d00/a00137.html#af67e732258579f2e0c619014e718a75c" title="Convert an integer to a string." alt="" coords="454,1475,492,1501"/>
+<area shape="poly" title=" " alt="" coords="296,1449,441,1480,437,1483,297,1454"/>
+<area shape="rect" href="../../d2/d00/a00137.html#aa70bc74cb9cef1fc1add36a16b97a694" title="Convert a string to an integer." alt="" coords="454,1424,492,1451"/>
+<area shape="poly" title=" " alt="" coords="302,1435,440,1436,436,1439,304,1440"/>
+<area shape="rect" href="../../df/d00/a00107.html#af67e732258579f2e0c619014e718a75c" title="Convert an integer to a string." alt="" coords="701,1487,739,1513"/>
+<area shape="poly" title=" " alt="" coords="492,1486,688,1497,683,1500,493,1492"/>
+<area shape="poly" title=" " alt="" coords="698,1494,680,1485,677,1473,691,1463,720,1460,745,1462,761,1469,764,1479,755,1490,751,1486,759,1478,757,1473,744,1468,720,1465,693,1468,682,1475,684,1482,703,1494"/>
+<area shape="rect" href="../../df/d00/a00107.html#aa70bc74cb9cef1fc1add36a16b97a694" title="Convert a string to an integer." alt="" coords="701,1412,739,1439"/>
+<area shape="poly" title=" " alt="" coords="492,1434,688,1426,683,1428,494,1439"/>
+<area shape="poly" title=" " alt="" coords="698,1420,680,1411,677,1398,691,1389,720,1385,745,1388,761,1394,764,1405,755,1415,751,1411,759,1404,757,1398,744,1393,720,1391,693,1394,682,1400,684,1408,703,1419"/>
+<area shape="poly" title=" " alt="" coords="307,1555,370,1561,516,1568,646,1570,641,1572,516,1573,370,1567,309,1560"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="af654c080e1f2899e44cae4afc8cda239" name="af654c080e1f2899e44cae4afc8cda239"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af654c080e1f2899e44cae4afc8cda239">&#9670;&#160;</a></span>ask_hotkey_override()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">string ask_hotkey_override </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="../../de/d00/a01101.html">GUIHotkeyPrompt</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>prompt</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00196">196</a> of file <a class="el" href="../../d1/d00/a00128_source.html">es40-cfg.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d7/d00/a00131_source.html#l00054">FreeTextQuestion::ask()</a>, <a class="el" href="../../d1/d00/a00128_source.html#l00196">ask_hotkey_override()</a>, <a class="el" href="../../d1/d00/a00128_source.html#l00175">GUIHotkeyPrompt::default_binding</a>, <a class="el" href="../../d1/d00/a00128_source.html#l00174">GUIHotkeyPrompt::description</a>, <a class="el" href="../../d5/d00/a00140_source.html#l00062">Question::setExplanation()</a>, <a class="el" href="../../d5/d00/a00140_source.html#l00070">Question::setQuestion()</a>, and <a class="el" href="../../d1/d00/a00128_source.html#l00187">trim_answer()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d1/d00/a00128_source.html#l00196">ask_hotkey_override()</a>, and <a class="el" href="../../d1/d00/a00128_source.html#l00464">main()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d1/d00/a00128_af654c080e1f2899e44cae4afc8cda239_cgraph.png" border="0" usemap="#ad1/d00/a00128_af654c080e1f2899e44cae4afc8cda239_cgraph" loading="lazy" alt=""/></div>
+<map name="ad1/d00/a00128_af654c080e1f2899e44cae4afc8cda239_cgraph" id="ad1/d00/a00128_af654c080e1f2899e44cae4afc8cda239_cgraph">
+<area shape="rect" title=" " alt="" coords="5,81,147,108"/>
+<area shape="poly" title=" " alt="" coords="41,81,35,73,40,63,54,57,76,55,100,57,114,65,109,67,99,62,76,60,55,62,43,67,41,72,46,80"/>
+<area shape="rect" href="../../de/d00/a01105.html#a4e0ee1b8945023966643623f7d5fb2ef" title="Ask the question, and return the answer." alt="" coords="202,5,355,32"/>
+<area shape="poly" title=" " alt="" coords="106,79,194,42,216,36,212,39,196,46,108,83"/>
+<area shape="rect" href="../../dd/d00/a01121.html#ab228fc4ead58d9dd06a047b5dd8d73d6" title="Define an explanation for the question, that will be shown when the question is answered with &#39;?" alt="" coords="195,56,362,83"/>
+<area shape="poly" title=" " alt="" coords="146,83,181,81,177,83,148,88"/>
+<area shape="rect" href="../../dd/d00/a01121.html#a4523526a84111bf252fa61aa56e13051" title="Define the question to ask." alt="" coords="203,107,354,133"/>
+<area shape="poly" title=" " alt="" coords="147,101,190,108,185,110,148,106"/>
+<area shape="rect" href="../../d1/d00/a00128.html#a49fe56c9967ff7bc117c46e3c5731d28" title=" " alt="" coords="232,181,324,208"/>
+<area shape="poly" title=" " alt="" coords="106,106,238,173,234,176,104,111"/>
+<area shape="rect" href="../../dd/d00/a01121.html#a22c5dcad982785f032635566f0829a05" title="Display the explanation." alt="" coords="410,5,532,32"/>
+<area shape="poly" title=" " alt="" coords="355,16,397,18,392,19,356,21"/>
+<area shape="poly" title=" " alt="" coords="245,180,240,173,244,163,257,157,278,155,301,157,315,166,310,166,300,162,278,160,258,162,247,167,245,172,250,182"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d1/d00/a00128_af654c080e1f2899e44cae4afc8cda239_icgraph.png" border="0" usemap="#ad1/d00/a00128_af654c080e1f2899e44cae4afc8cda239_icgraph" loading="lazy" alt=""/></div>
+<map name="ad1/d00/a00128_af654c080e1f2899e44cae4afc8cda239_icgraph" id="ad1/d00/a00128_af654c080e1f2899e44cae4afc8cda239_icgraph">
+<area shape="rect" title=" " alt="" coords="103,29,244,56"/>
+<area shape="poly" title=" " alt="" coords="196,14,189,10,173,8,159,10,151,14,149,20,153,30,148,28,144,21,147,11,157,5,173,3,191,5,201,15"/>
+<area shape="rect" href="../../d1/d00/a00128.html#a0ddf1224851353fc92bfbff6f499fa97" title="Main program entry point." alt="" coords="5,29,55,56"/>
+<area shape="poly" title=" " alt="" coords="84,44,55,45,55,40,89,42"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a0ddf1224851353fc92bfbff6f499fa97" name="a0ddf1224851353fc92bfbff6f499fa97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ddf1224851353fc92bfbff6f499fa97">&#9670;&#160;</a></span>main()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int main </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>argc</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>argv</em></span>[]&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Main program entry point. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00464">464</a> of file <a class="el" href="../../d1/d00/a00128_source.html">es40-cfg.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../df/d00/a00107_source.html#l00597">add_disks()</a>, <a class="el" href="../../de/d00/a00134_source.html#l00112">MultipleChoiceQuestion::addAnswer()</a>, <a class="el" href="../../d7/d00/a00131_source.html#l00054">FreeTextQuestion::ask()</a>, <a class="el" href="../../de/d00/a00134_source.html#l00154">MultipleChoiceQuestion::ask()</a>, <a class="el" href="../../d2/d00/a00137_source.html#l00087">NumberQuestion::ask()</a>, <a class="el" href="../../d1/d00/a00128_source.html#l00196">ask_hotkey_override()</a>, <a class="el" href="../../d1/d00/a00128_source.html#l00173">GUIHotkeyPrompt::config_name</a>, <a class="el" href="../../de/d00/a00134_source.html#l00146">MultipleChoiceQuestion::countAnswers()</a>, <a class="el" href="../../d1/d00/a00128_source.html#l00175">GUIHotkeyPrompt::default_binding</a>, <a class="el" href="../../d1/d00/a00128_source.html#l00174">GUIHotkeyPrompt::description</a>, <a class="el" href="../../de/d00/a00134_source.html#l00214">MultipleChoiceQuestion::dropChoice()</a>, <a class="el" href="../../d5/d00/a00140_source.html#l00045">Question::getAnswer()</a>, <a class="el" href="../../de/d00/a00134_source.html#l00243">MultipleChoiceQuestion::getFirstChoice()</a>, <a class="el" href="../../d2/d00/a00137_source.html#l00079">NumberQuestion::getNum()</a>, <a class="el" href="../../d1/d00/a00128_source.html#l00178">gui_hotkey_prompts</a>, <a class="el" href="../../df/d00/a00107_source.html#l00202">i2s()</a>, <a class="el" href="../../d7/d00/a00002_source.html#l00308">main()</a>, <a class="el" href="../../d7/d00/a00002_source.html#l00223">path</a>, <a class="el" href="../../df/d00/a00107_source.html#l00215">s2i()</a>, <a class="el" href="../../d5/d00/a00140_source.html#l00053">Question::setAnswer()</a>, <a class="el" href="../../d5/d00/a00140_source.html#l00079">Question::setDefault()</a>, <a class="el" href="../../d5/d00/a00140_source.html#l00062">Question::setExplanation()</a>, <a class="el" href="../../d7/d00/a00131_source.html#l00046">FreeTextQuestion::setOptions()</a>, <a class="el" href="../../d5/d00/a00140_source.html#l00070">Question::setQuestion()</a>, <a class="el" href="../../d2/d00/a00137_source.html#l00071">NumberQuestion::setRange()</a>, and <a class="el" href="../../d1/d00/a00128_source.html#l00187">trim_answer()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d1/d00/a00128_a0ddf1224851353fc92bfbff6f499fa97_cgraph.png" border="0" usemap="#ad1/d00/a00128_a0ddf1224851353fc92bfbff6f499fa97_cgraph" loading="lazy" alt=""/></div>
+<map name="ad1/d00/a00128_a0ddf1224851353fc92bfbff6f499fa97_cgraph" id="ad1/d00/a00128_a0ddf1224851353fc92bfbff6f499fa97_cgraph">
+<area shape="rect" title="Main program entry point." alt="" coords="5,1844,55,1871"/>
+<area shape="rect" href="../../df/d00/a00107.html#a30ce9217e2f73c216badd694b03bd399" title="Add disk &#39;disk_name&#39; to the controller &#39;parent&#39; of the configuration." alt="" coords="157,593,237,620"/>
+<area shape="poly" title=" " alt="" coords="30,1843,100,1272,192,632,191,638,105,1272,36,1844"/>
+<area shape="rect" href="../../d8/d00/a01113.html#aa4773c34891246ce027ce92d7e13b1d7" title="Add an answer to the set of allowed answers." alt="" coords="117,1416,276,1459"/>
+<area shape="poly" title=" " alt="" coords="30,1843,36,1769,50,1661,71,1554,84,1510,101,1480,117,1465,115,1470,105,1483,89,1512,76,1555,55,1662,41,1770,35,1844"/>
+<area shape="rect" href="../../de/d00/a01105.html#a4e0ee1b8945023966643623f7d5fb2ef" title="Ask the question, and return the answer." alt="" coords="366,1591,519,1617"/>
+<area shape="poly" title=" " alt="" coords="28,1844,29,1801,38,1741,47,1710,60,1679,78,1651,101,1627,131,1608,164,1594,198,1585,234,1579,304,1578,368,1586,364,1589,304,1583,234,1585,199,1590,165,1599,133,1613,104,1631,82,1654,65,1681,52,1711,43,1742,35,1801,33,1844"/>
+<area shape="rect" href="../../d8/d00/a01113.html#a98a7fffbb7b45cbb4ff3b6200a881575" title="Ask the question." alt="" coords="103,1539,291,1565"/>
+<area shape="poly" title=" " alt="" coords="28,1843,29,1795,37,1726,46,1688,59,1651,77,1615,101,1584,119,1571,116,1575,105,1587,82,1618,64,1653,51,1690,43,1727,34,1796,33,1844"/>
+<area shape="rect" href="../../de/d00/a01105.html#a4e1a1941a1ba2242a267f9ee21adb69e" title="Define a list of options to show following the question, to show the user what values are acceptable." alt="" coords="344,1473,540,1500"/>
+<area shape="poly" title=" " alt="" coords="30,1844,35,1776,48,1680,69,1586,84,1549,101,1525,117,1514,139,1506,196,1494,262,1487,331,1485,327,1488,262,1492,196,1499,140,1511,119,1519,105,1529,88,1552,74,1588,53,1681,41,1777,35,1844"/>
+<area shape="rect" href="../../d6/d00/a01117.html#adf24984c09bf926b3c13347aa8bd5112" title="Ask the question and return the answer." alt="" coords="123,1641,271,1668"/>
+<area shape="poly" title=" " alt="" coords="31,1843,37,1811,50,1769,70,1724,101,1685,119,1673,117,1678,105,1689,75,1727,55,1771,42,1813,36,1844"/>
+<area shape="rect" href="../../df/d00/a00107.html#af67e732258579f2e0c619014e718a75c" title="Convert an integer to a string." alt="" coords="672,1679,710,1705"/>
+<area shape="poly" title=" " alt="" coords="32,1843,40,1817,53,1786,73,1754,101,1728,148,1709,212,1696,289,1688,373,1684,536,1683,658,1689,654,1692,536,1689,373,1689,290,1693,213,1702,149,1715,104,1733,77,1757,58,1788,45,1819,37,1844"/>
+<area shape="rect" href="../../df/d00/a00107.html#aa70bc74cb9cef1fc1add36a16b97a694" title="Convert a string to an integer." alt="" coords="672,1768,710,1795"/>
+<area shape="poly" title=" " alt="" coords="53,1852,102,1844,425,1806,659,1783,655,1786,425,1811,103,1849,57,1856"/>
+<area shape="rect" href="../../d1/d00/a00128.html#af654c080e1f2899e44cae4afc8cda239" title=" " alt="" coords="126,1919,268,1945"/>
+<area shape="poly" title=" " alt="" coords="54,1866,153,1910,149,1913,56,1871"/>
+<area shape="rect" href="../../dd/d00/a01121.html#ab228fc4ead58d9dd06a047b5dd8d73d6" title="Define an explanation for the question, that will be shown when the question is answered with &#39;?" alt="" coords="358,1863,526,1889"/>
+<area shape="poly" title=" " alt="" coords="54,1856,345,1869,341,1874,56,1861"/>
+<area shape="rect" href="../../dd/d00/a01121.html#a4523526a84111bf252fa61aa56e13051" title="Define the question to ask." alt="" coords="366,1932,518,1959"/>
+<area shape="poly" title=" " alt="" coords="36,1869,62,1915,80,1938,104,1955,138,1969,175,1978,213,1982,251,1982,323,1974,387,1962,382,1965,324,1980,251,1988,213,1987,174,1983,137,1974,101,1960,77,1941,57,1918,37,1874"/>
+<area shape="rect" href="../../d1/d00/a00128.html#a49fe56c9967ff7bc117c46e3c5731d28" title=" " alt="" coords="396,2013,488,2040"/>
+<area shape="poly" title=" " alt="" coords="34,1869,44,1897,57,1929,77,1962,104,1989,137,2007,172,2020,246,2035,319,2038,383,2035,379,2038,319,2043,246,2040,170,2025,134,2012,101,1993,73,1966,53,1932,39,1898,34,1874"/>
+<area shape="rect" href="../../d8/d00/a01113.html#a58a2015f7dce182742c284ba5a8bad0f" title="Get the number of answers in the answer set." alt="" coords="117,2071,276,2113"/>
+<area shape="poly" title=" " alt="" coords="33,1868,41,1906,53,1954,73,2005,87,2029,105,2050,117,2061,111,2063,101,2054,83,2032,69,2007,48,1955,36,1907,33,1874"/>
+<area shape="rect" href="../../d8/d00/a01113.html#a0229dcf7f41643b75a1e5598b5dfe260" title="Remove one answer from the answer set." alt="" coords="117,2137,276,2180"/>
+<area shape="poly" title=" " alt="" coords="31,1868,35,1918,43,1986,52,2022,65,2059,82,2093,105,2124,108,2127,102,2129,101,2127,77,2096,60,2061,47,2024,38,1987,29,1919,31,1874"/>
+<area shape="rect" href="../../dd/d00/a01121.html#af3f8d8834e22610c573b8b8d79d906d4" title="Return the answer previously given." alt="" coords="125,2204,268,2231"/>
+<area shape="poly" title=" " alt="" coords="32,1869,42,1939,55,2035,76,2129,89,2166,105,2190,114,2199,109,2200,101,2194,84,2168,71,2131,50,2036,36,1939,32,1874"/>
+<area shape="rect" href="../../d8/d00/a01113.html#aa0dafb39fade0ff64364cbcadfe542d3" title="Return the first possible answer." alt="" coords="117,2255,276,2297"/>
+<area shape="poly" title=" " alt="" coords="32,1869,40,1947,53,2058,74,2168,88,2212,105,2241,108,2245,102,2246,101,2244,83,2214,69,2170,48,2059,35,1948,32,1874"/>
+<area shape="rect" href="../../d6/d00/a01117.html#a74d2383631056a781e1d0ede0cd39d4f" title="Convert the answer to a number." alt="" coords="110,1743,284,1769"/>
+<area shape="poly" title=" " alt="" coords="40,1843,66,1814,101,1786,130,1773,127,1777,104,1790,70,1818,44,1845"/>
+<area shape="rect" href="../../d7/d00/a00002.html#a0ddf1224851353fc92bfbff6f499fa97" title="Entry point for the application." alt="" coords="418,1195,467,1221"/>
+<area shape="poly" title=" " alt="" coords="29,1844,34,1757,47,1626,68,1494,83,1441,100,1403,132,1364,169,1330,210,1301,252,1276,335,1239,405,1216,401,1220,337,1244,255,1281,213,1306,172,1335,136,1368,105,1405,88,1442,73,1495,52,1627,40,1757,35,1844"/>
+<area shape="rect" href="../../dd/d00/a01121.html#ab3ba7fba02239fbda45f38474b7f5a46" title="Set the answer." alt="" coords="125,2321,268,2348"/>
+<area shape="poly" title=" " alt="" coords="32,1869,37,1959,48,2091,57,2159,69,2222,85,2273,105,2308,114,2317,109,2318,101,2311,80,2275,64,2223,52,2160,42,2091,32,1960,32,1874"/>
+<area shape="rect" href="../../dd/d00/a01121.html#a0ed619ad6e54a96912a7c2586f4c1e58" title="Define a default value to use when the question is answered with a &lt;return&gt;." alt="" coords="126,2372,268,2399"/>
+<area shape="poly" title=" " alt="" coords="31,1868,36,1967,45,2114,54,2191,66,2261,83,2319,93,2342,105,2358,115,2369,110,2369,101,2362,89,2344,78,2321,61,2263,48,2192,39,2115,31,1967,31,1874"/>
+<area shape="rect" href="../../d6/d00/a01117.html#a136873986a087e3e3169db4d3d9002dc" title="Define the allowable range for the answer." alt="" coords="105,2423,288,2449"/>
+<area shape="poly" title=" " alt="" coords="31,1869,34,1976,42,2138,50,2223,63,2301,81,2366,92,2390,105,2409,107,2413,102,2412,101,2412,87,2393,76,2368,58,2303,45,2224,37,2139,29,1976,31,1874"/>
+<area shape="poly" title=" " alt="" coords="168,594,163,585,166,575,178,569,197,567,217,569,229,577,224,579,215,574,197,572,180,574,170,579,168,584,173,592"/>
+<area shape="rect" href="../../df/d00/a00107.html#aaa8db5e66842a2cfeb529810e494547a" title=" " alt="" coords="381,668,503,695"/>
+<area shape="poly" title=" " alt="" coords="236,616,383,662,379,665,238,621"/>
+<area shape="rect" href="../../df/d00/a00107.html#acb6f07703c72f2f1170ceaf34a20b718" title="General helper routines." alt="" coords="645,619,737,645"/>
+<area shape="poly" title=" " alt="" coords="236,606,631,627,628,631,239,611"/>
+<area shape="rect" href="../../df/d00/a00107.html#a0ee632ae84a429268b46ea0dfa3acbb3" title=" " alt="" coords="650,719,732,745"/>
+<area shape="poly" title=" " alt="" coords="211,618,266,663,301,686,340,704,418,725,498,734,573,737,637,735,633,739,573,742,498,740,417,730,338,709,299,691,263,667,213,623"/>
+<area shape="rect" href="../../df/d00/a00107.html#abcfdd36790109e61c1a7080098d5a862" title=" " alt="" coords="404,868,481,895"/>
+<area shape="poly" title=" " alt="" coords="203,618,223,659,252,715,292,776,341,830,364,847,391,862,387,864,362,852,337,834,288,779,248,718,219,661,204,623"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a3f177a1c477285fec97e62585c6cd799" title=" " alt="" coords="1042,911,1170,953"/>
+<area shape="poly" title=" " alt="" coords="200,618,212,676,235,756,253,798,276,839,305,875,340,905,364,917,394,927,470,942,560,950,660,953,862,948,1029,938,1025,941,863,954,660,959,560,956,469,947,393,932,362,922,338,909,301,879,272,842,248,800,230,757,207,677,200,623"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a646e11c13c5a706a8389b898992ee012" title=" " alt="" coords="1042,809,1170,852"/>
+<area shape="poly" title=" " alt="" coords="197,593,209,484,235,315,254,227,277,147,305,82,320,58,337,41,364,22,389,10,414,4,439,3,464,7,490,15,547,40,606,75,662,116,714,161,763,211,809,263,851,318,926,431,988,542,1036,644,1072,731,1096,795,1090,794,1067,733,1031,647,983,545,922,434,847,321,805,267,760,214,711,165,659,120,603,80,544,45,488,20,463,12,439,8,415,9,391,16,367,27,341,45,324,62,309,85,282,149,259,228,240,316,214,484,202,593"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a36498889497191fbc49ebf533c0d3d36" title=" " alt="" coords="1042,1313,1170,1356"/>
+<area shape="poly" title=" " alt="" coords="200,618,216,737,244,920,264,1017,286,1107,312,1181,326,1210,341,1232,374,1267,412,1296,452,1320,496,1340,542,1356,589,1367,686,1380,784,1381,876,1375,958,1364,1029,1352,1025,1355,959,1369,876,1380,784,1387,686,1385,588,1372,540,1361,494,1345,450,1325,409,1300,371,1271,337,1235,322,1212,307,1183,281,1108,259,1018,239,921,211,738,200,623"/>
+<area shape="rect" href="../../df/d00/a00107.html#adc7032b62f5a776228d8b51b076c99e4" title=" " alt="" coords="387,79,497,105"/>
+<area shape="poly" title=" " alt="" coords="195,593,196,511,201,450,211,382,228,311,254,240,289,173,312,143,337,115,353,104,373,97,370,101,356,109,341,119,316,146,294,176,259,242,233,312,216,383,206,451,201,511,200,593"/>
+<area shape="rect" href="../../df/d00/a00107.html#a7ae42d86f470ff6fd3f8110e5a6fc078" title=" " alt="" coords="400,793,485,820"/>
+<area shape="poly" title=" " alt="" coords="208,618,264,678,301,715,341,749,399,785,394,787,337,753,297,719,260,682,210,623"/>
+<area shape="rect" href="../../df/d00/a00107.html#aa9ba707e5bf3ce7299a639424db452c6" title=" " alt="" coords="354,153,530,196"/>
+<area shape="poly" title=" " alt="" coords="196,592,203,524,224,421,242,364,266,307,298,253,337,206,343,203,341,208,341,210,302,256,271,309,247,366,229,422,209,525,201,593"/>
+<area shape="rect" href="../../df/d00/a00107.html#aea360290a299efa384c56028ccf2dc36" title=" " alt="" coords="339,244,545,271"/>
+<area shape="poly" title=" " alt="" coords="197,592,208,535,231,450,250,404,273,359,302,317,337,281,346,276,343,281,341,285,306,320,278,362,254,407,236,452,213,536,202,593"/>
+<area shape="rect" href="../../df/d00/a00107.html#a264183cbb9b3bfa3ac16eb56a0b29445" title=" " alt="" coords="376,319,508,345"/>
+<area shape="poly" title=" " alt="" coords="199,592,214,546,241,482,282,414,308,382,337,355,363,343,360,347,341,360,311,386,286,417,246,484,219,548,204,593"/>
+<area shape="rect" href="../../df/d00/a00107.html#ac16a12235ca9f0836e87924bb0995d2a" title=" " alt="" coords="366,393,518,420"/>
+<area shape="poly" title=" " alt="" coords="203,592,222,558,252,514,291,469,338,430,354,423,351,427,340,434,294,472,256,518,226,561,208,594"/>
+<area shape="rect" href="../../df/d00/a00107.html#ab6afc3e179771d380b73b469ef50968d" title=" " alt="" coords="368,468,517,495"/>
+<area shape="poly" title=" " alt="" coords="211,592,265,548,300,525,338,504,357,498,354,502,340,509,303,529,268,553,216,594"/>
+<area shape="rect" href="../../df/d00/a00107.html#a09b0a4efec84ec436a2b892a1f6ef2a8" title="Routine for adding disks." alt="" coords="372,543,512,569"/>
+<area shape="poly" title=" " alt="" coords="235,597,361,571,357,575,239,601"/>
+<area shape="rect" href="../../df/d00/a00107.html#af0ea0eb071d132df8d1a4e10242be776" title=" " alt="" coords="380,993,505,1020"/>
+<area shape="poly" title=" " alt="" coords="200,618,215,678,241,764,259,812,282,861,309,907,341,949,364,969,391,985,386,987,360,973,337,953,304,910,277,863,254,815,235,766,210,679,201,623"/>
+<area shape="poly" title=" " alt="" coords="401,668,394,659,399,649,415,644,442,641,472,644,488,652,484,654,470,649,442,647,416,649,402,654,399,659,406,667"/>
+<area shape="poly" title=" " alt="" coords="502,667,632,642,628,646,505,671"/>
+<area shape="poly" title=" " alt="" coords="503,691,637,719,633,722,505,696"/>
+<area shape="poly" title=" " alt="" coords="653,619,646,610,651,600,666,594,691,592,718,595,733,602,728,604,716,600,691,597,667,599,655,604,652,610,658,618"/>
+<area shape="poly" title=" " alt="" coords="653,719,646,710,651,700,666,694,691,692,718,695,733,702,728,704,716,700,691,697,667,699,655,704,652,710,658,718"/>
+<area shape="poly" title=" " alt="" coords="401,868,394,859,399,849,415,844,442,841,472,844,488,852,484,854,470,849,442,847,416,849,402,854,399,859,406,867"/>
+<area shape="rect" href="../../d2/d00/a01085.html#afe0ca9e6f3009dcedfbf6eb256f77083" title="Constructor." alt="" coords="595,993,787,1020"/>
+<area shape="poly" title=" " alt="" coords="470,893,651,985,647,987,472,898"/>
+<area shape="poly" title=" " alt="" coords="480,880,699,888,846,897,994,911,1029,917,1024,919,994,916,845,902,699,893,483,885"/>
+<area shape="poly" title=" " alt="" coords="480,876,1028,835,1025,839,483,881"/>
+<area shape="poly" title=" " alt="" coords="653,993,646,985,651,975,666,969,691,967,718,969,733,977,728,979,716,974,691,972,667,974,655,979,652,984,658,993"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a92e6679588d861939dd3da4ebeadd4c7" title="Determine what device this configurator represents, and instantiate it; then call initialize for our ..." alt="" coords="837,993,994,1020"/>
+<area shape="poly" title=" " alt="" coords="786,1013,823,1014,819,1017,788,1018"/>
+<area shape="poly" title=" " alt="" coords="834,999,803,1000,801,995,838,997"/>
+<area shape="poly" title=" " alt="" coords="882,993,877,985,881,975,894,969,915,967,938,969,952,977,946,979,937,974,915,972,895,974,885,979,882,984,888,993"/>
+<area shape="poly" title=" " alt="" coords="950,991,1038,958,1034,961,953,995"/>
+<area shape="poly" title=" " alt="" coords="929,991,1072,861,1069,865,933,995"/>
+<area shape="poly" title=" " alt="" coords="925,1018,1087,1300,1082,1300,924,1023"/>
+<area shape="poly" title=" " alt="" coords="1070,1312,1068,1303,1074,1294,1087,1289,1106,1287,1127,1289,1141,1297,1135,1298,1125,1294,1106,1292,1088,1294,1078,1299,1073,1305,1075,1314"/>
+<area shape="poly" title=" " alt="" coords="401,79,394,70,399,60,415,54,442,52,472,55,488,63,484,65,470,60,442,57,416,59,402,64,399,70,406,78"/>
+<area shape="poly" title=" " alt="" coords="483,792,637,747,633,751,487,796"/>
+<area shape="poly" title=" " alt="" coords="401,794,394,785,399,775,415,769,442,767,472,769,488,777,484,780,470,775,442,772,416,774,402,779,399,784,406,792"/>
+<area shape="poly" title=" " alt="" coords="396,153,394,143,402,134,418,129,442,127,468,129,485,137,481,139,467,134,442,132,419,134,405,139,399,145,401,153"/>
+<area shape="poly" title=" " alt="" coords="401,244,394,235,399,225,415,220,442,217,472,220,488,228,484,230,470,225,442,223,416,225,402,230,399,235,406,243"/>
+<area shape="poly" title=" " alt="" coords="401,319,394,310,399,300,415,294,442,292,472,295,488,303,484,305,470,300,442,297,416,299,402,304,399,310,406,318"/>
+<area shape="poly" title=" " alt="" coords="401,394,394,385,399,375,415,369,442,367,472,369,488,377,484,380,470,375,442,372,416,374,402,379,399,384,406,392"/>
+<area shape="poly" title=" " alt="" coords="401,468,394,459,399,449,415,444,442,441,472,444,488,452,484,454,470,449,442,447,416,449,402,454,399,459,406,467"/>
+<area shape="poly" title=" " alt="" coords="401,543,394,534,399,524,415,518,442,516,472,519,488,527,484,529,470,524,442,521,416,523,402,528,399,534,406,542"/>
+<area shape="poly" title=" " alt="" coords="401,994,394,985,399,975,415,969,442,967,472,969,488,977,484,980,470,975,442,972,416,974,402,979,399,984,406,992"/>
+<area shape="rect" href="../../d8/d00/a01109.html#ac05029eaab6bad31d4cc602f70d70943" title="Constructor." alt="" coords="384,1423,501,1449"/>
+<area shape="poly" title=" " alt="" coords="275,1435,370,1435,366,1438,278,1439"/>
+<area shape="rect" href="../../dd/d00/a01121.html#a22c5dcad982785f032635566f0829a05" title="Display the explanation." alt="" coords="630,1591,752,1617"/>
+<area shape="poly" title=" " alt="" coords="518,1602,616,1603,612,1605,520,1606"/>
+<area shape="poly" title=" " alt="" coords="262,1564,363,1585,359,1588,264,1568"/>
+<area shape="rect" href="../../d8/d00/a01113.html#ad10c9a14e4b91a1da05a4e90b665cda3" title="Override this to do something special with the answer received." alt="" coords="362,1524,522,1567"/>
+<area shape="poly" title=" " alt="" coords="290,1547,349,1546,345,1550,293,1552"/>
+<area shape="poly" title=" " alt="" coords="244,1536,338,1509,371,1502,367,1506,340,1515,247,1540"/>
+<area shape="poly" title=" " alt="" coords="264,1639,361,1619,358,1623,267,1643"/>
+<area shape="poly" title=" " alt="" coords="215,1639,251,1611,289,1576,302,1558,311,1541,320,1525,337,1510,349,1505,346,1509,341,1514,324,1529,315,1544,307,1560,293,1579,255,1615,220,1642"/>
+<area shape="rect" href="../../d2/d00/a00137.html#af67e732258579f2e0c619014e718a75c" title="Convert an integer to a string." alt="" coords="423,1641,461,1668"/>
+<area shape="poly" title=" " alt="" coords="270,1652,409,1653,405,1656,273,1657"/>
+<area shape="rect" href="../../d2/d00/a00137.html#aa70bc74cb9cef1fc1add36a16b97a694" title="Convert a string to an integer." alt="" coords="423,1743,461,1769"/>
+<area shape="poly" title=" " alt="" coords="231,1666,411,1741,406,1744,232,1671"/>
+<area shape="poly" title=" " alt="" coords="461,1655,659,1686,654,1688,463,1660"/>
+<area shape="poly" title=" " alt="" coords="669,1687,650,1678,647,1665,662,1655,691,1652,717,1654,732,1661,735,1671,726,1682,722,1678,730,1670,728,1665,715,1660,691,1657,663,1660,652,1667,655,1674,674,1686"/>
+<area shape="poly" title=" " alt="" coords="461,1755,659,1777,654,1779,463,1761"/>
+<area shape="poly" title=" " alt="" coords="669,1776,650,1767,647,1754,662,1745,691,1741,717,1744,732,1750,735,1761,726,1771,722,1767,730,1760,728,1754,715,1749,691,1747,663,1750,652,1756,655,1764,674,1775"/>
+<area shape="poly" title=" " alt="" coords="206,1917,245,1859,289,1780,301,1737,304,1699,311,1664,321,1646,337,1627,353,1618,350,1622,341,1631,326,1649,316,1665,309,1700,306,1738,293,1782,250,1862,211,1919"/>
+<area shape="poly" title=" " alt="" coords="168,1919,163,1910,166,1900,178,1894,197,1892,217,1895,229,1903,224,1904,215,1900,197,1897,180,1899,170,1904,168,1910,173,1918"/>
+<area shape="poly" title=" " alt="" coords="257,1916,368,1892,364,1895,260,1920"/>
+<area shape="poly" title=" " alt="" coords="267,1933,353,1939,349,1942,269,1938"/>
+<area shape="poly" title=" " alt="" coords="234,1943,394,2006,389,2009,234,1949"/>
+<area shape="poly" title=" " alt="" coords="401,2013,394,2005,399,1995,415,1989,442,1987,472,1989,489,1998,483,1999,470,1995,442,1992,416,1994,402,1999,399,2004,406,2013"/>
+<area shape="poly" title=" " alt="" coords="283,1754,409,1754,405,1758,285,1758"/>
+<area shape="poly" title=" " alt="" coords="450,1193,503,1119,544,1075,592,1037,619,1024,615,1028,595,1041,548,1079,507,1123,454,1196"/>
+<area shape="poly" title=" " alt="" coords="453,1193,510,1138,549,1107,592,1080,688,1054,835,1022,831,1026,689,1059,594,1085,552,1111,513,1142,458,1196"/>
+<area shape="poly" title=" " alt="" coords="414,1202,397,1192,395,1180,411,1171,442,1168,469,1170,486,1176,491,1186,483,1196,479,1193,485,1186,482,1180,468,1175,442,1173,413,1176,400,1182,401,1189,419,1200"/>
+<area shape="rect" href="../../d9/d00/a01289.html#a2eb452217150a77083a6ac7f3b2ede7b" title="Constructor." alt="" coords="593,1271,789,1297"/>
+<area shape="poly" title=" " alt="" coords="466,1214,594,1256,622,1265,617,1267,593,1261,468,1219"/>
+<area shape="rect" href="../../d7/d00/a00002.html#aae18338a0146b067f49f86dec65a6f7d" title=" " alt="" coords="612,1119,770,1145"/>
+<area shape="poly" title=" " alt="" coords="465,1197,593,1155,621,1148,617,1152,594,1160,469,1202"/>
+<area shape="rect" href="../../dc/d00/a00833.html#aa7330dfcfcd119e8b934be57d22311b4" title=" " alt="" coords="609,1169,773,1196"/>
+<area shape="poly" title=" " alt="" coords="466,1203,596,1191,592,1194,469,1208"/>
+<area shape="rect" href="../../dd/d00/a01693.html#a05ad0a6c66db864f96cdc8741e423431" title=" " alt="" coords="605,1220,777,1247"/>
+<area shape="poly" title=" " alt="" coords="466,1208,592,1222,588,1225,468,1213"/>
+<area shape="rect" href="../../d3/d00/a02069.html#a5bb4b5438a940567e78fd50332626e42" title="Initialize the DPR device." alt="" coords="873,1321,958,1348"/>
+<area shape="poly" title=" " alt="" coords="458,1219,516,1265,554,1288,594,1307,663,1325,734,1334,800,1337,859,1338,855,1340,800,1342,733,1339,662,1330,592,1312,551,1293,513,1269,459,1225"/>
+<area shape="poly" title=" " alt="" coords="653,1119,646,1110,651,1100,666,1094,691,1092,718,1095,733,1103,728,1104,716,1100,691,1097,667,1099,655,1104,652,1110,658,1118"/>
+<area shape="poly" title=" " alt="" coords="957,1332,1029,1334,1024,1336,959,1337"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a49fe56c9967ff7bc117c46e3c5731d28" name="a49fe56c9967ff7bc117c46e3c5731d28"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a49fe56c9967ff7bc117c46e3c5731d28">&#9670;&#160;</a></span>trim_answer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">string trim_answer </td>
+          <td>(</td>
+          <td class="paramtype">const string &amp;</td>          <td class="paramname"><span class="paramname"><em>value</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00187">187</a> of file <a class="el" href="../../d1/d00/a00128_source.html">es40-cfg.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d1/d00/a00128_source.html#l00187">trim_answer()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d1/d00/a00128_source.html#l00196">ask_hotkey_override()</a>, <a class="el" href="../../d1/d00/a00128_source.html#l00464">main()</a>, and <a class="el" href="../../d1/d00/a00128_source.html#l00187">trim_answer()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d1/d00/a00128_a49fe56c9967ff7bc117c46e3c5731d28_cgraph.png" border="0" usemap="#ad1/d00/a00128_a49fe56c9967ff7bc117c46e3c5731d28_cgraph" loading="lazy" alt=""/></div>
+<map name="ad1/d00/a00128_a49fe56c9967ff7bc117c46e3c5731d28_cgraph" id="ad1/d00/a00128_a49fe56c9967ff7bc117c46e3c5731d28_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,98,56"/>
+<area shape="poly" title=" " alt="" coords="34,29,32,20,33,11,40,5,52,3,63,5,70,14,65,14,61,10,51,8,43,10,38,14,37,20,39,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d1/d00/a00128_a49fe56c9967ff7bc117c46e3c5731d28_icgraph.png" border="0" usemap="#ad1/d00/a00128_a49fe56c9967ff7bc117c46e3c5731d28_icgraph" loading="lazy" alt=""/></div>
+<map name="ad1/d00/a00128_a49fe56c9967ff7bc117c46e3c5731d28_icgraph" id="ad1/d00/a00128_a49fe56c9967ff7bc117c46e3c5731d28_icgraph">
+<area shape="rect" title=" " alt="" coords="292,55,384,81"/>
+<area shape="poly" title=" " alt="" coords="365,39,356,36,338,33,321,35,312,40,310,45,314,55,310,53,305,46,308,36,320,30,338,28,358,31,370,40"/>
+<area shape="rect" href="../../d1/d00/a00128.html#af654c080e1f2899e44cae4afc8cda239" title=" " alt="" coords="103,29,244,56"/>
+<area shape="poly" title=" " alt="" coords="274,59,244,56,245,51,279,59"/>
+<area shape="rect" href="../../d1/d00/a00128.html#a0ddf1224851353fc92bfbff6f499fa97" title="Main program entry point." alt="" coords="5,55,55,81"/>
+<area shape="poly" title=" " alt="" coords="277,71,55,71,55,65,277,65"/>
+<area shape="poly" title=" " alt="" coords="196,14,189,10,173,8,159,10,151,14,149,20,153,30,148,28,144,21,147,11,157,5,173,3,191,5,201,14"/>
+<area shape="poly" title=" " alt="" coords="85,59,55,66,54,61,90,57"/>
+</map>
+</div>
+
+</div>
+</div>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="a1395871239d0eb401560f43391ee5a68" name="a1395871239d0eb401560f43391ee5a68"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1395871239d0eb401560f43391ee5a68">&#9670;&#160;</a></span>gui_hotkey_prompts</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="../../de/d00/a01101.html">GUIHotkeyPrompt</a> gui_hotkey_prompts[]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">                                                = {</div>
+<div class="line">        { <span class="stringliteral">&quot;hotkey.mouse_capture&quot;</span>, <span class="stringliteral">&quot;Mouse capture&quot;</span>, <span class="stringliteral">&quot;Ctrl+F10&quot;</span> },</div>
+<div class="line">        { <span class="stringliteral">&quot;hotkey.media&quot;</span>, <span class="stringliteral">&quot;Disk and media controls&quot;</span>, <span class="stringliteral">&quot;Ctrl+F11&quot;</span> },</div>
+<div class="line">        { <span class="stringliteral">&quot;hotkey.ctrl_alt_delete&quot;</span>, <span class="stringliteral">&quot;Send Ctrl+Alt+Delete to the guest&quot;</span>, <span class="stringliteral">&quot;Ctrl+Alt+End&quot;</span> },</div>
+<div class="line">        { <span class="stringliteral">&quot;hotkey.reset_window&quot;</span>, <span class="stringliteral">&quot;Reset window size&quot;</span>, <span class="stringliteral">&quot;Ctrl+Alt+Home&quot;</span> },</div>
+<div class="line">        { <span class="stringliteral">&quot;hotkey.scale_up&quot;</span>, <span class="stringliteral">&quot;Increase runtime window scale&quot;</span>, <span class="stringliteral">&quot;Ctrl+PageUp&quot;</span> },</div>
+<div class="line">        { <span class="stringliteral">&quot;hotkey.scale_down&quot;</span>, <span class="stringliteral">&quot;Decrease runtime window scale&quot;</span>, <span class="stringliteral">&quot;Ctrl+PageDown&quot;</span> }</div>
+<div class="line">}</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00128_source.html#l00178">178</a> of file <a class="el" href="../../d1/d00/a00128_source.html">es40-cfg.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d1/d00/a00128_source.html#l00464">main()</a>.</p>
 
 </div>
 </div>
@@ -1341,7 +818,7 @@ Macros</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../d1/d00/a00128.html">config.h</a></li>
+    <li class="navelem"><a href="../../dir_9f351d46ce3cc29445a41dc3a31e6919.html">config</a></li><li class="navelem"><a href="../../d1/d00/a00128.html">es40-cfg.cpp</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

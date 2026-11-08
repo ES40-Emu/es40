@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: emu/SystemComponent.cpp Source File</title>
+<title>ES40: CPU/Ev68MMU.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,87 +109,82 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('de/d00/a00290_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">SystemComponent.cpp</div></div>
+  <div class="headertitle"><div class="title">Ev68MMU.h</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../de/d00/a00290.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 Emulator.</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2007 by the ES40 Emulator Project</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * This program is free software; you can redistribute it and/or</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * modify it under the terms of the GNU General Public License</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * as published by the Free Software Foundation; either version 2</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * of the License, or (at your option) any later version.</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * This program is distributed in the hope that it will be useful,</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * GNU General Public License for more details.</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * You should have received a copy of the GNU General Public License</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * along with this program; if not, write to the Free Software</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * Although this is not required, the author would appreciate being notified of,</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * and receiving any modifications you may make to the source code that might serve</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * the general public.</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span></div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d00/a00524.html">StdAfx.h</a>&quot;</span></div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#include &quot;<a class="code" href="../../d6/d00/a00293.html">SystemComponent.h</a>&quot;</span></div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="preprocessor">#include &quot;<a class="code" href="../../dc/d00/a00620.html">system/System.h</a>&quot;</span></div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span></div>
-<div class="foldopen" id="foldopen00075" data-start="{" data-end="}">
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="../../dd/d00/a01121.html#a14e444f9ccc389b59b947164f8dfb101">   75</a></span><a class="code hl_function" href="../../dd/d00/a01121.html#a14e444f9ccc389b59b947164f8dfb101">CSystemComponent::CSystemComponent</a>(<a class="code hl_class" href="../../d3/d00/a00869.html">CConfigurator</a>* cfg, <a class="code hl_class" href="../../d4/d00/a01817.html">CSystem</a>* system)</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>{</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="keywordtype">char</span>* a;</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        <span class="keywordtype">char</span>* b;</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        system-&gt;<a class="code hl_function" href="../../d4/d00/a01817.html#ab74fa3c30d9adadebee72c621cbe137a">RegisterComponent</a>(<span class="keyword">this</span>);</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        <a class="code hl_variable" href="../../dd/d00/a01121.html#ae46a17e651ac3dc9842a761b15799ac3">cSystem</a> = system;</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        <a class="code hl_variable" href="../../dd/d00/a01121.html#a6166fe06203cf37344e9d948b0569758">myCfg</a> = cfg;</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        a = <a class="code hl_variable" href="../../dd/d00/a01121.html#a6166fe06203cf37344e9d948b0569758">myCfg</a>-&gt;<a class="code hl_function" href="../../d3/d00/a00869.html#a3f177a1c477285fec97e62585c6cd799">get_myName</a>();</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        b = <a class="code hl_variable" href="../../dd/d00/a01121.html#a6166fe06203cf37344e9d948b0569758">myCfg</a>-&gt;<a class="code hl_function" href="../../d3/d00/a00869.html#a646e11c13c5a706a8389b898992ee012">get_myValue</a>();</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        <a class="code hl_define" href="../../d0/d00/a00302.html#a59661d12c2cd12b9612a73f2097bbd8d">CHECK_ALLOCATION</a>(<a class="code hl_variable" href="../../dd/d00/a01121.html#a558b85d48f0fcb79a6dde8b654a3d956">devid_string</a> = (<span class="keywordtype">char</span>*)malloc(strlen(a) + strlen(b) + 3));</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        sprintf(<a class="code hl_variable" href="../../dd/d00/a01121.html#a558b85d48f0fcb79a6dde8b654a3d956">devid_string</a>, <span class="stringliteral">&quot;%s(%s)&quot;</span>, a, b);</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>}</div>
+<a href="../../de/d00/a00290.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator -- EV68 translation-fill rules</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2026 by gdwnldsKSC</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * All rights reserved.</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * SPDX-License-Identifier: BSD-1-Clause</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * Redistribution and use in source and binary forms, with or without</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * modification, are permitted provided that the following conditions are met:</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * 1. Redistributions of source code must retain the above copyright notice,</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> *    this list of conditions and the following disclaimer.</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> * POSSIBILITY OF SUCH DAMAGE.</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#if !defined(INCLUDED_EV68MMU_H)</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#define INCLUDED_EV68MMU_H</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &quot;<a class="code" href="../../d3/d00/a00215.html">AlphaMMU.h</a>&quot;</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="foldopen" id="foldopen00032" data-start="{" data-end="};">
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="../../de/d00/a01261.html">   32</a></span><span class="keyword">class </span><a class="code hl_class" href="../../de/d00/a01261.html">Ev68MMU</a></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>{</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>  <span class="keyword">static</span> <a class="code hl_struct" href="../../da/d00/a01217.html">AlphaMMUAccess</a> <a class="code hl_function" href="../../de/d00/a01261.html#aa6d4fce70ff132f7e851e110b7694d18">access</a>(<span class="keyword">const</span> <a class="code hl_class" href="../../d6/d00/a01137.html">CAlphaCPU</a>&amp; <a class="code hl_variable" href="../../d4/d00/a00710.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a>, <span class="keywordtype">int</span> access_flags);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  <span class="keyword">static</span> <a class="code hl_struct" href="../../dd/d00/a01221.html">AlphaMMUAddress</a> <a class="code hl_function" href="../../de/d00/a01261.html#a0270ba5da2d11e256e0a2bea8eef800e">map_address</a>(<span class="keyword">const</span> <a class="code hl_class" href="../../d6/d00/a01137.html">CAlphaCPU</a>&amp; <a class="code hl_variable" href="../../d4/d00/a00710.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a>, std::uint64_t virt,</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>                                     <span class="keywordtype">int</span> access_flags, <span class="keywordtype">int</span> mode);</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <span class="keyword">static</span> <a class="code hl_struct" href="../../de/d00/a01209.html">AlphaTBFill</a> <a class="code hl_function" href="../../de/d00/a01261.html#a69771d1846d5b7013b6e7d7ab39b0c7b">decode_fill</a>(<span class="keyword">const</span> <a class="code hl_class" href="../../d6/d00/a01137.html">CAlphaCPU</a>&amp; <a class="code hl_variable" href="../../d4/d00/a00710.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a>, std::uint64_t virt,</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>                                 std::uint64_t pte_phys, std::uint64_t pte_flags,</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>                                 <span class="keywordtype">int</span> access_flags);</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>};</div>
 </div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span></div>
-<div class="foldopen" id="foldopen00094" data-start="{" data-end="}">
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="../../dd/d00/a01121.html#a66223eb094bd9ff4a0bf1b6f7da194a0">   94</a></span><a class="code hl_function" href="../../dd/d00/a01121.html#a66223eb094bd9ff4a0bf1b6f7da194a0">CSystemComponent::~CSystemComponent</a>()</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>{</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../dd/d00/a01121.html#ae46a17e651ac3dc9842a761b15799ac3">cSystem</a>)</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>                <a class="code hl_variable" href="../../dd/d00/a01121.html#ae46a17e651ac3dc9842a761b15799ac3">cSystem</a>-&gt;<a class="code hl_function" href="../../d4/d00/a01817.html#a8518849ce7f0d69cb626603a0ba3ba51">UnregisterComponent</a>(<span class="keyword">this</span>);</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>        free(<a class="code hl_variable" href="../../dd/d00/a01121.html#a558b85d48f0fcb79a6dde8b654a3d956">devid_string</a>);</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        <a class="code hl_variable" href="../../dd/d00/a01121.html#a558b85d48f0fcb79a6dde8b654a3d956">devid_string</a> = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>}</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="../../de/d00/a00290.html#a46c3fb375cb12b1b0d03cf0995bb21ca">   43</a></span><span class="keyword">inline</span> <span class="keyword">constexpr</span> <a class="code hl_struct" href="../../d5/d00/a01213.html">AlphaTBFillPolicy</a> <a class="code hl_variable" href="../../de/d00/a00290.html#a46c3fb375cb12b1b0d03cf0995bb21ca">kEv68TBFillPolicy</a>{&amp;<a class="code hl_function" href="../../de/d00/a01261.html#a69771d1846d5b7013b6e7d7ab39b0c7b">Ev68MMU::decode_fill</a>};</div>
+<div class="foldopen" id="foldopen00044" data-start="{" data-end="};">
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="../../de/d00/a00290.html#af72d7608012fab6bf3716a3d9092570a">   44</a></span><span class="keyword">inline</span> <span class="keyword">constexpr</span> <a class="code hl_struct" href="../../d8/d00/a01225.html">AlphaMMUAddressPolicy</a> <a class="code hl_variable" href="../../de/d00/a00290.html#af72d7608012fab6bf3716a3d9092570a">kEv68MMUAddressPolicy</a>{</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  &amp;<a class="code hl_function" href="../../de/d00/a01261.html#aa6d4fce70ff132f7e851e110b7694d18">Ev68MMU::access</a>, &amp;<a class="code hl_function" href="../../de/d00/a01261.html#a0270ba5da2d11e256e0a2bea8eef800e">Ev68MMU::map_address</a></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>};</div>
 </div>
-<div class="ttc" id="aa00293_html"><div class="ttname"><a href="../../d6/d00/a00293.html">SystemComponent.h</a></div><div class="ttdoc">Contains definitions for the base class for devices that connect to the chipset.</div></div>
-<div class="ttc" id="aa00302_html_a59661d12c2cd12b9612a73f2097bbd8d"><div class="ttname"><a href="../../d0/d00/a00302.html#a59661d12c2cd12b9612a73f2097bbd8d">CHECK_ALLOCATION</a></div><div class="ttdeci">#define CHECK_ALLOCATION(ptr)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d00/a00302_source.html#l00149">es40_debug.h:149</a></div></div>
-<div class="ttc" id="aa00524_html"><div class="ttname"><a href="../../d9/d00/a00524.html">StdAfx.h</a></div><div class="ttdoc">Standard includes.</div></div>
-<div class="ttc" id="aa00620_html"><div class="ttname"><a href="../../dc/d00/a00620.html">System.h</a></div><div class="ttdoc">Contains the definitions for the emulated Typhoon Chipset devices.</div></div>
-<div class="ttc" id="aa00869_html"><div class="ttname"><a href="../../d3/d00/a00869.html">CConfigurator</a></div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00080_source.html#l00133">Configurator.h:134</a></div></div>
-<div class="ttc" id="aa00869_html_a3f177a1c477285fec97e62585c6cd799"><div class="ttname"><a href="../../d3/d00/a00869.html#a3f177a1c477285fec97e62585c6cd799">CConfigurator::get_myName</a></div><div class="ttdeci">char * get_myName()</div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00080_source.html#l00168">Configurator.h:168</a></div></div>
-<div class="ttc" id="aa00869_html_a646e11c13c5a706a8389b898992ee012"><div class="ttname"><a href="../../d3/d00/a00869.html#a646e11c13c5a706a8389b898992ee012">CConfigurator::get_myValue</a></div><div class="ttdeci">char * get_myValue()</div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00080_source.html#l00169">Configurator.h:169</a></div></div>
-<div class="ttc" id="aa01121_html_a14e444f9ccc389b59b947164f8dfb101"><div class="ttname"><a href="../../dd/d00/a01121.html#a14e444f9ccc389b59b947164f8dfb101">CSystemComponent::CSystemComponent</a></div><div class="ttdeci">CSystemComponent(class CConfigurator *cfg, class CSystem *system)</div><div class="ttdoc">Constructor.</div><div class="ttdef"><b>Definition</b> <a href="#l00075">SystemComponent.cpp:75</a></div></div>
-<div class="ttc" id="aa01121_html_a558b85d48f0fcb79a6dde8b654a3d956"><div class="ttname"><a href="../../dd/d00/a01121.html#a558b85d48f0fcb79a6dde8b654a3d956">CSystemComponent::devid_string</a></div><div class="ttdeci">char * devid_string</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00293_source.html#l00167">SystemComponent.h:167</a></div></div>
-<div class="ttc" id="aa01121_html_a6166fe06203cf37344e9d948b0569758"><div class="ttname"><a href="../../dd/d00/a01121.html#a6166fe06203cf37344e9d948b0569758">CSystemComponent::myCfg</a></div><div class="ttdeci">class CConfigurator * myCfg</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00293_source.html#l00170">SystemComponent.h:170</a></div></div>
-<div class="ttc" id="aa01121_html_a66223eb094bd9ff4a0bf1b6f7da194a0"><div class="ttname"><a href="../../dd/d00/a01121.html#a66223eb094bd9ff4a0bf1b6f7da194a0">CSystemComponent::~CSystemComponent</a></div><div class="ttdeci">virtual ~CSystemComponent()</div><div class="ttdoc">destructor.</div><div class="ttdef"><b>Definition</b> <a href="#l00094">SystemComponent.cpp:94</a></div></div>
-<div class="ttc" id="aa01121_html_ae46a17e651ac3dc9842a761b15799ac3"><div class="ttname"><a href="../../dd/d00/a01121.html#ae46a17e651ac3dc9842a761b15799ac3">CSystemComponent::cSystem</a></div><div class="ttdeci">class CSystem * cSystem</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00293_source.html#l00169">SystemComponent.h:169</a></div></div>
-<div class="ttc" id="aa01817_html"><div class="ttname"><a href="../../d4/d00/a01817.html">CSystem</a></div><div class="ttdoc">Emulated Typhoon 21272 chipset.</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00620_source.html#l00236">System.h:237</a></div></div>
-<div class="ttc" id="aa01817_html_a8518849ce7f0d69cb626603a0ba3ba51"><div class="ttname"><a href="../../d4/d00/a01817.html#a8518849ce7f0d69cb626603a0ba3ba51">CSystem::UnregisterComponent</a></div><div class="ttdeci">void UnregisterComponent(CSystemComponent *component)</div><div class="ttdoc">Unregister a device (should only be needed if constructor of device fails).</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00617_source.html#l00536">System.cpp:536</a></div></div>
-<div class="ttc" id="aa01817_html_ab74fa3c30d9adadebee72c621cbe137a"><div class="ttname"><a href="../../d4/d00/a01817.html#ab74fa3c30d9adadebee72c621cbe137a">CSystem::RegisterComponent</a></div><div class="ttdeci">int RegisterComponent(CSystemComponent *component)</div><div class="ttdoc">Register a device.</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00617_source.html#l00513">System.cpp:513</a></div></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aa00215_html"><div class="ttname"><a href="../../d3/d00/a00215.html">AlphaMMU.h</a></div></div>
+<div class="ttc" id="aa00290_html_a46c3fb375cb12b1b0d03cf0995bb21ca"><div class="ttname"><a href="../../de/d00/a00290.html#a46c3fb375cb12b1b0d03cf0995bb21ca">kEv68TBFillPolicy</a></div><div class="ttdeci">constexpr AlphaTBFillPolicy kEv68TBFillPolicy</div><div class="ttdef"><b>Definition</b> <a href="#l00043">Ev68MMU.h:43</a></div></div>
+<div class="ttc" id="aa00290_html_af72d7608012fab6bf3716a3d9092570a"><div class="ttname"><a href="../../de/d00/a00290.html#af72d7608012fab6bf3716a3d9092570a">kEv68MMUAddressPolicy</a></div><div class="ttdeci">constexpr AlphaMMUAddressPolicy kEv68MMUAddressPolicy</div><div class="ttdef"><b>Definition</b> <a href="#l00044">Ev68MMU.h:44</a></div></div>
+<div class="ttc" id="aa00710_html_a4e906a1b455653dd9be3d01ef9aadebb"><div class="ttname"><a href="../../d4/d00/a00710.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a></div><div class="ttdeci">CAlphaCPU * cpu[4]</div></div>
+<div class="ttc" id="aa01137_html"><div class="ttname"><a href="../../d6/d00/a01137.html">CAlphaCPU</a></div><div class="ttdoc">Emulated CPU.</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00259">AlphaCPU.h:260</a></div></div>
+<div class="ttc" id="aa01209_html"><div class="ttname"><a href="../../de/d00/a01209.html">AlphaTBFill</a></div><div class="ttdef"><b>Definition</b> <a href="../../d3/d00/a00215_source.html#l00035">AlphaMMU.h:36</a></div></div>
+<div class="ttc" id="aa01213_html"><div class="ttname"><a href="../../d5/d00/a01213.html">AlphaTBFillPolicy</a></div><div class="ttdef"><b>Definition</b> <a href="../../d3/d00/a00215_source.html#l00048">AlphaMMU.h:49</a></div></div>
+<div class="ttc" id="aa01217_html"><div class="ttname"><a href="../../da/d00/a01217.html">AlphaMMUAccess</a></div><div class="ttdef"><b>Definition</b> <a href="../../d3/d00/a00215_source.html#l00056">AlphaMMU.h:57</a></div></div>
+<div class="ttc" id="aa01221_html"><div class="ttname"><a href="../../dd/d00/a01221.html">AlphaMMUAddress</a></div><div class="ttdef"><b>Definition</b> <a href="../../d3/d00/a00215_source.html#l00070">AlphaMMU.h:71</a></div></div>
+<div class="ttc" id="aa01225_html"><div class="ttname"><a href="../../d8/d00/a01225.html">AlphaMMUAddressPolicy</a></div><div class="ttdef"><b>Definition</b> <a href="../../d3/d00/a00215_source.html#l00078">AlphaMMU.h:79</a></div></div>
+<div class="ttc" id="aa01261_html"><div class="ttname"><a href="../../de/d00/a01261.html">Ev68MMU</a></div><div class="ttdef"><b>Definition</b> <a href="#l00032">Ev68MMU.h:33</a></div></div>
+<div class="ttc" id="aa01261_html_a0270ba5da2d11e256e0a2bea8eef800e"><div class="ttname"><a href="../../de/d00/a01261.html#a0270ba5da2d11e256e0a2bea8eef800e">Ev68MMU::map_address</a></div><div class="ttdeci">static AlphaMMUAddress map_address(const CAlphaCPU &amp;cpu, std::uint64_t virt, int access_flags, int mode)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00287_source.html#l00043">Ev68MMU.cpp:43</a></div></div>
+<div class="ttc" id="aa01261_html_a69771d1846d5b7013b6e7d7ab39b0c7b"><div class="ttname"><a href="../../de/d00/a01261.html#a69771d1846d5b7013b6e7d7ab39b0c7b">Ev68MMU::decode_fill</a></div><div class="ttdeci">static AlphaTBFill decode_fill(const CAlphaCPU &amp;cpu, std::uint64_t virt, std::uint64_t pte_phys, std::uint64_t pte_flags, int access_flags)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00287_source.html#l00075">Ev68MMU.cpp:75</a></div></div>
+<div class="ttc" id="aa01261_html_aa6d4fce70ff132f7e851e110b7694d18"><div class="ttname"><a href="../../de/d00/a01261.html#aa6d4fce70ff132f7e851e110b7694d18">Ev68MMU::access</a></div><div class="ttdeci">static AlphaMMUAccess access(const CAlphaCPU &amp;cpu, int access_flags)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00287_source.html#l00032">Ev68MMU.cpp:32</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_450cafc1c0b54ccdbdec0997809be7cf.html">emu</a></li><li class="navelem"><a href="../../de/d00/a00290.html">SystemComponent.cpp</a></li>
+    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../de/d00/a00290.html">Ev68MMU.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

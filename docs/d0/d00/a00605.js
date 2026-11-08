@@ -1,20 +1,25 @@
 var a00605 =
 [
-    [ "MODE_AUTOSEL", "d0/d00/a00605.html#ad586b5cd61b461e7157cabb44f8bf160", null ],
-    [ "MODE_CONFIRM_0", "d0/d00/a00605.html#aeca5b7d2d01471b72545b510971ba314", null ],
-    [ "MODE_CONFIRM_1", "d0/d00/a00605.html#aa5d3f2115af5e53d3b3974b218c70cdc", null ],
-    [ "MODE_ERASE_STEP3", "d0/d00/a00605.html#ac71987735c70a24574c06fc74de1bbb7", null ],
-    [ "MODE_ERASE_STEP4", "d0/d00/a00605.html#ad3d4a674d6d339ddc80fcbc8c2268eb3", null ],
-    [ "MODE_ERASE_STEP5", "d0/d00/a00605.html#a980e33cd72e22d85aa67582427b0f499", null ],
-    [ "MODE_PROGRAM", "d0/d00/a00605.html#ae52122633567e99792826c1892adde0e", null ],
-    [ "MODE_READ", "d0/d00/a00605.html#ac4d1baf108e9ce6414088db508d7c182", null ],
-    [ "MODE_STEP1", "d0/d00/a00605.html#a874ebd176831eab586ec8297d59fc13d", null ],
-    [ "MODE_STEP2", "d0/d00/a00605.html#a14ea84be8c8000d67a121846d2ba4091", null ],
-    [ "cpq_sig_offset", "d0/d00/a00605.html#aa31769675ea797d3118b8159ed58bf87", null ],
-    [ "cpu", "d0/d00/a00605.html#a4e906a1b455653dd9be3d01ef9aadebb", null ],
-    [ "flash_magic1", "d0/d00/a00605.html#aed804cf0fdaeec6ae97f0804412ca0b4", null ],
-    [ "flash_snapshot_magic1", "d0/d00/a00605.html#ab20c4dbda423ab8c84d302797cc5f8a4", null ],
-    [ "flash_snapshot_magic2", "d0/d00/a00605.html#afaf136d29cfcf0eac44af521afd6fe91", null ],
-    [ "srm_partition_offset", "d0/d00/a00605.html#ad4b49d5eee9c58f608a0af38c447edeb", null ],
-    [ "theSROM", "d0/d00/a00605.html#ac6030b77c2d04175c983cf2554459dee", null ]
+    [ "es40_vmnet_msg", "d9/d00/a01877.html", "d9/d00/a01877" ],
+    [ "es40_vmnet_open_req", "de/d00/a01881.html", "de/d00/a01881" ],
+    [ "es40_vmnet_open_reply", "d7/d00/a01885.html", "d7/d00/a01885" ],
+    [ "es40_vmnet_status", "d9/d00/a01889.html", "d9/d00/a01889" ],
+    [ "ES40_VMNET_HELPER_FD", "d0/d00/a00605.html#ac4a4e86463480ea27227adbbc64c6f09", null ],
+    [ "ES40_VMNET_HELPER_NAME", "d0/d00/a00605.html#af6dbe87ffe18f5f23e77f31c810a00ef", null ],
+    [ "ES40_VMNET_MAX_FRAME", "d0/d00/a00605.html#a20476203e3e7e79fa5ae5e217fae290b", null ],
+    [ "ES40_VMNET_PROTO_MAGIC", "d0/d00/a00605.html#a48f9395342c895af883b0223cc6c1d26", null ],
+    [ "ES40_VMNET_PROTO_VERSION", "d0/d00/a00605.html#ae040efee058d8ef9ecd36a6f5b650144", null ],
+    [ "ES40_VMNET_STATUS_HELPER_ERROR", "d0/d00/a00605.html#aff0436d89b3cfc41a04d24a51e2b24a9", null ],
+    [ "ES40_VMNET_STATUS_OK", "d0/d00/a00605.html#af8538c2f718f983d2fd04f69952974bc", null ],
+    [ "es40_vmnet_msg_type", "d0/d00/a00605.html#a41001c1dee37072dcccb49e65462a74c", [
+      [ "ES40_VMNET_MSG_OPEN", "d0/d00/a00605.html#a41001c1dee37072dcccb49e65462a74ca5e70ea1b18816580833a084750f0f7d0", null ],
+      [ "ES40_VMNET_MSG_OPEN_REPLY", "d0/d00/a00605.html#a41001c1dee37072dcccb49e65462a74ca6b3a9051b75393b711746d5156c2259d", null ],
+      [ "ES40_VMNET_MSG_PACKET", "d0/d00/a00605.html#a41001c1dee37072dcccb49e65462a74ca90c8931f538ccd3ee7107982079f71e9", null ],
+      [ "ES40_VMNET_MSG_STATUS", "d0/d00/a00605.html#a41001c1dee37072dcccb49e65462a74ca573b858587c676813644270dd06f8a2a", null ],
+      [ "ES40_VMNET_MSG_SHUTDOWN", "d0/d00/a00605.html#a41001c1dee37072dcccb49e65462a74cae5c695178e4a0892e42af9c625fed52c", null ]
+    ] ],
+    [ "es40_vmnet_operation", "d0/d00/a00605.html#a55f3cfb317f6d99eecad86136ecff215", [
+      [ "ES40_VMNET_OP_READ", "d0/d00/a00605.html#a55f3cfb317f6d99eecad86136ecff215aa8cb30a55efa0ae2450991c79c67e8f4", null ],
+      [ "ES40_VMNET_OP_WRITE", "d0/d00/a00605.html#a55f3cfb317f6d99eecad86136ecff215a8f92c5f9ceb8996508619977e6533a89", null ]
+    ] ]
 ];

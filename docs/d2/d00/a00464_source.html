@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: network/lockstep.h Source File</title>
+<title>ES40: gui/scancodes.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,72 +109,71 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d2/d00/a00464_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">lockstep.h</div></div>
+  <div class="headertitle"><div class="title">scancodes.h</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../d2/d00/a00464.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 Emulator.</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2007 by Camiel Vanderhoeven</span></div>
+<a href="../../d2/d00/a00464.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator.</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2007-2008 by the ES40 Emulator Project</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * This program is free software; you can redistribute it and/or</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * modify it under the terms of the GNU General Public License</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * as published by the Free Software Foundation; either version 2</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * of the License, or (at your option) any later version.</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * This program is distributed in the hope that it will be useful,</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * GNU General Public License for more details.</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> *  This file is based upon Bochs.</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *  Copyright (C) 2002  MandrakeSoft S.A.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> *    MandrakeSoft S.A.</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> *    43, rue d&#39;Aboukir</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> *    75002 Paris - France</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> *    http://www.linux-mandrake.com/</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> *    http://www.mandrakesoft.com/</span></div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * You should have received a copy of the GNU General Public License</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * along with this program; if not, write to the Free Software</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * Although this is not required, the author would appreciate being notified of,</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * and receiving any modifications you may make to the source code that might serve</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * the general public.</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#if !defined(INCLUDED_LOCKSTEP_H)</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#define INCLUDED_LOCKSTEP_H</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#include &quot;<a class="code" href="../../dc/d00/a00515.html">telnet.h</a>&quot;</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#if defined(IDB) &amp;&amp; (defined(LS_MASTER) || defined(LS_SLAVE))</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="keyword">extern</span> <a class="code hl_typedef" href="../../de/d00/a00134.html#a414156feea104f8f75b4ed9e3121b2f6">int64_t</a>  <a class="code hl_variable" href="../../d5/d00/a00461.html#a420e694f3bd69046e6c5cd282519546a">ls_Socket</a>;</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#if defined(LS_MASTER)</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="keyword">extern</span> <span class="keywordtype">char</span> <a class="code hl_variable" href="../../d5/d00/a00461.html#a21aaefc0affb27d517fd6f5db5775c35">ls_IP</a>[30];</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="keyword">extern</span> <a class="code hl_typedef" href="../../de/d00/a00134.html#a414156feea104f8f75b4ed9e3121b2f6">int64_t</a>  ls_listenSocket;</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="keywordtype">void</span>        <a class="code hl_function" href="../../d5/d00/a00461.html#aa72983489060743593655a52e3c05484">lockstep_init</a>();</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="keywordtype">void</span>        <a class="code hl_function" href="../../d5/d00/a00461.html#a4c1259e01d22f15dad0840da4fe2f348">lockstep_sync_m2s</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* s);</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="keywordtype">void</span>        <a class="code hl_function" href="../../d5/d00/a00461.html#aa292ee0b71c185d28fbc01d97f2dd7bf">lockstep_sync_s2m</a>(<span class="keywordtype">char</span>* s);</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="keywordtype">void</span>        <a class="code hl_function" href="../../d5/d00/a00461.html#a019bbfcd3f60ab4df0ad2578cd73f636">lockstep_compare</a>(<span class="keywordtype">char</span>* s);</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="keywordtype">void</span>        <a class="code hl_function" href="../../d5/d00/a00461.html#a1b33b32a1570638720de82e5f7b3cfed">lockstep_send</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* s);</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="keywordtype">void</span>        <a class="code hl_function" href="../../d5/d00/a00461.html#a12d841b7884a5b067928f9365cf4f659">lockstep_receive</a>(<span class="keywordtype">char</span>* s, <span class="keywordtype">int</span> sz);</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#endif </span><span class="comment">// defined(IDB) &amp;&amp; (defined(LS_MASTER) || defined(LS_SLAVE))</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#endif </span><span class="comment">// !defined(INCLUDED_LOCKSTEP_H)</span></div>
-<div class="ttc" id="aa00134_html_a414156feea104f8f75b4ed9e3121b2f6"><div class="ttname"><a href="../../de/d00/a00134.html#a414156feea104f8f75b4ed9e3121b2f6">int64_t</a></div><div class="ttdeci">signed __int64 int64_t</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00134_source.html#l00306">config_vms.h:306</a></div></div>
-<div class="ttc" id="aa00461_html_a019bbfcd3f60ab4df0ad2578cd73f636"><div class="ttname"><a href="../../d5/d00/a00461.html#a019bbfcd3f60ab4df0ad2578cd73f636">lockstep_compare</a></div><div class="ttdeci">void lockstep_compare(char *s)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00461_source.html#l00165">lockstep.cpp:165</a></div></div>
-<div class="ttc" id="aa00461_html_a12d841b7884a5b067928f9365cf4f659"><div class="ttname"><a href="../../d5/d00/a00461.html#a12d841b7884a5b067928f9365cf4f659">lockstep_receive</a></div><div class="ttdeci">void lockstep_receive(char *s, int sz)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00461_source.html#l00238">lockstep.cpp:238</a></div></div>
-<div class="ttc" id="aa00461_html_a1b33b32a1570638720de82e5f7b3cfed"><div class="ttname"><a href="../../d5/d00/a00461.html#a1b33b32a1570638720de82e5f7b3cfed">lockstep_send</a></div><div class="ttdeci">void lockstep_send(const char *s)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00461_source.html#l00214">lockstep.cpp:214</a></div></div>
-<div class="ttc" id="aa00461_html_a21aaefc0affb27d517fd6f5db5775c35"><div class="ttname"><a href="../../d5/d00/a00461.html#a21aaefc0affb27d517fd6f5db5775c35">ls_IP</a></div><div class="ttdeci">char ls_IP[30]</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00461_source.html#l00052">lockstep.cpp:52</a></div></div>
-<div class="ttc" id="aa00461_html_a420e694f3bd69046e6c5cd282519546a"><div class="ttname"><a href="../../d5/d00/a00461.html#a420e694f3bd69046e6c5cd282519546a">ls_Socket</a></div><div class="ttdeci">int64_t ls_Socket</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00461_source.html#l00049">lockstep.cpp:49</a></div></div>
-<div class="ttc" id="aa00461_html_a4c1259e01d22f15dad0840da4fe2f348"><div class="ttname"><a href="../../d5/d00/a00461.html#a4c1259e01d22f15dad0840da4fe2f348">lockstep_sync_m2s</a></div><div class="ttdeci">void lockstep_sync_m2s(const char *s)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00461_source.html#l00111">lockstep.cpp:111</a></div></div>
-<div class="ttc" id="aa00461_html_aa292ee0b71c185d28fbc01d97f2dd7bf"><div class="ttname"><a href="../../d5/d00/a00461.html#aa292ee0b71c185d28fbc01d97f2dd7bf">lockstep_sync_s2m</a></div><div class="ttdeci">void lockstep_sync_s2m(char *s)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00461_source.html#l00137">lockstep.cpp:137</a></div></div>
-<div class="ttc" id="aa00461_html_aa72983489060743593655a52e3c05484"><div class="ttname"><a href="../../d5/d00/a00461.html#aa72983489060743593655a52e3c05484">lockstep_init</a></div><div class="ttdeci">void lockstep_init()</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00461_source.html#l00056">lockstep.cpp:56</a></div></div>
-<div class="ttc" id="aa00515_html"><div class="ttname"><a href="../../dc/d00/a00515.html">telnet.h</a></div><div class="ttdoc">Contains TCP/IP declarations used by the serial port emulator and lock-step code.</div></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> *  This library is free software; you can redistribute it and/or</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> *  modify it under the terms of the GNU Lesser General Public</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> *  License as published by the Free Software Foundation; either</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> *  version 2 of the License, or (at your option) any later version.</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> *  This library is distributed in the hope that it will be useful,</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> *  but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> *  Lesser General Public License for more details.</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> *  You should have received a copy of the GNU Lesser General Public</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment"> *  License along with this library; if not, write to the Free Software</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment"> *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#include &quot;<a class="code" href="../../de/d00/a00440.html">gui.h</a>&quot;</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#ifndef BX_SCANCODES_H</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#define BX_SCANCODES_H</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  <span class="comment">// Translation table of the 8042</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="keyword">extern</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>  <a class="code hl_variable" href="../../d5/d00/a00461.html#a7f0e8c4fb68c1d8c66eba95692662e8f">translation8042</a>[256];</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="foldopen" id="foldopen00050" data-start="{" data-end="};">
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="../../dd/d00/a01717.html">   50</a></span><span class="keyword">typedef</span> <span class="keyword">struct</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>{</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="../../dd/d00/a01717.html#a6cf1e7205ca6f6a7c575085b9502ff6b">   52</a></span>  <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_variable" href="../../dd/d00/a01717.html#a6cf1e7205ca6f6a7c575085b9502ff6b">make</a>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="../../dd/d00/a01717.html#a70fb6939e614d70a77d31366d0011865">   53</a></span>  <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_variable" href="../../dd/d00/a01717.html#a70fb6939e614d70a77d31366d0011865">brek</a>;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>} <a class="code hl_struct" href="../../dd/d00/a01717.html">scancode</a>;</div>
+</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="comment">// Scancodes table</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="keyword">extern</span> <a class="code hl_struct" href="../../dd/d00/a01717.html">scancode</a> <a class="code hl_variable" href="../../d5/d00/a00461.html#af45274cdf70d1c81c6d6a3e222c93d81">scancodes</a>[<a class="code hl_define" href="../../de/d00/a00440.html#afd2e39e1ec046bf75b774a7f3fd8a7b8">BX_KEY_NBKEYS</a>][3];</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aa00440_html"><div class="ttname"><a href="../../de/d00/a00440.html">gui.h</a></div><div class="ttdoc">Contains the definitions for the bx_gui_c base class used for interfacing with SDL and other device i...</div></div>
+<div class="ttc" id="aa00440_html_afd2e39e1ec046bf75b774a7f3fd8a7b8"><div class="ttname"><a href="../../de/d00/a00440.html#afd2e39e1ec046bf75b774a7f3fd8a7b8">BX_KEY_NBKEYS</a></div><div class="ttdeci">#define BX_KEY_NBKEYS</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00440_source.html#l00377">gui.h:377</a></div></div>
+<div class="ttc" id="aa00461_html_a7f0e8c4fb68c1d8c66eba95692662e8f"><div class="ttname"><a href="../../d5/d00/a00461.html#a7f0e8c4fb68c1d8c66eba95692662e8f">translation8042</a></div><div class="ttdeci">unsigned char translation8042[256]</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00461_source.html#l00050">scancodes.cpp:50</a></div></div>
+<div class="ttc" id="aa00461_html_af45274cdf70d1c81c6d6a3e222c93d81"><div class="ttname"><a href="../../d5/d00/a00461.html#af45274cdf70d1c81c6d6a3e222c93d81">scancodes</a></div><div class="ttdeci">scancode scancodes[119][3]</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00461_source.html#l00073">scancodes.cpp:73</a></div></div>
+<div class="ttc" id="aa01717_html"><div class="ttname"><a href="../../dd/d00/a01717.html">scancode</a></div><div class="ttdef"><b>Definition</b> <a href="#l00050">scancodes.h:51</a></div></div>
+<div class="ttc" id="aa01717_html_a6cf1e7205ca6f6a7c575085b9502ff6b"><div class="ttname"><a href="../../dd/d00/a01717.html#a6cf1e7205ca6f6a7c575085b9502ff6b">scancode::make</a></div><div class="ttdeci">const char * make</div><div class="ttdef"><b>Definition</b> <a href="#l00052">scancodes.h:52</a></div></div>
+<div class="ttc" id="aa01717_html_a70fb6939e614d70a77d31366d0011865"><div class="ttname"><a href="../../dd/d00/a01717.html#a70fb6939e614d70a77d31366d0011865">scancode::brek</a></div><div class="ttdeci">const char * brek</div><div class="ttdef"><b>Definition</b> <a href="#l00053">scancodes.h:53</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_c901c14b65aa229498a52b725b3d4a2c.html">network</a></li><li class="navelem"><a href="../../d2/d00/a00464.html">lockstep.h</a></li>
+    <li class="navelem"><a href="../../dir_11bc0974ce736ce9a6fadebbeb7a8314.html">gui</a></li><li class="navelem"><a href="../../d2/d00/a00464.html">scancodes.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

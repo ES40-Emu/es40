@@ -1,9 +1,7 @@
 var a01553 =
 [
-    [ "bit", "de/d00/a01553.html#a76820090e846776e8a27eb80ebfab415", null ],
-    [ "opcode", "de/d00/a01553.html#a34391838643a867bd89423285d878853", null ],
-    [ "phy_reg", "de/d00/a01553.html#a26b36664f893d7df749c41e4a7051fcf", null ],
-    [ "phyaddr", "de/d00/a01553.html#a45e6c98ce7657922114e5852831ac26c", null ],
-    [ "regaddr", "de/d00/a01553.html#ac10d24925e2cec70c6617150cff37c7a", null ],
-    [ "state", "de/d00/a01553.html#a675bf6283111861e8c210619a4cb7eff", null ]
+    [ "address", "de/d00/a01553.html#a2397785e727e29b89e968cdff6a5ed32", null ],
+    [ "destination_banks", "de/d00/a01553.html#ae97d6fc9b94446008654b9639db8f578", null ],
+    [ "selected", "de/d00/a01553.html#ade83f362eb2a62550937f404a262c654", null ],
+    [ "value", "de/d00/a01553.html#ae8a80533c8770fd4d1d0cac7c99f35c0", null ]
 ];

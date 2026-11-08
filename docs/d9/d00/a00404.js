@@ -1,5 +1,6 @@
 var a00404 =
 [
-    [ "sdl_font8x16", "d9/d00/a00404.html#a5d4546200d20060296ce3250e8977138", null ],
-    [ "sdl_font8x8", "d9/d00/a00404.html#a21d0a369bf2d91d31776c803b888dd6f", null ]
+    [ "CRadeon7500", "dc/d00/a01505.html", "dc/d00/a01505" ],
+    [ "CRadeon7500::PCIConfig", "db/d00/a01509.html", "db/d00/a01509" ],
+    [ "CRadeon7500::OptionROM", "d0/d00/a01513.html", "d0/d00/a01513" ]
 ];

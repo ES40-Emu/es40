@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: CPU/jit/jitengine.h File Reference</title>
+<title>ES40: CPU/cpu_fp_operate.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,21 +109,1237 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d6/d00/a00245.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">jitengine.h File Reference</div></div>
+  <div class="headertitle"><div class="title">cpu_fp_operate.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Contains code macros for the processor floating-point operate instructions.  
+<a href="#details">More...</a></p>
 <div class="textblock"><div class="dynheader">
 This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../d0/d00/a00247.png" border="0" usemap="#a_c_p_u_2jit_2jitengine_8hdep" loading="lazy" alt=""/></div>
-<map name="a_c_p_u_2jit_2jitengine_8hdep" id="a_c_p_u_2jit_2jitengine_8hdep">
-<area shape="rect" title=" " alt="" coords="12,5,140,32"/>
-<area shape="rect" href="../../d5/d00/a00140.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="5,80,147,107"/>
-<area shape="poly" title=" " alt="" coords="78,46,79,80,73,79,74,50"/>
+<div class="center"><img src="../../d0/d00/a00247.png" border="0" usemap="#a_c_p_u_2cpu__fp__operate_8hdep" loading="lazy" alt=""/></div>
+<map name="a_c_p_u_2cpu__fp__operate_8hdep" id="a_c_p_u_2cpu__fp__operate_8hdep">
+<area shape="rect" title="Contains code macros for the processor floating&#45;point operate instructions." alt="" coords="5,5,160,32"/>
+<area shape="rect" href="../../d7/d00/a00182.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="12,80,153,107"/>
+<area shape="poly" title=" " alt="" coords="84,46,85,81,80,79,81,50"/>
 </map>
 </div>
 </div>
 <p><a href="../../d6/d00/a00245_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:a35cbff736c397d624b27c6ba10d4b26e" id="r_a35cbff736c397d624b27c6ba10d4b26e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a35cbff736c397d624b27c6ba10d4b26e">FP_IS_ZERO</a>(val)</td></tr>
+<tr class="memitem:a6f52790b6d3c56191d155e4a701ffd39" id="r_a6f52790b6d3c56191d155e4a701ffd39"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6f52790b6d3c56191d155e4a701ffd39">FP_IS_NEGATIVE</a>(val)</td></tr>
+<tr class="memitem:ad57db0ffa7dfd010e5162eb6d4bf468b" id="r_ad57db0ffa7dfd010e5162eb6d4bf468b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad57db0ffa7dfd010e5162eb6d4bf468b">DO_CPYS</a></td></tr>
+<tr class="memitem:abcddc4bdc8a88d5b164de5fc57213d75" id="r_abcddc4bdc8a88d5b164de5fc57213d75"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#abcddc4bdc8a88d5b164de5fc57213d75">DO_CPYSN</a></td></tr>
+<tr class="memitem:a734f5a5cab9a323aaf0fea89b4cf4634" id="r_a734f5a5cab9a323aaf0fea89b4cf4634"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a734f5a5cab9a323aaf0fea89b4cf4634">DO_CPYSE</a></td></tr>
+<tr class="memitem:a6d2632d7255b2a7a7febc35528e57a3f" id="r_a6d2632d7255b2a7a7febc35528e57a3f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6d2632d7255b2a7a7febc35528e57a3f">DO_FCMOVEQ</a></td></tr>
+<tr class="memitem:a8ef1ed57db7479b15238156c8d37f322" id="r_a8ef1ed57db7479b15238156c8d37f322"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a8ef1ed57db7479b15238156c8d37f322">DO_FCMOVGE</a></td></tr>
+<tr class="memitem:a22a7581c28697121b07cc8f9b90a9fa6" id="r_a22a7581c28697121b07cc8f9b90a9fa6"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a22a7581c28697121b07cc8f9b90a9fa6">DO_FCMOVGT</a></td></tr>
+<tr class="memitem:aae3f716919c3c5975d25bf951731b9a4" id="r_aae3f716919c3c5975d25bf951731b9a4"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aae3f716919c3c5975d25bf951731b9a4">DO_FCMOVLE</a></td></tr>
+<tr class="memitem:a13043d0468053df6b9ffcbb0b202dadb" id="r_a13043d0468053df6b9ffcbb0b202dadb"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a13043d0468053df6b9ffcbb0b202dadb">DO_FCMOVLT</a></td></tr>
+<tr class="memitem:a5597b4a0ede1de8816dc9573e4b1580e" id="r_a5597b4a0ede1de8816dc9573e4b1580e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5597b4a0ede1de8816dc9573e4b1580e">DO_FCMOVNE</a></td></tr>
+<tr class="memitem:a7968b086f06bc9736092d0fd1c7f289e" id="r_a7968b086f06bc9736092d0fd1c7f289e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a7968b086f06bc9736092d0fd1c7f289e">DO_MF_FPCR</a></td></tr>
+<tr class="memitem:a4f2e1a9ed8e1869ca9b9b08ae2df3ea4" id="r_a4f2e1a9ed8e1869ca9b9b08ae2df3ea4"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a4f2e1a9ed8e1869ca9b9b08ae2df3ea4">DO_MT_FPCR</a></td></tr>
+<tr class="memitem:a9a52dacf7810e116a15f558230c4e5f6" id="r_a9a52dacf7810e116a15f558230c4e5f6"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9a52dacf7810e116a15f558230c4e5f6">DO_ADDG</a></td></tr>
+<tr class="memitem:ad7ea8645ef991d40f6b7cb930ae250e9" id="r_ad7ea8645ef991d40f6b7cb930ae250e9"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad7ea8645ef991d40f6b7cb930ae250e9">DO_ADDF</a></td></tr>
+<tr class="memitem:a9d146781cce61df1f383be941f63a952" id="r_a9d146781cce61df1f383be941f63a952"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9d146781cce61df1f383be941f63a952">DO_ADDT</a></td></tr>
+<tr class="memitem:adc4dc280ac872752f7780b12de7c9d0f" id="r_adc4dc280ac872752f7780b12de7c9d0f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#adc4dc280ac872752f7780b12de7c9d0f">DO_ADDS</a></td></tr>
+<tr class="memitem:a8eabd789cc49a3ca6598c48e2c0a34b4" id="r_a8eabd789cc49a3ca6598c48e2c0a34b4"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a8eabd789cc49a3ca6598c48e2c0a34b4">DO_SUBG</a></td></tr>
+<tr class="memitem:af630b70c14c7bbc4444dcd2d91de7bca" id="r_af630b70c14c7bbc4444dcd2d91de7bca"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af630b70c14c7bbc4444dcd2d91de7bca">DO_SUBF</a></td></tr>
+<tr class="memitem:a6b6e96c1c3b2822a9530f34a0357602b" id="r_a6b6e96c1c3b2822a9530f34a0357602b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6b6e96c1c3b2822a9530f34a0357602b">DO_SUBT</a></td></tr>
+<tr class="memitem:ad73287e50aaca50f51d3d161221d3531" id="r_ad73287e50aaca50f51d3d161221d3531"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad73287e50aaca50f51d3d161221d3531">DO_SUBS</a></td></tr>
+<tr class="memitem:afd954482a32f16f9690ba8478fa78689" id="r_afd954482a32f16f9690ba8478fa78689"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#afd954482a32f16f9690ba8478fa78689">DO_CMPGEQ</a></td></tr>
+<tr class="memitem:a734a449a6d501dc55467a4c5be883bfe" id="r_a734a449a6d501dc55467a4c5be883bfe"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a734a449a6d501dc55467a4c5be883bfe">DO_CMPGLE</a></td></tr>
+<tr class="memitem:a10965bbb16ac78e513df49e4896a337b" id="r_a10965bbb16ac78e513df49e4896a337b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a10965bbb16ac78e513df49e4896a337b">DO_CMPGLT</a></td></tr>
+<tr class="memitem:a7748d2ac4231b13142c46493d62babc4" id="r_a7748d2ac4231b13142c46493d62babc4"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a7748d2ac4231b13142c46493d62babc4">DO_CMPTEQ</a></td></tr>
+<tr class="memitem:a9525fd72df943c7f2119e109d59cacb0" id="r_a9525fd72df943c7f2119e109d59cacb0"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9525fd72df943c7f2119e109d59cacb0">DO_CMPTLE</a></td></tr>
+<tr class="memitem:ab0b51ee5192f35a1c0806c0695bd7a3d" id="r_ab0b51ee5192f35a1c0806c0695bd7a3d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab0b51ee5192f35a1c0806c0695bd7a3d">DO_CMPTLT</a></td></tr>
+<tr class="memitem:a141f796f44752d1b37e674497682e423" id="r_a141f796f44752d1b37e674497682e423"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a141f796f44752d1b37e674497682e423">DO_CMPTUN</a></td></tr>
+<tr class="memitem:acdcf3d65eee1d33aff9de950ef64431e" id="r_acdcf3d65eee1d33aff9de950ef64431e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#acdcf3d65eee1d33aff9de950ef64431e">DO_CVTQL</a></td></tr>
+<tr class="memitem:a66127f3d4e7750227755f3af13afe158" id="r_a66127f3d4e7750227755f3af13afe158"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a66127f3d4e7750227755f3af13afe158">DO_CVTLQ</a></td></tr>
+<tr class="memitem:a88fcab13dee9142db241a9fa1f0c8f9b" id="r_a88fcab13dee9142db241a9fa1f0c8f9b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a88fcab13dee9142db241a9fa1f0c8f9b">DO_CVTGQ</a></td></tr>
+<tr class="memitem:a28b37768c9012b40fd82e14198ddf4ca" id="r_a28b37768c9012b40fd82e14198ddf4ca"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a28b37768c9012b40fd82e14198ddf4ca">DO_CVTQG</a></td></tr>
+<tr class="memitem:a263d77ea21cb38bdc1fc6358634256b3" id="r_a263d77ea21cb38bdc1fc6358634256b3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a263d77ea21cb38bdc1fc6358634256b3">DO_CVTQF</a></td></tr>
+<tr class="memitem:aee310986a572e807c67baa4db96d9b31" id="r_aee310986a572e807c67baa4db96d9b31"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aee310986a572e807c67baa4db96d9b31">DO_CVTTQ</a></td></tr>
+<tr class="memitem:a53e87f7b166512ec1a15e8a79d89d8b8" id="r_a53e87f7b166512ec1a15e8a79d89d8b8"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a53e87f7b166512ec1a15e8a79d89d8b8">DO_CVTQT</a></td></tr>
+<tr class="memitem:a35114c46db6621bf92b49ca60e3c8865" id="r_a35114c46db6621bf92b49ca60e3c8865"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a35114c46db6621bf92b49ca60e3c8865">DO_CVTQS</a></td></tr>
+<tr class="memitem:afc61207c5baa9b2b324d596bdcf2672e" id="r_afc61207c5baa9b2b324d596bdcf2672e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#afc61207c5baa9b2b324d596bdcf2672e">DO_CVTGD</a></td></tr>
+<tr class="memitem:abcd047b7115c84114ed0ece5ab5ed8b3" id="r_abcd047b7115c84114ed0ece5ab5ed8b3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#abcd047b7115c84114ed0ece5ab5ed8b3">DO_CVTDG</a></td></tr>
+<tr class="memitem:ad78dfd41f96bdf1d2dab09e728f85390" id="r_ad78dfd41f96bdf1d2dab09e728f85390"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad78dfd41f96bdf1d2dab09e728f85390">DO_CVTGF</a></td></tr>
+<tr class="memitem:a82e54a5f19e6f81d85eac1acc318c5d0" id="r_a82e54a5f19e6f81d85eac1acc318c5d0"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a82e54a5f19e6f81d85eac1acc318c5d0">DO_CVTST</a></td></tr>
+<tr class="memitem:ac09dd0175a73461e761b39d33f117adb" id="r_ac09dd0175a73461e761b39d33f117adb"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac09dd0175a73461e761b39d33f117adb">DO_CVTTS</a></td></tr>
+<tr class="memitem:a8ba41d9e8b3e9b46f7178e4a981faef4" id="r_a8ba41d9e8b3e9b46f7178e4a981faef4"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a8ba41d9e8b3e9b46f7178e4a981faef4">DO_FTOIS</a></td></tr>
+<tr class="memitem:a9d1866497a7a9a318c5630c963c8bdcf" id="r_a9d1866497a7a9a318c5630c963c8bdcf"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9d1866497a7a9a318c5630c963c8bdcf">DO_FTOIT</a></td></tr>
+<tr class="memitem:a366306d697cc5d270dcf897479f7b1f3" id="r_a366306d697cc5d270dcf897479f7b1f3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a366306d697cc5d270dcf897479f7b1f3">DO_ITOFT</a></td></tr>
+<tr class="memitem:a35b61b3e0fa60f345e08fdc6071b0153" id="r_a35b61b3e0fa60f345e08fdc6071b0153"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a35b61b3e0fa60f345e08fdc6071b0153">DO_ITOFS</a></td></tr>
+<tr class="memitem:a2e9b435ac2f7d57b7b81a2bfa4a2147a" id="r_a2e9b435ac2f7d57b7b81a2bfa4a2147a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a2e9b435ac2f7d57b7b81a2bfa4a2147a">DO_ITOFF</a></td></tr>
+<tr class="memitem:af538883e36b52fca9f053bdc87e900cd" id="r_af538883e36b52fca9f053bdc87e900cd"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af538883e36b52fca9f053bdc87e900cd">DO_MULG</a></td></tr>
+<tr class="memitem:a252b71b76dc552e91fadbc7464c85a5b" id="r_a252b71b76dc552e91fadbc7464c85a5b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a252b71b76dc552e91fadbc7464c85a5b">DO_MULF</a></td></tr>
+<tr class="memitem:a20ee898a32ff0e2f3899d027619e4314" id="r_a20ee898a32ff0e2f3899d027619e4314"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a20ee898a32ff0e2f3899d027619e4314">DO_MULT</a></td></tr>
+<tr class="memitem:a458e4d7971fdfbd957c749dd566ec31d" id="r_a458e4d7971fdfbd957c749dd566ec31d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a458e4d7971fdfbd957c749dd566ec31d">DO_MULS</a></td></tr>
+<tr class="memitem:aa8c5ea625671732e4d6aa23e22de0066" id="r_aa8c5ea625671732e4d6aa23e22de0066"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aa8c5ea625671732e4d6aa23e22de0066">DO_DIVG</a></td></tr>
+<tr class="memitem:a261114a05080ea9a402260c81b101e11" id="r_a261114a05080ea9a402260c81b101e11"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a261114a05080ea9a402260c81b101e11">DO_DIVF</a></td></tr>
+<tr class="memitem:ad56a41647e1a517ec0862375fe8125b2" id="r_ad56a41647e1a517ec0862375fe8125b2"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad56a41647e1a517ec0862375fe8125b2">DO_DIVT</a></td></tr>
+<tr class="memitem:acaad0e20c3191a867f8a16f8c3e9311e" id="r_acaad0e20c3191a867f8a16f8c3e9311e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#acaad0e20c3191a867f8a16f8c3e9311e">DO_DIVS</a></td></tr>
+<tr class="memitem:afc6b9671eb4a9312655f6f5b118560e6" id="r_afc6b9671eb4a9312655f6f5b118560e6"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#afc6b9671eb4a9312655f6f5b118560e6">DO_SQRTG</a></td></tr>
+<tr class="memitem:a66a99906f7386519baa577aa05c9510a" id="r_a66a99906f7386519baa577aa05c9510a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a66a99906f7386519baa577aa05c9510a">DO_SQRTF</a></td></tr>
+<tr class="memitem:a324dbbc58b61013ccab38ddcbf6457d6" id="r_a324dbbc58b61013ccab38ddcbf6457d6"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a324dbbc58b61013ccab38ddcbf6457d6">DO_SQRTT</a></td></tr>
+<tr class="memitem:afb2585495f8152e23023e4b71b712c3d" id="r_afb2585495f8152e23023e4b71b712c3d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#afb2585495f8152e23023e4b71b712c3d">DO_SQRTS</a></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Contains code macros for the processor floating-point operate instructions. </p>
+<p>Based on ARM chapter 4.10.</p>
+<p>$Id$</p>
+<p>X-1.20 Camiel Vanderhoeven 14-MAR-2008</p><ol type="1">
+<li>More meaningful exceptions replace throwing (int) 1.</li>
+<li>U64 macro replaces X64 macro.</li>
+</ol>
+<p>X-1.19 Brian Wheeler 27-FEB-2008 Avoid compiler warnings.</p>
+<p>X-1.18 Camiel Vanderhoeven 06-FEB-2008 Check for FPEN in old floating point code.</p>
+<p>X-1.17 Camiel Vanderhoeven 05-FEB-2008 Only use new floating-point code when HAVE_NEW_FP has been defined.</p>
+<p>X-1.16 Camiel Vanderhoeven 05-feb-2008 Put X64 around 64-bit constants in DO_CVTQL.</p>
+<p>X-1.15 Camiel Vanderhoeven 28-JAN-2008 Better floating-point exception handling.</p>
+<p>X-1.14 Camiel Vanderhoeven 27-JAN-2008 Minor floating-point improvements.</p>
+<p>X-1.13 Camiel Vanderhoeven 22-JAN-2008 Completed new floating-point code.</p>
+<p>X-1.12 Camiel Vanderhoeven 21-JAN-2008 Implement new floating-point code for most operations.</p>
+<p>X-1.11 Camiel Vanderhoeven 18-JAN-2008 Replaced sext_64 inlines with sext_u64_&lt;bits&gt; inlines for performance reasons (thanks to David Hittner for spotting this!);</p>
+<p>X-1.10 Camiel Vanderhoeven 2-DEC-2007 Use sext_64 inline.</p>
+<p>X-1.9 Camiel Vanderhoeven 16-NOV-2007 Avoid more compiler warnings.</p>
+<p>X-1.8 Camiel Vanderhoeven 08-NOV-2007 Added ITOFS, ITOFF.</p>
+<p>X-1.7 Camiel Vanderhoeven 08-NOV-2007 Restructured conversion routines.</p>
+<p>X-1.6 Camiel Vanderhoeven 02-NOV-2007 Added missing floating point instructions.</p>
+<p>X-1.5 Marcelo Eduardo Serrat 31-OCT-2007 Added CVTDG, CVTGD, CVTGF, MULG instructions.</p>
+<p>X-1.4 Camiel Vanderhoeven 11-APR-2007 Moved all data that should be saved to a state file to a structure "state".</p>
+<p>X-1.3 Camiel Vanderhoeven 30-MAR-2007 Added old changelog comments.</p>
+<p>X-1.2 Camiel Vanderhoeven 13-MAR-2007 Basic floating point support added.</p>
+<p>X-1.1 Camiel Vanderhoeven 18-FEB-2007 File created. Contains code previously found in <a class="el" href="../../de/d00/a00185.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor.">AlphaCPU.h</a></p>
+<dl class="section author"><dt>Author</dt><dd>Camiel Vanderhoeven </dd></dl>
+
+<p class="definition">Definition in file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+</div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
+<a id="ad7ea8645ef991d40f6b7cb930ae250e9" name="ad7ea8645ef991d40f6b7cb930ae250e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7ea8645ef991d40f6b7cb930ae250e9">&#9670;&#160;</a></span>DO_ADDF</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_ADDF</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = vax_fadd(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#adfe98457df4b407795d721952fa12e83">DT_F</a>,  <span class="keyword">false</span>);</div>
+<div class="ttc" id="aa00236_html_a29d129d2f45aa7c3558ed295c8e4958f"><div class="ttname"><a href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a></div><div class="ttdeci">#define FREG_2</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00825">cpu_defs.h:825</a></div></div>
+<div class="ttc" id="aa00236_html_a5591e9ff8152342313b8c38f14c437b7"><div class="ttname"><a href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a></div><div class="ttdeci">#define FREG_1</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00824">cpu_defs.h:824</a></div></div>
+<div class="ttc" id="aa00236_html_ab0813d80598693a82bb2c295cc7c69b7"><div class="ttname"><a href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a></div><div class="ttdeci">#define FREG_3</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00826">cpu_defs.h:826</a></div></div>
+<div class="ttc" id="aa00236_html_adaa245d6bc2073b49c4a609ddcac8d4a"><div class="ttname"><a href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a></div><div class="ttdeci">#define FPSTART</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00850">cpu_defs.h:850</a></div></div>
+<div class="ttc" id="aa00236_html_adfe98457df4b407795d721952fa12e83"><div class="ttname"><a href="../../d7/d00/a00236.html#adfe98457df4b407795d721952fa12e83">DT_F</a></div><div class="ttdeci">#define DT_F</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00203">cpu_defs.h:203</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00155">155</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a9a52dacf7810e116a15f558230c4e5f6" name="a9a52dacf7810e116a15f558230c4e5f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a52dacf7810e116a15f558230c4e5f6">&#9670;&#160;</a></span>DO_ADDG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_ADDG</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = vax_fadd(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#ad6e682b44ca5b016f3597dd085568b11">DT_G</a>,  <span class="keyword">false</span>);</div>
+<div class="ttc" id="aa00236_html_ad6e682b44ca5b016f3597dd085568b11"><div class="ttname"><a href="../../d7/d00/a00236.html#ad6e682b44ca5b016f3597dd085568b11">DT_G</a></div><div class="ttdeci">#define DT_G</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00204">cpu_defs.h:204</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00152">152</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="adc4dc280ac872752f7780b12de7c9d0f" name="adc4dc280ac872752f7780b12de7c9d0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adc4dc280ac872752f7780b12de7c9d0f">&#9670;&#160;</a></span>DO_ADDS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_ADDS</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = ieee_fadd(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#a7cd2aa50731dcccc13b40fa8c4d81077">DT_S</a>,  <span class="keyword">false</span>);</div>
+<div class="ttc" id="aa00236_html_a7cd2aa50731dcccc13b40fa8c4d81077"><div class="ttname"><a href="../../d7/d00/a00236.html#a7cd2aa50731dcccc13b40fa8c4d81077">DT_S</a></div><div class="ttdeci">#define DT_S</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00205">cpu_defs.h:205</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00161">161</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a9d146781cce61df1f383be941f63a952" name="a9d146781cce61df1f383be941f63a952"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d146781cce61df1f383be941f63a952">&#9670;&#160;</a></span>DO_ADDT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_ADDT</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = ieee_fadd(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#a28614ef2ea6b8fb90342ccab672bd319">DT_T</a>,  <span class="keyword">false</span>);</div>
+<div class="ttc" id="aa00236_html_a28614ef2ea6b8fb90342ccab672bd319"><div class="ttname"><a href="../../d7/d00/a00236.html#a28614ef2ea6b8fb90342ccab672bd319">DT_T</a></div><div class="ttdeci">#define DT_T</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00206">cpu_defs.h:206</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00158">158</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="afd954482a32f16f9690ba8478fa78689" name="afd954482a32f16f9690ba8478fa78689"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afd954482a32f16f9690ba8478fa78689">&#9670;&#160;</a></span>DO_CMPGEQ</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CMPGEQ</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">{ <span class="keywordtype">int</span> c = vax_fcmp(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins); \</div>
+<div class="line">  state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = (c == 0) ? <a class="code hl_define" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x4000000000000000) : 0; }</div>
+<div class="ttc" id="aa00326_html_a87a27db8f6877dc5bbc36ec833e88c58"><div class="ttname"><a href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a></div><div class="ttdeci">#define U64(a)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00119">datatypes.h:119</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00178">178</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a734a449a6d501dc55467a4c5be883bfe" name="a734a449a6d501dc55467a4c5be883bfe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a734a449a6d501dc55467a4c5be883bfe">&#9670;&#160;</a></span>DO_CMPGLE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CMPGLE</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">{ <span class="keywordtype">int</span> c = vax_fcmp(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins); \</div>
+<div class="line">  state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = (c &lt;= 0) ? <a class="code hl_define" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x4000000000000000) : 0; }</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00182">182</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a10965bbb16ac78e513df49e4896a337b" name="a10965bbb16ac78e513df49e4896a337b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10965bbb16ac78e513df49e4896a337b">&#9670;&#160;</a></span>DO_CMPGLT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CMPGLT</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">{ <span class="keywordtype">int</span> c = vax_fcmp(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins); \</div>
+<div class="line">  state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = (c &lt; 0) ? <a class="code hl_define" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x4000000000000000) : 0; }</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00186">186</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a7748d2ac4231b13142c46493d62babc4" name="a7748d2ac4231b13142c46493d62babc4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7748d2ac4231b13142c46493d62babc4">&#9670;&#160;</a></span>DO_CMPTEQ</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CMPTEQ</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">{ <span class="keywordtype">int</span> c = ieee_fcmp(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, 0); \</div>
+<div class="line">  state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = (c == 0) ? <a class="code hl_define" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x4000000000000000) : 0; }</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00192">192</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a9525fd72df943c7f2119e109d59cacb0" name="a9525fd72df943c7f2119e109d59cacb0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9525fd72df943c7f2119e109d59cacb0">&#9670;&#160;</a></span>DO_CMPTLE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CMPTLE</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">{ <span class="keywordtype">int</span> c = ieee_fcmp(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, 1); \</div>
+<div class="line">  state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = (c &lt;= 0) ? <a class="code hl_define" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x4000000000000000) : 0; }</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00196">196</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="ab0b51ee5192f35a1c0806c0695bd7a3d" name="ab0b51ee5192f35a1c0806c0695bd7a3d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab0b51ee5192f35a1c0806c0695bd7a3d">&#9670;&#160;</a></span>DO_CMPTLT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CMPTLT</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">{ <span class="keywordtype">int</span> c = ieee_fcmp(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, 1); \</div>
+<div class="line">  state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = (c &lt; 0) ? <a class="code hl_define" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x4000000000000000) : 0; }</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00200">200</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a141f796f44752d1b37e674497682e423" name="a141f796f44752d1b37e674497682e423"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a141f796f44752d1b37e674497682e423">&#9670;&#160;</a></span>DO_CMPTUN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CMPTUN</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">{ <span class="keywordtype">int</span> c = ieee_fcmp(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, 0); \</div>
+<div class="line">  state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = (c == 2) ? <a class="code hl_define" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x4000000000000000) : 0; }</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00206">206</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="ad57db0ffa7dfd010e5162eb6d4bf468b" name="ad57db0ffa7dfd010e5162eb6d4bf468b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad57db0ffa7dfd010e5162eb6d4bf468b">&#9670;&#160;</a></span>DO_CPYS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CPYS</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = (state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>] &amp; <a class="code hl_define" href="../../d7/d00/a00236.html#a48f0868c2774aad1501138b9f9c01ef0">FPR_SIGN</a>) | (state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>] &amp;~<a class="code hl_define" href="../../d7/d00/a00236.html#a48f0868c2774aad1501138b9f9c01ef0">FPR_SIGN</a>);</div>
+<div class="ttc" id="aa00236_html_a48f0868c2774aad1501138b9f9c01ef0"><div class="ttname"><a href="../../d7/d00/a00236.html#a48f0868c2774aad1501138b9f9c01ef0">FPR_SIGN</a></div><div class="ttdeci">#define FPR_SIGN</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00259">cpu_defs.h:259</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00103">103</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a734f5a5cab9a323aaf0fea89b4cf4634" name="a734f5a5cab9a323aaf0fea89b4cf4634"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a734f5a5cab9a323aaf0fea89b4cf4634">&#9670;&#160;</a></span>DO_CPYSE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CPYSE</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = (state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>] &amp; (<a class="code hl_define" href="../../d7/d00/a00236.html#a48f0868c2774aad1501138b9f9c01ef0">FPR_SIGN</a> | <a class="code hl_define" href="../../d7/d00/a00236.html#a78f2a9280808026a86dd8bff85cc66b4">FPR_EXP</a>)) | (state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>] &amp;~(<a class="code hl_define" href="../../d7/d00/a00236.html#a48f0868c2774aad1501138b9f9c01ef0">FPR_SIGN</a> | <a class="code hl_define" href="../../d7/d00/a00236.html#a78f2a9280808026a86dd8bff85cc66b4">FPR_EXP</a>));</div>
+<div class="ttc" id="aa00236_html_a78f2a9280808026a86dd8bff85cc66b4"><div class="ttname"><a href="../../d7/d00/a00236.html#a78f2a9280808026a86dd8bff85cc66b4">FPR_EXP</a></div><div class="ttdeci">#define FPR_EXP</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00263">cpu_defs.h:263</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00109">109</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="abcddc4bdc8a88d5b164de5fc57213d75" name="abcddc4bdc8a88d5b164de5fc57213d75"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abcddc4bdc8a88d5b164de5fc57213d75">&#9670;&#160;</a></span>DO_CPYSN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CPYSN</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = ((state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>] &amp; <a class="code hl_define" href="../../d7/d00/a00236.html#a48f0868c2774aad1501138b9f9c01ef0">FPR_SIGN</a>) ^ <a class="code hl_define" href="../../d7/d00/a00236.html#a48f0868c2774aad1501138b9f9c01ef0">FPR_SIGN</a>) | (state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>] &amp;~<a class="code hl_define" href="../../d7/d00/a00236.html#a48f0868c2774aad1501138b9f9c01ef0">FPR_SIGN</a>);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00106">106</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="abcd047b7115c84114ed0ece5ab5ed8b3" name="abcd047b7115c84114ed0ece5ab5ed8b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abcd047b7115c84114ed0ece5ab5ed8b3">&#9670;&#160;</a></span>DO_CVTDG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CVTDG</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>;                   \</div>
+<div class="line">vax_unpack_d(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], &amp;ufp2, ins); \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = vax_rpack(&amp;ufp2, ins, <a class="code hl_define" href="../../d7/d00/a00236.html#ad6e682b44ca5b016f3597dd085568b11">DT_G</a>);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00250">250</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="afc61207c5baa9b2b324d596bdcf2672e" name="afc61207c5baa9b2b324d596bdcf2672e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc61207c5baa9b2b324d596bdcf2672e">&#9670;&#160;</a></span>DO_CVTGD</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CVTGD</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>;                 \</div>
+<div class="line">vax_unpack(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], &amp;ufp2, ins); \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = vax_rpack_d(&amp;ufp2, ins);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00246">246</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="ad78dfd41f96bdf1d2dab09e728f85390" name="ad78dfd41f96bdf1d2dab09e728f85390"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad78dfd41f96bdf1d2dab09e728f85390">&#9670;&#160;</a></span>DO_CVTGF</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CVTGF</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>;                 \</div>
+<div class="line">vax_unpack(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], &amp;ufp2, ins); \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = vax_rpack(&amp;ufp2, ins, <a class="code hl_define" href="../../d7/d00/a00236.html#adfe98457df4b407795d721952fa12e83">DT_F</a>);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00254">254</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a88fcab13dee9142db241a9fa1f0c8f9b" name="a88fcab13dee9142db241a9fa1f0c8f9b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a88fcab13dee9142db241a9fa1f0c8f9b">&#9670;&#160;</a></span>DO_CVTGQ</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CVTGQ</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = vax_cvtfi(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00228">228</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a66127f3d4e7750227755f3af13afe158" name="a66127f3d4e7750227755f3af13afe158"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a66127f3d4e7750227755f3af13afe158">&#9670;&#160;</a></span>DO_CVTLQ</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CVTLQ</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>;                                               \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = <a class="code hl_function" href="../../d8/d00/a00326.html#ab6397ea9cae4b1b067118eacffc71ab7">sext_u64_32</a>(((state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>] &gt;&gt; 32) &amp; 0xC0000000) | \</div>
+<div class="line">                                ((state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>] &gt;&gt; 29) &amp; 0x3FFFFFFF));</div>
+<div class="ttc" id="aa00326_html_ab6397ea9cae4b1b067118eacffc71ab7"><div class="ttname"><a href="../../d8/d00/a00326.html#ab6397ea9cae4b1b067118eacffc71ab7">sext_u64_32</a></div><div class="ttdeci">u64 sext_u64_32(u64 a)</div><div class="ttdoc">Sign-extend a 32-bit value to 64 bits.</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00226">datatypes.h:226</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00224">224</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a263d77ea21cb38bdc1fc6358634256b3" name="a263d77ea21cb38bdc1fc6358634256b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a263d77ea21cb38bdc1fc6358634256b3">&#9670;&#160;</a></span>DO_CVTQF</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CVTQF</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = vax_cvtif(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#adfe98457df4b407795d721952fa12e83">DT_F</a>);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00234">234</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a28b37768c9012b40fd82e14198ddf4ca" name="a28b37768c9012b40fd82e14198ddf4ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a28b37768c9012b40fd82e14198ddf4ca">&#9670;&#160;</a></span>DO_CVTQG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CVTQG</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = vax_cvtif(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#ad6e682b44ca5b016f3597dd085568b11">DT_G</a>);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00231">231</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="acdcf3d65eee1d33aff9de950ef64431e" name="acdcf3d65eee1d33aff9de950ef64431e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acdcf3d65eee1d33aff9de950ef64431e">&#9670;&#160;</a></span>DO_CVTQL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CVTQL</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>;                                                                           \</div>
+<div class="line">{                                                                                                  \</div>
+<div class="line">  <a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> cvtql_src = state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>];                                                                 \</div>
+<div class="line">  state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = ((cvtql_src &amp; 0xC0000000) &lt;&lt; 32) | ((cvtql_src &amp; 0x3FFFFFFF) &lt;&lt; 29);            \</div>
+<div class="line">  if(<a class="code hl_define" href="../../d7/d00/a00236.html#a22aca3bf34a94c41f8db01ef670bce1b">FPR_GETSIGN</a>(cvtql_src) ? (cvtql_src &lt; <a class="code hl_define" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0xFFFFFFFF80000000)) :                              \</div>
+<div class="line">       (cvtql_src &gt; <a class="code hl_define" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x000000007FFFFFFF)))                                                      \</div>
+<div class="line">  {                                                                                                \</div>
+<div class="line">    write_fpcr_arch(state.fpcr | <a class="code hl_define" href="../../d7/d00/a00236.html#a772f8a5cf0b33a82836d05c793cdab8d">FPCR_IOV</a>);                                                        \</div>
+<div class="line">    if(ins &amp; <a class="code hl_define" href="../../d7/d00/a00236.html#a25cad10602d7583e985e0e96938286bd">I_FTRP_V</a>)                                                                             \</div>
+<div class="line">      vax_trap(<a class="code hl_define" href="../../d7/d00/a00236.html#a161e193f4ff9d271b7cc6ed12c4463ac">TRAP_IOV</a>, ins);                                                                     \</div>
+<div class="line">  }                                                                                                \</div>
+<div class="line">}</div>
+<div class="ttc" id="aa00236_html_a161e193f4ff9d271b7cc6ed12c4463ac"><div class="ttname"><a href="../../d7/d00/a00236.html#a161e193f4ff9d271b7cc6ed12c4463ac">TRAP_IOV</a></div><div class="ttdeci">#define TRAP_IOV</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00864">cpu_defs.h:864</a></div></div>
+<div class="ttc" id="aa00236_html_a22aca3bf34a94c41f8db01ef670bce1b"><div class="ttname"><a href="../../d7/d00/a00236.html#a22aca3bf34a94c41f8db01ef670bce1b">FPR_GETSIGN</a></div><div class="ttdeci">#define FPR_GETSIGN(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00267">cpu_defs.h:267</a></div></div>
+<div class="ttc" id="aa00236_html_a25cad10602d7583e985e0e96938286bd"><div class="ttname"><a href="../../d7/d00/a00236.html#a25cad10602d7583e985e0e96938286bd">I_FTRP_V</a></div><div class="ttdeci">#define I_FTRP_V</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00157">cpu_defs.h:157</a></div></div>
+<div class="ttc" id="aa00236_html_a772f8a5cf0b33a82836d05c793cdab8d"><div class="ttname"><a href="../../d7/d00/a00236.html#a772f8a5cf0b33a82836d05c793cdab8d">FPCR_IOV</a></div><div class="ttdeci">#define FPCR_IOV</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00369">cpu_defs.h:369</a></div></div>
+<div class="ttc" id="aa00326_html_a1af9f95651e921615e75917a6dd1b574"><div class="ttname"><a href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a></div><div class="ttdeci">uint64_t u64</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00126">datatypes.h:126</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00211">211</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a35114c46db6621bf92b49ca60e3c8865" name="a35114c46db6621bf92b49ca60e3c8865"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35114c46db6621bf92b49ca60e3c8865">&#9670;&#160;</a></span>DO_CVTQS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CVTQS</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = ieee_cvtif(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#a7cd2aa50731dcccc13b40fa8c4d81077">DT_S</a>);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00243">243</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a53e87f7b166512ec1a15e8a79d89d8b8" name="a53e87f7b166512ec1a15e8a79d89d8b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53e87f7b166512ec1a15e8a79d89d8b8">&#9670;&#160;</a></span>DO_CVTQT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CVTQT</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = ieee_cvtif(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#a28614ef2ea6b8fb90342ccab672bd319">DT_T</a>);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00240">240</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a82e54a5f19e6f81d85eac1acc318c5d0" name="a82e54a5f19e6f81d85eac1acc318c5d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82e54a5f19e6f81d85eac1acc318c5d0">&#9670;&#160;</a></span>DO_CVTST</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CVTST</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = ieee_cvtst(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00258">258</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="aee310986a572e807c67baa4db96d9b31" name="aee310986a572e807c67baa4db96d9b31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee310986a572e807c67baa4db96d9b31">&#9670;&#160;</a></span>DO_CVTTQ</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CVTTQ</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = ieee_cvtfi(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00237">237</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="ac09dd0175a73461e761b39d33f117adb" name="ac09dd0175a73461e761b39d33f117adb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac09dd0175a73461e761b39d33f117adb">&#9670;&#160;</a></span>DO_CVTTS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CVTTS</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = ieee_cvtts(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00261">261</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a261114a05080ea9a402260c81b101e11" name="a261114a05080ea9a402260c81b101e11"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a261114a05080ea9a402260c81b101e11">&#9670;&#160;</a></span>DO_DIVF</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_DIVF</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = vax_fdiv(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#adfe98457df4b407795d721952fa12e83">DT_F</a>);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00317">317</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="aa8c5ea625671732e4d6aa23e22de0066" name="aa8c5ea625671732e4d6aa23e22de0066"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8c5ea625671732e4d6aa23e22de0066">&#9670;&#160;</a></span>DO_DIVG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_DIVG</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = vax_fdiv(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#ad6e682b44ca5b016f3597dd085568b11">DT_G</a>);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00314">314</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="acaad0e20c3191a867f8a16f8c3e9311e" name="acaad0e20c3191a867f8a16f8c3e9311e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acaad0e20c3191a867f8a16f8c3e9311e">&#9670;&#160;</a></span>DO_DIVS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_DIVS</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = ieee_fdiv(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#a7cd2aa50731dcccc13b40fa8c4d81077">DT_S</a>);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00323">323</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="ad56a41647e1a517ec0862375fe8125b2" name="ad56a41647e1a517ec0862375fe8125b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad56a41647e1a517ec0862375fe8125b2">&#9670;&#160;</a></span>DO_DIVT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_DIVT</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = ieee_fdiv(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#a28614ef2ea6b8fb90342ccab672bd319">DT_T</a>);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00320">320</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a6d2632d7255b2a7a7febc35528e57a3f" name="a6d2632d7255b2a7a7febc35528e57a3f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d2632d7255b2a7a7febc35528e57a3f">&#9670;&#160;</a></span>DO_FCMOVEQ</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_FCMOVEQ</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">if (<a class="code hl_define" href="../../d0/d00/a00239.html#a35cbff736c397d624b27c6ba10d4b26e">FP_IS_ZERO</a>(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>])) \</div>
+<div class="line">  state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>];</div>
+<div class="ttc" id="aa00239_html_a35cbff736c397d624b27c6ba10d4b26e"><div class="ttname"><a href="../../d0/d00/a00239.html#a35cbff736c397d624b27c6ba10d4b26e">FP_IS_ZERO</a></div><div class="ttdeci">#define FP_IS_ZERO(val)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d00/a00239_source.html#l00074">cpu_fp_branch.h:74</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00115">115</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a8ef1ed57db7479b15238156c8d37f322" name="a8ef1ed57db7479b15238156c8d37f322"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8ef1ed57db7479b15238156c8d37f322">&#9670;&#160;</a></span>DO_FCMOVGE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_FCMOVGE</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">if (!<a class="code hl_define" href="../../d0/d00/a00239.html#a6f52790b6d3c56191d155e4a701ffd39">FP_IS_NEGATIVE</a>(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]) || <a class="code hl_define" href="../../d0/d00/a00239.html#a35cbff736c397d624b27c6ba10d4b26e">FP_IS_ZERO</a>(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>])) \</div>
+<div class="line">  state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>];</div>
+<div class="ttc" id="aa00239_html_a6f52790b6d3c56191d155e4a701ffd39"><div class="ttname"><a href="../../d0/d00/a00239.html#a6f52790b6d3c56191d155e4a701ffd39">FP_IS_NEGATIVE</a></div><div class="ttdeci">#define FP_IS_NEGATIVE(val)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d00/a00239_source.html#l00075">cpu_fp_branch.h:75</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00120">120</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a22a7581c28697121b07cc8f9b90a9fa6" name="a22a7581c28697121b07cc8f9b90a9fa6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a22a7581c28697121b07cc8f9b90a9fa6">&#9670;&#160;</a></span>DO_FCMOVGT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_FCMOVGT</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">if (!<a class="code hl_define" href="../../d0/d00/a00239.html#a6f52790b6d3c56191d155e4a701ffd39">FP_IS_NEGATIVE</a>(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]) &amp;&amp; !<a class="code hl_define" href="../../d0/d00/a00239.html#a35cbff736c397d624b27c6ba10d4b26e">FP_IS_ZERO</a>(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>])) \</div>
+<div class="line">  state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>];</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00125">125</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="aae3f716919c3c5975d25bf951731b9a4" name="aae3f716919c3c5975d25bf951731b9a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae3f716919c3c5975d25bf951731b9a4">&#9670;&#160;</a></span>DO_FCMOVLE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_FCMOVLE</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">if (<a class="code hl_define" href="../../d0/d00/a00239.html#a6f52790b6d3c56191d155e4a701ffd39">FP_IS_NEGATIVE</a>(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]) || <a class="code hl_define" href="../../d0/d00/a00239.html#a35cbff736c397d624b27c6ba10d4b26e">FP_IS_ZERO</a>(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>])) \</div>
+<div class="line">  state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>];</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00130">130</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a13043d0468053df6b9ffcbb0b202dadb" name="a13043d0468053df6b9ffcbb0b202dadb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13043d0468053df6b9ffcbb0b202dadb">&#9670;&#160;</a></span>DO_FCMOVLT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_FCMOVLT</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">if (<a class="code hl_define" href="../../d0/d00/a00239.html#a6f52790b6d3c56191d155e4a701ffd39">FP_IS_NEGATIVE</a>(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]) &amp;&amp; !<a class="code hl_define" href="../../d0/d00/a00239.html#a35cbff736c397d624b27c6ba10d4b26e">FP_IS_ZERO</a>(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>])) \</div>
+<div class="line">  state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>];</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00135">135</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a5597b4a0ede1de8816dc9573e4b1580e" name="a5597b4a0ede1de8816dc9573e4b1580e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5597b4a0ede1de8816dc9573e4b1580e">&#9670;&#160;</a></span>DO_FCMOVNE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_FCMOVNE</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">if (!<a class="code hl_define" href="../../d0/d00/a00239.html#a35cbff736c397d624b27c6ba10d4b26e">FP_IS_ZERO</a>(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>])) \</div>
+<div class="line">  state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>];</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00140">140</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a8ba41d9e8b3e9b46f7178e4a981faef4" name="a8ba41d9e8b3e9b46f7178e4a981faef4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8ba41d9e8b3e9b46f7178e4a981faef4">&#9670;&#160;</a></span>DO_FTOIS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_FTOIS</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line"><span class="keywordflow">do</span> { \</div>
+<div class="line">  if (<a class="code hl_define" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a> != 31) { <a class="code hl_define" href="../../d6/d00/a00233.html#a6e0aaa4a706eeb77b476e170dfb26f97">GO_PAL</a>(<a class="code hl_enumvalue" href="../../dc/d00/a00218.html#a5c9934e3a54f06127616037536160abda63458a13f289bb736a9af99d72741952">AlphaPALException::OpcodeDecode</a>); } \</div>
+<div class="line">  <span class="keywordflow">else</span> { state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#a14e5d5a6641dfac1ed51225a7b87bc92">REG_3</a>] = <a class="code hl_function" href="../../d8/d00/a00326.html#ab6397ea9cae4b1b067118eacffc71ab7">sext_u64_32</a>(ieee_sts(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>])); } \</div>
+<div class="line">} <span class="keywordflow">while</span> (0)</div>
+<div class="ttc" id="aa00218_html_a5c9934e3a54f06127616037536160abda63458a13f289bb736a9af99d72741952"><div class="ttname"><a href="../../dc/d00/a00218.html#a5c9934e3a54f06127616037536160abda63458a13f289bb736a9af99d72741952">AlphaPALException::OpcodeDecode</a></div><div class="ttdeci">@ OpcodeDecode</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00218_source.html#l00041">AlphaPAL.h:41</a></div></div>
+<div class="ttc" id="aa00233_html_a6e0aaa4a706eeb77b476e170dfb26f97"><div class="ttname"><a href="../../d6/d00/a00233.html#a6e0aaa4a706eeb77b476e170dfb26f97">GO_PAL</a></div><div class="ttdeci">#define GO_PAL(reason)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00233_source.html#l00170">cpu_debug.h:170</a></div></div>
+<div class="ttc" id="aa00236_html_a14e5d5a6641dfac1ed51225a7b87bc92"><div class="ttname"><a href="../../d7/d00/a00236.html#a14e5d5a6641dfac1ed51225a7b87bc92">REG_3</a></div><div class="ttdeci">#define REG_3</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00823">cpu_defs.h:823</a></div></div>
+<div class="ttc" id="aa00236_html_afc0e94c6f29d79352470dfd56076e09f"><div class="ttname"><a href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a></div><div class="ttdeci">#define REG_2</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00822">cpu_defs.h:822</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00267">267</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a9d1866497a7a9a318c5630c963c8bdcf" name="a9d1866497a7a9a318c5630c963c8bdcf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d1866497a7a9a318c5630c963c8bdcf">&#9670;&#160;</a></span>DO_FTOIT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_FTOIT</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line"><span class="keywordflow">do</span> { \</div>
+<div class="line">  if (<a class="code hl_define" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a> != 31) { <a class="code hl_define" href="../../d6/d00/a00233.html#a6e0aaa4a706eeb77b476e170dfb26f97">GO_PAL</a>(<a class="code hl_enumvalue" href="../../dc/d00/a00218.html#a5c9934e3a54f06127616037536160abda63458a13f289bb736a9af99d72741952">AlphaPALException::OpcodeDecode</a>); } \</div>
+<div class="line">  <span class="keywordflow">else</span> { state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#a14e5d5a6641dfac1ed51225a7b87bc92">REG_3</a>] = state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]; } \</div>
+<div class="line">} <span class="keywordflow">while</span> (0)</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00273">273</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a2e9b435ac2f7d57b7b81a2bfa4a2147a" name="a2e9b435ac2f7d57b7b81a2bfa4a2147a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e9b435ac2f7d57b7b81a2bfa4a2147a">&#9670;&#160;</a></span>DO_ITOFF</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_ITOFF</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line"><span class="keywordflow">do</span> { \</div>
+<div class="line">  if (<a class="code hl_define" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a> != 31) { <a class="code hl_define" href="../../d6/d00/a00233.html#a6e0aaa4a706eeb77b476e170dfb26f97">GO_PAL</a>(<a class="code hl_enumvalue" href="../../dc/d00/a00218.html#a5c9934e3a54f06127616037536160abda63458a13f289bb736a9af99d72741952">AlphaPALException::OpcodeDecode</a>); } \</div>
+<div class="line">  <span class="keywordflow">else</span> { state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = vax_ldf(<a class="code hl_define" href="../../d7/d00/a00236.html#aa57d8839405fb974153684a006535b97">SWAP_VAXF</a>((<a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>)state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>])); } \</div>
+<div class="line">} <span class="keywordflow">while</span> (0)</div>
+<div class="ttc" id="aa00236_html_a3cc7326bd3140cc269e686fc46179a21"><div class="ttname"><a href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a></div><div class="ttdeci">#define REG_1</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00821">cpu_defs.h:821</a></div></div>
+<div class="ttc" id="aa00236_html_aa57d8839405fb974153684a006535b97"><div class="ttname"><a href="../../d7/d00/a00236.html#aa57d8839405fb974153684a006535b97">SWAP_VAXF</a></div><div class="ttdeci">#define SWAP_VAXF(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00217">cpu_defs.h:217</a></div></div>
+<div class="ttc" id="aa00326_html_a70c1fcc1a4e96af8f6580f708657cd41"><div class="ttname"><a href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a></div><div class="ttdeci">uint32_t u32</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00125">datatypes.h:125</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00294">294</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a35b61b3e0fa60f345e08fdc6071b0153" name="a35b61b3e0fa60f345e08fdc6071b0153"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35b61b3e0fa60f345e08fdc6071b0153">&#9670;&#160;</a></span>DO_ITOFS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_ITOFS</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line"><span class="keywordflow">do</span> { \</div>
+<div class="line">  if (<a class="code hl_define" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a> != 31) { <a class="code hl_define" href="../../d6/d00/a00233.html#a6e0aaa4a706eeb77b476e170dfb26f97">GO_PAL</a>(<a class="code hl_enumvalue" href="../../dc/d00/a00218.html#a5c9934e3a54f06127616037536160abda63458a13f289bb736a9af99d72741952">AlphaPALException::OpcodeDecode</a>); } \</div>
+<div class="line">  <span class="keywordflow">else</span> { state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = ieee_lds((<a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>)state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]); } \</div>
+<div class="line">} <span class="keywordflow">while</span> (0)</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00287">287</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a366306d697cc5d270dcf897479f7b1f3" name="a366306d697cc5d270dcf897479f7b1f3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a366306d697cc5d270dcf897479f7b1f3">&#9670;&#160;</a></span>DO_ITOFT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_ITOFT</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line"><span class="keywordflow">do</span> { \</div>
+<div class="line">  if (<a class="code hl_define" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a> != 31) { <a class="code hl_define" href="../../d6/d00/a00233.html#a6e0aaa4a706eeb77b476e170dfb26f97">GO_PAL</a>(<a class="code hl_enumvalue" href="../../dc/d00/a00218.html#a5c9934e3a54f06127616037536160abda63458a13f289bb736a9af99d72741952">AlphaPALException::OpcodeDecode</a>); } \</div>
+<div class="line">  <span class="keywordflow">else</span> { state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]; } \</div>
+<div class="line">} <span class="keywordflow">while</span> (0)</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00280">280</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a7968b086f06bc9736092d0fd1c7f289e" name="a7968b086f06bc9736092d0fd1c7f289e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7968b086f06bc9736092d0fd1c7f289e">&#9670;&#160;</a></span>DO_MF_FPCR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_MF_FPCR</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>;                             \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>] = read_fpcr_arch();</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00145">145</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a4f2e1a9ed8e1869ca9b9b08ae2df3ea4" name="a4f2e1a9ed8e1869ca9b9b08ae2df3ea4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f2e1a9ed8e1869ca9b9b08ae2df3ea4">&#9670;&#160;</a></span>DO_MT_FPCR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_MT_FPCR</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>;                         \</div>
+<div class="line">write_fpcr_arch(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00148">148</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a252b71b76dc552e91fadbc7464c85a5b" name="a252b71b76dc552e91fadbc7464c85a5b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a252b71b76dc552e91fadbc7464c85a5b">&#9670;&#160;</a></span>DO_MULF</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_MULF</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = vax_fmul(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#adfe98457df4b407795d721952fa12e83">DT_F</a>);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00304">304</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="af538883e36b52fca9f053bdc87e900cd" name="af538883e36b52fca9f053bdc87e900cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af538883e36b52fca9f053bdc87e900cd">&#9670;&#160;</a></span>DO_MULG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_MULG</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = vax_fmul(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#ad6e682b44ca5b016f3597dd085568b11">DT_G</a>);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00301">301</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a458e4d7971fdfbd957c749dd566ec31d" name="a458e4d7971fdfbd957c749dd566ec31d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a458e4d7971fdfbd957c749dd566ec31d">&#9670;&#160;</a></span>DO_MULS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_MULS</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = ieee_fmul(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#a7cd2aa50731dcccc13b40fa8c4d81077">DT_S</a>);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00310">310</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a20ee898a32ff0e2f3899d027619e4314" name="a20ee898a32ff0e2f3899d027619e4314"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20ee898a32ff0e2f3899d027619e4314">&#9670;&#160;</a></span>DO_MULT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_MULT</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = ieee_fmul(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#a28614ef2ea6b8fb90342ccab672bd319">DT_T</a>);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00307">307</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a66a99906f7386519baa577aa05c9510a" name="a66a99906f7386519baa577aa05c9510a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a66a99906f7386519baa577aa05c9510a">&#9670;&#160;</a></span>DO_SQRTF</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_SQRTF</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line"><span class="keywordflow">do</span> { <span class="keywordflow">if</span> (<a class="code hl_define" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> != 31) { <a class="code hl_define" href="../../d6/d00/a00233.html#a6e0aaa4a706eeb77b476e170dfb26f97">GO_PAL</a>(<a class="code hl_enumvalue" href="../../dc/d00/a00218.html#a5c9934e3a54f06127616037536160abda63458a13f289bb736a9af99d72741952">AlphaPALException::OpcodeDecode</a>); } \</div>
+<div class="line">     <span class="keywordflow">else</span> { state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = vax_sqrt(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#adfe98457df4b407795d721952fa12e83">DT_F</a>); } } <span class="keywordflow">while</span> (0)</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00331">331</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="afc6b9671eb4a9312655f6f5b118560e6" name="afc6b9671eb4a9312655f6f5b118560e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc6b9671eb4a9312655f6f5b118560e6">&#9670;&#160;</a></span>DO_SQRTG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_SQRTG</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line"><span class="keywordflow">do</span> { <span class="keywordflow">if</span> (<a class="code hl_define" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> != 31) { <a class="code hl_define" href="../../d6/d00/a00233.html#a6e0aaa4a706eeb77b476e170dfb26f97">GO_PAL</a>(<a class="code hl_enumvalue" href="../../dc/d00/a00218.html#a5c9934e3a54f06127616037536160abda63458a13f289bb736a9af99d72741952">AlphaPALException::OpcodeDecode</a>); } \</div>
+<div class="line">     <span class="keywordflow">else</span> { state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = vax_sqrt(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#ad6e682b44ca5b016f3597dd085568b11">DT_G</a>); } } <span class="keywordflow">while</span> (0)</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00327">327</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="afb2585495f8152e23023e4b71b712c3d" name="afb2585495f8152e23023e4b71b712c3d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb2585495f8152e23023e4b71b712c3d">&#9670;&#160;</a></span>DO_SQRTS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_SQRTS</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line"><span class="keywordflow">do</span> { <span class="keywordflow">if</span> (<a class="code hl_define" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> != 31) { <a class="code hl_define" href="../../d6/d00/a00233.html#a6e0aaa4a706eeb77b476e170dfb26f97">GO_PAL</a>(<a class="code hl_enumvalue" href="../../dc/d00/a00218.html#a5c9934e3a54f06127616037536160abda63458a13f289bb736a9af99d72741952">AlphaPALException::OpcodeDecode</a>); } \</div>
+<div class="line">     <span class="keywordflow">else</span> { state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = ieee_sqrt(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#a7cd2aa50731dcccc13b40fa8c4d81077">DT_S</a>); } } <span class="keywordflow">while</span> (0)</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00339">339</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a324dbbc58b61013ccab38ddcbf6457d6" name="a324dbbc58b61013ccab38ddcbf6457d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a324dbbc58b61013ccab38ddcbf6457d6">&#9670;&#160;</a></span>DO_SQRTT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_SQRTT</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line"><span class="keywordflow">do</span> { <span class="keywordflow">if</span> (<a class="code hl_define" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> != 31) { <a class="code hl_define" href="../../d6/d00/a00233.html#a6e0aaa4a706eeb77b476e170dfb26f97">GO_PAL</a>(<a class="code hl_enumvalue" href="../../dc/d00/a00218.html#a5c9934e3a54f06127616037536160abda63458a13f289bb736a9af99d72741952">AlphaPALException::OpcodeDecode</a>); } \</div>
+<div class="line">     <span class="keywordflow">else</span> { state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = ieee_sqrt(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#a28614ef2ea6b8fb90342ccab672bd319">DT_T</a>); } } <span class="keywordflow">while</span> (0)</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00335">335</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="af630b70c14c7bbc4444dcd2d91de7bca" name="af630b70c14c7bbc4444dcd2d91de7bca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af630b70c14c7bbc4444dcd2d91de7bca">&#9670;&#160;</a></span>DO_SUBF</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_SUBF</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = vax_fadd(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#adfe98457df4b407795d721952fa12e83">DT_F</a>,  <span class="keyword">true</span>);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00168">168</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a8eabd789cc49a3ca6598c48e2c0a34b4" name="a8eabd789cc49a3ca6598c48e2c0a34b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8eabd789cc49a3ca6598c48e2c0a34b4">&#9670;&#160;</a></span>DO_SUBG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_SUBG</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = vax_fadd(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#ad6e682b44ca5b016f3597dd085568b11">DT_G</a>,  <span class="keyword">true</span>);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00165">165</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="ad73287e50aaca50f51d3d161221d3531" name="ad73287e50aaca50f51d3d161221d3531"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad73287e50aaca50f51d3d161221d3531">&#9670;&#160;</a></span>DO_SUBS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_SUBS</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = ieee_fadd(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#a7cd2aa50731dcccc13b40fa8c4d81077">DT_S</a>,  <span class="keyword">true</span>);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00174">174</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a6b6e96c1c3b2822a9530f34a0357602b" name="a6b6e96c1c3b2822a9530f34a0357602b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6b6e96c1c3b2822a9530f34a0357602b">&#9670;&#160;</a></span>DO_SUBT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_SUBT</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>] = ieee_fadd(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>], ins, <a class="code hl_define" href="../../d7/d00/a00236.html#a28614ef2ea6b8fb90342ccab672bd319">DT_T</a>,  <span class="keyword">true</span>);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00171">171</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a6f52790b6d3c56191d155e4a701ffd39" name="a6f52790b6d3c56191d155e4a701ffd39"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f52790b6d3c56191d155e4a701ffd39">&#9670;&#160;</a></span>FP_IS_NEGATIVE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FP_IS_NEGATIVE</td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>val</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">(((val) &amp; <a class="code hl_define" href="../../d7/d00/a00236.html#a48f0868c2774aad1501138b9f9c01ef0">FPR_SIGN</a>) != 0)</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00100">100</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
+<a id="a35cbff736c397d624b27c6ba10d4b26e" name="a35cbff736c397d624b27c6ba10d4b26e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35cbff736c397d624b27c6ba10d4b26e">&#9670;&#160;</a></span>FP_IS_ZERO</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FP_IS_ZERO</td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>val</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">(((val) &amp; <a class="code hl_define" href="../../d7/d00/a00236.html#a48f0868c2774aad1501138b9f9c01ef0">~FPR_SIGN</a>) == 0)</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00245_source.html#l00099">99</a> of file <a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
@@ -137,7 +1353,7 @@ This graph shows which files directly or indirectly include this file:</div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../dir_2c260bc9952edac4006fc3f88bbf2931.html">jit</a></li><li class="navelem"><a href="../../d6/d00/a00245.html">jitengine.h</a></li>
+    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d6/d00/a00245.html">cpu_fp_operate.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

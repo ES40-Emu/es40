@@ -1,5 +1,29 @@
 var a00122 =
 [
-    [ "MAX", "df/d00/a00122.html#afa99ec4acc4ecb2dc3c2d05da15d0e3f", null ],
-    [ "MIN", "df/d00/a00122.html#a3acffbd305ee72dcd4593c0d8af64a4f", null ]
+    [ "TuiUI", "d1/d00/a01097.html", "d1/d00/a01097" ],
+    [ "MENU_1ST_LEVEL", "df/d00/a00122.html#aaa1469a5b9f1ba662375b25b6484561b", null ],
+    [ "MENU_2ND_LEVEL", "df/d00/a00122.html#a1081da49f32002e9bebff41e34c49a19", null ],
+    [ "MENU_3RD_LEVEL", "df/d00/a00122.html#a51da317b34b93d5933689b281046a9d7", null ],
+    [ "MENU_4TH_LEVEL", "df/d00/a00122.html#ae3df331104b4ed92b6aaa7e9610fd8a8", null ],
+    [ "MYKEY_DEL", "df/d00/a00122.html#a6e3ed80b2d9f407ac699480121300a4b", null ],
+    [ "MYKEY_EXIT", "df/d00/a00122.html#a07d78c49abceb4c64b1fbf79f9368aec", null ],
+    [ "MYKEY_EXIT_STR", "df/d00/a00122.html#a1591fb36e7b0d74c59a96ec3d5e213f7", null ],
+    [ "MYKEY_HELP", "df/d00/a00122.html#acc2562e41ad69acae4243bb37d603719", null ],
+    [ "MYKEY_HELP_STR", "df/d00/a00122.html#aa44879879443563dcfd2ddf03d99a1fc", null ],
+    [ "MYKEY_QUIT", "df/d00/a00122.html#abea479fa978328755d9843b7cb47d98c", null ],
+    [ "MYKEY_QUIT_STR", "df/d00/a00122.html#a023dcabfe1ab8bc812b9394e039d873c", null ],
+    [ "MYKEY_RETURN", "df/d00/a00122.html#a1276c9bece1e9b4786490ca0204d30d4", null ],
+    [ "MYKEY_TAB", "df/d00/a00122.html#a5883182e65fb007d8b63b59b431c9273", null ],
+    [ "WAITSEC", "df/d00/a00122.html#a10d5fd5f4b15a7fec20bf28f78243a85", null ],
+    [ "create_window", "df/d00/a00122.html#a71b598f658af3b041f7d3ee92e037b83", null ],
+    [ "es40_banner", "df/d00/a00122.html#af656a1a567edb57d8a0d1abeac5512fe", null ],
+    [ "main", "df/d00/a00122.html#a3c04138a5bfe5d72780bb7e82a18e627", null ],
+    [ "mvwprintw_center", "df/d00/a00122.html#acb1fea10b65ac2c6c32952e3276a4110", null ],
+    [ "set_min_width", "df/d00/a00122.html#ae14c8386ea3c62a86871c48b4b03c610", null ],
+    [ "show_text", "df/d00/a00122.html#a60f946025a893c52cb1e4c236f6734bb", null ],
+    [ "tui_form", "df/d00/a00122.html#a558a54f89d00f71bc42b361876103ca0", null ],
+    [ "tui_menu", "df/d00/a00122.html#a6b0e04268d7289e9e7e00b944527a21f", null ],
+    [ "tui_text", "df/d00/a00122.html#a8458ec5ffd657eef6d5d9274668a82cc", null ],
+    [ "scrh", "df/d00/a00122.html#a2e9cb51790f9acde6aadcd48a3b66c86", null ],
+    [ "scrw", "df/d00/a00122.html#a3396a316d98df733b5a5187860d92c2a", null ]
 ];

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: network/NetworkVmnetIPC.h Source File</title>
+<title>ES40: gui/win32_media.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,85 +109,69 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('de/d00/a00500_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">NetworkVmnetIPC.h</div></div>
+  <div class="headertitle"><div class="title">win32_media.h</div></div>
 </div><!--header-->
 <div class="contents">
 <a href="../../de/d00/a00500.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator.</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2026 by gdwnldsKSC</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * This program is free software; you can redistribute it and/or</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * modify it under the terms of the GNU General Public License</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * as published by the Free Software Foundation; either version 2</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * of the License, or (at your option) any later version.</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * This program is distributed in the hope that it will be useful,</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * GNU General Public License for more details.</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * You should have received a copy of the GNU General Public License</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * along with this program; if not, write to the Free Software</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * Although this is not required, the author would appreciate being notified of,</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * and receiving any modifications you may make to the source code that might serve</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * the general public.</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#ifndef INCLUDED_NETWORK_VMNET_IPC_H_</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#define INCLUDED_NETWORK_VMNET_IPC_H_</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;<a class="code" href="../../d4/d00/a00503.html">NetworkVmnetProto.h</a>&quot;</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;stddef.h&gt;</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;sys/types.h&gt;</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
-<div class="foldopen" id="foldopen00035" data-start="{" data-end="};">
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="../../d7/d00/a01589.html">   35</a></span><span class="keyword">class </span><a class="code hl_function" href="../../d7/d00/a01589.html#a640dc5d9d7b52c1769a2b9bebebfba0b">CNetworkVmnetIPC</a> {</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="../../d7/d00/a01589.html#a640dc5d9d7b52c1769a2b9bebebfba0b">   37</a></span>        <a class="code hl_function" href="../../d7/d00/a01589.html#a640dc5d9d7b52c1769a2b9bebebfba0b">CNetworkVmnetIPC</a>();</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="../../d7/d00/a01589.html#a374cb0fcd3d3a1eb16cd6e96b77f0d8c">   38</a></span>        <a class="code hl_function" href="../../d7/d00/a01589.html#a374cb0fcd3d3a1eb16cd6e96b77f0d8c">~CNetworkVmnetIPC</a>();</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="../../d7/d00/a01589.html#aab65511cef2bed1445656ff7e2d99154">   40</a></span>        <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d7/d00/a01589.html#aab65511cef2bed1445656ff7e2d99154">start</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *devid_string, <span class="keyword">const</span> <span class="keywordtype">char</span> *adapter,</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>                <span class="keyword">struct</span> <a class="code hl_struct" href="../../d7/d00/a01601.html">es40_vmnet_open_reply</a> *reply);</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="../../d7/d00/a01589.html#a69b8625acf77fdeee430953fcbba5bf7">   42</a></span>        <span class="keywordtype">int</span> <a class="code hl_function" href="../../d7/d00/a01589.html#a69b8625acf77fdeee430953fcbba5bf7">send_packet</a>(<span class="keyword">const</span> <span class="keywordtype">void</span> *data, <span class="keywordtype">size_t</span> len);</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="../../d7/d00/a01589.html#a722515a089b6235aa14e26668ea342e2">   43</a></span>        <span class="keywordtype">int</span> <a class="code hl_function" href="../../d7/d00/a01589.html#a722515a089b6235aa14e26668ea342e2">receive</a>(<span class="keywordtype">void</span> *data, <span class="keywordtype">size_t</span> capacity, <span class="keywordtype">int</span> *len,</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>                <span class="keyword">struct</span> <a class="code hl_struct" href="../../d5/d00/a01605.html">es40_vmnet_status</a> *status);</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="../../d7/d00/a01589.html#ad688555bbf24c5a0d64a47883839fa45">   45</a></span>        <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code hl_function" href="../../d7/d00/a01589.html#ad688555bbf24c5a0d64a47883839fa45">get_helper_path</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d7/d00/a01589.html#a3dcaeb194aaa68e1e5ee2409beb23a7a">helper_path</a>.c_str(); }</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="../../d7/d00/a01589.html#a0357e16dcf6fa3513b34f83857bde525">   46</a></span>        <span class="keywordtype">void</span> <a class="code hl_function" href="../../d7/d00/a01589.html#a0357e16dcf6fa3513b34f83857bde525">close</a>();</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="../../d7/d00/a01589.html#a79030b56c8cc300f61f612fc29a3808f">   49</a></span>        <span class="keywordtype">int</span> <a class="code hl_variable" href="../../d7/d00/a01589.html#a79030b56c8cc300f61f612fc29a3808f">fd</a>;</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="../../d7/d00/a01589.html#a8f45a3abb9da2088a181abee7bcd4dff">   50</a></span>        pid_t <a class="code hl_variable" href="../../d7/d00/a01589.html#a8f45a3abb9da2088a181abee7bcd4dff">helper_pid</a>;</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="../../d7/d00/a01589.html#a3dcaeb194aaa68e1e5ee2409beb23a7a">   51</a></span>        std::string <a class="code hl_variable" href="../../d7/d00/a01589.html#a3dcaeb194aaa68e1e5ee2409beb23a7a">helper_path</a>;</div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * All rights reserved.</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * SPDX-License-Identifier: BSD-1-Clause</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * Redistribution and use in source and binary forms, with or without</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * modification, are permitted provided that the following conditions are met:</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * 1. Redistributions of source code must retain the above copyright notice,</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> *    this list of conditions and the following disclaimer.</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS AND CONTRIBUTORS BE</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> * POSSIBILITY OF SUCH DAMAGE.</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#if defined(_WIN32)</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;windows.h&gt;</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;functional&gt;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="comment">// Main-thread media OSD. Disk requests are delivered through shared mailboxes.</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="keyword">class </span>win32_media_selector</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>{</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    win32_media_selector(std::function&lt;<span class="keywordtype">bool</span>(UINT, WPARAM, LPARAM)&gt; key_handler,</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>                         std::function&lt;<span class="keywordtype">void</span>()&gt; release_input,</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>                         std::function&lt;<span class="keywordtype">void</span>()&gt; reset);</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    ~win32_media_selector();</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keywordtype">void</span> toggle(HWND parent);</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keywordtype">void</span> close();</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keywordtype">void</span> shutdown() noexcept;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keywordtype">void</span> reconcile_input();</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keywordtype">bool</span> active() const;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    HWND parent() const;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keywordtype">bool</span> filter_message(UINT, WPARAM, LPARAM);</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>private:</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    struct state;</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    std::shared_ptr&lt;state&gt; impl;</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>};</div>
-</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#endif </span><span class="comment">/* !defined(INCLUDED_NETWORK_VMNET_IPC_H_) */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aa00503_html"><div class="ttname"><a href="../../d4/d00/a00503.html">NetworkVmnetProto.h</a></div><div class="ttdoc">Private protocol between ES40 and its macOS vmnet helper.</div></div>
-<div class="ttc" id="aa01589_html_a0357e16dcf6fa3513b34f83857bde525"><div class="ttname"><a href="../../d7/d00/a01589.html#a0357e16dcf6fa3513b34f83857bde525">CNetworkVmnetIPC::close</a></div><div class="ttdeci">void close()</div></div>
-<div class="ttc" id="aa01589_html_a374cb0fcd3d3a1eb16cd6e96b77f0d8c"><div class="ttname"><a href="../../d7/d00/a01589.html#a374cb0fcd3d3a1eb16cd6e96b77f0d8c">CNetworkVmnetIPC::~CNetworkVmnetIPC</a></div><div class="ttdeci">~CNetworkVmnetIPC()</div></div>
-<div class="ttc" id="aa01589_html_a3dcaeb194aaa68e1e5ee2409beb23a7a"><div class="ttname"><a href="../../d7/d00/a01589.html#a3dcaeb194aaa68e1e5ee2409beb23a7a">CNetworkVmnetIPC::helper_path</a></div><div class="ttdeci">std::string helper_path</div><div class="ttdef"><b>Definition</b> <a href="#l00051">NetworkVmnetIPC.h:51</a></div></div>
-<div class="ttc" id="aa01589_html_a640dc5d9d7b52c1769a2b9bebebfba0b"><div class="ttname"><a href="../../d7/d00/a01589.html#a640dc5d9d7b52c1769a2b9bebebfba0b">CNetworkVmnetIPC::CNetworkVmnetIPC</a></div><div class="ttdeci">CNetworkVmnetIPC()</div></div>
-<div class="ttc" id="aa01589_html_a69b8625acf77fdeee430953fcbba5bf7"><div class="ttname"><a href="../../d7/d00/a01589.html#a69b8625acf77fdeee430953fcbba5bf7">CNetworkVmnetIPC::send_packet</a></div><div class="ttdeci">int send_packet(const void *data, size_t len)</div></div>
-<div class="ttc" id="aa01589_html_a722515a089b6235aa14e26668ea342e2"><div class="ttname"><a href="../../d7/d00/a01589.html#a722515a089b6235aa14e26668ea342e2">CNetworkVmnetIPC::receive</a></div><div class="ttdeci">int receive(void *data, size_t capacity, int *len, struct es40_vmnet_status *status)</div></div>
-<div class="ttc" id="aa01589_html_a79030b56c8cc300f61f612fc29a3808f"><div class="ttname"><a href="../../d7/d00/a01589.html#a79030b56c8cc300f61f612fc29a3808f">CNetworkVmnetIPC::fd</a></div><div class="ttdeci">int fd</div><div class="ttdef"><b>Definition</b> <a href="#l00049">NetworkVmnetIPC.h:49</a></div></div>
-<div class="ttc" id="aa01589_html_a8f45a3abb9da2088a181abee7bcd4dff"><div class="ttname"><a href="../../d7/d00/a01589.html#a8f45a3abb9da2088a181abee7bcd4dff">CNetworkVmnetIPC::helper_pid</a></div><div class="ttdeci">pid_t helper_pid</div><div class="ttdef"><b>Definition</b> <a href="#l00050">NetworkVmnetIPC.h:50</a></div></div>
-<div class="ttc" id="aa01589_html_aab65511cef2bed1445656ff7e2d99154"><div class="ttname"><a href="../../d7/d00/a01589.html#aab65511cef2bed1445656ff7e2d99154">CNetworkVmnetIPC::start</a></div><div class="ttdeci">bool start(const char *devid_string, const char *adapter, struct es40_vmnet_open_reply *reply)</div></div>
-<div class="ttc" id="aa01589_html_ad688555bbf24c5a0d64a47883839fa45"><div class="ttname"><a href="../../d7/d00/a01589.html#ad688555bbf24c5a0d64a47883839fa45">CNetworkVmnetIPC::get_helper_path</a></div><div class="ttdeci">const char * get_helper_path() const</div><div class="ttdef"><b>Definition</b> <a href="#l00045">NetworkVmnetIPC.h:45</a></div></div>
-<div class="ttc" id="aa01601_html"><div class="ttname"><a href="../../d7/d00/a01601.html">es40_vmnet_open_reply</a></div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00503_source.html#l00071">NetworkVmnetProto.h:71</a></div></div>
-<div class="ttc" id="aa01605_html"><div class="ttname"><a href="../../d5/d00/a01605.html">es40_vmnet_status</a></div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00503_source.html#l00081">NetworkVmnetProto.h:81</a></div></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_c901c14b65aa229498a52b725b3d4a2c.html">network</a></li><li class="navelem"><a href="../../de/d00/a00500.html">NetworkVmnetIPC.h</a></li>
+    <li class="navelem"><a href="../../dir_11bc0974ce736ce9a6fadebbeb7a8314.html">gui</a></li><li class="navelem"><a href="../../de/d00/a00500.html">win32_media.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

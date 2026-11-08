@@ -1,6 +1,10 @@
 var a01209 =
 [
-    [ "argb", "de/d00/a01209.html#a1c254eed483df2e2e8ffa52628c6a45e", null ],
-    [ "height", "de/d00/a01209.html#a818ebc754ba138b01d8d2d630c8970ef", null ],
-    [ "width", "de/d00/a01209.html#a3dabee14681d568931dba7e317290dc8", null ]
+    [ "access", "de/d00/a01209.html#aaccf486300727cc3fc3b54f7079db9ae", null ],
+    [ "asm_bit", "de/d00/a01209.html#aa14fd03bf8a25c052d2430586a2c29de", null ],
+    [ "fault", "de/d00/a01209.html#a885845dc312ae14b1c190a58810d5af2", null ],
+    [ "keep_mask", "de/d00/a01209.html#adec374be244abbaa05832045fccb8d44", null ],
+    [ "match_mask", "de/d00/a01209.html#a159fac4bf9726aedf3304e1959104368", null ],
+    [ "phys", "de/d00/a01209.html#a7284a81ee5fadc6870343470565bb061", null ],
+    [ "virt", "de/d00/a01209.html#adddb44443c2501c41ddb5098291752ed", null ]
 ];

@@ -1,8 +1,7 @@
 var a00845 =
 [
-    [ "address_mask", "d7/d00/a00845.html#a719ae702d021e6a2c3afa9caab3308f3", null ],
-    [ "address_shift", "d7/d00/a00845.html#aed0204f2e51772fbaabcead8ce58e1f7", null ],
-    [ "address_step", "d7/d00/a00845.html#a135405f41bb1834abb276bbf4f2de487", null ],
-    [ "count_unit", "d7/d00/a00845.html#aa1b18248503d490ea9ee6002a2cec0fe", null ],
-    [ "data_width", "d7/d00/a00845.html#a452a8f4590b14760a346fc2521b0bed9", null ]
+    [ "CNullPointerException", "d7/d00/a00845.html#a91797b24d7b754fd3c06f935592e5af3", null ],
+    [ "CNullPointerException", "d7/d00/a00845.html#ad32382c6c6467538da9e6c8eb7fc8d3f", null ],
+    [ "CNullPointerException", "d7/d00/a00845.html#acbf064540320828674e0235d7aef0c1a", null ],
+    [ "name", "d7/d00/a00845.html#a551664a6ea54eac7837a8c3e5ee71591", null ]
 ];

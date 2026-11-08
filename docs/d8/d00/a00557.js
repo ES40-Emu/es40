@@ -1,5 +1,5 @@
 var a00557 =
 [
-    [ "ramdisk_magic1", "d8/d00/a00557.html#a6188341e2abfde240b16de5e056f58bf", null ],
-    [ "ramdisk_magic2", "d8/d00/a00557.html#a9acd6fd3edaf1e0c8c97fb5b355336de", null ]
+    [ "eth_crc32", "d8/d00/a00557.html#a3bfbc59c214962ad31300721fae81158", null ],
+    [ "crcTable", "d8/d00/a00557.html#a8cd963aa1510a06da50c808a7453f85f", null ]
 ];

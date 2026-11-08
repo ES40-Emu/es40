@@ -1,14 +1,9 @@
 var a01097 =
 [
-    [ "required_device", "d1/d00/a01097.html#a715d8b10a3fd55b71556983129ccd6ee", null ],
-    [ "required_device", "d1/d00/a01097.html#a7e534bc7feac3f2d59b23a67384f5b85", null ],
-    [ "operator bool", "d1/d00/a01097.html#ac07dc0261bf82220109cd7fff0a64ac8", null ],
-    [ "operator T*", "d1/d00/a01097.html#a949d7daee29291b3fe9f7028322ae0a7", null ],
-    [ "operator*", "d1/d00/a01097.html#a799b65a8bddf7d47602d7f31001c0331", null ],
-    [ "operator->", "d1/d00/a01097.html#a9cd4a7ce5761cf214964ed1b9ec1e561", null ],
-    [ "set", "d1/d00/a01097.html#a5416892388abb6bfc30cb844694c3dea", null ],
-    [ "set_tag", "d1/d00/a01097.html#a1e864073b1d67609e9dcd3d0af465405", null ],
-    [ "set_tag", "d1/d00/a01097.html#a679438bb7e11db443cc9d5cdd235d825", null ],
-    [ "target", "d1/d00/a01097.html#a1cc60c115a1eeaea3f10fee11ff591cf", null ],
-    [ "m_ptr", "d1/d00/a01097.html#a703cc6910e461bf12e6f0d250adeb505", null ]
+    [ "banner", "d1/d00/a01097.html#ab247be5a2b04bde1ac83a762dbc19ae0", null ],
+    [ "form", "d1/d00/a01097.html#a41e5e27011940f612568d221fd7e2773", null ],
+    [ "initialize", "d1/d00/a01097.html#a6d4301b90ac828b73bdf0f4b1424e6ee", null ],
+    [ "menu", "d1/d00/a01097.html#a4e97a0514efdd15a2c697a72e75e7821", null ],
+    [ "shutdown", "d1/d00/a01097.html#a9d49c9b6adcfa2c8e99639c28a6e23a7", null ],
+    [ "text", "d1/d00/a01097.html#a072d38cf2f5a1c579a564b4616b29339", null ]
 ];

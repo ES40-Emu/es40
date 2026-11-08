@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: config_win32.h Source File</title>
+<title>ES40: config/NumberQuestion.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,344 +109,148 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d2/d00/a00137_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">config_win32.h</div></div>
+  <div class="headertitle"><div class="title">NumberQuestion.h</div></div>
 </div><!--header-->
 <div class="contents">
 <a href="../../d2/d00/a00137.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 Emulator.</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2007-2008 by the ES40 Emulator Project</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright (C) 2023-2026 by gdwnldsKSC</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * This program is free software; you can redistribute it and/or</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * modify it under the terms of the GNU General Public License</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * as published by the Free Software Foundation; either version 2</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * of the License, or (at your option) any later version.</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * This program is distributed in the hope that it will be useful,</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * GNU General Public License for more details.</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * You should have received a copy of the GNU General Public License</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * along with this program; if not, write to the Free Software</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * Although this is not required, the author would appreciate being notified of,</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * and receiving any modifications you may make to the source code that might serve</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> * the general public.</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  <span class="comment">/* Version number of package */</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a1c6d5de492ac61ad29aec7aa9a436bbf">   45</a></span><span class="preprocessor">#define VERSION &quot;0.92.2&quot;</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="comment">/* Define to 1 if you have the `alarm&#39; function. */</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a777e1baef81548a6bd84c0da28443435">   48</a></span><span class="preprocessor">#define HAVE_ALARM 1</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="comment">/* Define to 1 if you have the &lt;arpa/inet.h&gt; header file. */</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="comment">//#define HAVE_ARPA_INET_H 1</span></div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="comment">/* Define to 1 if you have the &lt;arpa/telnet.h&gt; header file. */</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="comment">//#define HAVE_ARPA_TELNET_H 1</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="comment">/* Define to 1 if you have the `atexit&#39; function. */</span></div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#ac4faa6cee576eede96dd582213f19b78">   57</a></span><span class="preprocessor">#define HAVE_ATEXIT 1</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment">/* Define to 1 if you have the &lt;ctype.h&gt; header file. */</span></div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="comment">//#define HAVE_CTYPE_H 1</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="comment">/* Define to 1 if you have the &lt;errno.h&gt; header file. */</span></div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#ae655a511fd230d2fd6b99ff2801df201">   63</a></span><span class="preprocessor">#define HAVE_ERRNO_H 1</span></div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="comment">/* Define to 1 if you have the &lt;fcntl.h&gt; header file. */</span></div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a765d75020849aa0a9b6becd9a5b7a193">   66</a></span><span class="preprocessor">#define HAVE_FCNTL_H 1</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="comment">/* Define to 1 if you have the `fopen&#39; function. */</span></div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#ae66ae9e7dd3317575c065cfee95af9af">   69</a></span><span class="preprocessor">#define HAVE_FOPEN 1</span></div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="comment">/* Define to 1 if you have the `fopen64&#39; function. */</span></div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="comment">//#define HAVE_FOPEN64 1</span></div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="comment">/* Define to 1 if you have the `fork&#39; function. */</span></div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#af5eda00981183c9820f5930f0933c293">   75</a></span><span class="preprocessor">#define HAVE_FORK 1</span></div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="comment">/* Define to 1 if you have the `fseek&#39; function. */</span></div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#aa3f9bf1a577dac0b2776294ceceef0a0">   78</a></span><span class="preprocessor">#define HAVE_FSEEK 1</span></div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="comment">/* Define to 1 if you have the `fseeko&#39; function. */</span></div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="comment">//#define HAVE_FSEEKO 1</span></div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><span class="comment">/* Define to 1 if you have the `fseeko64&#39; function. */</span></div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="comment">//#define HAVE_FSEEKO64 1</span></div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="comment">/* Define to 1 if you have the `_fseeki64&#39; function. */</span></div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a1b4ad1de265825592816e490dec1cf5c">   87</a></span><span class="preprocessor">#define HAVE__FSEEKI64 1</span></div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="comment">/* Define to 1 if you have the `ftell&#39; function. */</span></div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#ab96b8c4b3c1b32bf3e6447d72fe7528d">   90</a></span><span class="preprocessor">#define HAVE_FTELL 1</span></div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="comment">/* Define to 1 if you have the `ftello&#39; function. */</span></div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span><span class="comment">//#define HAVE_FTELLO 1</span></div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="comment">/* Define to 1 if you have the `ftello64&#39; function. */</span></div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="comment">//#define HAVE_FTELLO64 1</span></div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="comment">/* Define to 1 if you have the `_ftelli64&#39; function. */</span></div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a425e73fd0c6cbb54a4c5407c25cfdb55">   99</a></span><span class="preprocessor">#define HAVE__FTELLI64 1</span></div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="comment">/* Define to 1 if you have the `gmtime_s&#39; function. */</span></div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a4c24f1d5b184f4a2c17a87c1328e0e5a">  102</a></span><span class="preprocessor">#define HAVE_GMTIME_S 1</span></div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="comment">/* Define to 1 if you have the `inet_aton&#39; function. */</span></div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#ad719da5884fb483b57d9d1ccdea9ec10">  105</a></span><span class="preprocessor">#define HAVE_INET_ATON 1</span></div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="comment">/* Define to 1 if you have the &lt;inet.h&gt; header file. */</span></div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="comment">//#define HAVE_INET_H 1</span></div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span><span class="comment">/* Define to 1 if you have the &lt;inttypes.h&gt; header file. */</span></div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#ab90a030ff2790ebdc176660a6dd2a478">  111</a></span><span class="preprocessor">#define HAVE_INTTYPES_H 1</span></div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="comment">/* Define to 1 if you have the &lt;in.h&gt; header file. */</span></div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="comment">// #define HAVE_IN_H 1</span></div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span><span class="comment">/* Define to 1 if you have the `isblank&#39; function. */</span></div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a95e96283574b8b96b6cd1659f9788307">  117</a></span><span class="preprocessor">#define HAVE_ISBLANK 1</span></div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="comment">/* Define to 1 if your system has a GNU libc compatible `malloc&#39; function, and</span></div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span><span class="comment">   to 0 otherwise. */</span></div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a14503280ca0cb757db915eea09282bfc">  121</a></span><span class="preprocessor">#define HAVE_MALLOC 1</span></div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>   <span class="comment">/* Define to 1 if you have the &lt;malloc.h&gt; header file. */</span></div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a7981d8bf53b0cb48f41ab0e4ddb7c629">  124</a></span><span class="preprocessor">#define HAVE_MALLOC_H 1</span></div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span><span class="comment">/* Define to 1 if you have the &lt;memory.h&gt; header file. */</span></div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#ae93a78f9d076138897af441c9f86f285">  127</a></span><span class="preprocessor">#define HAVE_MEMORY_H 1</span></div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span><span class="comment">/* Define to 1 if you have the `memset&#39; function. */</span></div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a3df52e9809253860c385be6f3a160607">  130</a></span><span class="preprocessor">#define HAVE_MEMSET 1</span></div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span><span class="comment">/* Define to 1 if you have the &lt;netinet/in.h&gt; header file. */</span></div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span><span class="comment">//#define HAVE_NETINET_IN_H 1</span></div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span><span class="comment">/* Define to 1 if you have the `pow&#39; function. */</span></div>
-<div class="line"><a id="l00136" name="l00136"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a9d17c48138de7e59ce0ef00b33ed05cb">  136</a></span><span class="preprocessor">#define HAVE_POW 1</span></div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span><span class="comment">/* Define to 1 if you have the &lt;process.h&gt; header file. */</span></div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#ad87b674d2bc3bb6b7642699e116a8e83">  139</a></span><span class="preprocessor">#define HAVE_PROCESS_H 1</span></div>
-<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span> </div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span><span class="comment">/* Define to 1 if you have the &lt;pthread.h&gt; header file. */</span></div>
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span><span class="comment">//#define HAVE_PTHREAD_H 1</span></div>
-<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span> </div>
-<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span><span class="comment">/* Define to 1 if your system has a GNU libc compatible `realloc&#39; function,</span></div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span><span class="comment">   and to 0 otherwise. */</span></div>
-<div class="line"><a id="l00146" name="l00146"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a0302094a0ee567c610a36c63104ebda5">  146</a></span><span class="preprocessor">#define HAVE_REALLOC 1</span></div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span> </div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>   <span class="comment">/* Define to 1 if you have the `select&#39; function. */</span></div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#aee3a7313d861afa18971031528fd0cd5">  149</a></span><span class="preprocessor">#define HAVE_SELECT 1</span></div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span> </div>
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span><span class="comment">/* Define to 1 if you have the &lt;signal.h&gt; header file. */</span></div>
-<div class="line"><a id="l00152" name="l00152"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a494d1ecf5a4567ccbf7901e3be337bc7">  152</a></span><span class="preprocessor">#define HAVE_SIGNAL_H 1</span></div>
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span> </div>
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span><span class="comment">/* Define to 1 if you have the `socket&#39; function. */</span></div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a4cd6234bfe3f7c10968a1151f43ce280">  155</a></span><span class="preprocessor">#define HAVE_SOCKET 1</span></div>
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span><span class="comment">/* Define to 1 if you have the &lt;socket.h&gt; header file. */</span></div>
-<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span><span class="comment">//#define HAVE_SOCKET_H 1</span></div>
-<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span> </div>
-<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span><span class="comment">/* Define to 1 if you have the `sqrt&#39; function. */</span></div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a04f983617a16d562f9a6df2e34a6a41c">  161</a></span><span class="preprocessor">#define HAVE_SQRT 1</span></div>
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span> </div>
-<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span><span class="comment">/* Define to 1 if stdbool.h conforms to C99. */</span></div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a8c3fa1b2f1be8c6f6929548c548cf50a">  164</a></span><span class="preprocessor">#define HAVE_STDBOOL_H 1</span></div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span><span class="comment">/* Define to 1 if you have the &lt;stdint.h&gt; header file. */</span></div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#ab6cd6d1c63c1e26ea2d4537b77148354">  167</a></span><span class="preprocessor">#define HAVE_STDINT_H 1</span></div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span> </div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span><span class="comment">/* Define to 1 if you have the &lt;stdlib.h&gt; header file. */</span></div>
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a9e0e434ec1a6ddbd97db12b5a32905e0">  170</a></span><span class="preprocessor">#define HAVE_STDLIB_H 1</span></div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span> </div>
-<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span><span class="comment">/* Define to 1 if you have the `strcasecmp&#39; function. */</span></div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span><span class="comment">//#define HAVE_STRCASECMP 1</span></div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span> </div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span><span class="comment">/* Define to 1 if you have the &#39;_stricmp&#39; function. */</span></div>
-<div class="line"><a id="l00176" name="l00176"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#ab16f46169d92b78980b56216950e7213">  176</a></span><span class="preprocessor">#define HAVE__STRICMP 1</span></div>
-<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span> </div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span><span class="comment">/* Define to 1 if you have the `strchr&#39; function. */</span></div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a37eb0020e42f0ebb6cba24c2888cc48b">  179</a></span><span class="preprocessor">#define HAVE_STRCHR 1</span></div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span> </div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span><span class="comment">/* Define to 1 if you have the `strdup&#39; function. */</span></div>
-<div class="line"><a id="l00182" name="l00182"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a41b838eb3b86a0ebbd0981e92a759c0f">  182</a></span><span class="preprocessor">#define HAVE_STRDUP 1</span></div>
-<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span> </div>
-<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span><span class="comment">/* Definr to 1 if you have the &#39;_strdup&#39; function. */</span></div>
-<div class="line"><a id="l00185" name="l00185"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a48e0cd5c7c1209c71eb6f3b0e8bb072b">  185</a></span><span class="preprocessor">#define HAVE__STRDUP 1</span></div>
-<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span> </div>
-<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span><span class="comment">/* Define to 1 if you have the &lt;strings.h&gt; header file. */</span></div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span><span class="comment">//#define HAVE_STRINGS_H 1</span></div>
-<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span> </div>
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span><span class="comment">/* Define to 1 if you have the &lt;string.h&gt; header file. */</span></div>
-<div class="line"><a id="l00191" name="l00191"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#ad4c234dd1625255dc626a15886306e7d">  191</a></span><span class="preprocessor">#define HAVE_STRING_H 1</span></div>
-<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span> </div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span><span class="comment">/* Define to 1 if you have the `strncasecmp&#39; function. */</span></div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span><span class="comment">//#define HAVE_STRNCASECMP 1</span></div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span> </div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span><span class="comment">/* Define to 1 if you have the &#39;_strnicmp&#39; function. */</span></div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#ab326d583ba2d834dfaf8a50d0b730126">  197</a></span><span class="preprocessor">#define HAVE__STRNICMP 1</span></div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span> </div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span><span class="comment">/* Define to 1 if you have the `strspn&#39; function. */</span></div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#aecb4dff1de46336ff30ad7a3a6743cc5">  200</a></span><span class="preprocessor">#define HAVE_STRSPN 1</span></div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span> </div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span><span class="comment">/* Define to 1 if you have the &lt;sys/param.h&gt; header file. */</span></div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a05aa9fc25e1231d8eb347390558e4e22">  203</a></span><span class="preprocessor">#define HAVE_SYS_PARAM_H 1</span></div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span> </div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span><span class="comment">/* Define to 1 if you have the &lt;sys/select.h&gt; header file. */</span></div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span><span class="comment">//#define HAVE_SYS_SELECT_H 1</span></div>
-<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span> </div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span><span class="comment">/* Define to 1 if you have the &lt;sys/socket.h&gt; header file. */</span></div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span><span class="comment">//#define HAVE_SYS_SOCKET_H 1</span></div>
-<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span> </div>
-<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span><span class="comment">/* Define to 1 if you have the &lt;sys/stat.h&gt; header file. */</span></div>
-<div class="line"><a id="l00212" name="l00212"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#ace156430ba007d19b4348a950d0c692b">  212</a></span><span class="preprocessor">#define HAVE_SYS_STAT_H 1</span></div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span> </div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span><span class="comment">/* Define to 1 if you have the &lt;sys/time.h&gt; header file. */</span></div>
-<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span><span class="comment">//#define HAVE_SYS_TIME_H 1</span></div>
-<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span> </div>
-<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span><span class="comment">/* Define to 1 if you have the &lt;sys/types.h&gt; header file. */</span></div>
-<div class="line"><a id="l00218" name="l00218"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a69dc70bea5d1f8bd2be9740e974fa666">  218</a></span><span class="preprocessor">#define HAVE_SYS_TYPES_H 1</span></div>
-<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span> </div>
-<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span><span class="comment">/* Define to 1 if you have &lt;sys/wait.h&gt; that is POSIX.1 compatible. */</span></div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span><span class="comment">//#define HAVE_SYS_WAIT_H 1</span></div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span> </div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span><span class="comment">/* Define to 1 if you have the &lt;unistd.h&gt; header file. */</span></div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span><span class="comment">//#define HAVE_UNISTD_H 1</span></div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span> </div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span><span class="comment">/* Define to 1 if you have the `vfork&#39; function. */</span></div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a6e660eb97fa8ec4462facdd5d3721aed">  227</a></span><span class="preprocessor">#define HAVE_VFORK 1</span></div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span> </div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span><span class="comment">/* Define to 1 if you have the &lt;vfork.h&gt; header file. */</span></div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span><span class="comment">/* #undef HAVE_VFORK_H */</span></div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span> </div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span><span class="comment">/* Define to 1 if you have the &lt;windows.h&gt; header file. */</span></div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a32b823c25c0494590b626157b0d479b3">  233</a></span><span class="preprocessor">#define HAVE_WINDOWS_H 1</span></div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span> </div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span><span class="comment">/* Define to 1 if you have the &lt;winsock2.h&gt; header file. */</span></div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a0996a14424bcb84fce6b7cdf326b2f82">  236</a></span><span class="preprocessor">#define HAVE_WINSOCK2_H 1</span></div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span> </div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span><span class="comment">/* Define to 1 if you have the &lt;ws2tcpip.h&gt; header file. */</span></div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span> </div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span><span class="comment">/* Define to 1 if `fork&#39; works. */</span></div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#ac5b8a9a863350e942e04a4ad13fe905a">  241</a></span><span class="preprocessor">#define HAVE_WORKING_FORK 1</span></div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span> </div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span><span class="comment">/* Define to 1 if `vfork&#39; works. */</span></div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a3f110f0b36f0c6ef25501e5a10e9a0de">  244</a></span><span class="preprocessor">#define HAVE_WORKING_VFORK 1</span></div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span> </div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span><span class="comment">/* Define to 1 if the system has the type `_Bool&#39;. */</span></div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a862ffdbac7ac8323712310a418b7d9a3">  247</a></span><span class="preprocessor">#define HAVE__BOOL 1</span></div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span> </div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span><span class="comment">/* Name of package */</span></div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#aca8570fb706c81df371b7f9bc454ae03">  250</a></span><span class="preprocessor">#define PACKAGE &quot;es40&quot;</span></div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span> </div>
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span><span class="comment">/* Define to the address where bug reports for this package should be sent. */</span></div>
-<div class="line"><a id="l00253" name="l00253"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a1d1d2d7f8d2f95b376954d649ab03233">  253</a></span><span class="preprocessor">#define PACKAGE_BUGREPORT &quot;iamcamiel@gmail.com&quot;</span></div>
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span> </div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span><span class="comment">/* Define to the full name of this package. */</span></div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a1c0439e4355794c09b64274849eb0279">  256</a></span><span class="preprocessor">#define PACKAGE_NAME &quot;es40&quot;</span></div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span> </div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span><span class="comment">/* Define to the full name and version of this package. */</span></div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#ac73e6f903c16eca7710f92e36e1c6fbf">  259</a></span><span class="preprocessor">#define PACKAGE_STRING &quot;es40 &quot; VERSION</span></div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span> </div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span><span class="comment">/* Define to the one symbol short name of this package. */</span></div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#af415af6bfede0e8d5453708afe68651c">  262</a></span><span class="preprocessor">#define PACKAGE_TARNAME &quot;es40&quot;</span></div>
-<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span> </div>
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span><span class="comment">/* Define to the version of this package. */</span></div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#aa326a05d5e30f9e9a4bb0b4469d5d0c0">  265</a></span><span class="preprocessor">#define PACKAGE_VERSION VERSION</span></div>
-<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span> </div>
-<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span><span class="comment">/* Define as the return type of signal handlers (`int&#39; or `void&#39;). */</span></div>
-<div class="line"><a id="l00268" name="l00268"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#adbe5dcee9c146b338794974137c55e70">  268</a></span><span class="preprocessor">#define RETSIGTYPE void</span></div>
-<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span> </div>
-<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span><span class="comment">/* Define to the type of arg 1 for `select&#39;. */</span></div>
-<div class="line"><a id="l00271" name="l00271"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a9f4c30db127f8c10d9b4f0eaed1d6e8f">  271</a></span><span class="preprocessor">#define SELECT_TYPE_ARG1 int</span></div>
-<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span> </div>
-<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span><span class="comment">/* Define to the type of args 2, 3 and 4 for `select&#39;. */</span></div>
-<div class="line"><a id="l00274" name="l00274"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a2c1fd0e84b7aaf9617b67596ef9b274f">  274</a></span><span class="preprocessor">#define SELECT_TYPE_ARG234 (fd_set *)</span></div>
-<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span> </div>
-<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span><span class="comment">/* Define to the type of arg 5 for `select&#39;. */</span></div>
-<div class="line"><a id="l00277" name="l00277"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#af3f6c94b1def9d6d936270c458f586a0">  277</a></span><span class="preprocessor">#define SELECT_TYPE_ARG5 (struct timeval *)</span></div>
-<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span> </div>
-<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span><span class="comment">/* Define to 1 if you have the ANSI C header files. */</span></div>
-<div class="line"><a id="l00280" name="l00280"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a550e5c272cc3cf3814651721167dcd23">  280</a></span><span class="preprocessor">#define STDC_HEADERS 1</span></div>
-<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span> </div>
-<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span><span class="comment">/* Define to 1 if you can safely include both &lt;sys/time.h&gt; and &lt;time.h&gt;. */</span></div>
-<div class="line"><a id="l00283" name="l00283"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a2b44ef64cf38e064ef11e11f35271380">  283</a></span><span class="preprocessor">#define TIME_WITH_SYS_TIME 1</span></div>
-<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span> </div>
-<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span><span class="comment">/* Define to 1 if your &lt;sys/time.h&gt; declares `struct tm&#39;. */</span></div>
-<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span><span class="comment">/* #undef TM_IN_SYS_TIME */</span></div>
-<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span> </div>
-<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span><span class="comment">/* Define for Solaris 2.5.1 so the uint32_t typedef from &lt;sys/synch.h&gt;,</span></div>
-<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span><span class="comment">   &lt;pthread.h&gt;, or &lt;semaphore.h&gt; is not used. If the typedef was allowed, the</span></div>
-<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span><span class="comment">   #define below would cause a syntax error. */</span></div>
-<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>   <span class="comment">/* #undef _UINT32_T */</span></div>
-<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span> </div>
-<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>   <span class="comment">/* Define for Solaris 2.5.1 so the uint64_t typedef from &lt;sys/synch.h&gt;,</span></div>
-<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span><span class="comment">      &lt;pthread.h&gt;, or &lt;semaphore.h&gt; is not used. If the typedef was allowed, the</span></div>
-<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span><span class="comment">      #define below would cause a syntax error. */</span></div>
-<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>      <span class="comment">/* #undef _UINT64_T */</span></div>
-<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span> </div>
-<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>      <span class="comment">/* Define for Solaris 2.5.1 so the uint8_t typedef from &lt;sys/synch.h&gt;,</span></div>
-<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span><span class="comment">         &lt;pthread.h&gt;, or &lt;semaphore.h&gt; is not used. If the typedef was allowed, the</span></div>
-<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span><span class="comment">         #define below would cause a syntax error. */</span></div>
-<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>         <span class="comment">/* #undef _UINT8_T */</span></div>
-<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span> </div>
-<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>         <span class="comment">/* Define to empty if `const&#39; does not conform to ANSI C. */</span></div>
-<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>         <span class="comment">/* #undef const */</span></div>
-<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span> </div>
-<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>         <span class="comment">/* Define to `__inline__&#39; or `__inline&#39; if that&#39;s what the C compiler</span></div>
-<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span><span class="comment">            calls it, or to nothing if &#39;inline&#39; is not supported under any name.  */</span></div>
-<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span><span class="preprocessor">#ifndef __cplusplus</span></div>
-<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>            <span class="comment">/* #undef inline */</span></div>
-<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span> </div>
-<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span><span class="comment">/* Define to rpl_malloc if the replacement function should be used. */</span></div>
-<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span><span class="comment">/* #undef malloc */</span></div>
-<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span> </div>
-<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span><span class="comment">/* Define to `int&#39; if &lt;sys/types.h&gt; does not define. */</span></div>
-<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span><span class="comment">/* #undef pid_t */</span></div>
-<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span> </div>
-<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span><span class="comment">/* Define to rpl_realloc if the replacement function should be used. */</span></div>
-<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span><span class="comment">/* #undef realloc */</span></div>
-<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span> </div>
-<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span><span class="comment">/* Define to `unsigned int&#39; if &lt;sys/types.h&gt; does not define. */</span></div>
-<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span><span class="comment">/* #undef size_t */</span></div>
-<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span> </div>
-<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span><span class="comment">/* Define to `int&#39; if &lt;sys/types.h&gt; does not define. */</span></div>
-<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span><span class="comment">/* #undef ssize_t */</span></div>
-<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span> </div>
-<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span><span class="comment">/* Define as `fork&#39; if `vfork&#39; does not work. */</span></div>
-<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span><span class="comment">/* #undef vfork */</span></div>
-<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span> </div>
-<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span><span class="comment">// Windows 7 API baseline, independent of the selected Windows SDK version.</span></div>
-<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span><span class="preprocessor">#ifndef _WIN32_WINNT</span></div>
-<div class="line"><a id="l00332" name="l00332"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#ac50762666aa00bd3a4308158510f1748">  332</a></span><span class="preprocessor">#define _WIN32_WINNT  0x0601</span></div>
-<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span> </div>
-<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span><span class="preprocessor">#ifndef WINVER</span></div>
-<div class="line"><a id="l00336" name="l00336"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a966cd377b9f3fdeb1432460c33352af1">  336</a></span><span class="preprocessor">#define WINVER  _WIN32_WINNT</span></div>
-<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span> </div>
-<div class="line"><a id="l00339" name="l00339"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#ac7bef5d85e3dcd73eef56ad39ffc84a9">  339</a></span><span class="preprocessor">#define WIN32_LEAN_AND_MEAN </span><span class="comment">// Exclude rarely-used stuff from Windows headers</span></div>
-<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span> </div>
-<div class="line"><a id="l00341" name="l00341"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#a411c46599e926f8cdf49c63957255359">  341</a></span><span class="preprocessor">#define _CRT_SECURE_NO_DEPRECATE  1</span></div>
-<div class="line"><a id="l00342" name="l00342"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#af08ec37a8c99d747fb60fa15bc28678b">  342</a></span><span class="preprocessor">#define _CRT_SECURE_NO_WARNINGS 1</span></div>
-<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span> </div>
-<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * This program is free software; you can redistribute it and/or</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * modify it under the terms of the GNU General Public License</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * as published by the Free Software Foundation; either version 2</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * of the License, or (at your option) any later version.</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * This program is distributed in the hope that it will be useful,</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * GNU General Public License for more details.</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * You should have received a copy of the GNU General Public License</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * along with this program; if not, write to the Free Software</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * Although this is not required, the author would appreciate being notified of,</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * and receiving any modifications you may make to the source code that might serve</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * the general public.</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span></div>
+<div class="foldopen" id="foldopen00039" data-start="{" data-end="}">
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#af67e732258579f2e0c619014e718a75c">   39</a></span><span class="keyword">inline</span> <span class="keywordtype">string</span> <a class="code hl_function" href="../../df/d00/a00107.html#af67e732258579f2e0c619014e718a75c">i2s</a>(<span class="keywordtype">int</span> x)</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>{</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  ostringstream o;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  o &lt;&lt; x;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  <span class="keywordflow">return</span> o.str();</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>}</div>
+</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span></div>
+<div class="foldopen" id="foldopen00051" data-start="{" data-end="}">
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="../../d2/d00/a00137.html#aa70bc74cb9cef1fc1add36a16b97a694">   51</a></span><span class="keyword">inline</span> <span class="keywordtype">int</span> <a class="code hl_function" href="../../df/d00/a00107.html#aa70bc74cb9cef1fc1add36a16b97a694">s2i</a>(<span class="keyword">const</span> <span class="keywordtype">string</span> x)</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>{</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  istringstream i(x);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  <span class="keywordtype">int</span> x1;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>  <span class="keywordtype">char</span> c;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  <span class="keywordflow">if</span> (!(i &gt;&gt; x1) || i.get(c))</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <a class="code hl_define" href="../../dd/d00/a00365.html#a5641b3e8b9f16e5ce6f4ba1f83943832">FAILURE</a>(Logic, <span class="stringliteral">&quot;invalid conversion&quot;</span>);;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>  <span class="keywordflow">return</span> x1;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>}</div>
+</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span></div>
+<div class="foldopen" id="foldopen00065" data-start="{" data-end="};">
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="../../d6/d00/a01117.html">   65</a></span><span class="keyword">class </span><a class="code hl_class" href="../../d6/d00/a01117.html">NumberQuestion</a> : <span class="keyword">public</span> <a class="code hl_class" href="../../de/d00/a01105.html">FreeTextQuestion</a></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>{</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00071" data-start="{" data-end="}">
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="../../d6/d00/a01117.html#a136873986a087e3e3169db4d3d9002dc">   71</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../d6/d00/a01117.html#a136873986a087e3e3169db4d3d9002dc">setRange</a>(<span class="keywordtype">int</span> low, <span class="keywordtype">int</span> high)</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>  {</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <a class="code hl_variable" href="../../d6/d00/a01117.html#ac4ac04ecfd46a487b37237729626d4b2">mLow</a> = low; <a class="code hl_variable" href="../../d6/d00/a01117.html#a482bc0350f01cae9701598189614e93b">mHigh</a> = high;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>  }</div>
+</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span></div>
+<div class="foldopen" id="foldopen00079" data-start="{" data-end="}">
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="../../d6/d00/a01117.html#a74d2383631056a781e1d0ede0cd39d4f">   79</a></span>  <span class="keywordtype">int</span> <a class="code hl_function" href="../../d6/d00/a01117.html#a74d2383631056a781e1d0ede0cd39d4f">getNum</a>()</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  {</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d2/d00/a00137.html#aa70bc74cb9cef1fc1add36a16b97a694">s2i</a>(<a class="code hl_variable" href="../../dd/d00/a01121.html#a94d92e8cd36adb5f9130fa2aced4980f">mAnswer</a>);</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  }</div>
+</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span></div>
+<div class="foldopen" id="foldopen00087" data-start="{" data-end="}">
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="../../d6/d00/a01117.html#adf24984c09bf926b3c13347aa8bd5112">   87</a></span>  <span class="keyword">virtual</span> <span class="keywordtype">string</span> <a class="code hl_function" href="../../d6/d00/a01117.html#adf24984c09bf926b3c13347aa8bd5112">ask</a>()</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  {</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="comment">/* Set the options list to (low-high).</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <a class="code hl_function" href="../../de/d00/a01105.html#a4e1a1941a1ba2242a267f9ee21adb69e">setOptions</a>(<a class="code hl_function" href="../../d2/d00/a00137.html#af67e732258579f2e0c619014e718a75c">i2s</a>(<a class="code hl_variable" href="../../d6/d00/a01117.html#ac4ac04ecfd46a487b37237729626d4b2">mLow</a>) + <span class="stringliteral">&quot;-&quot;</span> + <a class="code hl_function" href="../../d2/d00/a00137.html#af67e732258579f2e0c619014e718a75c">i2s</a>(<a class="code hl_variable" href="../../d6/d00/a01117.html#a482bc0350f01cae9701598189614e93b">mHigh</a>));</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <span class="comment">/* Keep repeating the question until a valid</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="comment">     * answer is received.</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="keywordflow">for</span> (;;)</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    {</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>      <span class="keywordtype">int</span> value;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>      <span class="comment">/* Ask the question as a FreeTextQuestion. This</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="comment">       * takes care of the explanation and default</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="comment">       * value handling.</span></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="comment">       */</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>      <a class="code hl_function" href="../../de/d00/a01105.html#a4e0ee1b8945023966643623f7d5fb2ef">FreeTextQuestion::ask</a>();</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>      <span class="keywordflow">try</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>      {</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>        <span class="comment">/* Convert the answer to an integer.</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="comment">         */</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>        value = <a class="code hl_function" href="../../d2/d00/a00137.html#aa70bc74cb9cef1fc1add36a16b97a694">s2i</a>(<a class="code hl_variable" href="../../dd/d00/a01121.html#a94d92e8cd36adb5f9130fa2aced4980f">mAnswer</a>);</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>        <span class="comment">/* If the answer is within the allowed range,</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="comment">         * return it.</span></div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="comment">         */</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>        <span class="keywordflow">if</span> (value &gt;= <a class="code hl_variable" href="../../d6/d00/a01117.html#ac4ac04ecfd46a487b37237729626d4b2">mLow</a> &amp;&amp; value &lt;= <a class="code hl_variable" href="../../d6/d00/a01117.html#a482bc0350f01cae9701598189614e93b">mHigh</a>)</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>          <span class="keywordflow">return</span> <a class="code hl_variable" href="../../dd/d00/a01121.html#a94d92e8cd36adb5f9130fa2aced4980f">mAnswer</a>;</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>        <span class="comment">/* The answer is out of range.</span></div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="comment">         */</span></div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>        cout &lt;&lt; <span class="stringliteral">&quot;\nPlease enter a value that is within the indicated range, or &#39;?&#39; for help.\n\n&quot;</span>;</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>      }</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>      <span class="keywordflow">catch</span> (<a class="code hl_class" href="../../d1/d00/a00837.html">CLogicException</a>)</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>      {</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>        <span class="comment">/* The answer is not a number.</span></div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><span class="comment">         */</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>        cout &lt;&lt; <span class="stringliteral">&quot;\nPlease enter an integer value.\n\n&quot;</span>;</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>      }</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    }</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>  }</div>
+</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span> </div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><span class="keyword">protected</span>:</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno"><a class="line" href="../../d6/d00/a01117.html#ac4ac04ecfd46a487b37237729626d4b2">  133</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="../../d6/d00/a01117.html#ac4ac04ecfd46a487b37237729626d4b2">mLow</a>;</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno"><a class="line" href="../../d6/d00/a01117.html#a482bc0350f01cae9701598189614e93b">  135</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="../../d6/d00/a01117.html#a482bc0350f01cae9701598189614e93b">mHigh</a>;</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>};</div>
+</div>
+<div class="ttc" id="aa00107_html_aa70bc74cb9cef1fc1add36a16b97a694"><div class="ttname"><a href="../../df/d00/a00107.html#aa70bc74cb9cef1fc1add36a16b97a694">s2i</a></div><div class="ttdeci">int s2i(const string x)</div><div class="ttdoc">Convert a string to an integer.</div><div class="ttdef"><b>Definition</b> <a href="../../df/d00/a00107_source.html#l00215">ConfigEditor.cpp:215</a></div></div>
+<div class="ttc" id="aa00107_html_af67e732258579f2e0c619014e718a75c"><div class="ttname"><a href="../../df/d00/a00107.html#af67e732258579f2e0c619014e718a75c">i2s</a></div><div class="ttdeci">string i2s(int x)</div><div class="ttdoc">Convert an integer to a string.</div><div class="ttdef"><b>Definition</b> <a href="../../df/d00/a00107_source.html#l00202">ConfigEditor.cpp:202</a></div></div>
+<div class="ttc" id="aa00137_html_aa70bc74cb9cef1fc1add36a16b97a694"><div class="ttname"><a href="../../d2/d00/a00137.html#aa70bc74cb9cef1fc1add36a16b97a694">s2i</a></div><div class="ttdeci">int s2i(const string x)</div><div class="ttdoc">Convert a string to an integer.</div><div class="ttdef"><b>Definition</b> <a href="#l00051">NumberQuestion.h:51</a></div></div>
+<div class="ttc" id="aa00137_html_af67e732258579f2e0c619014e718a75c"><div class="ttname"><a href="../../d2/d00/a00137.html#af67e732258579f2e0c619014e718a75c">i2s</a></div><div class="ttdeci">string i2s(int x)</div><div class="ttdoc">Convert an integer to a string.</div><div class="ttdef"><b>Definition</b> <a href="#l00039">NumberQuestion.h:39</a></div></div>
+<div class="ttc" id="aa00365_html_a5641b3e8b9f16e5ce6f4ba1f83943832"><div class="ttname"><a href="../../dd/d00/a00365.html#a5641b3e8b9f16e5ce6f4ba1f83943832">FAILURE</a></div><div class="ttdeci">#define FAILURE(cls, error_msg)</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d00/a00365_source.html#l00099">es40_debug.h:99</a></div></div>
+<div class="ttc" id="aa00837_html"><div class="ttname"><a href="../../d1/d00/a00837.html">CLogicException</a></div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00047_source.html#l00071">Exception.h:71</a></div></div>
+<div class="ttc" id="aa01105_html"><div class="ttname"><a href="../../de/d00/a01105.html">FreeTextQuestion</a></div><div class="ttdoc">Question class that allows free-format text input.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00131_source.html#l00039">FreeTextQuestion.h:40</a></div></div>
+<div class="ttc" id="aa01105_html_a4e0ee1b8945023966643623f7d5fb2ef"><div class="ttname"><a href="../../de/d00/a01105.html#a4e0ee1b8945023966643623f7d5fb2ef">FreeTextQuestion::ask</a></div><div class="ttdeci">virtual string ask()</div><div class="ttdoc">Ask the question, and return the answer.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00131_source.html#l00054">FreeTextQuestion.h:54</a></div></div>
+<div class="ttc" id="aa01105_html_a4e1a1941a1ba2242a267f9ee21adb69e"><div class="ttname"><a href="../../de/d00/a01105.html#a4e1a1941a1ba2242a267f9ee21adb69e">FreeTextQuestion::setOptions</a></div><div class="ttdeci">void setOptions(string options)</div><div class="ttdoc">Define a list of options to show following the question, to show the user what values are acceptable.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00131_source.html#l00046">FreeTextQuestion.h:46</a></div></div>
+<div class="ttc" id="aa01117_html"><div class="ttname"><a href="../../d6/d00/a01117.html">NumberQuestion</a></div><div class="ttdoc">Question class that accepts a numeric answer within a defined range.</div><div class="ttdef"><b>Definition</b> <a href="#l00065">NumberQuestion.h:66</a></div></div>
+<div class="ttc" id="aa01117_html_a136873986a087e3e3169db4d3d9002dc"><div class="ttname"><a href="../../d6/d00/a01117.html#a136873986a087e3e3169db4d3d9002dc">NumberQuestion::setRange</a></div><div class="ttdeci">void setRange(int low, int high)</div><div class="ttdoc">Define the allowable range for the answer.</div><div class="ttdef"><b>Definition</b> <a href="#l00071">NumberQuestion.h:71</a></div></div>
+<div class="ttc" id="aa01117_html_a482bc0350f01cae9701598189614e93b"><div class="ttname"><a href="../../d6/d00/a01117.html#a482bc0350f01cae9701598189614e93b">NumberQuestion::mHigh</a></div><div class="ttdeci">int mHigh</div><div class="ttdoc">High limit of the allowed range.</div><div class="ttdef"><b>Definition</b> <a href="#l00135">NumberQuestion.h:135</a></div></div>
+<div class="ttc" id="aa01117_html_a74d2383631056a781e1d0ede0cd39d4f"><div class="ttname"><a href="../../d6/d00/a01117.html#a74d2383631056a781e1d0ede0cd39d4f">NumberQuestion::getNum</a></div><div class="ttdeci">int getNum()</div><div class="ttdoc">Convert the answer to a number.</div><div class="ttdef"><b>Definition</b> <a href="#l00079">NumberQuestion.h:79</a></div></div>
+<div class="ttc" id="aa01117_html_ac4ac04ecfd46a487b37237729626d4b2"><div class="ttname"><a href="../../d6/d00/a01117.html#ac4ac04ecfd46a487b37237729626d4b2">NumberQuestion::mLow</a></div><div class="ttdeci">int mLow</div><div class="ttdoc">Low limit of the allowed range.</div><div class="ttdef"><b>Definition</b> <a href="#l00133">NumberQuestion.h:133</a></div></div>
+<div class="ttc" id="aa01117_html_adf24984c09bf926b3c13347aa8bd5112"><div class="ttname"><a href="../../d6/d00/a01117.html#adf24984c09bf926b3c13347aa8bd5112">NumberQuestion::ask</a></div><div class="ttdeci">virtual string ask()</div><div class="ttdoc">Ask the question and return the answer.</div><div class="ttdef"><b>Definition</b> <a href="#l00087">NumberQuestion.h:87</a></div></div>
+<div class="ttc" id="aa01121_html_a94d92e8cd36adb5f9130fa2aced4980f"><div class="ttname"><a href="../../dd/d00/a01121.html#a94d92e8cd36adb5f9130fa2aced4980f">Question::mAnswer</a></div><div class="ttdeci">string mAnswer</div><div class="ttdoc">The stored answer.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00140_source.html#l00099">Question.h:99</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../d2/d00/a00137.html">config_win32.h</a></li>
+    <li class="navelem"><a href="../../dir_9f351d46ce3cc29445a41dc3a31e6919.html">config</a></li><li class="navelem"><a href="../../d2/d00/a00137.html">NumberQuestion.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

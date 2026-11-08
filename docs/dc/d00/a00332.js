@@ -1,8 +1,9 @@
 var a00332 =
 [
-    [ "CPowerStormDisplayLock", "d6/d00/a01233.html", "d6/d00/a01233" ],
-    [ "powerstorm_read_u32", "dc/d00/a00332.html#ab10e242e2a16e2fedbf938edbb488a81", null ],
-    [ "powerstorm_setting", "dc/d00/a00332.html#a1b7f3442c604512f1a394975cb85128e", null ],
-    [ "powerstorm_vga_window_offset", "dc/d00/a00332.html#ad4f454f93828d009d1e259468507e925", null ],
-    [ "powerstorm_write_u32", "dc/d00/a00332.html#abf7516a618c32209915a0b806a16e130", null ]
+    [ "address_map_entry", "dc/d00/a01293.html", "dc/d00/a01293" ],
+    [ "address_map", "dc/d00/a01297.html", "dc/d00/a01297" ],
+    [ "address_map::Slot", "d3/d00/a01301.html", "d3/d00/a01301" ],
+    [ "FUNC", "dc/d00/a00332.html#ad60e8ac79b1b33c0d3baac32e8de427d", null ],
+    [ "NAME", "dc/d00/a00332.html#a14111ac8f43949172b152e50dc720aba", null ],
+    [ "bind_map_member", "dc/d00/a00332.html#a83818d64d5600350357564fb917bb1cd", null ]
 ];

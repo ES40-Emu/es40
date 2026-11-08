@@ -1,25 +1,6 @@
 var a00023 =
 [
-    [ "CException", "d8/d00/a00669.html", "d8/d00/a00669" ],
-    [ "CLogicException", "d4/d00/a00673.html", "d4/d00/a00673" ],
-    [ "CAssertionViolationException", "dc/d00/a00677.html", "dc/d00/a00677" ],
-    [ "CNullPointerException", "d8/d00/a00681.html", "d8/d00/a00681" ],
-    [ "CBugcheckException", "d0/d00/a00685.html", "d0/d00/a00685" ],
-    [ "CInvalidArgumentException", "d1/d00/a00689.html", "d1/d00/a00689" ],
-    [ "CNotImplementedException", "d3/d00/a00693.html", "d3/d00/a00693" ],
-    [ "CIllegalStateException", "d2/d00/a00697.html", "d2/d00/a00697" ],
-    [ "CRuntimeException", "dd/d00/a00701.html", "dd/d00/a00701" ],
-    [ "CSystemException", "d7/d00/a00705.html", "d7/d00/a00705" ],
-    [ "COutOfMemoryException", "d7/d00/a00709.html", "d7/d00/a00709" ],
-    [ "CIOException", "d1/d00/a00713.html", "d1/d00/a00713" ],
-    [ "CFileException", "d3/d00/a00717.html", "d3/d00/a00717" ],
-    [ "CFileNotFoundException", "dd/d00/a00721.html", "dd/d00/a00721" ],
-    [ "CConfigurationException", "d8/d00/a00725.html", "d8/d00/a00725" ],
-    [ "CThreadException", "d8/d00/a00729.html", "d8/d00/a00729" ],
-    [ "CWin32Exception", "d4/d00/a00733.html", "d4/d00/a00733" ],
-    [ "CSDLException", "dd/d00/a00737.html", "dd/d00/a00737" ],
-    [ "CGracefulException", "da/d00/a00741.html", "da/d00/a00741" ],
-    [ "CAbortException", "d1/d00/a00745.html", "d1/d00/a00745" ],
-    [ "ES40_DECLARE_EXCEPTION", "d3/d00/a00023.html#ae075d449e84c3af1e2f73368ff4b28a8", null ],
-    [ "ES40_IMPLEMENT_EXCEPTION", "d3/d00/a00023.html#a371dfcc5322b2e178a025c1f8f98edd9", null ]
+    [ "host_audio::detail::Driver", "dd/d00/a00825.html", "dd/d00/a00825" ],
+    [ "host_audio::detail::null_driver", "dc/d00/a00740.html#a584f041447ca850d8c41590fa7cf920c", null ],
+    [ "host_audio::detail::sdl_driver", "dc/d00/a00740.html#aaab95942de282bad0096fe1ea70688d6", null ]
 ];

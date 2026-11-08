@@ -1,9 +1,7 @@
 var a00853 =
 [
-    [ "base", "db/d00/a00853.html#adee142d09c4b0d763cdaf4d9854fb96a", null ],
-    [ "base_count", "db/d00/a00853.html#abd32a6a11ce1bae9c11696cb94ace9d6", null ],
-    [ "count", "db/d00/a00853.html#abb974a8a80286954c4522c4f02c3d9f6", null ],
-    [ "current", "db/d00/a00853.html#ab7c890add7fcd497406355e86c298577", null ],
-    [ "mode", "db/d00/a00853.html#a254c962a78f35b9dfdc3e130c8e29f0c", null ],
-    [ "pagebase", "db/d00/a00853.html#a06a91172c9122f0e7743c4c3cb280cad", null ]
+    [ "CInvalidArgumentException", "db/d00/a00853.html#a71b168b5fdeca60614253e7e68b5bfa8", null ],
+    [ "CInvalidArgumentException", "db/d00/a00853.html#a4e68f6065f1cf2a938545130d24468ae", null ],
+    [ "CInvalidArgumentException", "db/d00/a00853.html#a692b2fca229603c6cf8f73541aa30f28", null ],
+    [ "name", "db/d00/a00853.html#aca9aa952e93bc4160ed34f8eb2b48ac2", null ]
 ];

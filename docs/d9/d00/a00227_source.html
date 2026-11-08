@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: CPU/Ev68IPR.h Source File</title>
+<title>ES40: CPU/cpu_bwx.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,159 +109,178 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d9/d00/a00227_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">Ev68IPR.h</div></div>
+  <div class="headertitle"><div class="title">cpu_bwx.h</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../d9/d00/a00227.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator -- EV68 privileged-register rules</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2026 by gdwnldsKSC</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * All rights reserved.</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * SPDX-License-Identifier: BSD-1-Clause</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * Redistribution and use in source and binary forms, with or without</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * modification, are permitted provided that the following conditions are met:</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * 1. Redistributions of source code must retain the above copyright notice,</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> *    this list of conditions and the following disclaimer.</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> * POSSIBILITY OF SUCH DAMAGE.</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#if !defined(INCLUDED_EV68IPR_H)</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#define INCLUDED_EV68IPR_H</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &quot;<a class="code" href="../../db/d00/a00164.html">AlphaIPR.h</a>&quot;</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="foldopen" id="foldopen00032" data-start="{" data-end="};">
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="../../d7/d00/a01013.html">   32</a></span><span class="keyword">class </span><a class="code hl_class" href="../../d7/d00/a01013.html">Ev68IPR</a></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>{</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keyword">public</span>:</div>
-<div class="foldopen" id="foldopen00035" data-start="{" data-end="}">
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="../../d7/d00/a01013.html#a3edb59a5656b48f4a812f4636c736505">   35</a></span>  <span class="keyword">static</span> <span class="keyword">constexpr</span> std::uint32_t <a class="code hl_function" href="../../d7/d00/a01013.html#a3edb59a5656b48f4a812f4636c736505">selector</a>(std::uint32_t instruction)</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  {</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="keywordflow">return</span> (instruction &gt;&gt; 8) &amp; 0xff;</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  }</div>
+<a href="../../d9/d00/a00227.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 Emulator.</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2007-2008 by the ES40 Emulator Project</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * This program is free software; you can redistribute it and/or</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * modify it under the terms of the GNU General Public License</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * as published by the Free Software Foundation; either version 2</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * of the License, or (at your option) any later version.</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * This program is distributed in the hope that it will be useful,</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * GNU General Public License for more details.</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * You should have received a copy of the GNU General Public License</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * along with this program; if not, write to the Free Software</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * Although this is not required, the author would appreciate being notified of,</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * and receiving any modifications you may make to the source code that might serve</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * the general public.</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span></div>
+<div class="foldopen" id="foldopen00068" data-start="" data-end="">
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#a372036f3cc8e2a102c691c814c13193c">   68</a></span><span class="preprocessor">#define DO_CMPBGE state.r[REG_3] =                                                   \</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">    (((u8) (state.r[REG_1] &amp; 0xff) &gt;= (u8) (V_2 &amp; 0xff)) ? 1 : 0) |                  \</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="preprocessor">    (((u8) ((state.r[REG_1] &gt;&gt; 8) &amp; 0xff) &gt;= (u8) ((V_2 &gt;&gt; 8) &amp; 0xff)) ? 2 : 0) |    \</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">    (((u8) ((state.r[REG_1] &gt;&gt; 16) &amp; 0xff) &gt;= (u8) ((V_2 &gt;&gt; 16) &amp; 0xff)) ? 4 : 0) |  \</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="preprocessor">    (((u8) ((state.r[REG_1] &gt;&gt; 24) &amp; 0xff) &gt;= (u8) ((V_2 &gt;&gt; 24) &amp; 0xff)) ? 8 : 0) |  \</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="preprocessor">    (((u8) ((state.r[REG_1] &gt;&gt; 32) &amp; 0xff) &gt;= (u8) ((V_2 &gt;&gt; 32) &amp; 0xff)) ? 16 : 0) | \</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">    (((u8) ((state.r[REG_1] &gt;&gt; 40) &amp; 0xff) &gt;= (u8) ((V_2 &gt;&gt; 40) &amp; 0xff)) ? 32 : 0) | \</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="preprocessor">    (((u8) ((state.r[REG_1] &gt;&gt; 48) &amp; 0xff) &gt;= (u8) ((V_2 &gt;&gt; 48) &amp; 0xff)) ? 64 : 0) | \</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="preprocessor">    (((u8) ((state.r[REG_1] &gt;&gt; 56) &amp; 0xff) &gt;= (u8) ((V_2 &gt;&gt; 56) &amp; 0xff)) ? 128 : 0);</span></div>
 </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  <span class="keyword">static</span> std::uint64_t <a class="code hl_function" href="../../d7/d00/a01013.html#a57e7288237a4c3e406a338922e4c379b">read</a>(<a class="code hl_class" href="../../dd/d00/a00921.html">CAlphaCPU</a>&amp; <a class="code hl_variable" href="../../d0/d00/a00605.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a>, std::uint32_t instruction);</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d7/d00/a01013.html#a643fa16d85802843c6e813d27403c612">write</a>(<a class="code hl_class" href="../../dd/d00/a00921.html">CAlphaCPU</a>&amp; <a class="code hl_variable" href="../../d0/d00/a00605.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a>, std::uint32_t instruction, std::uint64_t value,</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>                    <a class="code hl_enumeration" href="../../db/d00/a00164.html#ab8366be706d87922abd430dd2ca35e90">AlphaIPRWriteContext</a> context);</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="foldopen" id="foldopen00044" data-start="{" data-end="}">
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="../../d7/d00/a01013.html#ab1f9fdab225d3feea8454dd60176dd07">   44</a></span>  <span class="keyword">static</span> <span class="keyword">constexpr</span> <a class="code hl_struct" href="../../da/d00/a00961.html">AlphaIPRReadDescriptor</a> <a class="code hl_function" href="../../d7/d00/a01013.html#ab1f9fdab225d3feea8454dd60176dd07">describe</a>(std::uint32_t instruction)</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  {</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keyword">const</span> <span class="keyword">auto</span> function = <a class="code hl_function" href="../../d7/d00/a01013.html#a3edb59a5656b48f4a812f4636c736505">selector</a>(instruction);</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="keywordflow">if</span> ((function &amp; 0xc0) == 0x40)</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>      <span class="keywordflow">return</span> {<a class="code hl_enumvalue" href="../../db/d00/a00164.html#ac4dcb3fde2c4af4411f1df03597b592daec34cd6f057c4737bfc8df7590ecb87e">AlphaIPRReadKind::Helper</a>, <span class="keyword">false</span>, <span class="keyword">true</span>}; <span class="comment">// PCTX group.</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="keywordflow">switch</span> (function)</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    {</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keywordflow">case</span> 0x06: <span class="keywordflow">return</span> {<a class="code hl_enumvalue" href="../../db/d00/a00164.html#ac4dcb3fde2c4af4411f1df03597b592dadafc6570cf5b3ae702f66aec1b191110">AlphaIPRReadKind::ExceptionAddress</a>, <span class="keyword">false</span>, <span class="keyword">true</span>};</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordflow">case</span> 0x0f: <span class="keywordflow">return</span> {<a class="code hl_enumvalue" href="../../db/d00/a00164.html#ac4dcb3fde2c4af4411f1df03597b592daa5bdce26550b735919b60ee85e4bbca0">AlphaIPRReadKind::ExceptionSummary</a>, <span class="keyword">false</span>, <span class="keyword">true</span>};</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keywordflow">case</span> 0x10: <span class="keywordflow">return</span> {<a class="code hl_enumvalue" href="../../db/d00/a00164.html#ac4dcb3fde2c4af4411f1df03597b592dacc686cbc1a19109e79fa697c0de4fa7a">AlphaIPRReadKind::PalBase</a>, <span class="keyword">false</span>, <span class="keyword">true</span>};</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keywordflow">case</span> 0x27: <span class="keywordflow">return</span> {<a class="code hl_enumvalue" href="../../db/d00/a00164.html#ac4dcb3fde2c4af4411f1df03597b592da63491745a13b0f22cbb2d462ef2e752c">AlphaIPRReadKind::MemoryFaultStatus</a>, <span class="keyword">false</span>, <span class="keyword">true</span>};</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordflow">case</span> 0xc2: <span class="keywordflow">return</span> {<a class="code hl_enumvalue" href="../../db/d00/a00164.html#ac4dcb3fde2c4af4411f1df03597b592dae4d6e8c2d2570ff7445406e7069bc456">AlphaIPRReadKind::FaultAddress</a>, <span class="keyword">false</span>, <span class="keyword">true</span>};</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keywordflow">case</span> 0x0d: <span class="keywordflow">return</span> {<a class="code hl_enumvalue" href="../../db/d00/a00164.html#ac4dcb3fde2c4af4411f1df03597b592daec34cd6f057c4737bfc8df7590ecb87e">AlphaIPRReadKind::Helper</a>, <span class="keyword">true</span>, <span class="keyword">true</span>}; <span class="comment">// ISUM is asynchronous.</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordflow">case</span> 0x05: <span class="keywordflow">case</span> 0x07:</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keywordflow">case</span> 0x08: <span class="keywordflow">case</span> 0x09: <span class="keywordflow">case</span> 0x0a: <span class="keywordflow">case</span> 0x0b: <span class="keywordflow">case</span> 0x0c:</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="keywordflow">case</span> 0x11: <span class="keywordflow">case</span> 0x14: <span class="keywordflow">case</span> 0x16: <span class="keywordflow">case</span> 0x2a: <span class="keywordflow">case</span> 0x2b:</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="keywordflow">case</span> 0xc0: <span class="keywordflow">case</span> 0xc3:</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>      <span class="keywordflow">return</span> {<a class="code hl_enumvalue" href="../../db/d00/a00164.html#ac4dcb3fde2c4af4411f1df03597b592daec34cd6f057c4737bfc8df7590ecb87e">AlphaIPRReadKind::Helper</a>, <span class="keyword">false</span>, <span class="keyword">true</span>};</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="keywordflow">default</span>:</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>      <span class="keywordflow">return</span> {<a class="code hl_enumvalue" href="../../db/d00/a00164.html#ac4dcb3fde2c4af4411f1df03597b592dab4080bdf74febf04d578ff105cce9d3f">AlphaIPRReadKind::Unsupported</a>, <span class="keyword">false</span>, <span class="keyword">true</span>};</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    }</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>  }</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="foldopen" id="foldopen00078" data-start="" data-end="">
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#ab82b9647c32461fcbc75ca10ffd36983">   78</a></span><span class="preprocessor">#define DO_EXTBL  state.r[REG_3] = \</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="preprocessor">    (                              \</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="preprocessor">      state.r[REG_1] &gt;&gt;            \</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="preprocessor">      ((V_2 &amp; 7) * 8)              \</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="preprocessor">    ) &amp; X64_BYTE;</span></div>
 </div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
-<div class="foldopen" id="foldopen00068" data-start="{" data-end="}">
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="../../d7/d00/a01013.html#a64e93adefc3abef23c59262919db31f6">   68</a></span>  <span class="keyword">static</span> <span class="keyword">constexpr</span> <a class="code hl_enumeration" href="../../db/d00/a00164.html#afbd8d11c1a31419c9f7e00562b943eef">AlphaIPRWriteKind</a> <a class="code hl_function" href="../../d7/d00/a01013.html#a64e93adefc3abef23c59262919db31f6">describe_write</a>(std::uint32_t instruction)</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>  {</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="keyword">const</span> <span class="keyword">auto</span> function = <a class="code hl_function" href="../../d7/d00/a01013.html#a3edb59a5656b48f4a812f4636c736505">selector</a>(instruction);</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="comment">// ASN changes require interpreter dispatch; the other PCTX fields can compile.</span></div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <span class="keywordflow">if</span> ((function &amp; 0xc0) == 0x40)</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>      <span class="keywordflow">return</span> (function &amp; 1) ? <a class="code hl_enumvalue" href="../../db/d00/a00164.html#afbd8d11c1a31419c9f7e00562b943eefadf608edb53fcc79c12759cdbdf58d9db">AlphaIPRWriteKind::Interpreter</a> : <a class="code hl_enumvalue" href="../../db/d00/a00164.html#afbd8d11c1a31419c9f7e00562b943eefaec34cd6f057c4737bfc8df7590ecb87e">AlphaIPRWriteKind::Helper</a>;</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="keywordflow">switch</span> (function)</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    {</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="keywordflow">case</span> 0x00: <span class="keywordflow">case</span> 0x14: <span class="keywordflow">case</span> 0x20: <span class="keywordflow">case</span> 0x26:</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keywordflow">case</span> 0x29: <span class="keywordflow">case</span> 0xa0: <span class="keywordflow">case</span> 0xc0: <span class="comment">// Field stores.</span></div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="keywordflow">case</span> 0x01: <span class="keywordflow">case</span> 0x21: <span class="keywordflow">case</span> 0xa1: <span class="comment">// Translation-buffer fills.</span></div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="keywordflow">case</span> 0x02: <span class="keywordflow">case</span> 0x03: <span class="keywordflow">case</span> 0x04: <span class="comment">// ITB invalidation.</span></div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="keywordflow">case</span> 0x13:                     <span class="comment">// Lazy instruction-cache flush.</span></div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <span class="keywordflow">case</span> 0x09: <span class="keywordflow">case</span> 0x0a: <span class="keywordflow">case</span> 0x0b: <span class="keywordflow">case</span> 0x0c: <span class="comment">// Mode/interrupt fields.</span></div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="keywordflow">case</span> 0x24: <span class="keywordflow">case</span> 0xa4:           <span class="comment">// Single-entry DTB invalidation.</span></div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>      <span class="keywordflow">return</span> <a class="code hl_enumvalue" href="../../db/d00/a00164.html#afbd8d11c1a31419c9f7e00562b943eefaec34cd6f057c4737bfc8df7590ecb87e">AlphaIPRWriteKind::Helper</a>;</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="keywordflow">case</span> 0x11:                     <span class="comment">// I_CTL changes compiled assumptions, including SDE.</span></div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>      <span class="keywordflow">return</span> <a class="code hl_enumvalue" href="../../db/d00/a00164.html#afbd8d11c1a31419c9f7e00562b943eefa6cd2db502632e6e1ac06880a776dac16">AlphaIPRWriteKind::HelperTerminator</a>;</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <span class="keywordflow">case</span> 0x15: <span class="keywordflow">case</span> 0x17: <span class="keywordflow">case</span> 0x27:</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keywordflow">case</span> 0x2b: <span class="keywordflow">case</span> 0x2c: <span class="keywordflow">case</span> 0x2d:</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>      <span class="keywordflow">return</span> <a class="code hl_enumvalue" href="../../db/d00/a00164.html#afbd8d11c1a31419c9f7e00562b943eefa35721c181ec6a9cca6cdb99dd844d07b">AlphaIPRWriteKind::Noop</a>;</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <span class="keywordflow">default</span>:</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>      <span class="keywordflow">return</span> <a class="code hl_enumvalue" href="../../db/d00/a00164.html#afbd8d11c1a31419c9f7e00562b943eefadf608edb53fcc79c12759cdbdf58d9db">AlphaIPRWriteKind::Interpreter</a>;</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    }</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  }</div>
+<div class="foldopen" id="foldopen00083" data-start="" data-end="">
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#a1095041dc292439083adb9ac75f78afc">   83</a></span><span class="preprocessor">#define DO_EXTWL  state.r[REG_3] = \</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="preprocessor">    (                              \</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="preprocessor">      state.r[REG_1] &gt;&gt;            \</span></div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="preprocessor">      ((V_2 &amp; 7) * 8)              \</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="preprocessor">    ) &amp; X64_WORD;</span></div>
 </div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>};</div>
+<div class="foldopen" id="foldopen00088" data-start="" data-end="">
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#a40637e96e246de62996f87b090d44b2e">   88</a></span><span class="preprocessor">#define DO_EXTLL  state.r[REG_3] = \</span></div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="preprocessor">    (                              \</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="preprocessor">      state.r[REG_1] &gt;&gt;            \</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="preprocessor">      ((V_2 &amp; 7) * 8)              \</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="preprocessor">    ) &amp; X64_LONG;</span></div>
 </div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
-<div class="foldopen" id="foldopen00096" data-start="{" data-end="};">
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#ac72e7b81fb425e5ebbce074acda1caf7">   96</a></span><span class="keyword">inline</span> <span class="keyword">constexpr</span> <a class="code hl_struct" href="../../d3/d00/a00965.html">AlphaIPRReadPolicy</a> <a class="code hl_variable" href="../../d9/d00/a00227.html#ac72e7b81fb425e5ebbce074acda1caf7">kEv68IPRReadPolicy</a>{</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>  &amp;<a class="code hl_function" href="../../d7/d00/a01013.html#a57e7288237a4c3e406a338922e4c379b">Ev68IPR::read</a>, &amp;<a class="code hl_function" href="../../d7/d00/a01013.html#ab1f9fdab225d3feea8454dd60176dd07">Ev68IPR::describe</a></div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>};</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#a8da6416c0140888536a6d51760d4ebb8">   93</a></span><span class="preprocessor">#define DO_EXTQL  state.r[REG_3] = (state.r[REG_1] &gt;&gt; ((V_2 &amp; 7) * 8));</span></div>
+<div class="foldopen" id="foldopen00094" data-start="" data-end="">
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#a1477843632d0fbae38b74f29c19af66f">   94</a></span><span class="preprocessor">#define DO_EXTWH  state.r[REG_3] =  \</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="preprocessor">    (                               \</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="preprocessor">      state.r[REG_1] &lt;&lt;             \</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="preprocessor">      ((64 - ((V_2 &amp; 7) * 8)) &amp; 63) \</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="preprocessor">    ) &amp; X64_WORD;</span></div>
 </div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
-<div class="foldopen" id="foldopen00100" data-start="{" data-end="};">
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#ac5a652b053679c56a4f876bb9f861408">  100</a></span><span class="keyword">inline</span> <span class="keyword">constexpr</span> <a class="code hl_struct" href="../../d7/d00/a00969.html">AlphaIPRWritePolicy</a> <a class="code hl_variable" href="../../d9/d00/a00227.html#ac5a652b053679c56a4f876bb9f861408">kEv68IPRWritePolicy</a>{</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>  &amp;<a class="code hl_function" href="../../d7/d00/a01013.html#a643fa16d85802843c6e813d27403c612">Ev68IPR::write</a>, &amp;<a class="code hl_function" href="../../d7/d00/a01013.html#a64e93adefc3abef23c59262919db31f6">Ev68IPR::describe_write</a></div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>};</div>
+<div class="foldopen" id="foldopen00099" data-start="" data-end="">
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#ac92d07b8eb4f683568f7d0d10545adea">   99</a></span><span class="preprocessor">#define DO_EXTLH  state.r[REG_3] =  \</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span><span class="preprocessor">    (                               \</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="preprocessor">      state.r[REG_1] &lt;&lt;             \</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="preprocessor">      ((64 - ((V_2 &amp; 7) * 8)) &amp; 63) \</span></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="preprocessor">    ) &amp; X64_LONG;</span></div>
 </div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="aa00164_html"><div class="ttname"><a href="../../db/d00/a00164.html">AlphaIPR.h</a></div></div>
-<div class="ttc" id="aa00164_html_ab8366be706d87922abd430dd2ca35e90"><div class="ttname"><a href="../../db/d00/a00164.html#ab8366be706d87922abd430dd2ca35e90">AlphaIPRWriteContext</a></div><div class="ttdeci">AlphaIPRWriteContext</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00071">AlphaIPR.h:72</a></div></div>
-<div class="ttc" id="aa00164_html_ac4dcb3fde2c4af4411f1df03597b592da63491745a13b0f22cbb2d462ef2e752c"><div class="ttname"><a href="../../db/d00/a00164.html#ac4dcb3fde2c4af4411f1df03597b592da63491745a13b0f22cbb2d462ef2e752c">AlphaIPRReadKind::MemoryFaultStatus</a></div><div class="ttdeci">@ MemoryFaultStatus</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00042">AlphaIPR.h:42</a></div></div>
-<div class="ttc" id="aa00164_html_ac4dcb3fde2c4af4411f1df03597b592daa5bdce26550b735919b60ee85e4bbca0"><div class="ttname"><a href="../../db/d00/a00164.html#ac4dcb3fde2c4af4411f1df03597b592daa5bdce26550b735919b60ee85e4bbca0">AlphaIPRReadKind::ExceptionSummary</a></div><div class="ttdeci">@ ExceptionSummary</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00040">AlphaIPR.h:40</a></div></div>
-<div class="ttc" id="aa00164_html_ac4dcb3fde2c4af4411f1df03597b592dab4080bdf74febf04d578ff105cce9d3f"><div class="ttname"><a href="../../db/d00/a00164.html#ac4dcb3fde2c4af4411f1df03597b592dab4080bdf74febf04d578ff105cce9d3f">AlphaIPRReadKind::Unsupported</a></div><div class="ttdeci">@ Unsupported</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00037">AlphaIPR.h:37</a></div></div>
-<div class="ttc" id="aa00164_html_ac4dcb3fde2c4af4411f1df03597b592dacc686cbc1a19109e79fa697c0de4fa7a"><div class="ttname"><a href="../../db/d00/a00164.html#ac4dcb3fde2c4af4411f1df03597b592dacc686cbc1a19109e79fa697c0de4fa7a">AlphaIPRReadKind::PalBase</a></div><div class="ttdeci">@ PalBase</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00041">AlphaIPR.h:41</a></div></div>
-<div class="ttc" id="aa00164_html_ac4dcb3fde2c4af4411f1df03597b592dadafc6570cf5b3ae702f66aec1b191110"><div class="ttname"><a href="../../db/d00/a00164.html#ac4dcb3fde2c4af4411f1df03597b592dadafc6570cf5b3ae702f66aec1b191110">AlphaIPRReadKind::ExceptionAddress</a></div><div class="ttdeci">@ ExceptionAddress</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00039">AlphaIPR.h:39</a></div></div>
-<div class="ttc" id="aa00164_html_ac4dcb3fde2c4af4411f1df03597b592dae4d6e8c2d2570ff7445406e7069bc456"><div class="ttname"><a href="../../db/d00/a00164.html#ac4dcb3fde2c4af4411f1df03597b592dae4d6e8c2d2570ff7445406e7069bc456">AlphaIPRReadKind::FaultAddress</a></div><div class="ttdeci">@ FaultAddress</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00043">AlphaIPR.h:43</a></div></div>
-<div class="ttc" id="aa00164_html_ac4dcb3fde2c4af4411f1df03597b592daec34cd6f057c4737bfc8df7590ecb87e"><div class="ttname"><a href="../../db/d00/a00164.html#ac4dcb3fde2c4af4411f1df03597b592daec34cd6f057c4737bfc8df7590ecb87e">AlphaIPRReadKind::Helper</a></div><div class="ttdeci">@ Helper</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00038">AlphaIPR.h:38</a></div></div>
-<div class="ttc" id="aa00164_html_afbd8d11c1a31419c9f7e00562b943eef"><div class="ttname"><a href="../../db/d00/a00164.html#afbd8d11c1a31419c9f7e00562b943eef">AlphaIPRWriteKind</a></div><div class="ttdeci">AlphaIPRWriteKind</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00062">AlphaIPR.h:63</a></div></div>
-<div class="ttc" id="aa00164_html_afbd8d11c1a31419c9f7e00562b943eefa35721c181ec6a9cca6cdb99dd844d07b"><div class="ttname"><a href="../../db/d00/a00164.html#afbd8d11c1a31419c9f7e00562b943eefa35721c181ec6a9cca6cdb99dd844d07b">AlphaIPRWriteKind::Noop</a></div><div class="ttdeci">@ Noop</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00067">AlphaIPR.h:67</a></div></div>
-<div class="ttc" id="aa00164_html_afbd8d11c1a31419c9f7e00562b943eefa6cd2db502632e6e1ac06880a776dac16"><div class="ttname"><a href="../../db/d00/a00164.html#afbd8d11c1a31419c9f7e00562b943eefa6cd2db502632e6e1ac06880a776dac16">AlphaIPRWriteKind::HelperTerminator</a></div><div class="ttdeci">@ HelperTerminator</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00066">AlphaIPR.h:66</a></div></div>
-<div class="ttc" id="aa00164_html_afbd8d11c1a31419c9f7e00562b943eefadf608edb53fcc79c12759cdbdf58d9db"><div class="ttname"><a href="../../db/d00/a00164.html#afbd8d11c1a31419c9f7e00562b943eefadf608edb53fcc79c12759cdbdf58d9db">AlphaIPRWriteKind::Interpreter</a></div><div class="ttdeci">@ Interpreter</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00064">AlphaIPR.h:64</a></div></div>
-<div class="ttc" id="aa00164_html_afbd8d11c1a31419c9f7e00562b943eefaec34cd6f057c4737bfc8df7590ecb87e"><div class="ttname"><a href="../../db/d00/a00164.html#afbd8d11c1a31419c9f7e00562b943eefaec34cd6f057c4737bfc8df7590ecb87e">AlphaIPRWriteKind::Helper</a></div><div class="ttdeci">@ Helper</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00065">AlphaIPR.h:65</a></div></div>
-<div class="ttc" id="aa00227_html_ac5a652b053679c56a4f876bb9f861408"><div class="ttname"><a href="../../d9/d00/a00227.html#ac5a652b053679c56a4f876bb9f861408">kEv68IPRWritePolicy</a></div><div class="ttdeci">constexpr AlphaIPRWritePolicy kEv68IPRWritePolicy</div><div class="ttdef"><b>Definition</b> <a href="#l00100">Ev68IPR.h:100</a></div></div>
-<div class="ttc" id="aa00227_html_ac72e7b81fb425e5ebbce074acda1caf7"><div class="ttname"><a href="../../d9/d00/a00227.html#ac72e7b81fb425e5ebbce074acda1caf7">kEv68IPRReadPolicy</a></div><div class="ttdeci">constexpr AlphaIPRReadPolicy kEv68IPRReadPolicy</div><div class="ttdef"><b>Definition</b> <a href="#l00096">Ev68IPR.h:96</a></div></div>
-<div class="ttc" id="aa00605_html_a4e906a1b455653dd9be3d01ef9aadebb"><div class="ttname"><a href="../../d0/d00/a00605.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a></div><div class="ttdeci">CAlphaCPU * cpu[4]</div></div>
-<div class="ttc" id="aa00921_html"><div class="ttname"><a href="../../dd/d00/a00921.html">CAlphaCPU</a></div><div class="ttdoc">Emulated CPU.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00143_source.html#l00258">AlphaCPU.h:259</a></div></div>
-<div class="ttc" id="aa00961_html"><div class="ttname"><a href="../../da/d00/a00961.html">AlphaIPRReadDescriptor</a></div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00046">AlphaIPR.h:47</a></div></div>
-<div class="ttc" id="aa00965_html"><div class="ttname"><a href="../../d3/d00/a00965.html">AlphaIPRReadPolicy</a></div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00055">AlphaIPR.h:56</a></div></div>
-<div class="ttc" id="aa00969_html"><div class="ttname"><a href="../../d7/d00/a00969.html">AlphaIPRWritePolicy</a></div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00079">AlphaIPR.h:80</a></div></div>
-<div class="ttc" id="aa01013_html"><div class="ttname"><a href="../../d7/d00/a01013.html">Ev68IPR</a></div><div class="ttdef"><b>Definition</b> <a href="#l00032">Ev68IPR.h:33</a></div></div>
-<div class="ttc" id="aa01013_html_a3edb59a5656b48f4a812f4636c736505"><div class="ttname"><a href="../../d7/d00/a01013.html#a3edb59a5656b48f4a812f4636c736505">Ev68IPR::selector</a></div><div class="ttdeci">static constexpr std::uint32_t selector(std::uint32_t instruction)</div><div class="ttdef"><b>Definition</b> <a href="#l00035">Ev68IPR.h:35</a></div></div>
-<div class="ttc" id="aa01013_html_a57e7288237a4c3e406a338922e4c379b"><div class="ttname"><a href="../../d7/d00/a01013.html#a57e7288237a4c3e406a338922e4c379b">Ev68IPR::read</a></div><div class="ttdeci">static std::uint64_t read(CAlphaCPU &amp;cpu, std::uint32_t instruction)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00224_source.html#l00032">Ev68IPR.cpp:32</a></div></div>
-<div class="ttc" id="aa01013_html_a643fa16d85802843c6e813d27403c612"><div class="ttname"><a href="../../d7/d00/a01013.html#a643fa16d85802843c6e813d27403c612">Ev68IPR::write</a></div><div class="ttdeci">static void write(CAlphaCPU &amp;cpu, std::uint32_t instruction, std::uint64_t value, AlphaIPRWriteContext context)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00224_source.html#l00086">Ev68IPR.cpp:86</a></div></div>
-<div class="ttc" id="aa01013_html_a64e93adefc3abef23c59262919db31f6"><div class="ttname"><a href="../../d7/d00/a01013.html#a64e93adefc3abef23c59262919db31f6">Ev68IPR::describe_write</a></div><div class="ttdeci">static constexpr AlphaIPRWriteKind describe_write(std::uint32_t instruction)</div><div class="ttdef"><b>Definition</b> <a href="#l00068">Ev68IPR.h:68</a></div></div>
-<div class="ttc" id="aa01013_html_ab1f9fdab225d3feea8454dd60176dd07"><div class="ttname"><a href="../../d7/d00/a01013.html#ab1f9fdab225d3feea8454dd60176dd07">Ev68IPR::describe</a></div><div class="ttdeci">static constexpr AlphaIPRReadDescriptor describe(std::uint32_t instruction)</div><div class="ttdef"><b>Definition</b> <a href="#l00044">Ev68IPR.h:44</a></div></div>
+<div class="foldopen" id="foldopen00104" data-start="" data-end="">
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#a2a20febd2910865ff6c4f056ebc9929a">  104</a></span><span class="preprocessor">#define DO_EXTQH  state.r[REG_3] =  \</span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="preprocessor">    (                               \</span></div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><span class="preprocessor">      state.r[REG_1] &lt;&lt;             \</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="preprocessor">      ((64 - ((V_2 &amp; 7) * 8)) &amp; 63) \</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="preprocessor">    ) &amp; X64_QUAD;</span></div>
+</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
+<div class="foldopen" id="foldopen00110" data-start="" data-end="">
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#a83f6074bcb75e3de991c28c43220e95c">  110</a></span><span class="preprocessor">#define DO_INSBL  state.r[REG_3] = (state.r[REG_1] &amp; X64_BYTE) &lt;&lt; \</span></div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="preprocessor">    ((V_2 &amp; 7) * 8);</span></div>
+</div>
+<div class="foldopen" id="foldopen00112" data-start="" data-end="">
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#adb6144f6a39acc2135860ec558c03a20">  112</a></span><span class="preprocessor">#define DO_INSWL  state.r[REG_3] = (state.r[REG_1] &amp; X64_WORD) &lt;&lt; \</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="preprocessor">    ((V_2 &amp; 7) * 8);</span></div>
+</div>
+<div class="foldopen" id="foldopen00114" data-start="" data-end="">
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#adb7377634aaabb854b67869e6d7b0ba5">  114</a></span><span class="preprocessor">#define DO_INSLL  state.r[REG_3] = (state.r[REG_1] &amp; X64_LONG) &lt;&lt; \</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><span class="preprocessor">    ((V_2 &amp; 7) * 8);</span></div>
+</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#a115f5127a932ba4a7e7a5cb58209a13d">  116</a></span><span class="preprocessor">#define DO_INSQL  state.r[REG_3] = (state.r[REG_1]) &lt;&lt; ((V_2 &amp; 7) * 8);</span></div>
+<div class="foldopen" id="foldopen00117" data-start="" data-end="">
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#a712824244f379491b105a4edc9814e5e">  117</a></span><span class="preprocessor">#define DO_INSWH  state.r[REG_3] = (V_2 &amp; 7) ? \</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span><span class="preprocessor">    ((state.r[REG_1] &amp; X64_WORD) &gt;&gt; ((64 - ((V_2 &amp; 7) * 8)) &amp; 63)) : 0;</span></div>
+</div>
+<div class="foldopen" id="foldopen00119" data-start="" data-end="">
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#a61d14ed5f9ab647874e39e4375161277">  119</a></span><span class="preprocessor">#define DO_INSLH  state.r[REG_3] = (V_2 &amp; 7) ? \</span></div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span><span class="preprocessor">    ((state.r[REG_1] &amp; X64_LONG) &gt;&gt; ((64 - ((V_2 &amp; 7) * 8)) &amp; 63)) : 0;</span></div>
+</div>
+<div class="foldopen" id="foldopen00121" data-start="" data-end="">
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#ac4aaee832a97952e925e5558498b5166">  121</a></span><span class="preprocessor">#define DO_INSQH  state.r[REG_3] = (V_2 &amp; 7) ? \</span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span><span class="preprocessor">    ((state.r[REG_1] &amp; X64_QUAD) &gt;&gt; ((64 - ((V_2 &amp; 7) * 8)) &amp; 63)) : 0;</span></div>
+</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
+<div class="foldopen" id="foldopen00124" data-start="" data-end="">
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#afa836623b2db0a5d6ce8cd2d4fcefea3">  124</a></span><span class="preprocessor">#define DO_MSKBL  state.r[REG_3] = state.r[REG_1] &amp;~ \</span></div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><span class="preprocessor">    (X64_BYTE &lt;&lt; ((V_2 &amp; 7) * 8));</span></div>
+</div>
+<div class="foldopen" id="foldopen00126" data-start="" data-end="">
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#af2d9677b3538325ce0287d47da5c43ad">  126</a></span><span class="preprocessor">#define DO_MSKWL  state.r[REG_3] = state.r[REG_1] &amp;~ \</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><span class="preprocessor">    (X64_WORD &lt;&lt; ((V_2 &amp; 7) * 8));</span></div>
+</div>
+<div class="foldopen" id="foldopen00128" data-start="" data-end="">
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#aeb72fdb5c6c0ada118733f8bb360bc84">  128</a></span><span class="preprocessor">#define DO_MSKLL  state.r[REG_3] = state.r[REG_1] &amp;~ \</span></div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span><span class="preprocessor">    (X64_LONG &lt;&lt; ((V_2 &amp; 7) * 8));</span></div>
+</div>
+<div class="foldopen" id="foldopen00130" data-start="" data-end="">
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#a91274c06a2544984be9b45ab75f2dd85">  130</a></span><span class="preprocessor">#define DO_MSKQL  state.r[REG_3] = state.r[REG_1] &amp;~ \</span></div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><span class="preprocessor">    (X64_QUAD &lt;&lt; ((V_2 &amp; 7) * 8));</span></div>
+</div>
+<div class="foldopen" id="foldopen00132" data-start="" data-end="">
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#ab94e927be6f5e842c3b06cac81531967">  132</a></span><span class="preprocessor">#define DO_MSKWH  state.r[REG_3] = (V_2 &amp; 7) ? \</span></div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span><span class="preprocessor">    (state.r[REG_1] &amp;~(X64_WORD &gt;&gt; ((64 - ((V_2 &amp; 7) * 8)) &amp; 63))) : state.r[REG_1];</span></div>
+</div>
+<div class="foldopen" id="foldopen00134" data-start="" data-end="">
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#af163a99132459cf319467fd97da7ee91">  134</a></span><span class="preprocessor">#define DO_MSKLH  state.r[REG_3] = (V_2 &amp; 7) ? \</span></div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span><span class="preprocessor">    (state.r[REG_1] &amp;~(X64_LONG &gt;&gt; ((64 - ((V_2 &amp; 7) * 8)) &amp; 63))) : state.r[REG_1];</span></div>
+</div>
+<div class="foldopen" id="foldopen00136" data-start="" data-end="">
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#a9a613b45436d25fd3a487d2cfb70a6ab">  136</a></span><span class="preprocessor">#define DO_MSKQH  state.r[REG_3] = (V_2 &amp; 7) ? \</span></div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span><span class="preprocessor">    (state.r[REG_1] &amp;~(X64_QUAD &gt;&gt; ((64 - ((V_2 &amp; 7) * 8)) &amp; 63))) : state.r[REG_1];</span></div>
+</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span> </div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#a1f4e71922d944d0c2165bd8cd2897940">  139</a></span><span class="preprocessor">#define DO_SEXTB  state.r[REG_3] = sext_u64_8(V_2);</span></div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#ac8f0ffc9582a26dfbc88adc4410795b2">  140</a></span><span class="preprocessor">#define DO_SEXTW  state.r[REG_3] = sext_u64_16(V_2);</span></div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span> </div>
+<div class="foldopen" id="foldopen00142" data-start="" data-end="">
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#ae5a22f70b5fda12dc2a165f08020fb97">  142</a></span><span class="preprocessor">#define DO_ZAP    state.r[REG_3] = state.r[REG_1] &amp;                           \</span></div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span><span class="preprocessor">    (                                                                         \</span></div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span><span class="preprocessor">      ((V_2 &amp; 1) ? 0 : U64(0xff)) | ((V_2 &amp; 2) ? 0 : U64(0xff00)) |           \</span></div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span><span class="preprocessor">        ((V_2 &amp; 4) ? 0 : U64(0xff0000)) | ((V_2 &amp; 8) ? 0 : U64(0xff000000)) | \</span></div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span><span class="preprocessor">          ((V_2 &amp; 16) ? 0 : U64(0xff00000000)) |                              \</span></div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span><span class="preprocessor">            ((V_2 &amp; 32) ? 0 : U64(0xff0000000000)) |                          \</span></div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span><span class="preprocessor">              ((V_2 &amp; 64) ? 0 : U64(0xff000000000000)) |                      \</span></div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span><span class="preprocessor">                ((V_2 &amp; 128) ? 0 : U64(0xff00000000000000))                   \</span></div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span><span class="preprocessor">    );</span></div>
+</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span> </div>
+<div class="foldopen" id="foldopen00152" data-start="" data-end="">
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno"><a class="line" href="../../d9/d00/a00227.html#a35d662444896120d13eb3a05ad9651e9">  152</a></span><span class="preprocessor">#define DO_ZAPNOT state.r[REG_3] = state.r[REG_1] &amp;                           \</span></div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span><span class="preprocessor">    (                                                                         \</span></div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span><span class="preprocessor">      ((V_2 &amp; 1) ? U64(0xff) : 0) | ((V_2 &amp; 2) ? U64(0xff00) : 0) |           \</span></div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span><span class="preprocessor">        ((V_2 &amp; 4) ? U64(0xff0000) : 0) | ((V_2 &amp; 8) ? U64(0xff000000) : 0) | \</span></div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span><span class="preprocessor">          ((V_2 &amp; 16) ? U64(0xff00000000) : 0) |                              \</span></div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span><span class="preprocessor">            ((V_2 &amp; 32) ? U64(0xff0000000000) : 0) |                          \</span></div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span><span class="preprocessor">              ((V_2 &amp; 64) ? U64(0xff000000000000) : 0) |                      \</span></div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span><span class="preprocessor">                ((V_2 &amp; 128) ? U64(0xff00000000000000) : 0)                   \</span></div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span><span class="preprocessor">    );</span></div>
+</div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d9/d00/a00227.html">Ev68IPR.h</a></li>
+    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d9/d00/a00227.html">cpu_bwx.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

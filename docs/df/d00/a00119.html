@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: config/tui_win32/include/strings.h File Reference</title>
+<title>ES40: config/es40-cfg-sdl.cpp File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,22 +109,743 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('df/d00/a00119.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">strings.h File Reference</div></div>
+  <div class="headertitle"><div class="title">es40-cfg-sdl.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;string.h&gt;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d4/d00/a00110_source.html">ConfigEditor.h</a>&quot;</code><br />
+<code>#include &lt;SDL3/SDL.h&gt;</code><br />
+<code>#include &lt;SDL3/SDL_main.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="../../dc/d00/a00473_source.html">gui/sdl_fonts.h</a>&quot;</code><br />
+<code>#include &lt;algorithm&gt;</code><br />
+<code>#include &lt;cstring&gt;</code><br />
+<code>#include &lt;stdexcept&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
-Include dependency graph for strings.h:</div>
+Include dependency graph for es40-cfg-sdl.cpp:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../d4/d00/a00120.png" border="0" usemap="#aconfig_2tui__win32_2include_2strings_8h" loading="lazy" alt=""/></div>
-<map name="aconfig_2tui__win32_2include_2strings_8h" id="aconfig_2tui__win32_2include_2strings_8h">
-<area shape="rect" title=" " alt="" coords="5,5,166,48"/>
-<area shape="rect" title=" " alt="" coords="53,96,118,123"/>
-<area shape="poly" title=" " alt="" coords="87,47,88,81,83,79,84,51"/>
+<div class="center"><img src="../../d4/d00/a00120.png" border="0" usemap="#aconfig_2es40-cfg-sdl_8cpp" loading="lazy" alt=""/></div>
+<map name="aconfig_2es40-cfg-sdl_8cpp" id="aconfig_2es40-cfg-sdl_8cpp">
+<area shape="rect" title=" " alt="" coords="398,5,554,32"/>
+<area shape="rect" href="../../d4/d00/a00110.html" title=" " alt="" coords="20,80,124,107"/>
+<area shape="poly" title=" " alt="" coords="403,35,140,82,139,77,403,30"/>
+<area shape="rect" title=" " alt="" coords="148,80,244,107"/>
+<area shape="poly" title=" " alt="" coords="425,34,259,78,258,73,430,31"/>
+<area shape="rect" title=" " alt="" coords="268,80,398,107"/>
+<area shape="poly" title=" " alt="" coords="454,32,373,75,371,70,449,33"/>
+<area shape="rect" href="../../dc/d00/a00473.html" title="Contains fonts used by SDL." alt="" coords="423,80,529,107"/>
+<area shape="poly" title=" " alt="" coords="478,30,478,66,474,63,474,35"/>
+<area shape="rect" title=" " alt="" coords="554,80,628,107"/>
+<area shape="poly" title=" " alt="" coords="497,30,560,71,555,71,495,35"/>
+<area shape="rect" title=" " alt="" coords="652,80,713,107"/>
+<area shape="poly" title=" " alt="" coords="512,30,641,76,636,77,512,35"/>
+<area shape="rect" title=" " alt="" coords="737,80,815,107"/>
+<area shape="poly" title=" " alt="" coords="529,30,724,79,719,79,528,35"/>
+<area shape="rect" title=" " alt="" coords="5,155,59,181"/>
+<area shape="poly" title=" " alt="" coords="67,106,49,142,44,140,63,109"/>
+<area shape="rect" title=" " alt="" coords="83,155,141,181"/>
+<area shape="poly" title=" " alt="" coords="80,105,100,141,95,141,78,110"/>
 </map>
 </div>
 </div>
 <p><a href="../../df/d00/a00119_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Data Structures</h2></td></tr>
+<tr class="memitem:ES40SdlConfigEditorUI" id="r_ES40SdlConfigEditorUI"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../de/d00/a01093.html">ES40SdlConfigEditorUI</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:af9fd88bad9903275ff92b2a0d7292a09" id="r_af9fd88bad9903275ff92b2a0d7292a09"><td class="memItemLeft">static size_t&#160;</td><td class="memItemRight"><a class="el" href="#af9fd88bad9903275ff92b2a0d7292a09">previous_char</a> (const std::string &amp;value, size_t pos)</td></tr>
+<tr class="memitem:a4f620bf78f3f07cadfa4883a5a4a0192" id="r_a4f620bf78f3f07cadfa4883a5a4a0192"><td class="memItemLeft">static size_t&#160;</td><td class="memItemRight"><a class="el" href="#a4f620bf78f3f07cadfa4883a5a4a0192">next_char</a> (const std::string &amp;value, size_t pos)</td></tr>
+<tr class="memitem:adb0cdaa1f7c4e0aa03089bcd93ed024b" id="r_adb0cdaa1f7c4e0aa03089bcd93ed024b"><td class="memItemLeft">static std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight"><a class="el" href="#adb0cdaa1f7c4e0aa03089bcd93ed024b">wrap_text</a> (const std::string &amp;body, size_t width)</td></tr>
+<tr class="memitem:a3c04138a5bfe5d72780bb7e82a18e627" id="r_a3c04138a5bfe5d72780bb7e82a18e627"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a3c04138a5bfe5d72780bb7e82a18e627">main</a> (int argc, char **argv)</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:ab44a4b7e31fd22d0239c90f6e4ef1838" id="r_ab44a4b7e31fd22d0239c90f6e4ef1838"><td class="memItemLeft">static constexpr int&#160;</td><td class="memItemRight"><a class="el" href="#ab44a4b7e31fd22d0239c90f6e4ef1838">WIDTH</a> = 1100</td></tr>
+<tr class="memitem:a9e8570bdf916e835b1b38a1c66bf2946" id="r_a9e8570bdf916e835b1b38a1c66bf2946"><td class="memItemLeft">static constexpr int&#160;</td><td class="memItemRight"><a class="el" href="#a9e8570bdf916e835b1b38a1c66bf2946">HEIGHT</a> = 760</td></tr>
+<tr class="memitem:a765c3ac5f8f00709d2f37fa0a6686108" id="r_a765c3ac5f8f00709d2f37fa0a6686108"><td class="memItemLeft">static constexpr int&#160;</td><td class="memItemRight"><a class="el" href="#a765c3ac5f8f00709d2f37fa0a6686108">TOP</a> = 88</td></tr>
+<tr class="memitem:a8b2d6700059691cca4b074db97d6df3d" id="r_a8b2d6700059691cca4b074db97d6df3d"><td class="memItemLeft">static constexpr int&#160;</td><td class="memItemRight"><a class="el" href="#a8b2d6700059691cca4b074db97d6df3d">BOTTOM</a> = 560</td></tr>
+<tr class="memitem:a3d5f83217872e1e605c44772666036cf" id="r_a3d5f83217872e1e605c44772666036cf"><td class="memItemLeft">static constexpr int&#160;</td><td class="memItemRight"><a class="el" href="#a3d5f83217872e1e605c44772666036cf">ROW</a> = 36</td></tr>
+<tr class="memitem:a59e1d079f69945983f149eb45e2bd641" id="r_a59e1d079f69945983f149eb45e2bd641"><td class="memItemLeft">static constexpr int&#160;</td><td class="memItemRight"><a class="el" href="#a59e1d079f69945983f149eb45e2bd641">FORM_ROW</a> = 64</td></tr>
+<tr class="memitem:a57d425a37b734699e7c6a4e89ea1156b" id="r_a57d425a37b734699e7c6a4e89ea1156b"><td class="memItemLeft">static constexpr SDL_Color&#160;</td><td class="memItemRight"><a class="el" href="#a57d425a37b734699e7c6a4e89ea1156b">BACKGROUND</a> {18, 24, 35, 255}</td></tr>
+<tr class="memitem:a3c0f643aa822fb1fc0007d4e3030da7c" id="r_a3c0f643aa822fb1fc0007d4e3030da7c"><td class="memItemLeft">static constexpr SDL_Color&#160;</td><td class="memItemRight"><a class="el" href="#a3c0f643aa822fb1fc0007d4e3030da7c">PANEL</a> {28, 37, 52, 255}</td></tr>
+<tr class="memitem:af50588cc56b0fb46303f26989d1a26d8" id="r_af50588cc56b0fb46303f26989d1a26d8"><td class="memItemLeft">static constexpr SDL_Color&#160;</td><td class="memItemRight"><a class="el" href="#af50588cc56b0fb46303f26989d1a26d8">INK</a> {228, 234, 244, 255}</td></tr>
+<tr class="memitem:ae35497623fd6caf5e33a4bb8957ee332" id="r_ae35497623fd6caf5e33a4bb8957ee332"><td class="memItemLeft">static constexpr SDL_Color&#160;</td><td class="memItemRight"><a class="el" href="#ae35497623fd6caf5e33a4bb8957ee332">MUTED</a> {157, 174, 195, 255}</td></tr>
+<tr class="memitem:a5d519e780e0449a46e547b798619dcb6" id="r_a5d519e780e0449a46e547b798619dcb6"><td class="memItemLeft">static constexpr SDL_Color&#160;</td><td class="memItemRight"><a class="el" href="#a5d519e780e0449a46e547b798619dcb6">ACCENT</a> {67, 123, 186, 255}</td></tr>
+<tr class="memitem:a9ac9d4d18a6a00b47fd95437ffa60b39" id="r_a9ac9d4d18a6a00b47fd95437ffa60b39"><td class="memItemLeft">static constexpr SDL_Color&#160;</td><td class="memItemRight"><a class="el" href="#a9ac9d4d18a6a00b47fd95437ffa60b39">INPUT</a> {12, 19, 30, 255}</td></tr>
+</table>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a3c04138a5bfe5d72780bb7e82a18e627" name="a3c04138a5bfe5d72780bb7e82a18e627"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c04138a5bfe5d72780bb7e82a18e627">&#9670;&#160;</a></span>main()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int main </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>argc</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char **</td>          <td class="paramname"><span class="paramname"><em>argv</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../df/d00/a00119_source.html#l00407">407</a> of file <a class="el" href="../../df/d00/a00119_source.html">es40-cfg-sdl.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d7/d00/a00002_source.html#l00308">main()</a>, and <a class="el" href="../../df/d00/a00107_source.html#l02912">run_config_editor()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../df/d00/a00119_a3c04138a5bfe5d72780bb7e82a18e627_cgraph.png" border="0" usemap="#adf/d00/a00119_a3c04138a5bfe5d72780bb7e82a18e627_cgraph" loading="lazy" alt=""/></div>
+<map name="adf/d00/a00119_a3c04138a5bfe5d72780bb7e82a18e627_cgraph" id="adf/d00/a00119_a3c04138a5bfe5d72780bb7e82a18e627_cgraph">
+<area shape="rect" title=" " alt="" coords="5,819,55,845"/>
+<area shape="rect" href="../../d7/d00/a00002.html#a0ddf1224851353fc92bfbff6f499fa97" title="Entry point for the application." alt="" coords="138,467,188,493"/>
+<area shape="poly" title=" " alt="" coords="34,817,151,505,151,510,39,819"/>
+<area shape="rect" href="../../df/d00/a00107.html#ae799ccf629887c5248e091c94325d297" title=" " alt="" coords="103,1145,223,1172"/>
+<area shape="poly" title=" " alt="" coords="38,843,153,1130,148,1132,36,848"/>
+<area shape="poly" title=" " alt="" coords="139,467,135,458,138,449,148,442,163,440,179,443,189,450,184,452,177,448,163,445,149,447,142,452,141,458,144,466"/>
+<area shape="rect" href="../../d2/d00/a01085.html#afe0ca9e6f3009dcedfbf6eb256f77083" title="Constructor." alt="" coords="273,768,464,795"/>
+<area shape="poly" title=" " alt="" coords="167,491,179,537,199,600,229,668,249,701,273,730,292,746,314,760,309,762,289,750,269,734,245,704,225,671,194,602,174,539,167,496"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a92e6679588d861939dd3da4ebeadd4c7" title="Determine what device this configurator represents, and instantiate it; then call initialize for our ..." alt="" coords="548,760,706,787"/>
+<area shape="poly" title=" " alt="" coords="176,491,219,531,272,572,325,600,369,615,413,629,468,655,540,702,600,749,595,751,537,707,465,660,411,634,367,620,323,605,270,577,215,535,178,496"/>
+<area shape="rect" href="../../d9/d00/a01289.html#a2eb452217150a77083a6ac7f3b2ede7b" title="Constructor." alt="" coords="271,467,466,493"/>
+<area shape="poly" title=" " alt="" coords="186,478,257,478,253,482,189,482"/>
+<area shape="rect" href="../../d7/d00/a00002.html#aae18338a0146b067f49f86dec65a6f7d" title=" " alt="" coords="548,299,706,325"/>
+<area shape="poly" title=" " alt="" coords="186,472,465,402,480,386,488,369,496,352,513,335,535,325,531,329,516,339,500,355,493,372,484,389,468,406,189,476"/>
+<area shape="rect" href="../../dc/d00/a00833.html#aa7330dfcfcd119e8b934be57d22311b4" title=" " alt="" coords="545,944,709,971"/>
+<area shape="poly" title=" " alt="" coords="166,491,180,573,202,690,233,805,252,850,273,879,290,891,315,902,380,921,456,935,532,947,527,949,455,941,379,926,313,907,288,896,269,883,248,853,228,807,197,691,175,574,166,496"/>
+<area shape="rect" href="../../dd/d00/a01693.html#a05ad0a6c66db864f96cdc8741e423431" title=" " alt="" coords="283,173,454,200"/>
+<area shape="poly" title=" " alt="" coords="163,466,171,419,189,352,221,280,243,246,269,217,288,205,285,209,273,221,247,250,226,283,194,354,176,420,168,467"/>
+<area shape="rect" href="../../d3/d00/a02069.html#a5bb4b5438a940567e78fd50332626e42" title="Initialize the DPR device." alt="" coords="584,349,670,376"/>
+<area shape="poly" title=" " alt="" coords="187,486,240,502,310,515,349,519,389,518,428,513,465,503,509,480,548,449,580,416,608,386,605,391,584,420,551,453,512,484,467,508,429,519,389,524,349,524,310,520,239,507,189,491"/>
+<area shape="rect" href="../../d7/d00/a02109.html#a390eeea8f34b1dcc08338563e803d738" title="Load ROM contents from file." alt="" coords="555,537,699,564"/>
+<area shape="poly" title=" " alt="" coords="178,491,220,522,245,536,272,547,341,561,411,567,479,566,542,562,538,565,480,571,411,572,340,567,270,552,243,541,217,526,180,497"/>
+<area shape="rect" href="../../dc/d00/a00563.html#aa72983489060743593655a52e3c05484" title=" " alt="" coords="322,693,416,720"/>
+<area shape="poly" title=" " alt="" coords="170,491,209,564,238,608,273,649,297,668,324,685,319,687,294,672,269,653,234,612,205,567,170,497"/>
+<area shape="rect" href="../../dd/d00/a01693.html#ae9e5441457a2175c0854129768b076b1" title=" " alt="" coords="280,5,457,32"/>
+<area shape="poly" title=" " alt="" coords="163,466,174,380,195,253,210,187,227,126,247,76,269,42,275,39,273,43,273,46,251,79,232,128,215,188,201,254,179,381,168,466"/>
+<area shape="rect" href="../../dd/d00/a01693.html#afc6e9b3d58462041db8b925eb29c883e" title=" " alt="" coords="273,56,464,83"/>
+<area shape="poly" title=" " alt="" coords="161,466,161,399,173,299,186,244,206,189,233,138,269,93,276,89,273,94,273,96,237,141,210,191,191,245,178,300,167,400,166,466"/>
+<area shape="rect" href="../../dd/d00/a01693.html#a2bee4f74968994292cfb033bddaf27a0" title=" " alt="" coords="305,107,432,149"/>
+<area shape="poly" title=" " alt="" coords="162,466,167,410,183,329,196,284,215,239,239,197,269,159,292,144,289,149,273,163,243,200,220,241,201,285,188,330,172,411,167,467"/>
+<area shape="rect" href="../../d7/d00/a02109.html#a0a6178e372b7f2fb6d28f6dbaadb63af" title="Restore system state with all component threads stopped." alt="" coords="288,843,449,869"/>
+<area shape="poly" title=" " alt="" coords="165,491,174,549,190,631,204,676,222,722,245,766,273,805,291,821,313,835,307,837,287,825,269,808,240,768,217,724,199,678,185,632,169,549,165,496"/>
+<area shape="rect" href="../../d7/d00/a00002.html#a103d46ddda22631adbfcee6fe3b9e48d" title="Run the emulator, and clean up after it terminates." alt="" coords="320,299,417,325"/>
+<area shape="poly" title=" " alt="" coords="168,465,205,402,234,366,270,335,307,320,304,324,272,340,238,370,209,405,173,467"/>
+<area shape="rect" href="../../d7/d00/a02109.html#af0acf3c89a9c57eaf301cbfb7b0ef479" title=" " alt="" coords="547,224,707,251"/>
+<area shape="poly" title=" " alt="" coords="164,466,172,424,191,367,222,308,244,282,269,260,301,243,335,230,407,215,478,213,544,220,540,223,478,219,408,221,337,235,304,247,273,265,248,286,227,311,196,369,178,425,169,467"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a1d6b389fb9cebb49a98fd4d466de2c3e" title=" " alt="" coords="295,349,442,392"/>
+<area shape="poly" title=" " alt="" coords="181,465,221,437,270,408,298,396,295,400,272,413,224,441,185,468"/>
+<area shape="poly" title=" " alt="" coords="333,768,327,759,332,750,346,743,369,741,393,744,408,752,403,754,392,749,369,747,347,749,336,753,333,759,339,767"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a1e8dc1a28e0fee9755d1ce03025eaa6f" title="Add a value to our list of values." alt="" coords="561,811,693,853"/>
+<area shape="poly" title=" " alt="" coords="440,793,549,815,544,818,441,798"/>
+<area shape="poly" title=" " alt="" coords="464,785,535,784,530,786,466,789"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a64025ff01cec4be17ab802bf98f3b814" title="Reduce a quoted string to it&#39;s real value." alt="" coords="559,877,695,920"/>
+<area shape="poly" title=" " alt="" coords="442,793,468,804,484,819,493,834,501,849,516,863,548,880,542,881,513,868,497,852,488,837,480,823,465,809,444,798"/>
+<area shape="poly" title=" " alt="" coords="545,769,481,771,479,767,550,766"/>
+<area shape="poly" title=" " alt="" coords="583,760,576,751,581,741,599,735,627,733,658,736,676,745,671,746,657,741,627,739,600,741,585,746,581,751,589,759"/>
+<area shape="rect" href="../../df/d00/a00949.html#ac122c7fac7b90bc5fd33d89946152083" title="Constructor." alt="" coords="799,760,976,787"/>
+<area shape="poly" title=" " alt="" coords="705,771,785,772,780,774,707,776"/>
+<area shape="rect" href="../../d1/d00/a00957.html#a00fce959dc60b31ac91bfe640d5a1e97" title="Constructor." alt="" coords="792,811,983,853"/>
+<area shape="poly" title=" " alt="" coords="689,785,740,796,779,806,774,808,739,801,690,790"/>
+<area shape="rect" href="../../da/d00/a00985.html#a07f95e40be721516704ce299ecf2ca43" title=" " alt="" coords="788,877,987,920"/>
+<area shape="poly" title=" " alt="" coords="706,781,741,796,758,813,766,830,774,847,789,863,796,869,791,869,786,867,770,850,762,833,754,816,738,801,707,786"/>
+<area shape="rect" href="../../da/d00/a00993.html#a0007a0575275dced05be17e1399bd7fd" title="Constructor." alt="" coords="790,944,985,987"/>
+<area shape="poly" title=" " alt="" coords="706,778,725,786,741,797,756,813,763,830,767,864,770,898,777,914,790,930,793,935,788,935,786,934,772,917,765,899,762,865,758,832,751,816,738,801,723,790,707,783"/>
+<area shape="rect" href="../../d6/d00/a01137.html#a98d0c554957a79bb825eb74ba101bade" title="Constructor." alt="" coords="801,1011,974,1037"/>
+<area shape="poly" title=" " alt="" coords="705,777,725,785,742,797,760,822,768,847,769,873,767,899,764,924,765,949,772,973,790,997,793,1002,788,1001,786,1000,767,975,760,949,759,924,761,898,764,873,763,848,755,824,738,801,723,789,706,782"/>
+<area shape="rect" href="../../df/d00/a01825.html#a3f0a90e3ef9ab1a498d464ea8fa21d29" title="Constructor." alt="" coords="800,1061,975,1088"/>
+<area shape="poly" title=" " alt="" coords="706,776,726,785,742,797,764,828,772,860,772,892,767,924,762,955,761,986,769,1017,790,1048,793,1052,787,1051,786,1051,764,1019,756,987,756,955,761,923,766,892,767,861,759,831,738,801,723,789,707,782"/>
+<area shape="rect" href="../../da/d00/a01941.html#a19df4830f0de587d4755c3cdca7ed244" title=" " alt="" coords="795,1112,980,1139"/>
+<area shape="poly" title=" " alt="" coords="705,776,726,784,742,797,757,816,767,835,776,873,774,911,767,949,759,987,757,1024,766,1061,775,1080,790,1098,793,1103,787,1102,786,1102,771,1083,761,1063,752,1025,754,986,762,948,769,911,771,874,762,837,752,819,738,801,723,789,706,781"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a36498889497191fbc49ebf533c0d3d36" title=" " alt="" coords="1035,575,1163,617"/>
+<area shape="poly" title=" " alt="" coords="706,776,726,784,742,797,759,819,770,842,776,865,778,888,773,934,762,980,751,1025,748,1068,751,1089,758,1109,771,1129,789,1149,814,1167,838,1181,863,1188,887,1191,911,1188,935,1180,960,1167,985,1149,999,1134,1012,1113,1035,1057,1053,987,1067,909,1086,752,1095,635,1098,631,1091,753,1072,910,1058,988,1040,1059,1017,1115,1004,1137,989,1153,963,1171,937,1185,912,1193,887,1196,861,1194,836,1186,811,1172,786,1153,767,1133,753,1112,746,1090,742,1068,746,1024,756,979,768,933,773,888,771,866,765,844,754,822,738,801,723,789,707,781"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a1fabb1daaa09396904b199b72cec3c7c" title=" " alt="" coords="815,557,960,584"/>
+<area shape="poly" title=" " alt="" coords="634,758,656,725,691,680,735,633,786,594,802,588,798,591,789,598,738,637,695,684,661,728,639,761"/>
+<area shape="rect" href="../../d3/d00/a01973.html#a891aae1f0f684cec87d5238079693fcd" title=" " alt="" coords="808,608,967,635"/>
+<area shape="poly" title=" " alt="" coords="640,758,700,703,741,671,786,644,805,638,801,642,789,649,744,676,703,707,643,761"/>
+<area shape="rect" href="../../df/d00/a01001.html#a5cd0e48895e9bb31ca0ffc510d8f1025" title="Constructor." alt="" coords="833,659,942,685"/>
+<area shape="poly" title=" " alt="" coords="652,757,713,726,787,695,820,686,815,689,789,700,715,731,655,762"/>
+<area shape="rect" href="../../d3/d00/a02069.html#af1466e82ebe6c8c2edc4f83b4a6c5ca1" title="Constructor." alt="" coords="834,709,941,736"/>
+<area shape="poly" title=" " alt="" coords="698,757,821,735,816,737,701,762"/>
+<area shape="poly" title=" " alt="" coords="971,1109,985,1098,1008,1064,1027,1012,1045,949,1059,880,1080,740,1093,635,1096,630,1086,741,1064,881,1050,951,1033,1014,1012,1066,989,1102,973,1114"/>
+<area shape="poly" title=" " alt="" coords="1059,573,1057,565,1064,556,1078,550,1099,548,1122,550,1137,559,1132,559,1121,556,1099,553,1079,555,1067,560,1062,566,1064,575"/>
+<area shape="poly" title=" " alt="" coords="960,577,1022,586,1017,587,961,582"/>
+<area shape="poly" title=" " alt="" coords="966,609,1022,604,1017,607,968,614"/>
+<area shape="poly" title=" " alt="" coords="583,299,576,290,581,280,599,274,627,272,658,275,676,283,671,285,657,280,627,277,600,279,585,284,581,289,589,298"/>
+<area shape="rect" href="../../dd/d00/a01693.html#aee556513e3f6e7b231bebd9e9ca016f7" title=" " alt="" coords="808,112,967,155"/>
+<area shape="poly" title=" " alt="" coords="677,296,709,281,738,261,754,237,761,213,767,189,786,165,796,159,793,163,790,169,772,191,766,215,759,239,742,265,712,286,680,300"/>
+<area shape="rect" href="../../dc/d00/a00833.html#aee465d122ea9ae75c8e5b85ab824b028" title=" " alt="" coords="823,1213,952,1240"/>
+<area shape="poly" title=" " alt="" coords="640,968,687,1027,742,1104,755,1130,762,1152,771,1172,789,1193,811,1208,806,1208,786,1197,767,1175,757,1154,750,1132,737,1107,683,1030,639,974"/>
+<area shape="rect" href="../../dd/d00/a01693.html#a8948f8579e7113ee7b75db3e780f5905" title=" " alt="" coords="576,173,678,200"/>
+<area shape="poly" title=" " alt="" coords="453,184,562,185,558,188,456,189"/>
+<area shape="poly" title=" " alt="" coords="653,374,789,442,844,463,889,477,934,492,988,518,1060,565,1055,566,986,522,932,497,888,482,843,468,787,446,654,379"/>
+<area shape="rect" href="../../d7/d00/a02109.html#aaf04cfd8c42e747b950d9bbbeb851ac5" title=" " alt="" coords="822,179,952,205"/>
+<area shape="poly" title=" " alt="" coords="669,360,706,353,723,345,738,335,750,322,757,307,761,277,766,246,773,230,786,215,809,203,806,207,789,219,777,233,771,248,767,278,762,309,755,324,741,339,725,350,707,358,672,365"/>
+<area shape="rect" href="../../d7/d00/a02109.html#ae5ecd9f4a0e9cda31e1ce06e089af4f5" title=" " alt="" coords="806,229,968,256"/>
+<area shape="poly" title=" " alt="" coords="668,358,705,350,738,335,754,319,761,302,769,283,786,266,798,261,794,265,789,270,774,286,766,304,758,322,741,340,706,356,671,363"/>
+<area shape="rect" href="../../d7/d00/a02109.html#a9b3a715757806e0e624f2f1e7aab869b" title=" " alt="" coords="796,280,979,307"/>
+<area shape="poly" title=" " alt="" coords="668,353,739,335,787,316,815,309,811,313,789,321,740,340,671,357"/>
+<area shape="rect" href="../../d7/d00/a02109.html#ae413df4a2758b5d6202377311cb18db9" title=" " alt="" coords="803,331,972,357"/>
+<area shape="poly" title=" " alt="" coords="669,357,789,350,785,353,672,362"/>
+<area shape="rect" href="../../d3/d00/a02069.html#a91b8908cde65eb6efb3433afa5ca2b9f" title="Restore state from the default DPR rom file." alt="" coords="811,405,964,432"/>
+<area shape="poly" title=" " alt="" coords="669,369,809,400,805,403,671,374"/>
+<area shape="poly" title=" " alt="" coords="950,430,988,448,1018,474,1044,503,1082,562,1077,561,1039,506,1014,478,986,453,951,435"/>
+<area shape="poly" title=" " alt="" coords="851,405,845,397,849,387,864,381,887,379,913,381,927,389,922,391,911,386,887,384,865,386,853,391,850,396,856,405"/>
+<area shape="poly" title=" " alt="" coords="698,538,761,532,834,529,911,532,988,543,1019,552,1050,567,1045,568,1017,557,986,548,911,537,834,534,761,537,700,543"/>
+<area shape="poly" title=" " alt="" coords="333,693,327,685,332,675,346,669,369,667,393,669,408,677,403,679,392,674,369,672,347,674,336,679,333,684,339,693"/>
+<area shape="poly" title=" " alt="" coords="425,867,468,886,483,897,492,909,501,920,516,930,533,939,528,940,513,934,498,923,488,912,479,901,465,890,426,873"/>
+<area shape="poly" title=" " alt="" coords="333,842,327,834,332,824,346,818,369,816,393,819,408,827,403,828,392,824,369,821,347,823,336,828,333,833,339,842"/>
+<area shape="poly" title=" " alt="" coords="416,310,534,310,530,314,419,314"/>
+<area shape="poly" title=" " alt="" coords="416,311,445,319,468,336,482,359,492,387,500,459,499,544,492,635,486,727,485,811,493,881,503,909,516,930,534,945,529,946,512,934,498,911,488,882,480,811,481,726,487,635,493,544,495,459,487,389,478,361,464,339,443,323,419,316"/>
+<area shape="poly" title=" " alt="" coords="333,299,327,290,332,280,346,274,369,272,393,275,407,282,403,284,392,280,369,277,347,279,336,284,333,289,339,298"/>
+<area shape="poly" title=" " alt="" coords="405,296,514,260,546,253,542,257,515,265,409,300"/>
+<area shape="poly" title=" " alt="" coords="161,1144,164,1083,177,992,190,942,209,892,235,845,269,805,276,801,273,806,273,809,240,848,214,894,195,943,182,993,169,1084,167,1145"/>
+<area shape="poly" title=" " alt="" coords="167,1144,180,1113,201,1074,231,1033,270,1000,300,984,333,971,401,955,468,947,532,948,527,950,468,953,402,960,334,977,302,989,272,1005,235,1037,206,1076,184,1115,171,1146"/>
+<area shape="poly" title=" " alt="" coords="139,1145,135,1137,138,1127,148,1121,163,1119,179,1121,189,1129,184,1131,177,1126,163,1124,149,1126,142,1130,141,1136,144,1145"/>
+<area shape="rect" href="../../d0/d00/a01077.html#a349bfe671a4f774446a8d91057807bc9" title=" " alt="" coords="310,1120,427,1147"/>
+<area shape="poly" title=" " alt="" coords="222,1149,297,1141,293,1144,225,1154"/>
+<area shape="rect" href="../../dc/d00/a01053.html#a021ded9424255bc8eea48d6ae3549c83" title=" " alt="" coords="514,1224,740,1251"/>
+<area shape="poly" title=" " alt="" coords="223,1166,467,1207,535,1220,530,1221,466,1212,223,1171"/>
+<area shape="rect" href="../../df/d00/a00107.html#a4c10fcf316c8281617dedcf253766c3c" title="Ask before replacing an existing output file." alt="" coords="306,1245,431,1272"/>
+<area shape="poly" title=" " alt="" coords="192,1170,328,1237,323,1239,192,1175"/>
+<area shape="rect" href="../../d0/d00/a01077.html#acca6baf1ac7c456decd152a212537849" title=" " alt="" coords="306,1421,431,1448"/>
+<area shape="poly" title=" " alt="" coords="167,1170,178,1216,197,1277,227,1343,248,1374,273,1401,295,1417,289,1417,269,1405,244,1377,223,1346,192,1279,173,1217,166,1175"/>
+<area shape="rect" href="../../df/d00/a00107.html#adea02253cbd3cd163da5f5ba64144983" title="Main menu." alt="" coords="583,1141,671,1168"/>
+<area shape="poly" title=" " alt="" coords="168,1143,183,1118,205,1086,234,1055,270,1031,323,1011,367,1007,413,1014,467,1031,509,1050,547,1076,606,1130,601,1130,544,1080,506,1055,465,1036,412,1019,367,1012,324,1017,272,1036,238,1059,209,1089,188,1120,173,1146"/>
+<area shape="rect" href="../../df/d00/a00107.html#aadd8ca6ef6a2cb15bc4699f1a5b055f4" title="Read theConfig from a file named &#39;filename&#39;." alt="" coords="305,1320,432,1347"/>
+<area shape="poly" title=" " alt="" coords="174,1170,215,1223,242,1254,273,1282,321,1313,316,1313,269,1286,238,1258,210,1227,173,1175"/>
+<area shape="rect" href="../../d0/d00/a01077.html#a7a29a1e9371bef6865ec0cdec3edfa42" title=" " alt="" coords="302,1472,435,1499"/>
+<area shape="poly" title=" " alt="" coords="165,1170,173,1226,188,1303,202,1345,220,1386,243,1425,273,1458,290,1472,285,1471,269,1462,239,1428,215,1389,197,1347,183,1304,167,1226,164,1175"/>
+<area shape="rect" href="../../dc/d00/a00833.html#a07b5e388ef0deeb7804f9778a77caa45" title=" " alt="" coords="564,1339,690,1365"/>
+<area shape="poly" title=" " alt="" coords="167,1170,179,1210,197,1263,228,1315,248,1338,272,1356,308,1373,347,1384,387,1389,427,1390,505,1382,573,1369,567,1371,505,1387,428,1396,387,1395,346,1389,306,1378,270,1361,245,1342,224,1319,193,1265,173,1212,166,1175"/>
+<area shape="rect" href="../../df/d00/a00107.html#a064b554d42fb43217107fcc387a4d0d2" title="Patch the original document, retaining comments and unedited source bytes." alt="" coords="304,1069,434,1096"/>
+<area shape="poly" title=" " alt="" coords="188,1143,270,1106,295,1099,291,1102,272,1110,192,1147"/>
+<area shape="poly" title=" " alt="" coords="333,1245,327,1237,332,1227,346,1221,369,1219,393,1221,408,1230,402,1230,392,1226,369,1224,347,1226,336,1231,333,1236,339,1245"/>
+<area shape="poly" title=" " alt="" coords="660,1166,700,1186,741,1210,764,1232,774,1242,789,1250,845,1270,894,1282,916,1282,938,1278,961,1267,985,1250,1002,1232,1017,1206,1042,1138,1061,1054,1075,959,1090,772,1096,635,1099,631,1096,772,1080,960,1066,1055,1047,1140,1021,1209,1006,1235,989,1254,964,1272,940,1283,916,1288,893,1287,844,1275,787,1254,771,1246,761,1236,738,1214,697,1190,659,1171"/>
+<area shape="poly" title=" " alt="" coords="583,1141,576,1133,581,1123,599,1117,627,1115,658,1117,676,1126,670,1127,657,1122,627,1120,600,1122,585,1127,581,1132,589,1141"/>
+<area shape="poly" title=" " alt="" coords="406,1317,577,1255,572,1258,408,1322"/>
+<area shape="poly" title=" " alt="" coords="333,1319,327,1311,332,1302,346,1295,369,1293,393,1296,408,1305,402,1305,392,1301,369,1299,347,1301,336,1305,333,1311,339,1320"/>
+<area shape="poly" title=" " alt="" coords="656,1336,841,1248,846,1246,658,1341"/>
+<area shape="poly" title=" " alt="" coords="333,1069,327,1061,332,1051,346,1045,369,1043,393,1045,408,1054,402,1055,392,1050,369,1048,347,1050,336,1055,333,1060,339,1069"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a4f620bf78f3f07cadfa4883a5a4a0192" name="a4f620bf78f3f07cadfa4883a5a4a0192"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f620bf78f3f07cadfa4883a5a4a0192">&#9670;&#160;</a></span>next_char()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t next_char </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>value</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>pos</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../df/d00/a00119_source.html#l00046">46</a> of file <a class="el" href="../../df/d00/a00119_source.html">es40-cfg-sdl.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../df/d00/a00119_source.html#l00046">next_char()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00119_source.html#l00271">ES40SdlConfigEditorUI::form()</a>, <a class="el" href="../../df/d00/a00119_source.html#l00089">ES40SdlConfigEditorUI::label()</a>, and <a class="el" href="../../df/d00/a00119_source.html#l00046">next_char()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../df/d00/a00119_a4f620bf78f3f07cadfa4883a5a4a0192_cgraph.png" border="0" usemap="#adf/d00/a00119_a4f620bf78f3f07cadfa4883a5a4a0192_cgraph" loading="lazy" alt=""/></div>
+<map name="adf/d00/a00119_a4f620bf78f3f07cadfa4883a5a4a0192_cgraph" id="adf/d00/a00119_a4f620bf78f3f07cadfa4883a5a4a0192_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,84,56"/>
+<area shape="poly" title=" " alt="" coords="29,28,29,12,35,5,45,3,55,5,61,14,56,14,52,10,44,8,37,10,34,14,35,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../df/d00/a00119_a4f620bf78f3f07cadfa4883a5a4a0192_icgraph.png" border="0" usemap="#adf/d00/a00119_a4f620bf78f3f07cadfa4883a5a4a0192_icgraph" loading="lazy" alt=""/></div>
+<map name="adf/d00/a00119_a4f620bf78f3f07cadfa4883a5a4a0192_icgraph" id="adf/d00/a00119_a4f620bf78f3f07cadfa4883a5a4a0192_icgraph">
+<area shape="rect" title=" " alt="" coords="831,45,909,72"/>
+<area shape="poly" title=" " alt="" coords="897,30,888,26,870,24,853,26,844,30,841,36,846,46,841,44,836,36,840,27,851,21,870,19,890,21,902,30"/>
+<area shape="rect" href="../../de/d00/a01093.html#a296a821596dad9c2721e29a1a7aa1e4a" title=" " alt="" coords="5,88,164,131"/>
+<area shape="poly" title=" " alt="" coords="813,47,703,28,552,11,468,8,382,10,296,20,212,37,185,47,159,60,115,89,111,86,156,56,183,42,211,32,295,14,382,5,468,3,553,6,704,23,818,46"/>
+<area shape="rect" href="../../de/d00/a01093.html#a05671fcfaa20060bdc79f9d9b21aff66" title=" " alt="" coords="624,143,783,185"/>
+<area shape="poly" title=" " alt="" coords="836,80,740,145,737,140,832,82"/>
+<area shape="poly" title=" " alt="" coords="668,132,626,101,602,86,575,74,477,47,436,42,397,41,315,50,212,68,174,77,138,89,135,85,172,72,211,63,314,45,396,36,436,37,478,42,577,69,604,81,629,96,673,132"/>
+<area shape="rect" href="../../de/d00/a01093.html#aaafe6419c76df4c27125b45b980531fa" title=" " alt="" coords="418,201,576,244"/>
+<area shape="poly" title=" " alt="" coords="614,189,575,203,574,198,609,191"/>
+<area shape="rect" href="../../de/d00/a01093.html#a28729681ad362565720618ee8599fcf8" title=" " alt="" coords="5,260,164,303"/>
+<area shape="poly" title=" " alt="" coords="680,196,636,248,608,272,578,292,527,317,482,335,441,348,400,354,360,355,316,352,211,335,167,322,128,306,129,300,169,317,212,329,316,347,360,350,400,349,439,342,480,330,525,312,575,287,605,267,632,244,675,199"/>
+<area shape="rect" href="../../de/d00/a01093.html#a3caf31c8d1c62bea22f8e1f0aa30c39f" title=" " alt="" coords="212,143,370,185"/>
+<area shape="poly" title=" " alt="" coords="607,165,371,167,370,161,612,163"/>
+<area shape="rect" href="../../de/d00/a01093.html#ac9d001a57960d69abd53735b90803b3b" title=" " alt="" coords="212,260,370,303"/>
+<area shape="poly" title=" " alt="" coords="672,195,629,231,577,258,525,274,471,283,371,288,370,283,470,278,524,269,575,253,626,226,667,197"/>
+<area shape="rect" href="../../de/d00/a01093.html#a21e3589345a5ee7f1eb9883122084fc5" title=" " alt="" coords="418,84,576,127"/>
+<area shape="poly" title=" " alt="" coords="609,138,575,130,575,125,615,138"/>
+<area shape="poly" title=" " alt="" coords="400,227,308,223,259,214,211,200,181,186,153,169,109,134,109,128,156,164,183,181,213,195,260,208,309,217,405,226"/>
+<area shape="poly" title=" " alt="" coords="467,253,423,290,398,306,371,317,312,328,253,327,196,318,147,306,147,301,197,313,253,322,312,323,369,312,396,301,420,286,462,255"/>
+<area shape="poly" title=" " alt="" coords="403,197,368,189,368,183,408,196"/>
+<area shape="poly" title=" " alt="" coords="194,140,165,133,163,128,199,138"/>
+<area shape="poly" title=" " alt="" coords="237,195,125,262,122,257,240,191"/>
+<area shape="poly" title=" " alt="" coords="225,252,210,243,147,186,102,134,103,128,151,182,213,239,230,252"/>
+<area shape="poly" title=" " alt="" coords="194,282,165,284,164,279,199,281"/>
+<area shape="poly" title=" " alt="" coords="400,91,370,89,291,85,212,89,165,95,163,91,211,84,291,80,370,84,405,89"/>
+<area shape="poly" title=" " alt="" coords="400,97,357,99,308,104,259,115,213,133,174,160,142,195,117,231,99,261,94,258,112,228,138,192,171,156,210,128,257,110,307,99,356,94,405,95"/>
+<area shape="poly" title=" " alt="" coords="403,132,369,144,367,140,408,130"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="af9fd88bad9903275ff92b2a0d7292a09" name="af9fd88bad9903275ff92b2a0d7292a09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af9fd88bad9903275ff92b2a0d7292a09">&#9670;&#160;</a></span>previous_char()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t previous_char </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>value</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>pos</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../df/d00/a00119_source.html#l00040">40</a> of file <a class="el" href="../../df/d00/a00119_source.html">es40-cfg-sdl.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../df/d00/a00119_source.html#l00040">previous_char()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00119_source.html#l00271">ES40SdlConfigEditorUI::form()</a>, and <a class="el" href="../../df/d00/a00119_source.html#l00040">previous_char()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../df/d00/a00119_af9fd88bad9903275ff92b2a0d7292a09_cgraph.png" border="0" usemap="#adf/d00/a00119_af9fd88bad9903275ff92b2a0d7292a09_cgraph" loading="lazy" alt=""/></div>
+<map name="adf/d00/a00119_af9fd88bad9903275ff92b2a0d7292a09_cgraph" id="adf/d00/a00119_af9fd88bad9903275ff92b2a0d7292a09_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,108,56"/>
+<area shape="poly" title=" " alt="" coords="38,29,35,20,37,11,44,5,57,3,69,5,77,14,72,14,67,10,56,8,47,10,41,14,40,20,43,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../df/d00/a00119_af9fd88bad9903275ff92b2a0d7292a09_icgraph.png" border="0" usemap="#adf/d00/a00119_af9fd88bad9903275ff92b2a0d7292a09_icgraph" loading="lazy" alt=""/></div>
+<map name="adf/d00/a00119_af9fd88bad9903275ff92b2a0d7292a09_icgraph" id="adf/d00/a00119_af9fd88bad9903275ff92b2a0d7292a09_icgraph">
+<area shape="rect" title=" " alt="" coords="212,29,314,56"/>
+<area shape="poly" title=" " alt="" coords="292,14,283,10,263,8,244,10,234,15,232,20,237,30,232,28,227,21,231,11,243,5,263,3,284,5,297,14"/>
+<area shape="rect" href="../../de/d00/a01093.html#a296a821596dad9c2721e29a1a7aa1e4a" title=" " alt="" coords="5,21,164,64"/>
+<area shape="poly" title=" " alt="" coords="193,43,164,45,164,40,199,42"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="adb0cdaa1f7c4e0aa03089bcd93ed024b" name="adb0cdaa1f7c4e0aa03089bcd93ed024b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb0cdaa1f7c4e0aa03089bcd93ed024b">&#9670;&#160;</a></span>wrap_text()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::string &gt; wrap_text </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>body</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>width</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../df/d00/a00119_source.html#l00052">52</a> of file <a class="el" href="../../df/d00/a00119_source.html">es40-cfg-sdl.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../df/d00/a00119_source.html#l00052">wrap_text()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00119_source.html#l00110">ES40SdlConfigEditorUI::description()</a>, <a class="el" href="../../df/d00/a00119_source.html#l00180">ES40SdlConfigEditorUI::text()</a>, and <a class="el" href="../../df/d00/a00119_source.html#l00052">wrap_text()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../df/d00/a00119_adb0cdaa1f7c4e0aa03089bcd93ed024b_cgraph.png" border="0" usemap="#adf/d00/a00119_adb0cdaa1f7c4e0aa03089bcd93ed024b_cgraph" loading="lazy" alt=""/></div>
+<map name="adf/d00/a00119_adb0cdaa1f7c4e0aa03089bcd93ed024b_cgraph" id="adf/d00/a00119_adb0cdaa1f7c4e0aa03089bcd93ed024b_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,84,56"/>
+<area shape="poly" title=" " alt="" coords="29,28,29,12,35,5,45,3,55,5,61,14,56,14,52,10,44,8,37,10,34,14,35,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../df/d00/a00119_adb0cdaa1f7c4e0aa03089bcd93ed024b_icgraph.png" border="0" usemap="#adf/d00/a00119_adb0cdaa1f7c4e0aa03089bcd93ed024b_icgraph" loading="lazy" alt=""/></div>
+<map name="adf/d00/a00119_adb0cdaa1f7c4e0aa03089bcd93ed024b_icgraph" id="adf/d00/a00119_adb0cdaa1f7c4e0aa03089bcd93ed024b_icgraph">
+<area shape="rect" title=" " alt="" coords="418,47,496,73"/>
+<area shape="poly" title=" " alt="" coords="484,31,475,28,457,25,440,27,431,32,429,37,433,47,428,45,423,38,427,28,438,22,457,20,477,23,489,32"/>
+<area shape="rect" href="../../de/d00/a01093.html#ac9d001a57960d69abd53735b90803b3b" title=" " alt="" coords="212,5,370,48"/>
+<area shape="poly" title=" " alt="" coords="400,49,370,45,370,40,405,49"/>
+<area shape="rect" href="../../de/d00/a01093.html#a3caf31c8d1c62bea22f8e1f0aa30c39f" title=" " alt="" coords="212,72,370,115"/>
+<area shape="poly" title=" " alt="" coords="405,70,371,80,370,75,400,71"/>
+<area shape="rect" href="../../de/d00/a01093.html#a296a821596dad9c2721e29a1a7aa1e4a" title=" " alt="" coords="5,5,164,48"/>
+<area shape="poly" title=" " alt="" coords="194,27,165,29,164,24,199,26"/>
+<area shape="rect" href="../../de/d00/a01093.html#a28729681ad362565720618ee8599fcf8" title=" " alt="" coords="5,72,164,115"/>
+<area shape="poly" title=" " alt="" coords="211,52,154,74,152,69,206,54"/>
+<area shape="poly" title=" " alt="" coords="206,67,153,51,153,46,211,66"/>
+<area shape="poly" title=" " alt="" coords="194,94,164,96,164,91,199,93"/>
+</map>
+</div>
+
+</div>
+</div>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="a5d519e780e0449a46e547b798619dcb6" name="a5d519e780e0449a46e547b798619dcb6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5d519e780e0449a46e547b798619dcb6">&#9670;&#160;</a></span>ACCENT</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">SDL_Color ACCENT {67, 123, 186, 255}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../df/d00/a00119_source.html#l00038">38</a> of file <a class="el" href="../../df/d00/a00119_source.html">es40-cfg-sdl.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00119_source.html#l00116">ES40SdlConfigEditorUI::button()</a>, <a class="el" href="../../df/d00/a00119_source.html#l00271">ES40SdlConfigEditorUI::form()</a>, <a class="el" href="../../df/d00/a00119_source.html#l00101">ES40SdlConfigEditorUI::frame()</a>, and <a class="el" href="../../df/d00/a00119_source.html#l00211">ES40SdlConfigEditorUI::menu()</a>.</p>
+
+</div>
+</div>
+<a id="a57d425a37b734699e7c6a4e89ea1156b" name="a57d425a37b734699e7c6a4e89ea1156b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a57d425a37b734699e7c6a4e89ea1156b">&#9670;&#160;</a></span>BACKGROUND</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">SDL_Color BACKGROUND {18, 24, 35, 255}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../df/d00/a00119_source.html#l00036">36</a> of file <a class="el" href="../../df/d00/a00119_source.html">es40-cfg-sdl.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00119_source.html#l00101">ES40SdlConfigEditorUI::frame()</a>.</p>
+
+</div>
+</div>
+<a id="a8b2d6700059691cca4b074db97d6df3d" name="a8b2d6700059691cca4b074db97d6df3d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b2d6700059691cca4b074db97d6df3d">&#9670;&#160;</a></span>BOTTOM</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int BOTTOM = 560</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../df/d00/a00119_source.html#l00035">35</a> of file <a class="el" href="../../df/d00/a00119_source.html">es40-cfg-sdl.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00119_source.html#l00271">ES40SdlConfigEditorUI::form()</a>, and <a class="el" href="../../df/d00/a00119_source.html#l00211">ES40SdlConfigEditorUI::menu()</a>.</p>
+
+</div>
+</div>
+<a id="a59e1d079f69945983f149eb45e2bd641" name="a59e1d079f69945983f149eb45e2bd641"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a59e1d079f69945983f149eb45e2bd641">&#9670;&#160;</a></span>FORM_ROW</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int FORM_ROW = 64</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../df/d00/a00119_source.html#l00035">35</a> of file <a class="el" href="../../df/d00/a00119_source.html">es40-cfg-sdl.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00119_source.html#l00271">ES40SdlConfigEditorUI::form()</a>.</p>
+
+</div>
+</div>
+<a id="a9e8570bdf916e835b1b38a1c66bf2946" name="a9e8570bdf916e835b1b38a1c66bf2946"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e8570bdf916e835b1b38a1c66bf2946">&#9670;&#160;</a></span>HEIGHT</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int HEIGHT = 760</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../df/d00/a00119_source.html#l00034">34</a> of file <a class="el" href="../../df/d00/a00119_source.html">es40-cfg-sdl.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00119_source.html#l00145">ES40SdlConfigEditorUI::initialize()</a>.</p>
+
+</div>
+</div>
+<a id="af50588cc56b0fb46303f26989d1a26d8" name="af50588cc56b0fb46303f26989d1a26d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af50588cc56b0fb46303f26989d1a26d8">&#9670;&#160;</a></span>INK</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">SDL_Color INK {228, 234, 244, 255}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../df/d00/a00119_source.html#l00037">37</a> of file <a class="el" href="../../df/d00/a00119_source.html">es40-cfg-sdl.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00119_source.html#l00116">ES40SdlConfigEditorUI::button()</a>, <a class="el" href="../../df/d00/a00119_source.html#l00271">ES40SdlConfigEditorUI::form()</a>, and <a class="el" href="../../df/d00/a00119_source.html#l00089">ES40SdlConfigEditorUI::label()</a>.</p>
+
+</div>
+</div>
+<a id="a9ac9d4d18a6a00b47fd95437ffa60b39" name="a9ac9d4d18a6a00b47fd95437ffa60b39"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ac9d4d18a6a00b47fd95437ffa60b39">&#9670;&#160;</a></span>INPUT</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">SDL_Color INPUT {12, 19, 30, 255}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../df/d00/a00119_source.html#l00038">38</a> of file <a class="el" href="../../df/d00/a00119_source.html">es40-cfg-sdl.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00119_source.html#l00271">ES40SdlConfigEditorUI::form()</a>.</p>
+
+</div>
+</div>
+<a id="ae35497623fd6caf5e33a4bb8957ee332" name="ae35497623fd6caf5e33a4bb8957ee332"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae35497623fd6caf5e33a4bb8957ee332">&#9670;&#160;</a></span>MUTED</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">SDL_Color MUTED {157, 174, 195, 255}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../df/d00/a00119_source.html#l00037">37</a> of file <a class="el" href="../../df/d00/a00119_source.html">es40-cfg-sdl.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00119_source.html#l00110">ES40SdlConfigEditorUI::description()</a>, <a class="el" href="../../df/d00/a00119_source.html#l00271">ES40SdlConfigEditorUI::form()</a>, <a class="el" href="../../df/d00/a00119_source.html#l00101">ES40SdlConfigEditorUI::frame()</a>, and <a class="el" href="../../df/d00/a00119_source.html#l00211">ES40SdlConfigEditorUI::menu()</a>.</p>
+
+</div>
+</div>
+<a id="a3c0f643aa822fb1fc0007d4e3030da7c" name="a3c0f643aa822fb1fc0007d4e3030da7c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c0f643aa822fb1fc0007d4e3030da7c">&#9670;&#160;</a></span>PANEL</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">SDL_Color PANEL {28, 37, 52, 255}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../df/d00/a00119_source.html#l00036">36</a> of file <a class="el" href="../../df/d00/a00119_source.html">es40-cfg-sdl.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00119_source.html#l00116">ES40SdlConfigEditorUI::button()</a>, and <a class="el" href="../../df/d00/a00119_source.html#l00101">ES40SdlConfigEditorUI::frame()</a>.</p>
+
+</div>
+</div>
+<a id="a3d5f83217872e1e605c44772666036cf" name="a3d5f83217872e1e605c44772666036cf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d5f83217872e1e605c44772666036cf">&#9670;&#160;</a></span>ROW</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ROW = 36</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../df/d00/a00119_source.html#l00035">35</a> of file <a class="el" href="../../df/d00/a00119_source.html">es40-cfg-sdl.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00119_source.html#l00211">ES40SdlConfigEditorUI::menu()</a>.</p>
+
+</div>
+</div>
+<a id="a765c3ac5f8f00709d2f37fa0a6686108" name="a765c3ac5f8f00709d2f37fa0a6686108"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a765c3ac5f8f00709d2f37fa0a6686108">&#9670;&#160;</a></span>TOP</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TOP = 88</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../df/d00/a00119_source.html#l00035">35</a> of file <a class="el" href="../../df/d00/a00119_source.html">es40-cfg-sdl.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00119_source.html#l00271">ES40SdlConfigEditorUI::form()</a>, <a class="el" href="../../df/d00/a00119_source.html#l00211">ES40SdlConfigEditorUI::menu()</a>, and <a class="el" href="../../df/d00/a00119_source.html#l00180">ES40SdlConfigEditorUI::text()</a>.</p>
+
+</div>
+</div>
+<a id="ab44a4b7e31fd22d0239c90f6e4ef1838" name="ab44a4b7e31fd22d0239c90f6e4ef1838"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab44a4b7e31fd22d0239c90f6e4ef1838">&#9670;&#160;</a></span>WIDTH</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int WIDTH = 1100</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../df/d00/a00119_source.html#l00034">34</a> of file <a class="el" href="../../df/d00/a00119_source.html">es40-cfg-sdl.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d00/a00119_source.html#l00271">ES40SdlConfigEditorUI::form()</a>, <a class="el" href="../../df/d00/a00119_source.html#l00101">ES40SdlConfigEditorUI::frame()</a>, <a class="el" href="../../df/d00/a00119_source.html#l00145">ES40SdlConfigEditorUI::initialize()</a>, and <a class="el" href="../../df/d00/a00119_source.html#l00211">ES40SdlConfigEditorUI::menu()</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
@@ -138,7 +859,7 @@ Include dependency graph for strings.h:</div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_9f351d46ce3cc29445a41dc3a31e6919.html">config</a></li><li class="navelem"><a href="../../dir_6b7d1cab4fc1513651fc64c4a9a49cf4.html">tui_win32</a></li><li class="navelem"><a href="../../dir_2c38ba4e84cb869759378366b3e67103.html">include</a></li><li class="navelem"><a href="../../df/d00/a00119.html">strings.h</a></li>
+    <li class="navelem"><a href="../../dir_9f351d46ce3cc29445a41dc3a31e6919.html">config</a></li><li class="navelem"><a href="../../df/d00/a00119.html">es40-cfg-sdl.cpp</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

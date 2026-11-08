@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: CPU/AlphaHWStore.h Source File</title>
+<title>ES40: config/tui_win32/include/strings.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,11 +109,11 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d6/d00/a00161_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">AlphaHWStore.h</div></div>
+  <div class="headertitle"><div class="title">strings.h</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../d6/d00/a00161.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator -- Alpha hardware-store policy</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2026 by gdwnldsKSC</span></div>
+<a href="../../d6/d00/a00161.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator.</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2026 by the ES40 Emulator Project</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * All rights reserved.</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d6/d00/a00161_
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;</span></div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span></div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS AND CONTRIBUTORS BE</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span></div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span></div>
@@ -138,94 +138,22 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d6/d00/a00161_
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span></div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> * POSSIBILITY OF SUCH DAMAGE.</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#if !defined(INCLUDED_ALPHAHWSTORE_H)</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#define INCLUDED_ALPHAHWSTORE_H</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;cstdint&gt;</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="foldopen" id="foldopen00032" data-start="{" data-end="};">
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="../../d6/d00/a00161.html#a6889a01466ae6a205075559fff83ebce">   32</a></span><span class="keyword">enum class</span> <a class="code hl_enumeration" href="../../d6/d00/a00161.html#a6889a01466ae6a205075559fff83ebce">AlphaHWStoreAddress</a></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>{</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="../../d6/d00/a00161.html#a6889a01466ae6a205075559fff83ebcea4bbb8f967da6d1a610596d7257179c2b">   34</a></span>  <a class="code hl_enumvalue" href="../../d6/d00/a00158.html#aa3ad26f561afb9009c452480177375e7a4bbb8f967da6d1a610596d7257179c2b">Invalid</a>,</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="../../d6/d00/a00161.html#a6889a01466ae6a205075559fff83ebceace898d62ed9ca7653a01fe0c781e97e9">   35</a></span>  <a class="code hl_enumvalue" href="../../d6/d00/a00158.html#aa3ad26f561afb9009c452480177375e7ace898d62ed9ca7653a01fe0c781e97e9">Physical</a>,</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="../../d6/d00/a00161.html#a6889a01466ae6a205075559fff83ebcea615e6f9baca5553d44683a098d342b70">   36</a></span>  <a class="code hl_enumvalue" href="../../d6/d00/a00158.html#aa3ad26f561afb9009c452480177375e7a615e6f9baca5553d44683a098d342b70">Virtual</a></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>};</div>
-</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="comment">// Decoded hardware store, outside saved CPU state. Plain stores translate before</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment">// rounding down the physical write. Conditional stores use the original PA.</span></div>
-<div class="foldopen" id="foldopen00041" data-start="{" data-end="};">
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="../../d5/d00/a00953.html">   41</a></span><span class="keyword">struct </span><a class="code hl_struct" href="../../d5/d00/a00953.html">AlphaHWStoreDescriptor</a></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>{</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="../../d5/d00/a00953.html#a11c3e74cb892bdca8eda6dd77e3f9571">   43</a></span>  <a class="code hl_enumeration" href="../../d6/d00/a00161.html#a6889a01466ae6a205075559fff83ebce">AlphaHWStoreAddress</a> <a class="code hl_variable" href="../../d5/d00/a00953.html#a11c3e74cb892bdca8eda6dd77e3f9571">address</a> = <a class="code hl_enumvalue" href="../../d6/d00/a00161.html#a6889a01466ae6a205075559fff83ebcea4bbb8f967da6d1a610596d7257179c2b">AlphaHWStoreAddress::Invalid</a>;</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="../../d5/d00/a00953.html#a6ae47b36ed425f427ad7393f7996dc42">   44</a></span>  std::uint32_t <a class="code hl_variable" href="../../d5/d00/a00953.html#a6ae47b36ed425f427ad7393f7996dc42">size_bits</a> = 0;</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="../../d5/d00/a00953.html#ab6b8b33d0dc8ef100bbae583b8c88cd4">   45</a></span>  std::int32_t <a class="code hl_variable" href="../../d5/d00/a00953.html#ab6b8b33d0dc8ef100bbae583b8c88cd4">displacement</a> = 0;</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="../../d5/d00/a00953.html#a83fda1b4123b8f5cd4b70ce2b5f4e709">   46</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d5/d00/a00953.html#a83fda1b4123b8f5cd4b70ce2b5f4e709">alternate</a> = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="../../d5/d00/a00953.html#a7b8f0e10438e33bc3dbe5eefabac2aea">   47</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d5/d00/a00953.html#a7b8f0e10438e33bc3dbe5eefabac2aea">conditional</a> = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="../../d5/d00/a00953.html#a669e643e31f1029e283c58b145d66ae0">   48</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d5/d00/a00953.html#a669e643e31f1029e283c58b145d66ae0">compilable</a> = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>};</div>
-</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
-<div class="foldopen" id="foldopen00051" data-start="{" data-end="}">
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="../../d6/d00/a00161.html#a8d024b1940dafa03aa33f64093337148">   51</a></span><span class="keyword">constexpr</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d6/d00/a00161.html#a8d024b1940dafa03aa33f64093337148">alpha_hw_store_valid</a>(<span class="keyword">const</span> <a class="code hl_struct" href="../../d5/d00/a00953.html">AlphaHWStoreDescriptor</a>&amp; store)</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>{</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  <span class="keywordflow">return</span> (store.<a class="code hl_variable" href="../../d5/d00/a00953.html#a11c3e74cb892bdca8eda6dd77e3f9571">address</a> == <a class="code hl_enumvalue" href="../../d6/d00/a00161.html#a6889a01466ae6a205075559fff83ebceace898d62ed9ca7653a01fe0c781e97e9">AlphaHWStoreAddress::Physical</a></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>          || store.<a class="code hl_variable" href="../../d5/d00/a00953.html#a11c3e74cb892bdca8eda6dd77e3f9571">address</a> == <a class="code hl_enumvalue" href="../../d6/d00/a00161.html#a6889a01466ae6a205075559fff83ebcea615e6f9baca5553d44683a098d342b70">AlphaHWStoreAddress::Virtual</a>)</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    &amp;&amp; (store.<a class="code hl_variable" href="../../d5/d00/a00953.html#a6ae47b36ed425f427ad7393f7996dc42">size_bits</a> == 32 || store.<a class="code hl_variable" href="../../d5/d00/a00953.html#a6ae47b36ed425f427ad7393f7996dc42">size_bits</a> == 64);</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>}</div>
-</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="comment">// The shared JIT currently implements only plain physical hardware stores.</span></div>
-<div class="foldopen" id="foldopen00059" data-start="{" data-end="}">
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="../../d6/d00/a00161.html#a3e2a3c63be8e751928bcbb792cd4f16a">   59</a></span><span class="keyword">constexpr</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d6/d00/a00161.html#a3e2a3c63be8e751928bcbb792cd4f16a">alpha_hw_store_compilable</a>(<span class="keyword">const</span> <a class="code hl_struct" href="../../d5/d00/a00953.html">AlphaHWStoreDescriptor</a>&amp; store)</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>{</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="../../d6/d00/a00161.html#a8d024b1940dafa03aa33f64093337148">alpha_hw_store_valid</a>(store) &amp;&amp; store.<a class="code hl_variable" href="../../d5/d00/a00953.html#a669e643e31f1029e283c58b145d66ae0">compilable</a></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    &amp;&amp; store.<a class="code hl_variable" href="../../d5/d00/a00953.html#a11c3e74cb892bdca8eda6dd77e3f9571">address</a> == <a class="code hl_enumvalue" href="../../d6/d00/a00161.html#a6889a01466ae6a205075559fff83ebceace898d62ed9ca7653a01fe0c781e97e9">AlphaHWStoreAddress::Physical</a> &amp;&amp; !store.<a class="code hl_variable" href="../../d5/d00/a00953.html#a7b8f0e10438e33bc3dbe5eefabac2aea">conditional</a>;</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>}</div>
-</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
-<div class="foldopen" id="foldopen00065" data-start="{" data-end="};">
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="../../d1/d00/a00957.html">   65</a></span><span class="keyword">struct </span><a class="code hl_struct" href="../../d1/d00/a00957.html">AlphaHWStorePolicy</a></div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>{</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="../../d1/d00/a00957.html#a2d3f424e7716c6125b195bcc99384349">   67</a></span>  <a class="code hl_struct" href="../../d5/d00/a00953.html">AlphaHWStoreDescriptor</a> (*<a class="code hl_variable" href="../../d1/d00/a00957.html#a2d3f424e7716c6125b195bcc99384349">decode</a>)(std::uint32_t instruction) = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>};</div>
-</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
-<div class="foldopen" id="foldopen00070" data-start="{" data-end="}">
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="../../d6/d00/a00161.html#a63cf5f4cdc4525a7c12a2f1e609c6c8d">   70</a></span><span class="keyword">constexpr</span> <a class="code hl_struct" href="../../d5/d00/a00953.html">AlphaHWStoreDescriptor</a> <a class="code hl_function" href="../../d6/d00/a00161.html#a63cf5f4cdc4525a7c12a2f1e609c6c8d">alpha_decode_hw_store</a>(</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keyword">const</span> <a class="code hl_struct" href="../../d1/d00/a00957.html">AlphaHWStorePolicy</a>&amp; policy, std::uint32_t instruction)</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>{</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>  <span class="keywordflow">return</span> policy.<a class="code hl_variable" href="../../d1/d00/a00957.html#a2d3f424e7716c6125b195bcc99384349">decode</a> ? policy.<a class="code hl_variable" href="../../d1/d00/a00957.html#a2d3f424e7716c6125b195bcc99384349">decode</a>(instruction) : <a class="code hl_struct" href="../../d5/d00/a00953.html">AlphaHWStoreDescriptor</a>{};</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>}</div>
-</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="aa00158_html_aa3ad26f561afb9009c452480177375e7a4bbb8f967da6d1a610596d7257179c2b"><div class="ttname"><a href="../../d6/d00/a00158.html#aa3ad26f561afb9009c452480177375e7a4bbb8f967da6d1a610596d7257179c2b">AlphaHWLoadAddress::Invalid</a></div><div class="ttdeci">@ Invalid</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00158_source.html#l00034">AlphaHWLoad.h:34</a></div></div>
-<div class="ttc" id="aa00158_html_aa3ad26f561afb9009c452480177375e7a615e6f9baca5553d44683a098d342b70"><div class="ttname"><a href="../../d6/d00/a00158.html#aa3ad26f561afb9009c452480177375e7a615e6f9baca5553d44683a098d342b70">AlphaHWLoadAddress::Virtual</a></div><div class="ttdeci">@ Virtual</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00158_source.html#l00036">AlphaHWLoad.h:36</a></div></div>
-<div class="ttc" id="aa00158_html_aa3ad26f561afb9009c452480177375e7ace898d62ed9ca7653a01fe0c781e97e9"><div class="ttname"><a href="../../d6/d00/a00158.html#aa3ad26f561afb9009c452480177375e7ace898d62ed9ca7653a01fe0c781e97e9">AlphaHWLoadAddress::Physical</a></div><div class="ttdeci">@ Physical</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00158_source.html#l00035">AlphaHWLoad.h:35</a></div></div>
-<div class="ttc" id="aa00161_html_a3e2a3c63be8e751928bcbb792cd4f16a"><div class="ttname"><a href="../../d6/d00/a00161.html#a3e2a3c63be8e751928bcbb792cd4f16a">alpha_hw_store_compilable</a></div><div class="ttdeci">constexpr bool alpha_hw_store_compilable(const AlphaHWStoreDescriptor &amp;store)</div><div class="ttdef"><b>Definition</b> <a href="#l00059">AlphaHWStore.h:59</a></div></div>
-<div class="ttc" id="aa00161_html_a63cf5f4cdc4525a7c12a2f1e609c6c8d"><div class="ttname"><a href="../../d6/d00/a00161.html#a63cf5f4cdc4525a7c12a2f1e609c6c8d">alpha_decode_hw_store</a></div><div class="ttdeci">constexpr AlphaHWStoreDescriptor alpha_decode_hw_store(const AlphaHWStorePolicy &amp;policy, std::uint32_t instruction)</div><div class="ttdef"><b>Definition</b> <a href="#l00070">AlphaHWStore.h:70</a></div></div>
-<div class="ttc" id="aa00161_html_a6889a01466ae6a205075559fff83ebce"><div class="ttname"><a href="../../d6/d00/a00161.html#a6889a01466ae6a205075559fff83ebce">AlphaHWStoreAddress</a></div><div class="ttdeci">AlphaHWStoreAddress</div><div class="ttdef"><b>Definition</b> <a href="#l00032">AlphaHWStore.h:33</a></div></div>
-<div class="ttc" id="aa00161_html_a6889a01466ae6a205075559fff83ebcea4bbb8f967da6d1a610596d7257179c2b"><div class="ttname"><a href="../../d6/d00/a00161.html#a6889a01466ae6a205075559fff83ebcea4bbb8f967da6d1a610596d7257179c2b">AlphaHWStoreAddress::Invalid</a></div><div class="ttdeci">@ Invalid</div><div class="ttdef"><b>Definition</b> <a href="#l00034">AlphaHWStore.h:34</a></div></div>
-<div class="ttc" id="aa00161_html_a6889a01466ae6a205075559fff83ebcea615e6f9baca5553d44683a098d342b70"><div class="ttname"><a href="../../d6/d00/a00161.html#a6889a01466ae6a205075559fff83ebcea615e6f9baca5553d44683a098d342b70">AlphaHWStoreAddress::Virtual</a></div><div class="ttdeci">@ Virtual</div><div class="ttdef"><b>Definition</b> <a href="#l00036">AlphaHWStore.h:36</a></div></div>
-<div class="ttc" id="aa00161_html_a6889a01466ae6a205075559fff83ebceace898d62ed9ca7653a01fe0c781e97e9"><div class="ttname"><a href="../../d6/d00/a00161.html#a6889a01466ae6a205075559fff83ebceace898d62ed9ca7653a01fe0c781e97e9">AlphaHWStoreAddress::Physical</a></div><div class="ttdeci">@ Physical</div><div class="ttdef"><b>Definition</b> <a href="#l00035">AlphaHWStore.h:35</a></div></div>
-<div class="ttc" id="aa00161_html_a8d024b1940dafa03aa33f64093337148"><div class="ttname"><a href="../../d6/d00/a00161.html#a8d024b1940dafa03aa33f64093337148">alpha_hw_store_valid</a></div><div class="ttdeci">constexpr bool alpha_hw_store_valid(const AlphaHWStoreDescriptor &amp;store)</div><div class="ttdef"><b>Definition</b> <a href="#l00051">AlphaHWStore.h:51</a></div></div>
-<div class="ttc" id="aa00953_html"><div class="ttname"><a href="../../d5/d00/a00953.html">AlphaHWStoreDescriptor</a></div><div class="ttdef"><b>Definition</b> <a href="#l00041">AlphaHWStore.h:42</a></div></div>
-<div class="ttc" id="aa00953_html_a11c3e74cb892bdca8eda6dd77e3f9571"><div class="ttname"><a href="../../d5/d00/a00953.html#a11c3e74cb892bdca8eda6dd77e3f9571">AlphaHWStoreDescriptor::address</a></div><div class="ttdeci">AlphaHWStoreAddress address</div><div class="ttdef"><b>Definition</b> <a href="#l00043">AlphaHWStore.h:43</a></div></div>
-<div class="ttc" id="aa00953_html_a669e643e31f1029e283c58b145d66ae0"><div class="ttname"><a href="../../d5/d00/a00953.html#a669e643e31f1029e283c58b145d66ae0">AlphaHWStoreDescriptor::compilable</a></div><div class="ttdeci">bool compilable</div><div class="ttdef"><b>Definition</b> <a href="#l00048">AlphaHWStore.h:48</a></div></div>
-<div class="ttc" id="aa00953_html_a6ae47b36ed425f427ad7393f7996dc42"><div class="ttname"><a href="../../d5/d00/a00953.html#a6ae47b36ed425f427ad7393f7996dc42">AlphaHWStoreDescriptor::size_bits</a></div><div class="ttdeci">std::uint32_t size_bits</div><div class="ttdef"><b>Definition</b> <a href="#l00044">AlphaHWStore.h:44</a></div></div>
-<div class="ttc" id="aa00953_html_a7b8f0e10438e33bc3dbe5eefabac2aea"><div class="ttname"><a href="../../d5/d00/a00953.html#a7b8f0e10438e33bc3dbe5eefabac2aea">AlphaHWStoreDescriptor::conditional</a></div><div class="ttdeci">bool conditional</div><div class="ttdef"><b>Definition</b> <a href="#l00047">AlphaHWStore.h:47</a></div></div>
-<div class="ttc" id="aa00953_html_a83fda1b4123b8f5cd4b70ce2b5f4e709"><div class="ttname"><a href="../../d5/d00/a00953.html#a83fda1b4123b8f5cd4b70ce2b5f4e709">AlphaHWStoreDescriptor::alternate</a></div><div class="ttdeci">bool alternate</div><div class="ttdef"><b>Definition</b> <a href="#l00046">AlphaHWStore.h:46</a></div></div>
-<div class="ttc" id="aa00953_html_ab6b8b33d0dc8ef100bbae583b8c88cd4"><div class="ttname"><a href="../../d5/d00/a00953.html#ab6b8b33d0dc8ef100bbae583b8c88cd4">AlphaHWStoreDescriptor::displacement</a></div><div class="ttdeci">std::int32_t displacement</div><div class="ttdef"><b>Definition</b> <a href="#l00045">AlphaHWStore.h:45</a></div></div>
-<div class="ttc" id="aa00957_html"><div class="ttname"><a href="../../d1/d00/a00957.html">AlphaHWStorePolicy</a></div><div class="ttdef"><b>Definition</b> <a href="#l00065">AlphaHWStore.h:66</a></div></div>
-<div class="ttc" id="aa00957_html_a2d3f424e7716c6125b195bcc99384349"><div class="ttname"><a href="../../d1/d00/a00957.html#a2d3f424e7716c6125b195bcc99384349">AlphaHWStorePolicy::decode</a></div><div class="ttdeci">AlphaHWStoreDescriptor(*) decode(std::uint32_t instruction)</div><div class="ttdef"><b>Definition</b> <a href="#l00067">AlphaHWStore.h:67</a></div></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">/* MSVC has no &lt;strings.h&gt;; index/strcasecmp/strncasecmp come from the force-included</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment"> * bsd_compat.h, so this only has to exist. */</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#ifndef ES40_TUI_STRINGS_H</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#define ES40_TUI_STRINGS_H</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &lt;string.h&gt;</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d6/d00/a00161.html">AlphaHWStore.h</a></li>
+    <li class="navelem"><a href="../../dir_9f351d46ce3cc29445a41dc3a31e6919.html">config</a></li><li class="navelem"><a href="../../dir_6b7d1cab4fc1513651fc64c4a9a49cf4.html">tui_win32</a></li><li class="navelem"><a href="../../dir_2c38ba4e84cb869759378366b3e67103.html">include</a></li><li class="navelem"><a href="../../d6/d00/a00161.html">strings.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

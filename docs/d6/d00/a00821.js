@@ -1,22 +1,12 @@
 var a00821 =
 [
-    [ "SPMU_state", "dd/d00/a00825.html", "dd/d00/a00825" ],
-    [ "CAliM1543C_pmu", "d6/d00/a00821.html#a07f95e40be721516704ce299ecf2ca43", null ],
-    [ "~CAliM1543C_pmu", "d6/d00/a00821.html#a45c63140546644ff969fd8956e3ea379", null ],
-    [ "bind_isa_bridge", "d6/d00/a00821.html#a5bcb1388fc3409d441074743cb4f6930", null ],
-    [ "decodes_memory_access", "d6/d00/a00821.html#ac3d9882404a971bf5e919a4f11b2c05d", null ],
-    [ "docking_config", "d6/d00/a00821.html#afdf081c95d383185f0ce9fd2a88d6951", null ],
-    [ "memory_decode_owner", "d6/d00/a00821.html#ab63a6ae3997304cb87d3c2b13f9ef53c", null ],
-    [ "pm_io_read", "d6/d00/a00821.html#a1ea7073e3e1067dee9bf150495f69dda", null ],
-    [ "pm_io_write", "d6/d00/a00821.html#a3d037b920106767c6069db706f88058f", null ],
-    [ "pm_timer_value", "d6/d00/a00821.html#a51437f4aa1f836c71e83dc4e26b163a8", null ],
-    [ "ReadMem_Bar", "d6/d00/a00821.html#aa257b431c415447e600ce3ec25176683", null ],
-    [ "RestoreState", "d6/d00/a00821.html#a923504667254206d45377a81fb1e1eb4", null ],
-    [ "SaveState", "d6/d00/a00821.html#ace9dfb8445485f2699ddf53f0a804182", null ],
-    [ "smb_io_read", "d6/d00/a00821.html#a74dc26b6d8a149cd055a53741e4a2a17", null ],
-    [ "smb_io_write", "d6/d00/a00821.html#a5bf8f46e144a2719cf9e19878801b5ae", null ],
-    [ "uses_subtractive_decode", "d6/d00/a00821.html#a2c7072f70f2e843ec393ae9524bfecb8", null ],
-    [ "WriteMem_Bar", "d6/d00/a00821.html#a6b99583985d64ac1abc25363c40d8167", null ],
-    [ "isa_bridge", "d6/d00/a00821.html#ab94dbeea33f47b07d215ecedd68ee6aa", null ],
-    [ "state", "d6/d00/a00821.html#a92c9105a2ef7d6427513e4e874d58f50", null ]
+    [ "SetupGuard", "d6/d00/a00821.html#aee1f71eafd169dbb2974f7645088546d", null ],
+    [ "~SetupGuard", "d6/d00/a00821.html#a663622e627278311f1f98b24b90b629a", null ],
+    [ "SetupGuard", "d6/d00/a00821.html#a35b549d8b802a719089ab6ad3e4fe159", null ],
+    [ "complete", "d6/d00/a00821.html#a560782e8b3426f107f21746fad7c3b0f", null ],
+    [ "operator=", "d6/d00/a00821.html#a544d6c3feb884c25077be38dbc04bc5f", null ],
+    [ "active_", "d6/d00/a00821.html#a84fd534373f49e5aabd6dcea250710bd", null ],
+    [ "backend_", "d6/d00/a00821.html#ab52b0b3d63f64e0876d0dde883df92c1", null ],
+    [ "devices_", "d6/d00/a00821.html#a103bddcfcaf9dc37fb660cadb91db7ff", null ],
+    [ "streams_", "d6/d00/a00821.html#a501ce8ebc8ab57d770c613d639f8ac30", null ]
 ];

@@ -1,10 +1,5 @@
 var a00299 =
 [
-    [ "debug", "df/d00/a00299.html#a3627c620cc9c0c2bfdd890a59306286a", null ],
-    [ "debug_indentation", "df/d00/a00299.html#a4f0d9bd05e6cac75f07f7404d592b4f6", null ],
-    [ "fatal", "df/d00/a00299.html#ab56c14a5ed99df4361152c41d2e40a4c", null ],
-    [ "va_debug", "df/d00/a00299.html#a92816c7eb467508cf7576dc1c66ec6bf", null ],
-    [ "debug_currently_at_start_of_line", "df/d00/a00299.html#a53b6b8ff93aaf9363c604be810d6da43", null ],
-    [ "debug_indent", "df/d00/a00299.html#abe0a56f90c6c8b261d23838bbeda2d22", null ],
-    [ "quiet_mode", "df/d00/a00299.html#ab839b95749ccc6e8c5fecd0c591da7d4", null ]
+    [ "Ev68Reset", "da/d00/a01265.html", "da/d00/a01265" ],
+    [ "kEv68ResetPolicy", "df/d00/a00299.html#adfb5a6cc332d2304745b475f17be58aa", null ]
 ];

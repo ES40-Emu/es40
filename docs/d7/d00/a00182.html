@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: CPU/cpu_debug.h File Reference</title>
+<title>ES40: CPU/AlphaCPU.cpp File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,24 +109,174 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d7/d00/a00182.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">cpu_debug.h File Reference</div></div>
+  <div class="headertitle"><div class="title">AlphaCPU.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>Contains debugging macros used by <a class="el" href="../../d5/d00/a00140.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor.">AlphaCPU.cpp</a>.  
+<p>Contains the code for the emulated DecChip 21264CB EV68 Alpha processor.  
 <a href="#details">More...</a></p>
-<div class="textblock"><div class="dynheader">
-This graph shows which files directly or indirectly include this file:</div>
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d6/d00/a00626_source.html">StdAfx.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../de/d00/a00185_source.html">AlphaCPU.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d5/d00/a00308_source.html">jit/jitengine.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d00/a00074_source.html">chipset/AliM1543C.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../de/d00/a00323_source.html">TraceEngine.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d0/d00/a00566_source.html">network/lockstep.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d00/a00251_source.html">cpu_memory.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d1/d00/a00230_source.html">cpu_control.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d5/d00/a00224_source.html">cpu_arith.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dd/d00/a00248_source.html">cpu_logical.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d9/d00/a00227_source.html">cpu_bwx.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d2/d00/a00242_source.html">cpu_fp_memory.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d0/d00/a00239_source.html">cpu_fp_branch.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d00/a00245_source.html">cpu_fp_operate.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/d00/a00254_source.html">cpu_misc.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d00/a00263_source.html">cpu_vax.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d9/d00/a00257_source.html">cpu_mvi.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dd/d00/a00260_source.html">cpu_pal.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d00/a00233_source.html">cpu_debug.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d5/d00/a00266_source.html">diag_rpcc.h</a>&quot;</code><br />
+<code>#include &lt;thread&gt;</code><br />
+</div><div class="textblock"><div class="dynheader">
+Include dependency graph for AlphaCPU.cpp:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../d2/d00/a00184.png" border="0" usemap="#a_c_p_u_2cpu__debug_8hdep" loading="lazy" alt=""/></div>
-<map name="a_c_p_u_2cpu__debug_8hdep" id="a_c_p_u_2cpu__debug_8hdep">
-<area shape="rect" title="Contains debugging macros used by AlphaCPU.cpp." alt="" coords="205,5,334,32"/>
-<area shape="rect" href="../../d5/d00/a00140.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="5,80,147,107"/>
-<area shape="poly" title=" " alt="" coords="223,40,111,82,109,77,220,36"/>
-<area shape="rect" href="../../da/d00/a00149.html" title="Contains IEEE floating point code for the Alpha CPU." alt="" coords="171,80,368,107"/>
-<area shape="poly" title=" " alt="" coords="271,46,272,81,267,78,267,50"/>
-<area shape="rect" href="../../d7/d00/a00152.html" title="Contains VAX floating point code for the Alpha CPU." alt="" coords="392,80,586,107"/>
-<area shape="poly" title=" " alt="" coords="323,35,453,79,448,80,322,40"/>
+<div class="center"><img src="../../dc/d00/a00183.png" border="0" usemap="#a_c_p_u_2_alpha_c_p_u_8cpp" loading="lazy" alt=""/></div>
+<map name="a_c_p_u_2_alpha_c_p_u_8cpp" id="a_c_p_u_2_alpha_c_p_u_8cpp">
+<area shape="rect" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="2716,5,2857,32"/>
+<area shape="rect" href="../../d6/d00/a00626.html" title="Standard includes." alt="" coords="510,80,583,107"/>
+<area shape="poly" title=" " alt="" coords="2716,25,599,93,598,88,2716,20"/>
+<area shape="rect" title=" " alt="" coords="931,304,989,331"/>
+<area shape="poly" title=" " alt="" coords="2713,22,2562,29,2350,39,2109,56,1864,83,1655,109,1492,133,1414,148,1332,169,1132,232,1057,264,994,298,992,293,1055,259,1130,227,1331,163,1413,143,1491,128,1654,104,1864,77,2108,51,2350,34,2562,23,2718,21"/>
+<area shape="rect" href="../../de/d00/a00185.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="1600,155,1694,181"/>
+<area shape="poly" title=" " alt="" coords="2713,22,2582,29,2403,39,2200,56,1996,83,1836,116,1703,152,1702,147,1835,111,1996,77,2200,51,2402,34,2582,23,2719,21"/>
+<area shape="rect" href="../../de/d00/a00323.html" title="Contains the definitions for the CPU tracing engine." alt="" coords="1627,304,1765,331"/>
+<area shape="poly" title=" " alt="" coords="2713,21,2542,26,2328,35,2227,43,2140,53,2075,66,2054,74,2042,82,2034,93,2031,103,2037,123,2053,144,2074,165,2097,187,2114,209,2120,233,2117,245,2109,258,2085,275,2050,287,2008,295,1961,299,1781,307,1781,301,1961,294,2007,289,2049,282,2082,271,2105,254,2112,243,2115,233,2109,212,2093,190,2071,169,2049,148,2032,126,2026,103,2030,90,2038,78,2052,69,2074,61,2139,48,2227,37,2328,30,2541,21,2718,20"/>
+<area shape="rect" href="../../d5/d00/a00308.html" title=" " alt="" coords="2052,80,2146,107"/>
+<area shape="poly" title=" " alt="" coords="2713,25,2471,48,2164,83,2162,83,2161,78,2164,77,2471,42,2718,25"/>
+<area shape="rect" href="../../db/d00/a00074.html" title="Contains the definitions for the ISA part of the emulated Ali M1543C chipset." alt="" coords="2112,155,2254,181"/>
+<area shape="poly" title=" " alt="" coords="2713,23,2580,33,2422,45,2283,61,2236,71,2210,82,2199,94,2192,108,2185,141,2181,137,2187,107,2195,91,2206,78,2234,66,2283,56,2421,39,2580,28,2718,23"/>
+<area shape="rect" href="../../d0/d00/a00566.html" title="Contains telnet declarations for the lock&#45;step code." alt="" coords="2220,80,2351,107"/>
+<area shape="poly" title=" " alt="" coords="2718,29,2367,82,2366,77,2713,30"/>
+<area shape="rect" href="../../d3/d00/a00251.html" title="Contains code macros for the processor memory load/store instructions." alt="" coords="2375,80,2481,107"/>
+<area shape="poly" title=" " alt="" coords="2726,32,2497,81,2496,76,2721,33"/>
+<area shape="rect" href="../../d1/d00/a00230.html" title="Contains code macros for the processor control instructions." alt="" coords="2505,80,2604,107"/>
+<area shape="poly" title=" " alt="" coords="2749,32,2610,78,2609,72,2744,33"/>
+<area shape="rect" href="../../d5/d00/a00224.html" title="Contains code macros for the processor integer arithmetic instructions." alt="" coords="2628,80,2713,107"/>
+<area shape="poly" title=" " alt="" coords="2769,32,2705,74,2703,69,2764,33"/>
+<area shape="rect" href="../../dd/d00/a00248.html" title="Contains code macros for the processor logical instructions." alt="" coords="2738,80,2835,107"/>
+<area shape="poly" title=" " alt="" coords="2788,31,2789,66,2785,63,2785,35"/>
+<area shape="rect" href="../../d9/d00/a00227.html" title="Contains code macros for the processor BWX (byte and word extension) instructions." alt="" coords="2859,80,2944,107"/>
+<area shape="poly" title=" " alt="" coords="2807,30,2871,72,2866,71,2806,35"/>
+<area shape="rect" href="../../d2/d00/a00242.html" title="Contains code macros for the processor floating&#45;point load/store instructions." alt="" coords="2967,80,3092,107"/>
+<area shape="poly" title=" " alt="" coords="2829,30,2975,75,2970,75,2829,35"/>
+<area shape="rect" href="../../d0/d00/a00239.html" title="Contains code macros for the processor floating&#45;point branch instructions." alt="" coords="3116,80,3233,107"/>
+<area shape="poly" title=" " alt="" coords="2855,30,3103,78,3098,78,2855,35"/>
+<area shape="rect" href="../../d6/d00/a00245.html" title="Contains code macros for the processor floating&#45;point operate instructions." alt="" coords="3258,80,3379,107"/>
+<area shape="poly" title=" " alt="" coords="2858,26,3245,80,3240,80,2858,31"/>
+<area shape="rect" href="../../d7/d00/a00254.html" title="Contains code macros for miscellaneous processor instructions." alt="" coords="2869,155,2958,181"/>
+<area shape="poly" title=" " alt="" coords="2857,19,3000,25,3169,35,3315,52,3366,64,3394,78,3401,91,3399,103,3388,113,3372,122,3322,136,3257,147,3106,162,2973,168,2973,163,3106,156,3256,142,3321,131,3370,117,3385,109,3394,100,3396,92,3390,82,3364,69,3315,58,3168,41,3000,30,2858,24"/>
+<area shape="rect" href="../../df/d00/a00263.html" title="Contains code macros for the processor VAX compatibility instructions." alt="" coords="3455,80,3537,107"/>
+<area shape="poly" title=" " alt="" coords="2858,21,3113,41,3274,57,3436,77,3443,81,3437,81,3436,83,3274,62,3113,46,2858,27"/>
+<area shape="rect" href="../../d9/d00/a00257.html" title="Contains code macros for the processor MVI (multimedia) instructions." alt="" coords="3561,80,3642,107"/>
+<area shape="poly" title=" " alt="" coords="2857,19,3154,35,3347,52,3548,80,3542,80,3346,57,3153,41,2858,25"/>
+<area shape="rect" href="../../dd/d00/a00260.html" title="Contains code macros for the processor PALmode instructions." alt="" coords="3667,80,3744,107"/>
+<area shape="poly" title=" " alt="" coords="2858,18,3001,22,3197,32,3421,49,3654,80,3649,80,3421,55,3196,37,3001,28,2858,24"/>
+<area shape="rect" href="../../d6/d00/a00233.html" title="Contains debugging macros used by AlphaCPU.cpp." alt="" coords="3768,80,3864,107"/>
+<area shape="poly" title=" " alt="" coords="2857,18,3016,23,3236,33,3491,50,3756,80,3751,80,3491,55,3236,38,3016,28,2858,24"/>
+<area shape="rect" href="../../d5/d00/a00266.html" title=" " alt="" coords="3418,155,3507,181"/>
+<area shape="poly" title=" " alt="" coords="2857,19,3112,24,3442,36,3736,53,3832,64,3862,71,3878,78,3885,93,3878,108,3853,127,3817,141,3772,151,3721,159,3615,167,3522,170,3522,164,3615,162,3721,154,3771,146,3815,135,3851,122,3874,105,3879,93,3874,82,3861,76,3831,70,3735,58,3442,41,3111,30,2858,24"/>
+<area shape="rect" href="../../d7/d00/a00173.html" title=" " alt="" coords="5,155,115,181"/>
+<area shape="poly" title=" " alt="" coords="509,102,134,157,132,157,128,153,133,152,511,97"/>
+<area shape="rect" href="../../d8/d00/a00326.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="850,379,939,405"/>
+<area shape="poly" title=" " alt="" coords="508,96,430,101,332,110,241,127,208,140,186,156,158,200,150,222,148,243,150,265,157,286,169,308,186,329,198,337,219,344,282,357,366,367,465,375,671,384,838,390,832,390,670,389,464,380,366,372,281,362,217,349,196,342,182,333,165,311,152,288,145,266,143,243,145,221,153,198,182,153,205,136,240,122,331,104,429,95,512,94"/>
+<area shape="rect" title=" " alt="" coords="1373,379,1440,405"/>
+<area shape="poly" title=" " alt="" coords="508,98,445,108,364,129,325,146,287,168,255,196,230,231,224,252,222,280,226,308,238,328,281,336,389,344,723,362,1360,388,1355,390,722,367,389,350,281,341,234,333,221,310,216,280,218,251,226,228,251,193,284,164,322,142,363,124,443,103,513,96"/>
+<area shape="rect" href="../../d6/d00/a00047.html" title=" " alt="" coords="240,229,362,256"/>
+<area shape="poly" title=" " alt="" coords="507,104,448,124,415,139,383,157,348,187,320,219,317,215,344,183,380,152,412,134,447,119,512,101"/>
+<area shape="rect" href="../../dc/d00/a00053.html" title=" " alt="" coords="667,229,768,256"/>
+<area shape="poly" title=" " alt="" coords="553,105,575,141,606,179,638,203,673,223,667,223,635,207,602,183,570,144,552,110"/>
+<area shape="rect" href="../../de/d00/a00065.html" title=" " alt="" coords="488,229,592,256"/>
+<area shape="poly" title=" " alt="" coords="548,105,544,215,539,213,544,109"/>
+<area shape="rect" href="../../d9/d00/a00056.html" title=" " alt="" coords="350,304,437,331"/>
+<area shape="poly" title=" " alt="" coords="540,106,412,293,409,289,535,108"/>
+<area shape="rect" href="../../df/d00/a00062.html" title=" " alt="" coords="792,229,922,256"/>
+<area shape="poly" title=" " alt="" coords="558,105,597,142,622,162,649,179,713,206,780,227,775,227,712,211,647,184,619,166,594,146,557,110"/>
+<area shape="rect" href="../../d3/d00/a00059.html" title=" " alt="" coords="660,155,774,181"/>
+<area shape="poly" title=" " alt="" coords="577,105,676,148,671,148,576,110"/>
+<area shape="rect" href="../../dd/d00/a00365.html" title="Contains macro&#39;s and prototypes for debugging." alt="" coords="798,155,900,181"/>
+<area shape="poly" title=" " alt="" coords="583,101,785,150,780,152,583,106"/>
+<area shape="rect" href="../../d8/d00/a00368.html" title="Contains byte&#45;order conversion helpers." alt="" coords="925,155,1030,181"/>
+<area shape="poly" title=" " alt="" coords="583,98,912,153,907,155,583,103"/>
+<area shape="rect" title=" " alt="" coords="248,304,325,331"/>
+<area shape="poly" title=" " alt="" coords="301,255,294,290,290,287,297,259"/>
+<area shape="rect" title=" " alt="" coords="461,304,515,331"/>
+<area shape="poly" title=" " alt="" coords="334,254,449,300,444,301,334,259"/>
+<area shape="rect" title=" " alt="" coords="1049,304,1106,331"/>
+<area shape="poly" title=" " alt="" coords="768,252,1036,307,1031,307,768,257"/>
+<area shape="rect" title=" " alt="" coords="1199,304,1260,331"/>
+<area shape="poly" title=" " alt="" coords="768,251,780,253,1007,286,1186,311,1181,311,1006,291,780,259,768,257"/>
+<area shape="poly" title=" " alt="" coords="760,254,919,303,913,303,759,259"/>
+<area shape="rect" title=" " alt="" coords="632,304,688,331"/>
+<area shape="poly" title=" " alt="" coords="710,255,681,294,678,290,705,258"/>
+<area shape="rect" title=" " alt="" coords="713,304,791,331"/>
+<area shape="poly" title=" " alt="" coords="725,254,742,291,737,289,722,259"/>
+<area shape="poly" title=" " alt="" coords="533,255,507,294,504,289,529,258"/>
+<area shape="poly" title=" " alt="" coords="593,248,1000,301,1036,309,1031,309,1000,307,593,253"/>
+<area shape="poly" title=" " alt="" coords="592,247,655,253,1118,301,1187,311,1182,311,1117,307,654,259,593,252"/>
+<area shape="poly" title=" " alt="" coords="593,250,919,308,913,309,593,256"/>
+<area shape="poly" title=" " alt="" coords="561,254,629,296,623,295,560,259"/>
+<area shape="poly" title=" " alt="" coords="577,254,703,298,698,299,577,259"/>
+<area shape="rect" title=" " alt="" coords="1458,304,1518,331"/>
+<area shape="poly" title=" " alt="" coords="592,247,655,253,1114,289,1445,313,1439,313,1114,294,654,259,593,253"/>
+<area shape="rect" title=" " alt="" coords="539,304,608,331"/>
+<area shape="poly" title=" " alt="" coords="547,254,564,291,559,289,545,259"/>
+<area shape="poly" title=" " alt="" coords="517,256,434,299,432,294,512,257"/>
+<area shape="poly" title=" " alt="" coords="896,254,1037,302,1031,302,895,259"/>
+<area shape="poly" title=" " alt="" coords="923,254,1186,307,1181,307,922,259"/>
+<area shape="poly" title=" " alt="" coords="841,256,784,297,782,292,836,257"/>
+<area shape="poly" title=" " alt="" coords="719,180,720,215,715,212,716,184"/>
+<area shape="poly" title=" " alt="" coords="774,179,962,227,1043,253,1187,302,1182,301,1042,259,961,232,774,185"/>
+<area shape="poly" title=" " alt="" coords="774,179,873,204,914,217,936,227,947,241,954,257,961,290,957,287,949,258,942,244,933,231,912,222,872,209,774,185"/>
+<area shape="poly" title=" " alt="" coords="657,176,553,197,506,212,489,221,478,231,473,243,478,254,619,302,614,303,474,258,468,243,474,228,486,217,504,208,552,192,662,175"/>
+<area shape="poly" title=" " alt="" coords="699,181,680,198,663,216,654,236,654,245,657,255,677,278,704,298,698,297,673,282,652,257,648,246,649,234,659,213,676,194,695,183"/>
+<area shape="poly" title=" " alt="" coords="775,178,1444,306,1440,309,774,183"/>
+<area shape="poly" title=" " alt="" coords="1596,172,1445,191,1351,208,1258,232,1179,264,1112,298,1111,293,1176,259,1257,227,1350,203,1445,186,1602,172"/>
+<area shape="poly" title=" " alt="" coords="1596,173,1432,194,1348,210,1315,220,1291,232,1275,244,1262,259,1242,292,1239,288,1258,256,1272,240,1288,227,1313,215,1347,205,1431,189,1602,172"/>
+<area shape="poly" title=" " alt="" coords="1596,171,1519,177,1416,187,1300,205,1186,232,1159,244,1132,258,1004,305,1002,300,1130,254,1156,239,1184,227,1299,199,1415,182,1519,172,1602,170"/>
+<area shape="poly" title=" " alt="" coords="1648,180,1643,218,1635,239,1623,258,1608,269,1586,281,1533,303,1532,298,1584,276,1606,265,1619,254,1631,237,1638,217,1644,183"/>
+<area shape="rect" href="../../d5/d00/a00050.html" title=" " alt="" coords="1302,229,1461,256"/>
+<area shape="poly" title=" " alt="" coords="1603,181,1443,227,1442,222,1598,182"/>
+<area shape="rect" href="../../d0/d00/a00302.html" title=" " alt="" coords="1684,229,1780,256"/>
+<area shape="poly" title=" " alt="" coords="1662,179,1709,220,1703,219,1661,184"/>
+<area shape="rect" href="../../d6/d00/a00356.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="1789,304,1963,331"/>
+<area shape="poly" title=" " alt="" coords="1690,179,1741,199,1794,227,1830,258,1860,293,1855,291,1827,262,1790,232,1739,204,1689,185"/>
+<area shape="rect" href="../../d8/d00/a00725.html" title="Contains the definitions for the emulated Typhoon Chipset devices." alt="" coords="1484,229,1609,256"/>
+<area shape="poly" title=" " alt="" coords="1632,181,1577,222,1575,217,1627,183"/>
+<area shape="rect" href="../../d7/d00/a00236.html" title="Contains some macro definitions and some inline functions for the Alpha CPU." alt="" coords="1855,229,1940,256"/>
+<area shape="poly" title=" " alt="" coords="1691,179,1842,225,1837,225,1690,185"/>
+<area shape="rect" href="../../da/d00/a00188.html" title=" " alt="" coords="1964,229,2095,256"/>
+<area shape="poly" title=" " alt="" coords="1695,176,1951,226,1945,226,1694,181"/>
+<area shape="poly" title=" " alt="" coords="1331,256,1122,308,1121,303,1325,257"/>
+<area shape="poly" title=" " alt="" coords="1357,256,1270,299,1269,294,1352,257"/>
+<area shape="rect" title=" " alt="" coords="1542,304,1602,331"/>
+<area shape="poly" title=" " alt="" coords="1415,254,1530,300,1525,299,1414,259"/>
+<area shape="poly" title=" " alt="" coords="1707,256,1614,300,1613,295,1702,257"/>
+<area shape="poly" title=" " alt="" coords="1796,331,1456,386,1455,381,1791,331"/>
+<area shape="poly" title=" " alt="" coords="1487,254,1474,259,1331,270,1210,275,1002,272,901,271,794,275,673,286,531,307,530,301,672,280,794,270,901,266,1002,267,1209,269,1331,265,1473,253,1481,255"/>
+<area shape="poly" title=" " alt="" coords="1487,254,1474,259,1122,312,1121,307,1473,253,1481,255"/>
+<area shape="poly" title=" " alt="" coords="1494,256,1275,308,1274,303,1488,257"/>
+<area shape="poly" title=" " alt="" coords="1539,255,1509,294,1506,289,1534,258"/>
+<area shape="poly" title=" " alt="" coords="1605,254,1806,300,1801,300,1604,259"/>
+<area shape="poly" title=" " alt="" coords="1573,254,1659,297,1653,296,1572,259"/>
+<area shape="poly" title=" " alt="" coords="1629,329,1615,333,1240,369,955,390,955,384,1240,364,1614,328,1624,329"/>
+<area shape="poly" title=" " alt="" coords="1966,254,1952,259,1786,279,1712,289,1618,306,1617,301,1711,284,1785,274,1952,253,1960,255"/>
+<area shape="poly" title=" " alt="" coords="2179,180,2152,222,2132,242,2108,259,1994,270,1751,287,1275,316,1275,311,1750,282,1994,265,2106,253,2128,238,2148,218,2174,183"/>
+<area shape="rect" href="../../db/d00/a00350.html" title="Contains the definitions for the PCI Device base class." alt="" coords="2220,229,2345,256"/>
+<area shape="poly" title=" " alt="" coords="2201,179,2255,221,2250,219,2199,184"/>
+<area shape="poly" title=" " alt="" coords="2222,255,1963,303,1962,298,2217,255"/>
+<area shape="rect" href="../../d4/d00/a00617.html" title="Contains TCP/IP declarations used by the serial port emulator and lock&#45;step code." alt="" coords="2278,155,2343,181"/>
+<area shape="poly" title=" " alt="" coords="2291,105,2303,141,2299,138,2288,109"/>
+<area shape="poly" title=" " alt="" coords="2871,173,2692,197,2466,232,2412,246,2358,259,2234,274,2128,281,1946,280,1858,279,1764,281,1658,289,1533,306,1533,301,1658,284,1764,276,1858,274,1946,275,2128,275,2233,269,2357,253,2411,241,2465,227,2691,192,2866,174"/>
+<area shape="poly" title=" " alt="" coords="3421,173,3014,212,2431,259,2203,269,2024,270,1846,278,1741,289,1618,307,1617,301,1740,283,1845,272,2024,265,2203,263,2431,253,3014,207,3415,174"/>
 </map>
 </div>
 </div>
@@ -134,64 +284,7 @@ This graph shows which files directly or indirectly include this file:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a7950569f3016b4617852c20a090668ed" id="r_a7950569f3016b4617852c20a090668ed"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a7950569f3016b4617852c20a090668ed">ES40_EXECUTE_END</a>()</td></tr>
-<tr class="memitem:a0651a1723c81134a9c55c718862ec658" id="r_a0651a1723c81134a9c55c718862ec658"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0651a1723c81134a9c55c718862ec658">DEBUG_INSTALL_PAL_TRAP</a>(offset)</td></tr>
-<tr class="memitem:aa91b9aec2cea38293d56446d5c02c5a4" id="r_aa91b9aec2cea38293d56446d5c02c5a4"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aa91b9aec2cea38293d56446d5c02c5a4">TRC_</a>(down,  up,  x,  y)</td></tr>
-<tr class="memitem:aab3906b700eae34b8c3911ed79ca662f" id="r_aab3906b700eae34b8c3911ed79ca662f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aab3906b700eae34b8c3911ed79ca662f">TRC</a>(down,  up)</td></tr>
-<tr class="memitem:a6b7167988ca15a6be1e18cbda60458a8" id="r_a6b7167988ca15a6be1e18cbda60458a8"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6b7167988ca15a6be1e18cbda60458a8">TRC_BR</a></td></tr>
-<tr class="memitem:a6e0aaa4a706eeb77b476e170dfb26f97" id="r_a6e0aaa4a706eeb77b476e170dfb26f97"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6e0aaa4a706eeb77b476e170dfb26f97">GO_PAL</a>(reason)</td></tr>
-<tr class="memitem:a0aea852a7eb3ef471a4484d0049d8f46" id="r_a0aea852a7eb3ef471a4484d0049d8f46"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a></td></tr>
-<tr class="memitem:ad0ad9f1b07beee1a12245ea001ccfadb" id="r_ad0ad9f1b07beee1a12245ea001ccfadb"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad0ad9f1b07beee1a12245ea001ccfadb">UNKNOWN1</a></td></tr>
-<tr class="memitem:adbb58d71d6ce0c75fd320e8f97da799e" id="r_adbb58d71d6ce0c75fd320e8f97da799e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#adbb58d71d6ce0c75fd320e8f97da799e">UNKNOWN2</a></td></tr>
-<tr class="memitem:a6df8a8ff1c6a7a0736645728aaa34882" id="r_a6df8a8ff1c6a7a0736645728aaa34882"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(a)</td></tr>
-<tr class="memitem:a83958729390bb15927d13d57d401b540" id="r_a83958729390bb15927d13d57d401b540"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a83958729390bb15927d13d57d401b540">PRE_PAL</a>(mnemonic)</td></tr>
-<tr class="memitem:aaa7015c441641696d6f7a3ce69251b7e" id="r_aaa7015c441641696d6f7a3ce69251b7e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aaa7015c441641696d6f7a3ce69251b7e">POST_PAL</a>&#160;&#160;&#160;<a class="el" href="#aab3906b700eae34b8c3911ed79ca662f">TRC</a>(1, 0);</td></tr>
-<tr class="memitem:a44544ab2f7492382687c78b37f875a12" id="r_a44544ab2f7492382687c78b37f875a12"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a44544ab2f7492382687c78b37f875a12">PRE_BR</a>(mnemonic)</td></tr>
-<tr class="memitem:af88c16af85d0cd4f537ee7b34df0bc08" id="r_af88c16af85d0cd4f537ee7b34df0bc08"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af88c16af85d0cd4f537ee7b34df0bc08">POST_BR</a>&#160;&#160;&#160;<a class="el" href="#a6b7167988ca15a6be1e18cbda60458a8">TRC_BR</a>;</td></tr>
-<tr class="memitem:a3b46103aa61fa20b28459692b3a23b0b" id="r_a3b46103aa61fa20b28459692b3a23b0b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a3b46103aa61fa20b28459692b3a23b0b">PRE_COND</a>(mnemonic)</td></tr>
-<tr class="memitem:a6b9e1d80796c52b0ca3fc31f6b050eca" id="r_a6b9e1d80796c52b0ca3fc31f6b050eca"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6b9e1d80796c52b0ca3fc31f6b050eca">POST_COND</a>&#160;&#160;&#160;<a class="el" href="#a6b7167988ca15a6be1e18cbda60458a8">TRC_BR</a>;</td></tr>
-<tr class="memitem:a2d98e9dd6a422a307ebb397481c6e042" id="r_a2d98e9dd6a422a307ebb397481c6e042"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a2d98e9dd6a422a307ebb397481c6e042">PRE_FCOND</a>(mnemonic)</td></tr>
-<tr class="memitem:a5977ed0462e86ac18c2a883596b30af7" id="r_a5977ed0462e86ac18c2a883596b30af7"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5977ed0462e86ac18c2a883596b30af7">POST_FCOND</a>&#160;&#160;&#160;<a class="el" href="#a6b7167988ca15a6be1e18cbda60458a8">TRC_BR</a>;</td></tr>
-<tr class="memitem:ac308f5973074165e8b2987ab691ca0bd" id="r_ac308f5973074165e8b2987ab691ca0bd"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac308f5973074165e8b2987ab691ca0bd">PRE_BSR</a>(mnemonic)</td></tr>
-<tr class="memitem:a50f730968c2f9cfe54790d79b8b5c5af" id="r_a50f730968c2f9cfe54790d79b8b5c5af"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a50f730968c2f9cfe54790d79b8b5c5af">POST_BSR</a></td></tr>
-<tr class="memitem:aab2969c659d528450603ccb31859bb86" id="r_aab2969c659d528450603ccb31859bb86"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aab2969c659d528450603ccb31859bb86">PRE_JMP</a>(mnemonic)</td></tr>
-<tr class="memitem:a284c16bac42b9c1583db531b7480ab44" id="r_a284c16bac42b9c1583db531b7480ab44"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a284c16bac42b9c1583db531b7480ab44">POST_JMP</a></td></tr>
-<tr class="memitem:a2a622e92aa6f7d9ce799a7771be459f4" id="r_a2a622e92aa6f7d9ce799a7771be459f4"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a2a622e92aa6f7d9ce799a7771be459f4">PRE_RET</a>(mnemonic)</td></tr>
-<tr class="memitem:a50fb90a609c7d03744736747e5ee3123" id="r_a50fb90a609c7d03744736747e5ee3123"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a50fb90a609c7d03744736747e5ee3123">POST_RET</a>&#160;&#160;&#160;<a class="el" href="#aab3906b700eae34b8c3911ed79ca662f">TRC</a>(0, 1);</td></tr>
-<tr class="memitem:ae6d7f89f33e0fbce5c06864a3b7d08f9" id="r_ae6d7f89f33e0fbce5c06864a3b7d08f9"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae6d7f89f33e0fbce5c06864a3b7d08f9">PRE_MFPR</a>(mnemonic)</td></tr>
-<tr class="memitem:afdc533111e69f3fb406112dab0d48770" id="r_afdc533111e69f3fb406112dab0d48770"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#afdc533111e69f3fb406112dab0d48770">POST_MFPR</a>&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.r[<a class="el" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td></tr>
-<tr class="memitem:a9877f1528224efb9f0312140af08bc04" id="r_a9877f1528224efb9f0312140af08bc04"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9877f1528224efb9f0312140af08bc04">PRE_MTPR</a>(mnemonic)</td></tr>
-<tr class="memitem:aa7c1ba82ae3114a5dba1030ad749531d" id="r_aa7c1ba82ae3114a5dba1030ad749531d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aa7c1ba82ae3114a5dba1030ad749531d">POST_MTPR</a>&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.r[<a class="el" href="../../de/d00/a00185.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>]);</td></tr>
-<tr class="memitem:a67fa5f39794491f423fd7365fdc2f556" id="r_a67fa5f39794491f423fd7365fdc2f556"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a67fa5f39794491f423fd7365fdc2f556">PRE_NOP</a>(mnemonic)</td></tr>
-<tr class="memitem:af6fd75b59cf8d0b0df24e0533188f2d0" id="r_af6fd75b59cf8d0b0df24e0533188f2d0"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af6fd75b59cf8d0b0df24e0533188f2d0">POST_NOP</a>&#160;&#160;&#160;;</td></tr>
-<tr class="memitem:ad37a854b21ddabe4b43a3b72dddfc0fc" id="r_ad37a854b21ddabe4b43a3b72dddfc0fc"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad37a854b21ddabe4b43a3b72dddfc0fc">PRE_MEM</a>(mnemonic)</td></tr>
-<tr class="memitem:a8b52d8963ebec588d9eaf32b6c3521fc" id="r_a8b52d8963ebec588d9eaf32b6c3521fc"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a8b52d8963ebec588d9eaf32b6c3521fc">POST_MEM</a>&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.r[<a class="el" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td></tr>
-<tr class="memitem:a274dddad5c7c0808dce47c9b0fda677d" id="r_a274dddad5c7c0808dce47c9b0fda677d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a274dddad5c7c0808dce47c9b0fda677d">PRE_R12_R3</a>(mnemonic)</td></tr>
-<tr class="memitem:aa2d099c4a51379e6a04582c16524cb10" id="r_aa2d099c4a51379e6a04582c16524cb10"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aa2d099c4a51379e6a04582c16524cb10">POST_R12_R3</a>&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.r[<a class="el" href="../../de/d00/a00185.html#a14e5d5a6641dfac1ed51225a7b87bc92">REG_3</a>]);</td></tr>
-<tr class="memitem:a018e0b3a60b50c19a0ec7909f3df2725" id="r_a018e0b3a60b50c19a0ec7909f3df2725"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a018e0b3a60b50c19a0ec7909f3df2725">PRE_F12_F3</a>(mnemonic)</td></tr>
-<tr class="memitem:adec66a3756e2e98f0a132cf00231ec55" id="r_adec66a3756e2e98f0a132cf00231ec55"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#adec66a3756e2e98f0a132cf00231ec55">POST_F12_F3</a>&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.f[<a class="el" href="../../de/d00/a00185.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>]);</td></tr>
-<tr class="memitem:a997ccabb3c5895837302b0d3370bf086" id="r_a997ccabb3c5895837302b0d3370bf086"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a997ccabb3c5895837302b0d3370bf086">PRE_R1_F3</a>(mnemonic)</td></tr>
-<tr class="memitem:ab6089b91db20ea50fd017e8fb834a932" id="r_ab6089b91db20ea50fd017e8fb834a932"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab6089b91db20ea50fd017e8fb834a932">POST_R1_F3</a>&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.f[<a class="el" href="../../de/d00/a00185.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>]);</td></tr>
-<tr class="memitem:ad3645b14ab2e7e202c8f14e403c05597" id="r_ad3645b14ab2e7e202c8f14e403c05597"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad3645b14ab2e7e202c8f14e403c05597">PRE_F1_R3</a>(mnemonic)</td></tr>
-<tr class="memitem:a6f66274d228fd259c91034c2574bffbf" id="r_a6f66274d228fd259c91034c2574bffbf"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6f66274d228fd259c91034c2574bffbf">POST_F1_R3</a>&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.r[<a class="el" href="../../de/d00/a00185.html#a14e5d5a6641dfac1ed51225a7b87bc92">REG_3</a>]);</td></tr>
-<tr class="memitem:affa6f71623b7af5c3f23eb5237aa0e6e" id="r_affa6f71623b7af5c3f23eb5237aa0e6e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#affa6f71623b7af5c3f23eb5237aa0e6e">PRE_X_F1</a>(mnemonic)</td></tr>
-<tr class="memitem:ada28a9a972a16b7ae35bf47c116fc37c" id="r_ada28a9a972a16b7ae35bf47c116fc37c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ada28a9a972a16b7ae35bf47c116fc37c">POST_X_F1</a>&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.f[<a class="el" href="../../de/d00/a00185.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]);</td></tr>
-<tr class="memitem:acf47abbfa93a6735084d947efa9ebf81" id="r_acf47abbfa93a6735084d947efa9ebf81"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#acf47abbfa93a6735084d947efa9ebf81">PRE_R2_R3</a>(mnemonic)</td></tr>
-<tr class="memitem:aa1d095f3d38dcf64c79c38b232ea26bf" id="r_aa1d095f3d38dcf64c79c38b232ea26bf"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aa1d095f3d38dcf64c79c38b232ea26bf">POST_R2_R3</a>&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.r[<a class="el" href="../../de/d00/a00185.html#a14e5d5a6641dfac1ed51225a7b87bc92">REG_3</a>]);</td></tr>
-<tr class="memitem:a7f4881d51bb7e0cd293e14d238f67423" id="r_a7f4881d51bb7e0cd293e14d238f67423"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a7f4881d51bb7e0cd293e14d238f67423">PRE_X_R1</a>(mnemonic)</td></tr>
-<tr class="memitem:a3d45e1996511e3cd732d7bfd1413db8d" id="r_a3d45e1996511e3cd732d7bfd1413db8d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a3d45e1996511e3cd732d7bfd1413db8d">POST_X_R1</a>&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.r[<a class="el" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td></tr>
-<tr class="memitem:a7354b4874e10a67941cd5169bcdff337" id="r_a7354b4874e10a67941cd5169bcdff337"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a7354b4874e10a67941cd5169bcdff337">PRE_X_R3</a>(mnemonic)</td></tr>
-<tr class="memitem:a01e04d77e4767be57b7e33c2078c5a23" id="r_a01e04d77e4767be57b7e33c2078c5a23"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a01e04d77e4767be57b7e33c2078c5a23">POST_X_R3</a>&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.r[<a class="el" href="../../de/d00/a00185.html#a14e5d5a6641dfac1ed51225a7b87bc92">REG_3</a>]);</td></tr>
-<tr class="memitem:ab14316df2926d07c95500ee8260eb2c6" id="r_ab14316df2926d07c95500ee8260eb2c6"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab14316df2926d07c95500ee8260eb2c6">PRE_HW_LD</a>(mnemonic)</td></tr>
-<tr class="memitem:ae47d15c764e5ff57a36fea29fe938781" id="r_ae47d15c764e5ff57a36fea29fe938781"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae47d15c764e5ff57a36fea29fe938781">POST_HW_LD</a>&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.r[<a class="el" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td></tr>
-<tr class="memitem:a02f8d283932d3e995bff0a51a1a1a28e" id="r_a02f8d283932d3e995bff0a51a1a1a28e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a02f8d283932d3e995bff0a51a1a1a28e">PRE_HW_ST</a>(mnemonic)</td></tr>
-<tr class="memitem:a7c92c242606e0803d4741c1835517ae7" id="r_a7c92c242606e0803d4741c1835517ae7"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a7c92c242606e0803d4741c1835517ae7">POST_HW_ST</a>&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.r[<a class="el" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td></tr>
-<tr class="memitem:a333e96053775509019ef9edaaf2f0221" id="r_a333e96053775509019ef9edaaf2f0221"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a333e96053775509019ef9edaaf2f0221">PRE_FMEM</a>(mnemonic)</td></tr>
-<tr class="memitem:a90d7302097801cf8d445f7976c51609f" id="r_a90d7302097801cf8d445f7976c51609f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a90d7302097801cf8d445f7976c51609f">POST_FMEM</a>&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.f[<a class="el" href="../../de/d00/a00185.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]);</td></tr>
-<tr class="memitem:a7727fc03663e01d608319f24cd8b76aa" id="r_a7727fc03663e01d608319f24cd8b76aa"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a7727fc03663e01d608319f24cd8b76aa">PRE_F2_F3</a>(mnemonic)</td></tr>
-<tr class="memitem:a15d4d9ac0de4701ce49b06cc4ab0ef5a" id="r_a15d4d9ac0de4701ce49b06cc4ab0ef5a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a15d4d9ac0de4701ce49b06cc4ab0ef5a">POST_F2_F3</a>&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.f[<a class="el" href="../../de/d00/a00185.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>]);</td></tr>
-<tr class="memitem:a2ed3c9a3e24f996d9d0c1944f4ff059e" id="r_a2ed3c9a3e24f996d9d0c1944f4ff059e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a2ed3c9a3e24f996d9d0c1944f4ff059e">OP</a>(mnemonic,  format)</td></tr>
-<tr class="memitem:a2074dd6ee6ab881660a6dd1a8b724c46" id="r_a2074dd6ee6ab881660a6dd1a8b724c46"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a2074dd6ee6ab881660a6dd1a8b724c46">OP_FNC</a>(mnemonic,  format)</td></tr>
+<tr class="memitem:a0ec8cc45e9c157359d5516d2eddd4f6f" id="r_a0ec8cc45e9c157359d5516d2eddd4f6f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0ec8cc45e9c157359d5516d2eddd4f6f">TB_ASN_MATCH</a>(entry)</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
@@ -200,1482 +293,123 @@ Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
+<tr class="memitem:a44c69c496db2b301dfe775ca621ed0ec" id="r_a44c69c496db2b301dfe775ca621ed0ec"><td class="memItemLeft">char&#160;</td><td class="memItemRight"><a class="el" href="#a44c69c496db2b301dfe775ca621ed0ec">dbg_string</a> [1000]</td></tr>
+<tr class="memitem:a4f8b5d8df71b7c95fa4163f773be3665" id="r_a4f8b5d8df71b7c95fa4163f773be3665"><td class="memItemLeft">static <a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a4f8b5d8df71b7c95fa4163f773be3665">cpu_magic1</a> = 0x2126468C</td></tr>
+<tr class="memitem:a4bb3e9f50ad1051903db016567329ca7" id="r_a4bb3e9f50ad1051903db016567329ca7"><td class="memItemLeft">static <a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a4bb3e9f50ad1051903db016567329ca7">cpu_magic2</a> = 0xC8646212</td></tr>
+<tr id="var-members-0" class="groupHeader"><td colspan="2"><div class="groupHeader">TB</div></td></tr>
+<tr><td colspan="2" class="ititle"><div class="groupText"><p>Translation Buffer related functions </p>
+</div></td></tr>
 <tr class="memitem:a3f0d3ad7c7154bd2768d6e4be7f01651" id="r_a3f0d3ad7c7154bd2768d6e4be7f01651"><td class="memItemLeft">const char *&#160;</td><td class="memItemRight"><a class="el" href="#a3f0d3ad7c7154bd2768d6e4be7f01651">PAL_NAME</a> []</td></tr>
 <tr class="memitem:ac5c7bc8ea0ac6b09a8fa5d9de79c5335" id="r_ac5c7bc8ea0ac6b09a8fa5d9de79c5335"><td class="memItemLeft">const char *&#160;</td><td class="memItemRight"><a class="el" href="#ac5c7bc8ea0ac6b09a8fa5d9de79c5335">IPR_NAME</a> []</td></tr>
-<tr class="memitem:a44c69c496db2b301dfe775ca621ed0ec" id="r_a44c69c496db2b301dfe775ca621ed0ec"><td class="memItemLeft">char&#160;</td><td class="memItemRight"><a class="el" href="#a44c69c496db2b301dfe775ca621ed0ec">dbg_string</a> [1000]</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Contains debugging macros used by <a class="el" href="../../d5/d00/a00140.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor.">AlphaCPU.cpp</a>. </p>
+<div class="textblock"><p>Contains the code for the emulated DecChip 21264CB EV68 Alpha processor. </p>
 <p>$Id$</p>
-<p>X-1.29 Camiel Vanderhoeven 26-MAR-2008 Fix compiler warnings.</p>
-<p>X-1.28 Camiel Vanderhoeven 19-MAR-2008 IDB versions compileable again.</p>
-<p>X-1.27 Camiel Vanderhoeven 13-MAR-2008 Formatting.</p>
-<p>X-1.26 Camiel Vanderhoeven 14-MAR-2008</p><ol type="1">
+<p>X-1.82 Camiel Vanderhoeven 15-MAR-2008 a) Added CONSTANT_TIME_FACTOR define to lock the CPU timing. b) Fixed a bug in SPE0 handling, spotted by David Hittner.</p>
+<p>X-1.81 Camiel Vanderhoeven 12-JUN-2008 a) Support to keep secondary CPUs waiting until activated from primary. b) New unaligned memory access handling. c) Fixed support for current_pc_physical handling with new icache.</p>
+<p>X-1.80 Camiel Vanderhoeven 31-MAY-2008 Changes to include parts of Poco.</p>
+<p>X-1.79 Camiel Vanderhoeven 26-MAR-2008 Fix compiler warnings.</p>
+<p>X-1.78 Camiel Vanderhoeven 19-MAR-2008 IDB versions compileable again.</p>
+<p>X-1.77 Camiel Vanderhoeven 15-MAR-2008 Remove confusing outer for-loop in <a class="el" href="../../d6/d00/a01137.html#a920854ec4029c667ee80ec021d526065">CAlphaCPU::run()</a>.</p>
+<p>X-1.76 Camiel Vanderhoeven 14-MAR-2008 Formatting.</p>
+<p>X-1.75 Camiel Vanderhoeven 14-MAR-2008</p><ol type="1">
 <li>More meaningful exceptions replace throwing (int) 1.</li>
 <li>U64 macro replaces X64 macro.</li>
 </ol>
-<p>X-1.25 Camiel Vanderhoeven 05-MAR-2008 Multi-threading version.</p>
-<p>X-1.24 Camiel Vanderhoeven 29-FEB-2008 Comments.</p>
-<p>X-1.23 Brian Wheeler 29-FEB-2008 Fix IDB compilation.</p>
-<p>X-1.22 Camiel Vanderhoeven 30-JAN-2008 Always use set_pc or add_pc to change the program counter.</p>
-<p>X-1.21 Camiel Vanderhoeven 30-JAN-2008 Remember number of instructions left in current memory page, so that the translation-buffer doens't need to be consulted on every instruction fetch when the Icache is disabled.</p>
-<p>X-1.20 Camiel Vanderhoeven 28-JAN-2008 Better floating-point exception handling.</p>
-<p>X-1.19 Camiel Vanderhoeven 27-JAN-2008 Have GO_PAL throw an exception, so we don't continue doing what we were doing before the exception was taken.</p>
-<p>X-1.18 Camiel Vanderhoeven 21-JAN-2008 Moved some macro's to <a class="el" href="../../de/d00/a00185.html" title="Contains some macro definitions and some inline functions for the Alpha CPU.">cpu_defs.h</a>.</p>
-<p>X-1.17 Camiel Vanderhoeven 16-JAN-2008 Added ARITH_TRAP macro.</p>
-<p>X-1.16 Camiel Vanderhoeven 2-DEC-2007 Moved PAL_NAME and IPR_NAME to <a class="el" href="../../d5/d00/a00140.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor.">AlphaCPU.cpp</a>.</p>
-<p>X-1.15 Camiel Vanderhoeven 10-NOV-2007 f12_f3 operations show fxx as registers instead of rxx.</p>
-<p>X-1.14 Camiel Vanderhoeven 30-OCT-2007 IPR 0x2d identified as M_FIX (Mbox fixed behaviour)</p>
-<p>X-1.13 Camiel Vanderhoeven 11-APR-2007 Moved all data that should be saved to a state file to a structure "state".</p>
-<p>X-1.12 Camiel Vanderhoeven 30-MAR-2007 Added old changelog comments.</p>
-<p>X-1.11 Camiel Vanderhoeven 14-MAR-2007 Small bugfix in DEBUG_XX macro.</p>
-<p>X-1.10 Camiel Vanderhoeven 14-MAR-2007 Small bugfix in FP debugging macro's.</p>
-<p>X-1.9 Camiel Vanderhoeven 13-MAR-2007 Added FP debugging macro's.</p>
-<p>X-1.8 Camiel Vanderhoeven 12-MAR-2007 a) When an exception occurs, debugging information for the previous instruction is no longer lost. b) Made various printf-statements 64-bit safe in a neater way. (Use printf("%" LL "x",value) instead of printf("%x",(<a class="el" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a>)value)).</p>
-<p>X-1.7 Camiel Vanderhoeven 8-MAR-2007 Pass "this" as an argument to <a class="el" href="../../d1/d00/a01041.html#a9399420be02465a4e5d268b481af71e1" title="See if a function name is known for a given address.">CTraceEngine::get_fnc_name</a>.</p>
-<p>X-1.6 Camiel Vanderhoeven 28-FEB-2007 a) Removed MINI_DEBUG_XX b) Debugging now writes to the char* debug_string, rather than using printf directly. This allows us to do other things with debugger output.</p>
-<p>X-1.5 Camiel Vanderhoeven 22-FEB-2007 a) Replaced IPR macro's with separate MTPR and MFPR macro's (because these instructions use different registers). b) Made a couple of printf's multi-platform-safe.</p>
-<p>X-1.4 Camiel Vanderhoeven 18-FEB-2007 Introduced POST_xxx and PRE_xxx macro's. When debugging, these are included from the OP macro in <a class="el" href="../../d5/d00/a00140.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor.">AlphaCPU.cpp</a>.</p>
-<p>X-1.3 Camiel Vanderhoeven 16-FEB-2007 a) Macro's that end CAlphaCPU::DoClock() now return 0. b) Made a couple of printf's multi-platform-safe.</p>
-<p>X-1.2 Brian Wheeler 13-FEB-2007 Added mini-version of DEBUG_XX, that dumps all registers in a concise format.</p>
-<p>X-1.1 Camiel Vanderhoeven 12-FEB-2007 File created. Contains code previously found in <a class="el" href="../../d7/d00/a00143.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor.">AlphaCPU.h</a> </p>
+<p>X-1.74 Camiel Vanderhoeven 13-MAR-2008 Create init(), start_threads() and stop_threads() functions.</p>
+<p>X-1.73 Camiel Vanderhoeven 11-MAR-2008 Don't printf calibration loop.</p>
+<p>X-1.72 Camiel Vanderhoeven 05-MAR-2008 Multi-threading version.</p>
+<p>X-1.71 Camiel Vanderhoeven 04-MAR-2008 Support some basic MP features. (CPUID read from C-Chip MISC register, inter-processor interrupts)</p>
+<p>X-1.70 Camiel Vanderhoeven 29-FEB-2008 Comments.</p>
+<p>X-1.69 Brian Wheeler 29-FEB-2008 Add BREAKPOINT INSTRUCTION command to IDB.</p>
+<p>X-1.68 Brian Wheeler 27-FEB-2008 Avoid compiler warnings.</p>
+<p>X-1.67 Camiel Vanderhoeven 08-FEB-2008 Show originating device name on memory errors.</p>
+<p>X-1.66 Camiel Vanderhoeven 05-FEB-2008 Only use new floating-point code when HAVE_NEW_FP has been defined.</p>
+<p>X-1.65 Camiel Vanderhoeven 01-FEB-2008 Avoid unnecessary shift-operations to calculate constant values.</p>
+<p>X-1.64 Camiel Vanderhoeven 30-JAN-2008 Always use set_pc or add_pc to change the program counter.</p>
+<p>X-1.63 Camiel Vanderhoeven 30-JAN-2008 Remember number of instructions left in current memory page, so that the translation-buffer doens't need to be consulted on every instruction fetch when the Icache is disabled.</p>
+<p>X-1.62 Camiel Vanderhoeven 29-JAN-2008 Comments.</p>
+<p>X-1.61 Camiel Vanderhoeven 29-JAN-2008 Undid last change, remember separate last found translation-buffer entries for read and wrote operations. This should help with memory copy operations.</p>
+<p>X-1.60 Camiel Vanderhoeven 27-JAN-2008 Have GO_PAL throw an exception, so we don't continue doing what we were doing before the exception was taken.</p>
+<p>X-1.59 Camiel Vanderhoeven 26-JAN-2008 Made IDB compile again.</p>
+<p>X-1.58 Camiel Vanderhoeven 25-JAN-2008 Added option to disable the icache.</p>
+<p>X-1.57 Camiel Vanderhoeven 22-JAN-2008 Nicer initialization of "state" structure.</p>
+<p>X-1.56 Camiel Vanderhoeven 22-JAN-2008 Implemented missing /V integer instructions.</p>
+<p>X-1.55 Camiel Vanderhoeven 21-JAN-2008 Moved some macro's to <a class="el" href="../../d7/d00/a00236.html" title="Contains some macro definitions and some inline functions for the Alpha CPU.">cpu_defs.h</a>; implement new floating-point code.</p>
+<p>X-1.54 Camiel Vanderhoeven 19-JAN-2008 Run CPU in a separate thread if CPU_THREADS is defined. NOTA BENE: This is very experimental, and has several problems.</p>
+<p>X-1.53 Camiel Vanderhoeven 18-JAN-2008 Replaced sext_64 inlines with sext_u64_&lt;bits&gt; inlines for performance reasons (thanks to David Hittner for spotting this!); Process device interrupts after a 100-cpu-cycle delay.</p>
+<p>X-1.52 David Hittner 16-JAN-2008 Added ADDL/V instruction, added MIPS estimate (define MIPS_ESTIMATE)</p>
+<p>X-1.51 Camiel Vanderhoeven 08-JAN-2008 Removed last references to IDE disk read SRM replacement.</p>
+<p>X-1.50 Camiel Vanderhoeven 30-DEC-2007 Print file id on initialization.</p>
+<p>X-1.49 Camiel Vanderhoeven 28-DEC-2007 Keep the compiler happy.</p>
+<p>X-1.48 Camiel Vanderhoeven 17-DEC-2007 SaveState file format 2.1</p>
+<p>X-1.47 Camiel Vanderhoeven 10-DEC-2007 Use configurator.</p>
+<p>X-1.46 Camiel Vanderhoeven 2-DEC-2007 Changed the way translation buffers work, the way interrupts work.</p>
+<p>X-1.45 Brian Wheeler 1-DEC-2007 Added support for instruction counting, underlined lines in listings, corrected some unsigned/signed issues.</p>
+<p>X-1.44 Camiel Vanderhoeven 16-NOV-2007 Avoid more compiler warnings.</p>
+<p>X-1.43 Camiel Vanderhoeven 16-NOV-2007 Avoid compiler warning about default without any cases.</p>
+<p>X-1.42 Camiel Vanderhoeven 08-NOV-2007 Instruction set complete now.</p>
+<p>X-1.41 Camiel Vanderhoeven 06-NOV-2007 Performance improvements to ICACHE: last result is kept; cache lines are larger (512 DWORDS in stead of 16 DWORDS), cache size is configurable (both number of cache lines and size of each cache line), memcpy is used to move memory into the ICACHE. CAVEAT: ICACHE can only be filled from memory (not from I/O).</p>
+<p>X-1.40 Camiel Vanderhoeven 02-NOV-2007 Added integer /V instructions.</p>
+<p>X-1.39 Camiel Vanderhoeven 02-NOV-2007 Added missing floating point instructions.</p>
+<p>X-1.38 Eduardo Marcelo Ferrat 31-OCT-2007 EXC_SUM contained the wrong register (3 in stead of 1) on a DTBM exception. Added instructions for CVTDG, CVTGD, MULG, CVTGF.</p>
+<p>X-1.37 Camiel Vanderhoeven 18-APR-2007 Faster lockstep mechanism (send info 50 cpu cycles at a time)</p>
+<p>X-1.36 Camiel Vanderhoeven 11-APR-2007 Moved all data that should be saved to a state file to a structure "state".</p>
+<p>X-1.35 Camiel Vanderhoeven 10-APR-2007 New mechanism for SRM replacements. Where these need to be executed, <a class="el" href="../../d7/d00/a02109.html#a390eeea8f34b1dcc08338563e803d738" title="Load ROM contents from file.">CSystem::LoadROM()</a> puts a special opcode (a CALL_PAL instruction with an otherwise illegal operand of 0x01234xx) in memory. CAlphaCPU::DoClock() recognizes these opcodes and performs the SRM action.</p>
+<p>X-1.34 Camiel Vanderhoeven 10-APR-2007 Unintentional version number increase.</p>
+<p>X-1.33 Camiel Vanderhoeven 30-MAR-2007 Formatting.</p>
+<p>X-1.32 Camiel Vanderhoeven 29-MAR-2007 Added AST to the list of conditions that cause the processor to go to the interrupt PAL vector (680).</p>
+<p>X-1.31 Brian Wheeler 28-MAR-2007 Fixed missing ) after #if !defined(SRM_NO_SPEEDUPS</p>
+<p>X-1.30 Camiel Vanderhoeven 26-MAR-2007 a) Possibility to disable SRM-code replacements with the defines SRM_NO_IDE, SRM_NO_SRL, and SRM_NO_SPEEDUPS b) Possibility to send SRM-code replacement debugging messages to the console, with the defines DEBUG_SRM_IDE and DEBUG_SRM_SRL c) Added software-interrupts to the list of conditions that can cause the processot to go to the interrupt PAL vector (680)</p>
+<p>X-1.29 Camiel Vanderhoeven 14-MAR-2007 Formatting.</p>
+<p>X-1.28 Camiel Vanderhoeven 14-MAR-2007 Fixed typo in "case 0x22: OP(CPYSE,F12_f3);"</p>
+<p>X-1.27 Camiel Vanderhoeven 13-MAR-2007 Added some floating-point opcodes, added es_float.h inclusion</p>
+<p>X-1.26 Camiel Vanderhoeven 12-MAR-2007 a) Changed call to CTranslationBuffer::convert_address (arguments list changed) b) Set values for EXC_SUM and MM_STAT on various exceptions</p>
+<p>X-1.25 Camiel Vanderhoeven 9-MAR-2007 In the listing-process, addresses were executed twice</p>
+<p>X-1.24 Camiel Vanderhoeven 8-MAR-2007 a) Changed call to CTranslationBuffer::write_pte (arguments list changed) b) Backed-out X-1.23 as real problem was solved. (X-1.3 in <a class="el" href="../../d9/d00/a00227.html" title="Contains code macros for the processor BWX (byte and word extension) instructions.">cpu_bwx.h</a>)</p>
+<p>X-1.23 Camiel Vanderhoeven 7-MAR-2007 HACK to stop APB.EXE from crashing when passing bootflags</p>
+<p>X-1.22 Camiel Vanderhoeven 3-MAR-2007 Wrote code to be executed in stead of SRM console code for writing to the serial port, and reading from IDE disks. Mechanism is based on recognition of the PC value. Should be replaced with a better mechanism in the future.</p>
+<p>X-1.21 Camiel Vanderhoeven 2-MAR-2007 Initialize debug_string to "".</p>
+<p>X-1.20 Camiel Vanderhoeven 2-MAR-2007 Fixed problem in Save and RestoreState; argument f conflicted with class member f.</p>
+<p>X-1.19 Camiel Vanderhoeven 28-FEB-2007 Added support for the lockstep-mechanism.</p>
+<p>X-1.18 Camiel Vanderhoeven 27-FEB-2007 Removed an unreachable "return 0;" line from DoClock</p>
+<p>X-1.17 Camiel Vanderhoeven 22-FEB-2007 E_FAULT returned from translation buffer now causes DFAULT exception</p>
+<p>X-1.16 Camiel Vanderhoven 22-FEB-2007 a) Changed call to CTranslationBuffer::convert_address (arguments list changed) b) Fixed HW_MTPR and HW_MFPR opcodes</p>
+<p>X-1.15 Camiel Vanderhoeven 19-FEB-2007 Fixed preprocessor macro concatenation bug (used ## both before and after the literal; changed this to only before).</p>
+<p>X-1.14 Camiel Vanderhoeven 18-FEB-2007 Put all actual code behind the processor opcodes in cpu_xxx.h include files, and replaced them with <a class="el" href="../../d6/d00/a00233.html#a2ed3c9a3e24f996d9d0c1944f4ff059e">OP(...,...)</a> macro's in this file.</p>
+<p>X-1.13 Camiel Vanderhoeven 16-FEB-2007 a) Added <a class="el" href="../../d6/d00/a01137.html#a9ed4ccedc35d2fd10325ade59834b363" title="Produce disassembly-listing without marker.">CAlphaCPU::listing</a>. b) Clocking changes (due to changes in <a class="el" href="../../d7/d00/a02109.html" title="Emulated Typhoon 21272 chipset.">CSystem</a>): CAlphaCPU::DoClock now returns a value, and the CPU is registered as a fast clocked device.</p>
+<p>X-1.12 Brian Wheeler 13-FEB-2007 Different algorithm used for UMULH (previous algorithm suffered from portability issues).</p>
+<p>X-1.11 Camiel Vanderhoeven 13-FEB-2007 a) Bugfix in the UMULH instruction. b) Bugfix in the HW_MTPR VA_CTL instruction. Now updates va_ctl_va_mode instead of i_ctl_va_mode.</p>
+<p>X-1.10 Camiel Vanderhoeven 12-FEB-2007 a) Moved debugging macro's to <a class="el" href="../../d6/d00/a00233.html" title="Contains debugging macros used by AlphaCPU.cpp.">cpu_debug.h</a> b) Cleaned up SEXT and REG macro's (a lot neater now) c) Moved <a class="el" href="../../d6/d00/a01137.html#af620fa1cf9b5fe7a1b0e23acb8e934ee" title="Get a register value.">CAlphaCPU::get_r</a> and <a class="el" href="../../d6/d00/a01137.html#ab5bdcfdcd6eb2b5f555cab875edbcb09" title="Get the processor base register.">CAlphaCPU::get_prbr</a> to <a class="el" href="../../de/d00/a00185.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor.">AlphaCPU.h</a> as inline functions d) Use SEXT macro in a some places where exotic constructions were used previously</p>
+<p>X-1.9 Camiel Vanderhoeven 12-FEB-2007 a) Added X64_BYTE, X64_WORD, X64_LONG and X64_QUAD, and used these instead of the corresponding values. b) Added ier to the variables that are saved to the state file.</p>
+<p>X-1.8 Camiel Vanderhoeven 9-FEB-2007 a) Moved debugging flags (booleans) to CSystem.cpp. b) Removed loggin of last_write_loc and last_write_val</p>
+<p>X-1.7 Camiel Vanderhoeven 7-FEB-2007 Made various dubugging-related statements dependent on the definition of IDB (interactive debugger)</p>
+<p>X-1.6 Camiel Vanderhoeven 3-FEB-2007 Inline function printable moved to <a class="el" href="../../d6/d00/a00626.html" title="Standard includes.">StdAfx.h</a></p>
+<p>X-1.5 Brian Wheeler 3-FEB-2007 Formatting.</p>
+<p>X-1.4 Brian Wheeler 3-FEB-2007 More scanf and printf statements made compatible with Linux/GCC/glibc.</p>
+<p>X-1.3 Brian Wheeler 3-FEB-2007 Scanf and printf statements made compatible with Linux/GCC/glibc.</p>
+<p>X-1.2 Brian Wheeler 3-FEB-2007 Includes are now case-correct (necessary on Linux)</p>
+<p>X-1.1 Camiel Vanderhoeven 19-JAN-2007 Initial version in CVS. </p>
 
-<p class="definition">Definition in file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
+<p class="definition">Definition in file <a class="el" href="../../d7/d00/a00182_source.html">AlphaCPU.cpp</a>.</p>
 </div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
-<a id="a0651a1723c81134a9c55c718862ec658" name="a0651a1723c81134a9c55c718862ec658"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0651a1723c81134a9c55c718862ec658">&#9670;&#160;</a></span>DEBUG_INSTALL_PAL_TRAP</h2>
+<a id="a0ec8cc45e9c157359d5516d2eddd4f6f" name="a0ec8cc45e9c157359d5516d2eddd4f6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ec8cc45e9c157359d5516d2eddd4f6f">&#9670;&#160;</a></span>TB_ASN_MATCH</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define DEBUG_INSTALL_PAL_TRAP</td>
+          <td class="memname">#define TB_ASN_MATCH</td>
           <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>offset</em></span></td><td>)</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>entry</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">((void) 0)</div>
+<b>Value:</b><div class="fragment"><div class="line">((entry).asm_bit || (entry).asn == asn)</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00146">146</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a0aea852a7eb3ef471a4484d0049d8f46" name="a0aea852a7eb3ef471a4484d0049d8f46"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0aea852a7eb3ef471a4484d0049d8f46">&#9670;&#160;</a></span>DEBUG_XX</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define DEBUG_XX</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00205">205</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a7950569f3016b4617852c20a090668ed" name="a7950569f3016b4617852c20a090668ed"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7950569f3016b4617852c20a090668ed">&#9670;&#160;</a></span>ES40_EXECUTE_END</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ES40_EXECUTE_END</td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">goto</span> _next_instruction</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00140">140</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d5/d00/a00140_source.html#l02949">CAlphaCPU::execute()</a>.</p>
-
-</div>
-</div>
-<a id="a6e0aaa4a706eeb77b476e170dfb26f97" name="a6e0aaa4a706eeb77b476e170dfb26f97"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6e0aaa4a706eeb77b476e170dfb26f97">&#9670;&#160;</a></span>GO_PAL</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define GO_PAL</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>reason</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">{                                                                           \</div>
-<div class="line">  <span class="keyword">const</span> <span class="keyword">auto</span> pal_entry = pal_exception_entry((reason), state.current_pc);    \</div>
-<div class="line">  <span class="keyword">const</span> <a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> pal_offset = pal_entry.offset;                                  \</div>
-<div class="line">  if(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                                         \</div>
-<div class="line">  {                                                                         \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot; ==&gt; PAL %&quot;</span> PRIx64 <span class="stringliteral">&quot;!\n&quot;</span>, pal_offset);            \</div>
-<div class="line">    <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                      \</div>
-<div class="line">  }                                                                         \</div>
-<div class="line">  handle_debug_string(<a class="code hl_variable" href="../../d5/d00/a00140.html#a44c69c496db2b301dfe775ca621ed0ec">dbg_string</a>);                                         \</div>
-<div class="line">  DEBUG_INSTALL_PAL_TRAP(pal_offset);                                      \</div>
-<div class="line">  enter_pal_exception(pal_entry);                                          \</div>
-<div class="line">  <span class="keywordflow">if</span> <span class="keyword">constexpr</span> ((reason) == <a class="code hl_enumvalue" href="../../d5/d00/a00170.html#a5c9934e3a54f06127616037536160abdab7b098553ebc1f6249f61942f47fdda7">AlphaPALException::DataTlbMiss</a> ||               \</div>
-<div class="line">                (reason) == <a class="code hl_enumvalue" href="../../d5/d00/a00170.html#a5c9934e3a54f06127616037536160abda41cf96ed58ab05378c27c3ed54cfe00e">AlphaPALException::InstructionTlbMiss</a>) {       \</div>
-<div class="line">    if(<a class="code hl_variable" href="../../d9/d00/a00257.html#aec440ea495e89a5b3c1c6020761c31d7">bTrace</a>)                                                             \</div>
-<div class="line">      <a class="code hl_variable" href="../../d9/d00/a00257.html#a68bf49d9a6ffe37d4e0ebb6a7d175d5c">trc</a>-&gt;<a class="code hl_function" href="../../d1/d00/a01041.html#ada4a46db8ce27662374b2437a734a9ce">set_waitfor</a>(<span class="keyword">this</span>, state.exc_addr &amp; ~<a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x3));                   \</div>
-<div class="line">    else                                                                    \</div>
-<div class="line">      TRC_(<span class="keyword">true</span>, <span class="keyword">false</span>, <span class="stringliteral">&quot;GO_PAL %&quot;</span> PRIx64, pal_offset);                     \</div>
-<div class="line">  } else                                                                    \</div>
-<div class="line">    TRC_(<span class="keyword">true</span>, <span class="keyword">false</span>, <span class="stringliteral">&quot;GO_PAL %&quot;</span> PRIx64, pal_offset);                       \</div>
-<div class="line">}</div>
-<div class="ttc" id="aa00140_html_a44c69c496db2b301dfe775ca621ed0ec"><div class="ttname"><a href="../../d5/d00/a00140.html#a44c69c496db2b301dfe775ca621ed0ec">dbg_string</a></div><div class="ttdeci">char dbg_string[1000]</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00140_source.html#l00991">AlphaCPU.cpp:991</a></div></div>
-<div class="ttc" id="aa00170_html_a5c9934e3a54f06127616037536160abda41cf96ed58ab05378c27c3ed54cfe00e"><div class="ttname"><a href="../../d5/d00/a00170.html#a5c9934e3a54f06127616037536160abda41cf96ed58ab05378c27c3ed54cfe00e">AlphaPALException::InstructionTlbMiss</a></div><div class="ttdeci">@ InstructionTlbMiss</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00170_source.html#l00044">AlphaPAL.h:44</a></div></div>
-<div class="ttc" id="aa00170_html_a5c9934e3a54f06127616037536160abdab7b098553ebc1f6249f61942f47fdda7"><div class="ttname"><a href="../../d5/d00/a00170.html#a5c9934e3a54f06127616037536160abdab7b098553ebc1f6249f61942f47fdda7">AlphaPALException::DataTlbMiss</a></div><div class="ttdeci">@ DataTlbMiss</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00170_source.html#l00039">AlphaPAL.h:39</a></div></div>
-<div class="ttc" id="aa00257_html_a68bf49d9a6ffe37d4e0ebb6a7d175d5c"><div class="ttname"><a href="../../d9/d00/a00257.html#a68bf49d9a6ffe37d4e0ebb6a7d175d5c">trc</a></div><div class="ttdeci">CTraceEngine * trc</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d00/a00257_source.html#l00171">TraceEngine.cpp:171</a></div></div>
-<div class="ttc" id="aa00257_html_a9c3cfa2b0c665b04458d1d148bc10e17"><div class="ttname"><a href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a></div><div class="ttdeci">bool bDisassemble</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d00/a00257_source.html#l01848">TraceEngine.cpp:1848</a></div></div>
-<div class="ttc" id="aa00257_html_aec440ea495e89a5b3c1c6020761c31d7"><div class="ttname"><a href="../../d9/d00/a00257.html#aec440ea495e89a5b3c1c6020761c31d7">bTrace</a></div><div class="ttdeci">bool bTrace</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d00/a00257_source.html#l01847">TraceEngine.cpp:1847</a></div></div>
-<div class="ttc" id="aa00263_html_a1af9f95651e921615e75917a6dd1b574"><div class="ttname"><a href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a></div><div class="ttdeci">uint64_t u64</div><div class="ttdef"><b>Definition</b> <a href="../../df/d00/a00263_source.html#l00126">datatypes.h:126</a></div></div>
-<div class="ttc" id="aa00263_html_a87a27db8f6877dc5bbc36ec833e88c58"><div class="ttname"><a href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a></div><div class="ttdeci">#define U64(a)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d00/a00263_source.html#l00119">datatypes.h:119</a></div></div>
-<div class="ttc" id="aa00617_html_abc293cf295b84b4862942d89d8c97be5"><div class="ttname"><a href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a></div><div class="ttdeci">char * dbg_strptr</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00617_source.html#l00347">System.cpp:347</a></div></div>
-<div class="ttc" id="aa01041_html_ada4a46db8ce27662374b2437a734a9ce"><div class="ttname"><a href="../../d1/d00/a01041.html#ada4a46db8ce27662374b2437a734a9ce">CTraceEngine::set_waitfor</a></div><div class="ttdeci">void set_waitfor(class CAlphaCPU *cpu, u64 address)</div><div class="ttdoc">Suspend tracing until the given address is reached.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d00/a00257_source.html#l00550">TraceEngine.cpp:550</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00170">170</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d5/d00/a00140_source.html#l02949">CAlphaCPU::execute()</a>.</p>
-
-</div>
-</div>
-<a id="a2ed3c9a3e24f996d9d0c1944f4ff059e" name="a2ed3c9a3e24f996d9d0c1944f4ff059e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2ed3c9a3e24f996d9d0c1944f4ff059e">&#9670;&#160;</a></span>OP</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define OP</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>format</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">PRE_##format(mnemonic);          \</div>
-<div class="line">if(!<a class="code hl_variable" href="../../d9/d00/a00257.html#a5783a67942e298401dd23cddf8f3448a">bListing</a>)                    \</div>
-<div class="line">{                                \</div>
-<div class="line">  DO_##mnemonic;                 \</div>
-<div class="line">} POST_##format;                 \</div>
-<div class="line">handle_debug_string(<a class="code hl_variable" href="../../d5/d00/a00140.html#a44c69c496db2b301dfe775ca621ed0ec">dbg_string</a>); \</div>
-<div class="line">ES40_EXECUTE_END();</div>
-<div class="ttc" id="aa00257_html_a5783a67942e298401dd23cddf8f3448a"><div class="ttname"><a href="../../d9/d00/a00257.html#a5783a67942e298401dd23cddf8f3448a">bListing</a></div><div class="ttdeci">bool bListing</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d00/a00257_source.html#l01850">TraceEngine.cpp:1850</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00770">770</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d5/d00/a00140_source.html#l02949">CAlphaCPU::execute()</a>.</p>
-
-</div>
-</div>
-<a id="a2074dd6ee6ab881660a6dd1a8b724c46" name="a2074dd6ee6ab881660a6dd1a8b724c46"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2074dd6ee6ab881660a6dd1a8b724c46">&#9670;&#160;</a></span>OP_FNC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define OP_FNC</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>format</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">PRE_##format(mnemonic);          \</div>
-<div class="line">if(!<a class="code hl_variable" href="../../d9/d00/a00257.html#a5783a67942e298401dd23cddf8f3448a">bListing</a>)                    \</div>
-<div class="line">{                                \</div>
-<div class="line">  mnemonic();                    \</div>
-<div class="line">} POST_##format;                 \</div>
-<div class="line">handle_debug_string(<a class="code hl_variable" href="../../d5/d00/a00140.html#a44c69c496db2b301dfe775ca621ed0ec">dbg_string</a>); \</div>
-<div class="line">ES40_EXECUTE_END();</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00780">780</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="af88c16af85d0cd4f537ee7b34df0bc08" name="af88c16af85d0cd4f537ee7b34df0bc08"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af88c16af85d0cd4f537ee7b34df0bc08">&#9670;&#160;</a></span>POST_BR</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_BR&#160;&#160;&#160;<a class="el" href="#a6b7167988ca15a6be1e18cbda60458a8">TRC_BR</a>;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00382">382</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a50f730968c2f9cfe54790d79b8b5c5af" name="a50f730968c2f9cfe54790d79b8b5c5af"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a50f730968c2f9cfe54790d79b8b5c5af">&#9670;&#160;</a></span>POST_BSR</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_BSR</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_define" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> == 31) \</div>
-<div class="line">{                               \</div>
-<div class="line">  TRC(0, 1);                    \</div>
-<div class="line">}                               \</div>
-<div class="line"><span class="keywordflow">else</span>                            \</div>
-<div class="line">{                               \</div>
-<div class="line">  TRC(1, 1);                    \</div>
-<div class="line">}</div>
-<div class="ttc" id="aa00185_html_a3cc7326bd3140cc269e686fc46179a21"><div class="ttname"><a href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a></div><div class="ttdeci">#define REG_1</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00839">cpu_defs.h:839</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00437">437</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a6b9e1d80796c52b0ca3fc31f6b050eca" name="a6b9e1d80796c52b0ca3fc31f6b050eca"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6b9e1d80796c52b0ca3fc31f6b050eca">&#9670;&#160;</a></span>POST_COND</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_COND&#160;&#160;&#160;<a class="el" href="#a6b7167988ca15a6be1e18cbda60458a8">TRC_BR</a>;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00402">402</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="adec66a3756e2e98f0a132cf00231ec55" name="adec66a3756e2e98f0a132cf00231ec55"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adec66a3756e2e98f0a132cf00231ec55">&#9670;&#160;</a></span>POST_F12_F3</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_F12_F3&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.f[<a class="el" href="../../de/d00/a00185.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00568">568</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a6f66274d228fd259c91034c2574bffbf" name="a6f66274d228fd259c91034c2574bffbf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6f66274d228fd259c91034c2574bffbf">&#9670;&#160;</a></span>POST_F1_R3</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_F1_R3&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.r[<a class="el" href="../../de/d00/a00185.html#a14e5d5a6641dfac1ed51225a7b87bc92">REG_3</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00598">598</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a15d4d9ac0de4701ce49b06cc4ab0ef5a" name="a15d4d9ac0de4701ce49b06cc4ab0ef5a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a15d4d9ac0de4701ce49b06cc4ab0ef5a">&#9670;&#160;</a></span>POST_F2_F3</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_F2_F3&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.f[<a class="el" href="../../de/d00/a00185.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00739">739</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a5977ed0462e86ac18c2a883596b30af7" name="a5977ed0462e86ac18c2a883596b30af7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5977ed0462e86ac18c2a883596b30af7">&#9670;&#160;</a></span>POST_FCOND</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_FCOND&#160;&#160;&#160;<a class="el" href="#a6b7167988ca15a6be1e18cbda60458a8">TRC_BR</a>;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00422">422</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a90d7302097801cf8d445f7976c51609f" name="a90d7302097801cf8d445f7976c51609f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a90d7302097801cf8d445f7976c51609f">&#9670;&#160;</a></span>POST_FMEM</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_FMEM&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.f[<a class="el" href="../../de/d00/a00185.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00719">719</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="ae47d15c764e5ff57a36fea29fe938781" name="ae47d15c764e5ff57a36fea29fe938781"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae47d15c764e5ff57a36fea29fe938781">&#9670;&#160;</a></span>POST_HW_LD</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_HW_LD&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.r[<a class="el" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00677">677</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a7c92c242606e0803d4741c1835517ae7" name="a7c92c242606e0803d4741c1835517ae7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7c92c242606e0803d4741c1835517ae7">&#9670;&#160;</a></span>POST_HW_ST</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_HW_ST&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.r[<a class="el" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00701">701</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a284c16bac42b9c1583db531b7480ab44" name="a284c16bac42b9c1583db531b7480ab44"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a284c16bac42b9c1583db531b7480ab44">&#9670;&#160;</a></span>POST_JMP</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_JMP</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_define" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> == 31) \</div>
-<div class="line">{                               \</div>
-<div class="line">  TRC(0, 1);                    \</div>
-<div class="line">}                               \</div>
-<div class="line"><span class="keywordflow">else</span>                            \</div>
-<div class="line">{                               \</div>
-<div class="line">  TRC(1, 1);                    \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00458">458</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a8b52d8963ebec588d9eaf32b6c3521fc" name="a8b52d8963ebec588d9eaf32b6c3521fc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8b52d8963ebec588d9eaf32b6c3521fc">&#9670;&#160;</a></span>POST_MEM</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_MEM&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.r[<a class="el" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00525">525</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="afdc533111e69f3fb406112dab0d48770" name="afdc533111e69f3fb406112dab0d48770"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afdc533111e69f3fb406112dab0d48770">&#9670;&#160;</a></span>POST_MFPR</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_MFPR&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.r[<a class="el" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00489">489</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="aa7c1ba82ae3114a5dba1030ad749531d" name="aa7c1ba82ae3114a5dba1030ad749531d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa7c1ba82ae3114a5dba1030ad749531d">&#9670;&#160;</a></span>POST_MTPR</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_MTPR&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.r[<a class="el" href="../../de/d00/a00185.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00499">499</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="af6fd75b59cf8d0b0df24e0533188f2d0" name="af6fd75b59cf8d0b0df24e0533188f2d0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af6fd75b59cf8d0b0df24e0533188f2d0">&#9670;&#160;</a></span>POST_NOP</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_NOP&#160;&#160;&#160;;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00509">509</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="aaa7015c441641696d6f7a3ce69251b7e" name="aaa7015c441641696d6f7a3ce69251b7e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaa7015c441641696d6f7a3ce69251b7e">&#9670;&#160;</a></span>POST_PAL</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_PAL&#160;&#160;&#160;<a class="el" href="#aab3906b700eae34b8c3911ed79ca662f">TRC</a>(1, 0);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00367">367</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="aa2d099c4a51379e6a04582c16524cb10" name="aa2d099c4a51379e6a04582c16524cb10"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa2d099c4a51379e6a04582c16524cb10">&#9670;&#160;</a></span>POST_R12_R3</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_R12_R3&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.r[<a class="el" href="../../de/d00/a00185.html#a14e5d5a6641dfac1ed51225a7b87bc92">REG_3</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00547">547</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="ab6089b91db20ea50fd017e8fb834a932" name="ab6089b91db20ea50fd017e8fb834a932"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab6089b91db20ea50fd017e8fb834a932">&#9670;&#160;</a></span>POST_R1_F3</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_R1_F3&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.f[<a class="el" href="../../de/d00/a00185.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00583">583</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="aa1d095f3d38dcf64c79c38b232ea26bf" name="aa1d095f3d38dcf64c79c38b232ea26bf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa1d095f3d38dcf64c79c38b232ea26bf">&#9670;&#160;</a></span>POST_R2_R3</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_R2_R3&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.r[<a class="el" href="../../de/d00/a00185.html#a14e5d5a6641dfac1ed51225a7b87bc92">REG_3</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00630">630</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a50fb90a609c7d03744736747e5ee3123" name="a50fb90a609c7d03744736747e5ee3123"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a50fb90a609c7d03744736747e5ee3123">&#9670;&#160;</a></span>POST_RET</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_RET&#160;&#160;&#160;<a class="el" href="#aab3906b700eae34b8c3911ed79ca662f">TRC</a>(0, 1);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00479">479</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a6df8a8ff1c6a7a0736645728aaa34882" name="a6df8a8ff1c6a7a0736645728aaa34882"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6df8a8ff1c6a7a0736645728aaa34882">&#9670;&#160;</a></span>POST_X64</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_X64</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>a</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                            \</div>
-<div class="line">{                                           \</div>
-<div class="line">  if(!<a class="code hl_variable" href="../../d9/d00/a00257.html#a5783a67942e298401dd23cddf8f3448a">bListing</a>)                             \</div>
-<div class="line">  {                                         \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot; ==&gt; %&quot;</span> PRIx64, a); \</div>
-<div class="line">    <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);       \</div>
-<div class="line">  }                                         \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00346">346</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="ada28a9a972a16b7ae35bf47c116fc37c" name="ada28a9a972a16b7ae35bf47c116fc37c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ada28a9a972a16b7ae35bf47c116fc37c">&#9670;&#160;</a></span>POST_X_F1</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_X_F1&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.f[<a class="el" href="../../de/d00/a00185.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00608">608</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a3d45e1996511e3cd732d7bfd1413db8d" name="a3d45e1996511e3cd732d7bfd1413db8d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3d45e1996511e3cd732d7bfd1413db8d">&#9670;&#160;</a></span>POST_X_R1</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_X_R1&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.r[<a class="el" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00640">640</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a01e04d77e4767be57b7e33c2078c5a23" name="a01e04d77e4767be57b7e33c2078c5a23"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a01e04d77e4767be57b7e33c2078c5a23">&#9670;&#160;</a></span>POST_X_R3</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POST_X_R3&#160;&#160;&#160;<a class="el" href="#a6df8a8ff1c6a7a0736645728aaa34882">POST_X64</a>(state.r[<a class="el" href="../../de/d00/a00185.html#a14e5d5a6641dfac1ed51225a7b87bc92">REG_3</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00650">650</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a44544ab2f7492382687c78b37f875a12" name="a44544ab2f7492382687c78b37f875a12"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a44544ab2f7492382687c78b37f875a12">&#9670;&#160;</a></span>PRE_BR</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_BR</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                                       \</div>
-<div class="line">{                                                                      \</div>
-<div class="line">  <a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a>       dbg_x = (state.current_pc + 4 + (<a class="code hl_define" href="../../de/d00/a00185.html#a7d990f4991dae437ae9b885db118eebd">DISP_21</a> * 4)) &amp;~<a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x3); \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; r%d, &quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 31);       \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                    \</div>
-<div class="line">  if(<a class="code hl_variable" href="../../d9/d00/a00257.html#a68bf49d9a6ffe37d4e0ebb6a7d175d5c">trc</a>-&gt;<a class="code hl_function" href="../../d1/d00/a01041.html#a9399420be02465a4e5d268b481af71e1">get_fnc_name</a>(<span class="keyword">this</span>, dbg_x, &amp;funcname))                        \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;%s&quot;</span>, funcname);                               \</div>
-<div class="line">  else                                                                 \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;%&quot;</span> PRIx64, dbg_x);                             \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                    \</div>
-<div class="line">}</div>
-<div class="ttc" id="aa00182_html_a0aea852a7eb3ef471a4484d0049d8f46"><div class="ttname"><a href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a></div><div class="ttdeci">#define DEBUG_XX</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00182_source.html#l00205">cpu_debug.h:205</a></div></div>
-<div class="ttc" id="aa00185_html_a7d990f4991dae437ae9b885db118eebd"><div class="ttname"><a href="../../de/d00/a00185.html#a7d990f4991dae437ae9b885db118eebd">DISP_21</a></div><div class="ttdeci">#define DISP_21</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00582">cpu_defs.h:582</a></div></div>
-<div class="ttc" id="aa01041_html_a9399420be02465a4e5d268b481af71e1"><div class="ttname"><a href="../../d1/d00/a01041.html#a9399420be02465a4e5d268b481af71e1">CTraceEngine::get_fnc_name</a></div><div class="ttdeci">bool get_fnc_name(class CAlphaCPU *cpu, u64 address, char **p_fn_name)</div><div class="ttdoc">See if a function name is known for a given address.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d00/a00257_source.html#l00562">TraceEngine.cpp:562</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00369">369</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="ac308f5973074165e8b2987ab691ca0bd" name="ac308f5973074165e8b2987ab691ca0bd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac308f5973074165e8b2987ab691ca0bd">&#9670;&#160;</a></span>PRE_BSR</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_BSR</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                                       \</div>
-<div class="line">{                                                                      \</div>
-<div class="line">  <a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a>       dbg_x = (state.current_pc + 4 + (<a class="code hl_define" href="../../de/d00/a00185.html#a7d990f4991dae437ae9b885db118eebd">DISP_21</a> * 4)) &amp;~<a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x3); \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; r%d, &quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 31);       \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                    \</div>
-<div class="line">  if(<a class="code hl_variable" href="../../d9/d00/a00257.html#a68bf49d9a6ffe37d4e0ebb6a7d175d5c">trc</a>-&gt;<a class="code hl_function" href="../../d1/d00/a01041.html#a9399420be02465a4e5d268b481af71e1">get_fnc_name</a>(<span class="keyword">this</span>, dbg_x, &amp;funcname))                        \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;%s&quot;</span>, funcname);                               \</div>
-<div class="line">  else                                                                 \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;%&quot;</span> PRIx64, dbg_x);                            \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                    \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00424">424</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a3b46103aa61fa20b28459692b3a23b0b" name="a3b46103aa61fa20b28459692b3a23b0b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3b46103aa61fa20b28459692b3a23b0b">&#9670;&#160;</a></span>PRE_COND</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_COND</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                                       \</div>
-<div class="line">{                                                                      \</div>
-<div class="line">  <a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a>       dbg_x = (state.current_pc + 4 + (<a class="code hl_define" href="../../de/d00/a00185.html#a7d990f4991dae437ae9b885db118eebd">DISP_21</a> * 4)) &amp;~<a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x3); \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; r%d, &quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 31);       \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                    \</div>
-<div class="line">  if(<a class="code hl_variable" href="../../d9/d00/a00257.html#a68bf49d9a6ffe37d4e0ebb6a7d175d5c">trc</a>-&gt;<a class="code hl_function" href="../../d1/d00/a01041.html#a9399420be02465a4e5d268b481af71e1">get_fnc_name</a>(<span class="keyword">this</span>, dbg_x, &amp;funcname))                        \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;%s&quot;</span>, funcname);                               \</div>
-<div class="line">  else                                                                 \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;%&quot;</span> PRIx64, dbg_x);                             \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                    \</div>
-<div class="line">  if(!<a class="code hl_variable" href="../../d9/d00/a00257.html#a5783a67942e298401dd23cddf8f3448a">bListing</a>)                                                        \</div>
-<div class="line">  {                                                                    \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;: (%&quot;</span> PRIx64 <span class="stringliteral">&quot;)&quot;</span>, state.r[<a class="code hl_define" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);            \</div>
-<div class="line">    <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                  \</div>
-<div class="line">  }                                                                    \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00384">384</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a018e0b3a60b50c19a0ec7909f3df2725" name="a018e0b3a60b50c19a0ec7909f3df2725"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a018e0b3a60b50c19a0ec7909f3df2725">&#9670;&#160;</a></span>PRE_F12_F3</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_F12_F3</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                                           \</div>
-<div class="line">{                                                                          \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>;                                                                \</div>
-<div class="line">  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; f%d, f%d, f%d&quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>, <a class="code hl_define" href="../../de/d00/a00185.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>, <a class="code hl_define" href="../../de/d00/a00185.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>); \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                        \</div>
-<div class="line">  if(!<a class="code hl_variable" href="../../d9/d00/a00257.html#a5783a67942e298401dd23cddf8f3448a">bListing</a>)                                                            \</div>
-<div class="line">  {                                                                        \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;: (%&quot;</span> PRIx64 <span class="stringliteral">&quot;,%&quot;</span> PRIx64 <span class="stringliteral">&quot;)&quot;</span>, state.f[<a class="code hl_define" href="../../de/d00/a00185.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>],            \</div>
-<div class="line">            state.f[<a class="code hl_define" href="../../de/d00/a00185.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>]);                                              \</div>
-<div class="line">    <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                      \</div>
-<div class="line">  }                                                                        \</div>
-<div class="line">}</div>
-<div class="ttc" id="aa00185_html_a29d129d2f45aa7c3558ed295c8e4958f"><div class="ttname"><a href="../../de/d00/a00185.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a></div><div class="ttdeci">#define FREG_2</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00843">cpu_defs.h:843</a></div></div>
-<div class="ttc" id="aa00185_html_a5591e9ff8152342313b8c38f14c437b7"><div class="ttname"><a href="../../de/d00/a00185.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a></div><div class="ttdeci">#define FREG_1</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00842">cpu_defs.h:842</a></div></div>
-<div class="ttc" id="aa00185_html_ab0813d80598693a82bb2c295cc7c69b7"><div class="ttname"><a href="../../de/d00/a00185.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a></div><div class="ttdeci">#define FREG_3</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00844">cpu_defs.h:844</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00552">552</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="ad3645b14ab2e7e202c8f14e403c05597" name="ad3645b14ab2e7e202c8f14e403c05597"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad3645b14ab2e7e202c8f14e403c05597">&#9670;&#160;</a></span>PRE_F1_R3</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_F1_R3</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                                   \</div>
-<div class="line">{                                                                  \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>;                                                        \</div>
-<div class="line">  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; f%d, r%d &quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>, <a class="code hl_define" href="../../de/d00/a00185.html#a14e5d5a6641dfac1ed51225a7b87bc92">REG_3</a> &amp; 31); \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                \</div>
-<div class="line">  if(!<a class="code hl_variable" href="../../d9/d00/a00257.html#a5783a67942e298401dd23cddf8f3448a">bListing</a>)                                                    \</div>
-<div class="line">  {                                                                \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;: (%&quot;</span> PRIx64 <span class="stringliteral">&quot;)&quot;</span>, state.f[<a class="code hl_define" href="../../de/d00/a00185.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]);           \</div>
-<div class="line">    <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                              \</div>
-<div class="line">  }                                                                \</div>
-<div class="line">}</div>
-<div class="ttc" id="aa00185_html_a14e5d5a6641dfac1ed51225a7b87bc92"><div class="ttname"><a href="../../de/d00/a00185.html#a14e5d5a6641dfac1ed51225a7b87bc92">REG_3</a></div><div class="ttdeci">#define REG_3</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00841">cpu_defs.h:841</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00585">585</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a7727fc03663e01d608319f24cd8b76aa" name="a7727fc03663e01d608319f24cd8b76aa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7727fc03663e01d608319f24cd8b76aa">&#9670;&#160;</a></span>PRE_F2_F3</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_F2_F3</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                              \</div>
-<div class="line">{                                                             \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>;                                                   \</div>
-<div class="line">  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; f%d, f%d&quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>, <a class="code hl_define" href="../../de/d00/a00185.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>); \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                           \</div>
-<div class="line">  if(!<a class="code hl_variable" href="../../d9/d00/a00257.html#a5783a67942e298401dd23cddf8f3448a">bListing</a>)                                               \</div>
-<div class="line">  {                                                           \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;: (%&quot;</span> PRIx64 <span class="stringliteral">&quot;)&quot;</span>, state.f[<a class="code hl_define" href="../../de/d00/a00185.html#a29d129d2f45aa7c3558ed295c8e4958f">FREG_2</a>]);      \</div>
-<div class="line">    <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                         \</div>
-<div class="line">  }                                                           \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00724">724</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a2d98e9dd6a422a307ebb397481c6e042" name="a2d98e9dd6a422a307ebb397481c6e042"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2d98e9dd6a422a307ebb397481c6e042">&#9670;&#160;</a></span>PRE_FCOND</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_FCOND</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                                       \</div>
-<div class="line">{                                                                      \</div>
-<div class="line">  <a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a>       dbg_x = (state.current_pc + 4 + (<a class="code hl_define" href="../../de/d00/a00185.html#a7d990f4991dae437ae9b885db118eebd">DISP_21</a> * 4)) &amp;~<a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x3); \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; f%d, &quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>);           \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                    \</div>
-<div class="line">  if(<a class="code hl_variable" href="../../d9/d00/a00257.html#a68bf49d9a6ffe37d4e0ebb6a7d175d5c">trc</a>-&gt;<a class="code hl_function" href="../../d1/d00/a01041.html#a9399420be02465a4e5d268b481af71e1">get_fnc_name</a>(<span class="keyword">this</span>, dbg_x, &amp;funcname))                        \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;%s&quot;</span>, funcname);                               \</div>
-<div class="line">  else                                                                 \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;%&quot;</span> PRIx64, dbg_x);                            \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                    \</div>
-<div class="line">  if(!<a class="code hl_variable" href="../../d9/d00/a00257.html#a5783a67942e298401dd23cddf8f3448a">bListing</a>)                                                        \</div>
-<div class="line">  {                                                                    \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;: (%&quot;</span> PRIx64 <span class="stringliteral">&quot;)&quot;</span>, state.f[<a class="code hl_define" href="../../de/d00/a00185.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]);               \</div>
-<div class="line">    <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                  \</div>
-<div class="line">  }                                                                    \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00404">404</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a333e96053775509019ef9edaaf2f0221" name="a333e96053775509019ef9edaaf2f0221"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a333e96053775509019ef9edaaf2f0221">&#9670;&#160;</a></span>PRE_FMEM</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_FMEM</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                                           \</div>
-<div class="line">{                                                                          \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>;                                                                \</div>
-<div class="line">  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; f%d, %04xH(r%d)&quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>, (<a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>) <a class="code hl_define" href="../../de/d00/a00185.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, \</div>
-<div class="line">          <a class="code hl_define" href="../../de/d00/a00185.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a> &amp; 31);                                                     \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                        \</div>
-<div class="line">  if(!<a class="code hl_variable" href="../../d9/d00/a00257.html#a5783a67942e298401dd23cddf8f3448a">bListing</a>)                                                            \</div>
-<div class="line">  {                                                                        \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;: (%&quot;</span> PRIx64 <span class="stringliteral">&quot;)&quot;</span>, state.r[<a class="code hl_define" href="../../de/d00/a00185.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>]);                    \</div>
-<div class="line">    <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                      \</div>
-<div class="line">  }                                                                        \</div>
-<div class="line">}</div>
-<div class="ttc" id="aa00185_html_a1077f6bc8474ef39e14e42be631f6634"><div class="ttname"><a href="../../de/d00/a00185.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a></div><div class="ttdeci">#define DISP_16</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00581">cpu_defs.h:581</a></div></div>
-<div class="ttc" id="aa00185_html_afc0e94c6f29d79352470dfd56076e09f"><div class="ttname"><a href="../../de/d00/a00185.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a></div><div class="ttdeci">#define REG_2</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00840">cpu_defs.h:840</a></div></div>
-<div class="ttc" id="aa00263_html_a70c1fcc1a4e96af8f6580f708657cd41"><div class="ttname"><a href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a></div><div class="ttdeci">uint32_t u32</div><div class="ttdef"><b>Definition</b> <a href="../../df/d00/a00263_source.html#l00125">datatypes.h:125</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00704">704</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="ab14316df2926d07c95500ee8260eb2c6" name="ab14316df2926d07c95500ee8260eb2c6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab14316df2926d07c95500ee8260eb2c6">&#9670;&#160;</a></span>PRE_HW_LD</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_HW_LD</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                                                  \</div>
-<div class="line">{                                                                                 \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>;                                                                       \</div>
-<div class="line">  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic);                                                 \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                               \</div>
-<div class="line">  switch(function &amp;~1)                                                            \</div>
-<div class="line">  {                                                                               \</div>
-<div class="line">  <span class="keywordflow">case</span> 0:   sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;/Phys&quot;</span>); <span class="keywordflow">break</span>;                                  \</div>
-<div class="line">  <span class="keywordflow">case</span> 2:   sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;/Phys/Lock&quot;</span>); <span class="keywordflow">break</span>;                             \</div>
-<div class="line">  <span class="keywordflow">case</span> 4:   sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;/Vpte&quot;</span>); <span class="keywordflow">break</span>;                                  \</div>
-<div class="line">  <span class="keywordflow">case</span> 10:  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;/Chk&quot;</span>); <span class="keywordflow">break</span>;                                   \</div>
-<div class="line">  <span class="keywordflow">case</span> 12:  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;/Alt&quot;</span>); <span class="keywordflow">break</span>;                                   \</div>
-<div class="line">  <span class="keywordflow">case</span> 14:  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;/Alt/Chk&quot;</span>); <span class="keywordflow">break</span>;                               \</div>
-<div class="line">  }                                                                               \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                               \</div>
-<div class="line">  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot; r%d, %04xH(r%d)&quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 31, (<a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>) <a class="code hl_define" href="../../de/d00/a00185.html#a8e14c82fc965f3df2f51e6e2e9912fc0">DISP_12</a>, <a class="code hl_define" href="../../de/d00/a00185.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a> &amp; 31); \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                               \</div>
-<div class="line">  if(!<a class="code hl_variable" href="../../d9/d00/a00257.html#a5783a67942e298401dd23cddf8f3448a">bListing</a>)                                                                   \</div>
-<div class="line">  {                                                                               \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;: (%&quot;</span> PRIx64 <span class="stringliteral">&quot;)&quot;</span>, state.r[<a class="code hl_define" href="../../de/d00/a00185.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>]);                           \</div>
-<div class="line">    <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                             \</div>
-<div class="line">  }                                                                               \</div>
-<div class="line">}</div>
-<div class="ttc" id="aa00185_html_a8e14c82fc965f3df2f51e6e2e9912fc0"><div class="ttname"><a href="../../de/d00/a00185.html#a8e14c82fc965f3df2f51e6e2e9912fc0">DISP_12</a></div><div class="ttdeci">#define DISP_12</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00579">cpu_defs.h:579</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00652">652</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a02f8d283932d3e995bff0a51a1a1a28e" name="a02f8d283932d3e995bff0a51a1a1a28e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a02f8d283932d3e995bff0a51a1a1a28e">&#9670;&#160;</a></span>PRE_HW_ST</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_HW_ST</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                                                  \</div>
-<div class="line">{                                                                                 \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>;                                                                       \</div>
-<div class="line">  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic);                                                 \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                               \</div>
-<div class="line">  switch(function &amp;~1)                                                            \</div>
-<div class="line">  {                                                                               \</div>
-<div class="line">  <span class="keywordflow">case</span> 0:   sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;/Phys&quot;</span>); <span class="keywordflow">break</span>;                                  \</div>
-<div class="line">  <span class="keywordflow">case</span> 2:   sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;/Phys/Cond&quot;</span>); <span class="keywordflow">break</span>;                             \</div>
-<div class="line">  <span class="keywordflow">case</span> 12:  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;/Alt&quot;</span>); <span class="keywordflow">break</span>;                                   \</div>
-<div class="line">  }                                                                               \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                               \</div>
-<div class="line">  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot; r%d, %04xH(r%d)&quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 31, (<a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>) <a class="code hl_define" href="../../de/d00/a00185.html#a8e14c82fc965f3df2f51e6e2e9912fc0">DISP_12</a>, <a class="code hl_define" href="../../de/d00/a00185.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a> &amp; 31); \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                               \</div>
-<div class="line">  if(!<a class="code hl_variable" href="../../d9/d00/a00257.html#a5783a67942e298401dd23cddf8f3448a">bListing</a>)                                                                   \</div>
-<div class="line">  {                                                                               \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;: (%&quot;</span> PRIx64 <span class="stringliteral">&quot;)&quot;</span>, state.r[<a class="code hl_define" href="../../de/d00/a00185.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>]);                           \</div>
-<div class="line">    <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                             \</div>
-<div class="line">  }                                                                               \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00679">679</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="aab2969c659d528450603ccb31859bb86" name="aab2969c659d528450603ccb31859bb86"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aab2969c659d528450603ccb31859bb86">&#9670;&#160;</a></span>PRE_JMP</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_JMP</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                                                \</div>
-<div class="line">{                                                                               \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; r%d, r%d&quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 31, <a class="code hl_define" href="../../de/d00/a00185.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a> &amp; 31); \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                             \</div>
-<div class="line">  if(!<a class="code hl_variable" href="../../d9/d00/a00257.html#a5783a67942e298401dd23cddf8f3448a">bListing</a>)                                                                 \</div>
-<div class="line">  {                                                                             \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;: (%&quot;</span> PRIx64 <span class="stringliteral">&quot;)&quot;</span>, state.r[<a class="code hl_define" href="../../de/d00/a00185.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>]);                         \</div>
-<div class="line">    <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                           \</div>
-<div class="line">  }                                                                             \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00446">446</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="ad37a854b21ddabe4b43a3b72dddfc0fc" name="ad37a854b21ddabe4b43a3b72dddfc0fc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad37a854b21ddabe4b43a3b72dddfc0fc">&#9670;&#160;</a></span>PRE_MEM</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_MEM</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                                               \</div>
-<div class="line">{                                                                              \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>;                                                                    \</div>
-<div class="line">  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; r%d, %04xH(r%d)&quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 31, (<a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>) <a class="code hl_define" href="../../de/d00/a00185.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, \</div>
-<div class="line">          <a class="code hl_define" href="../../de/d00/a00185.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a> &amp; 31);                                                         \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                            \</div>
-<div class="line">  if(!<a class="code hl_variable" href="../../d9/d00/a00257.html#a5783a67942e298401dd23cddf8f3448a">bListing</a>)                                                                \</div>
-<div class="line">  {                                                                            \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;: (%&quot;</span> PRIx64 <span class="stringliteral">&quot;)&quot;</span>, state.r[<a class="code hl_define" href="../../de/d00/a00185.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>]);                        \</div>
-<div class="line">    <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                          \</div>
-<div class="line">  }                                                                            \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00511">511</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="ae6d7f89f33e0fbce5c06864a3b7d08f9" name="ae6d7f89f33e0fbce5c06864a3b7d08f9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae6d7f89f33e0fbce5c06864a3b7d08f9">&#9670;&#160;</a></span>PRE_MFPR</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_MFPR</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                                             \</div>
-<div class="line">{                                                                            \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>;                                                                  \</div>
-<div class="line">  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; r%d, %s&quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 31, <a class="code hl_variable" href="../../d5/d00/a00140.html#ac5c7bc8ea0ac6b09a8fa5d9de79c5335">IPR_NAME</a>[function]); \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                          \</div>
-<div class="line">}</div>
-<div class="ttc" id="aa00140_html_ac5c7bc8ea0ac6b09a8fa5d9de79c5335"><div class="ttname"><a href="../../d5/d00/a00140.html#ac5c7bc8ea0ac6b09a8fa5d9de79c5335">IPR_NAME</a></div><div class="ttdeci">const char * IPR_NAME[]</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00140_source.html#l04997">AlphaCPU.cpp:4997</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00481">481</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a9877f1528224efb9f0312140af08bc04" name="a9877f1528224efb9f0312140af08bc04"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9877f1528224efb9f0312140af08bc04">&#9670;&#160;</a></span>PRE_MTPR</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_MTPR</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                                             \</div>
-<div class="line">{                                                                            \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>;                                                                  \</div>
-<div class="line">  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; r%d, %s&quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a> &amp; 31, <a class="code hl_variable" href="../../d5/d00/a00140.html#ac5c7bc8ea0ac6b09a8fa5d9de79c5335">IPR_NAME</a>[function]); \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                          \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00491">491</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a67fa5f39794491f423fd7365fdc2f556" name="a67fa5f39794491f423fd7365fdc2f556"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a67fa5f39794491f423fd7365fdc2f556">&#9670;&#160;</a></span>PRE_NOP</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_NOP</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                     \</div>
-<div class="line">{                                    \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>;                          \</div>
-<div class="line">  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot;&quot;</span>); \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);  \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00501">501</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a83958729390bb15927d13d57d401b540" name="a83958729390bb15927d13d57d401b540"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a83958729390bb15927d13d57d401b540">&#9670;&#160;</a></span>PRE_PAL</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_PAL</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                              \</div>
-<div class="line">{                                                             \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>;                                                   \</div>
-<div class="line">  if(function &lt; 0x40 || (function &gt; 0x7f &amp;&amp; function &lt; 0xc0)) \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; %s&quot;</span>, <a class="code hl_variable" href="../../d5/d00/a00140.html#a3f0d3ad7c7154bd2768d6e4be7f01651">PAL_NAME</a>[function]); \</div>
-<div class="line">  else                                                        \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; ?%x?&quot;</span>, function);         \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                           \</div>
-<div class="line">}</div>
-<div class="ttc" id="aa00140_html_a3f0d3ad7c7154bd2768d6e4be7f01651"><div class="ttname"><a href="../../d5/d00/a00140.html#a3f0d3ad7c7154bd2768d6e4be7f01651">PAL_NAME</a></div><div class="ttdeci">const char * PAL_NAME[]</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00140_source.html#l04960">AlphaCPU.cpp:4960</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00356">356</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a274dddad5c7c0808dce47c9b0fda677d" name="a274dddad5c7c0808dce47c9b0fda677d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a274dddad5c7c0808dce47c9b0fda677d">&#9670;&#160;</a></span>PRE_R12_R3</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_R12_R3</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                                     \</div>
-<div class="line">{                                                                    \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>;                                                          \</div>
-<div class="line">  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; r%d, &quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 31);               \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                  \</div>
-<div class="line">  if(ins &amp; 0x1000)                                                   \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;%&quot;</span> PRIx64 <span class="stringliteral">&quot;H&quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a100362a825d9eb8f8cc30179894bcdc3">V_2</a>);                               \</div>
-<div class="line">  else                                                               \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;r%d&quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a> &amp; 31);                          \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                  \</div>
-<div class="line">  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;, r%d&quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a14e5d5a6641dfac1ed51225a7b87bc92">REG_3</a> &amp; 31);                          \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                  \</div>
-<div class="line">  if(!<a class="code hl_variable" href="../../d9/d00/a00257.html#a5783a67942e298401dd23cddf8f3448a">bListing</a>)                                                      \</div>
-<div class="line">  {                                                                  \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;: (%&quot;</span> PRIx64 <span class="stringliteral">&quot;,%&quot;</span> PRIx64 <span class="stringliteral">&quot;)&quot;</span>, state.r[<a class="code hl_define" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>], <a class="code hl_define" href="../../de/d00/a00185.html#a100362a825d9eb8f8cc30179894bcdc3">V_2</a>); \</div>
-<div class="line">    <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                \</div>
-<div class="line">  }                                                                  \</div>
-<div class="line">}</div>
-<div class="ttc" id="aa00185_html_a100362a825d9eb8f8cc30179894bcdc3"><div class="ttname"><a href="../../de/d00/a00185.html#a100362a825d9eb8f8cc30179894bcdc3">V_2</a></div><div class="ttdeci">#define V_2</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00849">cpu_defs.h:849</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00527">527</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a997ccabb3c5895837302b0d3370bf086" name="a997ccabb3c5895837302b0d3370bf086"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a997ccabb3c5895837302b0d3370bf086">&#9670;&#160;</a></span>PRE_R1_F3</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_R1_F3</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                                   \</div>
-<div class="line">{                                                                  \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>;                                                        \</div>
-<div class="line">  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; r%d, f%d &quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 31, <a class="code hl_define" href="../../de/d00/a00185.html#ab0813d80598693a82bb2c295cc7c69b7">FREG_3</a>); \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                \</div>
-<div class="line">  if(!<a class="code hl_variable" href="../../d9/d00/a00257.html#a5783a67942e298401dd23cddf8f3448a">bListing</a>)                                                    \</div>
-<div class="line">  {                                                                \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;: (%&quot;</span> PRIx64 <span class="stringliteral">&quot;)&quot;</span>, state.r[<a class="code hl_define" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);            \</div>
-<div class="line">    <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                              \</div>
-<div class="line">  }                                                                \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00570">570</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="acf47abbfa93a6735084d947efa9ebf81" name="acf47abbfa93a6735084d947efa9ebf81"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acf47abbfa93a6735084d947efa9ebf81">&#9670;&#160;</a></span>PRE_R2_R3</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_R2_R3</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                             \</div>
-<div class="line">{                                            \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>;                                  \</div>
-<div class="line">  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; &quot;</span>);        \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);          \</div>
-<div class="line">  if(ins &amp; 0x1000)                           \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;%&quot;</span> PRIx64 <span class="stringliteral">&quot;H&quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a100362a825d9eb8f8cc30179894bcdc3">V_2</a>);       \</div>
-<div class="line">  else                                       \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;r%d&quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a> &amp; 31);  \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);          \</div>
-<div class="line">  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;, r%d&quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a14e5d5a6641dfac1ed51225a7b87bc92">REG_3</a> &amp; 31);  \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);          \</div>
-<div class="line">  if(!<a class="code hl_variable" href="../../d9/d00/a00257.html#a5783a67942e298401dd23cddf8f3448a">bListing</a>)                              \</div>
-<div class="line">  {                                          \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;: (%&quot;</span> PRIx64 <span class="stringliteral">&quot;)&quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a100362a825d9eb8f8cc30179894bcdc3">V_2</a>); \</div>
-<div class="line">    <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);        \</div>
-<div class="line">  }                                          \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00610">610</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a2a622e92aa6f7d9ce799a7771be459f4" name="a2a622e92aa6f7d9ce799a7771be459f4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2a622e92aa6f7d9ce799a7771be459f4">&#9670;&#160;</a></span>PRE_RET</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_RET</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                               \</div>
-<div class="line">{                                                              \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; r%d&quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a> &amp; 31); \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                            \</div>
-<div class="line">  if(!<a class="code hl_variable" href="../../d9/d00/a00257.html#a5783a67942e298401dd23cddf8f3448a">bListing</a>)                                                \</div>
-<div class="line">  {                                                            \</div>
-<div class="line">    sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;: (%&quot;</span> PRIx64 <span class="stringliteral">&quot;)&quot;</span>, state.r[<a class="code hl_define" href="../../de/d00/a00185.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>]);        \</div>
-<div class="line">    <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                          \</div>
-<div class="line">  }                                                            \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00467">467</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="affa6f71623b7af5c3f23eb5237aa0e6e" name="affa6f71623b7af5c3f23eb5237aa0e6e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#affa6f71623b7af5c3f23eb5237aa0e6e">&#9670;&#160;</a></span>PRE_X_F1</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_X_F1</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                       \</div>
-<div class="line">{                                                      \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>;                                            \</div>
-<div class="line">  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; f%d &quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a> &amp; 31); \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                    \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00600">600</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a7f4881d51bb7e0cd293e14d238f67423" name="a7f4881d51bb7e0cd293e14d238f67423"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7f4881d51bb7e0cd293e14d238f67423">&#9670;&#160;</a></span>PRE_X_R1</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_X_R1</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                     \</div>
-<div class="line">{                                                    \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>;                                          \</div>
-<div class="line">  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; r%d&quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 31); \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                  \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00632">632</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a7354b4874e10a67941cd5169bcdff337" name="a7354b4874e10a67941cd5169bcdff337"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7354b4874e10a67941cd5169bcdff337">&#9670;&#160;</a></span>PRE_X_R3</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PRE_X_R3</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>mnemonic</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                     \</div>
-<div class="line">{                                                    \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>;                                          \</div>
-<div class="line">  sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, #mnemonic <span class="stringliteral">&quot; r%d&quot;</span>, <a class="code hl_define" href="../../de/d00/a00185.html#a14e5d5a6641dfac1ed51225a7b87bc92">REG_3</a> &amp; 31); \</div>
-<div class="line">  <a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                  \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00642">642</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="aab3906b700eae34b8c3911ed79ca662f" name="aab3906b700eae34b8c3911ed79ca662f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aab3906b700eae34b8c3911ed79ca662f">&#9670;&#160;</a></span>TRC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TRC</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>down</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>up</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#aec440ea495e89a5b3c1c6020761c31d7">bTrace</a>)          \</div>
-<div class="line">  <a class="code hl_variable" href="../../d9/d00/a00257.html#a68bf49d9a6ffe37d4e0ebb6a7d175d5c">trc</a>-&gt;<a class="code hl_function" href="../../d1/d00/a01041.html#a2b98838789e54afc35a8eaf3efc4e394">trace</a>(<span class="keyword">this</span>, state.current_pc, state.pc, down, up, (<span class="keywordtype">char</span>*) 0, 0);</div>
-<div class="ttc" id="aa01041_html_a2b98838789e54afc35a8eaf3efc4e394"><div class="ttname"><a href="../../d1/d00/a01041.html#a2b98838789e54afc35a8eaf3efc4e394">CTraceEngine::trace</a></div><div class="ttdeci">void trace(class CAlphaCPU *cpu, u64 f, u64 t, bool down, bool up, const char *x, int y)</div><div class="ttdoc">Trace function calling.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d00/a00257_source.html#l00256">TraceEngine.cpp:256</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00163">163</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="aa91b9aec2cea38293d56446d5c02c5a4" name="aa91b9aec2cea38293d56446d5c02c5a4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa91b9aec2cea38293d56446d5c02c5a4">&#9670;&#160;</a></span>TRC_</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TRC_</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>down</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>up</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>x</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>y</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#aec440ea495e89a5b3c1c6020761c31d7">bTrace</a>)                 \</div>
-<div class="line">  <a class="code hl_variable" href="../../d9/d00/a00257.html#a68bf49d9a6ffe37d4e0ebb6a7d175d5c">trc</a>-&gt;<a class="code hl_function" href="../../d1/d00/a01041.html#a2b98838789e54afc35a8eaf3efc4e394">trace</a>(<span class="keyword">this</span>, state.current_pc, state.pc, down, up, x, y);</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00159">159</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="a6b7167988ca15a6be1e18cbda60458a8" name="a6b7167988ca15a6be1e18cbda60458a8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6b7167988ca15a6be1e18cbda60458a8">&#9670;&#160;</a></span>TRC_BR</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TRC_BR</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#aec440ea495e89a5b3c1c6020761c31d7">bTrace</a>) \</div>
-<div class="line"><a class="code hl_variable" href="../../d9/d00/a00257.html#a68bf49d9a6ffe37d4e0ebb6a7d175d5c">trc</a>-&gt;<a class="code hl_function" href="../../d1/d00/a01041.html#a7aed0b81bfe05bb33966157e04b90c24">trace_br</a>(<span class="keyword">this</span>, state.current_pc, state.pc);</div>
-<div class="ttc" id="aa01041_html_a7aed0b81bfe05bb33966157e04b90c24"><div class="ttname"><a href="../../d1/d00/a01041.html#a7aed0b81bfe05bb33966157e04b90c24">CTraceEngine::trace_br</a></div><div class="ttdeci">void trace_br(class CAlphaCPU *cpu, u64 f, u64 t)</div><div class="ttdoc">Trace a branch.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d00/a00257_source.html#l00443">TraceEngine.cpp:443</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00167">167</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-</div>
-</div>
-<a id="ad0ad9f1b07beee1a12245ea001ccfadb" name="ad0ad9f1b07beee1a12245ea001ccfadb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad0ad9f1b07beee1a12245ea001ccfadb">&#9670;&#160;</a></span>UNKNOWN1</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define UNKNOWN1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                        \</div>
-<div class="line">{                                                       \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>                                              \</div>
-<div class="line">}                                                       \</div>
-<div class="line">sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;Unknown opcode: %02x   &quot;</span>, opcode); \</div>
-<div class="line"><a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                       \</div>
-<div class="line">handle_debug_string(<a class="code hl_variable" href="../../d5/d00/a00140.html#a44c69c496db2b301dfe775ca621ed0ec">dbg_string</a>);                        \</div>
-<div class="line">GO_PAL(<a class="code hl_enumvalue" href="../../d5/d00/a00170.html#a5c9934e3a54f06127616037536160abda63458a13f289bb736a9af99d72741952">AlphaPALException::OpcodeDecode</a>);                                    \</div>
-<div class="line">ES40_EXECUTE_END();</div>
-<div class="ttc" id="aa00170_html_a5c9934e3a54f06127616037536160abda63458a13f289bb736a9af99d72741952"><div class="ttname"><a href="../../d5/d00/a00170.html#a5c9934e3a54f06127616037536160abda63458a13f289bb736a9af99d72741952">AlphaPALException::OpcodeDecode</a></div><div class="ttdeci">@ OpcodeDecode</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00170_source.html#l00041">AlphaPAL.h:41</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00326">326</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d5/d00/a00140_source.html#l02949">CAlphaCPU::execute()</a>.</p>
-
-</div>
-</div>
-<a id="adbb58d71d6ce0c75fd320e8f97da799e" name="adbb58d71d6ce0c75fd320e8f97da799e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adbb58d71d6ce0c75fd320e8f97da799e">&#9670;&#160;</a></span>UNKNOWN2</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define UNKNOWN2</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d9/d00/a00257.html#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a>)                                       \</div>
-<div class="line">{                                                                      \</div>
-<div class="line">  <a class="code hl_define" href="#a0aea852a7eb3ef471a4484d0049d8f46">DEBUG_XX</a>                                                             \</div>
-<div class="line">}                                                                      \</div>
-<div class="line">sprintf(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>, <span class="stringliteral">&quot;Unknown opcode: %02x.%02x   &quot;</span>, opcode, function); \</div>
-<div class="line"><a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a> += strlen(<a class="code hl_variable" href="../../d4/d00/a00617.html#abc293cf295b84b4862942d89d8c97be5">dbg_strptr</a>);                                      \</div>
-<div class="line">handle_debug_string(<a class="code hl_variable" href="../../d5/d00/a00140.html#a44c69c496db2b301dfe775ca621ed0ec">dbg_string</a>);                                       \</div>
-<div class="line">GO_PAL(<a class="code hl_enumvalue" href="../../d5/d00/a00170.html#a5c9934e3a54f06127616037536160abda63458a13f289bb736a9af99d72741952">AlphaPALException::OpcodeDecode</a>);                                    \</div>
-<div class="line">ES40_EXECUTE_END();</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l00336">336</a> of file <a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d5/d00/a00140_source.html#l02949">CAlphaCPU::execute()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d7/d00/a00182_source.html#l04330">CAlphaCPU::FindTBEntry()</a>.</p>
 
 </div>
 </div>
@@ -1704,11 +438,11 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d00/a00140_source.html#l01004">1004</a> of file <a class="el" href="../../d5/d00/a00140_source.html">AlphaCPU.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l01275">1275</a> of file <a class="el" href="../../d7/d00/a00182_source.html">AlphaCPU.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d00/a00617_source.html#l00347">dbg_strptr</a>, and <a class="el" href="../../d5/d00/a00140_source.html#l01004">handle_debug_string()</a>.</p>
+<p class="reference">References <a class="el" href="../../db/d00/a00722_source.html#l00348">dbg_strptr</a>, and <a class="el" href="../../d7/d00/a00182_source.html#l01275">handle_debug_string()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d5/d00/a00140_source.html#l01004">handle_debug_string()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d7/d00/a00182_source.html#l01275">handle_debug_string()</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
@@ -1731,8 +465,8 @@ Here is the caller graph for this function:</div>
 </div>
 </div>
 <a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
-<a id="a44c69c496db2b301dfe775ca621ed0ec" name="a44c69c496db2b301dfe775ca621ed0ec"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a44c69c496db2b301dfe775ca621ed0ec">&#9670;&#160;</a></span>dbg_string</h2>
+<a id="a4f8b5d8df71b7c95fa4163f773be3665" name="a4f8b5d8df71b7c95fa4163f773be3665"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f8b5d8df71b7c95fa4163f773be3665">&#9670;&#160;</a></span>cpu_magic1</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1741,19 +475,63 @@ Here is the caller graph for this function:</div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">char dbg_string[1000]</td>
+          <td class="memname"><a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> cpu_magic1 = 0x2126468C</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d00/a00140_source.html#l00991">991</a> of file <a class="el" href="../../d5/d00/a00140_source.html">AlphaCPU.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l04209">4209</a> of file <a class="el" href="../../d7/d00/a00182_source.html">AlphaCPU.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d5/d00/a00140_source.html#l02949">CAlphaCPU::execute()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d7/d00/a00182_source.html#l04230">CAlphaCPU::RestoreState()</a>, and <a class="el" href="../../d7/d00/a00182_source.html#l04215">CAlphaCPU::SaveState()</a>.</p>
+
+</div>
+</div>
+<a id="a4bb3e9f50ad1051903db016567329ca7" name="a4bb3e9f50ad1051903db016567329ca7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4bb3e9f50ad1051903db016567329ca7">&#9670;&#160;</a></span>cpu_magic2</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> cpu_magic2 = 0xC8646212</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l04210">4210</a> of file <a class="el" href="../../d7/d00/a00182_source.html">AlphaCPU.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d7/d00/a00182_source.html#l04230">CAlphaCPU::RestoreState()</a>, and <a class="el" href="../../d7/d00/a00182_source.html#l04215">CAlphaCPU::SaveState()</a>.</p>
+
+</div>
+</div>
+<a id="a44c69c496db2b301dfe775ca621ed0ec" name="a44c69c496db2b301dfe775ca621ed0ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44c69c496db2b301dfe775ca621ed0ec">&#9670;&#160;</a></span>dbg_string</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char dbg_string[1000]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l01262">1262</a> of file <a class="el" href="../../d7/d00/a00182_source.html">AlphaCPU.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d7/d00/a00182_source.html#l03232">CAlphaCPU::execute()</a>.</p>
 
 </div>
 </div>
@@ -1762,22 +540,14 @@ Here is the caller graph for this function:</div>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">const char* IPR_NAME[]</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d00/a00140_source.html#l04997">4997</a> of file <a class="el" href="../../d5/d00/a00140_source.html">AlphaCPU.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l05168">5168</a> of file <a class="el" href="../../d7/d00/a00182_source.html">AlphaCPU.cpp</a>.</p>
 
 </div>
 </div>
@@ -1786,22 +556,14 @@ Here is the caller graph for this function:</div>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">const char* PAL_NAME[]</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d00/a00140_source.html#l04960">4960</a> of file <a class="el" href="../../d5/d00/a00140_source.html">AlphaCPU.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00182_source.html#l05131">5131</a> of file <a class="el" href="../../d7/d00/a00182_source.html">AlphaCPU.cpp</a>.</p>
 
 </div>
 </div>
@@ -1818,7 +580,7 @@ Here is the caller graph for this function:</div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d7/d00/a00182.html">cpu_debug.h</a></li>
+    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d7/d00/a00182.html">AlphaCPU.cpp</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

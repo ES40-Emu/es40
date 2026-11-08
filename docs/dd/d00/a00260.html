@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: CPU/TraceEngine.h File Reference</title>
+<title>ES40: CPU/cpu_pal.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,569 +109,277 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('dd/d00/a00260.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">TraceEngine.h File Reference</div></div>
+  <div class="headertitle"><div class="title">cpu_pal.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>Contains the definitions for the CPU tracing engine.  
+<p>Contains code macros for the processor PALmode instructions.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &quot;<a class="el" href="../../df/d00/a00263_source.html">datatypes.h</a>&quot;</code><br />
-</div><div class="textblock"><div class="dynheader">
-Include dependency graph for TraceEngine.h:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../dc/d00/a00261.png" border="0" usemap="#a_c_p_u_2_trace_engine_8h" loading="lazy" alt=""/></div>
-<map name="a_c_p_u_2_trace_engine_8h" id="a_c_p_u_2_trace_engine_8h">
-<area shape="rect" title="Contains the definitions for the CPU tracing engine." alt="" coords="5,5,144,32"/>
-<area shape="rect" href="../../df/d00/a00263.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="30,80,119,107"/>
-<area shape="poly" title=" " alt="" coords="76,31,77,65,72,64,73,35"/>
-</map>
-</div>
-</div><div class="textblock"><div class="dynheader">
+<div class="textblock"><div class="dynheader">
 This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00262.png" border="0" usemap="#a_c_p_u_2_trace_engine_8hdep" loading="lazy" alt=""/></div>
-<map name="a_c_p_u_2_trace_engine_8hdep" id="a_c_p_u_2_trace_engine_8hdep">
-<area shape="rect" title="Contains the definitions for the CPU tracing engine." alt="" coords="3058,5,3196,32"/>
-<area shape="rect" href="../../d5/d00/a00140.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="5,229,147,256"/>
-<area shape="poly" title=" " alt="" coords="3039,22,2538,38,1777,65,1374,83,994,105,666,129,419,157,333,173,249,193,116,231,114,226,248,188,332,168,418,152,665,124,994,99,1374,78,1777,60,2537,33,3045,22"/>
-<area shape="rect" href="../../d9/d00/a00257.html" title="Contains the code for the CPU tracing engine." alt="" coords="5389,229,5542,256"/>
-<area shape="poly" title=" " alt="" coords="3211,17,3697,20,4036,26,4396,37,4747,54,5057,78,5186,93,5294,110,5375,130,5427,152,5444,169,5455,190,5466,230,5461,227,5450,192,5439,172,5424,157,5373,135,5292,115,5185,98,5056,83,4747,59,4396,42,4036,32,3697,26,3212,23"/>
-<area shape="rect" href="../../dc/d00/a00620.html" title="Contains the definitions for the emulated Typhoon Chipset devices." alt="" coords="3064,80,3189,107"/>
-<area shape="poly" title=" " alt="" coords="3129,46,3129,81,3125,78,3125,50"/>
-<area shape="poly" title=" " alt="" coords="3205,92,3695,96,4404,105,4756,113,5060,123,5283,136,5353,144,5390,152,5415,168,5435,189,5461,230,5457,228,5431,192,5411,172,5388,157,5352,149,5282,141,5060,128,4756,118,4404,110,3695,101,3205,98"/>
-<area shape="rect" href="../../d7/d00/a00002.html" title="Defines the entry point for the application." alt="" coords="5086,155,5188,181"/>
-<area shape="poly" title=" " alt="" coords="3204,93,4115,110,4665,127,4894,139,5068,152,5088,157,5083,157,5068,157,4894,144,4664,133,4115,115,3204,98"/>
-<area shape="rect" href="../../d7/d00/a00143.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="664,155,792,181"/>
-<area shape="poly" title=" " alt="" coords="3046,96,1967,115,1301,132,1022,144,811,157,792,159,792,154,810,152,1021,139,1300,127,1967,109,3052,95"/>
-<area shape="rect" href="../../d1/d00/a00077.html" title="Contains the code for the configuration file interpreter." alt="" coords="5058,229,5214,256"/>
-<area shape="poly" title=" " alt="" coords="3205,93,3669,99,4329,110,4926,128,5120,139,5176,145,5202,153,5208,163,5209,174,5199,196,5180,215,5158,231,5156,226,5176,211,5195,193,5204,173,5203,165,5198,157,5175,151,5119,144,4926,133,4329,116,3669,104,3205,98"/>
-<area shape="rect" href="../../d5/d00/a00599.html" title="Contains the code for the emulated Dual Port Ram and RMC devices." alt="" coords="1723,229,1845,256"/>
-<area shape="poly" title=" " alt="" coords="3046,95,2546,103,1819,114,1159,132,944,143,882,150,856,157,851,168,857,180,875,191,907,200,1003,214,1129,222,1272,225,1546,225,1711,227,1725,231,1720,231,1710,232,1546,230,1272,230,1129,227,1002,219,906,205,873,196,853,183,846,168,853,153,881,145,944,138,1159,126,1819,108,2545,98,3052,95"/>
-<area shape="rect" href="../../d0/d00/a00605.html" title="Contains the code for the emulated Flash ROM devices." alt="" coords="3389,229,3515,256"/>
-<area shape="poly" title=" " alt="" coords="3204,93,4234,112,4776,129,4951,140,5003,146,5026,153,5033,168,5026,183,5002,194,4956,202,4806,217,4599,227,4357,235,3864,242,3515,244,3515,239,3864,237,4357,229,4599,222,4806,211,4955,197,5001,189,5022,179,5028,168,5022,157,5002,151,4951,145,4775,135,4234,117,3204,98"/>
-<area shape="rect" href="../../d4/d00/a00617.html" title="Contains the code for the emulated Typhoon Chipset devices." alt="" coords="171,229,309,256"/>
-<area shape="poly" title=" " alt="" coords="3047,95,2523,103,1739,114,983,132,705,144,542,157,466,172,391,192,274,231,273,226,390,187,464,167,541,152,705,138,983,127,1739,109,2523,98,3052,95"/>
-<area shape="rect" href="../../df/d00/a00623.html" title="ES40 (Clipper) board: TIGbus registers and DIMM topology." alt="" coords="333,229,507,256"/>
-<area shape="poly" title=" " alt="" coords="3046,95,2538,100,1781,109,1396,116,1054,127,786,140,692,148,630,157,576,172,524,192,443,231,442,226,522,187,574,167,629,152,692,143,786,135,1053,121,1396,111,1781,103,2538,95,3051,95"/>
-<area shape="rect" href="../../d6/d00/a00626.html" title="Tsunami/Typhoon chipset (Cchip, Dchip, Pchip) CSRs, interrupt delivery and PCI window translation." alt="" coords="531,229,722,256"/>
-<area shape="poly" title=" " alt="" coords="3046,95,2507,103,1714,115,989,133,752,144,683,151,653,157,641,172,633,192,628,231,624,227,628,190,636,170,651,152,682,145,752,139,989,127,1713,110,2507,98,3052,95"/>
-<area shape="rect" href="../../d4/d00/a00008.html" title=" " alt="" coords="5263,155,5377,181"/>
-<area shape="poly" title=" " alt="" coords="3204,93,4195,110,4800,127,5053,139,5244,152,5265,157,5260,157,5244,157,5053,144,4800,133,4195,115,3204,98"/>
-<area shape="rect" href="../../d6/d00/a00047.html" title="Contains the code for the emulated Ali M1543C chipset devices." alt="" coords="867,155,1024,181"/>
-<area shape="poly" title=" " alt="" coords="3046,94,2728,96,2233,102,1642,121,1335,136,1035,157,1024,158,1023,153,1034,152,1335,131,1641,115,2232,97,2728,91,3051,94"/>
-<area shape="rect" href="../../dc/d00/a00053.html" title="Contains the code for the emulated Ali M1543C IDE chipset part." alt="" coords="1047,155,1228,181"/>
-<area shape="poly" title=" " alt="" coords="3047,95,2756,100,2310,108,1781,126,1507,140,1239,157,1228,158,1228,153,1238,152,1507,134,1781,121,2310,103,2756,94,3052,95"/>
-<area shape="rect" href="../../d3/d00/a00059.html" title="Stub PMU/ACPI device at PCI 0:17:0 for the ALi M1543C bridge." alt="" coords="1251,155,1440,181"/>
-<area shape="poly" title=" " alt="" coords="3046,95,2785,102,2391,112,1927,129,1452,157,1440,158,1440,153,1452,152,1927,124,2391,106,2785,97,3052,95"/>
-<area shape="rect" href="../../de/d00/a00065.html" title="Contains the code for the emulated Ali M1543C IDE chipset part." alt="" coords="1464,155,1648,181"/>
-<area shape="poly" title=" " alt="" coords="3046,96,2471,114,2070,131,1660,157,1649,158,1648,153,1660,152,2070,126,2471,108,3052,96"/>
-<area shape="rect" href="../../d0/d00/a00071.html" title="Contains the code for the emulated DMA controller." alt="" coords="1672,155,1794,181"/>
-<area shape="poly" title=" " alt="" coords="3046,95,2835,101,2527,110,2170,128,1807,157,1795,159,1795,153,1806,152,2170,122,2527,104,2834,96,3051,95"/>
-<area shape="rect" href="../../db/d00/a00284.html" title="Contains the code for the PCI device class." alt="" coords="1818,155,1958,181"/>
-<area shape="poly" title=" " alt="" coords="3046,96,2592,115,2284,132,1971,157,1959,159,1958,153,1970,152,2283,127,2591,109,3052,96"/>
-<area shape="rect" href="../../de/d00/a00290.html" title="Contains code for the base class for devices that connect to the chipset." alt="" coords="1982,155,2170,181"/>
-<area shape="poly" title=" " alt="" coords="3052,98,2676,122,2183,157,2170,158,2170,153,2182,152,2676,116,3047,98"/>
-<area shape="rect" href="../../d5/d00/a00308.html" title="Contains the code for the emulated Cirrus CL GD&#45;5434 Video Card device." alt="" coords="2194,155,2328,181"/>
-<area shape="poly" title=" " alt="" coords="3052,98,2739,121,2540,137,2340,157,2329,159,2329,153,2340,152,2540,132,2739,116,3046,99"/>
-<area shape="rect" href="../../d0/d00/a00314.html" title=" " alt="" coords="2352,155,2533,181"/>
-<area shape="poly" title=" " alt="" coords="3051,102,2546,157,2534,159,2533,153,2545,152,3046,103"/>
-<area shape="rect" href="../../dc/d00/a00332.html" title=" " alt="" coords="2557,155,2750,181"/>
-<area shape="poly" title=" " alt="" coords="3052,106,2737,157,2736,151,3047,107"/>
-<area shape="rect" href="../../dc/d00/a00338.html" title=" " alt="" coords="2774,155,2946,181"/>
-<area shape="poly" title=" " alt="" coords="3068,111,2907,157,2906,151,3063,111"/>
-<area shape="rect" href="../../d6/d00/a00356.html" title=" " alt="" coords="2970,155,3121,181"/>
-<area shape="poly" title=" " alt="" coords="3104,116,3060,157,3058,152,3099,118"/>
-<area shape="rect" href="../../de/d00/a00362.html" title=" " alt="" coords="3146,155,3273,181"/>
-<area shape="poly" title=" " alt="" coords="3153,115,3198,155,3193,153,3152,120"/>
-<area shape="rect" href="../../da/d00/a00383.html" title="Contains the code for the bx_keymap_c class used for keyboard interfacing with SDL and other device i..." alt="" coords="3297,155,3410,181"/>
-<area shape="poly" title=" " alt="" coords="3181,109,3316,154,3311,154,3180,114"/>
-<area shape="rect" href="../../d9/d00/a00398.html" title="Contains the code for the bx_sdl_gui_c class used for interfacing with SDL." alt="" coords="3434,155,3518,181"/>
-<area shape="poly" title=" " alt="" coords="3204,107,3423,152,3436,157,3431,157,3422,157,3204,113"/>
-<area shape="rect" href="../../d1/d00/a00407.html" title=" " alt="" coords="3542,155,3668,181"/>
-<area shape="poly" title=" " alt="" coords="3205,103,3531,152,3544,157,3539,156,3530,157,3204,109"/>
-<area shape="rect" href="../../df/d00/a00416.html" title="Contains the code for the emulated Keyboard and mouse devices and controller." alt="" coords="3693,155,3808,181"/>
-<area shape="poly" title=" " alt="" coords="3205,99,3419,120,3680,152,3695,157,3690,156,3680,157,3419,126,3205,104"/>
-<area shape="rect" href="../../db/d00/a00422.html" title="Contains the code for the emulated Port 80 device." alt="" coords="3832,155,3930,181"/>
-<area shape="poly" title=" " alt="" coords="3204,96,3477,115,3648,131,3820,152,3834,157,3829,156,3820,157,3648,136,3477,120,3204,101"/>
-<area shape="rect" href="../../d4/d00/a00428.html" title="Contains the code for the emulated Serial Port devices." alt="" coords="3955,155,4048,181"/>
-<area shape="poly" title=" " alt="" coords="3205,94,3527,111,3734,128,3943,152,3957,157,3951,156,3942,157,3734,133,3527,116,3205,100"/>
-<area shape="rect" href="../../de/d00/a00440.html" title="Contains the code for the emulated DEC 21143 NIC device." alt="" coords="4072,155,4232,181"/>
-<area shape="poly" title=" " alt="" coords="3204,95,3574,115,3815,131,4060,152,4074,156,4069,156,4060,157,3815,136,3573,120,3204,101"/>
-<area shape="rect" href="../../dc/d00/a00563.html" title="Contains the code for the emulated Floppy Controller devices." alt="" coords="4255,155,4444,181"/>
-<area shape="poly" title=" " alt="" coords="3204,95,3646,113,3943,130,4244,152,4257,156,4252,156,4244,157,3942,135,3646,119,3204,100"/>
-<area shape="rect" href="../../d4/d00/a00569.html" title="Contains the code for the emulated LSI Logic 53C1020 controller." alt="" coords="4468,155,4633,181"/>
-<area shape="poly" title=" " alt="" coords="3205,93,3730,109,4089,126,4456,152,4470,156,4465,156,4456,157,4089,132,3729,114,3205,99"/>
-<area shape="rect" href="../../de/d00/a00587.html" title="Contains the code for the emulated Symbios SCSI controller." alt="" coords="4657,155,4823,181"/>
-<area shape="poly" title=" " alt="" coords="3204,93,3447,97,3802,106,4219,124,4646,152,4660,156,4654,156,4645,157,4219,129,3802,111,3447,102,3204,98"/>
-<area shape="rect" href="../../d2/d00/a00593.html" title="Contains the code for the emulated Symbios SCSI controller." alt="" coords="4847,155,5012,181"/>
-<area shape="poly" title=" " alt="" coords="3204,92,3473,95,3875,104,4349,121,4595,135,4835,152,4849,156,4844,156,4834,157,4594,140,4349,127,3875,109,3473,100,3204,98"/>
-<area shape="poly" title=" " alt="" coords="646,177,428,201,159,232,148,233,147,228,158,227,428,196,651,176"/>
-<area shape="poly" title=" " alt="" coords="807,175,855,179,1296,193,1844,198,3116,195,3770,193,4389,196,4936,206,5173,215,5378,227,5391,230,5386,230,5377,232,5172,220,4936,211,4389,201,3770,198,3116,200,1844,203,1296,198,855,184,807,180"/>
-<area shape="rect" href="../../da/d00/a00149.html" title="Contains IEEE floating point code for the Alpha CPU." alt="" coords="1283,229,1480,256"/>
-<area shape="poly" title=" " alt="" coords="807,178,811,179,1041,204,1271,227,1285,231,1280,230,1270,232,1040,209,810,184,807,184"/>
-<area shape="rect" href="../../d7/d00/a00152.html" title="Contains VAX floating point code for the Alpha CPU." alt="" coords="1504,229,1698,256"/>
-<area shape="poly" title=" " alt="" coords="807,178,811,179,1002,196,1151,205,1301,212,1492,227,1506,231,1501,230,1492,232,1300,218,1151,210,1002,201,810,184,807,184"/>
-<area shape="rect" href="../../d3/d00/a00155.html" title="Contains routines that replace parts of the VMS PALcode for the emulated DecChip 21264CB EV68 Alpha p..." alt="" coords="746,229,936,256"/>
-<area shape="poly" title=" " alt="" coords="761,187,824,229,819,228,760,192"/>
-<area shape="rect" href="../../d5/d00/a00224.html" title=" " alt="" coords="960,229,1093,256"/>
-<area shape="poly" title=" " alt="" coords="795,183,977,229,972,229,795,188"/>
-<area shape="rect" href="../../d1/d00/a00230.html" title=" " alt="" coords="1117,229,1259,256"/>
-<area shape="poly" title=" " alt="" coords="807,179,1120,230,1114,230,807,184"/>
-<area shape="poly" title=" " alt="" coords="807,175,855,179,1138,188,1618,197,2914,215,5060,241,5055,241,2914,221,1618,203,1138,193,855,184,807,180"/>
-<area shape="poly" title=" " alt="" coords="807,178,811,179,948,190,1064,197,1261,201,1458,207,1574,214,1711,227,1725,231,1720,231,1710,232,1574,219,1458,212,1261,207,1063,202,947,196,810,184,807,184"/>
-<area shape="poly" title=" " alt="" coords="807,175,855,179,1242,198,1636,213,2392,231,3013,238,3392,242,3386,242,3013,243,2392,237,1636,219,1242,204,854,184,807,180"/>
-<area shape="poly" title=" " alt="" coords="650,184,310,234,309,228,648,179"/>
-<area shape="poly" title=" " alt="" coords="662,185,474,231,473,226,657,186"/>
-<area shape="poly" title=" " alt="" coords="701,190,645,231,643,226,695,191"/>
-<area shape="poly" title=" " alt="" coords="5276,187,5169,231,5168,226,5271,188"/>
-<area shape="rect" href="../../dd/d00/a00005.html" title=" " alt="" coords="5238,229,5365,256"/>
-<area shape="poly" title=" " alt="" coords="5315,195,5306,231,5303,227,5311,198"/>
+<div class="center"><img src="../../d9/d00/a00262.png" border="0" usemap="#a_c_p_u_2cpu__pal_8hdep" loading="lazy" alt=""/></div>
+<map name="a_c_p_u_2cpu__pal_8hdep" id="a_c_p_u_2cpu__pal_8hdep">
+<area shape="rect" title="Contains code macros for the processor PALmode instructions." alt="" coords="21,5,131,32"/>
+<area shape="rect" href="../../d7/d00/a00182.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="5,80,147,107"/>
+<area shape="poly" title=" " alt="" coords="78,46,79,80,73,79,74,50"/>
 </map>
 </div>
 </div>
 <p><a href="../../dd/d00/a00260_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
-Data Structures</h2></td></tr>
-<tr class="memitem:STraceFunction" id="r_STraceFunction"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d0/d00/a01029.html">STraceFunction</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structure used to define named functions within memory.  <a href="../../d0/d00/a01029.html#details">More...</a><br /></td></tr>
-<tr class="memitem:STracePRBR" id="r_STracePRBR"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d2/d00/a01033.html">STracePRBR</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structure used to keep track of PRBR values.  <a href="../../d2/d00/a01033.html#details">More...</a><br /></td></tr>
-<tr class="memitem:STraceCPU" id="r_STraceCPU"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d2/d00/a01037.html">STraceCPU</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structure used to keep track of CPU's.  <a href="../../d2/d00/a01037.html#details">More...</a><br /></td></tr>
-<tr class="memitem:CTraceEngine" id="r_CTraceEngine"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../d1/d00/a01041.html">CTraceEngine</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">CPU tracing engine.  <a href="../../d1/d00/a01041.html#details">More...</a><br /></td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a5685fe0c3777ae5d0444ca732a98046a" id="r_a5685fe0c3777ae5d0444ca732a98046a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5685fe0c3777ae5d0444ca732a98046a">TRC_DEV</a>(a)</td></tr>
-<tr class="memitem:a5f8e5ecd8d3f2eb00e0f9de3f7b9d8cf" id="r_a5f8e5ecd8d3f2eb00e0f9de3f7b9d8cf"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5f8e5ecd8d3f2eb00e0f9de3f7b9d8cf">TRC_DEV2</a>(a,  b)</td></tr>
-<tr class="memitem:a5d061a8de02a24892767941c7f75b46f" id="r_a5d061a8de02a24892767941c7f75b46f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5d061a8de02a24892767941c7f75b46f">TRC_DEV3</a>(a,  b,  c)</td></tr>
-<tr class="memitem:a8c446219d3805aaef70060c06e7c69ab" id="r_a8c446219d3805aaef70060c06e7c69ab"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a8c446219d3805aaef70060c06e7c69ab">TRC_DEV4</a>(a,  b,  c,  d)</td></tr>
-<tr class="memitem:a3ec1c203f03b3a88cff7f3f1b89b0a69" id="r_a3ec1c203f03b3a88cff7f3f1b89b0a69"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a3ec1c203f03b3a88cff7f3f1b89b0a69">TRC_DEV5</a>(a,  b,  c,  d,  e)</td></tr>
-<tr class="memitem:a45513d2b22c442cd4d08456d2a982904" id="r_a45513d2b22c442cd4d08456d2a982904"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a45513d2b22c442cd4d08456d2a982904">TRC_DEV6</a>(a,  b,  c,  d,  e,  f)</td></tr>
-<tr class="memitem:a5eae87ad68d6e1dbcacbbd1c2099db89" id="r_a5eae87ad68d6e1dbcacbbd1c2099db89"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5eae87ad68d6e1dbcacbbd1c2099db89">DO_ACTION</a>&#160;&#160;&#160;!<a class="el" href="#a5783a67942e298401dd23cddf8f3448a">bListing</a></td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:aec440ea495e89a5b3c1c6020761c31d7" id="r_aec440ea495e89a5b3c1c6020761c31d7"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#aec440ea495e89a5b3c1c6020761c31d7">bTrace</a></td></tr>
-<tr class="memitem:a9c3cfa2b0c665b04458d1d148bc10e17" id="r_a9c3cfa2b0c665b04458d1d148bc10e17"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a></td></tr>
-<tr class="memitem:aab8239a91148ca640a60179bce466daf" id="r_aab8239a91148ca640a60179bce466daf"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#aab8239a91148ca640a60179bce466daf">bHashing</a></td></tr>
-<tr class="memitem:a5783a67942e298401dd23cddf8f3448a" id="r_a5783a67942e298401dd23cddf8f3448a"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a5783a67942e298401dd23cddf8f3448a">bListing</a></td></tr>
-<tr class="memitem:a68bf49d9a6ffe37d4e0ebb6a7d175d5c" id="r_a68bf49d9a6ffe37d4e0ebb6a7d175d5c"><td class="memItemLeft"><a class="el" href="../../d1/d00/a01041.html">CTraceEngine</a> *&#160;</td><td class="memItemRight"><a class="el" href="#a68bf49d9a6ffe37d4e0ebb6a7d175d5c">trc</a></td></tr>
+<tr class="memitem:a63424986d034c055c7fa2ce2ec4ccee3" id="r_a63424986d034c055c7fa2ce2ec4ccee3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a63424986d034c055c7fa2ce2ec4ccee3">DO_HW_MFPR</a>&#160;&#160;&#160;state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>] = read_ipr(ins);</td></tr>
+<tr class="memitem:a7cc9a5a8927d10c3b99ff386f4122de8" id="r_a7cc9a5a8927d10c3b99ff386f4122de8"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a7cc9a5a8927d10c3b99ff386f4122de8">DO_HW_MTPR</a>&#160;&#160;&#160;write_ipr(ins, state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>], <a class="el" href="../../dd/d00/a00212.html#ab8366be706d87922abd430dd2ca35e90adf608edb53fcc79c12759cdbdf58d9db">AlphaIPRWriteContext::Interpreter</a>);</td></tr>
+<tr class="memitem:ab419c1e6cc4997b8b1c5e70776dd95ea" id="r_ab419c1e6cc4997b8b1c5e70776dd95ea"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab419c1e6cc4997b8b1c5e70776dd95ea">DO_HW_RET</a></td></tr>
+<tr class="memitem:abd0b56ca5396b7b92637d902950fe025" id="r_abd0b56ca5396b7b92637d902950fe025"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#abd0b56ca5396b7b92637d902950fe025">DO_HW_LD</a></td></tr>
+<tr class="memitem:a41aaf5a161f59edf22d88343c803fac3" id="r_a41aaf5a161f59edf22d88343c803fac3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a41aaf5a161f59edf22d88343c803fac3">DO_HW_LDL</a>&#160;&#160;&#160;<a class="el" href="#abd0b56ca5396b7b92637d902950fe025">DO_HW_LD</a></td></tr>
+<tr class="memitem:a1598675c4277fd941cd62f5abcb83352" id="r_a1598675c4277fd941cd62f5abcb83352"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a1598675c4277fd941cd62f5abcb83352">DO_HW_LDQ</a>&#160;&#160;&#160;<a class="el" href="#abd0b56ca5396b7b92637d902950fe025">DO_HW_LD</a></td></tr>
+<tr class="memitem:a9d731021c936ebb6c0713bec736cab68" id="r_a9d731021c936ebb6c0713bec736cab68"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9d731021c936ebb6c0713bec736cab68">DO_HW_ST</a></td></tr>
+<tr class="memitem:aef54823c2658de763890af0c6e5cb133" id="r_aef54823c2658de763890af0c6e5cb133"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aef54823c2658de763890af0c6e5cb133">DO_HW_STL</a>&#160;&#160;&#160;<a class="el" href="#a9d731021c936ebb6c0713bec736cab68">DO_HW_ST</a></td></tr>
+<tr class="memitem:a0b0b30254f90a750e277f77a5ceea836" id="r_a0b0b30254f90a750e277f77a5ceea836"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0b0b30254f90a750e277f77a5ceea836">DO_HW_STQ</a>&#160;&#160;&#160;<a class="el" href="#a9d731021c936ebb6c0713bec736cab68">DO_HW_ST</a></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Contains the definitions for the CPU tracing engine. </p>
+<div class="textblock"><p>Contains code macros for the processor PALmode instructions. </p>
+<p>Based on HRM.</p>
 <p>$Id$</p>
-<p>X-1.20 Camiel Vanderhoeven 26-MAR-2008 Fix compiler warnings.</p>
-<p>X-1.19 Camiel Vanderhoeven 14-MAR-2008 Formatting.</p>
-<p>X-1.18 Brian Wheeler 29-FEB-2008 Add BREAKPOINT INSTRUCTION command to IDB.</p>
-<p>X-1.17 Camiel Vanderhoeven 02-JAN-2008 Comments.</p>
-<p>X-1.16 Camiel Vanderhoeven 7-APR-2007 Added hwpcb to PRBR structure.</p>
-<p>X-1.15 Camiel Vanderhoeven 30-MAR-2007 Added old changelog comments.</p>
-<p>X-1.14 Camiel Vanderhoeven 14-MAR-2007 bListing moved here from <a class="el" href="../../dd/d00/a00921.html" title="Emulated CPU.">CAlphaCPU</a>.</p>
-<p>X-1.13 Camiel Vanderhoeven 14-MAR-2007 Added list_all method.</p>
-<p>X-1.12 Camiel Vanderhoeven 12-MAR-2007 Added support for TranslationBuffer debugging.</p>
-<p>X-1.11 Camiel Vanderhoeven 8-MAR-2007 get_fnc_name now requires CCPU * as an argument.</p>
-<p>X-1.10 Camiel Vanderhoeven 3-MAR-2007 Added TRC_DEV6 macro.</p>
-<p>X-1.9 Camiel Vanderhoeven 1-MAR-2007 Made a couple of arguments const char *.</p>
-<p>X-1.8 Camiel Vanderhoeven 18-FEB-2007 Added bHashing.</p>
-<p>X-1.7 Camiel Vanderhoeven 16-FEB-2007 Added support for Interactive Debugger (IDB).</p>
-<p>X-1.6 Camiel Vanderhoeven 12-FEB-2007 Formatting.</p>
-<p>X-1.5 Camiel Vanderhoeven 12-FEB-2007 Added comments.</p>
-<p>X-1.4 Camiel Vanderhoeven 9-FEB-2007 Debugging flqags (booleans) moved here from <a class="el" href="../../dd/d00/a00921.html" title="Emulated CPU.">CAlphaCPU</a>.</p>
-<p>X-1.3 Camiel Vanderhoeven 7-FEB-2007 Debugging functions are enabled only when compiling with -DIDB (Interactive Debugger, a future feature)</p>
-<p>X-1.2 Brian Wheeler 3-FEB-2007 Formatting.</p>
-<p>X-1.1 Camiel Vanderhoeven 19-JAN-2007 Initial version in CVS.</p>
-<dl class="section author"><dt>Author</dt><dd>Camiel Vanderhoeven </dd></dl>
+<p>X-1.15 Camiel Vanderhoeven 14-MAR-2008</p><ol type="1">
+<li>More meaningful exceptions replace throwing (int) 1.</li>
+<li>U64 macro replaces X64 macro.</li>
+</ol>
+<p>X-1.14 Camiel Vanderhoeven 05-MAR-2008 Multi-threading version.</p>
+<p>X-1.13 Camiel Vanderhoeven 30-JAN-2008 Always use set_pc or add_pc to change the program counter.</p>
+<p>X-1.12 Camiel Vanderhoeven 30-JAN-2008 Remember number of instructions left in current memory page, so that the translation-buffer doens't need to be consulted on every instruction fetch when the Icache is disabled.</p>
+<p>X-1.11 Camiel Vanderhoeven 25-JAN-2008 Trap on unalogned memory access. The previous implementation where unaligned accesses were silently allowed could go wrong when page boundaries are crossed.</p>
+<p>X-1.10 Camiel Vanderhoeven 18-JAN-2008 Replaced sext_64 inlines with sext_u64_&lt;bits&gt; inlines for performance reasons (thanks to David Hittner for spotting this!);</p>
+<p>X-1.9 Camiel Vanderhoeven 2-DEC-2007 Changed the way translation buffers work, the way interrupts work.</p>
+<p>X-1.8 Camiel Vanderhoeven 12-NOV-2007 Fix Software Interrupt behaviour.</p>
+<p>X-1.7 Camiel Vanderhoeven 30-OCT-2007 IPR 0x2d identified as M_FIX (Mbox fixed behaviour)</p>
+<p>X-1.6 Camiel Vanderhoeven 11-APR-2007 Moved all data that should be saved to a state file to a structure "state".</p>
+<p>X-1.5 Camiel Vanderhoeven 30-MAR-2007 Added old changelog comments.</p>
+<p>X-1.4 Camiel Vanderhoeven 8-MAR-2007 Different argument list for CTranslationBuffer methods, and for va_form function.</p>
+<p>X-1.3 Camiel Vanderhoeven 3-MAR-2007 Put 0x2d in HW_MTPR to get rid of error messages about this unknown IPR. WE STILL NEED TO FIND OUT WHAT THIS REGISTER DOES.</p>
+<p>X-1.2 Camiel Vanderhoeven 22-FEB-2007 Got rid of calls to get_asn.</p>
+<p>X-1.1 Camiel Vanderhoeven 18-FEB-2007 File created. Contains code previously found in <a class="el" href="../../de/d00/a00185.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor.">AlphaCPU.h</a> </p>
 
-<p class="definition">Definition in file <a class="el" href="../../dd/d00/a00260_source.html">TraceEngine.h</a>.</p>
+<p class="definition">Definition in file <a class="el" href="../../dd/d00/a00260_source.html">cpu_pal.h</a>.</p>
 </div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
-<a id="a5eae87ad68d6e1dbcacbbd1c2099db89" name="a5eae87ad68d6e1dbcacbbd1c2099db89"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5eae87ad68d6e1dbcacbbd1c2099db89">&#9670;&#160;</a></span>DO_ACTION</h2>
+<a id="abd0b56ca5396b7b92637d902950fe025" name="abd0b56ca5396b7b92637d902950fe025"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd0b56ca5396b7b92637d902950fe025">&#9670;&#160;</a></span>DO_HW_LD</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define DO_ACTION&#160;&#160;&#160;!<a class="el" href="#a5783a67942e298401dd23cddf8f3448a">bListing</a></td>
+          <td class="memname">#define DO_HW_LD</td>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00260_source.html#l00233">233</a> of file <a class="el" href="../../dd/d00/a00260_source.html">TraceEngine.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d5/d00/a00140_source.html#l02949">CAlphaCPU::execute()</a>.</p>
-
-</div>
-</div>
-<a id="a5685fe0c3777ae5d0444ca732a98046a" name="a5685fe0c3777ae5d0444ca732a98046a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5685fe0c3777ae5d0444ca732a98046a">&#9670;&#160;</a></span>TRC_DEV</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TRC_DEV</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>a</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">{                      \</div>
-<div class="line">  if(<a class="code hl_variable" href="../../d9/d00/a00257.html#aec440ea495e89a5b3c1c6020761c31d7">bTrace</a>)           \</div>
-<div class="line">  {                    \</div>
-<div class="line">    <span class="keywordtype">char</span>  t[1000];     \</div>
-<div class="line">    sprintf(t, a);     \</div>
-<div class="line">    <a class="code hl_variable" href="../../d9/d00/a00257.html#a68bf49d9a6ffe37d4e0ebb6a7d175d5c">trc</a>-&gt;<a class="code hl_function" href="../../d1/d00/a01041.html#a0d48e0c44090654e7e9a372e1f9844ca">trace_dev</a>(t); \</div>
-<div class="line">  }                    \</div>
-<div class="line">}</div>
-<div class="ttc" id="aa00257_html_a68bf49d9a6ffe37d4e0ebb6a7d175d5c"><div class="ttname"><a href="../../d9/d00/a00257.html#a68bf49d9a6ffe37d4e0ebb6a7d175d5c">trc</a></div><div class="ttdeci">CTraceEngine * trc</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d00/a00257_source.html#l00171">TraceEngine.cpp:171</a></div></div>
-<div class="ttc" id="aa00257_html_aec440ea495e89a5b3c1c6020761c31d7"><div class="ttname"><a href="../../d9/d00/a00257.html#aec440ea495e89a5b3c1c6020761c31d7">bTrace</a></div><div class="ttdeci">bool bTrace</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d00/a00257_source.html#l01847">TraceEngine.cpp:1847</a></div></div>
-<div class="ttc" id="aa01041_html_a0d48e0c44090654e7e9a372e1f9844ca"><div class="ttname"><a href="../../d1/d00/a01041.html#a0d48e0c44090654e7e9a372e1f9844ca">CTraceEngine::trace_dev</a></div><div class="ttdeci">void trace_dev(const char *text)</div><div class="ttdoc">Print a string to the current trace file.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d00/a00257_source.html#l00775">TraceEngine.cpp:775</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line">  <span class="keywordflow">do</span> {                                                          \</div>
+<div class="line">  if (!<a class="code hl_function" href="../../d3/d00/a00200.html#a443860ab83551bf77dad9bf4efcaa6b7">alpha_hw_load_valid</a>(hw_load)) { <a class="code hl_define" href="../../d6/d00/a00233.html#adbb58d71d6ce0c75fd320e8f97da799e">UNKNOWN2</a>; }                             \</div>
+<div class="line">  <span class="keyword">const</span> <a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> hw_address = state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + (<a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a>)hw_load.displacement;           \</div>
+<div class="line">  if (hw_load.address == <a class="code hl_enumvalue" href="../../d3/d00/a00200.html#aa3ad26f561afb9009c452480177375e7a615e6f9baca5553d44683a098d342b70">AlphaHWLoadAddress::Virtual</a>) {                        \</div>
+<div class="line">    <span class="keyword">const</span> <span class="keywordtype">int</span> hw_flags = <a class="code hl_define" href="../../d7/d00/a00236.html#abffe9e5de3ddab85a21af380bf0531eb">ACCESS_READ</a> | (hw_load.vpte ? <a class="code hl_define" href="../../d7/d00/a00236.html#a6b11cfc191737a3107b9d196e178601c">VPTE</a> : 0)               \</div>
+<div class="line">      | (hw_load.alternate ? <a class="code hl_define" href="../../d7/d00/a00236.html#a9d8a33b1a8b82b9913a0ba70438d45be">ALT</a> : 0) | (hw_load.write_check ? <a class="code hl_define" href="../../d7/d00/a00236.html#a7e46e9bd2d820b34f985a358715dc1d4">WRCHK</a> : 0);     \</div>
+<div class="line">    if (hw_flags == <a class="code hl_define" href="../../d7/d00/a00236.html#abffe9e5de3ddab85a21af380bf0531eb">ACCESS_READ</a>) {                                             \</div>
+<div class="line">      DATA_PHYS_NT(hw_address, <a class="code hl_define" href="../../d7/d00/a00236.html#abffe9e5de3ddab85a21af380bf0531eb">ACCESS_READ</a>);                                   \</div>
+<div class="line">    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (virt2phys(hw_address, &amp;phys_address, hw_flags, <span class="keyword">nullptr</span>, ins)) { \</div>
+<div class="line">      ES40_EXECUTE_END();                                                      \</div>
+<div class="line">    }                                                                          \</div>
+<div class="line">  } <span class="keywordflow">else</span> {                                                                     \</div>
+<div class="line">    phys_address = hw_address;                                                 \</div>
+<div class="line">  }                                                                            \</div>
+<div class="line">            \</div>
+<div class="line">  if (hw_load.locked) {                                                        \</div>
+<div class="line">    state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>] = cSystem-&gt;cpu_read_locked(state.iProcNum,                  \</div>
+<div class="line">      <a class="code hl_define" href="../../d7/d00/a00236.html#ac0ef23f027a60fe8ded3b3fe3e575076">ALIGN_PHYS</a>(hw_load.size_bits / 8), hw_load.size_bits, <span class="keyword">this</span>);            \</div>
+<div class="line">    <a class="code hl_define" href="../../d7/d00/a00236.html#a8647ad154bf86a39e34c36ff4d36b367">LLR</a>;                                                                       \</div>
+<div class="line">  } <span class="keywordflow">else</span> {                                                                     \</div>
+<div class="line">    state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>] = <a class="code hl_define" href="../../d7/d00/a00236.html#ae5d5c18c7d707307561719025240114f">READ_PHYS_NT</a>(hw_load.size_bits);                          \</div>
+<div class="line">  }                                                                            \</div>
+<div class="line">  if (hw_load.size_bits == 32)                                                 \</div>
+<div class="line">    state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>] = <a class="code hl_function" href="../../d8/d00/a00326.html#ab6397ea9cae4b1b067118eacffc71ab7">sext_u64_32</a>(state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);                              \</div>
+<div class="line">} <span class="keywordflow">while</span> (0)</div>
+<div class="ttc" id="aa00200_html_a443860ab83551bf77dad9bf4efcaa6b7"><div class="ttname"><a href="../../d3/d00/a00200.html#a443860ab83551bf77dad9bf4efcaa6b7">alpha_hw_load_valid</a></div><div class="ttdeci">constexpr bool alpha_hw_load_valid(const AlphaHWLoadDescriptor &amp;load)</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d00/a00200_source.html#l00054">AlphaHWLoad.h:54</a></div></div>
+<div class="ttc" id="aa00200_html_aa3ad26f561afb9009c452480177375e7a615e6f9baca5553d44683a098d342b70"><div class="ttname"><a href="../../d3/d00/a00200.html#aa3ad26f561afb9009c452480177375e7a615e6f9baca5553d44683a098d342b70">AlphaHWLoadAddress::Virtual</a></div><div class="ttdeci">@ Virtual</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d00/a00200_source.html#l00036">AlphaHWLoad.h:36</a></div></div>
+<div class="ttc" id="aa00233_html_adbb58d71d6ce0c75fd320e8f97da799e"><div class="ttname"><a href="../../d6/d00/a00233.html#adbb58d71d6ce0c75fd320e8f97da799e">UNKNOWN2</a></div><div class="ttdeci">#define UNKNOWN2</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00233_source.html#l00336">cpu_debug.h:336</a></div></div>
+<div class="ttc" id="aa00236_html_a3cc7326bd3140cc269e686fc46179a21"><div class="ttname"><a href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a></div><div class="ttdeci">#define REG_1</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00821">cpu_defs.h:821</a></div></div>
+<div class="ttc" id="aa00236_html_a6b11cfc191737a3107b9d196e178601c"><div class="ttname"><a href="../../d7/d00/a00236.html#a6b11cfc191737a3107b9d196e178601c">VPTE</a></div><div class="ttdeci">#define VPTE</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00840">cpu_defs.h:840</a></div></div>
+<div class="ttc" id="aa00236_html_a7e46e9bd2d820b34f985a358715dc1d4"><div class="ttname"><a href="../../d7/d00/a00236.html#a7e46e9bd2d820b34f985a358715dc1d4">WRCHK</a></div><div class="ttdeci">#define WRCHK</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00843">cpu_defs.h:843</a></div></div>
+<div class="ttc" id="aa00236_html_a8647ad154bf86a39e34c36ff4d36b367"><div class="ttname"><a href="../../d7/d00/a00236.html#a8647ad154bf86a39e34c36ff4d36b367">LLR</a></div><div class="ttdeci">#define LLR</div><div class="ttdoc">Normal variant of read action DATA_PHYS faults on misalignment before the read.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00676">cpu_defs.h:676</a></div></div>
+<div class="ttc" id="aa00236_html_a9d8a33b1a8b82b9913a0ba70438d45be"><div class="ttname"><a href="../../d7/d00/a00236.html#a9d8a33b1a8b82b9913a0ba70438d45be">ALT</a></div><div class="ttdeci">#define ALT</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00842">cpu_defs.h:842</a></div></div>
+<div class="ttc" id="aa00236_html_abffe9e5de3ddab85a21af380bf0531eb"><div class="ttname"><a href="../../d7/d00/a00236.html#abffe9e5de3ddab85a21af380bf0531eb">ACCESS_READ</a></div><div class="ttdeci">#define ACCESS_READ</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00835">cpu_defs.h:835</a></div></div>
+<div class="ttc" id="aa00236_html_ac0ef23f027a60fe8ded3b3fe3e575076"><div class="ttname"><a href="../../d7/d00/a00236.html#ac0ef23f027a60fe8ded3b3fe3e575076">ALIGN_PHYS</a></div><div class="ttdeci">#define ALIGN_PHYS(a)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00622">cpu_defs.h:622</a></div></div>
+<div class="ttc" id="aa00236_html_ae5d5c18c7d707307561719025240114f"><div class="ttname"><a href="../../d7/d00/a00236.html#ae5d5c18c7d707307561719025240114f">READ_PHYS_NT</a></div><div class="ttdeci">#define READ_PHYS_NT(size)</div><div class="ttdoc">NO-TRAP (NT) variants of read action.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00796">cpu_defs.h:796</a></div></div>
+<div class="ttc" id="aa00236_html_afc0e94c6f29d79352470dfd56076e09f"><div class="ttname"><a href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a></div><div class="ttdeci">#define REG_2</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00822">cpu_defs.h:822</a></div></div>
+<div class="ttc" id="aa00326_html_a1af9f95651e921615e75917a6dd1b574"><div class="ttname"><a href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a></div><div class="ttdeci">uint64_t u64</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00126">datatypes.h:126</a></div></div>
+<div class="ttc" id="aa00326_html_ab6397ea9cae4b1b067118eacffc71ab7"><div class="ttname"><a href="../../d8/d00/a00326.html#ab6397ea9cae4b1b067118eacffc71ab7">sext_u64_32</a></div><div class="ttdeci">u64 sext_u64_32(u64 a)</div><div class="ttdoc">Sign-extend a 32-bit value to 64 bits.</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00226">datatypes.h:226</a></div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00260_source.html#l00178">178</a> of file <a class="el" href="../../dd/d00/a00260_source.html">TraceEngine.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00260_source.html#l00105">105</a> of file <a class="el" href="../../dd/d00/a00260_source.html">cpu_pal.h</a>.</p>
 
 </div>
 </div>
-<a id="a5f8e5ecd8d3f2eb00e0f9de3f7b9d8cf" name="a5f8e5ecd8d3f2eb00e0f9de3f7b9d8cf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5f8e5ecd8d3f2eb00e0f9de3f7b9d8cf">&#9670;&#160;</a></span>TRC_DEV2</h2>
+<a id="a41aaf5a161f59edf22d88343c803fac3" name="a41aaf5a161f59edf22d88343c803fac3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a41aaf5a161f59edf22d88343c803fac3">&#9670;&#160;</a></span>DO_HW_LDL</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define TRC_DEV2</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>a</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>b</em></span>&#160;)</td>
+          <td class="memname">#define DO_HW_LDL&#160;&#160;&#160;<a class="el" href="#abd0b56ca5396b7b92637d902950fe025">DO_HW_LD</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">{                      \</div>
-<div class="line">  if(<a class="code hl_variable" href="../../d9/d00/a00257.html#aec440ea495e89a5b3c1c6020761c31d7">bTrace</a>)           \</div>
-<div class="line">  {                    \</div>
-<div class="line">    <span class="keywordtype">char</span>  t[1000];     \</div>
-<div class="line">    sprintf(t, a, b);  \</div>
-<div class="line">    <a class="code hl_variable" href="../../d9/d00/a00257.html#a68bf49d9a6ffe37d4e0ebb6a7d175d5c">trc</a>-&gt;<a class="code hl_function" href="../../d1/d00/a01041.html#a0d48e0c44090654e7e9a372e1f9844ca">trace_dev</a>(t); \</div>
-<div class="line">  }                    \</div>
-<div class="line">}</div>
+
+<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00260_source.html#l00131">131</a> of file <a class="el" href="../../dd/d00/a00260_source.html">cpu_pal.h</a>.</p>
+
+</div>
+</div>
+<a id="a1598675c4277fd941cd62f5abcb83352" name="a1598675c4277fd941cd62f5abcb83352"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1598675c4277fd941cd62f5abcb83352">&#9670;&#160;</a></span>DO_HW_LDQ</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_HW_LDQ&#160;&#160;&#160;<a class="el" href="#abd0b56ca5396b7b92637d902950fe025">DO_HW_LD</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00260_source.html#l00132">132</a> of file <a class="el" href="../../dd/d00/a00260_source.html">cpu_pal.h</a>.</p>
+
+</div>
+</div>
+<a id="a63424986d034c055c7fa2ce2ec4ccee3" name="a63424986d034c055c7fa2ce2ec4ccee3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a63424986d034c055c7fa2ce2ec4ccee3">&#9670;&#160;</a></span>DO_HW_MFPR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_HW_MFPR&#160;&#160;&#160;state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>] = read_ipr(ins);</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00260_source.html#l00089">89</a> of file <a class="el" href="../../dd/d00/a00260_source.html">cpu_pal.h</a>.</p>
+
+</div>
+</div>
+<a id="a7cc9a5a8927d10c3b99ff386f4122de8" name="a7cc9a5a8927d10c3b99ff386f4122de8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7cc9a5a8927d10c3b99ff386f4122de8">&#9670;&#160;</a></span>DO_HW_MTPR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_HW_MTPR&#160;&#160;&#160;write_ipr(ins, state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>], <a class="el" href="../../dd/d00/a00212.html#ab8366be706d87922abd430dd2ca35e90adf608edb53fcc79c12759cdbdf58d9db">AlphaIPRWriteContext::Interpreter</a>);</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00260_source.html#l00091">91</a> of file <a class="el" href="../../dd/d00/a00260_source.html">cpu_pal.h</a>.</p>
+
+</div>
+</div>
+<a id="ab419c1e6cc4997b8b1c5e70776dd95ea" name="ab419c1e6cc4997b8b1c5e70776dd95ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab419c1e6cc4997b8b1c5e70776dd95ea">&#9670;&#160;</a></span>DO_HW_RET</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_HW_RET</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">  <span class="keywordflow">do</span> {                                                         \</div>
+<div class="line">  if (!<a class="code hl_function" href="../../dc/d00/a00218.html#a3b68c33c5649f7b4f9ea5a7fc7f478a3">alpha_pal_return_valid</a>(hw_return)) { <a class="code hl_define" href="../../d6/d00/a00233.html#ad0ad9f1b07beee1a12245ea001ccfadb">UNKNOWN1</a>; }                        \</div>
+<div class="line">  <span class="keyword">const</span> <a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> target = <a class="code hl_function" href="../../dc/d00/a00218.html#a2b0e116d716b41d9b189cf1626b06125">alpha_pal_return_target</a>(                                 \</div>
+<div class="line">    hw_return, state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>], state.exc_addr);                                \</div>
+<div class="line">  set_pc(target);                                                              \</div>
+<div class="line">  if (hw_return.clear_lock)                                                    \</div>
+<div class="line">    cSystem-&gt;cpu_clear_lock(state.iProcNum);                                   \</div>
+<div class="line">} <span class="keywordflow">while</span> (0)</div>
+<div class="ttc" id="aa00218_html_a2b0e116d716b41d9b189cf1626b06125"><div class="ttname"><a href="../../dc/d00/a00218.html#a2b0e116d716b41d9b189cf1626b06125">alpha_pal_return_target</a></div><div class="ttdeci">constexpr std::uint64_t alpha_pal_return_target(const AlphaPALReturnDescriptor &amp;entry, std::uint64_t register_b, std::uint64_t exception_address)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00218_source.html#l00093">AlphaPAL.h:93</a></div></div>
+<div class="ttc" id="aa00218_html_a3b68c33c5649f7b4f9ea5a7fc7f478a3"><div class="ttname"><a href="../../dc/d00/a00218.html#a3b68c33c5649f7b4f9ea5a7fc7f478a3">alpha_pal_return_valid</a></div><div class="ttdeci">constexpr bool alpha_pal_return_valid(const AlphaPALReturnDescriptor &amp;entry)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00218_source.html#l00087">AlphaPAL.h:87</a></div></div>
+<div class="ttc" id="aa00233_html_ad0ad9f1b07beee1a12245ea001ccfadb"><div class="ttname"><a href="../../d6/d00/a00233.html#ad0ad9f1b07beee1a12245ea001ccfadb">UNKNOWN1</a></div><div class="ttdeci">#define UNKNOWN1</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00233_source.html#l00326">cpu_debug.h:326</a></div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00260_source.html#l00187">187</a> of file <a class="el" href="../../dd/d00/a00260_source.html">TraceEngine.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d4/d00/a00428_source.html#l00565">CSerial::ReadMem()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00260_source.html#l00094">94</a> of file <a class="el" href="../../dd/d00/a00260_source.html">cpu_pal.h</a>.</p>
 
 </div>
 </div>
-<a id="a5d061a8de02a24892767941c7f75b46f" name="a5d061a8de02a24892767941c7f75b46f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5d061a8de02a24892767941c7f75b46f">&#9670;&#160;</a></span>TRC_DEV3</h2>
+<a id="a9d731021c936ebb6c0713bec736cab68" name="a9d731021c936ebb6c0713bec736cab68"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d731021c936ebb6c0713bec736cab68">&#9670;&#160;</a></span>DO_HW_ST</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define TRC_DEV3</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>a</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>b</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>c</em></span>&#160;)</td>
+          <td class="memname">#define DO_HW_ST</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">{                        \</div>
-<div class="line">  if(<a class="code hl_variable" href="../../d9/d00/a00257.html#aec440ea495e89a5b3c1c6020761c31d7">bTrace</a>)             \</div>
-<div class="line">  {                      \</div>
-<div class="line">    <span class="keywordtype">char</span>  t[1000];       \</div>
-<div class="line">    sprintf(t, a, b, c); \</div>
-<div class="line">    <a class="code hl_variable" href="../../d9/d00/a00257.html#a68bf49d9a6ffe37d4e0ebb6a7d175d5c">trc</a>-&gt;<a class="code hl_function" href="../../d1/d00/a01041.html#a0d48e0c44090654e7e9a372e1f9844ca">trace_dev</a>(t);   \</div>
-<div class="line">  }                      \</div>
-<div class="line">}</div>
+<b>Value:</b><div class="fragment"><div class="line">  <span class="keywordflow">do</span> {                                                          \</div>
+<div class="line">  if (!<a class="code hl_function" href="../../de/d00/a00203.html#a8d024b1940dafa03aa33f64093337148">alpha_hw_store_valid</a>(hw_store)) { <a class="code hl_define" href="../../d6/d00/a00233.html#adbb58d71d6ce0c75fd320e8f97da799e">UNKNOWN2</a>; }                           \</div>
+<div class="line">  <span class="keyword">const</span> <a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> hw_address = state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + (<a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a>)hw_store.displacement;          \</div>
+<div class="line">  if (hw_store.address == <a class="code hl_enumvalue" href="../../de/d00/a00203.html#a6889a01466ae6a205075559fff83ebcea615e6f9baca5553d44683a098d342b70">AlphaHWStoreAddress::Virtual</a>) {                      \</div>
+<div class="line">    if (hw_store.alternate) {                                                  \</div>
+<div class="line">      DATA_PHYS_NT(hw_address, <a class="code hl_define" href="../../d7/d00/a00236.html#a5f71164bcd05179ee7dcf8fbe8f27bff">ACCESS_WRITE</a> | <a class="code hl_define" href="../../d7/d00/a00236.html#a9d8a33b1a8b82b9913a0ba70438d45be">ALT</a>);                            \</div>
+<div class="line">    } <span class="keywordflow">else</span> {                                                                   \</div>
+<div class="line">      DATA_PHYS_NT(hw_address, <a class="code hl_define" href="../../d7/d00/a00236.html#a5f71164bcd05179ee7dcf8fbe8f27bff">ACCESS_WRITE</a>);                                  \</div>
+<div class="line">    }                                                                          \</div>
+<div class="line">  } <span class="keywordflow">else</span> {                                                                     \</div>
+<div class="line">    phys_address = hw_address;                                                 \</div>
+<div class="line">  }                                                                            \</div>
+<div class="line">     \</div>
+<div class="line">  if (hw_store.conditional) {                                                  \</div>
+<div class="line">    state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>] = cSystem-&gt;cpu_stx_c(state.iProcNum,                       \</div>
+<div class="line">      <a class="code hl_define" href="../../d7/d00/a00236.html#ac0ef23f027a60fe8ded3b3fe3e575076">ALIGN_PHYS</a>(hw_store.size_bits / 8),                                    \</div>
+<div class="line">      hw_store.size_bits, state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>], dram_ptr, dram_size, <span class="keyword">this</span>);          \</div>
+<div class="line">  } <span class="keywordflow">else</span> {                                                                     \</div>
+<div class="line">    WRITE_PHYS_NT(state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>], hw_store.size_bits);                         \</div>
+<div class="line">  }                                                                            \</div>
+<div class="line">} <span class="keywordflow">while</span> (0)</div>
+<div class="ttc" id="aa00203_html_a6889a01466ae6a205075559fff83ebcea615e6f9baca5553d44683a098d342b70"><div class="ttname"><a href="../../de/d00/a00203.html#a6889a01466ae6a205075559fff83ebcea615e6f9baca5553d44683a098d342b70">AlphaHWStoreAddress::Virtual</a></div><div class="ttdeci">@ Virtual</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00203_source.html#l00036">AlphaHWStore.h:36</a></div></div>
+<div class="ttc" id="aa00203_html_a8d024b1940dafa03aa33f64093337148"><div class="ttname"><a href="../../de/d00/a00203.html#a8d024b1940dafa03aa33f64093337148">alpha_hw_store_valid</a></div><div class="ttdeci">constexpr bool alpha_hw_store_valid(const AlphaHWStoreDescriptor &amp;store)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00203_source.html#l00051">AlphaHWStore.h:51</a></div></div>
+<div class="ttc" id="aa00236_html_a5f71164bcd05179ee7dcf8fbe8f27bff"><div class="ttname"><a href="../../d7/d00/a00236.html#a5f71164bcd05179ee7dcf8fbe8f27bff">ACCESS_WRITE</a></div><div class="ttdeci">#define ACCESS_WRITE</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00836">cpu_defs.h:836</a></div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00260_source.html#l00196">196</a> of file <a class="el" href="../../dd/d00/a00260_source.html">TraceEngine.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00260_source.html#l00135">135</a> of file <a class="el" href="../../dd/d00/a00260_source.html">cpu_pal.h</a>.</p>
 
 </div>
 </div>
-<a id="a8c446219d3805aaef70060c06e7c69ab" name="a8c446219d3805aaef70060c06e7c69ab"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8c446219d3805aaef70060c06e7c69ab">&#9670;&#160;</a></span>TRC_DEV4</h2>
+<a id="aef54823c2658de763890af0c6e5cb133" name="aef54823c2658de763890af0c6e5cb133"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aef54823c2658de763890af0c6e5cb133">&#9670;&#160;</a></span>DO_HW_STL</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define TRC_DEV4</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>a</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>b</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>c</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>d</em></span>&#160;)</td>
+          <td class="memname">#define DO_HW_STL&#160;&#160;&#160;<a class="el" href="#a9d731021c936ebb6c0713bec736cab68">DO_HW_ST</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">{                           \</div>
-<div class="line">  if(<a class="code hl_variable" href="../../d9/d00/a00257.html#aec440ea495e89a5b3c1c6020761c31d7">bTrace</a>)                \</div>
-<div class="line">  {                         \</div>
-<div class="line">    <span class="keywordtype">char</span>  t[1000];          \</div>
-<div class="line">    sprintf(t, a, b, c, d); \</div>
-<div class="line">    <a class="code hl_variable" href="../../d9/d00/a00257.html#a68bf49d9a6ffe37d4e0ebb6a7d175d5c">trc</a>-&gt;<a class="code hl_function" href="../../d1/d00/a01041.html#a0d48e0c44090654e7e9a372e1f9844ca">trace_dev</a>(t);      \</div>
-<div class="line">  }                         \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00260_source.html#l00205">205</a> of file <a class="el" href="../../dd/d00/a00260_source.html">TraceEngine.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d4/d00/a00428_source.html#l00565">CSerial::ReadMem()</a>, and <a class="el" href="../../d4/d00/a00428_source.html#l00647">CSerial::WriteMem()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00260_source.html#l00157">157</a> of file <a class="el" href="../../dd/d00/a00260_source.html">cpu_pal.h</a>.</p>
 
 </div>
 </div>
-<a id="a3ec1c203f03b3a88cff7f3f1b89b0a69" name="a3ec1c203f03b3a88cff7f3f1b89b0a69"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3ec1c203f03b3a88cff7f3f1b89b0a69">&#9670;&#160;</a></span>TRC_DEV5</h2>
+<a id="a0b0b30254f90a750e277f77a5ceea836" name="a0b0b30254f90a750e277f77a5ceea836"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b0b30254f90a750e277f77a5ceea836">&#9670;&#160;</a></span>DO_HW_STQ</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define TRC_DEV5</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>a</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>b</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>c</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>d</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>e</em></span>&#160;)</td>
+          <td class="memname">#define DO_HW_STQ&#160;&#160;&#160;<a class="el" href="#a9d731021c936ebb6c0713bec736cab68">DO_HW_ST</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">{                              \</div>
-<div class="line">  if(<a class="code hl_variable" href="../../d9/d00/a00257.html#aec440ea495e89a5b3c1c6020761c31d7">bTrace</a>)                   \</div>
-<div class="line">  {                            \</div>
-<div class="line">    <span class="keywordtype">char</span>  t[1000];             \</div>
-<div class="line">    sprintf(t, a, b, c, d, e); \</div>
-<div class="line">    <a class="code hl_variable" href="../../d9/d00/a00257.html#a68bf49d9a6ffe37d4e0ebb6a7d175d5c">trc</a>-&gt;<a class="code hl_function" href="../../d1/d00/a01041.html#a0d48e0c44090654e7e9a372e1f9844ca">trace_dev</a>(t);         \</div>
-<div class="line">  }                            \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00260_source.html#l00214">214</a> of file <a class="el" href="../../dd/d00/a00260_source.html">TraceEngine.h</a>.</p>
 
-</div>
-</div>
-<a id="a45513d2b22c442cd4d08456d2a982904" name="a45513d2b22c442cd4d08456d2a982904"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a45513d2b22c442cd4d08456d2a982904">&#9670;&#160;</a></span>TRC_DEV6</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TRC_DEV6</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>a</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>b</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>c</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>d</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>e</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>f</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">{                                 \</div>
-<div class="line">  if(<a class="code hl_variable" href="../../d9/d00/a00257.html#aec440ea495e89a5b3c1c6020761c31d7">bTrace</a>)                      \</div>
-<div class="line">  {                               \</div>
-<div class="line">    <span class="keywordtype">char</span>  t[1000];                \</div>
-<div class="line">    sprintf(t, a, b, c, d, e, f); \</div>
-<div class="line">    <a class="code hl_variable" href="../../d9/d00/a00257.html#a68bf49d9a6ffe37d4e0ebb6a7d175d5c">trc</a>-&gt;<a class="code hl_function" href="../../d1/d00/a01041.html#a0d48e0c44090654e7e9a372e1f9844ca">trace_dev</a>(t);            \</div>
-<div class="line">  }                               \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00260_source.html#l00223">223</a> of file <a class="el" href="../../dd/d00/a00260_source.html">TraceEngine.h</a>.</p>
-
-</div>
-</div>
-<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
-<a id="a9c3cfa2b0c665b04458d1d148bc10e17" name="a9c3cfa2b0c665b04458d1d148bc10e17"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9c3cfa2b0c665b04458d1d148bc10e17">&#9670;&#160;</a></span>bDisassemble</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool bDisassemble</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00257_source.html#l01848">1848</a> of file <a class="el" href="../../d9/d00/a00257_source.html">TraceEngine.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d5/d00/a00140_source.html#l04031">CAlphaCPU::listing()</a>, and <a class="el" href="../../d9/d00/a00257_source.html#l00888">CTraceEngine::parse()</a>.</p>
-
-</div>
-</div>
-<a id="aab8239a91148ca640a60179bce466daf" name="aab8239a91148ca640a60179bce466daf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aab8239a91148ca640a60179bce466daf">&#9670;&#160;</a></span>bHashing</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool bHashing</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00257_source.html#l01849">1849</a> of file <a class="el" href="../../d9/d00/a00257_source.html">TraceEngine.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00257_source.html#l00888">CTraceEngine::parse()</a>.</p>
-
-</div>
-</div>
-<a id="a5783a67942e298401dd23cddf8f3448a" name="a5783a67942e298401dd23cddf8f3448a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5783a67942e298401dd23cddf8f3448a">&#9670;&#160;</a></span>bListing</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool bListing</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00257_source.html#l01850">1850</a> of file <a class="el" href="../../d9/d00/a00257_source.html">TraceEngine.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d5/d00/a00140_source.html#l02949">CAlphaCPU::execute()</a>, <a class="el" href="../../d5/d00/a00140_source.html#l00645">CAlphaCPU::init()</a>, <a class="el" href="../../d5/d00/a00140_source.html#l04031">CAlphaCPU::listing()</a>, and <a class="el" href="../../d5/d00/a00140_source.html#l04302">CAlphaCPU::virt2phys()</a>.</p>
-
-</div>
-</div>
-<a id="aec440ea495e89a5b3c1c6020761c31d7" name="aec440ea495e89a5b3c1c6020761c31d7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aec440ea495e89a5b3c1c6020761c31d7">&#9670;&#160;</a></span>bTrace</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool bTrace</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00257_source.html#l01847">1847</a> of file <a class="el" href="../../d9/d00/a00257_source.html">TraceEngine.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00257_source.html#l00888">CTraceEngine::parse()</a>.</p>
-
-</div>
-</div>
-<a id="a68bf49d9a6ffe37d4e0ebb6a7d175d5c" name="a68bf49d9a6ffe37d4e0ebb6a7d175d5c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a68bf49d9a6ffe37d4e0ebb6a7d175d5c">&#9670;&#160;</a></span>trc</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../d1/d00/a01041.html">CTraceEngine</a>* trc</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00257_source.html#l00171">171</a> of file <a class="el" href="../../d9/d00/a00257_source.html">TraceEngine.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d7/d00/a00002_source.html#l00305">main()</a>, and <a class="el" href="../../d7/d00/a00002_source.html#l00540">run_emulator()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00260_source.html#l00158">158</a> of file <a class="el" href="../../dd/d00/a00260_source.html">cpu_pal.h</a>.</p>
 
 </div>
 </div>
@@ -688,7 +396,7 @@ Variables</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../dd/d00/a00260.html">TraceEngine.h</a></li>
+    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../dd/d00/a00260.html">cpu_pal.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

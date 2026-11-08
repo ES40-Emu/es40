@@ -1,6 +1,6 @@
 var a01261 =
 [
-    [ "parse", "de/d00/a01261.html#a19082d5582a73f46e1cab0a5da1253f8", null ],
-    [ "bytes", "de/d00/a01261.html#a1aac68d8000d425997c73d0c913a66b5", null ],
-    [ "file_size", "de/d00/a01261.html#a8d298a08ee27c03682dcce5535fa0876", null ]
+    [ "access", "de/d00/a01261.html#aa6d4fce70ff132f7e851e110b7694d18", null ],
+    [ "decode_fill", "de/d00/a01261.html#a69771d1846d5b7013b6e7d7ab39b0c7b", null ],
+    [ "map_address", "de/d00/a01261.html#a0270ba5da2d11e256e0a2bea8eef800e", null ]
 ];

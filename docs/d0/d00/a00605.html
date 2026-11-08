@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: system/Flash.cpp File Reference</title>
+<title>ES40: network/NetworkVmnetProto.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,567 +109,230 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d0/d00/a00605.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">Flash.cpp File Reference</div></div>
+  <div class="headertitle"><div class="title">NetworkVmnetProto.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>Contains the code for the emulated Flash ROM devices.  
+<p>Private protocol between ES40 and its macOS vmnet helper.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &quot;<a class="el" href="../../d9/d00/a00524_source.html">StdAfx.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d4/d00/a00608_source.html">Flash.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dc/d00/a00620_source.html">System.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d7/d00/a00143_source.html">CPU/AlphaCPU.h</a>&quot;</code><br />
-<code>#include &lt;memory&gt;</code><br />
+<div class="textblock"><code>#include &lt;net/if.h&gt;</code><br />
+<code>#include &lt;stdint.h&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
-Include dependency graph for Flash.cpp:</div>
+Include dependency graph for NetworkVmnetProto.h:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../d8/d00/a00606.png" border="0" usemap="#asystem_2_flash_8cpp" loading="lazy" alt=""/></div>
-<map name="asystem_2_flash_8cpp" id="asystem_2_flash_8cpp">
-<area shape="rect" title="Contains the code for the emulated Flash ROM devices." alt="" coords="2538,5,2663,32"/>
-<area shape="rect" href="../../d9/d00/a00524.html" title="Standard includes." alt="" coords="914,80,986,107"/>
-<area shape="poly" title=" " alt="" coords="2537,25,1002,92,1001,87,2538,20"/>
-<area shape="rect" title=" " alt="" coords="3048,304,3116,331"/>
-<area shape="poly" title=" " alt="" coords="2663,20,2774,33,2840,46,2909,66,2978,92,3044,128,3102,172,3128,199,3151,228,3156,247,3149,266,3135,283,3117,298,3115,293,3131,279,3145,263,3151,247,3146,231,3124,202,3099,176,3041,132,2976,97,2908,71,2839,51,2773,38,2663,25"/>
-<area shape="rect" href="../../d4/d00/a00608.html" title="Contains the definitions for the emulated Flash ROM devices." alt="" coords="2568,80,2633,107"/>
-<area shape="poly" title=" " alt="" coords="2602,31,2602,66,2598,63,2599,35"/>
-<area shape="rect" href="../../dc/d00/a00620.html" title="Contains the definitions for the emulated Typhoon Chipset devices." alt="" coords="2738,155,2815,181"/>
-<area shape="poly" title=" " alt="" coords="2616,30,2753,145,2747,144,2615,35"/>
-<area shape="rect" href="../../d7/d00/a00143.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="2155,80,2283,107"/>
-<area shape="poly" title=" " alt="" coords="2540,31,2298,80,2297,74,2535,32"/>
-<area shape="rect" href="../../d7/d00/a00131.html" title=" " alt="" coords="298,155,407,181"/>
-<area shape="poly" title=" " alt="" coords="911,99,706,123,426,157,423,158,422,153,425,152,706,117,916,97"/>
-<area shape="rect" href="../../df/d00/a00263.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="2673,304,2762,331"/>
-<area shape="poly" title=" " alt="" coords="986,92,1242,94,1624,103,1819,110,1992,121,2125,134,2172,143,2203,152,2221,163,2234,176,2251,203,2268,230,2279,242,2296,254,2350,267,2447,282,2660,310,2655,310,2447,287,2349,272,2294,258,2276,247,2263,233,2247,206,2230,179,2218,167,2201,157,2171,148,2125,140,1991,126,1819,115,1624,108,1242,100,986,97"/>
-<area shape="rect" title=" " alt="" coords="2272,304,2339,331"/>
-<area shape="poly" title=" " alt="" coords="986,92,1236,94,1607,102,1796,110,1963,120,2092,134,2137,143,2167,152,2198,173,2216,197,2231,224,2253,254,2286,293,2281,291,2249,258,2227,227,2211,200,2194,177,2165,157,2136,148,2091,139,1963,125,1795,115,1607,108,1236,100,987,97"/>
-<area shape="rect" href="../../d3/d00/a00023.html" title=" " alt="" coords="103,155,226,181"/>
-<area shape="poly" title=" " alt="" coords="912,100,286,157,242,161,240,156,285,152,914,95"/>
-<area shape="rect" href="../../d5/d00/a00029.html" title=" " alt="" coords="712,229,812,256"/>
-<area shape="poly" title=" " alt="" coords="936,106,791,222,788,217,931,108"/>
-<area shape="rect" href="../../dd/d00/a00041.html" title=" " alt="" coords="482,229,586,256"/>
-<area shape="poly" title=" " alt="" coords="916,107,585,226,583,221,911,108"/>
-<area shape="rect" href="../../dc/d00/a00032.html" title=" " alt="" coords="31,304,119,331"/>
-<area shape="poly" title=" " alt="" coords="911,104,700,157,135,303,133,298,698,152,916,102"/>
-<area shape="rect" href="../../d8/d00/a00038.html" title=" " alt="" coords="837,229,967,256"/>
-<area shape="poly" title=" " alt="" coords="948,106,912,216,908,213,944,109"/>
-<area shape="rect" href="../../d4/d00/a00035.html" title=" " alt="" coords="963,155,1078,181"/>
-<area shape="poly" title=" " alt="" coords="963,105,1000,144,995,143,961,110"/>
-<area shape="rect" href="../../d0/d00/a00302.html" title="Contains macro&#39;s and prototypes for debugging." alt="" coords="1120,155,1222,181"/>
-<area shape="poly" title=" " alt="" coords="986,104,1121,149,1115,149,986,109"/>
-<area shape="rect" href="../../d3/d00/a00305.html" title="Contains byte&#45;order conversion helpers." alt="" coords="1282,155,1388,181"/>
-<area shape="poly" title=" " alt="" coords="986,99,1270,154,1265,154,986,104"/>
-<area shape="rect" title=" " alt="" coords="126,229,203,256"/>
-<area shape="poly" title=" " alt="" coords="165,179,167,214,162,213,163,184"/>
-<area shape="rect" title=" " alt="" coords="1516,379,1570,405"/>
-<area shape="poly" title=" " alt="" coords="136,184,90,211,40,248,22,269,11,289,10,309,21,329,43,338,88,346,239,360,448,371,690,378,1176,386,1504,391,1498,391,1176,391,690,384,448,376,239,366,88,352,41,343,17,333,4,311,5,288,17,266,37,244,87,207,139,180"/>
-<area shape="rect" title=" " alt="" coords="1190,304,1248,331"/>
-<area shape="poly" title=" " alt="" coords="812,251,825,253,922,267,999,275,1077,284,1178,304,1172,304,1076,289,998,280,921,272,824,259,812,257"/>
-<area shape="rect" title=" " alt="" coords="1272,304,1332,331"/>
-<area shape="poly" title=" " alt="" coords="812,251,825,253,945,268,1040,274,1136,282,1259,304,1254,304,1135,287,1040,279,944,273,824,259,812,257"/>
-<area shape="rect" title=" " alt="" coords="870,304,928,331"/>
-<area shape="poly" title=" " alt="" coords="786,254,864,297,859,296,785,259"/>
-<area shape="rect" title=" " alt="" coords="687,304,743,331"/>
-<area shape="poly" title=" " alt="" coords="756,255,733,293,730,289,751,258"/>
-<area shape="rect" title=" " alt="" coords="768,304,846,331"/>
-<area shape="poly" title=" " alt="" coords="771,254,794,292,789,290,768,259"/>
-<area shape="poly" title=" " alt="" coords="553,254,624,298,676,328,750,345,849,358,1090,376,1330,385,1503,390,1498,390,1330,390,1090,381,848,364,749,350,674,333,621,303,552,259"/>
-<area shape="poly" title=" " alt="" coords="586,246,895,272,1178,304,1172,304,894,278,586,251"/>
-<area shape="poly" title=" " alt="" coords="586,245,943,274,1259,304,1254,304,942,279,586,251"/>
-<area shape="poly" title=" " alt="" coords="586,249,706,270,858,304,853,304,705,275,586,255"/>
-<area shape="poly" title=" " alt="" coords="566,254,675,299,669,299,565,259"/>
-<area shape="poly" title=" " alt="" coords="582,254,755,301,750,302,581,259"/>
-<area shape="rect" title=" " alt="" coords="1700,304,1760,331"/>
-<area shape="poly" title=" " alt="" coords="586,245,699,253,1685,311,1683,316,699,259,586,251"/>
-<area shape="rect" title=" " alt="" coords="142,304,211,331"/>
-<area shape="poly" title=" " alt="" coords="480,256,226,306,225,301,482,251"/>
-<area shape="rect" title=" " alt="" coords="952,304,1078,331"/>
-<area shape="poly" title=" " alt="" coords="587,249,939,303,934,304,586,254"/>
-<area shape="poly" title=" " alt="" coords="586,246,699,253,1283,275,1737,283,2191,288,2775,301,3035,314,3029,314,2775,307,2191,293,1737,288,1283,281,699,259,587,251"/>
-<area shape="rect" title=" " alt="" coords="235,304,331,331"/>
-<area shape="poly" title=" " alt="" coords="488,257,343,302,341,297,493,256"/>
-<area shape="poly" title=" " alt="" coords="479,254,463,259,300,281,135,306,133,301,299,276,463,253,484,252"/>
-<area shape="rect" title=" " alt="" coords="355,304,430,331"/>
-<area shape="poly" title=" " alt="" coords="512,256,432,299,430,294,507,257"/>
-<area shape="rect" title=" " alt="" coords="455,304,522,331"/>
-<area shape="poly" title=" " alt="" coords="528,255,506,293,503,289,524,258"/>
-<area shape="rect" title=" " alt="" coords="546,304,612,331"/>
-<area shape="poly" title=" " alt="" coords="543,254,566,292,561,290,540,259"/>
-<area shape="poly" title=" " alt="" coords="966,254,1178,303,1172,304,965,259"/>
-<area shape="poly" title=" " alt="" coords="967,252,1259,303,1254,304,967,257"/>
-<area shape="poly" title=" " alt="" coords="888,256,837,297,834,292,883,258"/>
-<area shape="poly" title=" " alt="" coords="922,254,985,296,980,295,921,259"/>
-<area shape="rect" title=" " alt="" coords="1102,304,1166,331"/>
-<area shape="poly" title=" " alt="" coords="942,254,1089,302,1084,301,942,259"/>
-<area shape="poly" title=" " alt="" coords="978,181,822,227,821,222,973,183"/>
-<area shape="poly" title=" " alt="" coords="1045,179,1267,297,1262,296,1044,184"/>
-<area shape="poly" title=" " alt="" coords="1050,179,1077,194,1101,212,1115,234,1115,246,1109,257,1092,276,1075,288,1057,295,1038,298,995,300,943,306,942,301,995,294,1037,292,1056,289,1073,283,1089,272,1105,255,1110,245,1109,235,1097,216,1074,198,1049,184"/>
-<area shape="poly" title=" " alt="" coords="960,172,888,179,806,189,733,206,707,217,689,231,683,244,684,259,698,292,693,290,679,260,678,243,685,228,704,213,732,201,805,184,888,173,965,171"/>
-<area shape="poly" title=" " alt="" coords="960,172,891,180,812,190,743,207,718,218,701,231,696,240,695,249,706,266,728,282,757,298,752,297,725,287,702,270,690,250,691,239,697,228,715,213,742,202,811,185,891,174,965,171"/>
-<area shape="poly" title=" " alt="" coords="1078,175,1109,179,1229,184,1386,187,1466,191,1540,198,1605,209,1655,227,1675,240,1692,256,1718,292,1713,290,1688,260,1671,244,1653,232,1603,215,1539,203,1465,196,1386,192,1229,189,1108,184,1078,180"/>
-<area shape="rect" title=" " alt="" coords="991,229,1095,256"/>
-<area shape="poly" title=" " alt="" coords="1026,180,1037,216,1032,213,1023,184"/>
-<area shape="rect" title=" " alt="" coords="1221,229,1289,256"/>
-<area shape="poly" title=" " alt="" coords="1186,179,1232,220,1226,218,1185,184"/>
-<area shape="rect" href="../../df/d00/a00122.html" title=" " alt="" coords="1314,229,1407,256"/>
-<area shape="poly" title=" " alt="" coords="1341,180,1353,216,1349,213,1338,184"/>
-<area shape="rect" href="../../d6/d00/a00293.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="2494,229,2667,256"/>
-<area shape="poly" title=" " alt="" coords="2601,105,2586,216,2582,212,2597,109"/>
-<area shape="poly" title=" " alt="" coords="2535,256,2355,306,2354,301,2530,257"/>
-<area shape="rect" href="../../da/d00/a00080.html" title="Contains the definitions for the configuration file interpreter." alt="" coords="2412,304,2554,331"/>
-<area shape="poly" title=" " alt="" coords="2566,256,2513,297,2511,292,2561,257"/>
-<area shape="poly" title=" " alt="" coords="2414,325,2351,333,1585,390,1585,385,2351,328,2409,326"/>
-<area shape="poly" title=" " alt="" coords="2816,168,2951,177,3034,187,3114,202,3182,223,3209,236,3230,251,3243,268,3248,288,3241,309,3223,333,3197,344,3145,353,2977,368,2745,379,2477,386,1940,393,1585,393,1585,388,1940,388,2477,381,2745,374,2977,363,3145,348,3196,339,3220,329,3236,307,3242,287,3239,270,3227,255,3207,240,3180,228,3113,207,3033,193,2951,183,2816,173"/>
-<area shape="poly" title=" " alt="" coords="2734,171,2676,179,2597,189,2510,206,2425,232,2404,245,2381,258,2333,270,2276,279,2145,291,1994,295,1834,295,1517,293,1378,296,1263,307,1263,301,1378,291,1517,287,1834,289,1994,289,2144,285,2276,274,2332,265,2379,254,2401,241,2423,227,2509,201,2596,184,2675,174,2740,171"/>
-<area shape="poly" title=" " alt="" coords="2740,174,2622,196,2552,212,2483,232,2454,246,2425,259,2356,268,2240,278,1921,295,1348,317,1348,312,1920,290,2239,273,2356,263,2424,253,2452,241,2481,227,2551,207,2621,191,2735,175"/>
-<area shape="poly" title=" " alt="" coords="2770,180,2734,222,2709,243,2680,258,2624,271,2528,282,2263,299,1776,318,1775,312,2262,294,2527,277,2623,266,2678,254,2706,238,2730,218,2765,183"/>
-<area shape="poly" title=" " alt="" coords="2815,167,2894,171,2988,180,3074,198,3107,211,3129,228,3136,245,3133,263,3122,280,3109,296,3106,291,3118,277,3128,261,3131,245,3125,231,3104,216,3073,203,2987,186,2893,176,2816,173"/>
-<area shape="poly" title=" " alt="" coords="2745,181,2630,226,2629,221,2740,182"/>
-<area shape="rect" href="../../dd/d00/a00260.html" title="Contains the definitions for the CPU tracing engine." alt="" coords="2742,229,2880,256"/>
-<area shape="poly" title=" " alt="" coords="2784,180,2801,217,2796,214,2781,184"/>
-<area shape="rect" href="../../d7/d00/a00614.html" title=" " alt="" coords="3038,229,3115,256"/>
-<area shape="poly" title=" " alt="" coords="2816,176,3025,229,3020,228,2815,181"/>
-<area shape="rect" title=" " alt="" coords="3152,304,3209,331"/>
-<area shape="poly" title=" " alt="" coords="2815,168,2896,173,2995,183,3088,201,3124,213,3150,227,3162,241,3171,256,3180,291,3175,288,3166,258,3158,244,3147,231,3122,218,3086,206,2994,189,2896,178,2815,173"/>
-<area shape="rect" title=" " alt="" coords="2904,229,3014,256"/>
-<area shape="poly" title=" " alt="" coords="2809,179,2915,223,2910,223,2808,185"/>
-<area shape="poly" title=" " alt="" coords="2797,256,2747,297,2745,292,2792,257"/>
-<area shape="poly" title=" " alt="" coords="3079,255,3082,290,3078,287,3076,259"/>
-<area shape="rect" title=" " alt="" coords="2138,304,2199,331"/>
-<area shape="poly" title=" " alt="" coords="3040,254,3026,259,2910,274,2812,283,2644,289,2476,292,2261,307,2214,312,2214,307,2260,301,2476,287,2644,284,2811,277,2910,268,3025,253,3035,254"/>
-<area shape="poly" title=" " alt="" coords="3095,254,3152,296,3147,294,3094,259"/>
-<area shape="poly" title=" " alt="" coords="2158,101,2031,124,1960,139,1889,157,1822,182,1772,208,1722,234,1655,259,1571,280,1486,296,1348,314,1347,309,1485,290,1570,275,1653,253,1720,229,1770,203,1820,177,1888,152,1958,133,2030,119,2153,102"/>
-<area shape="poly" title=" " alt="" coords="2152,96,2056,102,1930,112,1790,129,1650,157,1598,173,1559,189,1471,232,1446,246,1420,259,1350,276,1290,286,1185,291,1078,292,1016,296,943,307,943,301,1015,291,1078,286,1185,286,1290,281,1349,271,1418,253,1444,242,1468,227,1557,184,1596,168,1649,152,1789,124,1929,106,2056,97,2157,95"/>
-<area shape="poly" title=" " alt="" coords="2158,104,2080,122,1990,147,1895,183,1850,205,1807,231,1774,261,1748,293,1745,289,1770,257,1804,227,1847,201,1893,178,1988,142,2079,117,2152,104"/>
-<area shape="poly" title=" " alt="" coords="2283,99,2419,119,2482,134,2526,152,2554,181,2572,216,2568,214,2550,184,2523,157,2481,139,2418,124,2283,104"/>
-<area shape="poly" title=" " alt="" coords="2283,100,2725,160,2720,160,2283,106"/>
-<area shape="rect" href="../../d6/d00/a00026.html" title=" " alt="" coords="1482,229,1641,256"/>
-<area shape="poly" title=" " alt="" coords="2152,94,2066,99,1954,108,1832,126,1771,140,1712,157,1646,188,1591,222,1589,217,1643,183,1710,152,1770,135,1831,121,1954,103,2066,94,2158,94"/>
-<area shape="rect" href="../../d0/d00/a00239.html" title=" " alt="" coords="2417,155,2512,181"/>
-<area shape="poly" title=" " alt="" coords="2262,105,2410,150,2404,150,2262,110"/>
-<area shape="rect" href="../../de/d00/a00185.html" title="Contains some macro definitions and some inline functions for the Alpha CPU." alt="" coords="2307,155,2392,181"/>
-<area shape="poly" title=" " alt="" coords="2242,105,2316,147,2311,146,2241,110"/>
-<area shape="rect" href="../../d9/d00/a00146.html" title=" " alt="" coords="2023,155,2154,181"/>
-<area shape="poly" title=" " alt="" coords="2199,106,2126,149,2124,144,2194,108"/>
-<area shape="poly" title=" " alt="" coords="1491,256,1385,279,1263,306,1262,301,1384,274,1485,257"/>
-<area shape="poly" title=" " alt="" coords="1519,256,1347,306,1346,301,1514,257"/>
-<area shape="poly" title=" " alt="" coords="1484,254,1093,306,1093,301,1479,254"/>
-<area shape="poly" title=" " alt="" coords="1642,251,2125,310,2120,311,1642,256"/>
-<area shape="rect" title=" " alt="" coords="2308,229,2368,256"/>
-<area shape="poly" title=" " alt="" coords="2445,181,2374,224,2372,219,2440,183"/>
-<area shape="poly" title=" " alt="" coords="2104,179,2126,201,2145,228,2158,258,2166,290,2162,287,2153,260,2141,231,2122,204,2102,184"/>
-<area shape="rect" href="../../d7/d00/a00236.html" title=" " alt="" coords="1936,229,2022,256"/>
-<area shape="poly" title=" " alt="" coords="2072,181,2011,223,2010,218,2067,183"/>
-<area shape="rect" href="../../d9/d00/a00227.html" title=" " alt="" coords="2046,229,2131,256"/>
-<area shape="poly" title=" " alt="" coords="2090,180,2090,215,2086,212,2087,184"/>
-<area shape="rect" href="../../d6/d00/a00233.html" title=" " alt="" coords="1817,229,1912,256"/>
-<area shape="poly" title=" " alt="" coords="2052,181,1918,227,1917,222,2047,182"/>
+<div class="center"><img src="../../d8/d00/a00606.png" border="0" usemap="#anetwork_2_network_vmnet_proto_8h" loading="lazy" alt=""/></div>
+<map name="anetwork_2_network_vmnet_proto_8h" id="anetwork_2_network_vmnet_proto_8h">
+<area shape="rect" title="Private protocol between ES40 and its macOS vmnet helper." alt="" coords="5,5,206,32"/>
+<area shape="rect" title=" " alt="" coords="32,80,94,107"/>
+<area shape="poly" title=" " alt="" coords="100,31,80,68,76,65,96,34"/>
+<area shape="rect" title=" " alt="" coords="117,80,182,107"/>
+<area shape="poly" title=" " alt="" coords="114,30,137,67,131,66,112,35"/>
+</map>
+</div>
+</div><div class="textblock"><div class="dynheader">
+This graph shows which files directly or indirectly include this file:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d9/d00/a00607.png" border="0" usemap="#anetwork_2_network_vmnet_proto_8hdep" loading="lazy" alt=""/></div>
+<map name="anetwork_2_network_vmnet_proto_8hdep" id="anetwork_2_network_vmnet_proto_8hdep">
+<area shape="rect" title="Private protocol between ES40 and its macOS vmnet helper." alt="" coords="5,5,206,32"/>
+<area shape="rect" href="../../d5/d00/a00602.html" title=" " alt="" coords="9,80,202,107"/>
+<area shape="poly" title=" " alt="" coords="107,46,108,81,103,79,104,50"/>
 </map>
 </div>
 </div>
 <p><a href="../../d0/d00/a00605_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Data Structures</h2></td></tr>
+<tr class="memitem:es40_5Fvmnet_5Fmsg" id="r_es40_5Fvmnet_5Fmsg"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d9/d00/a01877.html">es40_vmnet_msg</a></td></tr>
+<tr class="memitem:es40_5Fvmnet_5Fopen_5Freq" id="r_es40_5Fvmnet_5Fopen_5Freq"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../de/d00/a01881.html">es40_vmnet_open_req</a></td></tr>
+<tr class="memitem:es40_5Fvmnet_5Fopen_5Freply" id="r_es40_5Fvmnet_5Fopen_5Freply"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d7/d00/a01885.html">es40_vmnet_open_reply</a></td></tr>
+<tr class="memitem:es40_5Fvmnet_5Fstatus" id="r_es40_5Fvmnet_5Fstatus"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d9/d00/a01889.html">es40_vmnet_status</a></td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:ac4d1baf108e9ce6414088db508d7c182" id="r_ac4d1baf108e9ce6414088db508d7c182"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac4d1baf108e9ce6414088db508d7c182">MODE_READ</a>&#160;&#160;&#160;0</td></tr>
-<tr class="memitem:a874ebd176831eab586ec8297d59fc13d" id="r_a874ebd176831eab586ec8297d59fc13d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a874ebd176831eab586ec8297d59fc13d">MODE_STEP1</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:a14ea84be8c8000d67a121846d2ba4091" id="r_a14ea84be8c8000d67a121846d2ba4091"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a14ea84be8c8000d67a121846d2ba4091">MODE_STEP2</a>&#160;&#160;&#160;2</td></tr>
-<tr class="memitem:ad586b5cd61b461e7157cabb44f8bf160" id="r_ad586b5cd61b461e7157cabb44f8bf160"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad586b5cd61b461e7157cabb44f8bf160">MODE_AUTOSEL</a>&#160;&#160;&#160;3</td></tr>
-<tr class="memitem:ae52122633567e99792826c1892adde0e" id="r_ae52122633567e99792826c1892adde0e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae52122633567e99792826c1892adde0e">MODE_PROGRAM</a>&#160;&#160;&#160;4</td></tr>
-<tr class="memitem:ac71987735c70a24574c06fc74de1bbb7" id="r_ac71987735c70a24574c06fc74de1bbb7"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac71987735c70a24574c06fc74de1bbb7">MODE_ERASE_STEP3</a>&#160;&#160;&#160;5</td></tr>
-<tr class="memitem:ad3d4a674d6d339ddc80fcbc8c2268eb3" id="r_ad3d4a674d6d339ddc80fcbc8c2268eb3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad3d4a674d6d339ddc80fcbc8c2268eb3">MODE_ERASE_STEP4</a>&#160;&#160;&#160;6</td></tr>
-<tr class="memitem:a980e33cd72e22d85aa67582427b0f499" id="r_a980e33cd72e22d85aa67582427b0f499"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a980e33cd72e22d85aa67582427b0f499">MODE_ERASE_STEP5</a>&#160;&#160;&#160;7</td></tr>
-<tr class="memitem:aeca5b7d2d01471b72545b510971ba314" id="r_aeca5b7d2d01471b72545b510971ba314"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aeca5b7d2d01471b72545b510971ba314">MODE_CONFIRM_0</a>&#160;&#160;&#160;8</td></tr>
-<tr class="memitem:aa5d3f2115af5e53d3b3974b218c70cdc" id="r_aa5d3f2115af5e53d3b3974b218c70cdc"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aa5d3f2115af5e53d3b3974b218c70cdc">MODE_CONFIRM_1</a>&#160;&#160;&#160;9</td></tr>
+<tr class="memitem:af6dbe87ffe18f5f23e77f31c810a00ef" id="r_af6dbe87ffe18f5f23e77f31c810a00ef"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af6dbe87ffe18f5f23e77f31c810a00ef">ES40_VMNET_HELPER_NAME</a>&#160;&#160;&#160;&quot;es40_vmnet_helper&quot;</td></tr>
+<tr class="memitem:ac4a4e86463480ea27227adbbc64c6f09" id="r_ac4a4e86463480ea27227adbbc64c6f09"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac4a4e86463480ea27227adbbc64c6f09">ES40_VMNET_HELPER_FD</a>&#160;&#160;&#160;3</td></tr>
+<tr class="memitem:a48f9395342c895af883b0223cc6c1d26" id="r_a48f9395342c895af883b0223cc6c1d26"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a48f9395342c895af883b0223cc6c1d26">ES40_VMNET_PROTO_MAGIC</a>&#160;&#160;&#160;0x30345345u</td></tr>
+<tr class="memitem:ae040efee058d8ef9ecd36a6f5b650144" id="r_ae040efee058d8ef9ecd36a6f5b650144"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae040efee058d8ef9ecd36a6f5b650144">ES40_VMNET_PROTO_VERSION</a>&#160;&#160;&#160;2u</td></tr>
+<tr class="memitem:a20476203e3e7e79fa5ae5e217fae290b" id="r_a20476203e3e7e79fa5ae5e217fae290b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a20476203e3e7e79fa5ae5e217fae290b">ES40_VMNET_MAX_FRAME</a>&#160;&#160;&#160;65536u</td></tr>
+<tr class="memitem:af8538c2f718f983d2fd04f69952974bc" id="r_af8538c2f718f983d2fd04f69952974bc"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af8538c2f718f983d2fd04f69952974bc">ES40_VMNET_STATUS_OK</a>&#160;&#160;&#160;0u</td></tr>
+<tr class="memitem:aff0436d89b3cfc41a04d24a51e2b24a9" id="r_aff0436d89b3cfc41a04d24a51e2b24a9"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aff0436d89b3cfc41a04d24a51e2b24a9">ES40_VMNET_STATUS_HELPER_ERROR</a>&#160;&#160;&#160;0xffffffffu</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:aed804cf0fdaeec6ae97f0804412ca0b4" id="r_aed804cf0fdaeec6ae97f0804412ca0b4"><td class="memItemLeft">static const <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#aed804cf0fdaeec6ae97f0804412ca0b4">flash_magic1</a> = 0xFF3E3FF3</td></tr>
-<tr class="memitem:ab20c4dbda423ab8c84d302797cc5f8a4" id="r_ab20c4dbda423ab8c84d302797cc5f8a4"><td class="memItemLeft">static const <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#ab20c4dbda423ab8c84d302797cc5f8a4">flash_snapshot_magic1</a> = 0x464c5331</td></tr>
-<tr class="memitem:afaf136d29cfcf0eac44af521afd6fe91" id="r_afaf136d29cfcf0eac44af521afd6fe91"><td class="memItemLeft">static const <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#afaf136d29cfcf0eac44af521afd6fe91">flash_snapshot_magic2</a> = 0x464c5332</td></tr>
-<tr class="memitem:ad4b49d5eee9c58f608a0af38c447edeb" id="r_ad4b49d5eee9c58f608a0af38c447edeb"><td class="memItemLeft">static const <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#ad4b49d5eee9c58f608a0af38c447edeb">srm_partition_offset</a> = 0x00010000</td></tr>
-<tr class="memitem:aa31769675ea797d3118b8159ed58bf87" id="r_aa31769675ea797d3118b8159ed58bf87"><td class="memItemLeft">static const <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#aa31769675ea797d3118b8159ed58bf87">cpq_sig_offset</a> = 0x14</td></tr>
-<tr class="memitem:a4e906a1b455653dd9be3d01ef9aadebb" id="r_a4e906a1b455653dd9be3d01ef9aadebb"><td class="memItemLeft"><a class="el" href="../../dd/d00/a00921.html">CAlphaCPU</a> *&#160;</td><td class="memItemRight"><a class="el" href="#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a> [4]</td></tr>
-<tr class="memitem:ac6030b77c2d04175c983cf2554459dee" id="r_ac6030b77c2d04175c983cf2554459dee"><td class="memItemLeft"><a class="el" href="../../d7/d00/a01785.html">CFlash</a> *&#160;</td><td class="memItemRight"><a class="el" href="#ac6030b77c2d04175c983cf2554459dee">theSROM</a> = 0</td></tr>
+<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:a41001c1dee37072dcccb49e65462a74c" id="r_a41001c1dee37072dcccb49e65462a74c"><td class="memItemLeft">enum &#160;</td><td class="memItemRight"><a class="el" href="#a41001c1dee37072dcccb49e65462a74c">es40_vmnet_msg_type</a> { <br />
+&#160;&#160;<a class="el" href="#a41001c1dee37072dcccb49e65462a74ca5e70ea1b18816580833a084750f0f7d0">ES40_VMNET_MSG_OPEN</a> = 1
+, <a class="el" href="#a41001c1dee37072dcccb49e65462a74ca6b3a9051b75393b711746d5156c2259d">ES40_VMNET_MSG_OPEN_REPLY</a> = 2
+, <a class="el" href="#a41001c1dee37072dcccb49e65462a74ca90c8931f538ccd3ee7107982079f71e9">ES40_VMNET_MSG_PACKET</a> = 3
+, <a class="el" href="#a41001c1dee37072dcccb49e65462a74ca573b858587c676813644270dd06f8a2a">ES40_VMNET_MSG_STATUS</a> = 4
+, <br />
+&#160;&#160;<a class="el" href="#a41001c1dee37072dcccb49e65462a74cae5c695178e4a0892e42af9c625fed52c">ES40_VMNET_MSG_SHUTDOWN</a> = 5
+<br />
+ }</td></tr>
+<tr class="memitem:a55f3cfb317f6d99eecad86136ecff215" id="r_a55f3cfb317f6d99eecad86136ecff215"><td class="memItemLeft">enum &#160;</td><td class="memItemRight"><a class="el" href="#a55f3cfb317f6d99eecad86136ecff215">es40_vmnet_operation</a> { <a class="el" href="#a55f3cfb317f6d99eecad86136ecff215aa8cb30a55efa0ae2450991c79c67e8f4">ES40_VMNET_OP_READ</a> = 1
+, <a class="el" href="#a55f3cfb317f6d99eecad86136ecff215a8f92c5f9ceb8996508619977e6533a89">ES40_VMNET_OP_WRITE</a> = 2
+ }</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Contains the code for the emulated Flash ROM devices. </p>
-<p>$Id$</p>
-<p>X-1.19 Camiel Vanderhoeven 24-MAR-2008 Comments.</p>
-<p>X-1.18 Camiel Vanderhoeven 17-MAR-2008 Always set volatile DPR rom contents.</p>
-<p>X-1.17 Camiel Vanderhoeven 14-MAR-2008 Formatting.</p>
-<p>X-1.16 Camiel Vanderhoeven 14-MAR-2008</p><ol type="1">
-<li>More meaningful exceptions replace throwing (int) 1.</li>
-<li>U64 macro replaces X64 macro.</li>
-</ol>
-<p>X-1.15 Camiel Vanderhoeven 30-DEC-2007 Print file id on initialization.</p>
-<p>X-1.14 Camiel Vanderhoeven 28-DEC-2007 Throw exceptions rather than just exiting when errors occur.</p>
-<p>X-1.13 Camiel Vanderhoeven 17-DEC-2007 SaveState file format 2.1</p>
-<p>X-1.12 Camiel Vanderhoeven 10-DEC-2007 Changes to make the TraceEngine work again after recent changes.</p>
-<p>X-1.11 Camiel Vanderhoeven 10-DEC-2007 Use configurator.</p>
-<p>X-1.10 Camiel Vanderhoeven 31-MAR-2007 Added old changelog comments.</p>
-<p>X-1.9 Camiel Vanderhoeven 16-FEB-2007 Added functions SaveStateF and RestoreStateF.</p>
-<p>X-1.8 Brian Wheeler 13-FEB-2007 Formatting.</p>
-<p>X-1.7 Camiel Vanderhoeven 12-FEB-2007 Added comments.</p>
-<p>X-1.6 Camiel Vanderhoeven 9-FEB-2007 Added comments.</p>
-<p>X-1.5 Camiel Vanderhoeven 7-FEB-2007 Calls to trace_dev now use the TRC_DEVx macro's.</p>
-<p>X-1.4 Brian Wheeler 3-FEB-2007 Formatting.</p>
-<p>X-1.3 Brian Wheeler 3-FEB-2007 64-bit literals made compatible with Linux/GCC/glibc.</p>
-<p>X-1.2 Brian Wheeler 3-FEB-2007 Includes are now case-correct (necessary on Linux)</p>
-<p>X-1.1 Camiel Vanderhoeven 19-JAN-2007 Initial version in CVS.</p>
-<dl class="section author"><dt>Author</dt><dd>Camiel Vanderhoeven </dd></dl>
+<div class="textblock"><p>Private protocol between ES40 and its macOS vmnet helper. </p>
+<p>Each message is one UNIX-domain datagram. Packet messages consist of an <a class="el" href="../../d9/d00/a01877.html">es40_vmnet_msg</a> header followed by one complete Ethernet frame. </p>
 
-<p class="definition">Definition in file <a class="el" href="../../d0/d00/a00605_source.html">Flash.cpp</a>.</p>
+<p class="definition">Definition in file <a class="el" href="../../d0/d00/a00605_source.html">NetworkVmnetProto.h</a>.</p>
 </div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
-<a id="ad586b5cd61b461e7157cabb44f8bf160" name="ad586b5cd61b461e7157cabb44f8bf160"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad586b5cd61b461e7157cabb44f8bf160">&#9670;&#160;</a></span>MODE_AUTOSEL</h2>
+<a id="ac4a4e86463480ea27227adbbc64c6f09" name="ac4a4e86463480ea27227adbbc64c6f09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4a4e86463480ea27227adbbc64c6f09">&#9670;&#160;</a></span>ES40_VMNET_HELPER_FD</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define MODE_AUTOSEL&#160;&#160;&#160;3</td>
+          <td class="memname">#define ES40_VMNET_HELPER_FD&#160;&#160;&#160;3</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00103">103</a> of file <a class="el" href="../../d0/d00/a00605_source.html">Flash.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d0/d00/a00605_source.html#l00201">CFlash::ReadMem()</a>, and <a class="el" href="../../d0/d00/a00605_source.html#l00300">CFlash::WriteMem()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00039">39</a> of file <a class="el" href="../../d0/d00/a00605_source.html">NetworkVmnetProto.h</a>.</p>
 
 </div>
 </div>
-<a id="aeca5b7d2d01471b72545b510971ba314" name="aeca5b7d2d01471b72545b510971ba314"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aeca5b7d2d01471b72545b510971ba314">&#9670;&#160;</a></span>MODE_CONFIRM_0</h2>
+<a id="af6dbe87ffe18f5f23e77f31c810a00ef" name="af6dbe87ffe18f5f23e77f31c810a00ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6dbe87ffe18f5f23e77f31c810a00ef">&#9670;&#160;</a></span>ES40_VMNET_HELPER_NAME</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define MODE_CONFIRM_0&#160;&#160;&#160;8</td>
+          <td class="memname">#define ES40_VMNET_HELPER_NAME&#160;&#160;&#160;&quot;es40_vmnet_helper&quot;</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00108">108</a> of file <a class="el" href="../../d0/d00/a00605_source.html">Flash.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d0/d00/a00605_source.html#l00201">CFlash::ReadMem()</a>, and <a class="el" href="../../d0/d00/a00605_source.html#l00300">CFlash::WriteMem()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00038">38</a> of file <a class="el" href="../../d0/d00/a00605_source.html">NetworkVmnetProto.h</a>.</p>
 
 </div>
 </div>
-<a id="aa5d3f2115af5e53d3b3974b218c70cdc" name="aa5d3f2115af5e53d3b3974b218c70cdc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa5d3f2115af5e53d3b3974b218c70cdc">&#9670;&#160;</a></span>MODE_CONFIRM_1</h2>
+<a id="a20476203e3e7e79fa5ae5e217fae290b" name="a20476203e3e7e79fa5ae5e217fae290b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20476203e3e7e79fa5ae5e217fae290b">&#9670;&#160;</a></span>ES40_VMNET_MAX_FRAME</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define MODE_CONFIRM_1&#160;&#160;&#160;9</td>
+          <td class="memname">#define ES40_VMNET_MAX_FRAME&#160;&#160;&#160;65536u</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00109">109</a> of file <a class="el" href="../../d0/d00/a00605_source.html">Flash.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d0/d00/a00605_source.html#l00201">CFlash::ReadMem()</a>, <a class="el" href="../../d0/d00/a00605_source.html#l00610">CFlash::RestoreState()</a>, <a class="el" href="../../d0/d00/a00605_source.html#l00592">CFlash::SaveState()</a>, and <a class="el" href="../../d0/d00/a00605_source.html#l00300">CFlash::WriteMem()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00042">42</a> of file <a class="el" href="../../d0/d00/a00605_source.html">NetworkVmnetProto.h</a>.</p>
 
 </div>
 </div>
-<a id="ac71987735c70a24574c06fc74de1bbb7" name="ac71987735c70a24574c06fc74de1bbb7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac71987735c70a24574c06fc74de1bbb7">&#9670;&#160;</a></span>MODE_ERASE_STEP3</h2>
+<a id="a48f9395342c895af883b0223cc6c1d26" name="a48f9395342c895af883b0223cc6c1d26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48f9395342c895af883b0223cc6c1d26">&#9670;&#160;</a></span>ES40_VMNET_PROTO_MAGIC</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define MODE_ERASE_STEP3&#160;&#160;&#160;5</td>
+          <td class="memname">#define ES40_VMNET_PROTO_MAGIC&#160;&#160;&#160;0x30345345u</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00105">105</a> of file <a class="el" href="../../d0/d00/a00605_source.html">Flash.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d0/d00/a00605_source.html#l00300">CFlash::WriteMem()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00040">40</a> of file <a class="el" href="../../d0/d00/a00605_source.html">NetworkVmnetProto.h</a>.</p>
 
 </div>
 </div>
-<a id="ad3d4a674d6d339ddc80fcbc8c2268eb3" name="ad3d4a674d6d339ddc80fcbc8c2268eb3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad3d4a674d6d339ddc80fcbc8c2268eb3">&#9670;&#160;</a></span>MODE_ERASE_STEP4</h2>
+<a id="ae040efee058d8ef9ecd36a6f5b650144" name="ae040efee058d8ef9ecd36a6f5b650144"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae040efee058d8ef9ecd36a6f5b650144">&#9670;&#160;</a></span>ES40_VMNET_PROTO_VERSION</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define MODE_ERASE_STEP4&#160;&#160;&#160;6</td>
+          <td class="memname">#define ES40_VMNET_PROTO_VERSION&#160;&#160;&#160;2u</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00106">106</a> of file <a class="el" href="../../d0/d00/a00605_source.html">Flash.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d0/d00/a00605_source.html#l00300">CFlash::WriteMem()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00041">41</a> of file <a class="el" href="../../d0/d00/a00605_source.html">NetworkVmnetProto.h</a>.</p>
 
 </div>
 </div>
-<a id="a980e33cd72e22d85aa67582427b0f499" name="a980e33cd72e22d85aa67582427b0f499"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a980e33cd72e22d85aa67582427b0f499">&#9670;&#160;</a></span>MODE_ERASE_STEP5</h2>
+<a id="aff0436d89b3cfc41a04d24a51e2b24a9" name="aff0436d89b3cfc41a04d24a51e2b24a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff0436d89b3cfc41a04d24a51e2b24a9">&#9670;&#160;</a></span>ES40_VMNET_STATUS_HELPER_ERROR</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define MODE_ERASE_STEP5&#160;&#160;&#160;7</td>
+          <td class="memname">#define ES40_VMNET_STATUS_HELPER_ERROR&#160;&#160;&#160;0xffffffffu</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00107">107</a> of file <a class="el" href="../../d0/d00/a00605_source.html">Flash.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d0/d00/a00605_source.html#l00300">CFlash::WriteMem()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00058">58</a> of file <a class="el" href="../../d0/d00/a00605_source.html">NetworkVmnetProto.h</a>.</p>
 
 </div>
 </div>
-<a id="ae52122633567e99792826c1892adde0e" name="ae52122633567e99792826c1892adde0e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae52122633567e99792826c1892adde0e">&#9670;&#160;</a></span>MODE_PROGRAM</h2>
+<a id="af8538c2f718f983d2fd04f69952974bc" name="af8538c2f718f983d2fd04f69952974bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af8538c2f718f983d2fd04f69952974bc">&#9670;&#160;</a></span>ES40_VMNET_STATUS_OK</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define MODE_PROGRAM&#160;&#160;&#160;4</td>
+          <td class="memname">#define ES40_VMNET_STATUS_OK&#160;&#160;&#160;0u</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00104">104</a> of file <a class="el" href="../../d0/d00/a00605_source.html">Flash.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d0/d00/a00605_source.html#l00300">CFlash::WriteMem()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00057">57</a> of file <a class="el" href="../../d0/d00/a00605_source.html">NetworkVmnetProto.h</a>.</p>
 
 </div>
 </div>
-<a id="ac4d1baf108e9ce6414088db508d7c182" name="ac4d1baf108e9ce6414088db508d7c182"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac4d1baf108e9ce6414088db508d7c182">&#9670;&#160;</a></span>MODE_READ</h2>
+<a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
+<a id="a41001c1dee37072dcccb49e65462a74c" name="a41001c1dee37072dcccb49e65462a74c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a41001c1dee37072dcccb49e65462a74c">&#9670;&#160;</a></span>es40_vmnet_msg_type</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define MODE_READ&#160;&#160;&#160;0</td>
+          <td class="memname">enum <a class="el" href="#a41001c1dee37072dcccb49e65462a74c">es40_vmnet_msg_type</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00100">100</a> of file <a class="el" href="../../d0/d00/a00605_source.html">Flash.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d0/d00/a00605_source.html#l00126">CFlash::CFlash()</a>, <a class="el" href="../../d0/d00/a00605_source.html#l00201">CFlash::ReadMem()</a>, <a class="el" href="../../d0/d00/a00605_source.html#l00592">CFlash::SaveState()</a>, and <a class="el" href="../../d0/d00/a00605_source.html#l00300">CFlash::WriteMem()</a>.</p>
-
-</div>
-</div>
-<a id="a874ebd176831eab586ec8297d59fc13d" name="a874ebd176831eab586ec8297d59fc13d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a874ebd176831eab586ec8297d59fc13d">&#9670;&#160;</a></span>MODE_STEP1</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define MODE_STEP1&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00101">101</a> of file <a class="el" href="../../d0/d00/a00605_source.html">Flash.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d0/d00/a00605_source.html#l00300">CFlash::WriteMem()</a>.</p>
-
-</div>
-</div>
-<a id="a14ea84be8c8000d67a121846d2ba4091" name="a14ea84be8c8000d67a121846d2ba4091"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a14ea84be8c8000d67a121846d2ba4091">&#9670;&#160;</a></span>MODE_STEP2</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define MODE_STEP2&#160;&#160;&#160;2</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00102">102</a> of file <a class="el" href="../../d0/d00/a00605_source.html">Flash.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d0/d00/a00605_source.html#l00300">CFlash::WriteMem()</a>.</p>
-
-</div>
-</div>
-<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
-<a id="aa31769675ea797d3118b8159ed58bf87" name="aa31769675ea797d3118b8159ed58bf87"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa31769675ea797d3118b8159ed58bf87">&#9670;&#160;</a></span>cpq_sig_offset</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> cpq_sig_offset = 0x14</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a41001c1dee37072dcccb49e65462a74ca5e70ea1b18816580833a084750f0f7d0" name="a41001c1dee37072dcccb49e65462a74ca5e70ea1b18816580833a084750f0f7d0"></a>ES40_VMNET_MSG_OPEN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a41001c1dee37072dcccb49e65462a74ca6b3a9051b75393b711746d5156c2259d" name="a41001c1dee37072dcccb49e65462a74ca6b3a9051b75393b711746d5156c2259d"></a>ES40_VMNET_MSG_OPEN_REPLY&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a41001c1dee37072dcccb49e65462a74ca90c8931f538ccd3ee7107982079f71e9" name="a41001c1dee37072dcccb49e65462a74ca90c8931f538ccd3ee7107982079f71e9"></a>ES40_VMNET_MSG_PACKET&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a41001c1dee37072dcccb49e65462a74ca573b858587c676813644270dd06f8a2a" name="a41001c1dee37072dcccb49e65462a74ca573b858587c676813644270dd06f8a2a"></a>ES40_VMNET_MSG_STATUS&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a41001c1dee37072dcccb49e65462a74cae5c695178e4a0892e42af9c625fed52c" name="a41001c1dee37072dcccb49e65462a74cae5c695178e4a0892e42af9c625fed52c"></a>ES40_VMNET_MSG_SHUTDOWN&#160;</td><td class="fielddoc"></td></tr>
 </table>
-</div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00119">119</a> of file <a class="el" href="../../d0/d00/a00605_source.html">Flash.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d0/d00/a00605_source.html#l00164">CFlash::HasBootFirmware()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00044">44</a> of file <a class="el" href="../../d0/d00/a00605_source.html">NetworkVmnetProto.h</a>.</p>
 
 </div>
 </div>
-<a id="a4e906a1b455653dd9be3d01ef9aadebb" name="a4e906a1b455653dd9be3d01ef9aadebb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4e906a1b455653dd9be3d01ef9aadebb">&#9670;&#160;</a></span>cpu</h2>
+<a id="a55f3cfb317f6d99eecad86136ecff215" name="a55f3cfb317f6d99eecad86136ecff215"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55f3cfb317f6d99eecad86136ecff215">&#9670;&#160;</a></span>es40_vmnet_operation</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../dd/d00/a00921.html">CAlphaCPU</a>* cpu[4]</td>
+          <td class="memname">enum <a class="el" href="#a55f3cfb317f6d99eecad86136ecff215">es40_vmnet_operation</a></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
-  </tr>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a55f3cfb317f6d99eecad86136ecff215aa8cb30a55efa0ae2450991c79c67e8f4" name="a55f3cfb317f6d99eecad86136ecff215aa8cb30a55efa0ae2450991c79c67e8f4"></a>ES40_VMNET_OP_READ&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a55f3cfb317f6d99eecad86136ecff215a8f92c5f9ceb8996508619977e6533a89" name="a55f3cfb317f6d99eecad86136ecff215a8f92c5f9ceb8996508619977e6533a89"></a>ES40_VMNET_OP_WRITE&#160;</td><td class="fielddoc"></td></tr>
 </table>
-</div><div class="memdoc">
 
-<p class="reference">Referenced by <a class="el" href="../../d1/d00/a00230_source.html#l00032">Ev68MMU::access()</a>, <a class="el" href="../../d6/d00/a00626_source.html#l01105">CSystem::cchip_csr_read()</a>, <a class="el" href="../../d6/d00/a00626_source.html#l01164">CSystem::cchip_csr_write()</a>, <a class="el" href="../../d4/d00/a00617_source.html#l01243">describe_source()</a>, <a class="el" href="../../d2/d00/a00083_source.html#l02086">edit_ev68cb()</a>, <a class="el" href="../../d1/d00/a00230_source.html#l00043">Ev68MMU::map_address()</a>, <a class="el" href="../../d4/d00/a00617_source.html#l02015">CSystem::panic()</a>, <a class="el" href="../../d4/d00/a00617_source.html#l00905">CSystem::ProcessPendingReset()</a>, <a class="el" href="../../d5/d00/a00224_source.html#l00032">Ev68IPR::read()</a>, <a class="el" href="../../d4/d00/a00617_source.html#l00634">CSystem::RegisterCPU()</a>, <a class="el" href="../../d4/d00/a00617_source.html#l00893">CSystem::RequestSystemReset()</a>, <a class="el" href="../../d9/d00/a00257_source.html#l00550">CTraceEngine::set_waitfor()</a>, <a class="el" href="../../d4/d00/a00617_source.html#l01507">srm_decomp_chunk()</a>, <a class="el" href="../../d4/d00/a00617_source.html#l01773">CSystem::stop_threads()</a>, <a class="el" href="../../d9/d00/a00257_source.html#l00256">CTraceEngine::trace()</a>, <a class="el" href="../../d9/d00/a00257_source.html#l00443">CTraceEngine::trace_br()</a>, and <a class="el" href="../../d5/d00/a00224_source.html#l00086">Ev68IPR::write()</a>.</p>
-
-</div>
-</div>
-<a id="aed804cf0fdaeec6ae97f0804412ca0b4" name="aed804cf0fdaeec6ae97f0804412ca0b4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aed804cf0fdaeec6ae97f0804412ca0b4">&#9670;&#160;</a></span>flash_magic1</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> flash_magic1 = 0xFF3E3FF3</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00113">113</a> of file <a class="el" href="../../d0/d00/a00605_source.html">Flash.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d0/d00/a00605_source.html#l00522">CFlash::RestoreStateF()</a>.</p>
-
-</div>
-</div>
-<a id="ab20c4dbda423ab8c84d302797cc5f8a4" name="ab20c4dbda423ab8c84d302797cc5f8a4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab20c4dbda423ab8c84d302797cc5f8a4">&#9670;&#160;</a></span>flash_snapshot_magic1</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> flash_snapshot_magic1 = 0x464c5331</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00114">114</a> of file <a class="el" href="../../d0/d00/a00605_source.html">Flash.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d0/d00/a00605_source.html#l00610">CFlash::RestoreState()</a>, and <a class="el" href="../../d0/d00/a00605_source.html#l00592">CFlash::SaveState()</a>.</p>
-
-</div>
-</div>
-<a id="afaf136d29cfcf0eac44af521afd6fe91" name="afaf136d29cfcf0eac44af521afd6fe91"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afaf136d29cfcf0eac44af521afd6fe91">&#9670;&#160;</a></span>flash_snapshot_magic2</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> flash_snapshot_magic2 = 0x464c5332</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00115">115</a> of file <a class="el" href="../../d0/d00/a00605_source.html">Flash.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d0/d00/a00605_source.html#l00610">CFlash::RestoreState()</a>, and <a class="el" href="../../d0/d00/a00605_source.html#l00592">CFlash::SaveState()</a>.</p>
-
-</div>
-</div>
-<a id="ad4b49d5eee9c58f608a0af38c447edeb" name="ad4b49d5eee9c58f608a0af38c447edeb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad4b49d5eee9c58f608a0af38c447edeb">&#9670;&#160;</a></span>srm_partition_offset</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> srm_partition_offset = 0x00010000</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00118">118</a> of file <a class="el" href="../../d0/d00/a00605_source.html">Flash.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d0/d00/a00605_source.html#l00164">CFlash::HasBootFirmware()</a>.</p>
-
-</div>
-</div>
-<a id="ac6030b77c2d04175c983cf2554459dee" name="ac6030b77c2d04175c983cf2554459dee"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac6030b77c2d04175c983cf2554459dee">&#9670;&#160;</a></span>theSROM</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../d7/d00/a01785.html">CFlash</a>* theSROM = 0</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00634">634</a> of file <a class="el" href="../../d0/d00/a00605_source.html">Flash.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d0/d00/a00605_source.html#l00126">CFlash::CFlash()</a>, <a class="el" href="../../d4/d00/a00617_source.html#l01532">CSystem::LoadROM()</a>, <a class="el" href="../../d9/d00/a00257_source.html#l00888">CTraceEngine::parse()</a>, <a class="el" href="../../d4/d00/a00617_source.html#l00905">CSystem::ProcessPendingReset()</a>, <a class="el" href="../../d7/d00/a00002_source.html#l00540">run_emulator()</a>, <a class="el" href="../../df/d00/a00623_source.html#l00129">CSystem::tig_write()</a>, and <a class="el" href="../../d0/d00/a00605_source.html#l00146">CFlash::~CFlash()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00605_source.html#l00052">52</a> of file <a class="el" href="../../d0/d00/a00605_source.html">NetworkVmnetProto.h</a>.</p>
 
 </div>
 </div>
@@ -686,7 +349,7 @@ Variables</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_e8522150b400a43ebfdbd1fed060b8e2.html">system</a></li><li class="navelem"><a href="../../d0/d00/a00605.html">Flash.cpp</a></li>
+    <li class="navelem"><a href="../../dir_c901c14b65aa229498a52b725b3d4a2c.html">network</a></li><li class="navelem"><a href="../../d0/d00/a00605.html">NetworkVmnetProto.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

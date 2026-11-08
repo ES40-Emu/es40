@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: emu/attotime.h File Reference</title>
+<title>ES40: CPU/Ev68HWStore.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,187 +109,82 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d9/d00/a00272.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">attotime.h File Reference</div></div>
+  <div class="headertitle"><div class="title">Ev68HWStore.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-
-<p>Support functions for working with attotime data.  
-<a href="#details">More...</a></p>
-<div class="textblock"><code>#include &quot;<a class="el" href="../../db/d00/a00296_source.html">xtal.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d9/d00/a00524_source.html">StdAfx.h</a>&quot;</code><br />
-<code>#include &lt;cassert&gt;</code><br />
-<code>#include &lt;cmath&gt;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../de/d00/a00203_source.html">AlphaHWStore.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
-Include dependency graph for attotime.h:</div>
+Include dependency graph for Ev68HWStore.h:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../d0/d00/a00273.png" border="0" usemap="#aemu_2attotime_8h" loading="lazy" alt=""/></div>
-<map name="aemu_2attotime_8h" id="aemu_2attotime_8h">
-<area shape="rect" title="Support functions for working with attotime data." alt="" coords="105,5,214,32"/>
-<area shape="rect" href="../../db/d00/a00296.html" title=" " alt="" coords="44,80,97,107"/>
-<area shape="poly" title=" " alt="" coords="143,35,99,72,95,68,145,30"/>
-<area shape="rect" title=" " alt="" coords="90,155,147,181"/>
-<area shape="poly" title=" " alt="" coords="157,30,128,140,123,139,155,35"/>
-<area shape="rect" href="../../d9/d00/a00524.html" title="Standard includes." alt="" coords="995,80,1068,107"/>
-<area shape="poly" title=" " alt="" coords="214,22,981,85,979,90,214,27"/>
-<area shape="rect" title=" " alt="" coords="141,304,205,331"/>
-<area shape="poly" title=" " alt="" coords="163,31,174,289,169,288,158,33"/>
-<area shape="rect" title=" " alt="" coords="5,155,66,181"/>
-<area shape="poly" title=" " alt="" coords="63,110,51,142,46,140,65,105"/>
-<area shape="poly" title=" " alt="" coords="79,105,104,141,99,142,78,110"/>
-<area shape="rect" href="../../d7/d00/a00131.html" title=" " alt="" coords="932,155,1041,181"/>
-<area shape="poly" title=" " alt="" coords="1026,106,1004,143,1001,139,1021,109"/>
-<area shape="rect" href="../../df/d00/a00263.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="1371,155,1460,181"/>
-<area shape="poly" title=" " alt="" coords="1068,98,1358,154,1353,154,1068,104"/>
-<area shape="rect" title=" " alt="" coords="1484,155,1552,181"/>
-<area shape="poly" title=" " alt="" coords="1068,95,1238,115,1351,131,1472,154,1467,154,1351,136,1237,120,1068,101"/>
-<area shape="rect" href="../../d3/d00/a00023.html" title=" " alt="" coords="226,229,349,256"/>
-<area shape="poly" title=" " alt="" coords="992,97,801,116,673,133,544,157,429,191,333,226,331,221,427,185,543,152,672,128,801,111,998,96"/>
-<area shape="rect" href="../../d5/d00/a00029.html" title=" " alt="" coords="475,229,575,256"/>
-<area shape="poly" title=" " alt="" coords="992,96,898,102,774,111,655,129,608,141,574,157,561,169,550,184,534,217,531,213,545,181,557,165,571,152,606,136,654,123,773,106,898,96,997,95"/>
-<area shape="rect" href="../../dd/d00/a00041.html" title=" " alt="" coords="1034,229,1138,256"/>
-<area shape="poly" title=" " alt="" coords="1038,105,1079,216,1074,214,1035,109"/>
-<area shape="rect" href="../../dc/d00/a00032.html" title=" " alt="" coords="1661,304,1748,331"/>
-<area shape="poly" title=" " alt="" coords="1068,93,1178,97,1323,106,1465,124,1522,137,1565,152,1607,182,1643,219,1672,257,1693,292,1689,289,1668,260,1639,222,1604,186,1562,157,1521,142,1464,129,1323,112,1178,102,1068,98"/>
-<area shape="rect" href="../../d8/d00/a00038.html" title=" " alt="" coords="829,229,959,256"/>
-<area shape="poly" title=" " alt="" coords="997,105,957,127,938,140,922,156,907,185,899,216,895,212,902,183,917,153,934,136,954,123,992,107"/>
-<area shape="rect" href="../../d4/d00/a00035.html" title=" " alt="" coords="585,155,699,181"/>
-<area shape="poly" title=" " alt="" coords="992,102,715,156,714,151,997,101"/>
-<area shape="rect" href="../../d0/d00/a00302.html" title="Contains macro&#39;s and prototypes for debugging." alt="" coords="1115,155,1217,181"/>
-<area shape="poly" title=" " alt="" coords="1055,105,1132,147,1126,147,1054,110"/>
-<area shape="rect" href="../../d3/d00/a00305.html" title="Contains byte&#45;order conversion helpers." alt="" coords="1242,155,1347,181"/>
-<area shape="poly" title=" " alt="" coords="1068,102,1236,150,1231,150,1068,107"/>
-<area shape="rect" title=" " alt="" coords="229,304,306,331"/>
-<area shape="poly" title=" " alt="" coords="286,255,277,291,273,287,282,258"/>
-<area shape="rect" title=" " alt="" coords="330,304,384,331"/>
-<area shape="poly" title=" " alt="" coords="301,254,337,293,332,292,299,259"/>
-<area shape="rect" title=" " alt="" coords="758,304,815,331"/>
-<area shape="poly" title=" " alt="" coords="572,254,745,303,740,303,572,259"/>
-<area shape="rect" title=" " alt="" coords="571,304,631,331"/>
-<area shape="poly" title=" " alt="" coords="539,254,579,294,574,293,537,259"/>
-<area shape="rect" title=" " alt="" coords="408,304,466,331"/>
-<area shape="poly" title=" " alt="" coords="512,256,465,296,463,292,507,257"/>
-<area shape="rect" title=" " alt="" coords="490,304,546,331"/>
-<area shape="poly" title=" " alt="" coords="526,255,523,290,519,287,522,258"/>
-<area shape="rect" title=" " alt="" coords="655,304,733,331"/>
-<area shape="poly" title=" " alt="" coords="555,254,653,298,648,297,554,259"/>
-<area shape="poly" title=" " alt="" coords="1036,249,972,259,812,269,686,273,559,282,399,307,399,301,559,277,685,268,811,264,971,253,1031,250"/>
-<area shape="poly" title=" " alt="" coords="1036,255,830,306,830,301,1031,256"/>
-<area shape="poly" title=" " alt="" coords="1036,250,839,277,646,307,646,301,839,272,1031,250"/>
-<area shape="poly" title=" " alt="" coords="1036,249,972,259,835,270,727,275,619,285,481,307,480,301,618,280,727,270,835,264,971,253,1031,250"/>
-<area shape="poly" title=" " alt="" coords="1036,250,562,307,562,302,1031,249"/>
-<area shape="poly" title=" " alt="" coords="1036,252,749,306,749,301,1031,253"/>
-<area shape="rect" title=" " alt="" coords="989,304,1050,331"/>
-<area shape="poly" title=" " alt="" coords="1077,255,1042,295,1040,290,1072,258"/>
-<area shape="rect" title=" " alt="" coords="1165,304,1234,331"/>
-<area shape="poly" title=" " alt="" coords="1107,254,1169,296,1164,295,1105,259"/>
-<area shape="rect" title=" " alt="" coords="840,304,965,331"/>
-<area shape="poly" title=" " alt="" coords="1057,256,949,301,948,295,1051,257"/>
-<area shape="rect" title=" " alt="" coords="1257,304,1326,331"/>
-<area shape="poly" title=" " alt="" coords="1122,254,1245,299,1240,299,1121,259"/>
-<area shape="rect" title=" " alt="" coords="1350,304,1446,331"/>
-<area shape="poly" title=" " alt="" coords="1139,253,1337,301,1332,301,1138,259"/>
-<area shape="poly" title=" " alt="" coords="1139,252,1151,253,1288,269,1397,276,1506,284,1649,304,1644,304,1506,289,1396,282,1288,274,1150,259,1139,257"/>
-<area shape="rect" title=" " alt="" coords="1470,304,1545,331"/>
-<area shape="poly" title=" " alt="" coords="1139,251,1151,253,1302,276,1457,304,1452,303,1301,281,1150,259,1139,257"/>
-<area shape="rect" title=" " alt="" coords="1570,304,1637,331"/>
-<area shape="poly" title=" " alt="" coords="1139,252,1151,253,1262,268,1351,275,1441,284,1557,304,1552,304,1440,289,1351,280,1262,273,1150,259,1139,257"/>
-<area shape="rect" title=" " alt="" coords="1074,304,1141,331"/>
-<area shape="poly" title=" " alt="" coords="1091,254,1102,291,1097,288,1088,259"/>
-<area shape="poly" title=" " alt="" coords="878,256,819,297,817,292,873,257"/>
-<area shape="poly" title=" " alt="" coords="841,256,647,306,646,301,836,257"/>
-<area shape="poly" title=" " alt="" coords="862,256,744,301,743,296,857,257"/>
-<area shape="poly" title=" " alt="" coords="897,255,901,290,897,287,894,259"/>
-<area shape="poly" title=" " alt="" coords="831,254,817,259,651,273,519,277,388,284,221,306,220,301,388,279,519,272,650,267,817,253,826,255"/>
-<area shape="poly" title=" " alt="" coords="624,181,559,223,557,219,619,183"/>
-<area shape="poly" title=" " alt="" coords="641,180,610,291,606,287,636,183"/>
-<area shape="poly" title=" " alt="" coords="582,173,551,180,515,191,482,207,454,231,445,244,440,258,436,290,432,287,435,257,441,242,449,228,479,203,513,186,549,175,587,171"/>
-<area shape="poly" title=" " alt="" coords="582,172,552,180,519,190,489,207,464,231,459,246,464,262,475,278,491,295,485,293,471,281,459,264,454,246,460,228,486,203,517,186,551,175,587,171"/>
-<area shape="poly" title=" " alt="" coords="648,180,687,290,682,288,645,184"/>
-<area shape="poly" title=" " alt="" coords="700,171,851,190,923,206,952,216,973,227,987,240,999,256,1014,291,1009,288,994,259,983,244,970,232,950,221,922,211,850,196,700,177"/>
-<area shape="rect" title=" " alt="" coords="701,229,804,256"/>
-<area shape="poly" title=" " alt="" coords="662,179,724,221,718,220,661,184"/>
-<area shape="rect" title=" " alt="" coords="1163,229,1231,256"/>
-<area shape="poly" title=" " alt="" coords="1173,180,1188,216,1183,214,1170,184"/>
-<area shape="rect" href="../../df/d00/a00122.html" title=" " alt="" coords="1256,229,1349,256"/>
-<area shape="poly" title=" " alt="" coords="1297,180,1301,215,1297,212,1294,184"/>
+<div class="center"><img src="../../d0/d00/a00273.png" border="0" usemap="#a_c_p_u_2_ev68_h_w_store_8h" loading="lazy" alt=""/></div>
+<map name="a_c_p_u_2_ev68_h_w_store_8h" id="a_c_p_u_2_ev68_h_w_store_8h">
+<area shape="rect" title=" " alt="" coords="5,5,155,32"/>
+<area shape="rect" href="../../de/d00/a00203.html" title=" " alt="" coords="20,80,140,107"/>
+<area shape="poly" title=" " alt="" coords="81,30,83,65,77,64,79,35"/>
+<area shape="rect" title=" " alt="" coords="50,155,110,181"/>
+<area shape="poly" title=" " alt="" coords="82,105,83,140,77,138,78,109"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
 This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../dd/d00/a00274.png" border="0" usemap="#aemu_2attotime_8hdep" loading="lazy" alt=""/></div>
-<map name="aemu_2attotime_8hdep" id="aemu_2attotime_8hdep">
-<area shape="rect" title="Support functions for working with attotime data." alt="" coords="117,5,226,32"/>
-<area shape="rect" href="../../d4/d00/a00359.html" title=" " alt="" coords="103,80,240,107"/>
-<area shape="poly" title=" " alt="" coords="173,46,174,81,169,79,170,50"/>
-<area shape="rect" href="../../d1/d00/a00077.html" title="Contains the code for the configuration file interpreter." alt="" coords="5,155,162,181"/>
-<area shape="poly" title=" " alt="" coords="147,116,100,156,97,152,142,117"/>
-<area shape="rect" href="../../d6/d00/a00356.html" title=" " alt="" coords="185,155,336,181"/>
-<area shape="poly" title=" " alt="" coords="200,114,248,154,243,154,198,119"/>
+<div class="center"><img src="../../dd/d00/a00274.png" border="0" usemap="#a_c_p_u_2_ev68_h_w_store_8hdep" loading="lazy" alt=""/></div>
+<map name="a_c_p_u_2_ev68_h_w_store_8hdep" id="a_c_p_u_2_ev68_h_w_store_8hdep">
+<area shape="rect" title=" " alt="" coords="1371,5,1520,32"/>
+<area shape="rect" href="../../da/d00/a00188.html" title=" " alt="" coords="1363,80,1528,107"/>
+<area shape="poly" title=" " alt="" coords="1447,46,1447,81,1443,78,1444,50"/>
+<area shape="rect" href="../../de/d00/a00185.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="1382,155,1509,181"/>
+<area shape="poly" title=" " alt="" coords="1447,121,1447,156,1443,152,1443,124"/>
+<area shape="rect" href="../../d7/d00/a00182.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="5,229,147,256"/>
+<area shape="poly" title=" " alt="" coords="1364,170,1157,177,858,187,511,205,159,232,148,233,147,228,158,227,511,199,858,182,1156,172,1369,170"/>
+<area shape="rect" href="../../d9/d00/a00191.html" title="Contains IEEE floating point code for the Alpha CPU." alt="" coords="171,229,368,256"/>
+<area shape="poly" title=" " alt="" coords="1363,173,944,195,664,211,380,232,368,233,368,228,380,227,664,206,944,190,1368,172"/>
+<area shape="rect" href="../../dc/d00/a00194.html" title="Contains VAX floating point code for the Alpha CPU." alt="" coords="392,229,586,256"/>
+<area shape="poly" title=" " alt="" coords="1368,174,1032,198,599,232,587,233,587,228,598,227,1031,193,1363,174"/>
+<area shape="rect" href="../../de/d00/a00197.html" title="Contains routines that replace parts of the VMS PALcode for the emulated DecChip 21264CB EV68 Alpha p..." alt="" coords="610,229,800,256"/>
+<area shape="poly" title=" " alt="" coords="1369,176,812,232,801,233,801,228,812,227,1363,176"/>
+<area shape="rect" href="../../d2/d00/a00281.html" title=" " alt="" coords="824,229,957,256"/>
+<area shape="poly" title=" " alt="" coords="1369,179,970,232,957,234,957,228,969,227,1364,179"/>
+<area shape="rect" href="../../d3/d00/a00275.html" title=" " alt="" coords="981,229,1184,256"/>
+<area shape="poly" title=" " alt="" coords="1369,185,1147,231,1146,226,1364,185"/>
+<area shape="rect" href="../../d6/d00/a00287.html" title=" " alt="" coords="1208,229,1349,256"/>
+<area shape="poly" title=" " alt="" coords="1405,187,1309,231,1307,226,1400,188"/>
+<area shape="rect" href="../../db/d00/a00296.html" title=" " alt="" coords="1373,229,1518,256"/>
+<area shape="poly" title=" " alt="" coords="1447,195,1447,231,1443,227,1443,199"/>
+<area shape="rect" href="../../dd/d00/a00320.html" title="Contains the code for the CPU tracing engine." alt="" coords="1541,229,1694,256"/>
+<area shape="poly" title=" " alt="" coords="1490,185,1590,229,1585,228,1489,190"/>
+<area shape="rect" href="../../d3/d00/a00113.html" title="Contains the code for the configuration file interpreter." alt="" coords="1718,229,1874,256"/>
+<area shape="poly" title=" " alt="" coords="1522,182,1737,229,1732,229,1521,188"/>
+<area shape="rect" href="../../d4/d00/a00704.html" title="Contains the code for the emulated Dual Port Ram and RMC devices." alt="" coords="1899,229,2021,256"/>
+<area shape="poly" title=" " alt="" coords="1524,177,1887,227,1901,231,1896,231,1886,232,1524,182"/>
+<area shape="rect" href="../../d4/d00/a00710.html" title="Contains the code for the emulated Flash ROM devices." alt="" coords="2045,229,2171,256"/>
+<area shape="poly" title=" " alt="" coords="1525,173,1754,195,2034,227,2048,231,2042,231,2033,232,1753,200,1525,179"/>
+<area shape="rect" href="../../db/d00/a00722.html" title="Contains the code for the emulated Typhoon Chipset devices." alt="" coords="2195,229,2333,256"/>
+<area shape="poly" title=" " alt="" coords="1525,171,1815,192,2183,227,2197,231,2192,231,2182,232,1814,197,1524,177"/>
+<area shape="rect" href="../../df/d00/a00728.html" title="ES40 (Clipper) board: TIGbus registers and DIMM topology." alt="" coords="2357,229,2531,256"/>
+<area shape="poly" title=" " alt="" coords="1524,170,1880,191,2346,227,2360,231,2354,230,2345,232,1880,196,1524,176"/>
+<area shape="rect" href="../../df/d00/a00731.html" title="Tsunami/Typhoon chipset (Cchip, Dchip, Pchip) CSRs, interrupt delivery and PCI window translation." alt="" coords="2555,229,2746,256"/>
+<area shape="poly" title=" " alt="" coords="1524,169,1958,189,2248,205,2543,227,2557,230,2552,230,2542,232,2248,211,1958,194,1524,175"/>
 </map>
 </div>
 </div>
 <p><a href="../../d9/d00/a00272_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
-Data Structures</h2></td></tr>
-<tr class="memitem:attotime" id="r_attotime"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../d2/d00/a01057.html">attotime</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attotime is an attosecond-accurate timing system implemented as 96-bit integers.  <a href="../../d2/d00/a01057.html#details">More...</a><br /></td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-typedef-members" class="groupheader"><a id="typedef-members" name="typedef-members"></a>
-Typedefs</h2></td></tr>
-<tr class="memitem:gafac853f7227a22554221554a16db9fc2" id="r_gafac853f7227a22554221554a16db9fc2"><td class="memItemLeft">typedef <a class="el" href="../../df/d00/a00263.html#aaab2ef2ca1576408739fdb8e9f52ae0f">s64</a>&#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a00631.html#gafac853f7227a22554221554a16db9fc2">attoseconds_t</a></td></tr>
-<tr class="memitem:ga292f343264c21c9294d1a67368a5fb5e" id="r_ga292f343264c21c9294d1a67368a5fb5e"><td class="memItemLeft">typedef <a class="el" href="../../df/d00/a00263.html#ae5300ed9eabeae78ee9d0c704a9c412a">s32</a>&#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a00631.html#ga292f343264c21c9294d1a67368a5fb5e">seconds_t</a></td></tr>
+<tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:Ev68HWStore" id="r_Ev68HWStore"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a00744.html">Ev68HWStore</a></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ga7c109b8b5f3e6931a46bab7c1c198504" id="r_ga7c109b8b5f3e6931a46bab7c1c198504"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a00631.html#ga7c109b8b5f3e6931a46bab7c1c198504">ATTOSECONDS_TO_DOUBLE</a> (<a class="el" href="../../d5/d00/a00631.html#gafac853f7227a22554221554a16db9fc2">attoseconds_t</a> x)</td></tr>
-<tr class="memitem:gacc82c968a2c23290fba5a15b58a699ca" id="r_gacc82c968a2c23290fba5a15b58a699ca"><td class="memItemLeft">constexpr <a class="el" href="../../d5/d00/a00631.html#gafac853f7227a22554221554a16db9fc2">attoseconds_t</a>&#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a00631.html#gacc82c968a2c23290fba5a15b58a699ca">DOUBLE_TO_ATTOSECONDS</a> (double x)</td></tr>
-<tr class="memitem:gaeebaeff3ac420250e7be41da2968704e" id="r_gaeebaeff3ac420250e7be41da2968704e"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a00631.html#gaeebaeff3ac420250e7be41da2968704e">ATTOSECONDS_TO_HZ</a> (<a class="el" href="../../d5/d00/a00631.html#gafac853f7227a22554221554a16db9fc2">attoseconds_t</a> x)</td></tr>
-<tr class="memitem:gaa699bbcb49ba2db04c39b1c3ae920655" id="r_gaa699bbcb49ba2db04c39b1c3ae920655"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:gaa699bbcb49ba2db04c39b1c3ae920655 template"><td class="memItemLeft">constexpr <a class="el" href="../../d5/d00/a00631.html#gafac853f7227a22554221554a16db9fc2">attoseconds_t</a>&#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a00631.html#gaa699bbcb49ba2db04c39b1c3ae920655">HZ_TO_ATTOSECONDS</a> (T &amp;&amp;x)</td></tr>
-<tr class="memitem:ga3a8fe10df29ba74308657005a9d9909d" id="r_ga3a8fe10df29ba74308657005a9d9909d"><td class="memItemLeft">constexpr <a class="el" href="../../d5/d00/a00631.html#gafac853f7227a22554221554a16db9fc2">attoseconds_t</a>&#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a00631.html#ga3a8fe10df29ba74308657005a9d9909d">HZ_TO_ATTOSECONDS</a> (const <a class="el" href="../../d9/d00/a01129.html">XTAL</a> &amp;x)</td></tr>
-<tr class="memitem:ga5bfc571cc11f3df8085b4719927567b7" id="r_ga5bfc571cc11f3df8085b4719927567b7"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:ga5bfc571cc11f3df8085b4719927567b7 template"><td class="memItemLeft">constexpr <a class="el" href="../../d5/d00/a00631.html#gafac853f7227a22554221554a16db9fc2">attoseconds_t</a>&#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a00631.html#ga5bfc571cc11f3df8085b4719927567b7">ATTOSECONDS_IN_SEC</a> (T &amp;&amp;x)</td></tr>
-<tr class="memitem:ga296461fff5fc14a4c1009edd04928de4" id="r_ga296461fff5fc14a4c1009edd04928de4"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:ga296461fff5fc14a4c1009edd04928de4 template"><td class="memItemLeft">constexpr <a class="el" href="../../d5/d00/a00631.html#gafac853f7227a22554221554a16db9fc2">attoseconds_t</a>&#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a00631.html#ga296461fff5fc14a4c1009edd04928de4">ATTOSECONDS_IN_MSEC</a> (T &amp;&amp;x)</td></tr>
-<tr class="memitem:ga64f22aa81c28973403ef716e78cec2a1" id="r_ga64f22aa81c28973403ef716e78cec2a1"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:ga64f22aa81c28973403ef716e78cec2a1 template"><td class="memItemLeft">constexpr <a class="el" href="../../d5/d00/a00631.html#gafac853f7227a22554221554a16db9fc2">attoseconds_t</a>&#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a00631.html#ga64f22aa81c28973403ef716e78cec2a1">ATTOSECONDS_IN_USEC</a> (T &amp;&amp;x)</td></tr>
-<tr class="memitem:gab1e52346ed8363ec3e30a0ea97cdcebd" id="r_gab1e52346ed8363ec3e30a0ea97cdcebd"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:gab1e52346ed8363ec3e30a0ea97cdcebd template"><td class="memItemLeft">constexpr <a class="el" href="../../d5/d00/a00631.html#gafac853f7227a22554221554a16db9fc2">attoseconds_t</a>&#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a00631.html#gab1e52346ed8363ec3e30a0ea97cdcebd">ATTOSECONDS_IN_NSEC</a> (T &amp;&amp;x)</td></tr>
-<tr class="memitem:a0905c5fdeefabc09fd51eb37e0225ddc" id="r_a0905c5fdeefabc09fd51eb37e0225ddc"><td class="memItemLeft">constexpr <a class="el" href="../../d2/d00/a01057.html">attotime</a>&#160;</td><td class="memItemRight"><a class="el" href="#a0905c5fdeefabc09fd51eb37e0225ddc">operator+</a> (const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;left, const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;right) noexcept</td></tr>
-<tr class="memdesc:a0905c5fdeefabc09fd51eb37e0225ddc"><td class="mdescLeft">&#160;</td><td class="mdescRight">handle addition between two attotimes  <br /></td></tr>
-<tr class="memitem:a9b18fd1bc9cbb6b34f3f991be887e838" id="r_a9b18fd1bc9cbb6b34f3f991be887e838"><td class="memItemLeft">constexpr <a class="el" href="../../d2/d00/a01057.html">attotime</a>&#160;</td><td class="memItemRight"><a class="el" href="#a9b18fd1bc9cbb6b34f3f991be887e838">operator-</a> (const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;left, const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;right) noexcept</td></tr>
-<tr class="memdesc:a9b18fd1bc9cbb6b34f3f991be887e838"><td class="mdescLeft">&#160;</td><td class="mdescRight">handle subtraction between two attotimes  <br /></td></tr>
-<tr class="memitem:ada82b4d32b1c309f025a111716f3b7e0" id="r_ada82b4d32b1c309f025a111716f3b7e0"><td class="memItemLeft"><a class="el" href="../../d2/d00/a01057.html">attotime</a>&#160;</td><td class="memItemRight"><a class="el" href="#ada82b4d32b1c309f025a111716f3b7e0">operator*</a> (const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;left, <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> factor)</td></tr>
-<tr class="memdesc:ada82b4d32b1c309f025a111716f3b7e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">handle multiplication by an integral factor; defined in terms of the assignment operators  <br /></td></tr>
-<tr class="memitem:a2d5f3551461b9cee7681f67ad89950cd" id="r_a2d5f3551461b9cee7681f67ad89950cd"><td class="memItemLeft"><a class="el" href="../../d2/d00/a01057.html">attotime</a>&#160;</td><td class="memItemRight"><a class="el" href="#a2d5f3551461b9cee7681f67ad89950cd">operator*</a> (<a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> factor, const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;right)</td></tr>
-<tr class="memitem:a33788fc7d1e745355809ce6b4ac21f08" id="r_a33788fc7d1e745355809ce6b4ac21f08"><td class="memItemLeft"><a class="el" href="../../d2/d00/a01057.html">attotime</a>&#160;</td><td class="memItemRight"><a class="el" href="#a33788fc7d1e745355809ce6b4ac21f08">operator/</a> (const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;left, <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> factor)</td></tr>
-<tr class="memdesc:a33788fc7d1e745355809ce6b4ac21f08"><td class="mdescLeft">&#160;</td><td class="mdescRight">handle division by an integral factor; defined in terms of the assignment operators  <br /></td></tr>
-<tr class="memitem:a5eb019637a9f166bc4c65dd3ce920a83" id="r_a5eb019637a9f166bc4c65dd3ce920a83"><td class="memItemLeft">constexpr bool&#160;</td><td class="memItemRight"><a class="el" href="#a5eb019637a9f166bc4c65dd3ce920a83">operator==</a> (const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;left, const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;right) noexcept</td></tr>
-<tr class="memdesc:a5eb019637a9f166bc4c65dd3ce920a83"><td class="mdescLeft">&#160;</td><td class="mdescRight">handle comparisons between attotimes  <br /></td></tr>
-<tr class="memitem:aef2c2733e3d563bcb741d2f95808148a" id="r_aef2c2733e3d563bcb741d2f95808148a"><td class="memItemLeft">constexpr bool&#160;</td><td class="memItemRight"><a class="el" href="#aef2c2733e3d563bcb741d2f95808148a">operator!=</a> (const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;left, const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;right) noexcept</td></tr>
-<tr class="memitem:af6383beaa66b425435de50e6ef5ded9a" id="r_af6383beaa66b425435de50e6ef5ded9a"><td class="memItemLeft">constexpr bool&#160;</td><td class="memItemRight"><a class="el" href="#af6383beaa66b425435de50e6ef5ded9a">operator&lt;</a> (const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;left, const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;right) noexcept</td></tr>
-<tr class="memitem:afeb67d8f0fe4dd183e1af89c3e08dce9" id="r_afeb67d8f0fe4dd183e1af89c3e08dce9"><td class="memItemLeft">constexpr bool&#160;</td><td class="memItemRight"><a class="el" href="#afeb67d8f0fe4dd183e1af89c3e08dce9">operator&lt;=</a> (const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;left, const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;right) noexcept</td></tr>
-<tr class="memitem:aaa1997b646a72b56ee01e63dd79dabf8" id="r_aaa1997b646a72b56ee01e63dd79dabf8"><td class="memItemLeft">constexpr bool&#160;</td><td class="memItemRight"><a class="el" href="#aaa1997b646a72b56ee01e63dd79dabf8">operator&gt;</a> (const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;left, const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;right) noexcept</td></tr>
-<tr class="memitem:a706b6a250e055dad06325570239b1292" id="r_a706b6a250e055dad06325570239b1292"><td class="memItemLeft">constexpr bool&#160;</td><td class="memItemRight"><a class="el" href="#a706b6a250e055dad06325570239b1292">operator&gt;=</a> (const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;left, const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;right) noexcept</td></tr>
+<tr class="memitem:a2dd4aa9781534103378d8fe1dcdbeaef" id="r_a2dd4aa9781534103378d8fe1dcdbeaef"><td class="memItemLeft">constexpr <a class="el" href="../../d7/d00/a01173.html">AlphaHWStoreDescriptor</a>&#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a00744.html#a2dd4aa9781534103378d8fe1dcdbeaef">Ev68HWStore::decode</a> (std::uint32_t instruction)</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:gacbb9a14ab55ca7a9451a72e3c94a8858" id="r_gacbb9a14ab55ca7a9451a72e3c94a8858"><td class="memItemLeft">constexpr <a class="el" href="../../d5/d00/a00631.html#gafac853f7227a22554221554a16db9fc2">attoseconds_t</a>&#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a00631.html#gacbb9a14ab55ca7a9451a72e3c94a8858">ATTOSECONDS_PER_SECOND_SQRT</a> = 1'000'000'000</td></tr>
-<tr class="memitem:gade828b8e4c4360337e0c1f5a52fe4801" id="r_gade828b8e4c4360337e0c1f5a52fe4801"><td class="memItemLeft">constexpr <a class="el" href="../../d5/d00/a00631.html#gafac853f7227a22554221554a16db9fc2">attoseconds_t</a>&#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a00631.html#gade828b8e4c4360337e0c1f5a52fe4801">ATTOSECONDS_PER_SECOND</a> = <a class="el" href="../../d5/d00/a00631.html#gacbb9a14ab55ca7a9451a72e3c94a8858">ATTOSECONDS_PER_SECOND_SQRT</a> * <a class="el" href="../../d5/d00/a00631.html#gacbb9a14ab55ca7a9451a72e3c94a8858">ATTOSECONDS_PER_SECOND_SQRT</a></td></tr>
-<tr class="memitem:gae1bdc75bbe5799b18f29a5fac23fafe3" id="r_gae1bdc75bbe5799b18f29a5fac23fafe3"><td class="memItemLeft">constexpr <a class="el" href="../../d5/d00/a00631.html#gafac853f7227a22554221554a16db9fc2">attoseconds_t</a>&#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a00631.html#gae1bdc75bbe5799b18f29a5fac23fafe3">ATTOSECONDS_PER_MILLISECOND</a> = <a class="el" href="../../d5/d00/a00631.html#gade828b8e4c4360337e0c1f5a52fe4801">ATTOSECONDS_PER_SECOND</a> / 1'000</td></tr>
-<tr class="memitem:gaa35d0a08c812d466ac3995eac1d7770a" id="r_gaa35d0a08c812d466ac3995eac1d7770a"><td class="memItemLeft">constexpr <a class="el" href="../../d5/d00/a00631.html#gafac853f7227a22554221554a16db9fc2">attoseconds_t</a>&#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a00631.html#gaa35d0a08c812d466ac3995eac1d7770a">ATTOSECONDS_PER_MICROSECOND</a> = <a class="el" href="../../d5/d00/a00631.html#gade828b8e4c4360337e0c1f5a52fe4801">ATTOSECONDS_PER_SECOND</a> / 1'000'000</td></tr>
-<tr class="memitem:ga1ada8f58b5dd0b44ed17c5d63c69c3bf" id="r_ga1ada8f58b5dd0b44ed17c5d63c69c3bf"><td class="memItemLeft">constexpr <a class="el" href="../../d5/d00/a00631.html#gafac853f7227a22554221554a16db9fc2">attoseconds_t</a>&#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a00631.html#ga1ada8f58b5dd0b44ed17c5d63c69c3bf">ATTOSECONDS_PER_NANOSECOND</a> = <a class="el" href="../../d5/d00/a00631.html#gade828b8e4c4360337e0c1f5a52fe4801">ATTOSECONDS_PER_SECOND</a> / 1'000'000'000</td></tr>
-<tr class="memitem:ga6d5d789345f60fb21c06bfaecee4623e" id="r_ga6d5d789345f60fb21c06bfaecee4623e"><td class="memItemLeft">constexpr <a class="el" href="../../d5/d00/a00631.html#ga292f343264c21c9294d1a67368a5fb5e">seconds_t</a>&#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a00631.html#ga6d5d789345f60fb21c06bfaecee4623e">ATTOTIME_MAX_SECONDS</a> = 1'000'000'000</td></tr>
+<tr class="memitem:a0d8be7fe2edf0a9abd0e211520fced2f" id="r_a0d8be7fe2edf0a9abd0e211520fced2f"><td class="memItemLeft">constexpr <a class="el" href="../../dc/d00/a01177.html">AlphaHWStorePolicy</a>&#160;</td><td class="memItemRight"><a class="el" href="#a0d8be7fe2edf0a9abd0e211520fced2f">kEv68HWStorePolicy</a> {&amp;<a class="el" href="../../d5/d00/a00744.html#a2dd4aa9781534103378d8fe1dcdbeaef">Ev68HWStore::decode</a>}</td></tr>
 </table>
-<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Support functions for working with attotime data. </p>
-
-<p class="definition">Definition in file <a class="el" href="../../d9/d00/a00272_source.html">attotime.h</a>.</p>
-</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
-<a id="aef2c2733e3d563bcb741d2f95808148a" name="aef2c2733e3d563bcb741d2f95808148a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aef2c2733e3d563bcb741d2f95808148a">&#9670;&#160;</a></span>operator!=()</h2>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="a0d8be7fe2edf0a9abd0e211520fced2f" name="a0d8be7fe2edf0a9abd0e211520fced2f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d8be7fe2edf0a9abd0e211520fced2f">&#9670;&#160;</a></span>kEv68HWStorePolicy</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -298,579 +193,17 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool operator!= </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>left</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>right</em></span>&#160;)</td>
+          <td class="memname"><a class="el" href="../../dc/d00/a01177.html">AlphaHWStorePolicy</a> kEv68HWStorePolicy {&amp;<a class="el" href="../../d5/d00/a00744.html#a2dd4aa9781534103378d8fe1dcdbeaef">Ev68HWStore::decode</a>}</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span><span class="mlabel noexcept">noexcept</span></span>  </td>
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00272_source.html#l00343">343</a> of file <a class="el" href="../../d9/d00/a00272_source.html">attotime.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d9/d00/a00272_source.html#l00343">operator!=()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00272_source.html#l00343">operator!=()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_aef2c2733e3d563bcb741d2f95808148a_cgraph.png" border="0" usemap="#ad9/d00/a00272_aef2c2733e3d563bcb741d2f95808148a_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_aef2c2733e3d563bcb741d2f95808148a_cgraph" id="ad9/d00/a00272_aef2c2733e3d563bcb741d2f95808148a_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,86,56"/>
-<area shape="poly" title=" " alt="" coords="30,28,29,12,36,5,46,3,56,5,62,14,57,14,53,10,45,8,38,10,34,14,35,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_aef2c2733e3d563bcb741d2f95808148a_icgraph.png" border="0" usemap="#ad9/d00/a00272_aef2c2733e3d563bcb741d2f95808148a_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_aef2c2733e3d563bcb741d2f95808148a_icgraph" id="ad9/d00/a00272_aef2c2733e3d563bcb741d2f95808148a_icgraph">
-<area shape="rect" title=" " alt="" coords="5,29,86,56"/>
-<area shape="poly" title=" " alt="" coords="57,14,53,10,45,8,38,10,34,14,35,29,30,28,29,12,36,5,46,3,56,5,62,14"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="ada82b4d32b1c309f025a111716f3b7e0" name="ada82b4d32b1c309f025a111716f3b7e0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ada82b4d32b1c309f025a111716f3b7e0">&#9670;&#160;</a></span>operator*() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../d2/d00/a01057.html">attotime</a> operator* </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>left</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a></td>          <td class="paramname"><span class="paramname"><em>factor</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>handle multiplication by an integral factor; defined in terms of the assignment operators </p>
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00272_source.html#l00314">314</a> of file <a class="el" href="../../d9/d00/a00272_source.html">attotime.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d9/d00/a00272_source.html#l00314">operator*()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00272_source.html#l00314">operator*()</a>, and <a class="el" href="../../d9/d00/a00272_source.html#l00321">operator*()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_ada82b4d32b1c309f025a111716f3b7e0_cgraph.png" border="0" usemap="#ad9/d00/a00272_ada82b4d32b1c309f025a111716f3b7e0_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_ada82b4d32b1c309f025a111716f3b7e0_cgraph" id="ad9/d00/a00272_ada82b4d32b1c309f025a111716f3b7e0_cgraph">
-<area shape="rect" title="handle multiplication by an integral factor; defined in terms of the assignment operators" alt="" coords="5,29,79,56"/>
-<area shape="poly" title=" " alt="" coords="28,28,27,12,33,5,42,3,52,5,57,14,52,14,49,10,42,8,36,10,32,14,33,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_ada82b4d32b1c309f025a111716f3b7e0_icgraph.png" border="0" usemap="#ad9/d00/a00272_ada82b4d32b1c309f025a111716f3b7e0_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_ada82b4d32b1c309f025a111716f3b7e0_icgraph" id="ad9/d00/a00272_ada82b4d32b1c309f025a111716f3b7e0_icgraph">
-<area shape="rect" title="handle multiplication by an integral factor; defined in terms of the assignment operators" alt="" coords="127,29,200,56"/>
-<area shape="poly" title=" " alt="" coords="182,14,176,10,163,8,151,10,145,14,143,20,146,30,142,28,138,20,141,11,149,5,163,3,178,5,187,15"/>
-<area shape="rect" href="../../d9/d00/a00272.html#a2d5f3551461b9cee7681f67ad89950cd" title=" " alt="" coords="5,29,79,56"/>
-<area shape="poly" title=" " alt="" coords="109,43,79,45,79,40,114,42"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a2d5f3551461b9cee7681f67ad89950cd" name="a2d5f3551461b9cee7681f67ad89950cd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2d5f3551461b9cee7681f67ad89950cd">&#9670;&#160;</a></span>operator*() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../d2/d00/a01057.html">attotime</a> operator* </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a></td>          <td class="paramname"><span class="paramname"><em>factor</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>right</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00272_source.html#l00321">321</a> of file <a class="el" href="../../d9/d00/a00272_source.html">attotime.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d9/d00/a00272_source.html#l00314">operator*()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_a2d5f3551461b9cee7681f67ad89950cd_cgraph.png" border="0" usemap="#ad9/d00/a00272_a2d5f3551461b9cee7681f67ad89950cd_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_a2d5f3551461b9cee7681f67ad89950cd_cgraph" id="ad9/d00/a00272_a2d5f3551461b9cee7681f67ad89950cd_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,79,56"/>
-<area shape="rect" href="../../d9/d00/a00272.html#ada82b4d32b1c309f025a111716f3b7e0" title="handle multiplication by an integral factor; defined in terms of the assignment operators" alt="" coords="127,29,200,56"/>
-<area shape="poly" title=" " alt="" coords="79,40,113,42,108,43,79,45"/>
-<area shape="poly" title=" " alt="" coords="142,28,138,20,141,11,149,5,163,3,178,5,187,15,182,14,176,10,163,8,151,10,145,14,143,20,146,30"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a0905c5fdeefabc09fd51eb37e0225ddc" name="a0905c5fdeefabc09fd51eb37e0225ddc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0905c5fdeefabc09fd51eb37e0225ddc">&#9670;&#160;</a></span>operator+()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../d2/d00/a01057.html">attotime</a> operator+ </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>left</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>right</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span><span class="mlabel noexcept">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>handle addition between two attotimes </p>
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00272_source.html#l00222">222</a> of file <a class="el" href="../../d9/d00/a00272_source.html">attotime.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d9/d00/a00272_source.html#l00094">ATTOSECONDS_PER_SECOND</a>, <a class="el" href="../../d9/d00/a00272_source.html#l00099">ATTOTIME_MAX_SECONDS</a>, <a class="el" href="../../d9/d00/a00272_source.html#l00208">attotime::m_attoseconds</a>, <a class="el" href="../../d9/d00/a00272_source.html#l00207">attotime::m_seconds</a>, <a class="el" href="../../d9/d00/a00272_source.html#l00211">attotime::never</a>, and <a class="el" href="../../d9/d00/a00272_source.html#l00222">operator+()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00272_source.html#l00222">operator+()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_a0905c5fdeefabc09fd51eb37e0225ddc_cgraph.png" border="0" usemap="#ad9/d00/a00272_a0905c5fdeefabc09fd51eb37e0225ddc_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_a0905c5fdeefabc09fd51eb37e0225ddc_cgraph" id="ad9/d00/a00272_a0905c5fdeefabc09fd51eb37e0225ddc_cgraph">
-<area shape="rect" title="handle addition between two attotimes" alt="" coords="5,29,82,56"/>
-<area shape="poly" title=" " alt="" coords="29,28,28,12,34,5,44,3,54,5,60,14,54,14,51,10,43,8,37,10,33,14,34,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_a0905c5fdeefabc09fd51eb37e0225ddc_icgraph.png" border="0" usemap="#ad9/d00/a00272_a0905c5fdeefabc09fd51eb37e0225ddc_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_a0905c5fdeefabc09fd51eb37e0225ddc_icgraph" id="ad9/d00/a00272_a0905c5fdeefabc09fd51eb37e0225ddc_icgraph">
-<area shape="rect" title="handle addition between two attotimes" alt="" coords="5,29,82,56"/>
-<area shape="poly" title=" " alt="" coords="54,14,51,10,43,8,37,10,33,14,34,29,29,28,28,12,34,5,44,3,54,5,60,14"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a9b18fd1bc9cbb6b34f3f991be887e838" name="a9b18fd1bc9cbb6b34f3f991be887e838"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9b18fd1bc9cbb6b34f3f991be887e838">&#9670;&#160;</a></span>operator-()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../d2/d00/a01057.html">attotime</a> operator- </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>left</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>right</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span><span class="mlabel noexcept">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>handle subtraction between two attotimes </p>
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00272_source.html#l00272">272</a> of file <a class="el" href="../../d9/d00/a00272_source.html">attotime.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d9/d00/a00272_source.html#l00094">ATTOSECONDS_PER_SECOND</a>, <a class="el" href="../../d9/d00/a00272_source.html#l00099">ATTOTIME_MAX_SECONDS</a>, <a class="el" href="../../d9/d00/a00272_source.html#l00208">attotime::m_attoseconds</a>, <a class="el" href="../../d9/d00/a00272_source.html#l00207">attotime::m_seconds</a>, <a class="el" href="../../d9/d00/a00272_source.html#l00211">attotime::never</a>, and <a class="el" href="../../d9/d00/a00272_source.html#l00272">operator-()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00272_source.html#l00272">operator-()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_a9b18fd1bc9cbb6b34f3f991be887e838_cgraph.png" border="0" usemap="#ad9/d00/a00272_a9b18fd1bc9cbb6b34f3f991be887e838_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_a9b18fd1bc9cbb6b34f3f991be887e838_cgraph" id="ad9/d00/a00272_a9b18fd1bc9cbb6b34f3f991be887e838_cgraph">
-<area shape="rect" title="handle subtraction between two attotimes" alt="" coords="5,29,78,56"/>
-<area shape="poly" title=" " alt="" coords="27,28,27,12,32,5,42,3,51,5,57,14,51,14,48,10,41,8,35,10,32,14,33,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_a9b18fd1bc9cbb6b34f3f991be887e838_icgraph.png" border="0" usemap="#ad9/d00/a00272_a9b18fd1bc9cbb6b34f3f991be887e838_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_a9b18fd1bc9cbb6b34f3f991be887e838_icgraph" id="ad9/d00/a00272_a9b18fd1bc9cbb6b34f3f991be887e838_icgraph">
-<area shape="rect" title="handle subtraction between two attotimes" alt="" coords="5,29,78,56"/>
-<area shape="poly" title=" " alt="" coords="51,14,48,10,41,8,35,10,32,14,33,29,27,28,27,12,32,5,42,3,51,5,57,14"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a33788fc7d1e745355809ce6b4ac21f08" name="a33788fc7d1e745355809ce6b4ac21f08"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a33788fc7d1e745355809ce6b4ac21f08">&#9670;&#160;</a></span>operator/()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../d2/d00/a01057.html">attotime</a> operator/ </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>left</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a></td>          <td class="paramname"><span class="paramname"><em>factor</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>handle division by an integral factor; defined in terms of the assignment operators </p>
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00272_source.html#l00329">329</a> of file <a class="el" href="../../d9/d00/a00272_source.html">attotime.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d9/d00/a00272_source.html#l00329">operator/()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00272_source.html#l00329">operator/()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_a33788fc7d1e745355809ce6b4ac21f08_cgraph.png" border="0" usemap="#ad9/d00/a00272_a33788fc7d1e745355809ce6b4ac21f08_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_a33788fc7d1e745355809ce6b4ac21f08_cgraph" id="ad9/d00/a00272_a33788fc7d1e745355809ce6b4ac21f08_cgraph">
-<area shape="rect" title="handle division by an integral factor; defined in terms of the assignment operators" alt="" coords="5,29,78,56"/>
-<area shape="poly" title=" " alt="" coords="27,28,27,12,32,5,42,3,51,5,57,14,51,14,48,10,41,8,35,10,32,14,33,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_a33788fc7d1e745355809ce6b4ac21f08_icgraph.png" border="0" usemap="#ad9/d00/a00272_a33788fc7d1e745355809ce6b4ac21f08_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_a33788fc7d1e745355809ce6b4ac21f08_icgraph" id="ad9/d00/a00272_a33788fc7d1e745355809ce6b4ac21f08_icgraph">
-<area shape="rect" title="handle division by an integral factor; defined in terms of the assignment operators" alt="" coords="5,29,78,56"/>
-<area shape="poly" title=" " alt="" coords="51,14,48,10,41,8,35,10,32,14,33,29,27,28,27,12,32,5,42,3,51,5,57,14"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="af6383beaa66b425435de50e6ef5ded9a" name="af6383beaa66b425435de50e6ef5ded9a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af6383beaa66b425435de50e6ef5ded9a">&#9670;&#160;</a></span>operator&lt;()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool operator&lt; </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>left</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>right</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span><span class="mlabel noexcept">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00272_source.html#l00348">348</a> of file <a class="el" href="../../d9/d00/a00272_source.html">attotime.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d9/d00/a00272_source.html#l00348">operator&lt;()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00272_source.html#l00348">operator&lt;()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_af6383beaa66b425435de50e6ef5ded9a_cgraph.png" border="0" usemap="#ad9/d00/a00272_af6383beaa66b425435de50e6ef5ded9a_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_af6383beaa66b425435de50e6ef5ded9a_cgraph" id="ad9/d00/a00272_af6383beaa66b425435de50e6ef5ded9a_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,82,56"/>
-<area shape="poly" title=" " alt="" coords="29,28,28,12,34,5,44,3,54,5,60,14,54,14,51,10,43,8,37,10,33,14,34,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_af6383beaa66b425435de50e6ef5ded9a_icgraph.png" border="0" usemap="#ad9/d00/a00272_af6383beaa66b425435de50e6ef5ded9a_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_af6383beaa66b425435de50e6ef5ded9a_icgraph" id="ad9/d00/a00272_af6383beaa66b425435de50e6ef5ded9a_icgraph">
-<area shape="rect" title=" " alt="" coords="5,29,82,56"/>
-<area shape="poly" title=" " alt="" coords="54,14,51,10,43,8,37,10,33,14,34,29,29,28,28,12,34,5,44,3,54,5,60,14"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="afeb67d8f0fe4dd183e1af89c3e08dce9" name="afeb67d8f0fe4dd183e1af89c3e08dce9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afeb67d8f0fe4dd183e1af89c3e08dce9">&#9670;&#160;</a></span>operator&lt;=()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool operator&lt;= </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>left</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>right</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span><span class="mlabel noexcept">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00272_source.html#l00353">353</a> of file <a class="el" href="../../d9/d00/a00272_source.html">attotime.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d9/d00/a00272_source.html#l00353">operator&lt;=()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00272_source.html#l00353">operator&lt;=()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_afeb67d8f0fe4dd183e1af89c3e08dce9_cgraph.png" border="0" usemap="#ad9/d00/a00272_afeb67d8f0fe4dd183e1af89c3e08dce9_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_afeb67d8f0fe4dd183e1af89c3e08dce9_cgraph" id="ad9/d00/a00272_afeb67d8f0fe4dd183e1af89c3e08dce9_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,90,56"/>
-<area shape="poly" title=" " alt="" coords="31,28,31,12,37,5,48,3,58,5,65,14,60,14,56,10,47,8,40,10,36,14,37,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_afeb67d8f0fe4dd183e1af89c3e08dce9_icgraph.png" border="0" usemap="#ad9/d00/a00272_afeb67d8f0fe4dd183e1af89c3e08dce9_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_afeb67d8f0fe4dd183e1af89c3e08dce9_icgraph" id="ad9/d00/a00272_afeb67d8f0fe4dd183e1af89c3e08dce9_icgraph">
-<area shape="rect" title=" " alt="" coords="5,29,90,56"/>
-<area shape="poly" title=" " alt="" coords="60,14,56,10,47,8,40,10,36,14,37,29,31,28,31,12,37,5,48,3,58,5,65,14"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a5eb019637a9f166bc4c65dd3ce920a83" name="a5eb019637a9f166bc4c65dd3ce920a83"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5eb019637a9f166bc4c65dd3ce920a83">&#9670;&#160;</a></span>operator==()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool operator== </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>left</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>right</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span><span class="mlabel noexcept">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>handle comparisons between attotimes </p>
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00272_source.html#l00338">338</a> of file <a class="el" href="../../d9/d00/a00272_source.html">attotime.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d9/d00/a00272_source.html#l00338">operator==()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00272_source.html#l00338">operator==()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_a5eb019637a9f166bc4c65dd3ce920a83_cgraph.png" border="0" usemap="#ad9/d00/a00272_a5eb019637a9f166bc4c65dd3ce920a83_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_a5eb019637a9f166bc4c65dd3ce920a83_cgraph" id="ad9/d00/a00272_a5eb019637a9f166bc4c65dd3ce920a83_cgraph">
-<area shape="rect" title="handle comparisons between attotimes" alt="" coords="5,29,90,56"/>
-<area shape="poly" title=" " alt="" coords="31,28,31,12,37,5,48,3,58,5,65,14,60,14,56,10,47,8,40,10,36,14,37,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_a5eb019637a9f166bc4c65dd3ce920a83_icgraph.png" border="0" usemap="#ad9/d00/a00272_a5eb019637a9f166bc4c65dd3ce920a83_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_a5eb019637a9f166bc4c65dd3ce920a83_icgraph" id="ad9/d00/a00272_a5eb019637a9f166bc4c65dd3ce920a83_icgraph">
-<area shape="rect" title="handle comparisons between attotimes" alt="" coords="5,29,90,56"/>
-<area shape="poly" title=" " alt="" coords="60,14,56,10,47,8,40,10,36,14,37,29,31,28,31,12,37,5,48,3,58,5,65,14"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="aaa1997b646a72b56ee01e63dd79dabf8" name="aaa1997b646a72b56ee01e63dd79dabf8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaa1997b646a72b56ee01e63dd79dabf8">&#9670;&#160;</a></span>operator&gt;()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool operator&gt; </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>left</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>right</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span><span class="mlabel noexcept">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00272_source.html#l00358">358</a> of file <a class="el" href="../../d9/d00/a00272_source.html">attotime.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d9/d00/a00272_source.html#l00358">operator&gt;()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00272_source.html#l00358">operator&gt;()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_aaa1997b646a72b56ee01e63dd79dabf8_cgraph.png" border="0" usemap="#ad9/d00/a00272_aaa1997b646a72b56ee01e63dd79dabf8_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_aaa1997b646a72b56ee01e63dd79dabf8_cgraph" id="ad9/d00/a00272_aaa1997b646a72b56ee01e63dd79dabf8_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,82,56"/>
-<area shape="poly" title=" " alt="" coords="29,28,28,12,34,5,44,3,54,5,60,14,54,14,51,10,43,8,37,10,33,14,34,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_aaa1997b646a72b56ee01e63dd79dabf8_icgraph.png" border="0" usemap="#ad9/d00/a00272_aaa1997b646a72b56ee01e63dd79dabf8_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_aaa1997b646a72b56ee01e63dd79dabf8_icgraph" id="ad9/d00/a00272_aaa1997b646a72b56ee01e63dd79dabf8_icgraph">
-<area shape="rect" title=" " alt="" coords="5,29,82,56"/>
-<area shape="poly" title=" " alt="" coords="54,14,51,10,43,8,37,10,33,14,34,29,29,28,28,12,34,5,44,3,54,5,60,14"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a706b6a250e055dad06325570239b1292" name="a706b6a250e055dad06325570239b1292"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a706b6a250e055dad06325570239b1292">&#9670;&#160;</a></span>operator&gt;=()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool operator&gt;= </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>left</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="../../d2/d00/a01057.html">attotime</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>right</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span><span class="mlabel noexcept">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00272_source.html#l00363">363</a> of file <a class="el" href="../../d9/d00/a00272_source.html">attotime.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d9/d00/a00272_source.html#l00363">operator&gt;=()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00272_source.html#l00363">operator&gt;=()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_a706b6a250e055dad06325570239b1292_cgraph.png" border="0" usemap="#ad9/d00/a00272_a706b6a250e055dad06325570239b1292_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_a706b6a250e055dad06325570239b1292_cgraph" id="ad9/d00/a00272_a706b6a250e055dad06325570239b1292_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,90,56"/>
-<area shape="poly" title=" " alt="" coords="31,28,31,12,37,5,48,3,58,5,65,14,60,14,56,10,47,8,40,10,36,14,37,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00272_a706b6a250e055dad06325570239b1292_icgraph.png" border="0" usemap="#ad9/d00/a00272_a706b6a250e055dad06325570239b1292_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00272_a706b6a250e055dad06325570239b1292_icgraph" id="ad9/d00/a00272_a706b6a250e055dad06325570239b1292_icgraph">
-<area shape="rect" title=" " alt="" coords="5,29,90,56"/>
-<area shape="poly" title=" " alt="" coords="60,14,56,10,47,8,40,10,36,14,37,29,31,28,31,12,37,5,48,3,58,5,65,14"/>
-</map>
-</div>
+<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00272_source.html#l00059">59</a> of file <a class="el" href="../../d9/d00/a00272_source.html">Ev68HWStore.h</a>.</p>
 
 </div>
 </div>
@@ -887,7 +220,7 @@ Here is the caller graph for this function:</div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_450cafc1c0b54ccdbdec0997809be7cf.html">emu</a></li><li class="navelem"><a href="../../d9/d00/a00272.html">attotime.h</a></li>
+    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d9/d00/a00272.html">Ev68HWStore.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: gui/gui.cpp File Reference</title>
+<title>ES40: es40_endian.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,255 +109,379 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d8/d00/a00368.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">gui.cpp File Reference</div></div>
+  <div class="headertitle"><div class="title">es40_endian.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>Contains code for the <a class="el" href="../../d2/d00/a01433.html" title="Abstract base class for GUI implementations.">bx_gui_c</a> base class used for interfacing with SDL and other device interfaces.  
+<p>Contains byte-order conversion helpers.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &quot;<a class="el" href="../../d9/d00/a00524_source.html">../StdAfx.h</a>&quot;</code><br />
-<code>#include &lt;signal.h&gt;</code><br />
-<code>#include &quot;<a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d3/d00/a00419_source.html">io/Keyboard.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &lt;<a class="el" href="../../db/d00/a00164_source.html">sys/param.h</a>&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
-Include dependency graph for gui.cpp:</div>
+Include dependency graph for es40_endian.h:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../df/d00/a00369.png" border="0" usemap="#agui_2gui_8cpp" loading="lazy" alt=""/></div>
-<map name="agui_2gui_8cpp" id="agui_2gui_8cpp">
-<area shape="rect" title="Contains code for the bx_gui_c base class used for interfacing with SDL and other device interfaces." alt="" coords="624,5,709,32"/>
-<area shape="rect" href="../../d9/d00/a00524.html" title="Standard includes." alt="" coords="1030,80,1114,107"/>
-<area shape="poly" title=" " alt="" coords="709,25,1017,81,1012,82,709,30"/>
-<area shape="rect" title=" " alt="" coords="1888,304,1954,331"/>
-<area shape="poly" title=" " alt="" coords="709,18,934,22,1092,29,1263,40,1434,57,1593,81,1663,95,1726,112,1779,131,1821,152,1856,182,1882,218,1902,256,1915,291,1911,288,1897,258,1878,221,1852,186,1819,157,1777,136,1724,117,1662,100,1592,86,1433,62,1262,46,1092,34,934,28,709,23"/>
-<area shape="rect" href="../../d6/d00/a00371.html" title="Contains the definitions for the bx_gui_c base class used for interfacing with SDL and other device i..." alt="" coords="159,155,209,181"/>
-<area shape="poly" title=" " alt="" coords="622,24,434,44,334,61,294,71,265,82,229,111,202,143,198,140,225,107,263,78,293,66,333,56,433,39,626,22"/>
-<area shape="rect" href="../../d3/d00/a00419.html" title="Contains the definitions for the emulated Keyboard and mouse devices and controller." alt="" coords="276,80,377,107"/>
-<area shape="poly" title=" " alt="" coords="622,30,393,81,392,75,626,28"/>
-<area shape="rect" href="../../d7/d00/a00131.html" title=" " alt="" coords="1157,155,1267,181"/>
-<area shape="poly" title=" " alt="" coords="1097,105,1176,147,1171,147,1096,110"/>
-<area shape="rect" href="../../df/d00/a00263.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="1589,155,1678,181"/>
-<area shape="poly" title=" " alt="" coords="1115,96,1309,116,1576,154,1571,155,1309,121,1115,101"/>
-<area shape="rect" title=" " alt="" coords="388,229,455,256"/>
-<area shape="poly" title=" " alt="" coords="1027,95,910,101,753,110,601,128,540,141,496,157,478,169,462,185,437,219,433,214,458,181,474,165,493,152,539,136,600,122,753,104,909,95,1032,95"/>
-<area shape="rect" href="../../d3/d00/a00023.html" title=" " alt="" coords="507,155,629,181"/>
-<area shape="poly" title=" " alt="" coords="1027,102,645,158,644,153,1032,100"/>
-<area shape="rect" href="../../d5/d00/a00029.html" title=" " alt="" coords="836,229,937,256"/>
-<area shape="poly" title=" " alt="" coords="1042,106,999,129,958,157,928,187,904,218,901,214,924,183,954,153,997,125,1037,108"/>
-<area shape="rect" href="../../dd/d00/a00041.html" title=" " alt="" coords="1292,229,1396,256"/>
-<area shape="poly" title=" " alt="" coords="1080,105,1108,142,1126,162,1147,179,1178,196,1211,210,1279,231,1274,231,1210,215,1176,201,1144,184,1122,166,1103,146,1078,110"/>
-<area shape="rect" href="../../dc/d00/a00032.html" title=" " alt="" coords="1776,304,1864,331"/>
-<area shape="poly" title=" " alt="" coords="1115,102,1193,122,1280,152,1322,174,1374,204,1426,234,1468,253,1547,275,1611,284,1677,289,1763,303,1758,303,1677,295,1611,289,1546,280,1466,259,1423,239,1371,209,1319,178,1278,157,1191,127,1114,107"/>
-<area shape="rect" href="../../d8/d00/a00038.html" title=" " alt="" coords="682,229,812,256"/>
-<area shape="poly" title=" " alt="" coords="1042,106,926,157,786,224,784,219,924,152,1037,108"/>
-<area shape="rect" href="../../d4/d00/a00035.html" title=" " alt="" coords="968,155,1082,181"/>
-<area shape="poly" title=" " alt="" coords="1066,106,1043,144,1040,140,1062,109"/>
-<area shape="rect" href="../../d0/d00/a00302.html" title="Contains macro&#39;s and prototypes for debugging." alt="" coords="1462,155,1564,181"/>
-<area shape="poly" title=" " alt="" coords="1115,99,1444,152,1449,155,1444,155,1444,157,1114,104"/>
-<area shape="rect" href="../../d3/d00/a00305.html" title="Contains byte&#45;order conversion helpers." alt="" coords="1702,155,1807,181"/>
-<area shape="poly" title=" " alt="" coords="1114,95,1354,114,1517,131,1689,154,1684,154,1517,136,1354,119,1115,100"/>
-<area shape="rect" title=" " alt="" coords="529,229,607,256"/>
-<area shape="poly" title=" " alt="" coords="570,180,570,215,566,212,566,184"/>
-<area shape="rect" title=" " alt="" coords="357,304,411,331"/>
-<area shape="poly" title=" " alt="" coords="557,181,468,258,415,297,413,292,465,254,552,182"/>
-<area shape="rect" title=" " alt="" coords="718,304,775,331"/>
-<area shape="poly" title=" " alt="" coords="865,256,786,299,784,294,860,257"/>
-<area shape="rect" title=" " alt="" coords="799,304,860,331"/>
-<area shape="poly" title=" " alt="" coords="879,255,850,294,847,289,874,258"/>
-<area shape="rect" title=" " alt="" coords="1034,304,1091,331"/>
-<area shape="poly" title=" " alt="" coords="918,254,1022,299,1017,298,917,259"/>
-<area shape="rect" title=" " alt="" coords="1116,304,1172,331"/>
-<area shape="poly" title=" " alt="" coords="934,254,1103,303,1098,303,933,259"/>
-<area shape="rect" title=" " alt="" coords="616,304,694,331"/>
-<area shape="poly" title=" " alt="" coords="849,256,709,302,708,297,844,257"/>
-<area shape="poly" title=" " alt="" coords="1294,250,1230,259,872,283,515,307,426,315,426,309,514,301,872,278,1229,253,1289,250"/>
-<area shape="poly" title=" " alt="" coords="1294,250,791,307,790,302,1289,250"/>
-<area shape="poly" title=" " alt="" coords="1294,249,1083,277,875,307,875,301,1083,271,1289,250"/>
-<area shape="poly" title=" " alt="" coords="1294,256,1107,306,1106,301,1289,257"/>
-<area shape="poly" title=" " alt="" coords="1312,256,1187,303,1186,298,1307,257"/>
-<area shape="poly" title=" " alt="" coords="1294,249,1230,259,1085,270,971,277,856,287,710,307,709,301,855,282,970,272,1084,265,1229,253,1289,250"/>
-<area shape="rect" title=" " alt="" coords="1196,304,1257,331"/>
-<area shape="poly" title=" " alt="" coords="1326,256,1261,298,1259,293,1321,257"/>
-<area shape="rect" title=" " alt="" coords="1684,304,1753,331"/>
-<area shape="poly" title=" " alt="" coords="1397,251,1672,304,1667,304,1397,256"/>
-<area shape="rect" title=" " alt="" coords="884,304,1009,331"/>
-<area shape="poly" title=" " alt="" coords="1294,253,1025,305,1024,299,1289,254"/>
-<area shape="rect" title=" " alt="" coords="1280,304,1349,331"/>
-<area shape="poly" title=" " alt="" coords="1341,255,1327,292,1324,287,1337,258"/>
-<area shape="rect" title=" " alt="" coords="1373,304,1470,331"/>
-<area shape="poly" title=" " alt="" coords="1358,254,1399,294,1394,292,1356,259"/>
-<area shape="poly" title=" " alt="" coords="1397,250,1415,253,1587,276,1764,304,1759,303,1587,281,1414,259,1396,256"/>
-<area shape="rect" title=" " alt="" coords="1493,304,1568,331"/>
-<area shape="poly" title=" " alt="" coords="1377,254,1486,298,1481,298,1376,259"/>
-<area shape="rect" title=" " alt="" coords="1593,304,1660,331"/>
-<area shape="poly" title=" " alt="" coords="1394,254,1580,304,1575,303,1393,259"/>
-<area shape="poly" title=" " alt="" coords="1397,247,1648,274,1876,304,1870,304,1647,279,1396,252"/>
-<area shape="poly" title=" " alt="" coords="749,255,749,290,745,287,745,258"/>
-<area shape="poly" title=" " alt="" coords="762,254,806,294,801,293,760,259"/>
-<area shape="poly" title=" " alt="" coords="733,256,683,297,681,292,728,257"/>
-<area shape="poly" title=" " alt="" coords="782,254,900,299,895,298,781,259"/>
-<area shape="rect" title=" " alt="" coords="526,304,591,331"/>
-<area shape="poly" title=" " alt="" coords="717,256,606,301,605,296,711,257"/>
-<area shape="poly" title=" " alt="" coords="1004,181,925,224,924,219,999,183"/>
-<area shape="poly" title=" " alt="" coords="1019,181,991,219,951,258,913,282,874,301,873,296,911,278,948,254,987,216,1014,183"/>
-<area shape="poly" title=" " alt="" coords="1030,180,1058,290,1053,288,1027,184"/>
-<area shape="poly" title=" " alt="" coords="1037,179,1127,293,1122,291,1034,184"/>
-<area shape="poly" title=" " alt="" coords="965,171,889,179,801,189,721,206,691,218,671,231,662,244,657,258,654,290,650,287,652,257,658,241,667,227,689,213,720,201,800,184,889,174,970,171"/>
-<area shape="poly" title=" " alt="" coords="1083,176,1171,196,1208,210,1231,228,1239,242,1241,258,1238,291,1234,287,1236,259,1234,244,1227,231,1205,215,1169,201,1083,181"/>
-<area shape="rect" title=" " alt="" coords="1114,229,1217,256"/>
-<area shape="poly" title=" " alt="" coords="1050,179,1130,222,1124,221,1049,184"/>
-<area shape="rect" title=" " alt="" coords="1479,229,1548,256"/>
-<area shape="poly" title=" " alt="" coords="1515,180,1515,215,1511,212,1512,184"/>
-<area shape="rect" href="../../df/d00/a00122.html" title=" " alt="" coords="1708,229,1801,256"/>
-<area shape="poly" title=" " alt="" coords="1757,180,1757,215,1753,212,1753,184"/>
-<area shape="poly" title=" " alt="" coords="186,179,192,217,200,237,211,254,241,277,275,293,310,304,344,312,339,312,309,309,273,298,238,282,207,258,195,240,187,219,183,184"/>
-<area shape="rect" title=" " alt="" coords="82,229,147,256"/>
-<area shape="poly" title=" " alt="" coords="174,180,139,220,135,216,170,184"/>
-<area shape="rect" href="../../d8/d00/a01932.html" title="Definitions for VGA cards." alt="" coords="5,229,59,256"/>
-<area shape="poly" title=" " alt="" coords="158,184,74,225,71,220,160,179"/>
-<area shape="poly" title=" " alt="" coords="300,109,224,149,221,145,304,106"/>
-<area shape="rect" href="../../d6/d00/a00293.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="240,155,413,181"/>
-<area shape="poly" title=" " alt="" coords="328,105,329,140,324,138,325,109"/>
-<area shape="poly" title=" " alt="" coords="344,179,396,220,390,220,343,184"/>
-<area shape="rect" href="../../da/d00/a00080.html" title="Contains the definitions for the configuration file interpreter." alt="" coords="221,229,363,256"/>
-<area shape="poly" title=" " alt="" coords="323,180,307,217,303,213,319,184"/>
-<area shape="poly" title=" " alt="" coords="309,254,359,295,354,294,307,259"/>
+<div class="center"><img src="../../df/d00/a00369.png" border="0" usemap="#aes40__endian_8h" loading="lazy" alt=""/></div>
+<map name="aes40__endian_8h" id="aes40__endian_8h">
+<area shape="rect" title="Contains byte&#45;order conversion helpers." alt="" coords="5,5,111,32"/>
+<area shape="rect" href="../../db/d00/a00164.html" title=" " alt="" coords="11,80,105,107"/>
+<area shape="poly" title=" " alt="" coords="60,30,61,65,55,64,56,35"/>
+</map>
+</div>
+</div><div class="textblock"><div class="dynheader">
+This graph shows which files directly or indirectly include this file:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d3/d00/a00370.png" border="0" usemap="#aes40__endian_8hdep" loading="lazy" alt=""/></div>
+<map name="aes40__endian_8hdep" id="aes40__endian_8hdep">
+<area shape="rect" title="Contains byte&#45;order conversion helpers." alt="" coords="4068,5,4173,32"/>
+<area shape="rect" href="../../d6/d00/a00626.html" title="Standard includes." alt="" coords="4084,80,4157,107"/>
+<area shape="poly" title=" " alt="" coords="4122,46,4122,81,4119,78,4119,50"/>
+<area shape="rect" href="../../d7/d00/a00002.html" title="Defines the entry point for the application." alt="" coords="5,155,108,181"/>
+<area shape="poly" title=" " alt="" coords="4066,95,3325,102,2084,112,848,131,389,143,119,157,109,158,107,154,119,152,389,137,848,125,2084,107,3325,96,4072,95"/>
+<area shape="rect" href="../../d7/d00/a00182.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="131,155,272,181"/>
+<area shape="poly" title=" " alt="" coords="4066,95,3419,98,2321,103,1721,111,1150,121,656,137,285,157,274,158,272,153,284,152,656,131,1150,116,1721,105,2321,98,3419,92,4071,94"/>
+<area shape="rect" href="../../d9/d00/a00191.html" title="Contains IEEE floating point code for the Alpha CPU." alt="" coords="296,155,494,181"/>
+<area shape="poly" title=" " alt="" coords="4067,95,3454,101,2420,111,1320,129,855,142,506,157,495,158,494,153,506,152,855,136,1320,123,2420,105,3454,96,4072,95"/>
+<area shape="rect" href="../../dc/d00/a00194.html" title="Contains VAX floating point code for the Alpha CPU." alt="" coords="518,155,712,181"/>
+<area shape="poly" title=" " alt="" coords="4066,95,3487,102,2517,112,1486,130,1051,142,725,157,713,158,712,153,724,152,1051,137,1486,124,2516,106,3487,96,4072,95"/>
+<area shape="rect" href="../../de/d00/a00197.html" title="Contains routines that replace parts of the VMS PALcode for the emulated DecChip 21264CB EV68 Alpha p..." alt="" coords="736,155,926,181"/>
+<area shape="poly" title=" " alt="" coords="4066,95,2610,112,1649,130,1243,143,938,157,927,158,926,153,938,152,1243,137,1649,125,2610,107,4071,95"/>
+<area shape="rect" href="../../d2/d00/a00281.html" title=" " alt="" coords="950,155,1083,181"/>
+<area shape="poly" title=" " alt="" coords="4066,95,3543,100,2680,108,1769,126,1384,140,1095,157,1083,159,1083,153,1095,152,1384,134,1769,121,2680,103,3543,94,4071,95"/>
+<area shape="rect" href="../../d3/d00/a00275.html" title=" " alt="" coords="1107,155,1310,181"/>
+<area shape="poly" title=" " alt="" coords="4066,95,2782,115,1942,133,1588,145,1322,157,1311,158,1310,153,1322,152,1588,139,1942,128,2782,110,4071,95"/>
+<area shape="rect" href="../../d6/d00/a00287.html" title=" " alt="" coords="1334,155,1475,181"/>
+<area shape="poly" title=" " alt="" coords="4066,95,3604,102,2855,112,2068,130,1737,142,1487,157,1476,158,1475,153,1487,152,1736,137,2068,124,2855,106,3604,96,4071,95"/>
+<area shape="rect" href="../../db/d00/a00296.html" title=" " alt="" coords="1499,155,1643,181"/>
+<area shape="poly" title=" " alt="" coords="4066,95,2931,113,2197,131,1888,143,1655,157,1644,158,1644,153,1655,152,1888,138,2197,126,2931,108,4072,95"/>
+<area shape="rect" href="../../dd/d00/a00320.html" title="Contains the code for the CPU tracing engine." alt="" coords="1667,155,1819,181"/>
+<area shape="poly" title=" " alt="" coords="4066,95,3010,115,2332,133,2047,144,1833,157,1820,159,1819,153,1832,152,2047,139,2332,128,3010,110,4071,95"/>
+<area shape="rect" href="../../df/d00/a00623.html" title="Source file that includes just the standard includes." alt="" coords="1844,155,1930,181"/>
+<area shape="poly" title=" " alt="" coords="4066,95,3677,101,3062,110,2421,128,2151,141,1949,157,1931,160,1930,155,1948,152,2151,136,2421,123,3062,105,3677,96,4072,95"/>
+<area shape="rect" href="../../d4/d00/a00008.html" title=" " alt="" coords="2005,155,2118,181"/>
+<area shape="poly" title=" " alt="" coords="4066,95,3144,114,2560,131,2315,143,2130,157,2119,159,2119,153,2130,152,2314,138,2560,126,3144,108,4071,95"/>
+<area shape="rect" href="../../d3/d00/a00113.html" title="Contains the code for the configuration file interpreter." alt="" coords="1984,229,2140,256"/>
+<area shape="poly" title=" " alt="" coords="4066,95,3614,103,2924,114,2287,132,2079,144,2019,150,1994,157,1989,165,1988,174,1999,193,2019,211,2042,230,2037,228,2015,216,1994,196,1983,175,1984,163,1991,153,2018,145,2079,139,2287,127,2924,109,3614,98,4071,95"/>
+<area shape="rect" href="../../d2/d00/a00014.html" title=" " alt="" coords="2142,155,2256,181"/>
+<area shape="poly" title=" " alt="" coords="4066,95,3206,115,2665,133,2438,144,2267,157,2256,159,2256,153,2267,152,2438,139,2665,127,3206,110,4071,95"/>
+<area shape="rect" href="../../d0/d00/a00071.html" title="Contains the code for the emulated Ali M1543C chipset devices." alt="" coords="2280,155,2436,181"/>
+<area shape="poly" title=" " alt="" coords="4066,95,3819,99,3421,107,2941,125,2692,139,2447,157,2436,158,2436,153,2447,152,2691,134,2941,120,3420,102,3819,94,4072,95"/>
+<area shape="rect" href="../../d1/d00/a00077.html" title="Contains the code for the emulated Ali M1543C IDE chipset part." alt="" coords="2460,155,2640,181"/>
+<area shape="poly" title=" " alt="" coords="4066,95,3497,112,3080,130,2651,157,2641,158,2640,153,2651,152,3080,125,3497,107,4071,95"/>
+<area shape="rect" href="../../d2/d00/a00083.html" title="Stub PMU/ACPI device at PCI 0:17:0 for the ALi M1543C bridge." alt="" coords="2664,155,2852,181"/>
+<area shape="poly" title=" " alt="" coords="4066,96,3578,116,3226,133,2865,157,2853,158,2852,153,2864,152,3225,128,3578,110,4072,96"/>
+<area shape="rect" href="../../db/d00/a00089.html" title="Contains the code for the emulated Ali M1543C IDE chipset part." alt="" coords="2876,155,3061,181"/>
+<area shape="poly" title=" " alt="" coords="4066,97,3657,118,3368,135,3073,157,3061,158,3061,153,3072,152,3368,130,3656,113,4071,96"/>
+<area shape="rect" href="../../d9/d00/a00095.html" title="Contains the code for the emulated DMA controller." alt="" coords="3085,155,3207,181"/>
+<area shape="poly" title=" " alt="" coords="4066,97,3713,116,3468,133,3219,157,3208,159,3207,153,3219,152,3468,128,3713,111,4071,96"/>
+<area shape="rect" href="../../d4/d00/a00101.html" title=" " alt="" coords="3232,155,3415,181"/>
+<area shape="poly" title=" " alt="" coords="4072,98,3795,124,3427,157,3415,159,3415,153,3427,152,3794,118,4066,99"/>
+<area shape="rect" href="../../df/d00/a00107.html" title=" " alt="" coords="3439,155,3596,181"/>
+<area shape="poly" title=" " alt="" coords="4072,100,3610,157,3597,159,3597,154,3610,152,4066,101"/>
+<area shape="rect" href="../../df/d00/a00122.html" title=" " alt="" coords="3621,155,3774,181"/>
+<area shape="poly" title=" " alt="" coords="4072,103,3772,157,3772,151,4066,104"/>
+<area shape="rect" href="../../d1/d00/a00128.html" title="Configuration file creator." alt="" coords="3798,155,3934,181"/>
+<area shape="poly" title=" " alt="" coords="4072,109,3911,157,3910,151,4067,109"/>
+<area shape="rect" href="../../d1/d00/a00347.html" title="Contains the code for the PCI device class." alt="" coords="3958,155,4097,181"/>
+<area shape="poly" title=" " alt="" coords="4095,116,4044,157,4042,152,4090,117"/>
+<area shape="rect" href="../../db/d00/a00353.html" title="Contains code for the base class for devices that connect to the chipset." alt="" coords="4122,155,4309,181"/>
+<area shape="poly" title=" " alt="" coords="4150,114,4201,155,4196,153,4148,119"/>
+<area shape="rect" href="../../df/d00/a00335.html" title="Support functions for working with attotime data." alt="" coords="4333,155,4441,181"/>
+<area shape="poly" title=" " alt="" coords="4172,106,4343,154,4338,154,4171,111"/>
+<area shape="rect" href="../../d3/d00/a00341.html" title=" " alt="" coords="4605,229,4692,256"/>
+<area shape="poly" title=" " alt="" coords="4172,96,4373,115,4476,132,4518,141,4550,152,4578,169,4603,189,4641,230,4636,228,4600,193,4575,173,4547,157,4517,146,4475,137,4372,121,4172,101"/>
+<area shape="rect" href="../../d6/d00/a00371.html" title=" " alt="" coords="4344,304,4478,331"/>
+<area shape="poly" title=" " alt="" coords="4172,94,4247,98,4332,108,4408,126,4436,138,4456,153,4467,172,4470,193,4468,214,4462,236,4443,275,4422,306,4420,301,4438,273,4457,234,4463,213,4465,193,4462,174,4452,156,4434,143,4406,131,4331,114,4247,104,4172,99"/>
+<area shape="rect" href="../../d3/d00/a00419.html" title=" " alt="" coords="4502,304,4654,331"/>
+<area shape="poly" title=" " alt="" coords="4172,95,4340,114,4423,130,4456,140,4481,152,4501,169,4518,188,4546,230,4565,271,4576,305,4572,302,4561,273,4541,233,4514,191,4497,172,4478,157,4454,145,4422,135,4339,119,4172,101"/>
+<area shape="rect" href="../../dc/d00/a00425.html" title=" " alt="" coords="4678,304,4814,331"/>
+<area shape="poly" title=" " alt="" coords="4172,93,4322,97,4511,107,4679,125,4738,137,4758,144,4770,153,4782,171,4787,191,4788,213,4784,234,4771,275,4755,306,4752,301,4766,273,4779,233,4783,212,4782,192,4777,173,4767,157,4756,149,4737,142,4679,130,4510,112,4321,103,4172,98"/>
+<area shape="rect" href="../../df/d00/a00431.html" title=" " alt="" coords="4838,304,4966,331"/>
+<area shape="poly" title=" " alt="" coords="4172,94,4519,114,4695,131,4759,141,4795,152,4817,168,4836,187,4866,229,4888,271,4900,305,4896,302,4883,273,4862,232,4832,190,4813,172,4793,157,4757,146,4695,136,4518,119,4172,99"/>
+<area shape="rect" href="../../d8/d00/a00344.html" title=" " alt="" coords="4618,155,4757,181"/>
+<area shape="poly" title=" " alt="" coords="4172,98,4600,152,4620,157,4614,157,4599,157,4172,104"/>
+<area shape="rect" href="../../de/d00/a00362.html" title="Contains code for debugging." alt="" coords="4882,155,4999,181"/>
+<area shape="poly" title=" " alt="" coords="4172,95,4467,115,4663,131,4863,152,4885,157,4879,157,4863,157,4663,137,4466,120,4172,100"/>
+<area shape="rect" href="../../d4/d00/a00377.html" title=" " alt="" coords="5022,155,5203,181"/>
+<area shape="poly" title=" " alt="" coords="4172,95,4524,115,5011,152,5025,156,5019,156,5011,157,4523,120,4172,100"/>
+<area shape="rect" href="../../db/d00/a00395.html" title=" " alt="" coords="5227,155,5419,181"/>
+<area shape="poly" title=" " alt="" coords="4172,94,4602,113,4905,130,5215,152,5229,156,5224,156,5215,157,4905,135,4602,118,4172,99"/>
+<area shape="rect" href="../../d7/d00/a00401.html" title=" " alt="" coords="5444,155,5616,181"/>
+<area shape="poly" title=" " alt="" coords="4172,93,4685,109,5053,126,5431,152,5446,156,5441,156,5431,157,5053,131,4685,114,4172,98"/>
+<area shape="rect" href="../../d4/d00/a00437.html" title="Contains code for the bx_gui_c base class used for interfacing with SDL and other device interfaces." alt="" coords="5640,155,5724,181"/>
+<area shape="poly" title=" " alt="" coords="4172,93,4878,109,5311,127,5492,139,5629,152,5642,157,5637,156,5628,157,5492,144,5310,132,4877,115,4172,98"/>
+<area shape="rect" href="../../d0/d00/a00443.html" title="Win32 GUI implementation." alt="" coords="5748,155,5874,181"/>
+<area shape="poly" title=" " alt="" coords="4172,92,4415,92,4800,99,5262,117,5502,132,5737,152,5751,156,5745,156,5736,157,5501,137,5261,122,4800,104,4415,97,4172,97"/>
+<area shape="rect" href="../../d9/d00/a00449.html" title="X&#45;Windows GUI implementation." alt="" coords="5898,155,6010,181"/>
+<area shape="poly" title=" " alt="" coords="4172,93,4995,110,5508,128,5724,139,5886,152,5900,156,5895,156,5886,157,5723,145,5508,133,4995,116,4172,98"/>
+<area shape="rect" href="../../d1/d00/a00452.html" title="Contains the code for the bx_keymap_c class used for keyboard interfacing with SDL and other device i..." alt="" coords="6033,155,6146,181"/>
+<area shape="poly" title=" " alt="" coords="4172,93,5056,109,5613,127,5846,138,6022,152,6035,156,6030,156,6022,157,5846,144,5612,132,5056,114,4172,98"/>
+<area shape="rect" href="../../d5/d00/a00461.html" title="Contains scancodes used to translate host keys to scancodes for the emulated keyboard controller." alt="" coords="6170,155,6300,181"/>
+<area shape="poly" title=" " alt="" coords="4172,93,5119,110,5718,127,5970,139,6159,152,6172,156,6167,156,6159,157,5969,144,5718,133,5118,115,4172,98"/>
+<area shape="rect" href="../../d7/d00/a00467.html" title="Contains the code for the bx_sdl_gui_c class used for interfacing with SDL." alt="" coords="6325,155,6409,181"/>
+<area shape="poly" title=" " alt="" coords="4172,92,4568,94,5189,102,5836,120,6108,134,6313,152,6328,157,6322,156,6312,157,6108,140,5836,126,5189,108,4568,100,4173,97"/>
+<area shape="rect" href="../../d9/d00/a00476.html" title=" " alt="" coords="6433,155,6560,181"/>
+<area shape="poly" title=" " alt="" coords="4172,92,4585,97,5237,107,5919,125,6206,137,6422,152,6436,156,6430,156,6422,157,6206,143,5919,130,5237,113,4585,102,4172,98"/>
+<area shape="rect" href="../../d4/d00/a00497.html" title=" " alt="" coords="6584,155,6727,181"/>
+<area shape="poly" title=" " alt="" coords="4172,92,5304,108,6033,126,6340,138,6571,152,6586,156,6581,156,6571,157,6340,143,6033,131,5303,113,4172,98"/>
+<area shape="rect" href="../../d5/d00/a00518.html" title="Contains the code for the emulated Keyboard and mouse devices and controller." alt="" coords="6751,155,6866,181"/>
+<area shape="poly" title=" " alt="" coords="4172,92,4635,95,5379,103,6162,121,6492,135,6739,152,6753,156,6748,156,6739,157,6491,140,6162,127,5379,109,4635,100,4172,97"/>
+<area shape="rect" href="../../d9/d00/a00524.html" title="Contains the code for the emulated Port 80 device." alt="" coords="6890,155,6988,181"/>
+<area shape="poly" title=" " alt="" coords="4172,92,4657,93,5442,99,5866,107,6268,117,6616,132,6878,152,6892,156,6887,156,6878,157,6616,138,6268,123,5866,112,5441,105,4657,98,4172,97"/>
+<area shape="rect" href="../../da/d00/a00530.html" title="Contains the code for the emulated Serial Port devices." alt="" coords="7012,155,7106,181"/>
+<area shape="poly" title=" " alt="" coords="4172,92,4675,92,5496,97,5940,104,6362,115,6727,131,7001,152,7015,156,7009,156,7000,157,6726,136,6362,120,5940,110,5496,103,4675,97,4172,97"/>
+<area shape="rect" href="../../d0/d00/a00542.html" title="Contains the code for the emulated DEC 21143 NIC device." alt="" coords="7130,155,7290,181"/>
+<area shape="poly" title=" " alt="" coords="4172,92,4694,96,5548,106,6451,124,6832,136,7118,152,7132,156,7127,156,7118,157,6831,142,6451,129,5548,111,4694,101,4172,98"/>
+<area shape="poly" title=" " alt="" coords="2064,195,2064,231,2060,227,2060,199"/>
+<area shape="poly" title=" " alt="" coords="2164,188,2087,231,2085,226,2159,190"/>
+<area shape="poly" title=" " alt="" coords="4595,261,4453,306,4452,301,4590,261"/>
+<area shape="poly" title=" " alt="" coords="4628,266,4591,306,4589,301,4623,268"/>
+<area shape="poly" title=" " alt="" coords="4678,263,4732,304,4727,303,4677,268"/>
+<area shape="poly" title=" " alt="" coords="4707,258,4860,304,4855,303,4706,263"/>
+<area shape="poly" title=" " alt="" coords="4676,194,4657,231,4654,227,4671,197"/>
 </map>
 </div>
 </div>
 <p><a href="../../d8/d00/a00368_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
-Data Structures</h2></td></tr>
-<tr class="memitem:user_5Fkey_5Ft" id="r_user_5Fkey_5Ft"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d4/d00/a01421.html">user_key_t</a></td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a3691c2acc010e4b9a816f259cc3ce3b9" id="r_a3691c2acc010e4b9a816f259cc3ce3b9"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a3691c2acc010e4b9a816f259cc3ce3b9">BX_KEY_UNKNOWN</a>&#160;&#160;&#160;0x7fffffff</td></tr>
-<tr class="memitem:acdbdf08a20a86e1bdf0b996b4ce6ba77" id="r_acdbdf08a20a86e1bdf0b996b4ce6ba77"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#acdbdf08a20a86e1bdf0b996b4ce6ba77">N_USER_KEYS</a>&#160;&#160;&#160;36</td></tr>
+<tr class="memitem:aa8bba16650486a9abc2767345a902df5" id="r_aa8bba16650486a9abc2767345a902df5"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aa8bba16650486a9abc2767345a902df5">ES40_LITTLE_ENDIAN</a></td></tr>
+<tr class="memitem:a95b2ddeb37caec6b711909814343cc9b" id="r_a95b2ddeb37caec6b711909814343cc9b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a95b2ddeb37caec6b711909814343cc9b">swap_64</a>(x)</td></tr>
+<tr class="memitem:a27db9edfbbf64257d43d610d109cf3b9" id="r_a27db9edfbbf64257d43d610d109cf3b9"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a27db9edfbbf64257d43d610d109cf3b9">swap_32</a>(x)</td></tr>
+<tr class="memitem:ab2242ecb8ffd8b5fb6a1647a5b1c9f2a" id="r_ab2242ecb8ffd8b5fb6a1647a5b1c9f2a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab2242ecb8ffd8b5fb6a1647a5b1c9f2a">swap_16</a>(x)</td></tr>
+<tr class="memitem:acdddca9641fa0f7b677049e76411ae70" id="r_acdddca9641fa0f7b677049e76411ae70"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#acdddca9641fa0f7b677049e76411ae70">swap_8</a>(x)</td></tr>
+<tr class="memitem:a29575aa850cc34cb06a727c9177aa31c" id="r_a29575aa850cc34cb06a727c9177aa31c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a29575aa850cc34cb06a727c9177aa31c">endian_64</a>(x)</td></tr>
+<tr class="memitem:a9dbf60e4a321b6a070aa6be105d6a7b4" id="r_a9dbf60e4a321b6a070aa6be105d6a7b4"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9dbf60e4a321b6a070aa6be105d6a7b4">endian_32</a>(x)</td></tr>
+<tr class="memitem:a056a9c9215d6af557101d08125b6680b" id="r_a056a9c9215d6af557101d08125b6680b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a056a9c9215d6af557101d08125b6680b">endian_16</a>(x)</td></tr>
+<tr class="memitem:a72fb55d3c7b08fe2d8779c59b33cc880" id="r_a72fb55d3c7b08fe2d8779c59b33cc880"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a72fb55d3c7b08fe2d8779c59b33cc880">endian_8</a>(x)</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a3e1e354e132b36ac8b8d9adef4aff053" id="r_a3e1e354e132b36ac8b8d9adef4aff053"><td class="memItemLeft"><a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a3e1e354e132b36ac8b8d9adef4aff053">get_user_key</a> (char *key)</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:aadf5655663e70c8f409d89a43fc98598" id="r_aadf5655663e70c8f409d89a43fc98598"><td class="memItemLeft"><a class="el" href="../../d2/d00/a01433.html">bx_gui_c</a> *&#160;</td><td class="memItemRight"><a class="el" href="#aadf5655663e70c8f409d89a43fc98598">bx_gui</a> = NULL</td></tr>
-<tr class="memitem:a9e96aaa11838a5b3911fb9aa87c5548a" id="r_a9e96aaa11838a5b3911fb9aa87c5548a"><td class="memItemLeft">static <a class="el" href="../../d4/d00/a01421.html">user_key_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#a9e96aaa11838a5b3911fb9aa87c5548a">user_keys</a> [36]</td></tr>
+<tr class="memitem:a98fbd186160b3cf0c2ef4726d0f33255" id="r_a98fbd186160b3cf0c2ef4726d0f33255"><td class="memItemLeft"><a class="el" href="../../d8/d00/a00326.html#a6dbf9516e516c901604625282c174aa4">u16</a>&#160;</td><td class="memItemRight"><a class="el" href="#a98fbd186160b3cf0c2ef4726d0f33255">get_be16</a> (const <a class="el" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> *p)</td></tr>
+<tr class="memitem:a2ca864743a05158f3d2f17ee582cb5c7" id="r_a2ca864743a05158f3d2f17ee582cb5c7"><td class="memItemLeft"><a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a2ca864743a05158f3d2f17ee582cb5c7">get_be32</a> (const <a class="el" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> *p)</td></tr>
+<tr class="memitem:adb50a751c412a7ab386483a20d577ba8" id="r_adb50a751c412a7ab386483a20d577ba8"><td class="memItemLeft"><a class="el" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a>&#160;</td><td class="memItemRight"><a class="el" href="#adb50a751c412a7ab386483a20d577ba8">get_be64</a> (const <a class="el" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> *p)</td></tr>
+<tr class="memitem:a3fcae6fa902cd866f100e222c59ee90d" id="r_a3fcae6fa902cd866f100e222c59ee90d"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a3fcae6fa902cd866f100e222c59ee90d">put_be16</a> (<a class="el" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> *p, <a class="el" href="../../d8/d00/a00326.html#a6dbf9516e516c901604625282c174aa4">u16</a> value)</td></tr>
+<tr class="memitem:a9b62b5c7f2bb5966cdcc05b7ef765295" id="r_a9b62b5c7f2bb5966cdcc05b7ef765295"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a9b62b5c7f2bb5966cdcc05b7ef765295">put_be32</a> (<a class="el" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> *p, <a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> value)</td></tr>
+<tr class="memitem:a0971e9e397ba42c7b56920165cc34e6f" id="r_a0971e9e397ba42c7b56920165cc34e6f"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a0971e9e397ba42c7b56920165cc34e6f">put_be64</a> (<a class="el" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> *p, <a class="el" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> value)</td></tr>
+<tr class="memitem:afb78eaf762a0da6c2255bb3429d95e7b" id="r_afb78eaf762a0da6c2255bb3429d95e7b"><td class="memItemLeft"><a class="el" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a>&#160;</td><td class="memItemRight"><a class="el" href="#afb78eaf762a0da6c2255bb3429d95e7b">endian_bits</a> (<a class="el" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> x, int numbits)</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Contains code for the <a class="el" href="../../d2/d00/a01433.html" title="Abstract base class for GUI implementations.">bx_gui_c</a> base class used for interfacing with SDL and other device interfaces. </p>
+<div class="textblock"><p>Contains byte-order conversion helpers. </p>
 <p>$Id$</p>
-<p>X-1.10 Camiel Vanderhoeven 26-MAR-2008 Fix compiler warnings.</p>
-<p>X-1.9 Camiel Vanderhoeven 16-MAR-2008 Fixed threading problems with SDL (I hope).</p>
-<p>X-1.8 Camiel Vanderhoeven 14-MAR-2008 Formatting.</p>
-<p>X-1.7 Camiel Vanderhoeven 11-MAR-2008 Named, debuggable mutexes.</p>
-<p>X-1.5 Camiel Vanderhoeven 05-MAR-2008 Multi-threading version.</p>
-<p>X-1.4 David Leonard 20-FEB-2008 Avoid 'Xlib: unexpected async reply' errors on Linux/Unix/BSD's by adding some thread interlocking.</p>
-<p>X-1.3 Camiel Vanderhoeven 02-JAN-2008 Comments.</p>
-<p>X-1.2 Camiel Vanderhoeven 7-DEC-2007 Code cleanup.</p>
-<p>X-1.1 Camiel Vanderhoeven 6-DEC-2007 Initial version for ES40 emulator. </p>
+<p>X-1.6 Camiel Vanderhoeven 14-MAR-2008</p><ol type="1">
+<li>More meaningful exceptions replace throwing (int) 1.</li>
+<li>U64 macro replaces X64 macro.</li>
+</ol>
+<p>X-1.5 Camiel Vanderhoeven 04-JAN-2008 Added swap_xx macro's for use in places where bytes need to be swapped regardless of endianess.</p>
+<p>X-1.4 Camiel Vanderhoeven 03-JAN-2008 Attempt to make PCI base device endianess-correct.</p>
+<p>X-1.3 Fang Zhe 02-JAN-2008 Recognize endianess on more architectures.</p>
+<p>X-1.2 Camiel Vanderhoeven 30-MAR-2007 Added old changelog comments.</p>
+<p>X-1.1 Brian Wheeler 8-MAR-2007 Renamed this file from endian.h to <a class="el" href="../../d8/d00/a00368.html" title="Contains byte-order conversion helpers.">es40_endian.h</a> to avoid conflicts with system-include files.</p>
+<p>X-A1-1.2 Camiel Vanderhoeven 7-MAR-2007 Properly handle OpenVMS</p>
+<p>X-A1-1.1 Camiel Vanderhoeven 1-MAR-2007 File created to support the Solaris/SPARC port.</p>
+<dl class="section author"><dt>Author</dt><dd>Camiel Vanderhoeven </dd></dl>
 
-<p class="definition">Definition in file <a class="el" href="../../d8/d00/a00368_source.html">gui.cpp</a>.</p>
+<p class="definition">Definition in file <a class="el" href="../../d8/d00/a00368_source.html">es40_endian.h</a>.</p>
 </div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
-<a id="a3691c2acc010e4b9a816f259cc3ce3b9" name="a3691c2acc010e4b9a816f259cc3ce3b9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3691c2acc010e4b9a816f259cc3ce3b9">&#9670;&#160;</a></span>BX_KEY_UNKNOWN</h2>
+<a id="a056a9c9215d6af557101d08125b6680b" name="a056a9c9215d6af557101d08125b6680b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a056a9c9215d6af557101d08125b6680b">&#9670;&#160;</a></span>endian_16</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define BX_KEY_UNKNOWN&#160;&#160;&#160;0x7fffffff</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00082">82</a> of file <a class="el" href="../../d8/d00/a00368_source.html">gui.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d8/d00/a00368_source.html#l00190">get_user_key()</a>.</p>
-
-</div>
-</div>
-<a id="acdbdf08a20a86e1bdf0b996b4ce6ba77" name="acdbdf08a20a86e1bdf0b996b4ce6ba77"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acdbdf08a20a86e1bdf0b996b4ce6ba77">&#9670;&#160;</a></span>N_USER_KEYS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define N_USER_KEYS&#160;&#160;&#160;36</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00083">83</a> of file <a class="el" href="../../d8/d00/a00368_source.html">gui.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d8/d00/a00368_source.html#l00190">get_user_key()</a>.</p>
-
-</div>
-</div>
-<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
-<a id="a3e1e354e132b36ac8b8d9adef4aff053" name="a3e1e354e132b36ac8b8d9adef4aff053"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3e1e354e132b36ac8b8d9adef4aff053">&#9670;&#160;</a></span>get_user_key()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> get_user_key </td>
+          <td class="memname">#define endian_16</td>
           <td>(</td>
-          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>key</em></span></td><td>)</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>x</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">((x) &amp; 0xffff)</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00151">151</a> of file <a class="el" href="../../d8/d00/a00368_source.html">es40_endian.h</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00190">190</a> of file <a class="el" href="../../d8/d00/a00368_source.html">gui.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d8/d00/a00368_source.html#l00082">BX_KEY_UNKNOWN</a>, <a class="el" href="../../d8/d00/a00368_source.html#l00190">get_user_key()</a>, <a class="el" href="../../d8/d00/a00368_source.html#l00083">N_USER_KEYS</a>, <a class="el" href="../../d8/d00/a00368_source.html#l00088">user_key_t::symbol</a>, and <a class="el" href="../../d8/d00/a00368_source.html#l00091">user_keys</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d8/d00/a00368_source.html#l00190">get_user_key()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d8/d00/a00368_a3e1e354e132b36ac8b8d9adef4aff053_cgraph.png" border="0" usemap="#ad8/d00/a00368_a3e1e354e132b36ac8b8d9adef4aff053_cgraph" loading="lazy" alt=""/></div>
-<map name="ad8/d00/a00368_a3e1e354e132b36ac8b8d9adef4aff053_cgraph" id="ad8/d00/a00368_a3e1e354e132b36ac8b8d9adef4aff053_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,105,56"/>
-<area shape="poly" title=" " alt="" coords="37,29,34,20,36,11,43,5,55,3,67,5,75,14,70,14,65,10,55,8,45,10,40,14,39,20,42,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d8/d00/a00368_a3e1e354e132b36ac8b8d9adef4aff053_icgraph.png" border="0" usemap="#ad8/d00/a00368_a3e1e354e132b36ac8b8d9adef4aff053_icgraph" loading="lazy" alt=""/></div>
-<map name="ad8/d00/a00368_a3e1e354e132b36ac8b8d9adef4aff053_icgraph" id="ad8/d00/a00368_a3e1e354e132b36ac8b8d9adef4aff053_icgraph">
-<area shape="rect" title=" " alt="" coords="5,29,105,56"/>
-<area shape="poly" title=" " alt="" coords="70,14,65,10,55,8,45,10,40,14,39,20,42,29,37,29,34,20,36,11,43,5,55,3,67,5,75,14"/>
-</map>
-</div>
+<p class="reference">Referenced by <a class="el" href="../../d1/d00/a00347_source.html#l00195">CPCIDevice::config_read()</a>, <a class="el" href="../../d1/d00/a00347_source.html#l00217">CPCIDevice::config_write()</a>, <a class="el" href="../../d0/d00/a00071_source.html#l00590">CAliM1543C::config_write_custom()</a>, <a class="el" href="../../d1/d00/a00347_source.html#l00797">CPCIDevice::do_pci_read()</a>, <a class="el" href="../../d1/d00/a00347_source.html#l00927">CPCIDevice::do_pci_write()</a>, <a class="el" href="../../d8/d00/a00368_source.html#l00154">endian_bits()</a>, <a class="el" href="../../d1/d00/a00077_source.html#l01746">CAliM1543C_ide::execute()</a>, <a class="el" href="../../db/d00/a00722_source.html#l01763">CSystem::ReadMem()</a>, and <a class="el" href="../../db/d00/a00722_source.html#l01713">CSystem::WriteMem()</a>.</p>
 
 </div>
 </div>
-<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
-<a id="aadf5655663e70c8f409d89a43fc98598" name="aadf5655663e70c8f409d89a43fc98598"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aadf5655663e70c8f409d89a43fc98598">&#9670;&#160;</a></span>bx_gui</h2>
+<a id="a9dbf60e4a321b6a070aa6be105d6a7b4" name="a9dbf60e4a321b6a070aa6be105d6a7b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9dbf60e4a321b6a070aa6be105d6a7b4">&#9670;&#160;</a></span>endian_32</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../d2/d00/a01433.html">bx_gui_c</a>* bx_gui = NULL</td>
+          <td class="memname">#define endian_32</td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>x</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">((x) &amp; 0xffffffff)</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00150">150</a> of file <a class="el" href="../../d8/d00/a00368_source.html">es40_endian.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d1/d00/a00347_source.html#l00160">CPCIDevice::add_function()</a>, <a class="el" href="../../da/d00/a00011_source.html#l00717">CES1371::channel_enabled()</a>, <a class="el" href="../../d1/d00/a00077_source.html#l01285">CAliM1543C_ide::channel_is_native()</a>, <a class="el" href="../../d1/d00/a00347_source.html#l00195">CPCIDevice::config_read()</a>, <a class="el" href="../../d1/d00/a00077_source.html#l00571">CAliM1543C_ide::config_read_custom()</a>, <a class="el" href="../../d1/d00/a00347_source.html#l00217">CPCIDevice::config_write()</a>, <a class="el" href="../../d0/d00/a00071_source.html#l00590">CAliM1543C::config_write_custom()</a>, <a class="el" href="../../d1/d00/a00077_source.html#l00534">CAliM1543C_ide::decodes_memory_access()</a>, <a class="el" href="../../d1/d00/a00347_source.html#l00461">CPCIDevice::decodes_memory_access()</a>, <a class="el" href="../../d1/d00/a00077_source.html#l02867">CAliM1543C_ide::do_dma_transfer()</a>, <a class="el" href="../../d1/d00/a00347_source.html#l00626">CPCIDevice::do_pci_interrupt()</a>, <a class="el" href="../../d1/d00/a00347_source.html#l00797">CPCIDevice::do_pci_read()</a>, <a class="el" href="../../d1/d00/a00347_source.html#l00927">CPCIDevice::do_pci_write()</a>, <a class="el" href="../../d2/d00/a00083_source.html#l00154">CAliM1543C_pmu::docking_config()</a>, <a class="el" href="../../d8/d00/a00368_source.html#l00154">endian_bits()</a>, <a class="el" href="../../da/d00/a00011_source.html#l00615">CES1371::es1371_update_status()</a>, <a class="el" href="../../d3/d00/a00275_source.html#l00135">Ev68InstructionFetch::fetch()</a>, <a class="el" href="../../d1/d00/a00077_source.html#l01148">CAliM1543C_ide::ide_busmaster_write()</a>, <a class="el" href="../../d7/d00/a00401_source.html#l00519">CRadeon7500::init()</a>, <a class="el" href="../../d0/d00/a00071_source.html#l00565">CAliM1543C::is_docking_mode()</a>, <a class="el" href="../../d0/d00/a00071_source.html#l00570">CAliM1543C::is_pmu_hidden()</a>, <a class="el" href="../../d0/d00/a00071_source.html#l00614">CAliM1543C::isa_io_decode()</a>, <a class="el" href="../../d4/d00/a00377_source.html#l00844">CGloriaSynergy::legacy_enabled()</a>, <a class="el" href="../../db/d00/a00395_source.html#l00731">CPowerStorm3xx::legacy_enabled()</a>, <a class="el" href="../../d7/d00/a00401_source.html#l00759">CRadeon7500::legacy_enabled()</a>, <a class="el" href="../../d3/d00/a00419_source.html#l01969">CS3Trio64::linear_bar_offset()</a>, <a class="el" href="../../d3/d00/a00419_source.html#l02678">CS3Trio64::normal_access_enabled()</a>, <a class="el" href="../../d1/d00/a00347_source.html#l00112">pci_bar_is_upper_64bit()</a>, <a class="el" href="../../d3/d00/a00275_source.html#l00065">Ev68InstructionFetch::peek_cached()</a>, <a class="el" href="../../d0/d00/a00071_source.html#l00608">CAliM1543C::programmable_io_is_subtractive()</a>, <a class="el" href="../../d3/d00/a00275_source.html#l00194">Ev68InstructionFetch::read_cache()</a>, <a class="el" href="../../d1/d00/a00347_source.html#l00489">CPCIDevice::ReadMem()</a>, <a class="el" href="../../db/d00/a00722_source.html#l01763">CSystem::ReadMem()</a>, <a class="el" href="../../d1/d00/a00347_source.html#l00333">CPCIDevice::register_bar()</a>, <a class="el" href="../../d1/d00/a00347_source.html#l00435">CPCIDevice::ResetPCI()</a>, <a class="el" href="../../d3/d00/a00419_source.html#l02668">CS3Trio64::ResetPCI()</a>, <a class="el" href="../../d1/d00/a00077_source.html#l00466">CAliM1543C_ide::RestoreState()</a>, <a class="el" href="../../d8/d00/a00674_source.html#l00943">CLSI53C1020::RestoreState()</a>, <a class="el" href="../../d1/d00/a00347_source.html#l00686">CPCIDevice::RestoreState()</a>, <a class="el" href="../../d3/d00/a00419_source.html#l01939">s3_lfb_size_from_cr58()</a>, <a class="el" href="../../d7/d00/a00401_source.html#l00752">CRadeon7500::sync_apertures()</a>, <a class="el" href="../../d4/d00/a00377_source.html#l00819">CGloriaSynergy::sync_pci_config()</a>, <a class="el" href="../../d1/d00/a00347_source.html#l00554">CPCIDevice::WriteMem()</a>, and <a class="el" href="../../db/d00/a00722_source.html#l01713">CSystem::WriteMem()</a>.</p>
+
+</div>
+</div>
+<a id="a29575aa850cc34cb06a727c9177aa31c" name="a29575aa850cc34cb06a727c9177aa31c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a29575aa850cc34cb06a727c9177aa31c">&#9670;&#160;</a></span>endian_64</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define endian_64</td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>x</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">(x)</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00149">149</a> of file <a class="el" href="../../d8/d00/a00368_source.html">es40_endian.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d8/d00/a00368_source.html#l00154">endian_bits()</a>, <a class="el" href="../../db/d00/a00722_source.html#l01763">CSystem::ReadMem()</a>, and <a class="el" href="../../db/d00/a00722_source.html#l01713">CSystem::WriteMem()</a>.</p>
+
+</div>
+</div>
+<a id="a72fb55d3c7b08fe2d8779c59b33cc880" name="a72fb55d3c7b08fe2d8779c59b33cc880"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72fb55d3c7b08fe2d8779c59b33cc880">&#9670;&#160;</a></span>endian_8</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define endian_8</td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>x</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">((x) &amp; 0xff)</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00152">152</a> of file <a class="el" href="../../d8/d00/a00368_source.html">es40_endian.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d1/d00/a00347_source.html#l00195">CPCIDevice::config_read()</a>, <a class="el" href="../../d1/d00/a00347_source.html#l00217">CPCIDevice::config_write()</a>, and <a class="el" href="../../d8/d00/a00368_source.html#l00154">endian_bits()</a>.</p>
+
+</div>
+</div>
+<a id="aa8bba16650486a9abc2767345a902df5" name="aa8bba16650486a9abc2767345a902df5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8bba16650486a9abc2767345a902df5">&#9670;&#160;</a></span>ES40_LITTLE_ENDIAN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES40_LITTLE_ENDIAN</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00080">80</a> of file <a class="el" href="../../d8/d00/a00368_source.html">gui.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d7/d00/a00002_source.html#l00278">detach_gui_guest_input()</a>, <a class="el" href="../../d4/d00/a00617_source.html#l01720">CSystem::init()</a>, <a class="el" href="../../d8/d00/a00368_source.html#l00215">bx_gui_c::init_signal_handlers()</a>, <a class="el" href="../../d1/d00/a00077_source.html#l00816">CConfigurator::initialize()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00761">libsdl_LTX_plugin_init()</a>, <a class="el" href="../../d7/d00/a00002_source.html#l00305">main()</a>, <a class="el" href="../../d8/d00/a00368_source.html#l00204">bx_gui_c::mouse_enabled_changed()</a>, <a class="el" href="../../d5/d00/a00308_source.html#l00165">CCirrus::run()</a>, <a class="el" href="../../d7/d00/a00002_source.html#l00540">run_emulator()</a>, <a class="el" href="../../d5/d00/a00308_source.html#l01012">CCirrus::write_b_3c0()</a>, <a class="el" href="../../d5/d00/a00308_source.html#l01377">CCirrus::write_b_3c5()</a>, <a class="el" href="../../d5/d00/a00308_source.html#l01533">CCirrus::write_b_3c9()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l00647">sdl_application::~sdl_application()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00083">83</a> of file <a class="el" href="../../d8/d00/a00368_source.html">es40_endian.h</a>.</p>
 
 </div>
 </div>
-<a id="a9e96aaa11838a5b3911fb9aa87c5548a" name="a9e96aaa11838a5b3911fb9aa87c5548a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9e96aaa11838a5b3911fb9aa87c5548a">&#9670;&#160;</a></span>user_keys</h2>
+<a id="ab2242ecb8ffd8b5fb6a1647a5b1c9f2a" name="ab2242ecb8ffd8b5fb6a1647a5b1c9f2a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab2242ecb8ffd8b5fb6a1647a5b1c9f2a">&#9670;&#160;</a></span>swap_16</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define swap_16</td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>x</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">((((x) &amp; 0x00ff) &lt;&lt; 8) | (((x) &amp; 0xff00) &gt;&gt; 8))</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00141">141</a> of file <a class="el" href="../../d8/d00/a00368_source.html">es40_endian.h</a>.</p>
+
+</div>
+</div>
+<a id="a27db9edfbbf64257d43d610d109cf3b9" name="a27db9edfbbf64257d43d610d109cf3b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27db9edfbbf64257d43d610d109cf3b9">&#9670;&#160;</a></span>swap_32</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define swap_32</td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>x</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">(                                                          \</div>
+<div class="line">  (((x) &amp; 0x000000ff) &lt;&lt; 24) | (((x) &amp; 0x0000ff00) &lt;&lt; 8) | \</div>
+<div class="line">    (((x) &amp; 0x00ff0000) &gt;&gt; 8) | (((x) &amp; 0xff000000) &gt;&gt; 24) \</div>
+<div class="line">)</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00136">136</a> of file <a class="el" href="../../d8/d00/a00368_source.html">es40_endian.h</a>.</p>
+
+</div>
+</div>
+<a id="a95b2ddeb37caec6b711909814343cc9b" name="a95b2ddeb37caec6b711909814343cc9b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95b2ddeb37caec6b711909814343cc9b">&#9670;&#160;</a></span>swap_64</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define swap_64</td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>x</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">(                                                       \</div>
+<div class="line">  (((x) &amp; <a class="code hl_define" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000000000000ff)) &lt;&lt; 56) |             \</div>
+<div class="line">    (((x) &amp; <a class="code hl_define" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x000000000000ff00)) &lt;&lt; 40) |           \</div>
+<div class="line">      (((x) &amp; <a class="code hl_define" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000000000ff0000)) &lt;&lt; 24) |         \</div>
+<div class="line">        (((x) &amp; <a class="code hl_define" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000000ff000000)) &lt;&lt; 8) |        \</div>
+<div class="line">          (((x) &amp; <a class="code hl_define" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x000000ff00000000)) &gt;&gt; 8) |      \</div>
+<div class="line">            (((x) &amp; <a class="code hl_define" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000ff0000000000)) &gt;&gt; 24) |   \</div>
+<div class="line">              (((x) &amp; <a class="code hl_define" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00ff000000000000)) &gt;&gt; 40) | \</div>
+<div class="line">                (((x) &amp; <a class="code hl_define" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0xff00000000000000)) &gt;&gt; 56) \</div>
+<div class="line">)</div>
+<div class="ttc" id="aa00326_html_a87a27db8f6877dc5bbc36ec833e88c58"><div class="ttname"><a href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a></div><div class="ttdeci">#define U64(a)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00119">datatypes.h:119</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00125">125</a> of file <a class="el" href="../../d8/d00/a00368_source.html">es40_endian.h</a>.</p>
+
+</div>
+</div>
+<a id="acdddca9641fa0f7b677049e76411ae70" name="acdddca9641fa0f7b677049e76411ae70"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acdddca9641fa0f7b677049e76411ae70">&#9670;&#160;</a></span>swap_8</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define swap_8</td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>x</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">((x) &amp; 0xff)</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00142">142</a> of file <a class="el" href="../../d8/d00/a00368_source.html">es40_endian.h</a>.</p>
+
+</div>
+</div>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="afb78eaf762a0da6c2255bb3429d95e7b" name="afb78eaf762a0da6c2255bb3429d95e7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb78eaf762a0da6c2255bb3429d95e7b">&#9670;&#160;</a></span>endian_bits()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -366,19 +490,1082 @@ Here is the caller graph for this function:</div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../d4/d00/a01421.html">user_key_t</a> user_keys[36]</td>
+          <td class="memname"><a class="el" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> endian_bits </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a></td>          <td class="paramname"><span class="paramname"><em>x</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>numbits</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00091">91</a> of file <a class="el" href="../../d8/d00/a00368_source.html">gui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00154">154</a> of file <a class="el" href="../../d8/d00/a00368_source.html">es40_endian.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/d00/a00368_source.html#l00190">get_user_key()</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/d00/a00368_source.html#l00151">endian_16</a>, <a class="el" href="../../d8/d00/a00368_source.html#l00150">endian_32</a>, <a class="el" href="../../d8/d00/a00368_source.html#l00149">endian_64</a>, <a class="el" href="../../d8/d00/a00368_source.html#l00152">endian_8</a>, <a class="el" href="../../d8/d00/a00368_source.html#l00154">endian_bits()</a>, and <a class="el" href="../../dd/d00/a00365_source.html#l00099">FAILURE</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d8/d00/a00368_source.html#l00154">endian_bits()</a>, and <a class="el" href="../../d0/d00/a00542_source.html#l00674">CDEC21143::WriteMem_Bar()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d8/d00/a00368_afb78eaf762a0da6c2255bb3429d95e7b_cgraph.png" border="0" usemap="#ad8/d00/a00368_afb78eaf762a0da6c2255bb3429d95e7b_cgraph" loading="lazy" alt=""/></div>
+<map name="ad8/d00/a00368_afb78eaf762a0da6c2255bb3429d95e7b_cgraph" id="ad8/d00/a00368_afb78eaf762a0da6c2255bb3429d95e7b_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,93,56"/>
+<area shape="poly" title=" " alt="" coords="33,28,32,12,38,5,49,3,60,5,67,14,62,14,58,10,49,8,41,10,37,14,38,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d8/d00/a00368_afb78eaf762a0da6c2255bb3429d95e7b_icgraph.png" border="0" usemap="#ad8/d00/a00368_afb78eaf762a0da6c2255bb3429d95e7b_icgraph" loading="lazy" alt=""/></div>
+<map name="ad8/d00/a00368_afb78eaf762a0da6c2255bb3429d95e7b_icgraph" id="ad8/d00/a00368_afb78eaf762a0da6c2255bb3429d95e7b_icgraph">
+<area shape="rect" title=" " alt="" coords="459,29,546,56"/>
+<area shape="poly" title=" " alt="" coords="533,14,523,10,503,8,483,10,473,15,471,20,476,30,471,28,465,21,469,11,482,5,503,3,525,5,538,15"/>
+<area shape="rect" href="../../df/d00/a01825.html#a52f9c7b0cc565863756e296ebd71392c" title=" " alt="" coords="223,29,411,56"/>
+<area shape="poly" title=" " alt="" coords="440,43,411,45,411,40,446,43"/>
+<area shape="rect" href="../../df/d00/a01825.html#a36f2b52cf280b78dacf8cfe8be4967fa" title=" " alt="" coords="5,29,175,56"/>
+<area shape="poly" title=" " alt="" coords="205,43,175,45,175,40,210,43"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a98fbd186160b3cf0c2ef4726d0f33255" name="a98fbd186160b3cf0c2ef4726d0f33255"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98fbd186160b3cf0c2ef4726d0f33255">&#9670;&#160;</a></span>get_be16()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d8/d00/a00326.html#a6dbf9516e516c901604625282c174aa4">u16</a> get_be16 </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> *</td>          <td class="paramname"><span class="paramname"><em>p</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00089">89</a> of file <a class="el" href="../../d8/d00/a00368_source.html">es40_endian.h</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d8/d00/a00368_source.html#l00089">get_be16()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00629_source.html#l01089">CDisk::do_scsi_command()</a>, <a class="el" href="../../d8/d00/a00368_source.html#l00089">get_be16()</a>, and <a class="el" href="../../dc/d00/a00659_source.html#l00373">CDiskFile::qcow2_check_metadata()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d8/d00/a00368_a98fbd186160b3cf0c2ef4726d0f33255_cgraph.png" border="0" usemap="#ad8/d00/a00368_a98fbd186160b3cf0c2ef4726d0f33255_cgraph" loading="lazy" alt=""/></div>
+<map name="ad8/d00/a00368_a98fbd186160b3cf0c2ef4726d0f33255_cgraph" id="ad8/d00/a00368_a98fbd186160b3cf0c2ef4726d0f33255_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,80,56"/>
+<area shape="poly" title=" " alt="" coords="28,28,27,12,33,5,43,3,52,5,58,14,53,14,49,10,42,8,36,10,32,14,33,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d8/d00/a00368_a98fbd186160b3cf0c2ef4726d0f33255_icgraph.png" border="0" usemap="#ad8/d00/a00368_a98fbd186160b3cf0c2ef4726d0f33255_icgraph" loading="lazy" alt=""/></div>
+<map name="ad8/d00/a00368_a98fbd186160b3cf0c2ef4726d0f33255_icgraph" id="ad8/d00/a00368_a98fbd186160b3cf0c2ef4726d0f33255_icgraph">
+<area shape="rect" title=" " alt="" coords="456,35,530,61"/>
+<area shape="poly" title=" " alt="" coords="521,19,512,16,493,13,475,15,466,20,463,25,468,35,463,33,458,26,462,16,474,10,493,8,514,11,526,20"/>
+<area shape="rect" href="../../d9/d00/a01897.html#a4d1bee575d551ab627571e6afe7b206a" title="Handle a SCSI command." alt="" coords="233,5,408,32"/>
+<area shape="poly" title=" " alt="" coords="438,39,403,35,403,30,443,39"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a96674475fa17505d3afe72c996edc72a" title=" " alt="" coords="237,56,404,99"/>
+<area shape="poly" title=" " alt="" coords="443,56,405,66,404,60,438,57"/>
+<area shape="rect" href="../../d9/d00/a01897.html#a426e10f6af92fae37732288bf84a7259" title="Process data written or read." alt="" coords="5,5,185,32"/>
+<area shape="poly" title=" " alt="" coords="215,19,185,21,185,16,220,18"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a8f040ac678a5bc8550cb63b4ebc9e4d5" title=" " alt="" coords="15,64,175,91"/>
+<area shape="poly" title=" " alt="" coords="218,78,176,80,176,75,224,77"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a2ca864743a05158f3d2f17ee582cb5c7" name="a2ca864743a05158f3d2f17ee582cb5c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ca864743a05158f3d2f17ee582cb5c7">&#9670;&#160;</a></span>get_be32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> get_be32 </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> *</td>          <td class="paramname"><span class="paramname"><em>p</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00094">94</a> of file <a class="el" href="../../d8/d00/a00368_source.html">es40_endian.h</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d8/d00/a00368_source.html#l00094">get_be32()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00629_source.html#l01089">CDisk::do_scsi_command()</a>, <a class="el" href="../../d8/d00/a00368_source.html#l00094">get_be32()</a>, <a class="el" href="../../d8/d00/a00368_source.html#l00100">get_be64()</a>, <a class="el" href="../../dc/d00/a00659_source.html#l00168">CDiskFile::qcow2_parse_header()</a>, and <a class="el" href="../../dc/d00/a00659_source.html#l00754">CDiskFile::qcow2_probe()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d8/d00/a00368_a2ca864743a05158f3d2f17ee582cb5c7_cgraph.png" border="0" usemap="#ad8/d00/a00368_a2ca864743a05158f3d2f17ee582cb5c7_cgraph" loading="lazy" alt=""/></div>
+<map name="ad8/d00/a00368_a2ca864743a05158f3d2f17ee582cb5c7_cgraph" id="ad8/d00/a00368_a2ca864743a05158f3d2f17ee582cb5c7_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,80,56"/>
+<area shape="poly" title=" " alt="" coords="28,28,27,12,33,5,43,3,52,5,58,14,53,14,49,10,42,8,36,10,32,14,33,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d8/d00/a00368_a2ca864743a05158f3d2f17ee582cb5c7_icgraph.png" border="0" usemap="#ad8/d00/a00368_a2ca864743a05158f3d2f17ee582cb5c7_icgraph" loading="lazy" alt=""/></div>
+<map name="ad8/d00/a00368_a2ca864743a05158f3d2f17ee582cb5c7_icgraph" id="ad8/d00/a00368_a2ca864743a05158f3d2f17ee582cb5c7_icgraph">
+<area shape="rect" title=" " alt="" coords="2726,567,2800,594"/>
+<area shape="poly" title=" " alt="" coords="2791,552,2782,548,2763,546,2745,548,2735,553,2733,558,2738,568,2733,566,2728,559,2731,549,2743,543,2763,541,2784,543,2796,552"/>
+<area shape="rect" href="../../d9/d00/a01897.html#a4d1bee575d551ab627571e6afe7b206a" title="Handle a SCSI command." alt="" coords="2502,475,2678,502"/>
+<area shape="poly" title=" " alt="" coords="2728,557,2676,527,2629,505,2629,500,2679,522,2733,558"/>
+<area shape="rect" href="../../d8/d00/a00368.html#adb50a751c412a7ab386483a20d577ba8" title=" " alt="" coords="2553,605,2627,631"/>
+<area shape="poly" title=" " alt="" coords="2708,592,2628,613,2627,608,2713,591"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a338de633338de55d3b49530b2509d511" title=" " alt="" coords="2282,522,2447,565"/>
+<area shape="poly" title=" " alt="" coords="2707,573,2677,571,2447,551,2447,546,2678,566,2713,573"/>
+<area shape="rect" href="../../d2/d00/a01961.html#af8ac5b35c073dc7835113337df7d6428" title=" " alt="" coords="2282,722,2447,749"/>
+<area shape="poly" title=" " alt="" coords="2738,603,2710,627,2679,646,2618,672,2555,694,2441,724,2439,719,2554,689,2616,667,2676,641,2707,623,2733,605"/>
+<area shape="rect" href="../../d9/d00/a01897.html#a426e10f6af92fae37732288bf84a7259" title="Process data written or read." alt="" coords="2275,471,2454,498"/>
+<area shape="poly" title=" " alt="" coords="2484,487,2455,489,2454,484,2490,486"/>
+<area shape="poly" title=" " alt="" coords="2618,589,2609,586,2590,583,2572,585,2563,590,2560,596,2565,605,2560,603,2555,596,2559,586,2571,580,2590,578,2611,581,2623,590"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a96674475fa17505d3afe72c996edc72a" title=" " alt="" coords="2281,589,2448,631"/>
+<area shape="poly" title=" " alt="" coords="2535,616,2449,616,2449,610,2540,616"/>
+<area shape="poly" title=" " alt="" coords="2535,601,2431,568,2432,563,2541,601"/>
+<area shape="poly" title=" " alt="" coords="2563,640,2514,679,2455,712,2425,724,2424,719,2453,708,2511,674,2558,642"/>
+<area shape="rect" href="../../d2/d00/a01961.html#af8738499e0da3586518f029065350705" title=" " alt="" coords="2286,655,2443,698"/>
+<area shape="poly" title=" " alt="" coords="2540,631,2444,659,2443,654,2535,632"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a8f040ac678a5bc8550cb63b4ebc9e4d5" title=" " alt="" coords="2067,534,2227,561"/>
+<area shape="poly" title=" " alt="" coords="2271,584,2196,564,2196,559,2276,584"/>
+<area shape="poly" title=" " alt="" coords="2264,546,2228,549,2227,543,2269,545"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a2c679f4616245dd61b59abfbedb27880" title=" " alt="" coords="2079,714,2214,757"/>
+<area shape="poly" title=" " alt="" coords="2264,736,2215,738,2215,733,2269,735"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a0e61610a6a7570e634ebe201fbc5668d" title=" " alt="" coords="1847,722,2019,749"/>
+<area shape="poly" title=" " alt="" coords="2061,736,2020,738,2019,733,2066,735"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a53dfa73ee81183f5b1d27395bca4a7ab" title=" " alt="" coords="1860,781,2006,807"/>
+<area shape="poly" title=" " alt="" coords="2067,757,1985,783,1984,777,2062,759"/>
+<area shape="rect" href="../../d2/d00/a01961.html#af5342ace9f485d1c3f25fc6806c9cbed" title=" " alt="" coords="1635,714,1799,757"/>
+<area shape="poly" title=" " alt="" coords="1829,736,1800,738,1800,733,1834,735"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a3d0de83b2c31a72d3c4a972d873e4267" title=" " alt="" coords="1429,714,1587,741"/>
+<area shape="poly" title=" " alt="" coords="1617,732,1588,733,1587,728,1622,731"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a1fabb1daaa09396904b199b72cec3c7c" title=" " alt="" coords="1644,789,1790,815"/>
+<area shape="poly" title=" " alt="" coords="1842,798,1791,802,1790,797,1847,797"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a92e6679588d861939dd3da4ebeadd4c7" title="Determine what device this configurator represents, and instantiate it; then call initialize for our ..." alt="" coords="1429,789,1586,815"/>
+<area shape="poly" title=" " alt="" coords="1627,802,1587,805,1587,799,1632,802"/>
+<area shape="poly" title=" " alt="" coords="1542,773,1531,770,1508,767,1486,769,1474,774,1471,779,1477,789,1472,787,1466,780,1470,770,1485,764,1508,762,1533,765,1547,774"/>
+<area shape="rect" href="../../d2/d00/a01085.html#afe0ca9e6f3009dcedfbf6eb256f77083" title="Constructor." alt="" coords="1189,789,1381,815"/>
+<area shape="poly" title=" " alt="" coords="1411,811,1381,814,1381,808,1416,811"/>
+<area shape="rect" href="../../d7/d00/a00002.html#a0ddf1224851353fc92bfbff6f499fa97" title="Entry point for the application." alt="" coords="1052,389,1102,415"/>
+<area shape="poly" title=" " alt="" coords="1465,780,1427,755,1379,709,1342,666,1287,586,1261,548,1230,509,1191,470,1140,430,1103,411,1102,406,1143,425,1195,466,1234,506,1265,545,1291,583,1346,663,1383,705,1430,751,1470,781"/>
+<area shape="poly" title=" " alt="" coords="1396,790,1432,793,1426,794,1396,796"/>
+<area shape="poly" title=" " alt="" coords="1319,773,1308,770,1285,767,1263,769,1251,774,1249,779,1255,789,1249,787,1243,780,1248,770,1262,764,1285,762,1310,765,1324,774"/>
+<area shape="rect" href="../../dc/d00/a01053.html#a26ecafeaa3d13966301b1bd2d5c9bad0" title=" " alt="" coords="764,738,965,765"/>
+<area shape="poly" title=" " alt="" coords="1257,778,1207,739,1175,719,1140,705,1106,696,1078,693,1049,697,1014,705,990,715,966,728,930,740,928,735,964,724,987,711,1012,699,1048,691,1078,688,1107,690,1142,699,1177,714,1210,734,1262,778"/>
+<area shape="rect" href="../../df/d00/a00107.html#abd420d0dae1fe4c263bea185f837c08c" title=" " alt="" coords="833,914,896,941"/>
+<area shape="poly" title=" " alt="" coords="1249,822,1199,851,1142,874,1074,894,1006,909,897,926,895,921,1005,903,1073,888,1140,869,1196,846,1244,824"/>
+<area shape="rect" href="../../df/d00/a00107.html#ae799ccf629887c5248e091c94325d297" title=" " alt="" coords="103,789,223,815"/>
+<area shape="poly" title=" " alt="" coords="1171,803,866,805,633,805,224,805,223,799,633,799,866,799,1176,801"/>
+<area shape="rect" href="../../df/d00/a00107.html#a55d5346931ade26cfe6e5bef1254ae5c" title="Floppy configuration." alt="" coords="592,989,676,1015"/>
+<area shape="poly" title=" " alt="" coords="1261,825,1209,871,1176,894,1142,912,1080,938,1014,959,948,974,883,986,765,1000,677,1004,676,999,764,994,882,981,947,969,1013,953,1078,933,1140,908,1174,889,1205,867,1256,827"/>
+<area shape="rect" href="../../df/d00/a00107.html#a899af87cb69af3549f9f4f07ba7c1e9e" title=" " alt="" coords="601,863,667,890"/>
+<area shape="poly" title=" " alt="" coords="1171,817,1142,823,668,876,667,871,1141,818,1176,816"/>
+<area shape="rect" href="../../df/d00/a00107.html#abcfdd36790109e61c1a7080098d5a862" title=" " alt="" coords="1038,1039,1116,1066"/>
+<area shape="poly" title=" " alt="" coords="1269,827,1216,908,1143,999,1097,1041,1095,1037,1139,995,1212,905,1265,830"/>
+<area shape="rect" href="../../df/d00/a00107.html#a5e1726ceaabe1a7f3b4952361f2a7efc" title=" " alt="" coords="1032,463,1123,490"/>
+<area shape="poly" title=" " alt="" coords="1264,775,1086,493,1088,488,1269,775"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a98dfe1458af681edc6a37827cba8b76a" title=" " alt="" coords="1013,597,1141,639"/>
+<area shape="poly" title=" " alt="" coords="1259,776,1207,722,1140,660,1116,643,1116,637,1143,656,1211,718,1265,777"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a6954ceeff88f33f7b0e38d9417b1eb26" title=" " alt="" coords="1013,1090,1141,1133"/>
+<area shape="poly" title=" " alt="" coords="1269,827,1232,891,1192,964,1179,997,1173,1025,1163,1051,1143,1080,1129,1092,1127,1087,1139,1076,1159,1049,1167,1023,1174,996,1187,962,1227,888,1264,830"/>
+<area shape="poly" title=" " alt="" coords="1268,774,1230,691,1187,584,1176,538,1172,500,1164,466,1154,448,1139,429,1122,416,1103,409,1102,404,1124,412,1143,425,1159,445,1169,464,1177,499,1181,537,1192,583,1235,689,1273,776"/>
+<area shape="rect" href="../../d4/d00/a00101.html#a50bc35add0aa5cc4e000ab7a199cd875" title=" " alt="" coords="1042,738,1112,765"/>
+<area shape="poly" title=" " alt="" coords="1210,785,1113,762,1112,757,1215,784"/>
+<area shape="rect" href="../../dc/d00/a01053.html#afa6bf98b875aa490abb79fe7b6bb88e2" title=" " alt="" coords="558,687,710,714"/>
+<area shape="poly" title=" " alt="" coords="746,735,669,717,668,712,751,734"/>
+<area shape="rect" href="../../dc/d00/a01053.html#a5375ce0de96e8d8ec261303ce8535b6c" title=" " alt="" coords="271,687,504,714"/>
+<area shape="poly" title=" " alt="" coords="772,732,762,728,747,715,738,701,730,688,714,678,677,666,638,659,598,658,558,660,485,673,428,689,425,685,484,668,558,655,598,652,638,654,678,660,717,673,733,684,743,698,751,711,765,724,777,732"/>
+<area shape="rect" href="../../dc/d00/a01053.html#afc444beb413e66f184a28d11a72eb868" title=" " alt="" coords="552,738,716,765"/>
+<area shape="poly" title=" " alt="" coords="745,752,717,754,716,749,751,751"/>
+<area shape="poly" title=" " alt="" coords="725,709,832,737,827,738,725,714"/>
+<area shape="poly" title=" " alt="" coords="541,702,506,703,504,698,546,700"/>
+<area shape="poly" title=" " alt="" coords="548,735,457,717,455,712,553,733"/>
+<area shape="poly" title=" " alt="" coords="901,902,892,896,864,893,841,895,829,900,827,906,835,916,830,915,822,907,825,896,840,890,864,887,894,891,907,903"/>
+<area shape="rect" href="../../df/d00/a00107.html#adea02253cbd3cd163da5f5ba64144983" title="Main menu." alt="" coords="344,951,432,978"/>
+<area shape="poly" title=" " alt="" coords="815,933,433,964,432,959,819,929"/>
+<area shape="poly" title=" " alt="" coords="425,936,413,932,388,930,364,932,351,937,348,942,355,951,349,951,343,943,348,933,363,927,388,925,414,927,430,936"/>
+<area shape="poly" title=" " alt="" coords="353,943,183,818,184,813,358,941"/>
+<area shape="poly" title=" " alt="" coords="184,774,177,770,163,767,149,769,142,774,141,780,144,788,139,788,135,780,138,771,148,764,163,762,179,765,189,773"/>
+<area shape="rect" href="../../df/d00/a00119.html#a3c04138a5bfe5d72780bb7e82a18e627" title=" " alt="" coords="5,402,55,429"/>
+<area shape="poly" title=" " alt="" coords="149,775,35,431,37,427,155,773"/>
+<area shape="poly" title=" " alt="" coords="574,994,432,974,432,969,579,993"/>
+<area shape="poly" title=" " alt="" coords="672,974,660,970,634,967,610,969,597,974,594,979,600,989,595,988,588,980,593,970,609,964,634,962,662,965,678,974"/>
+<area shape="poly" title=" " alt="" coords="584,895,429,953,426,948,589,892"/>
+<area shape="poly" title=" " alt="" coords="675,852,672,850,665,846,634,842,609,844,596,849,594,855,603,865,598,865,589,856,592,846,607,839,634,837,667,841,676,846,680,854"/>
+<area shape="poly" title=" " alt="" coords="1037,1031,888,944,890,939,1042,1031"/>
+<area shape="poly" title=" " alt="" coords="1111,1024,1100,1020,1077,1018,1055,1020,1044,1025,1041,1030,1047,1040,1042,1038,1036,1031,1040,1021,1054,1015,1077,1013,1102,1015,1117,1024"/>
+<area shape="rect" href="../../df/d00/a00107.html#a30ce9217e2f73c216badd694b03bd399" title="Add disk &#39;disk_name&#39; to the controller &#39;parent&#39; of the configuration." alt="" coords="824,1114,904,1141"/>
+<area shape="poly" title=" " alt="" coords="1026,1071,906,1116,904,1111,1021,1072"/>
+<area shape="rect" href="../../df/d00/a00107.html#abce3cdd7db8963ecaef147eca2204ceb" title=" " alt="" coords="588,1082,680,1109"/>
+<area shape="poly" title=" " alt="" coords="1027,1069,1015,1080,1000,1099,993,1119,985,1138,966,1155,925,1171,882,1177,837,1175,794,1166,715,1140,658,1112,659,1107,717,1135,795,1161,838,1169,881,1171,924,1166,964,1150,981,1135,988,1117,995,1096,1011,1076,1022,1071"/>
+<area shape="rect" href="../../df/d00/a00107.html#ad7d4a4763a70510d229bfb24e580bc28" title=" " alt="" coords="805,1039,924,1066"/>
+<area shape="poly" title=" " alt="" coords="1021,1053,925,1055,924,1050,1026,1052"/>
+<area shape="rect" href="../../df/d00/a00107.html#a213c3fa26e0fcd8563b31094f0ce490e" title=" " alt="" coords="594,1195,674,1222"/>
+<area shape="poly" title=" " alt="" coords="1027,1069,1015,1080,1004,1092,998,1105,993,1131,987,1157,979,1170,967,1182,931,1202,892,1215,852,1224,812,1228,735,1227,674,1219,675,1214,736,1222,811,1223,851,1219,891,1210,929,1197,963,1177,975,1167,982,1155,988,1130,993,1103,1000,1090,1011,1076,1022,1071"/>
+<area shape="poly" title=" " alt="" coords="816,1107,762,1080,714,1048,662,1019,662,1013,717,1044,765,1076,822,1107"/>
+<area shape="poly" title=" " alt="" coords="899,1098,888,1095,864,1093,842,1095,830,1099,827,1105,833,1115,828,1113,822,1105,826,1096,841,1089,864,1087,890,1090,905,1099"/>
+<area shape="poly" title=" " alt="" coords="591,1075,414,981,415,976,596,1074"/>
+<area shape="poly" title=" " alt="" coords="672,1067,660,1063,634,1061,610,1063,597,1067,594,1073,600,1082,595,1081,588,1073,593,1063,609,1057,634,1055,662,1058,678,1067"/>
+<area shape="poly" title=" " alt="" coords="899,1024,888,1020,864,1018,842,1020,830,1025,827,1030,833,1040,828,1038,822,1031,826,1021,841,1015,864,1013,890,1015,905,1024"/>
+<area shape="poly" title=" " alt="" coords="606,1185,401,981,404,976,611,1184"/>
+<area shape="poly" title=" " alt="" coords="673,1180,660,1177,634,1174,610,1176,597,1181,594,1186,600,1196,595,1194,588,1187,593,1177,609,1171,634,1169,662,1171,678,1181"/>
+<area shape="poly" title=" " alt="" coords="1111,448,1100,444,1077,442,1055,444,1044,449,1041,454,1047,463,1042,462,1036,455,1040,445,1054,439,1077,437,1102,439,1117,448"/>
+<area shape="rect" href="../../df/d00/a00107.html#ac6a88b63001f541658f403057231f9b3" title=" " alt="" coords="800,165,928,191"/>
+<area shape="poly" title=" " alt="" coords="1036,454,1011,429,996,397,990,366,993,310,994,284,992,258,983,232,963,205,947,193,930,186,928,181,950,189,967,201,987,229,997,257,1000,284,998,311,995,366,1001,395,1015,426,1041,455"/>
+<area shape="rect" href="../../df/d00/a00107.html#aa2e4d3352b6d313dec9e032ea0abb905" title=" " alt="" coords="807,239,922,266"/>
+<area shape="poly" title=" " alt="" coords="1037,454,1011,429,999,407,993,387,990,349,986,314,978,297,963,280,944,267,923,260,922,255,946,262,967,276,982,294,991,313,996,349,998,386,1004,405,1015,426,1042,454"/>
+<area shape="rect" href="../../df/d00/a00107.html#a69ca618c0bb2a5b00ee8424c18d26aac" title=" " alt="" coords="807,314,922,341"/>
+<area shape="poly" title=" " alt="" coords="1040,454,1011,429,996,408,989,389,980,372,963,355,944,344,923,337,922,332,946,339,967,351,984,368,993,387,1001,405,1015,426,1045,454"/>
+<area shape="rect" href="../../df/d00/a00107.html#a5ccf662c6889c07cc1a7eabdfa9b1847" title=" " alt="" coords="797,389,932,415"/>
+<area shape="poly" title=" " alt="" coords="1032,457,964,430,928,419,927,413,966,425,1037,456"/>
+<area shape="rect" href="../../df/d00/a00107.html#a6260c0e587a7b117a76078e0d6bff858" title=" " alt="" coords="794,463,934,490"/>
+<area shape="poly" title=" " alt="" coords="1014,478,936,479,934,474,1019,476"/>
+<area shape="rect" href="../../df/d00/a00107.html#a2e0638ed058a2d3704ffdcb52f46c906" title=" " alt="" coords="798,538,931,565"/>
+<area shape="poly" title=" " alt="" coords="1020,497,906,540,904,535,1025,494"/>
+<area shape="rect" href="../../df/d00/a00107.html#aeb58ce5f6cbcdde1c44ffa074f452193" title=" " alt="" coords="798,613,930,639"/>
+<area shape="poly" title=" " alt="" coords="1054,500,1015,541,966,579,901,614,898,610,964,574,1011,537,1050,503"/>
+<area shape="rect" href="../../df/d00/a00107.html#a859457a7bb8e506971468a287635f50b" title=" " alt="" coords="780,687,949,714"/>
+<area shape="poly" title=" " alt="" coords="1062,501,1009,592,967,653,937,674,907,689,904,684,935,670,963,649,1005,589,1058,505"/>
+<area shape="rect" href="../../df/d00/a00107.html#af6de69ff1551d7b9f4667681df5a84e4" title=" " alt="" coords="794,90,934,117"/>
+<area shape="poly" title=" " alt="" coords="1036,454,1011,429,992,386,987,346,989,308,995,271,999,236,999,201,988,166,963,131,950,120,936,113,934,107,953,115,967,127,993,164,1004,201,1005,236,1000,272,994,308,992,346,998,385,1015,426,1041,455"/>
+<area shape="poly" title=" " alt="" coords="899,150,888,146,864,143,842,145,830,150,827,155,833,164,828,164,822,156,826,146,841,140,864,138,890,141,905,149"/>
+<area shape="poly" title=" " alt="" coords="899,225,888,220,864,218,842,220,830,225,827,230,833,239,828,239,822,231,826,221,841,215,864,213,890,215,905,224"/>
+<area shape="poly" title=" " alt="" coords="899,299,888,295,864,293,842,295,830,299,827,305,833,314,828,313,822,305,826,296,841,289,864,287,890,290,905,298"/>
+<area shape="poly" title=" " alt="" coords="899,374,888,370,864,367,842,369,830,374,827,379,833,388,828,388,822,380,826,370,841,364,864,362,890,365,905,373"/>
+<area shape="poly" title=" " alt="" coords="899,448,888,444,864,442,842,444,830,449,827,454,833,463,828,463,822,455,826,445,841,439,864,437,890,439,905,448"/>
+<area shape="poly" title=" " alt="" coords="899,523,888,519,864,517,842,519,830,523,827,529,833,538,828,537,822,529,826,520,841,513,864,511,890,514,905,522"/>
+<area shape="poly" title=" " alt="" coords="899,598,888,594,864,591,842,593,830,598,827,603,833,613,828,612,822,604,826,594,841,588,864,586,890,589,905,597"/>
+<area shape="poly" title=" " alt="" coords="899,672,888,668,864,666,842,668,830,673,827,678,833,687,828,686,822,679,826,669,841,663,864,661,890,663,905,672"/>
+<area shape="poly" title=" " alt="" coords="899,75,888,71,864,69,842,71,830,75,827,81,833,90,828,90,822,81,826,72,841,65,864,63,890,66,905,74"/>
+<area shape="poly" title=" " alt="" coords="1136,1080,1685,816,1690,816,1138,1085"/>
+<area shape="poly" title=" " alt="" coords="1074,372,1071,306,1056,218,1042,173,1023,129,997,89,963,56,923,29,885,14,849,9,812,10,733,22,687,29,635,31,386,31,349,35,314,44,281,60,249,79,193,130,145,191,105,255,74,315,39,402,33,401,69,313,101,252,141,188,189,127,246,75,278,55,312,39,348,29,386,26,635,26,687,23,732,17,812,5,849,3,886,9,925,24,967,52,1001,86,1027,127,1047,171,1061,217,1076,305,1079,374"/>
+<area shape="poly" title=" " alt="" coords="1112,383,1113,377,1109,373,1097,369,1077,367,1053,370,1042,376,1042,382,1055,393,1049,393,1037,385,1038,373,1052,365,1077,362,1098,364,1112,368,1118,376,1116,385"/>
+<area shape="poly" title=" " alt="" coords="1024,752,966,754,965,749,1029,751"/>
+<area shape="poly" title=" " alt="" coords="1111,723,1100,719,1077,717,1055,719,1044,723,1041,729,1047,738,1042,737,1036,729,1040,720,1054,713,1077,711,1102,714,1117,723"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a3221084a74d734278e981f4d920c0490" title=" " alt="" coords="2068,613,2226,639"/>
+<area shape="poly" title=" " alt="" coords="2268,655,2208,643,2207,637,2274,655"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a9ec1039c112d1225fde7611590bd243d" title=" " alt="" coords="1853,663,2013,690"/>
+<area shape="poly" title=" " alt="" coords="2268,677,2014,679,2013,674,2273,676"/>
+<area shape="poly" title=" " alt="" coords="2182,597,2171,594,2147,591,2124,593,2112,598,2109,603,2115,613,2110,611,2104,604,2109,594,2123,588,2147,586,2172,589,2187,598"/>
+<area shape="poly" title=" " alt="" coords="2070,644,1993,665,1992,660,2075,643"/>
+<area shape="rect" href="../../d2/d00/a01961.html#aa38ae3f2496f7dce9bf1253783c2eeae" title="Read bytes bytes from the current position into dest." alt="" coords="1857,613,2009,639"/>
+<area shape="poly" title=" " alt="" coords="2050,626,2010,629,2009,623,2056,626"/>
+<area shape="rect" href="../../d2/d00/a01961.html#ad50c65f0ccee2c4697e3e4684d6f93f7" title="Write bytes bytes from src at the current position." alt="" coords="1640,663,1794,690"/>
+<area shape="poly" title=" " alt="" coords="1834,677,1795,679,1794,674,1840,676"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="adb50a751c412a7ab386483a20d577ba8" name="adb50a751c412a7ab386483a20d577ba8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb50a751c412a7ab386483a20d577ba8">&#9670;&#160;</a></span>get_be64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> get_be64 </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> *</td>          <td class="paramname"><span class="paramname"><em>p</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00100">100</a> of file <a class="el" href="../../d8/d00/a00368_source.html">es40_endian.h</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d8/d00/a00368_source.html#l00094">get_be32()</a>, and <a class="el" href="../../d8/d00/a00368_source.html#l00100">get_be64()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d8/d00/a00368_source.html#l00100">get_be64()</a>, <a class="el" href="../../dc/d00/a00659_source.html#l00373">CDiskFile::qcow2_check_metadata()</a>, <a class="el" href="../../dc/d00/a00659_source.html#l00168">CDiskFile::qcow2_parse_header()</a>, <a class="el" href="../../dc/d00/a00659_source.html#l00754">CDiskFile::qcow2_probe()</a>, and <a class="el" href="../../dc/d00/a00659_source.html#l00518">CDiskFile::qcow2_read_l2_entry()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d8/d00/a00368_adb50a751c412a7ab386483a20d577ba8_cgraph.png" border="0" usemap="#ad8/d00/a00368_adb50a751c412a7ab386483a20d577ba8_cgraph" loading="lazy" alt=""/></div>
+<map name="ad8/d00/a00368_adb50a751c412a7ab386483a20d577ba8_cgraph" id="ad8/d00/a00368_adb50a751c412a7ab386483a20d577ba8_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,80,56"/>
+<area shape="poly" title=" " alt="" coords="20,29,17,20,20,11,28,5,43,3,58,5,67,14,61,14,56,10,42,8,30,10,24,14,22,20,26,29"/>
+<area shape="rect" href="../../d8/d00/a00368.html#a2ca864743a05158f3d2f17ee582cb5c7" title=" " alt="" coords="128,29,202,56"/>
+<area shape="poly" title=" " alt="" coords="80,40,115,42,110,43,80,45"/>
+<area shape="poly" title=" " alt="" coords="143,28,139,20,142,11,151,5,165,3,180,5,189,15,184,14,178,10,165,8,153,10,146,14,145,20,148,30"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d8/d00/a00368_adb50a751c412a7ab386483a20d577ba8_icgraph.png" border="0" usemap="#ad8/d00/a00368_adb50a751c412a7ab386483a20d577ba8_icgraph" loading="lazy" alt=""/></div>
+<map name="ad8/d00/a00368_adb50a751c412a7ab386483a20d577ba8_icgraph" id="ad8/d00/a00368_adb50a751c412a7ab386483a20d577ba8_icgraph">
+<area shape="rect" title=" " alt="" coords="2490,612,2565,639"/>
+<area shape="poly" title=" " alt="" coords="2555,597,2546,593,2527,591,2510,593,2501,598,2499,603,2503,613,2498,611,2493,603,2497,594,2509,588,2528,586,2548,588,2560,597"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a96674475fa17505d3afe72c996edc72a" title=" " alt="" coords="2275,508,2442,551"/>
+<area shape="poly" title=" " alt="" coords="2496,602,2441,565,2419,554,2419,549,2444,561,2501,603"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a338de633338de55d3b49530b2509d511" title=" " alt="" coords="2276,575,2441,618"/>
+<area shape="poly" title=" " alt="" coords="2472,617,2442,613,2441,608,2477,616"/>
+<area shape="rect" href="../../d2/d00/a01961.html#af8ac5b35c073dc7835113337df7d6428" title=" " alt="" coords="2276,642,2441,668"/>
+<area shape="poly" title=" " alt="" coords="2472,635,2440,644,2439,638,2478,634"/>
+<area shape="rect" href="../../d2/d00/a01961.html#af8738499e0da3586518f029065350705" title=" " alt="" coords="2280,692,2437,735"/>
+<area shape="poly" title=" " alt="" coords="2497,647,2444,683,2419,694,2417,689,2441,678,2492,649"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a8f040ac678a5bc8550cb63b4ebc9e4d5" title=" " alt="" coords="2067,550,2227,576"/>
+<area shape="poly" title=" " alt="" coords="2257,546,2228,553,2227,548,2262,544"/>
+<area shape="poly" title=" " alt="" coords="2258,581,2228,578,2227,573,2263,581"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a2c679f4616245dd61b59abfbedb27880" title=" " alt="" coords="2079,634,2214,676"/>
+<area shape="poly" title=" " alt="" coords="2258,655,2215,658,2214,652,2263,654"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a0e61610a6a7570e634ebe201fbc5668d" title=" " alt="" coords="1847,596,2019,623"/>
+<area shape="poly" title=" " alt="" coords="2061,638,2000,626,1999,621,2067,637"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a53dfa73ee81183f5b1d27395bca4a7ab" title=" " alt="" coords="1860,651,2006,678"/>
+<area shape="poly" title=" " alt="" coords="2061,659,2007,664,2006,658,2066,658"/>
+<area shape="rect" href="../../d2/d00/a01961.html#af5342ace9f485d1c3f25fc6806c9cbed" title=" " alt="" coords="1635,587,1799,630"/>
+<area shape="poly" title=" " alt="" coords="1829,610,1801,611,1799,606,1834,608"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a3d0de83b2c31a72d3c4a972d873e4267" title=" " alt="" coords="1429,595,1587,622"/>
+<area shape="poly" title=" " alt="" coords="1617,609,1588,611,1587,606,1622,608"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a1fabb1daaa09396904b199b72cec3c7c" title=" " alt="" coords="1644,654,1790,680"/>
+<area shape="poly" title=" " alt="" coords="1842,666,1791,669,1790,663,1847,665"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a92e6679588d861939dd3da4ebeadd4c7" title="Determine what device this configurator represents, and instantiate it; then call initialize for our ..." alt="" coords="1429,1299,1586,1326"/>
+<area shape="poly" title=" " alt="" coords="1651,687,1637,702,1623,723,1609,751,1585,824,1565,911,1548,1006,1524,1185,1512,1300,1508,1297,1519,1184,1543,1005,1560,910,1580,822,1605,749,1618,721,1633,699,1646,690"/>
+<area shape="poly" title=" " alt="" coords="1542,1283,1531,1280,1508,1278,1486,1280,1474,1284,1471,1290,1477,1300,1472,1298,1466,1290,1470,1280,1485,1274,1508,1272,1533,1275,1547,1284"/>
+<area shape="rect" href="../../d2/d00/a01085.html#afe0ca9e6f3009dcedfbf6eb256f77083" title="Constructor." alt="" coords="1189,1178,1381,1204"/>
+<area shape="poly" title=" " alt="" coords="1453,1292,1371,1249,1302,1207,1303,1202,1373,1245,1458,1292"/>
+<area shape="rect" href="../../d7/d00/a00002.html#a0ddf1224851353fc92bfbff6f499fa97" title="Entry point for the application." alt="" coords="1052,1495,1102,1522"/>
+<area shape="poly" title=" " alt="" coords="1493,1338,1448,1399,1417,1430,1382,1455,1345,1472,1306,1486,1227,1503,1155,1510,1102,1512,1102,1506,1155,1505,1226,1498,1305,1481,1343,1467,1379,1450,1414,1426,1444,1396,1488,1340"/>
+<area shape="poly" title=" " alt="" coords="1338,1209,1422,1254,1493,1299,1488,1298,1419,1258,1337,1214"/>
+<area shape="poly" title=" " alt="" coords="1319,1162,1308,1159,1285,1156,1263,1158,1251,1163,1249,1168,1255,1178,1249,1176,1243,1169,1248,1159,1262,1153,1285,1151,1310,1154,1324,1163"/>
+<area shape="rect" href="../../dc/d00/a01053.html#a26ecafeaa3d13966301b1bd2d5c9bad0" title=" " alt="" coords="764,1190,965,1216"/>
+<area shape="poly" title=" " alt="" coords="1171,1195,966,1203,965,1197,1176,1193"/>
+<area shape="rect" href="../../df/d00/a00107.html#abd420d0dae1fe4c263bea185f837c08c" title=" " alt="" coords="833,279,896,306"/>
+<area shape="poly" title=" " alt="" coords="1275,1162,1233,990,1199,866,1160,733,1115,601,1066,481,1015,383,989,346,963,320,948,310,931,303,897,296,895,291,932,298,950,305,967,316,993,343,1020,380,1071,478,1120,599,1165,732,1205,865,1238,989,1280,1164"/>
+<area shape="rect" href="../../df/d00/a00107.html#ae799ccf629887c5248e091c94325d297" title=" " alt="" coords="103,1303,223,1330"/>
+<area shape="poly" title=" " alt="" coords="1261,1214,1209,1258,1176,1278,1142,1293,1067,1315,1006,1322,866,1319,633,1319,224,1319,223,1314,633,1314,866,1314,1006,1317,1066,1310,1140,1288,1174,1273,1205,1253,1256,1216"/>
+<area shape="rect" href="../../df/d00/a00107.html#a55d5346931ade26cfe6e5bef1254ae5c" title="Floppy configuration." alt="" coords="592,228,676,255"/>
+<area shape="poly" title=" " alt="" coords="1221,1173,1141,1152,951,1111,762,1066,743,1034,731,991,724,939,720,882,718,770,713,685,669,427,638,258,639,253,674,426,718,684,723,770,726,882,729,938,736,990,748,1032,765,1062,952,1105,1142,1147,1227,1173"/>
+<area shape="rect" href="../../df/d00/a00107.html#a899af87cb69af3549f9f4f07ba7c1e9e" title=" " alt="" coords="601,720,667,747"/>
+<area shape="poly" title=" " alt="" coords="1171,1180,926,1150,820,1131,783,1121,762,1110,723,1069,692,1020,670,967,654,913,637,814,634,750,636,745,642,813,659,912,675,965,697,1017,727,1065,765,1106,785,1116,821,1126,927,1145,1176,1179"/>
+<area shape="rect" href="../../df/d00/a00107.html#abcfdd36790109e61c1a7080098d5a862" title=" " alt="" coords="1038,242,1116,268"/>
+<area shape="poly" title=" " alt="" coords="1276,1162,1205,785,1139,449,1108,346,1083,271,1084,266,1113,344,1144,448,1211,784,1281,1163"/>
+<area shape="rect" href="../../df/d00/a00107.html#a5e1726ceaabe1a7f3b4952361f2a7efc" title=" " alt="" coords="1032,727,1123,754"/>
+<area shape="poly" title=" " alt="" coords="1269,1163,1083,756,1086,752,1274,1164"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a98dfe1458af681edc6a37827cba8b76a" title=" " alt="" coords="1013,1354,1141,1396"/>
+<area shape="poly" title=" " alt="" coords="1264,1215,1211,1275,1143,1337,1117,1355,1115,1351,1140,1333,1207,1271,1260,1218"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a6954ceeff88f33f7b0e38d9417b1eb26" title=" " alt="" coords="1013,151,1141,194"/>
+<area shape="poly" title=" " alt="" coords="1275,1162,1235,963,1187,682,1181,575,1179,437,1176,367,1169,303,1157,248,1139,207,1131,197,1131,192,1144,204,1162,246,1174,302,1181,367,1185,437,1186,575,1192,681,1240,962,1280,1164"/>
+<area shape="poly" title=" " alt="" coords="1269,1216,1089,1496,1086,1492,1264,1218"/>
+<area shape="rect" href="../../d4/d00/a00101.html#a50bc35add0aa5cc4e000ab7a199cd875" title=" " alt="" coords="1042,1252,1112,1279"/>
+<area shape="poly" title=" " alt="" coords="1234,1209,1114,1256,1112,1251,1229,1211"/>
+<area shape="rect" href="../../dc/d00/a01053.html#afa6bf98b875aa490abb79fe7b6bb88e2" title=" " alt="" coords="558,1190,710,1216"/>
+<area shape="poly" title=" " alt="" coords="745,1213,711,1214,710,1209,751,1211"/>
+<area shape="rect" href="../../dc/d00/a01053.html#a5375ce0de96e8d8ec261303ce8535b6c" title=" " alt="" coords="271,1190,504,1216"/>
+<area shape="poly" title=" " alt="" coords="778,1187,715,1180,634,1176,553,1180,464,1191,462,1186,552,1175,634,1171,716,1175,784,1186"/>
+<area shape="rect" href="../../dc/d00/a01053.html#afc444beb413e66f184a28d11a72eb868" title=" " alt="" coords="552,1240,716,1267"/>
+<area shape="poly" title=" " alt="" coords="783,1221,699,1242,697,1237,788,1219"/>
+<area shape="poly" title=" " alt="" coords="725,1192,766,1193,761,1195,726,1197"/>
+<area shape="poly" title=" " alt="" coords="541,1204,505,1206,504,1200,546,1202"/>
+<area shape="poly" title=" " alt="" coords="548,1237,456,1220,456,1214,553,1236"/>
+<area shape="poly" title=" " alt="" coords="901,268,892,261,864,258,841,260,829,265,827,271,835,280,830,280,822,272,825,261,840,255,864,252,894,256,907,267"/>
+<area shape="rect" href="../../df/d00/a00107.html#adea02253cbd3cd163da5f5ba64144983" title="Main menu." alt="" coords="344,254,432,280"/>
+<area shape="poly" title=" " alt="" coords="815,292,433,272,431,267,819,288"/>
+<area shape="poly" title=" " alt="" coords="425,239,413,235,388,232,364,234,351,239,348,244,355,253,349,254,343,245,348,235,363,229,388,227,414,229,430,237"/>
+<area shape="poly" title=" " alt="" coords="383,296,170,1303,164,1302,378,295"/>
+<area shape="poly" title=" " alt="" coords="184,1288,177,1284,163,1282,149,1284,142,1288,141,1294,144,1303,139,1302,135,1294,138,1285,148,1279,163,1276,179,1279,189,1287"/>
+<area shape="rect" href="../../df/d00/a00119.html#a3c04138a5bfe5d72780bb7e82a18e627" title=" " alt="" coords="5,1395,55,1422"/>
+<area shape="poly" title=" " alt="" coords="129,1341,53,1396,49,1393,130,1336"/>
+<area shape="poly" title=" " alt="" coords="575,249,434,265,431,260,579,246"/>
+<area shape="poly" title=" " alt="" coords="673,214,660,209,634,207,610,209,597,214,594,219,600,228,595,228,588,220,593,210,609,204,634,202,662,204,678,213"/>
+<area shape="poly" title=" " alt="" coords="616,707,395,283,397,278,621,706"/>
+<area shape="poly" title=" " alt="" coords="675,710,672,707,665,703,634,699,609,701,596,706,594,712,603,722,598,722,589,713,592,703,607,696,634,694,667,698,676,703,680,710"/>
+<area shape="poly" title=" " alt="" coords="1021,266,897,289,895,285,1026,263"/>
+<area shape="poly" title=" " alt="" coords="1111,227,1100,223,1077,220,1055,222,1044,227,1041,232,1047,241,1041,241,1036,233,1040,223,1054,217,1077,215,1102,218,1117,226"/>
+<area shape="rect" href="../../df/d00/a00107.html#a30ce9217e2f73c216badd694b03bd399" title="Add disk &#39;disk_name&#39; to the controller &#39;parent&#39; of the configuration." alt="" coords="824,204,904,231"/>
+<area shape="poly" title=" " alt="" coords="1021,247,906,227,904,222,1026,244"/>
+<area shape="rect" href="../../df/d00/a00107.html#abce3cdd7db8963ecaef147eca2204ceb" title=" " alt="" coords="588,142,680,168"/>
+<area shape="poly" title=" " alt="" coords="1043,232,964,171,927,160,889,152,811,145,739,146,682,151,679,146,738,141,811,139,889,146,928,154,966,166,1049,231"/>
+<area shape="rect" href="../../df/d00/a00107.html#ad7d4a4763a70510d229bfb24e580bc28" title=" " alt="" coords="805,79,924,106"/>
+<area shape="poly" title=" " alt="" coords="1039,232,1011,207,996,184,988,164,980,145,963,126,944,115,925,106,924,101,947,110,967,122,985,142,993,162,1001,182,1015,204,1045,232"/>
+<area shape="rect" href="../../df/d00/a00107.html#a213c3fa26e0fcd8563b31094f0ce490e" title=" " alt="" coords="594,36,674,63"/>
+<area shape="poly" title=" " alt="" coords="1037,233,1011,207,999,183,993,161,993,118,993,98,989,79,981,62,963,45,929,25,891,14,851,9,811,9,734,21,674,38,670,34,733,16,810,4,851,3,892,9,931,21,967,41,985,59,995,78,998,98,998,118,999,160,1004,182,1015,204,1042,232"/>
+<area shape="poly" title=" " alt="" coords="807,225,678,240,675,235,811,222"/>
+<area shape="poly" title=" " alt="" coords="899,190,888,185,864,183,842,185,830,190,827,195,833,204,828,204,822,196,826,186,841,180,864,178,890,180,905,188"/>
+<area shape="poly" title=" " alt="" coords="587,177,421,255,418,251,590,173"/>
+<area shape="poly" title=" " alt="" coords="673,128,660,123,634,120,610,122,597,127,594,132,600,141,595,142,588,133,593,123,609,117,634,115,662,118,678,126"/>
+<area shape="poly" title=" " alt="" coords="899,64,888,60,864,58,842,60,830,64,827,70,833,78,828,79,822,70,826,60,841,54,864,52,890,55,904,63"/>
+<area shape="poly" title=" " alt="" coords="597,74,554,108,466,189,404,255,399,252,462,186,551,104,600,70"/>
+<area shape="poly" title=" " alt="" coords="673,22,660,17,634,15,610,17,597,22,594,27,600,35,595,36,588,28,593,18,609,12,634,10,662,12,678,21"/>
+<area shape="poly" title=" " alt="" coords="1111,712,1100,708,1077,706,1055,708,1044,712,1041,718,1047,727,1042,726,1036,718,1040,708,1054,702,1077,700,1102,703,1117,711"/>
+<area shape="rect" href="../../df/d00/a00107.html#ac6a88b63001f541658f403057231f9b3" title=" " alt="" coords="800,503,928,530"/>
+<area shape="poly" title=" " alt="" coords="1065,712,1052,674,1031,628,1001,582,963,544,947,534,930,527,928,522,949,529,967,540,1006,579,1035,626,1057,672,1071,713"/>
+<area shape="rect" href="../../df/d00/a00107.html#aa2e4d3352b6d313dec9e032ea0abb905" title=" " alt="" coords="807,578,922,604"/>
+<area shape="poly" title=" " alt="" coords="1057,714,1018,665,992,640,964,619,923,602,922,597,966,614,996,636,1022,662,1062,714"/>
+<area shape="rect" href="../../df/d00/a00107.html#a69ca618c0bb2a5b00ee8424c18d26aac" title=" " alt="" coords="807,652,922,679"/>
+<area shape="poly" title=" " alt="" coords="1032,721,964,693,923,681,922,676,966,688,1037,719"/>
+<area shape="rect" href="../../df/d00/a00107.html#a5ccf662c6889c07cc1a7eabdfa9b1847" title=" " alt="" coords="797,727,932,754"/>
+<area shape="poly" title=" " alt="" coords="1014,741,933,743,932,738,1019,739"/>
+<area shape="rect" href="../../df/d00/a00107.html#a6260c0e587a7b117a76078e0d6bff858" title=" " alt="" coords="794,802,934,828"/>
+<area shape="poly" title=" " alt="" coords="1020,761,906,803,904,799,1025,758"/>
+<area shape="rect" href="../../df/d00/a00107.html#a2e0638ed058a2d3704ffdcb52f46c906" title=" " alt="" coords="798,876,931,903"/>
+<area shape="poly" title=" " alt="" coords="1054,763,1015,804,966,843,901,878,898,874,964,838,1011,800,1050,767"/>
+<area shape="rect" href="../../df/d00/a00107.html#aeb58ce5f6cbcdde1c44ffa074f452193" title=" " alt="" coords="798,951,930,978"/>
+<area shape="poly" title=" " alt="" coords="1066,765,1028,841,1000,881,967,917,937,938,907,953,904,948,935,933,963,913,996,877,1024,838,1063,769"/>
+<area shape="rect" href="../../df/d00/a00107.html#a859457a7bb8e506971468a287635f50b" title=" " alt="" coords="780,1026,949,1052"/>
+<area shape="poly" title=" " alt="" coords="1071,767,1060,816,1039,875,1008,936,989,965,967,992,940,1013,910,1027,908,1023,937,1008,963,988,985,962,1004,934,1034,873,1055,815,1068,771"/>
+<area shape="rect" href="../../df/d00/a00107.html#af6de69ff1551d7b9f4667681df5a84e4" title=" " alt="" coords="794,354,934,380"/>
+<area shape="poly" title=" " alt="" coords="1068,711,1052,637,1028,542,997,452,980,417,963,394,935,378,935,372,967,390,985,414,1002,450,1033,540,1057,636,1073,712"/>
+<area shape="rect" href="../../df/d00/a00107.html#a78a7895a216fdd6fca09164f477edf42" title=" " alt="" coords="807,428,922,455"/>
+<area shape="poly" title=" " alt="" coords="1070,711,1060,659,1041,594,1010,526,989,496,963,469,944,457,923,449,922,444,946,452,967,465,993,492,1015,524,1046,592,1066,658,1075,712"/>
+<area shape="poly" title=" " alt="" coords="899,488,888,484,864,482,842,484,830,488,827,494,833,503,828,502,822,494,826,484,841,478,864,476,890,479,905,487"/>
+<area shape="poly" title=" " alt="" coords="899,563,888,559,864,556,842,558,830,563,827,568,833,577,828,577,822,569,826,559,841,553,864,551,890,553,905,562"/>
+<area shape="poly" title=" " alt="" coords="899,638,888,633,864,631,842,633,830,638,827,643,833,652,828,652,822,644,826,634,841,628,864,626,890,628,905,637"/>
+<area shape="poly" title=" " alt="" coords="899,712,888,708,864,706,842,708,830,712,827,718,833,727,828,726,822,718,826,708,841,702,864,700,890,703,905,711"/>
+<area shape="poly" title=" " alt="" coords="899,787,888,783,864,780,842,782,830,787,827,792,833,801,828,801,822,793,826,783,841,777,864,775,890,777,905,786"/>
+<area shape="poly" title=" " alt="" coords="899,861,888,857,864,855,842,857,830,862,827,867,833,876,828,876,822,868,826,858,841,852,864,850,890,852,905,861"/>
+<area shape="poly" title=" " alt="" coords="899,936,888,932,864,930,842,932,830,936,827,942,833,951,828,950,822,942,826,932,841,926,864,924,890,927,905,935"/>
+<area shape="poly" title=" " alt="" coords="899,1011,888,1007,864,1004,842,1006,830,1011,827,1016,833,1026,828,1025,822,1017,826,1007,841,1001,864,999,890,1001,905,1010"/>
+<area shape="poly" title=" " alt="" coords="899,339,888,335,864,332,842,334,830,339,827,344,833,353,828,353,822,345,826,335,841,329,864,327,890,329,905,338"/>
+<area shape="poly" title=" " alt="" coords="899,414,888,409,864,407,842,409,830,414,827,419,833,428,828,428,822,420,826,410,841,404,864,402,890,404,905,412"/>
+<area shape="rect" href="../../d3/d00/a00757.html#ad752e1aa69e78c74e23eac68fb2431c0" title=" " alt="" coords="794,1366,935,1392"/>
+<area shape="poly" title=" " alt="" coords="995,1377,936,1380,935,1375,1000,1376"/>
+<area shape="rect" href="../../d3/d00/a00785.html#a70567b682af1d37687c68b38c8444d29" title=" " alt="" coords="794,1432,935,1459"/>
+<area shape="poly" title=" " alt="" coords="1001,1400,907,1434,906,1429,996,1402"/>
+<area shape="poly" title=" " alt="" coords="937,1393,1013,1406,1077,1410,1141,1406,1234,1389,1324,1367,1465,1327,1470,1326,1326,1372,1235,1395,1142,1411,1077,1416,1013,1411,937,1399"/>
+<area shape="poly" title=" " alt="" coords="895,1466,948,1502,980,1519,1014,1531,1118,1558,1162,1565,1204,1567,1244,1564,1286,1553,1330,1535,1379,1507,1404,1489,1426,1466,1462,1414,1486,1363,1500,1327,1505,1324,1491,1365,1466,1416,1430,1469,1408,1493,1382,1512,1332,1539,1287,1558,1245,1569,1204,1573,1162,1570,1117,1563,1012,1536,978,1524,946,1507,893,1472"/>
+<area shape="poly" title=" " alt="" coords="1138,200,1143,204,1197,262,1233,319,1258,376,1278,431,1299,485,1327,536,1369,585,1397,609,1430,631,1482,655,1538,668,1594,672,1647,674,1642,675,1594,678,1537,673,1480,660,1427,636,1393,613,1365,589,1323,540,1294,487,1273,433,1253,378,1228,322,1192,265,1139,208,1138,206"/>
+<area shape="poly" title=" " alt="" coords="1034,1508,635,1507,386,1507,337,1504,288,1497,193,1474,112,1446,55,1422,55,1417,114,1441,194,1469,289,1492,338,1499,386,1502,635,1502,1039,1507"/>
+<area shape="poly" title=" " alt="" coords="1112,1488,1113,1484,1109,1479,1097,1475,1077,1474,1053,1476,1042,1482,1042,1489,1054,1500,1049,1499,1037,1491,1038,1479,1052,1471,1077,1468,1098,1470,1112,1475,1118,1482,1116,1492"/>
+<area shape="poly" title=" " alt="" coords="1024,1251,912,1220,913,1214,1030,1251"/>
+<area shape="poly" title=" " alt="" coords="1111,1237,1100,1233,1077,1231,1055,1233,1044,1238,1041,1243,1047,1253,1042,1251,1036,1244,1040,1234,1054,1228,1077,1226,1102,1228,1117,1237"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a3221084a74d734278e981f4d920c0490" title=" " alt="" coords="2068,775,2226,802"/>
+<area shape="poly" title=" " alt="" coords="2279,742,2188,777,2186,772,2284,740"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a9ec1039c112d1225fde7611590bd243d" title=" " alt="" coords="1853,712,2013,739"/>
+<area shape="poly" title=" " alt="" coords="2262,717,2014,726,2013,721,2267,716"/>
+<area shape="poly" title=" " alt="" coords="2182,760,2171,756,2147,754,2125,756,2113,760,2110,766,2116,775,2111,774,2105,766,2109,756,2123,750,2147,748,2172,751,2187,760"/>
+<area shape="poly" title=" " alt="" coords="2081,770,1981,742,1981,737,2087,770"/>
+<area shape="rect" href="../../d2/d00/a01961.html#aa38ae3f2496f7dce9bf1253783c2eeae" title="Read bytes bytes from the current position into dest." alt="" coords="1857,775,2009,802"/>
+<area shape="poly" title=" " alt="" coords="2050,789,2010,791,2009,786,2056,788"/>
+<area shape="rect" href="../../d2/d00/a01961.html#ad50c65f0ccee2c4697e3e4684d6f93f7" title="Write bytes bytes from src at the current position." alt="" coords="1640,712,1794,739"/>
+<area shape="poly" title=" " alt="" coords="1834,726,1795,728,1794,723,1840,725"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a3fcae6fa902cd866f100e222c59ee90d" name="a3fcae6fa902cd866f100e222c59ee90d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3fcae6fa902cd866f100e222c59ee90d">&#9670;&#160;</a></span>put_be16()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void put_be16 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> *</td>          <td class="paramname"><span class="paramname"><em>p</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="../../d8/d00/a00326.html#a6dbf9516e516c901604625282c174aa4">u16</a></td>          <td class="paramname"><span class="paramname"><em>value</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00105">105</a> of file <a class="el" href="../../d8/d00/a00368_source.html">es40_endian.h</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d8/d00/a00368_source.html#l00105">put_be16()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00629_source.html#l01089">CDisk::do_scsi_command()</a>, <a class="el" href="../../d8/d00/a00368_source.html#l00105">put_be16()</a>, <a class="el" href="../../dc/d00/a00659_source.html#l00600">CDiskFile::qcow2_allocate_cluster()</a>, and <a class="el" href="../../dc/d00/a00659_source.html#l00829">CDiskFile::qcow2_create()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d8/d00/a00368_a3fcae6fa902cd866f100e222c59ee90d_cgraph.png" border="0" usemap="#ad8/d00/a00368_a3fcae6fa902cd866f100e222c59ee90d_cgraph" loading="lazy" alt=""/></div>
+<map name="ad8/d00/a00368_a3fcae6fa902cd866f100e222c59ee90d_cgraph" id="ad8/d00/a00368_a3fcae6fa902cd866f100e222c59ee90d_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,80,56"/>
+<area shape="poly" title=" " alt="" coords="28,28,27,12,33,5,43,3,52,5,58,14,53,14,49,10,42,8,36,10,32,14,33,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d8/d00/a00368_a3fcae6fa902cd866f100e222c59ee90d_icgraph.png" border="0" usemap="#ad8/d00/a00368_a3fcae6fa902cd866f100e222c59ee90d_icgraph" loading="lazy" alt=""/></div>
+<map name="ad8/d00/a00368_a3fcae6fa902cd866f100e222c59ee90d_icgraph" id="ad8/d00/a00368_a3fcae6fa902cd866f100e222c59ee90d_icgraph">
+<area shape="rect" title=" " alt="" coords="2519,748,2594,775"/>
+<area shape="poly" title=" " alt="" coords="2585,732,2576,729,2556,727,2539,729,2529,733,2527,739,2531,748,2526,747,2521,739,2525,730,2537,724,2557,721,2577,724,2590,733"/>
+<area shape="rect" href="../../d9/d00/a01897.html#a4d1bee575d551ab627571e6afe7b206a" title="Handle a SCSI command." alt="" coords="2295,689,2470,716"/>
+<area shape="poly" title=" " alt="" coords="2506,742,2470,731,2435,719,2435,714,2472,725,2511,742"/>
+<area shape="rect" href="../../d2/d00/a01961.html#aae6f88ac393037f933937a36aa617e1b" title=" " alt="" coords="2294,740,2471,783"/>
+<area shape="poly" title=" " alt="" coords="2501,762,2472,764,2471,759,2506,761"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a3d9335078e1c63b1a13bd8d5c4f453d2" title=" " alt="" coords="2298,807,2467,833"/>
+<area shape="poly" title=" " alt="" coords="2511,780,2472,797,2436,809,2434,804,2470,792,2506,782"/>
+<area shape="rect" href="../../d9/d00/a01897.html#a426e10f6af92fae37732288bf84a7259" title="Process data written or read." alt="" coords="2067,689,2246,716"/>
+<area shape="poly" title=" " alt="" coords="2277,703,2247,705,2246,700,2282,702"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a9ec1039c112d1225fde7611590bd243d" title=" " alt="" coords="2076,748,2236,775"/>
+<area shape="poly" title=" " alt="" coords="2276,762,2238,764,2237,759,2281,761"/>
+<area shape="rect" href="../../d2/d00/a01961.html#ad50c65f0ccee2c4697e3e4684d6f93f7" title="Write bytes bytes from src at the current position." alt="" coords="1856,748,2010,775"/>
+<area shape="poly" title=" " alt="" coords="2058,762,2011,764,2010,759,2063,761"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a2c679f4616245dd61b59abfbedb27880" title=" " alt="" coords="2089,799,2224,841"/>
+<area shape="poly" title=" " alt="" coords="2280,820,2225,823,2224,817,2286,820"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a0e61610a6a7570e634ebe201fbc5668d" title=" " alt="" coords="1847,803,2019,829"/>
+<area shape="poly" title=" " alt="" coords="2070,819,2020,820,2019,815,2076,818"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a53dfa73ee81183f5b1d27395bca4a7ab" title=" " alt="" coords="1860,855,2006,881"/>
+<area shape="poly" title=" " alt="" coords="2071,838,1999,857,1998,851,2076,837"/>
+<area shape="rect" href="../../d2/d00/a01961.html#af5342ace9f485d1c3f25fc6806c9cbed" title=" " alt="" coords="1635,547,1799,589"/>
+<area shape="poly" title=" " alt="" coords="1858,795,1846,789,1822,766,1800,741,1765,685,1739,632,1725,592,1726,587,1744,630,1769,683,1804,737,1826,762,1849,785,1863,796"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a3d0de83b2c31a72d3c4a972d873e4267" title=" " alt="" coords="1429,457,1587,484"/>
+<area shape="poly" title=" " alt="" coords="1666,539,1586,498,1557,487,1557,482,1588,494,1671,538"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a1fabb1daaa09396904b199b72cec3c7c" title=" " alt="" coords="1644,859,1790,885"/>
+<area shape="poly" title=" " alt="" coords="1842,870,1791,873,1790,868,1847,869"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a92e6679588d861939dd3da4ebeadd4c7" title="Determine what device this configurator represents, and instantiate it; then call initialize for our ..." alt="" coords="1429,532,1586,559"/>
+<area shape="poly" title=" " alt="" coords="1696,845,1517,561,1519,557,1702,846"/>
+<area shape="poly" title=" " alt="" coords="1542,517,1531,513,1508,511,1486,513,1474,517,1471,523,1477,532,1472,531,1466,523,1470,514,1485,507,1508,505,1533,508,1547,517"/>
+<area shape="rect" href="../../d2/d00/a01085.html#afe0ca9e6f3009dcedfbf6eb256f77083" title="Constructor." alt="" coords="1189,532,1381,559"/>
+<area shape="poly" title=" " alt="" coords="1411,555,1382,557,1380,552,1416,553"/>
+<area shape="rect" href="../../d7/d00/a00002.html#a0ddf1224851353fc92bfbff6f499fa97" title="Entry point for the application." alt="" coords="1052,29,1102,56"/>
+<area shape="poly" title=" " alt="" coords="1456,524,1440,514,1426,497,1412,458,1407,406,1408,280,1409,216,1407,158,1397,109,1389,91,1379,77,1348,53,1312,38,1274,29,1234,25,1159,29,1104,39,1101,34,1159,24,1234,20,1275,23,1314,32,1351,49,1383,73,1394,88,1402,108,1412,157,1415,216,1414,280,1412,406,1418,457,1431,495,1444,510,1461,524"/>
+<area shape="poly" title=" " alt="" coords="1395,534,1431,536,1426,538,1397,539"/>
+<area shape="poly" title=" " alt="" coords="1319,517,1308,513,1285,511,1263,513,1251,517,1249,523,1255,532,1249,531,1243,523,1248,514,1262,507,1285,505,1310,508,1324,516"/>
+<area shape="rect" href="../../dc/d00/a01053.html#a26ecafeaa3d13966301b1bd2d5c9bad0" title=" " alt="" coords="764,1405,965,1432"/>
+<area shape="poly" title=" " alt="" coords="1278,572,1229,764,1189,892,1144,1021,1111,1098,1083,1157,1015,1289,1004,1320,998,1347,988,1371,967,1395,948,1407,946,1402,963,1391,984,1368,993,1345,999,1319,1011,1287,1078,1154,1107,1096,1139,1019,1184,890,1224,762,1275,576"/>
+<area shape="rect" href="../../df/d00/a00107.html#abd420d0dae1fe4c263bea185f837c08c" title=" " alt="" coords="833,507,896,533"/>
+<area shape="poly" title=" " alt="" coords="1171,540,897,524,895,519,1176,537"/>
+<area shape="rect" href="../../df/d00/a00107.html#ae799ccf629887c5248e091c94325d297" title=" " alt="" coords="103,432,223,459"/>
+<area shape="poly" title=" " alt="" coords="1221,565,1152,585,1063,603,965,618,866,624,633,624,563,619,493,604,426,583,362,558,254,504,186,462,184,457,257,500,364,553,428,578,495,599,564,613,633,619,866,619,964,613,1062,598,1151,579,1225,562"/>
+<area shape="rect" href="../../df/d00/a00107.html#a55d5346931ade26cfe6e5bef1254ae5c" title="Floppy configuration." alt="" coords="592,256,676,283"/>
+<area shape="poly" title=" " alt="" coords="1266,518,1224,453,1157,367,1116,323,1070,283,1019,248,964,222,910,207,866,205,821,211,764,223,710,238,664,257,661,254,708,233,763,217,820,206,866,200,911,202,966,218,1021,244,1073,279,1120,319,1161,363,1228,450,1271,519"/>
+<area shape="rect" href="../../df/d00/a00107.html#a899af87cb69af3549f9f4f07ba7c1e9e" title=" " alt="" coords="601,557,667,584"/>
+<area shape="poly" title=" " alt="" coords="1172,551,668,572,667,567,1176,548"/>
+<area shape="rect" href="../../df/d00/a00107.html#abcfdd36790109e61c1a7080098d5a862" title=" " alt="" coords="1038,407,1116,433"/>
+<area shape="poly" title=" " alt="" coords="1246,524,1101,437,1101,431,1251,523"/>
+<area shape="rect" href="../../df/d00/a00107.html#a5e1726ceaabe1a7f3b4952361f2a7efc" title=" " alt="" coords="1032,981,1123,1008"/>
+<area shape="poly" title=" " alt="" coords="1273,572,1087,982,1083,979,1269,575"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a98dfe1458af681edc6a37827cba8b76a" title=" " alt="" coords="1013,181,1141,224"/>
+<area shape="poly" title=" " alt="" coords="1274,516,1256,463,1228,391,1189,315,1166,278,1139,245,1121,227,1120,222,1143,241,1170,275,1194,312,1233,389,1261,461,1279,518"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a6954ceeff88f33f7b0e38d9417b1eb26" title=" " alt="" coords="1013,1448,1141,1491"/>
+<area shape="poly" title=" " alt="" coords="1284,572,1276,701,1253,898,1235,1012,1211,1131,1181,1249,1144,1364,1121,1410,1096,1450,1093,1445,1117,1408,1139,1362,1176,1248,1206,1129,1230,1011,1248,898,1271,701,1281,576"/>
+<area shape="poly" title=" " alt="" coords="1271,517,1218,368,1139,170,1086,59,1086,54,1144,168,1223,367,1277,518"/>
+<area shape="rect" href="../../d4/d00/a00101.html#a50bc35add0aa5cc4e000ab7a199cd875" title=" " alt="" coords="1042,1324,1112,1351"/>
+<area shape="poly" title=" " alt="" coords="1279,572,1227,807,1144,1137,1085,1325,1081,1322,1139,1135,1222,806,1276,576"/>
+<area shape="rect" href="../../dc/d00/a01053.html#afa6bf98b875aa490abb79fe7b6bb88e2" title=" " alt="" coords="558,1380,710,1407"/>
+<area shape="poly" title=" " alt="" coords="746,1415,690,1410,690,1405,751,1415"/>
+<area shape="rect" href="../../dc/d00/a01053.html#a5375ce0de96e8d8ec261303ce8535b6c" title=" " alt="" coords="271,1431,504,1457"/>
+<area shape="poly" title=" " alt="" coords="787,1436,765,1446,741,1460,716,1472,642,1482,567,1481,497,1472,441,1461,441,1455,498,1467,567,1476,642,1477,715,1467,739,1455,763,1442,782,1437"/>
+<area shape="rect" href="../../dc/d00/a01053.html#afc444beb413e66f184a28d11a72eb868" title=" " alt="" coords="552,1431,716,1457"/>
+<area shape="poly" title=" " alt="" coords="745,1432,717,1438,716,1432,751,1431"/>
+<area shape="poly" title=" " alt="" coords="725,1392,811,1404,805,1405,725,1397"/>
+<area shape="poly" title=" " alt="" coords="548,1411,457,1433,455,1427,553,1410"/>
+<area shape="poly" title=" " alt="" coords="534,1444,505,1447,504,1441,539,1444"/>
+<area shape="poly" title=" " alt="" coords="901,495,892,489,864,485,841,487,829,493,827,498,835,508,830,508,822,499,825,489,840,482,864,480,894,484,907,495"/>
+<area shape="rect" href="../../df/d00/a00107.html#adea02253cbd3cd163da5f5ba64144983" title="Main menu." alt="" coords="344,432,432,459"/>
+<area shape="poly" title=" " alt="" coords="816,515,433,455,432,450,820,511"/>
+<area shape="poly" title=" " alt="" coords="425,418,413,413,388,411,364,413,351,417,348,423,355,431,349,432,343,423,348,413,363,407,388,405,414,408,430,416"/>
+<area shape="poly" title=" " alt="" coords="326,447,225,448,222,443,330,444"/>
+<area shape="poly" title=" " alt="" coords="184,418,177,413,163,411,149,413,142,417,141,423,144,431,139,432,135,423,138,414,148,408,163,405,179,408,189,416"/>
+<area shape="rect" href="../../df/d00/a00119.html#a3c04138a5bfe5d72780bb7e82a18e627" title=" " alt="" coords="5,231,55,257"/>
+<area shape="poly" title=" " alt="" coords="142,420,41,261,40,255,147,418"/>
+<area shape="poly" title=" " alt="" coords="596,293,554,324,408,433,404,430,551,319,599,289"/>
+<area shape="poly" title=" " alt="" coords="673,242,660,237,634,235,610,237,597,241,594,247,600,255,595,256,588,247,593,237,609,231,634,229,662,232,678,240"/>
+<area shape="poly" title=" " alt="" coords="590,551,417,462,416,457,595,549"/>
+<area shape="poly" title=" " alt="" coords="675,547,672,544,665,540,634,536,609,538,596,543,594,549,603,558,598,559,589,550,592,540,607,533,634,531,667,535,676,540,680,547"/>
+<area shape="poly" title=" " alt="" coords="1031,442,897,508,893,504,1035,439"/>
+<area shape="poly" title=" " alt="" coords="1111,392,1100,388,1077,385,1055,387,1044,392,1041,397,1047,406,1041,406,1036,398,1040,388,1054,382,1077,380,1102,383,1117,391"/>
+<area shape="rect" href="../../df/d00/a00107.html#a30ce9217e2f73c216badd694b03bd399" title="Add disk &#39;disk_name&#39; to the controller &#39;parent&#39; of the configuration." alt="" coords="824,256,904,283"/>
+<area shape="poly" title=" " alt="" coords="1057,394,1019,345,993,319,964,297,935,284,906,276,904,271,936,279,966,292,996,315,1023,341,1062,394"/>
+<area shape="rect" href="../../df/d00/a00107.html#abce3cdd7db8963ecaef147eca2204ceb" title=" " alt="" coords="588,432,680,459"/>
+<area shape="poly" title=" " alt="" coords="1021,425,681,445,679,440,1025,421"/>
+<area shape="rect" href="../../df/d00/a00107.html#ad7d4a4763a70510d229bfb24e580bc28" title=" " alt="" coords="805,331,924,357"/>
+<area shape="poly" title=" " alt="" coords="1026,401,964,379,912,360,910,355,966,373,1031,400"/>
+<area shape="rect" href="../../df/d00/a00107.html#a213c3fa26e0fcd8563b31094f0ce490e" title=" " alt="" coords="594,357,674,384"/>
+<area shape="poly" title=" " alt="" coords="1021,416,675,378,674,373,1025,413"/>
+<area shape="poly" title=" " alt="" coords="806,271,678,272,675,267,811,268"/>
+<area shape="poly" title=" " alt="" coords="899,241,888,237,864,235,842,237,830,241,827,247,833,255,828,256,822,247,826,238,841,231,864,229,890,232,905,240"/>
+<area shape="poly" title=" " alt="" coords="571,447,433,448,431,443,575,444"/>
+<area shape="poly" title=" " alt="" coords="673,418,660,413,634,411,610,413,597,417,594,423,600,431,595,432,588,423,593,413,609,407,634,405,662,408,678,416"/>
+<area shape="poly" title=" " alt="" coords="899,316,888,312,864,309,842,311,830,316,827,321,833,330,828,330,822,322,826,312,841,306,864,304,890,307,905,315"/>
+<area shape="poly" title=" " alt="" coords="577,389,434,434,431,430,581,385"/>
+<area shape="poly" title=" " alt="" coords="673,343,660,338,634,336,610,338,597,343,594,348,600,357,595,357,588,349,593,339,609,333,634,331,662,333,678,342"/>
+<area shape="poly" title=" " alt="" coords="1111,966,1100,962,1077,960,1055,962,1044,967,1041,972,1047,981,1042,980,1036,973,1040,963,1054,957,1077,955,1102,957,1117,966"/>
+<area shape="rect" href="../../df/d00/a00107.html#ac6a88b63001f541658f403057231f9b3" title=" " alt="" coords="800,1056,928,1083"/>
+<area shape="poly" title=" " alt="" coords="1020,1015,906,1058,904,1053,1025,1013"/>
+<area shape="rect" href="../../df/d00/a00107.html#aa2e4d3352b6d313dec9e032ea0abb905" title=" " alt="" coords="807,1131,922,1157"/>
+<area shape="poly" title=" " alt="" coords="1054,1018,1015,1059,966,1097,900,1133,898,1128,964,1092,1011,1055,1050,1021"/>
+<area shape="rect" href="../../df/d00/a00107.html#a69ca618c0bb2a5b00ee8424c18d26aac" title=" " alt="" coords="807,1205,922,1232"/>
+<area shape="poly" title=" " alt="" coords="1062,1019,1009,1110,967,1171,937,1192,907,1207,904,1202,935,1187,963,1167,1005,1107,1058,1023"/>
+<area shape="rect" href="../../df/d00/a00107.html#a5ccf662c6889c07cc1a7eabdfa9b1847" title=" " alt="" coords="797,1280,932,1307"/>
+<area shape="poly" title=" " alt="" coords="1060,1019,1037,1058,1015,1100,1002,1141,998,1176,990,1209,967,1246,941,1267,912,1282,910,1277,938,1263,963,1242,985,1207,992,1175,997,1140,1011,1098,1033,1056,1056,1023"/>
+<area shape="rect" href="../../df/d00/a00107.html#a6260c0e587a7b117a76078e0d6bff858" title=" " alt="" coords="794,1355,934,1381"/>
+<area shape="poly" title=" " alt="" coords="1059,1019,1036,1058,1015,1100,1005,1132,1001,1161,1001,1214,1000,1239,996,1265,986,1292,967,1320,943,1342,915,1357,913,1352,940,1337,963,1317,981,1289,991,1263,995,1239,996,1214,996,1161,1000,1131,1011,1098,1032,1055,1055,1022"/>
+<area shape="rect" href="../../df/d00/a00107.html#a2e0638ed058a2d3704ffdcb52f46c906" title=" " alt="" coords="798,981,931,1008"/>
+<area shape="poly" title=" " alt="" coords="1014,995,932,997,931,992,1019,994"/>
+<area shape="rect" href="../../df/d00/a00107.html#aeb58ce5f6cbcdde1c44ffa074f452193" title=" " alt="" coords="798,683,930,709"/>
+<area shape="poly" title=" " alt="" coords="1070,965,1060,914,1041,848,1010,781,989,750,963,723,948,713,931,706,930,701,950,708,967,719,993,747,1015,778,1046,846,1066,913,1075,967"/>
+<area shape="rect" href="../../df/d00/a00107.html#a859457a7bb8e506971468a287635f50b" title=" " alt="" coords="780,757,949,784"/>
+<area shape="poly" title=" " alt="" coords="1066,966,1052,929,1031,883,1001,837,963,798,946,787,945,782,967,794,1006,834,1035,880,1057,927,1071,967"/>
+<area shape="rect" href="../../df/d00/a00107.html#af6de69ff1551d7b9f4667681df5a84e4" title=" " alt="" coords="794,832,934,859"/>
+<area shape="poly" title=" " alt="" coords="1057,968,1018,920,992,894,964,873,935,860,935,855,966,868,996,890,1022,916,1062,969"/>
+<area shape="rect" href="../../df/d00/a00107.html#a78a7895a216fdd6fca09164f477edf42" title=" " alt="" coords="807,907,922,933"/>
+<area shape="poly" title=" " alt="" coords="1032,975,964,948,923,935,922,930,966,943,1037,974"/>
+<area shape="poly" title=" " alt="" coords="899,1041,888,1037,864,1035,842,1037,830,1041,827,1047,833,1056,828,1055,822,1047,826,1038,841,1031,864,1029,890,1032,905,1041"/>
+<area shape="poly" title=" " alt="" coords="899,1115,888,1112,864,1109,842,1111,830,1116,827,1121,833,1131,828,1130,822,1122,826,1112,841,1106,864,1104,890,1107,905,1115"/>
+<area shape="poly" title=" " alt="" coords="899,1190,888,1186,864,1184,842,1186,830,1191,827,1196,833,1206,828,1204,822,1197,826,1187,841,1181,864,1179,890,1181,905,1190"/>
+<area shape="poly" title=" " alt="" coords="899,1265,888,1261,864,1259,842,1261,830,1265,827,1271,833,1280,828,1279,822,1271,826,1262,841,1255,864,1253,890,1256,905,1265"/>
+<area shape="poly" title=" " alt="" coords="899,1339,888,1336,864,1333,842,1335,830,1340,827,1345,833,1355,828,1353,822,1346,826,1336,841,1330,864,1328,890,1331,905,1340"/>
+<area shape="poly" title=" " alt="" coords="899,966,888,962,864,960,842,962,830,967,827,972,833,981,828,980,822,973,826,963,841,957,864,955,890,957,905,966"/>
+<area shape="poly" title=" " alt="" coords="899,668,888,664,864,661,842,663,830,668,827,673,833,682,828,682,822,674,826,664,841,658,864,656,890,659,905,667"/>
+<area shape="poly" title=" " alt="" coords="899,743,888,738,864,736,842,738,830,743,827,748,833,757,828,757,822,749,826,739,841,733,864,731,890,733,905,742"/>
+<area shape="poly" title=" " alt="" coords="899,817,888,813,864,811,842,813,830,817,827,823,833,832,828,831,822,823,826,814,841,807,864,805,890,808,905,816"/>
+<area shape="poly" title=" " alt="" coords="899,892,888,888,864,885,842,887,830,892,827,897,833,907,828,906,822,898,826,888,841,882,864,880,890,883,905,891"/>
+<area shape="rect" href="../../d3/d00/a00757.html#ad752e1aa69e78c74e23eac68fb2431c0" title=" " alt="" coords="794,80,935,107"/>
+<area shape="poly" title=" " alt="" coords="1039,171,1005,145,964,121,936,110,935,105,966,116,1008,141,1044,171"/>
+<area shape="rect" href="../../d3/d00/a00785.html#a70567b682af1d37687c68b38c8444d29" title=" " alt="" coords="794,131,935,157"/>
+<area shape="poly" title=" " alt="" coords="996,182,917,160,915,155,1001,180"/>
+<area shape="poly" title=" " alt="" coords="950,93,1045,105,1094,116,1142,132,1221,164,1280,196,1306,215,1331,238,1383,304,1397,330,1404,355,1407,401,1409,446,1416,469,1431,494,1451,514,1476,531,1471,532,1448,519,1427,498,1411,472,1404,447,1401,401,1399,356,1392,332,1378,307,1327,242,1303,219,1277,200,1218,169,1140,137,1093,121,1044,110,952,98"/>
+<area shape="poly" title=" " alt="" coords="949,134,996,134,1046,138,1095,149,1143,167,1199,201,1240,238,1271,277,1297,317,1348,403,1383,448,1430,494,1483,531,1478,532,1427,498,1379,451,1344,406,1292,320,1267,280,1236,242,1196,206,1140,172,1094,154,1045,143,996,139,952,138"/>
+<area shape="poly" title=" " alt="" coords="1111,1435,1699,886,1704,885,1114,1440"/>
+<area shape="rect" href="../../d9/d00/a01897.html#a7a88c28aecc8f32c65b3d70d8ceb1962" title="Constructor." alt="" coords="813,1557,916,1584"/>
+<area shape="poly" title=" " alt="" coords="1040,1500,1005,1527,966,1548,917,1564,916,1559,964,1543,1002,1522,1035,1501"/>
+<area shape="rect" href="../../df/d00/a00949.html#acf39594b6b063bf03fe0b0f3ee61b697" title="Initialize the Ali device." alt="" coords="804,1507,924,1533"/>
+<area shape="poly" title=" " alt="" coords="1001,1488,924,1509,923,1503,996,1488"/>
+<area shape="rect" href="../../d6/d00/a01137.html#aeb341e51ffe7c9fd2876dabca0f03170" title="Initialize the CPU." alt="" coords="805,1456,924,1483"/>
+<area shape="poly" title=" " alt="" coords="995,1470,924,1472,924,1467,1000,1469"/>
+<area shape="poly" title=" " alt="" coords="931,1557,1031,1535,1140,1500,1212,1471,1267,1444,1318,1412,1379,1365,1445,1309,1493,1261,1535,1207,1585,1136,1627,1065,1663,992,1709,888,1713,884,1668,995,1632,1067,1589,1139,1540,1211,1497,1264,1449,1313,1382,1369,1321,1416,1269,1449,1214,1476,1142,1505,1032,1540,932,1562"/>
+<area shape="poly" title=" " alt="" coords="1035,44,635,45,386,45,330,51,276,68,224,92,176,122,96,184,46,231,42,229,93,180,173,117,221,88,274,63,329,46,386,40,635,40,1039,41"/>
+<area shape="poly" title=" " alt="" coords="1112,24,1113,18,1109,13,1097,10,1077,8,1053,11,1042,16,1042,23,1055,33,1049,34,1037,25,1038,13,1052,5,1077,3,1098,4,1112,9,1118,17,1117,26"/>
+<area shape="poly" title=" " alt="" coords="1042,1357,966,1396,930,1407,928,1402,964,1391,1037,1359"/>
+<area shape="poly" title=" " alt="" coords="1111,1308,1100,1305,1077,1303,1055,1305,1044,1309,1041,1315,1047,1324,1042,1323,1036,1315,1040,1306,1054,1299,1077,1297,1102,1300,1117,1309"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a9b62b5c7f2bb5966cdcc05b7ef765295" name="a9b62b5c7f2bb5966cdcc05b7ef765295"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b62b5c7f2bb5966cdcc05b7ef765295">&#9670;&#160;</a></span>put_be32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void put_be32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> *</td>          <td class="paramname"><span class="paramname"><em>p</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a></td>          <td class="paramname"><span class="paramname"><em>value</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00111">111</a> of file <a class="el" href="../../d8/d00/a00368_source.html">es40_endian.h</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d8/d00/a00368_source.html#l00111">put_be32()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00629_source.html#l01089">CDisk::do_scsi_command()</a>, <a class="el" href="../../d8/d00/a00368_source.html#l00111">put_be32()</a>, <a class="el" href="../../d8/d00/a00368_source.html#l00119">put_be64()</a>, and <a class="el" href="../../dc/d00/a00659_source.html#l00829">CDiskFile::qcow2_create()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d8/d00/a00368_a9b62b5c7f2bb5966cdcc05b7ef765295_cgraph.png" border="0" usemap="#ad8/d00/a00368_a9b62b5c7f2bb5966cdcc05b7ef765295_cgraph" loading="lazy" alt=""/></div>
+<map name="ad8/d00/a00368_a9b62b5c7f2bb5966cdcc05b7ef765295_cgraph" id="ad8/d00/a00368_a9b62b5c7f2bb5966cdcc05b7ef765295_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,80,56"/>
+<area shape="poly" title=" " alt="" coords="28,28,27,12,33,5,43,3,52,5,58,14,53,14,49,10,42,8,36,10,32,14,33,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d8/d00/a00368_a9b62b5c7f2bb5966cdcc05b7ef765295_icgraph.png" border="0" usemap="#ad8/d00/a00368_a9b62b5c7f2bb5966cdcc05b7ef765295_icgraph" loading="lazy" alt=""/></div>
+<map name="ad8/d00/a00368_a9b62b5c7f2bb5966cdcc05b7ef765295_icgraph" id="ad8/d00/a00368_a9b62b5c7f2bb5966cdcc05b7ef765295_icgraph">
+<area shape="rect" title=" " alt="" coords="3358,419,3432,445"/>
+<area shape="poly" title=" " alt="" coords="3423,403,3414,400,3395,397,3377,399,3367,404,3365,409,3370,419,3365,417,3360,410,3363,400,3375,394,3395,392,3416,395,3428,404"/>
+<area shape="rect" href="../../d9/d00/a01897.html#a4d1bee575d551ab627571e6afe7b206a" title="Handle a SCSI command." alt="" coords="3134,308,3310,335"/>
+<area shape="poly" title=" " alt="" coords="3357,410,3244,338,3245,333,3362,411"/>
+<area shape="rect" href="../../d8/d00/a00368.html#a0971e9e397ba42c7b56920165cc34e6f" title=" " alt="" coords="3185,419,3259,445"/>
+<area shape="poly" title=" " alt="" coords="3340,432,3260,435,3259,429,3345,432"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a3d9335078e1c63b1a13bd8d5c4f453d2" title=" " alt="" coords="2912,507,3081,533"/>
+<area shape="poly" title=" " alt="" coords="3346,448,3310,460,3189,487,3078,509,3077,503,3188,482,3309,455,3340,449"/>
+<area shape="rect" href="../../d9/d00/a01897.html#a426e10f6af92fae37732288bf84a7259" title="Process data written or read." alt="" coords="2907,272,3086,299"/>
+<area shape="poly" title=" " alt="" coords="3117,305,3084,302,3084,297,3122,305"/>
+<area shape="poly" title=" " alt="" coords="3250,403,3241,400,3222,397,3204,399,3195,404,3192,409,3197,419,3192,417,3187,410,3191,400,3203,394,3222,392,3243,395,3255,404"/>
+<area shape="rect" href="../../d2/d00/a01961.html#aae6f88ac393037f933937a36aa617e1b" title=" " alt="" coords="2908,440,3085,483"/>
+<area shape="poly" title=" " alt="" coords="3167,439,3086,452,3085,447,3172,438"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a9ec1039c112d1225fde7611590bd243d" title=" " alt="" coords="2699,396,2859,423"/>
+<area shape="poly" title=" " alt="" coords="3166,430,2860,416,2860,411,3172,429"/>
+<area shape="poly" title=" " alt="" coords="3174,451,3136,470,3112,484,3087,497,3054,509,3053,503,3085,492,3109,479,3133,466,3169,452"/>
+<area shape="rect" href="../../d2/d00/a01961.html#aa4f284d0a3abe400006515e9b7a19ead" title=" " alt="" coords="2922,323,3072,365"/>
+<area shape="poly" title=" " alt="" coords="3169,412,3053,369,3054,363,3174,413"/>
+<area shape="poly" title=" " alt="" coords="2891,437,2838,426,2838,421,2896,437"/>
+<area shape="rect" href="../../d2/d00/a01961.html#ad50c65f0ccee2c4697e3e4684d6f93f7" title="Write bytes bytes from src at the current position." alt="" coords="2496,400,2651,427"/>
+<area shape="poly" title=" " alt="" coords="2681,411,2652,414,2651,409,2686,411"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a2c679f4616245dd61b59abfbedb27880" title=" " alt="" coords="2083,469,2218,512"/>
+<area shape="poly" title=" " alt="" coords="2894,517,2219,496,2219,490,2900,516"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a0e61610a6a7570e634ebe201fbc5668d" title=" " alt="" coords="1847,469,2019,496"/>
+<area shape="poly" title=" " alt="" coords="2065,488,2019,488,2019,483,2070,487"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a53dfa73ee81183f5b1d27395bca4a7ab" title=" " alt="" coords="1860,520,2006,547"/>
+<area shape="poly" title=" " alt="" coords="2065,507,2005,522,2004,517,2070,506"/>
+<area shape="rect" href="../../d2/d00/a01961.html#af5342ace9f485d1c3f25fc6806c9cbed" title=" " alt="" coords="1635,411,1799,453"/>
+<area shape="poly" title=" " alt="" coords="1855,465,1800,454,1800,449,1861,465"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a3d0de83b2c31a72d3c4a972d873e4267" title=" " alt="" coords="1429,419,1587,445"/>
+<area shape="poly" title=" " alt="" coords="1617,432,1588,435,1587,429,1622,432"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a1fabb1daaa09396904b199b72cec3c7c" title=" " alt="" coords="1644,520,1790,547"/>
+<area shape="poly" title=" " alt="" coords="1842,534,1791,536,1790,531,1847,533"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a92e6679588d861939dd3da4ebeadd4c7" title="Determine what device this configurator represents, and instantiate it; then call initialize for our ..." alt="" coords="1429,507,1586,533"/>
+<area shape="poly" title=" " alt="" coords="1627,528,1587,528,1587,522,1632,527"/>
+<area shape="poly" title=" " alt="" coords="1542,491,1531,488,1508,485,1486,487,1474,492,1471,497,1477,507,1472,505,1466,498,1470,488,1485,482,1508,480,1533,483,1547,492"/>
+<area shape="rect" href="../../d2/d00/a01085.html#afe0ca9e6f3009dcedfbf6eb256f77083" title="Constructor." alt="" coords="1189,507,1381,533"/>
+<area shape="poly" title=" " alt="" coords="1411,529,1381,532,1381,526,1416,529"/>
+<area shape="rect" href="../../d7/d00/a00002.html#a0ddf1224851353fc92bfbff6f499fa97" title="Entry point for the application." alt="" coords="1052,29,1102,56"/>
+<area shape="poly" title=" " alt="" coords="1472,497,1427,459,1378,404,1342,354,1288,261,1263,217,1232,172,1192,126,1140,77,1102,54,1102,49,1143,73,1196,122,1236,169,1267,214,1293,259,1347,351,1383,401,1431,455,1477,498"/>
+<area shape="poly" title=" " alt="" coords="1396,508,1432,511,1426,512,1396,514"/>
+<area shape="poly" title=" " alt="" coords="1319,491,1308,488,1285,485,1263,487,1251,492,1249,497,1255,507,1249,505,1243,498,1248,488,1262,482,1285,480,1310,483,1324,492"/>
+<area shape="rect" href="../../dc/d00/a01053.html#a26ecafeaa3d13966301b1bd2d5c9bad0" title=" " alt="" coords="764,856,965,883"/>
+<area shape="poly" title=" " alt="" coords="1271,546,1202,672,1167,731,1143,763,1110,784,1081,794,1050,800,1014,814,991,831,966,846,934,858,932,853,964,842,988,826,1012,810,1049,795,1079,788,1108,780,1140,759,1162,728,1198,669,1267,549"/>
+<area shape="rect" href="../../df/d00/a00107.html#abd420d0dae1fe4c263bea185f837c08c" title=" " alt="" coords="833,205,896,232"/>
+<area shape="poly" title=" " alt="" coords="1270,491,1250,453,1222,403,1185,353,1140,310,1110,290,1077,274,1010,249,946,233,897,225,895,219,947,228,1011,244,1079,269,1112,286,1143,306,1189,350,1226,400,1255,450,1275,493"/>
+<area shape="rect" href="../../df/d00/a00107.html#ae799ccf629887c5248e091c94325d297" title=" " alt="" coords="103,104,223,131"/>
+<area shape="poly" title=" " alt="" coords="1256,495,1220,455,1187,403,1176,372,1171,345,1170,295,1170,272,1166,249,1157,225,1139,200,1108,168,1079,143,1049,124,1019,112,987,103,952,99,866,96,633,96,406,103,225,115,222,110,406,98,633,91,866,91,952,93,988,98,1021,106,1052,120,1082,138,1112,164,1143,197,1162,223,1171,247,1175,271,1176,295,1176,344,1181,371,1192,400,1225,452,1261,496"/>
+<area shape="rect" href="../../df/d00/a00107.html#a55d5346931ade26cfe6e5bef1254ae5c" title="Floppy configuration." alt="" coords="592,456,676,483"/>
+<area shape="poly" title=" " alt="" coords="1171,520,982,515,872,508,763,497,677,482,676,476,764,492,873,503,982,510,1176,519"/>
+<area shape="rect" href="../../df/d00/a00107.html#a899af87cb69af3549f9f4f07ba7c1e9e" title=" " alt="" coords="601,155,667,181"/>
+<area shape="poly" title=" " alt="" coords="1257,495,1222,455,1187,403,1172,362,1167,327,1160,295,1152,278,1139,260,1115,236,1088,216,1027,184,961,164,892,154,825,151,763,153,668,164,666,159,762,148,825,146,893,149,962,159,1029,179,1091,211,1119,232,1143,257,1157,276,1165,293,1172,326,1177,361,1192,400,1226,452,1263,496"/>
+<area shape="rect" href="../../df/d00/a00107.html#abcfdd36790109e61c1a7080098d5a862" title=" " alt="" coords="1038,344,1116,371"/>
+<area shape="poly" title=" " alt="" coords="1252,497,1095,374,1097,369,1257,497"/>
+<area shape="rect" href="../../df/d00/a00107.html#a5e1726ceaabe1a7f3b4952361f2a7efc" title=" " alt="" coords="1032,648,1123,675"/>
+<area shape="poly" title=" " alt="" coords="1254,541,1100,650,1097,645,1249,543"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a98dfe1458af681edc6a37827cba8b76a" title=" " alt="" coords="1013,557,1141,600"/>
+<area shape="poly" title=" " alt="" coords="1218,539,1143,563,1141,558,1223,537"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a6954ceeff88f33f7b0e38d9417b1eb26" title=" " alt="" coords="1013,824,1141,867"/>
+<area shape="poly" title=" " alt="" coords="1270,545,1233,612,1192,690,1179,723,1172,751,1163,777,1143,807,1122,826,1119,821,1139,804,1158,775,1167,749,1174,722,1187,688,1228,610,1265,548"/>
+<area shape="poly" title=" " alt="" coords="1270,491,1231,393,1187,263,1176,208,1173,163,1165,122,1155,100,1139,76,1121,61,1102,52,1102,47,1124,57,1143,73,1160,97,1171,120,1179,163,1181,208,1192,262,1236,391,1275,493"/>
+<area shape="rect" href="../../d4/d00/a00101.html#a50bc35add0aa5cc4e000ab7a199cd875" title=" " alt="" coords="1042,723,1112,749"/>
+<area shape="poly" title=" " alt="" coords="1267,544,1213,613,1143,689,1099,725,1097,720,1140,685,1209,610,1262,547"/>
+<area shape="rect" href="../../dc/d00/a01053.html#afa6bf98b875aa490abb79fe7b6bb88e2" title=" " alt="" coords="558,856,710,883"/>
+<area shape="poly" title=" " alt="" coords="745,878,710,881,710,875,751,878"/>
+<area shape="rect" href="../../dc/d00/a01053.html#a5375ce0de96e8d8ec261303ce8535b6c" title=" " alt="" coords="271,856,504,883"/>
+<area shape="poly" title=" " alt="" coords="778,853,715,847,634,842,553,847,463,858,463,853,552,841,634,837,716,841,784,853"/>
+<area shape="rect" href="../../dc/d00/a01053.html#afc444beb413e66f184a28d11a72eb868" title=" " alt="" coords="552,907,716,933"/>
+<area shape="poly" title=" " alt="" coords="788,886,698,909,698,903,783,887"/>
+<area shape="poly" title=" " alt="" coords="725,858,766,860,760,861,725,863"/>
+<area shape="poly" title=" " alt="" coords="541,870,505,872,505,867,546,869"/>
+<area shape="poly" title=" " alt="" coords="548,903,456,886,456,881,553,903"/>
+<area shape="poly" title=" " alt="" coords="901,194,892,187,864,184,841,186,829,191,827,197,835,207,830,206,822,198,825,188,840,181,864,179,894,182,907,194"/>
+<area shape="rect" href="../../df/d00/a00107.html#adea02253cbd3cd163da5f5ba64144983" title="Main menu." alt="" coords="344,243,432,269"/>
+<area shape="poly" title=" " alt="" coords="816,224,433,255,432,250,819,220"/>
+<area shape="poly" title=" " alt="" coords="425,228,413,224,388,221,364,223,351,228,348,233,355,242,349,242,343,234,348,224,363,218,388,216,414,219,430,227"/>
+<area shape="poly" title=" " alt="" coords="349,236,187,134,186,128,354,233"/>
+<area shape="poly" title=" " alt="" coords="184,90,177,85,163,83,149,85,142,89,141,95,144,103,139,104,135,95,138,86,148,80,163,77,179,80,189,88"/>
+<area shape="rect" href="../../df/d00/a00119.html#a3c04138a5bfe5d72780bb7e82a18e627" title=" " alt="" coords="5,67,55,93"/>
+<area shape="poly" title=" " alt="" coords="96,101,56,89,54,85,101,98"/>
+<area shape="poly" title=" " alt="" coords="603,446,404,272,405,267,608,445"/>
+<area shape="poly" title=" " alt="" coords="672,441,660,437,634,435,610,437,597,441,594,447,600,456,595,455,588,447,593,437,609,431,634,429,662,432,678,441"/>
+<area shape="poly" title=" " alt="" coords="584,187,429,244,426,240,588,183"/>
+<area shape="poly" title=" " alt="" coords="675,144,672,141,665,137,634,133,609,136,596,141,594,146,603,156,598,156,589,148,592,137,607,130,634,128,667,132,676,137,680,145"/>
+<area shape="poly" title=" " alt="" coords="1053,332,1014,292,964,253,929,237,896,227,895,222,931,232,966,248,1018,289,1058,332"/>
+<area shape="poly" title=" " alt="" coords="1111,329,1100,325,1077,323,1055,325,1044,329,1041,335,1047,344,1042,343,1036,335,1040,326,1054,319,1077,317,1102,320,1117,329"/>
+<area shape="rect" href="../../df/d00/a00107.html#a30ce9217e2f73c216badd694b03bd399" title="Add disk &#39;disk_name&#39; to the controller &#39;parent&#39; of the configuration." alt="" coords="824,456,904,483"/>
+<area shape="poly" title=" " alt="" coords="1041,377,966,422,896,458,893,453,964,418,1037,380"/>
+<area shape="rect" href="../../df/d00/a00107.html#abce3cdd7db8963ecaef147eca2204ceb" title=" " alt="" coords="588,355,680,381"/>
+<area shape="poly" title=" " alt="" coords="1021,351,965,348,864,343,764,348,681,361,679,356,763,343,864,338,965,343,1026,350"/>
+<area shape="rect" href="../../df/d00/a00107.html#ad7d4a4763a70510d229bfb24e580bc28" title=" " alt="" coords="805,381,924,408"/>
+<area shape="poly" title=" " alt="" coords="1021,368,925,387,923,382,1026,366"/>
+<area shape="rect" href="../../df/d00/a00107.html#a213c3fa26e0fcd8563b31094f0ce490e" title=" " alt="" coords="594,280,674,307"/>
+<area shape="poly" title=" " alt="" coords="1021,340,964,327,884,314,804,305,675,297,674,292,805,300,885,309,966,321,1026,339"/>
+<area shape="poly" title=" " alt="" coords="806,470,677,472,676,467,811,468"/>
+<area shape="poly" title=" " alt="" coords="899,441,888,437,864,435,842,437,830,441,827,447,833,456,828,455,822,447,826,438,841,431,864,429,890,432,905,441"/>
+<area shape="poly" title=" " alt="" coords="586,349,420,273,419,267,591,347"/>
+<area shape="poly" title=" " alt="" coords="673,340,660,336,634,333,610,335,597,340,594,345,600,354,595,354,588,346,593,336,609,330,634,328,662,331,678,339"/>
+<area shape="poly" title=" " alt="" coords="899,366,888,362,864,360,842,362,830,367,827,372,833,381,828,380,822,373,826,363,841,357,864,355,890,357,905,366"/>
+<area shape="poly" title=" " alt="" coords="576,286,433,265,431,260,581,284"/>
+<area shape="poly" title=" " alt="" coords="673,266,660,261,634,259,610,261,597,265,594,271,600,280,595,279,588,271,593,261,609,255,634,253,662,256,678,265"/>
+<area shape="poly" title=" " alt="" coords="1111,633,1100,629,1077,627,1055,629,1044,633,1041,639,1047,648,1042,647,1036,639,1040,630,1054,623,1077,621,1102,624,1117,633"/>
+<area shape="rect" href="../../df/d00/a00107.html#ac6a88b63001f541658f403057231f9b3" title=" " alt="" coords="800,656,928,683"/>
+<area shape="poly" title=" " alt="" coords="1014,664,929,670,929,664,1019,663"/>
+<area shape="rect" href="../../df/d00/a00107.html#aa2e4d3352b6d313dec9e032ea0abb905" title=" " alt="" coords="807,731,922,757"/>
+<area shape="poly" title=" " alt="" coords="1029,680,902,733,900,728,1024,681"/>
+<area shape="rect" href="../../df/d00/a00107.html#a69ca618c0bb2a5b00ee8424c18d26aac" title=" " alt="" coords="807,805,922,832"/>
+<area shape="poly" title=" " alt="" coords="1021,681,1015,689,999,709,991,728,983,749,967,771,938,792,907,807,905,802,935,788,963,767,979,747,986,727,994,706,1011,685,1016,684"/>
+<area shape="rect" href="../../df/d00/a00107.html#a5ccf662c6889c07cc1a7eabdfa9b1847" title=" " alt="" coords="797,581,932,608"/>
+<area shape="poly" title=" " alt="" coords="1025,642,964,623,925,611,925,606,966,617,1030,642"/>
+<area shape="poly" title=" " alt="" coords="899,641,888,637,864,635,842,637,830,641,827,647,833,656,828,655,822,647,826,638,841,631,864,629,890,632,905,641"/>
+<area shape="poly" title=" " alt="" coords="899,715,888,712,864,709,842,711,830,716,827,721,833,731,828,729,822,722,826,712,841,706,864,704,890,707,905,716"/>
+<area shape="poly" title=" " alt="" coords="899,790,888,786,864,784,842,786,830,791,827,796,833,806,828,804,822,797,826,787,841,781,864,779,890,781,905,790"/>
+<area shape="poly" title=" " alt="" coords="899,566,888,562,864,560,842,562,830,567,827,572,833,582,828,580,822,573,826,563,841,557,864,555,890,557,905,566"/>
+<area shape="poly" title=" " alt="" coords="1141,815,1467,656,1686,548,1691,547,1469,661,1142,820"/>
+<area shape="poly" title=" " alt="" coords="1035,44,635,45,386,45,306,47,244,52,103,71,57,77,53,74,102,65,244,47,306,42,386,40,635,40,1039,41"/>
+<area shape="poly" title=" " alt="" coords="1112,23,1113,18,1109,13,1097,10,1077,8,1053,11,1042,16,1042,23,1055,34,1049,34,1037,25,1038,13,1052,5,1077,3,1098,4,1112,9,1118,17,1117,26"/>
+<area shape="poly" title=" " alt="" coords="1031,755,1015,770,1000,789,993,808,984,827,967,846,945,858,943,853,963,842,980,825,988,806,995,787,1011,766,1026,757"/>
+<area shape="poly" title=" " alt="" coords="1111,707,1100,704,1077,701,1055,703,1044,708,1041,713,1047,723,1042,721,1036,714,1040,704,1054,698,1077,696,1102,699,1117,708"/>
+<area shape="poly" title=" " alt="" coords="2911,370,2827,398,2826,393,2906,371"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a6c3dc37f6bf1ae7b541e899f5b84ea6c" title="Flush write buffers." alt="" coords="2721,337,2836,364"/>
+<area shape="poly" title=" " alt="" coords="2903,347,2837,352,2837,346,2909,346"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a25648913ae674ba533a9dc0e4245bd05" title=" " alt="" coords="2286,283,2446,309"/>
+<area shape="poly" title=" " alt="" coords="2904,331,2859,328,2635,311,2447,302,2446,296,2635,306,2859,323,2909,331"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a4886ffab9a66c7ff3df21e1a9d55d91f" title=" " alt="" coords="2508,333,2639,376"/>
+<area shape="poly" title=" " alt="" coords="2703,352,2640,356,2639,351,2708,352"/>
+<area shape="rect" href="../../d2/d00/a01961.html#acce3a91c7b637bb897c1788fbccdfd8a" title=" " alt="" coords="2286,435,2445,477"/>
+<area shape="poly" title=" " alt="" coords="2507,382,2498,390,2474,408,2450,425,2426,437,2424,432,2447,420,2471,403,2495,386,2502,384"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a2a76b554e6986b905af1710da9f785c4" title=" " alt="" coords="2283,384,2448,411"/>
+<area shape="poly" title=" " alt="" coords="2491,372,2435,386,2434,381,2496,371"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a412a3fb80dd8a57e8dd136fce5b46105" title=" " alt="" coords="2289,333,2442,360"/>
+<area shape="poly" title=" " alt="" coords="2490,352,2443,352,2443,347,2495,351"/>
+<area shape="poly" title=" " alt="" coords="2268,472,2220,482,2219,477,2273,471"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a2a05efbc6d3cc28f3aac7fd90f86f2d5" title=" " alt="" coords="1854,419,2012,445"/>
+<area shape="poly" title=" " alt="" coords="2268,451,2012,439,2012,434,2274,450"/>
+<area shape="rect" href="../../d2/d00/a01961.html#ae4a13d34fb5128b5f8fb794f2e83b73e" title=" " alt="" coords="2067,368,2235,395"/>
+<area shape="poly" title=" " alt="" coords="2285,429,2191,398,2192,393,2290,429"/>
+<area shape="poly" title=" " alt="" coords="1836,432,1800,435,1800,429,1842,432"/>
+<area shape="poly" title=" " alt="" coords="2049,387,1953,397,1848,409,1800,417,1799,412,1847,404,1952,392,2054,386"/>
+<area shape="poly" title=" " alt="" coords="2291,316,2285,323,2267,343,2259,362,2251,384,2237,408,2208,442,2178,471,2175,467,2204,439,2233,405,2246,381,2254,360,2263,340,2281,319,2286,318"/>
+<area shape="poly" title=" " alt="" coords="2304,314,2284,324,2181,370,2179,365,2282,319,2299,316"/>
+<area shape="poly" title=" " alt="" coords="2400,267,2389,264,2366,261,2344,263,2332,268,2329,273,2335,283,2330,281,2324,274,2328,264,2343,258,2366,256,2390,259,2405,268"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a8f040ac678a5bc8550cb63b4ebc9e4d5" title=" " alt="" coords="2071,283,2231,309"/>
+<area shape="poly" title=" " alt="" coords="2268,296,2232,299,2231,293,2273,296"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a0971e9e397ba42c7b56920165cc34e6f" name="a0971e9e397ba42c7b56920165cc34e6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0971e9e397ba42c7b56920165cc34e6f">&#9670;&#160;</a></span>put_be64()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void put_be64 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> *</td>          <td class="paramname"><span class="paramname"><em>p</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a></td>          <td class="paramname"><span class="paramname"><em>value</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00119">119</a> of file <a class="el" href="../../d8/d00/a00368_source.html">es40_endian.h</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d8/d00/a00368_source.html#l00111">put_be32()</a>, and <a class="el" href="../../d8/d00/a00368_source.html#l00119">put_be64()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d8/d00/a00368_source.html#l00119">put_be64()</a>, <a class="el" href="../../dc/d00/a00659_source.html#l00600">CDiskFile::qcow2_allocate_cluster()</a>, <a class="el" href="../../dc/d00/a00659_source.html#l00829">CDiskFile::qcow2_create()</a>, <a class="el" href="../../dc/d00/a00659_source.html#l00580">CDiskFile::qcow2_set_dirty()</a>, and <a class="el" href="../../dc/d00/a00659_source.html#l00665">CDiskFile::qcow2_write()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d8/d00/a00368_a0971e9e397ba42c7b56920165cc34e6f_cgraph.png" border="0" usemap="#ad8/d00/a00368_a0971e9e397ba42c7b56920165cc34e6f_cgraph" loading="lazy" alt=""/></div>
+<map name="ad8/d00/a00368_a0971e9e397ba42c7b56920165cc34e6f_cgraph" id="ad8/d00/a00368_a0971e9e397ba42c7b56920165cc34e6f_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,80,56"/>
+<area shape="poly" title=" " alt="" coords="20,29,17,20,20,11,28,5,43,3,58,5,67,14,61,14,56,10,42,8,30,10,24,14,22,20,26,29"/>
+<area shape="rect" href="../../d8/d00/a00368.html#a9b62b5c7f2bb5966cdcc05b7ef765295" title=" " alt="" coords="128,29,202,56"/>
+<area shape="poly" title=" " alt="" coords="80,40,115,42,110,43,80,45"/>
+<area shape="poly" title=" " alt="" coords="143,28,139,20,142,11,151,5,165,3,180,5,189,15,184,14,178,10,165,8,153,10,146,14,145,20,148,30"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d8/d00/a00368_a0971e9e397ba42c7b56920165cc34e6f_icgraph.png" border="0" usemap="#ad8/d00/a00368_a0971e9e397ba42c7b56920165cc34e6f_icgraph" loading="lazy" alt=""/></div>
+<map name="ad8/d00/a00368_a0971e9e397ba42c7b56920165cc34e6f_icgraph" id="ad8/d00/a00368_a0971e9e397ba42c7b56920165cc34e6f_icgraph">
+<area shape="rect" title=" " alt="" coords="3140,255,3215,281"/>
+<area shape="poly" title=" " alt="" coords="3206,239,3197,236,3177,233,3160,235,3150,240,3148,245,3152,255,3147,253,3142,246,3146,236,3158,230,3178,228,3198,231,3211,240"/>
+<area shape="rect" href="../../d2/d00/a01961.html#aae6f88ac393037f933937a36aa617e1b" title=" " alt="" coords="2915,163,3092,205"/>
+<area shape="poly" title=" " alt="" coords="3135,247,3091,226,3054,209,3054,203,3094,222,3140,247"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a9ec1039c112d1225fde7611590bd243d" title=" " alt="" coords="2703,225,2863,252"/>
+<area shape="poly" title=" " alt="" coords="3122,264,3092,264,2864,247,2863,242,3093,259,3127,264"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a3d9335078e1c63b1a13bd8d5c4f453d2" title=" " alt="" coords="2699,279,2867,305"/>
+<area shape="poly" title=" " alt="" coords="3122,272,2868,290,2867,284,3127,271"/>
+<area shape="rect" href="../../d2/d00/a01961.html#aa4f284d0a3abe400006515e9b7a19ead" title=" " alt="" coords="2928,335,3079,377"/>
+<area shape="poly" title=" " alt="" coords="3139,288,3094,314,3050,337,3048,332,3091,310,3134,290"/>
+<area shape="poly" title=" " alt="" coords="2898,210,2840,227,2839,222,2903,209"/>
+<area shape="rect" href="../../d2/d00/a01961.html#ad50c65f0ccee2c4697e3e4684d6f93f7" title="Write bytes bytes from src at the current position." alt="" coords="2496,223,2651,249"/>
+<area shape="poly" title=" " alt="" coords="2684,238,2652,240,2651,234,2690,237"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a2c679f4616245dd61b59abfbedb27880" title=" " alt="" coords="2083,340,2218,383"/>
+<area shape="poly" title=" " alt="" coords="2680,287,2597,288,2496,290,2389,299,2284,315,2240,327,2200,342,2198,337,2239,322,2282,309,2389,293,2496,285,2597,283,2686,286"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a0e61610a6a7570e634ebe201fbc5668d" title=" " alt="" coords="1847,403,2019,429"/>
+<area shape="poly" title=" " alt="" coords="2065,383,1990,405,1988,400,2070,381"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a53dfa73ee81183f5b1d27395bca4a7ab" title=" " alt="" coords="1860,348,2006,375"/>
+<area shape="poly" title=" " alt="" coords="2065,362,2007,364,2006,359,2070,361"/>
+<area shape="rect" href="../../d2/d00/a01961.html#af5342ace9f485d1c3f25fc6806c9cbed" title=" " alt="" coords="1635,449,1799,492"/>
+<area shape="poly" title=" " alt="" coords="1860,435,1801,452,1799,447,1865,433"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a3d0de83b2c31a72d3c4a972d873e4267" title=" " alt="" coords="1429,457,1587,484"/>
+<area shape="poly" title=" " alt="" coords="1617,471,1588,473,1587,468,1622,470"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a1fabb1daaa09396904b199b72cec3c7c" title=" " alt="" coords="1644,348,1790,375"/>
+<area shape="poly" title=" " alt="" coords="1842,362,1791,364,1790,359,1847,361"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a92e6679588d861939dd3da4ebeadd4c7" title="Determine what device this configurator represents, and instantiate it; then call initialize for our ..." alt="" coords="1429,323,1586,349"/>
+<area shape="poly" title=" " alt="" coords="1627,351,1588,348,1587,343,1632,350"/>
+<area shape="poly" title=" " alt="" coords="1542,308,1531,304,1508,301,1486,303,1474,308,1471,313,1477,323,1472,322,1466,314,1470,304,1485,298,1508,296,1533,299,1547,307"/>
+<area shape="rect" href="../../d2/d00/a01085.html#afe0ca9e6f3009dcedfbf6eb256f77083" title="Constructor." alt="" coords="1189,323,1381,349"/>
+<area shape="poly" title=" " alt="" coords="1411,346,1382,347,1380,342,1416,344"/>
+<area shape="rect" href="../../d7/d00/a00002.html#a0ddf1224851353fc92bfbff6f499fa97" title="Entry point for the application." alt="" coords="1052,29,1102,56"/>
+<area shape="poly" title=" " alt="" coords="1477,312,1338,202,1242,133,1140,70,1103,53,1102,48,1143,66,1245,129,1341,198,1482,312"/>
+<area shape="poly" title=" " alt="" coords="1395,324,1431,327,1426,328,1397,330"/>
+<area shape="poly" title=" " alt="" coords="1319,308,1308,304,1285,301,1263,303,1251,308,1249,313,1255,323,1249,322,1243,314,1248,304,1262,298,1285,296,1310,299,1324,307"/>
+<area shape="rect" href="../../dc/d00/a01053.html#a26ecafeaa3d13966301b1bd2d5c9bad0" title=" " alt="" coords="764,171,965,197"/>
+<area shape="poly" title=" " alt="" coords="1243,316,1140,269,1024,229,922,200,921,195,1025,224,1142,264,1248,315"/>
+<area shape="rect" href="../../df/d00/a00107.html#abd420d0dae1fe4c263bea185f837c08c" title=" " alt="" coords="833,397,896,424"/>
+<area shape="poly" title=" " alt="" coords="1189,354,897,408,895,403,1193,351"/>
+<area shape="rect" href="../../df/d00/a00107.html#ae799ccf629887c5248e091c94325d297" title=" " alt="" coords="103,272,223,299"/>
+<area shape="poly" title=" " alt="" coords="1195,320,1043,299,954,291,866,288,633,288,224,288,222,283,633,283,866,283,955,286,1044,294,1200,319"/>
+<area shape="rect" href="../../df/d00/a00107.html#a55d5346931ade26cfe6e5bef1254ae5c" title="Floppy configuration." alt="" coords="592,472,676,499"/>
+<area shape="poly" title=" " alt="" coords="1232,357,1142,391,1055,418,966,439,806,466,678,483,676,478,805,461,964,433,1053,412,1140,385,1236,354"/>
+<area shape="rect" href="../../df/d00/a00107.html#a899af87cb69af3549f9f4f07ba7c1e9e" title=" " alt="" coords="601,347,667,373"/>
+<area shape="poly" title=" " alt="" coords="1172,342,668,361,667,356,1176,338"/>
+<area shape="rect" href="../../df/d00/a00107.html#abcfdd36790109e61c1a7080098d5a862" title=" " alt="" coords="1038,548,1116,575"/>
+<area shape="poly" title=" " alt="" coords="1227,358,1210,371,1191,386,1174,409,1165,430,1157,454,1144,481,1092,549,1089,546,1139,479,1152,452,1160,429,1169,406,1187,382,1207,366,1232,355"/>
+<area shape="rect" href="../../df/d00/a00107.html#a5e1726ceaabe1a7f3b4952361f2a7efc" title=" " alt="" coords="1032,885,1123,912"/>
+<area shape="poly" title=" " alt="" coords="1222,358,1207,370,1192,385,1174,456,1141,608,1084,886,1079,883,1136,607,1169,455,1187,383,1203,366,1226,355"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a98dfe1458af681edc6a37827cba8b76a" title=" " alt="" coords="1013,80,1141,123"/>
+<area shape="poly" title=" " alt="" coords="1267,308,1217,227,1181,179,1140,137,1126,126,1125,120,1143,133,1185,176,1221,224,1272,309"/>
+<area shape="rect" href="../../d2/d00/a01085.html#a6954ceeff88f33f7b0e38d9417b1eb26" title=" " alt="" coords="1013,936,1141,979"/>
+<area shape="poly" title=" " alt="" coords="1219,358,1205,371,1191,386,1170,422,1157,457,1149,491,1146,524,1153,589,1167,653,1182,717,1189,783,1186,817,1179,852,1165,888,1143,926,1132,938,1129,933,1139,922,1160,886,1174,851,1181,816,1183,783,1177,718,1162,654,1147,590,1141,524,1144,490,1151,455,1166,420,1187,382,1202,366,1223,355"/>
+<area shape="poly" title=" " alt="" coords="1265,309,1187,172,1175,141,1168,116,1159,94,1140,70,1121,58,1103,50,1102,45,1124,53,1143,66,1163,91,1173,115,1180,140,1192,170,1270,309"/>
+<area shape="rect" href="../../d4/d00/a00101.html#a50bc35add0aa5cc4e000ab7a199cd875" title=" " alt="" coords="1042,171,1112,197"/>
+<area shape="poly" title=" " alt="" coords="1256,312,1205,267,1140,218,1110,201,1109,195,1143,214,1208,263,1261,312"/>
+<area shape="rect" href="../../dc/d00/a01053.html#afa6bf98b875aa490abb79fe7b6bb88e2" title=" " alt="" coords="558,120,710,147"/>
+<area shape="poly" title=" " alt="" coords="746,169,669,150,668,145,751,166"/>
+<area shape="rect" href="../../dc/d00/a01053.html#a5375ce0de96e8d8ec261303ce8535b6c" title=" " alt="" coords="271,171,504,197"/>
+<area shape="poly" title=" " alt="" coords="746,186,506,186,504,182,750,182"/>
+<area shape="rect" href="../../dc/d00/a01053.html#afc444beb413e66f184a28d11a72eb868" title=" " alt="" coords="552,221,716,248"/>
+<area shape="poly" title=" " alt="" coords="783,203,699,223,697,218,787,200"/>
+<area shape="poly" title=" " alt="" coords="724,142,832,169,827,171,726,147"/>
+<area shape="poly" title=" " alt="" coords="549,152,458,172,454,168,553,149"/>
+<area shape="poly" title=" " alt="" coords="548,219,457,200,455,195,553,216"/>
+<area shape="poly" title=" " alt="" coords="901,386,892,379,864,376,841,378,829,383,827,389,835,398,830,398,822,390,825,380,840,373,864,371,894,374,907,386"/>
+<area shape="rect" href="../../df/d00/a00107.html#adea02253cbd3cd163da5f5ba64144983" title="Main menu." alt="" coords="344,435,432,461"/>
+<area shape="poly" title=" " alt="" coords="816,416,433,447,431,442,819,412"/>
+<area shape="poly" title=" " alt="" coords="425,420,413,416,388,413,364,415,351,420,348,425,355,434,349,435,343,426,348,416,363,410,388,408,414,411,430,418"/>
+<area shape="poly" title=" " alt="" coords="353,427,183,302,183,297,358,424"/>
+<area shape="poly" title=" " alt="" coords="184,258,177,253,163,251,149,253,142,257,141,263,144,271,139,272,135,263,138,254,148,248,163,245,179,248,189,256"/>
+<area shape="rect" href="../../df/d00/a00119.html#a3c04138a5bfe5d72780bb7e82a18e627" title=" " alt="" coords="5,171,55,197"/>
+<area shape="poly" title=" " alt="" coords="130,264,50,200,48,195,134,261"/>
+<area shape="poly" title=" " alt="" coords="574,478,433,457,431,452,579,475"/>
+<area shape="poly" title=" " alt="" coords="673,458,660,453,634,451,610,453,597,457,594,463,600,472,595,472,588,463,593,453,609,447,634,445,662,448,678,457"/>
+<area shape="poly" title=" " alt="" coords="584,379,429,436,426,432,588,375"/>
+<area shape="poly" title=" " alt="" coords="675,336,672,333,665,329,634,325,609,328,596,333,594,338,603,348,598,348,589,340,592,329,607,322,634,320,667,324,676,329,680,337"/>
+<area shape="poly" title=" " alt="" coords="1042,539,885,427,885,422,1047,538"/>
+<area shape="poly" title=" " alt="" coords="1111,533,1100,529,1077,527,1055,529,1044,533,1041,539,1047,548,1042,547,1036,539,1040,530,1054,523,1077,521,1102,524,1117,533"/>
+<area shape="rect" href="../../df/d00/a00107.html#a30ce9217e2f73c216badd694b03bd399" title="Add disk &#39;disk_name&#39; to the controller &#39;parent&#39; of the configuration." alt="" coords="824,523,904,549"/>
+<area shape="poly" title=" " alt="" coords="1021,556,906,543,905,538,1026,554"/>
+<area shape="rect" href="../../df/d00/a00107.html#abce3cdd7db8963ecaef147eca2204ceb" title=" " alt="" coords="588,624,680,651"/>
+<area shape="poly" title=" " alt="" coords="1021,572,681,632,679,627,1025,569"/>
+<area shape="rect" href="../../df/d00/a00107.html#ad7d4a4763a70510d229bfb24e580bc28" title=" " alt="" coords="805,699,924,725"/>
+<area shape="poly" title=" " alt="" coords="1053,584,1013,622,966,658,895,700,892,696,964,654,1010,618,1049,587"/>
+<area shape="rect" href="../../df/d00/a00107.html#a213c3fa26e0fcd8563b31094f0ce490e" title=" " alt="" coords="594,548,674,575"/>
+<area shape="poly" title=" " alt="" coords="1021,563,675,564,674,559,1025,560"/>
+<area shape="poly" title=" " alt="" coords="807,525,677,497,676,492,812,523"/>
+<area shape="poly" title=" " alt="" coords="899,508,888,504,864,501,842,503,830,508,827,513,833,523,828,522,822,514,826,504,841,498,864,496,890,499,905,507"/>
+<area shape="poly" title=" " alt="" coords="593,616,551,589,465,520,404,464,403,459,469,516,554,585,598,615"/>
+<area shape="poly" title=" " alt="" coords="673,610,660,605,634,603,610,605,597,609,594,615,600,624,595,623,588,615,593,605,609,599,634,597,662,600,678,609"/>
+<area shape="poly" title=" " alt="" coords="899,684,888,680,864,677,842,679,830,684,827,689,833,699,828,698,822,690,826,680,841,674,864,672,890,675,905,683"/>
+<area shape="poly" title=" " alt="" coords="587,542,419,464,418,459,592,540"/>
+<area shape="poly" title=" " alt="" coords="673,534,660,529,634,527,610,529,597,533,594,539,600,548,595,548,588,539,593,529,609,523,634,521,662,524,678,533"/>
+<area shape="poly" title=" " alt="" coords="1111,870,1100,866,1077,864,1055,866,1044,871,1041,876,1047,886,1042,884,1036,877,1040,867,1054,861,1077,859,1102,861,1117,870"/>
+<area shape="rect" href="../../df/d00/a00107.html#ac6a88b63001f541658f403057231f9b3" title=" " alt="" coords="800,1147,928,1173"/>
+<area shape="poly" title=" " alt="" coords="1021,917,1015,926,999,949,992,971,991,1017,990,1063,983,1087,967,1112,943,1134,914,1149,912,1143,940,1129,963,1109,978,1085,985,1062,985,1016,987,971,995,947,1011,922,1016,920"/>
+<area shape="rect" href="../../df/d00/a00107.html#aa2e4d3352b6d313dec9e032ea0abb905" title=" " alt="" coords="807,1221,922,1248"/>
+<area shape="poly" title=" " alt="" coords="1021,917,1015,926,995,959,987,991,986,1022,990,1053,994,1085,995,1118,987,1152,967,1187,944,1209,916,1223,914,1218,941,1204,963,1184,982,1150,989,1117,989,1086,985,1054,981,1022,981,990,990,957,1011,922,1016,920"/>
+<area shape="rect" href="../../df/d00/a00107.html#a69ca618c0bb2a5b00ee8424c18d26aac" title=" " alt="" coords="807,773,922,800"/>
+<area shape="poly" title=" " alt="" coords="1048,874,1011,844,964,814,922,799,922,794,966,810,1014,840,1054,875"/>
+<area shape="rect" href="../../df/d00/a00107.html#a5ccf662c6889c07cc1a7eabdfa9b1847" title=" " alt="" coords="797,848,932,875"/>
+<area shape="poly" title=" " alt="" coords="1014,888,933,876,932,871,1019,888"/>
+<area shape="rect" href="../../df/d00/a00107.html#a6260c0e587a7b117a76078e0d6bff858" title=" " alt="" coords="794,923,934,949"/>
+<area shape="poly" title=" " alt="" coords="1014,910,936,926,934,921,1019,909"/>
+<area shape="rect" href="../../df/d00/a00107.html#a2e0638ed058a2d3704ffdcb52f46c906" title=" " alt="" coords="798,997,931,1024"/>
+<area shape="poly" title=" " alt="" coords="1025,918,1014,926,990,944,966,964,899,999,897,994,964,959,987,940,1012,922,1020,920"/>
+<area shape="rect" href="../../df/d00/a00107.html#aeb58ce5f6cbcdde1c44ffa074f452193" title=" " alt="" coords="798,1072,930,1099"/>
+<area shape="poly" title=" " alt="" coords="1021,918,1015,926,1004,940,997,953,991,980,985,1008,978,1023,967,1038,940,1059,910,1074,909,1069,937,1054,963,1034,974,1020,980,1006,986,979,992,951,999,937,1011,922,1016,921"/>
+<area shape="poly" title=" " alt="" coords="899,1131,888,1128,864,1125,842,1127,830,1132,827,1137,833,1147,828,1145,822,1138,826,1128,841,1122,864,1120,890,1123,905,1132"/>
+<area shape="poly" title=" " alt="" coords="899,1206,888,1202,864,1200,842,1202,830,1207,827,1212,833,1222,828,1220,822,1213,826,1203,841,1197,864,1195,890,1197,905,1207"/>
+<area shape="poly" title=" " alt="" coords="899,758,888,754,864,752,842,754,830,759,827,764,833,773,828,772,822,765,826,755,841,749,864,747,890,749,905,758"/>
+<area shape="poly" title=" " alt="" coords="899,833,888,829,864,827,842,829,830,833,827,839,833,848,828,847,822,839,826,830,841,823,864,821,890,824,905,833"/>
+<area shape="poly" title=" " alt="" coords="899,907,888,904,864,901,842,903,830,908,827,913,833,923,828,921,822,914,826,904,841,898,864,896,890,899,905,907"/>
+<area shape="poly" title=" " alt="" coords="899,982,888,978,864,976,842,978,830,983,827,988,833,998,828,996,822,989,826,979,841,973,864,971,890,973,905,982"/>
+<area shape="poly" title=" " alt="" coords="899,1056,888,1053,864,1051,842,1053,830,1057,827,1063,833,1072,828,1071,822,1063,826,1054,841,1047,864,1045,890,1048,905,1057"/>
+<area shape="poly" title=" " alt="" coords="1137,924,1139,922,1170,890,1195,859,1232,797,1257,737,1276,677,1296,617,1324,559,1365,501,1393,472,1427,443,1479,412,1536,389,1593,374,1647,367,1642,368,1594,379,1538,394,1481,416,1430,447,1397,476,1369,504,1329,561,1301,619,1281,678,1262,738,1237,800,1200,862,1174,894,1143,926,1140,929"/>
+<area shape="poly" title=" " alt="" coords="1034,47,863,59,635,65,386,65,337,69,287,78,193,107,112,142,57,172,52,169,110,137,191,102,286,72,336,63,386,60,635,60,863,54,1039,44"/>
+<area shape="poly" title=" " alt="" coords="1112,23,1113,18,1109,13,1097,10,1077,8,1053,11,1042,16,1042,23,1055,34,1049,34,1037,25,1038,13,1052,5,1077,3,1098,4,1112,9,1118,17,1117,26"/>
+<area shape="poly" title=" " alt="" coords="1024,185,966,186,964,182,1029,183"/>
+<area shape="poly" title=" " alt="" coords="1111,156,1100,152,1077,149,1055,151,1044,156,1041,161,1047,170,1041,170,1036,162,1040,152,1054,146,1077,144,1102,147,1117,155"/>
+<area shape="poly" title=" " alt="" coords="2959,325,2916,297,2866,269,2832,255,2832,250,2868,264,2919,293,2964,326"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a6c3dc37f6bf1ae7b541e899f5b84ea6c" title="Flush write buffers." alt="" coords="2725,413,2840,440"/>
+<area shape="poly" title=" " alt="" coords="2923,382,2828,415,2826,410,2918,383"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a25648913ae674ba533a9dc0e4245bd05" title=" " alt="" coords="2286,348,2446,375"/>
+<area shape="poly" title=" " alt="" coords="2911,357,2446,363,2446,358,2916,356"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a4886ffab9a66c7ff3df21e1a9d55d91f" title=" " alt="" coords="2508,416,2639,459"/>
+<area shape="poly" title=" " alt="" coords="2708,431,2640,437,2639,431,2713,430"/>
+<area shape="rect" href="../../d2/d00/a01961.html#acce3a91c7b637bb897c1788fbccdfd8a" title=" " alt="" coords="2286,500,2445,543"/>
+<area shape="poly" title=" " alt="" coords="2507,464,2421,502,2420,497,2502,466"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a2a76b554e6986b905af1710da9f785c4" title=" " alt="" coords="2283,449,2448,476"/>
+<area shape="poly" title=" " alt="" coords="2490,448,2449,455,2448,450,2496,447"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a412a3fb80dd8a57e8dd136fce5b46105" title=" " alt="" coords="2289,399,2442,425"/>
+<area shape="poly" title=" " alt="" coords="2490,428,2443,424,2443,419,2496,427"/>
+<area shape="poly" title=" " alt="" coords="2284,490,2281,490,2263,466,2256,442,2250,419,2233,397,2219,386,2219,380,2237,393,2255,417,2262,441,2268,463,2285,486,2289,491"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a2a05efbc6d3cc28f3aac7fd90f86f2d5" title=" " alt="" coords="1854,508,2012,535"/>
+<area shape="poly" title=" " alt="" coords="2268,522,2013,524,2012,519,2274,521"/>
+<area shape="rect" href="../../d2/d00/a01961.html#ae4a13d34fb5128b5f8fb794f2e83b73e" title=" " alt="" coords="2067,457,2235,484"/>
+<area shape="poly" title=" " alt="" coords="2268,499,2210,487,2210,482,2274,499"/>
+<area shape="poly" title=" " alt="" coords="1855,504,1800,493,1800,487,1861,504"/>
+<area shape="poly" title=" " alt="" coords="2049,471,1800,473,1799,468,2054,470"/>
+<area shape="poly" title=" " alt="" coords="2268,362,2220,364,2219,359,2273,361"/>
+<area shape="poly" title=" " alt="" coords="2294,381,2285,389,2270,403,2261,417,2252,433,2237,448,2214,459,2212,454,2233,443,2248,429,2257,415,2266,399,2281,385,2289,383"/>
+<area shape="poly" title=" " alt="" coords="2400,333,2389,329,2366,327,2344,329,2332,333,2329,339,2335,348,2330,347,2324,339,2328,330,2343,323,2366,321,2390,324,2405,333"/>
+<area shape="rect" href="../../d2/d00/a01961.html#a8f040ac678a5bc8550cb63b4ebc9e4d5" title=" " alt="" coords="2071,407,2231,433"/>
+<area shape="poly" title=" " alt="" coords="2297,380,2203,409,2202,404,2302,378"/>
+</map>
+</div>
 
 </div>
 </div>
@@ -395,7 +1582,7 @@ Here is the caller graph for this function:</div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_11bc0974ce736ce9a6fadebbeb7a8314.html">gui</a></li><li class="navelem"><a href="../../d8/d00/a00368.html">gui.cpp</a></li>
+    <li class="navelem"><a href="../../d8/d00/a00368.html">es40_endian.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

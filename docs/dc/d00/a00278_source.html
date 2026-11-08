@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: emu/emu.h Source File</title>
+<title>ES40: CPU/Ev68InstructionFetch.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,32 +109,111 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('dc/d00/a00278_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">emu.h</div></div>
+  <div class="headertitle"><div class="title">Ev68InstructionFetch.h</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../dc/d00/a00278.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">// emu.h — ES40 shim for MAME&#39;s header</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">// Copyright (C) 2026 by gdwnldsKSC</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#ifndef __EMU_H__</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#define __EMU_H__</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d00/a00524.html">StdAfx.h</a>&quot;</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;<a class="code" href="../../d2/d00/a00281.html">mame_shims.h</a>&quot;</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;<a class="code" href="../../d5/d00/a00269.html">address_map.h</a>&quot;</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;<a class="code" href="../../db/d00/a00296.html">xtal.h</a>&quot;</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#endif </span><span class="comment">// __EMU_H__</span></div>
-<div class="ttc" id="aa00269_html"><div class="ttname"><a href="../../d5/d00/a00269.html">address_map.h</a></div></div>
-<div class="ttc" id="aa00281_html"><div class="ttname"><a href="../../d2/d00/a00281.html">mame_shims.h</a></div></div>
-<div class="ttc" id="aa00296_html"><div class="ttname"><a href="../../db/d00/a00296.html">xtal.h</a></div></div>
-<div class="ttc" id="aa00524_html"><div class="ttname"><a href="../../d9/d00/a00524.html">StdAfx.h</a></div><div class="ttdoc">Standard includes.</div></div>
+<a href="../../dc/d00/a00278.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator -- EV68 instruction fetching</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2026 by gdwnldsKSC</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * All rights reserved.</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * SPDX-License-Identifier: BSD-1-Clause</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * Redistribution and use in source and binary forms, with or without</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * modification, are permitted provided that the following conditions are met:</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * 1. Redistributions of source code must retain the above copyright notice,</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> *    this list of conditions and the following disclaimer.</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> * POSSIBILITY OF SUCH DAMAGE.</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#if !defined(INCLUDED_EV68INSTRUCTIONFETCH_H)</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#define INCLUDED_EV68INSTRUCTIONFETCH_H</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &quot;<a class="code" href="../../d5/d00/a00206.html">AlphaInstructionFetch.h</a>&quot;</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="foldopen" id="foldopen00032" data-start="{" data-end="};">
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="../../d3/d00/a01253.html">   32</a></span><span class="keyword">class </span><a class="code hl_class" href="../../d3/d00/a01253.html">Ev68InstructionFetch</a></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>{</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>  <span class="keyword">static</span> <span class="keywordtype">int</span> <a class="code hl_function" href="../../d3/d00/a01253.html#ac4158e810bebf3a612e91596f68e2435">fetch</a>(<a class="code hl_class" href="../../d6/d00/a01137.html">CAlphaCPU</a>&amp; <a class="code hl_variable" href="../../d4/d00/a00710.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a>, std::uint32_t* instruction);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d3/d00/a01253.html#a8c6a8f9a3ef3e4f2675ab3ecc5abdb3d">prepare_dispatch</a>(<a class="code hl_class" href="../../d6/d00/a01137.html">CAlphaCPU</a>&amp; <a class="code hl_variable" href="../../d4/d00/a00710.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a>);</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  <span class="keyword">static</span> <a class="code hl_struct" href="../../de/d00/a01181.html">AlphaInstructionMapping</a> <a class="code hl_function" href="../../d3/d00/a01253.html#afc451593e1ab7ccc5f2f6e1e884b224a">probe</a>(<a class="code hl_class" href="../../d6/d00/a01137.html">CAlphaCPU</a>&amp; <a class="code hl_variable" href="../../d4/d00/a00710.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a>, std::uint64_t pc);</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d3/d00/a01253.html#afd94d86e446ebb3ccb4601d7286d60e5">peek_cached</a>(<span class="keyword">const</span> <a class="code hl_class" href="../../d6/d00/a01137.html">CAlphaCPU</a>&amp; <a class="code hl_variable" href="../../d4/d00/a00710.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a>, std::uint32_t* instruction);</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d3/d00/a01253.html#ae11aacd49bc00522baa94fab14314300">matches_interpreted</a>(<span class="keyword">const</span> <a class="code hl_class" href="../../d6/d00/a01137.html">CAlphaCPU</a>&amp; <a class="code hl_variable" href="../../d4/d00/a00710.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a>, std::uint64_t start_pc,</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>                                  std::uint32_t count);</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d3/d00/a01253.html#aab3dca0aa37374c0560c1978c6693f27">can_chain</a>(<span class="keyword">const</span> <a class="code hl_class" href="../../d6/d00/a01137.html">CAlphaCPU</a>&amp; <a class="code hl_variable" href="../../d4/d00/a00710.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a>, std::uint64_t target);</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  <span class="keyword">static</span> <a class="code hl_struct" href="../../d3/d00/a01189.html">AlphaInstructionSourceView</a> <a class="code hl_function" href="../../d3/d00/a01253.html#ae19d7a687fee8299fdeea11a5c8fe59c">source</a>(<a class="code hl_class" href="../../d6/d00/a01137.html">CAlphaCPU</a>&amp; <a class="code hl_variable" href="../../d4/d00/a00710.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a>, std::uint64_t pc);</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  <span class="comment">// Keep admission exact until cache-backed dispatch and JIT invalidation have</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  <span class="comment">// been qualified together for a different family&#39;s source policy.</span></div>
+<div class="foldopen" id="foldopen00046" data-start="{" data-end="}">
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="../../d3/d00/a01253.html#aeb893ea5ef8c91ca90bca085e64dde8f">   46</a></span>  <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d3/d00/a01253.html#aeb893ea5ef8c91ca90bca085e64dde8f">supports_legacy_jit</a>(<span class="keyword">const</span> <a class="code hl_struct" href="../../d3/d00/a01185.html">AlphaInstructionFetchPolicy</a>&amp; policy)</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  {</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keywordflow">return</span> policy.<a class="code hl_variable" href="../../d3/d00/a01185.html#aca83fd377b75706fe2d55992cef3eb27">fetch</a> == &amp;<a class="code hl_function" href="../../d3/d00/a01253.html#ac4158e810bebf3a612e91596f68e2435">fetch</a> &amp;&amp; policy.<a class="code hl_variable" href="../../d3/d00/a01185.html#af18c541823c39234048de9fe33dfad28">prepare_dispatch</a> == &amp;<a class="code hl_function" href="../../d3/d00/a01253.html#a8c6a8f9a3ef3e4f2675ab3ecc5abdb3d">prepare_dispatch</a></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>      &amp;&amp; policy.<a class="code hl_variable" href="../../d3/d00/a01185.html#a47e3e16acac2f892316a4648b687ceea">probe</a> == &amp;<a class="code hl_function" href="../../d3/d00/a01253.html#afc451593e1ab7ccc5f2f6e1e884b224a">probe</a> &amp;&amp; policy.<a class="code hl_variable" href="../../d3/d00/a01185.html#ad801636d2dc4662023bf3655e8e54e97">peek_cached</a> == &amp;<a class="code hl_function" href="../../d3/d00/a01253.html#afd94d86e446ebb3ccb4601d7286d60e5">peek_cached</a></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>      &amp;&amp; policy.<a class="code hl_variable" href="../../d3/d00/a01185.html#a986cd7d62a8dd41a5de2f1afeec45886">matches_interpreted</a> == &amp;<a class="code hl_function" href="../../d3/d00/a01253.html#ae11aacd49bc00522baa94fab14314300">matches_interpreted</a> &amp;&amp; policy.<a class="code hl_variable" href="../../d3/d00/a01185.html#a8814a7ccacafe7b77aaf7b83268926f6">can_chain</a> == &amp;<a class="code hl_function" href="../../d3/d00/a01253.html#aab3dca0aa37374c0560c1978c6693f27">can_chain</a></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>      &amp;&amp; policy.<a class="code hl_variable" href="../../d3/d00/a01185.html#ad225a637b964722b4600195d70c7c37d">source</a> == &amp;<a class="code hl_function" href="../../d3/d00/a01253.html#ae19d7a687fee8299fdeea11a5c8fe59c">source</a>;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  }</div>
+</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>  <span class="keyword">static</span> <span class="keywordtype">int</span> <a class="code hl_function" href="../../d3/d00/a01253.html#a9abb29aaaa47b7d990eb5a43c1fef83c">read_cache</a>(<a class="code hl_class" href="../../d6/d00/a01137.html">CAlphaCPU</a>&amp; <a class="code hl_variable" href="../../d4/d00/a00710.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a>, std::uint64_t address, std::uint32_t* data);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>};</div>
+</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="foldopen" id="foldopen00058" data-start="{" data-end="};">
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="../../dc/d00/a00278.html#ae16a534d6bc0a50903d5852656a0bf39">   58</a></span><span class="keyword">inline</span> <span class="keyword">constexpr</span> <a class="code hl_struct" href="../../d3/d00/a01185.html">AlphaInstructionFetchPolicy</a> <a class="code hl_variable" href="../../dc/d00/a00278.html#ae16a534d6bc0a50903d5852656a0bf39">kEv68InstructionFetchPolicy</a>{</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>  &amp;<a class="code hl_function" href="../../d3/d00/a01253.html#ac4158e810bebf3a612e91596f68e2435">Ev68InstructionFetch::fetch</a>, &amp;<a class="code hl_function" href="../../d3/d00/a01253.html#a8c6a8f9a3ef3e4f2675ab3ecc5abdb3d">Ev68InstructionFetch::prepare_dispatch</a>,</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  &amp;<a class="code hl_function" href="../../d3/d00/a01253.html#afc451593e1ab7ccc5f2f6e1e884b224a">Ev68InstructionFetch::probe</a>, &amp;<a class="code hl_function" href="../../d3/d00/a01253.html#afd94d86e446ebb3ccb4601d7286d60e5">Ev68InstructionFetch::peek_cached</a>,</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  &amp;<a class="code hl_function" href="../../d3/d00/a01253.html#ae11aacd49bc00522baa94fab14314300">Ev68InstructionFetch::matches_interpreted</a>, &amp;<a class="code hl_function" href="../../d3/d00/a01253.html#aab3dca0aa37374c0560c1978c6693f27">Ev68InstructionFetch::can_chain</a>,</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>  &amp;<a class="code hl_function" href="../../d3/d00/a01253.html#ae19d7a687fee8299fdeea11a5c8fe59c">Ev68InstructionFetch::source</a></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>};</div>
+</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aa00206_html"><div class="ttname"><a href="../../d5/d00/a00206.html">AlphaInstructionFetch.h</a></div></div>
+<div class="ttc" id="aa00278_html_ae16a534d6bc0a50903d5852656a0bf39"><div class="ttname"><a href="../../dc/d00/a00278.html#ae16a534d6bc0a50903d5852656a0bf39">kEv68InstructionFetchPolicy</a></div><div class="ttdeci">constexpr AlphaInstructionFetchPolicy kEv68InstructionFetchPolicy</div><div class="ttdef"><b>Definition</b> <a href="#l00058">Ev68InstructionFetch.h:58</a></div></div>
+<div class="ttc" id="aa00710_html_a4e906a1b455653dd9be3d01ef9aadebb"><div class="ttname"><a href="../../d4/d00/a00710.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a></div><div class="ttdeci">CAlphaCPU * cpu[4]</div></div>
+<div class="ttc" id="aa01137_html"><div class="ttname"><a href="../../d6/d00/a01137.html">CAlphaCPU</a></div><div class="ttdoc">Emulated CPU.</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00259">AlphaCPU.h:260</a></div></div>
+<div class="ttc" id="aa01181_html"><div class="ttname"><a href="../../de/d00/a01181.html">AlphaInstructionMapping</a></div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00206_source.html#l00037">AlphaInstructionFetch.h:38</a></div></div>
+<div class="ttc" id="aa01185_html"><div class="ttname"><a href="../../d3/d00/a01185.html">AlphaInstructionFetchPolicy</a></div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00206_source.html#l00045">AlphaInstructionFetch.h:46</a></div></div>
+<div class="ttc" id="aa01185_html_a47e3e16acac2f892316a4648b687ceea"><div class="ttname"><a href="../../d3/d00/a01185.html#a47e3e16acac2f892316a4648b687ceea">AlphaInstructionFetchPolicy::probe</a></div><div class="ttdeci">AlphaInstructionMapping(*) probe(CAlphaCPU &amp;cpu, std::uint64_t pc)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00206_source.html#l00061">AlphaInstructionFetch.h:61</a></div></div>
+<div class="ttc" id="aa01185_html_a8814a7ccacafe7b77aaf7b83268926f6"><div class="ttname"><a href="../../d3/d00/a01185.html#a8814a7ccacafe7b77aaf7b83268926f6">AlphaInstructionFetchPolicy::can_chain</a></div><div class="ttdeci">bool(*) can_chain(const CAlphaCPU &amp;cpu, std::uint64_t target)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00206_source.html#l00074">AlphaInstructionFetch.h:74</a></div></div>
+<div class="ttc" id="aa01185_html_a986cd7d62a8dd41a5de2f1afeec45886"><div class="ttname"><a href="../../d3/d00/a01185.html#a986cd7d62a8dd41a5de2f1afeec45886">AlphaInstructionFetchPolicy::matches_interpreted</a></div><div class="ttdeci">bool(*) matches_interpreted(const CAlphaCPU &amp;cpu, std::uint64_t start_pc, std::uint32_t count)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00206_source.html#l00069">AlphaInstructionFetch.h:69</a></div></div>
+<div class="ttc" id="aa01185_html_aca83fd377b75706fe2d55992cef3eb27"><div class="ttname"><a href="../../d3/d00/a01185.html#aca83fd377b75706fe2d55992cef3eb27">AlphaInstructionFetchPolicy::fetch</a></div><div class="ttdeci">int(*) fetch(CAlphaCPU &amp;cpu, std::uint32_t *instruction)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00206_source.html#l00051">AlphaInstructionFetch.h:51</a></div></div>
+<div class="ttc" id="aa01185_html_ad225a637b964722b4600195d70c7c37d"><div class="ttname"><a href="../../d3/d00/a01185.html#ad225a637b964722b4600195d70c7c37d">AlphaInstructionFetchPolicy::source</a></div><div class="ttdeci">AlphaInstructionSourceView(*) source(CAlphaCPU &amp;cpu, std::uint64_t pc)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00206_source.html#l00077">AlphaInstructionFetch.h:77</a></div></div>
+<div class="ttc" id="aa01185_html_ad801636d2dc4662023bf3655e8e54e97"><div class="ttname"><a href="../../d3/d00/a01185.html#ad801636d2dc4662023bf3655e8e54e97">AlphaInstructionFetchPolicy::peek_cached</a></div><div class="ttdeci">bool(*) peek_cached(const CAlphaCPU &amp;cpu, std::uint32_t *instruction)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00206_source.html#l00065">AlphaInstructionFetch.h:65</a></div></div>
+<div class="ttc" id="aa01185_html_af18c541823c39234048de9fe33dfad28"><div class="ttname"><a href="../../d3/d00/a01185.html#af18c541823c39234048de9fe33dfad28">AlphaInstructionFetchPolicy::prepare_dispatch</a></div><div class="ttdeci">void(*) prepare_dispatch(CAlphaCPU &amp;cpu)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00206_source.html#l00055">AlphaInstructionFetch.h:55</a></div></div>
+<div class="ttc" id="aa01189_html"><div class="ttname"><a href="../../d3/d00/a01189.html">AlphaInstructionSourceView</a></div><div class="ttdef"><b>Definition</b> <a href="../../d3/d00/a00209_source.html#l00034">AlphaInstructionSource.h:35</a></div></div>
+<div class="ttc" id="aa01253_html"><div class="ttname"><a href="../../d3/d00/a01253.html">Ev68InstructionFetch</a></div><div class="ttdef"><b>Definition</b> <a href="#l00032">Ev68InstructionFetch.h:33</a></div></div>
+<div class="ttc" id="aa01253_html_a8c6a8f9a3ef3e4f2675ab3ecc5abdb3d"><div class="ttname"><a href="../../d3/d00/a01253.html#a8c6a8f9a3ef3e4f2675ab3ecc5abdb3d">Ev68InstructionFetch::prepare_dispatch</a></div><div class="ttdeci">static void prepare_dispatch(CAlphaCPU &amp;cpu)</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d00/a00275_source.html#l00033">Ev68InstructionFetch.cpp:33</a></div></div>
+<div class="ttc" id="aa01253_html_a9abb29aaaa47b7d990eb5a43c1fef83c"><div class="ttname"><a href="../../d3/d00/a01253.html#a9abb29aaaa47b7d990eb5a43c1fef83c">Ev68InstructionFetch::read_cache</a></div><div class="ttdeci">static int read_cache(CAlphaCPU &amp;cpu, std::uint64_t address, std::uint32_t *data)</div><div class="ttdoc">Get an instruction from the instruction cache.</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d00/a00275_source.html#l00194">Ev68InstructionFetch.cpp:194</a></div></div>
+<div class="ttc" id="aa01253_html_aab3dca0aa37374c0560c1978c6693f27"><div class="ttname"><a href="../../d3/d00/a01253.html#aab3dca0aa37374c0560c1978c6693f27">Ev68InstructionFetch::can_chain</a></div><div class="ttdeci">static bool can_chain(const CAlphaCPU &amp;cpu, std::uint64_t target)</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d00/a00275_source.html#l00112">Ev68InstructionFetch.cpp:112</a></div></div>
+<div class="ttc" id="aa01253_html_ac4158e810bebf3a612e91596f68e2435"><div class="ttname"><a href="../../d3/d00/a01253.html#ac4158e810bebf3a612e91596f68e2435">Ev68InstructionFetch::fetch</a></div><div class="ttdeci">static int fetch(CAlphaCPU &amp;cpu, std::uint32_t *instruction)</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d00/a00275_source.html#l00135">Ev68InstructionFetch.cpp:135</a></div></div>
+<div class="ttc" id="aa01253_html_ae11aacd49bc00522baa94fab14314300"><div class="ttname"><a href="../../d3/d00/a01253.html#ae11aacd49bc00522baa94fab14314300">Ev68InstructionFetch::matches_interpreted</a></div><div class="ttdeci">static bool matches_interpreted(const CAlphaCPU &amp;cpu, std::uint64_t start_pc, std::uint32_t count)</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d00/a00275_source.html#l00084">Ev68InstructionFetch.cpp:84</a></div></div>
+<div class="ttc" id="aa01253_html_ae19d7a687fee8299fdeea11a5c8fe59c"><div class="ttname"><a href="../../d3/d00/a01253.html#ae19d7a687fee8299fdeea11a5c8fe59c">Ev68InstructionFetch::source</a></div><div class="ttdeci">static AlphaInstructionSourceView source(CAlphaCPU &amp;cpu, std::uint64_t pc)</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d00/a00275_source.html#l00118">Ev68InstructionFetch.cpp:118</a></div></div>
+<div class="ttc" id="aa01253_html_aeb893ea5ef8c91ca90bca085e64dde8f"><div class="ttname"><a href="../../d3/d00/a01253.html#aeb893ea5ef8c91ca90bca085e64dde8f">Ev68InstructionFetch::supports_legacy_jit</a></div><div class="ttdeci">static constexpr bool supports_legacy_jit(const AlphaInstructionFetchPolicy &amp;policy)</div><div class="ttdef"><b>Definition</b> <a href="#l00046">Ev68InstructionFetch.h:46</a></div></div>
+<div class="ttc" id="aa01253_html_afc451593e1ab7ccc5f2f6e1e884b224a"><div class="ttname"><a href="../../d3/d00/a01253.html#afc451593e1ab7ccc5f2f6e1e884b224a">Ev68InstructionFetch::probe</a></div><div class="ttdeci">static AlphaInstructionMapping probe(CAlphaCPU &amp;cpu, std::uint64_t pc)</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d00/a00275_source.html#l00040">Ev68InstructionFetch.cpp:40</a></div></div>
+<div class="ttc" id="aa01253_html_afd94d86e446ebb3ccb4601d7286d60e5"><div class="ttname"><a href="../../d3/d00/a01253.html#afd94d86e446ebb3ccb4601d7286d60e5">Ev68InstructionFetch::peek_cached</a></div><div class="ttdeci">static bool peek_cached(const CAlphaCPU &amp;cpu, std::uint32_t *instruction)</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d00/a00275_source.html#l00065">Ev68InstructionFetch.cpp:65</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_450cafc1c0b54ccdbdec0997809be7cf.html">emu</a></li><li class="navelem"><a href="../../dc/d00/a00278.html">emu.h</a></li>
+    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../dc/d00/a00278.html">Ev68InstructionFetch.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

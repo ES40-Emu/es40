@@ -1,8 +1,8 @@
 var a00458 =
 [
-    [ "eth_frame", "d9/d00/a01569.html", "d9/d00/a01569" ],
-    [ "eth_packet", "d6/d00/a01573.html", "d6/d00/a01573" ],
-    [ "CPacketQueue", "d3/d00/a01577.html", "d3/d00/a01577" ],
-    [ "ETH_MAX_PACKET_CRC", "da/d00/a00458.html#aa39608c91dfed902ed6ea750ad44614d", null ],
-    [ "ETH_MAX_PACKET_RAW", "da/d00/a00458.html#a0992880f77f5bfef1a2e2c3cbe9c8ff0", null ]
+    [ "DECLARE_PLUGIN_INIT_FINI_FOR_MODULE", "da/d00/a00458.html#af4d16a6a0d89862ac4e4f2f151d6cec1", null ],
+    [ "PLUG_load_plugin", "da/d00/a00458.html#a3229ec1bb7d262485f5dad3652cc4a22", null ],
+    [ "PLUG_unload_plugin", "da/d00/a00458.html#a191307fb8f917c2744a1db9612bba6dd", null ],
+    [ "libsdl_LTX_plugin_fini", "da/d00/a00458.html#a49debd4cf7efa7b8293b70f8366f2b6c", null ],
+    [ "libsdl_LTX_plugin_init", "da/d00/a00458.html#a8256e45104a21ca374ffdafd6d5e1ecc", null ]
 ];

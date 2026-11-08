@@ -1,17 +1,27 @@
 var a00302 =
 [
-    [ "CHECK_ALLOCATION", "d0/d00/a00302.html#a59661d12c2cd12b9612a73f2097bbd8d", null ],
-    [ "CHECK_REALLOCATION", "d0/d00/a00302.html#a040fdb0700e5702e5efc4eb8a738a9e1", null ],
-    [ "DEBUG_BUFSIZE", "d0/d00/a00302.html#a71801a462cb421b85d381899e6b0f87f", null ],
-    [ "DEBUG_INDENTATION", "d0/d00/a00302.html#a37d833fbb137583737871c2d2659eae6", null ],
-    [ "FAILURE", "d0/d00/a00302.html#a5641b3e8b9f16e5ce6f4ba1f83943832", null ],
-    [ "FAILURE_1", "d0/d00/a00302.html#a4e7e9b5a4d9c0dcab3c0ac1f4f7e8014", null ],
-    [ "FAILURE_2", "d0/d00/a00302.html#a4ab93ebe58e8ae19380d2483a6183121", null ],
-    [ "FAILURE_3", "d0/d00/a00302.html#ae40bf0f0834a008ee6d1b6c76fbd5695", null ],
-    [ "FAILURE_4", "d0/d00/a00302.html#a13c413d3ed48df8e88119a8121c7057e", null ],
-    [ "FAILURE_5", "d0/d00/a00302.html#a7aafb04ba0519eff36a511757c9242d3", null ],
-    [ "FAILURE_6", "d0/d00/a00302.html#ad4f718b50417dc8cbc874c429d3d36ff", null ],
-    [ "debug", "d0/d00/a00302.html#a3627c620cc9c0c2bfdd890a59306286a", null ],
-    [ "debug_indentation", "d0/d00/a00302.html#a4f0d9bd05e6cac75f07f7404d592b4f6", null ],
-    [ "fatal", "d0/d00/a00302.html#ab56c14a5ed99df4361152c41d2e40a4c", null ]
+    [ "SIdleMethod", "d6/d00/a01269.html", "d6/d00/a01269" ],
+    [ "EIdleLoop", "d0/d00/a00302.html#a66f6a3a5d944cc3d217f1e7d59357db8", [
+      [ "IDLE_LOOP_UNKNOWN", "d0/d00/a00302.html#a66f6a3a5d944cc3d217f1e7d59357db8a69573a8cf87547b7802be9d541bff698", null ],
+      [ "IDLE_LOOP_POLLS", "d0/d00/a00302.html#a66f6a3a5d944cc3d217f1e7d59357db8afaf5a3bb8c6c4d83a04aed419325552a", null ],
+      [ "IDLE_LOOP_STORES", "d0/d00/a00302.html#a66f6a3a5d944cc3d217f1e7d59357db8aee78fd3e02a98ef40040a1815f25e883", null ],
+      [ "IDLE_LOOP_WALKS", "d0/d00/a00302.html#a66f6a3a5d944cc3d217f1e7d59357db8a6894220e928a6a67d0ab510e106ca2ea", null ],
+      [ "IDLE_LOOP_COMPUTES", "d0/d00/a00302.html#a66f6a3a5d944cc3d217f1e7d59357db8a70e8d720021f3f3340de45f9ff816809", null ],
+      [ "IDLE_LOOP_CALLS", "d0/d00/a00302.html#a66f6a3a5d944cc3d217f1e7d59357db8a1f066662377f1e124238b1190944af0e", null ],
+      [ "IDLE_LOOP_UNREADABLE", "d0/d00/a00302.html#a66f6a3a5d944cc3d217f1e7d59357db8a76e606e311d1d99641fe765c176763fe", null ]
+    ] ],
+    [ "EIdleRule", "d0/d00/a00302.html#ae1cb99b7c446a716f09351f157acec25", [
+      [ "RULE_NONE", "d0/d00/a00302.html#ae1cb99b7c446a716f09351f157acec25a592187f3a6746679fc32286eefb524dc", null ],
+      [ "RULE_SPIN", "d0/d00/a00302.html#ae1cb99b7c446a716f09351f157acec25a4eea9d49dcf47b30f12a0029f534f5c4", null ],
+      [ "RULE_SPIN_IPL3", "d0/d00/a00302.html#ae1cb99b7c446a716f09351f157acec25ad67b92be79262bd9f85e921c9a6f99af", null ],
+      [ "RULE_SPIN_KERNEL", "d0/d00/a00302.html#ae1cb99b7c446a716f09351f157acec25a000096f976ec0bb99c9319ee3706f94f", null ]
+    ] ],
+    [ "idle_loop_check", "d0/d00/a00302.html#aa11cc827ef4552020bbc0a8c3941ed39", null ],
+    [ "idle_loop_trace", "d0/d00/a00302.html#a90ac78d6308a278ace2e3d8e3e39ba25", null ],
+    [ "idle_method_by_name", "d0/d00/a00302.html#a737b2141c4f39691fac007695b10419c", null ],
+    [ "idle_pal_reads_only", "d0/d00/a00302.html#a444fbfa76f8a631e4c2363ca69d8edf4", null ],
+    [ "idle_methods", "d0/d00/a00302.html#aa859dbb982061717cc9142be2fdcbc87", null ],
+    [ "kIdleLoopMax", "d0/d00/a00302.html#a1919b1497102355eca3c37a825d830da", null ],
+    [ "kIdleSpanMax", "d0/d00/a00302.html#ab243ccbe8f97fc920ec096fe03b317a5", null ],
+    [ "kIdleTraceSteps", "d0/d00/a00302.html#a263261f2fbed23dbdef07bf872df6cca", null ]
 ];

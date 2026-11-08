@@ -1,7 +1,7 @@
 var a01565 =
 [
-    [ "td_bufaddr1", "d6/d00/a01565.html#a5b59039fd12d5eb4a91f64c60e2ff80a", null ],
-    [ "td_bufaddr2", "d6/d00/a01565.html#ae8749ab3d6fb617d004125d933c3d6bf", null ],
-    [ "td_ctl", "d6/d00/a01565.html#aee46a5a6ef585b6a40d8e1986d9e1a62", null ],
-    [ "td_status", "d6/d00/a01565.html#a1b6f8dcc7b0e2f25ae5e1e3541f513df", null ]
+    [ "address", "d6/d00/a01565.html#a242cde1fd5c7c1fb103fcbd59003ac75", null ],
+    [ "count", "d6/d00/a01565.html#a4ec3775ce83047f7cfc499b086ce24ca", null ],
+    [ "first", "d6/d00/a01565.html#ae8143909abfda63a40d0bba6227ef499", null ],
+    [ "wait_mask", "d6/d00/a01565.html#a8ab1a4a28cc3d87c1fba1927bcb03e2b", null ]
 ];

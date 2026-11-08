@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: CPU/jit/jitengine_x64.cpp File Reference</title>
+<title>ES40: CPU/cpu_misc.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,30 +109,332 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d7/d00/a00254.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">jitengine_x64.cpp File Reference</div></div>
+  <div class="headertitle"><div class="title">cpu_misc.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
+<p>Contains code macros for miscellaneous processor instructions.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &lt;atomic&gt;</code><br />
+</div><div class="textblock"><div class="dynheader">
+Include dependency graph for cpu_misc.h:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d4/d00/a00255.png" border="0" usemap="#a_c_p_u_2cpu__misc_8h" loading="lazy" alt=""/></div>
+<map name="a_c_p_u_2cpu__misc_8h" id="a_c_p_u_2cpu__misc_8h">
+<area shape="rect" title="Contains code macros for miscellaneous processor instructions." alt="" coords="5,5,127,32"/>
+<area shape="rect" title=" " alt="" coords="36,80,96,107"/>
+<area shape="poly" title=" " alt="" coords="68,31,69,65,63,64,64,35"/>
+</map>
+</div>
+</div><div class="textblock"><div class="dynheader">
+This graph shows which files directly or indirectly include this file:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d0/d00/a00256.png" border="0" usemap="#a_c_p_u_2cpu__misc_8hdep" loading="lazy" alt=""/></div>
+<map name="a_c_p_u_2cpu__misc_8hdep" id="a_c_p_u_2cpu__misc_8hdep">
+<area shape="rect" title="Contains code macros for miscellaneous processor instructions." alt="" coords="15,5,137,32"/>
+<area shape="rect" href="../../d7/d00/a00182.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="5,80,147,107"/>
+<area shape="poly" title=" " alt="" coords="78,46,79,80,73,79,74,50"/>
+</map>
+</div>
+</div>
 <p><a href="../../d7/d00/a00254_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:a0cbebc4c8e05d28ba9fbcfbf4cc093d6" id="r_a0cbebc4c8e05d28ba9fbcfbf4cc093d6"><td class="memItemLeft">const char&#160;</td><td class="memItemRight"><a class="el" href="#a0cbebc4c8e05d28ba9fbcfbf4cc093d6">jit_x64_backend_tu</a> = 0</td></tr>
+<tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:a1551be9c2752014edf0d9116c9861590" id="r_a1551be9c2752014edf0d9116c9861590"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a1551be9c2752014edf0d9116c9861590">DO_AMASK</a></td></tr>
+<tr class="memitem:a20dfe7400f7f63664fb544376d8b4700" id="r_a20dfe7400f7f63664fb544376d8b4700"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a20dfe7400f7f63664fb544376d8b4700">ENTER_NATIVE_CALL_PAL</a>()</td></tr>
+<tr class="memitem:ad5cb6ed3d167e6e2e1f5db9e4c64c8ff" id="r_ad5cb6ed3d167e6e2e1f5db9e4c64c8ff"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad5cb6ed3d167e6e2e1f5db9e4c64c8ff">DO_CALL_PAL</a></td></tr>
+<tr class="memitem:afc5cbeed1b87bfe62eb3f12f9ebce8af" id="r_afc5cbeed1b87bfe62eb3f12f9ebce8af"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#afc5cbeed1b87bfe62eb3f12f9ebce8af">DO_IMPLVER</a>&#160;&#160;&#160;state.r[<a class="el" href="../../d7/d00/a00236.html#a14e5d5a6641dfac1ed51225a7b87bc92">REG_3</a>] = get_profile().implver;</td></tr>
+<tr class="memitem:a7b84b1644227e47426c32e3ce2395ff5" id="r_a7b84b1644227e47426c32e3ce2395ff5"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a7b84b1644227e47426c32e3ce2395ff5">DO_RPCC</a>&#160;&#160;&#160;{ state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>] = rpcc_read(); }</td></tr>
+<tr class="memitem:ad85b264ab70048fa0241949dc50ad2dd" id="r_ad85b264ab70048fa0241949dc50ad2dd"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad85b264ab70048fa0241949dc50ad2dd">DO_TRAPB</a>&#160;&#160;&#160;std::atomic_thread_fence(std::memory_order_seq_cst);</td></tr>
+<tr class="memitem:ad0443843c170ca308169ea500ea0a521" id="r_ad0443843c170ca308169ea500ea0a521"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad0443843c170ca308169ea500ea0a521">DO_EXCB</a>&#160;&#160;&#160;std::atomic_thread_fence(std::memory_order_seq_cst);</td></tr>
+<tr class="memitem:a984b2e637d57c3343a4ab8f98f9953e4" id="r_a984b2e637d57c3343a4ab8f98f9953e4"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a984b2e637d57c3343a4ab8f98f9953e4">DO_MB</a>&#160;&#160;&#160;std::atomic_thread_fence(std::memory_order_seq_cst);</td></tr>
+<tr class="memitem:a5e4a6d6c44fc93fac88b784ab08e348f" id="r_a5e4a6d6c44fc93fac88b784ab08e348f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5e4a6d6c44fc93fac88b784ab08e348f">DO_WMB</a>&#160;&#160;&#160;std::atomic_thread_fence(std::memory_order_seq_cst);</td></tr>
+<tr class="memitem:a76fdee6a43c18514cbb7eb0ef839fa15" id="r_a76fdee6a43c18514cbb7eb0ef839fa15"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a76fdee6a43c18514cbb7eb0ef839fa15">DO_FETCH</a>&#160;&#160;&#160;;</td></tr>
+<tr class="memitem:a372ccbae35bf1b423149bfb9ed0118ce" id="r_a372ccbae35bf1b423149bfb9ed0118ce"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a372ccbae35bf1b423149bfb9ed0118ce">DO_FETCH_M</a>&#160;&#160;&#160;;</td></tr>
+<tr class="memitem:a24217b6a1cfcd3b3d5f659af57eace19" id="r_a24217b6a1cfcd3b3d5f659af57eace19"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a24217b6a1cfcd3b3d5f659af57eace19">DO_ECB</a>&#160;&#160;&#160;;</td></tr>
+<tr class="memitem:abd999677c1203a257788601d3c29be23" id="r_abd999677c1203a257788601d3c29be23"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#abd999677c1203a257788601d3c29be23">DO_WH64</a>&#160;&#160;&#160;;</td></tr>
+<tr class="memitem:af0507a22d73d61f6618e6b0735002a55" id="r_af0507a22d73d61f6618e6b0735002a55"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af0507a22d73d61f6618e6b0735002a55">DO_WH64EN</a>&#160;&#160;&#160;;</td></tr>
+<tr class="memitem:af832bbabef7025d50ceb2c1b85120094" id="r_af832bbabef7025d50ceb2c1b85120094"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af832bbabef7025d50ceb2c1b85120094">DO_IMB</a>&#160;&#160;&#160;do { flush_icache(); tbia(<a class="el" href="../../d7/d00/a00236.html#a50cb336402eca0f18fa5c8344b6af341">ACCESS_EXEC</a>); } while (0)</td></tr>
 </table>
-<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
-<a id="a0cbebc4c8e05d28ba9fbcfbf4cc093d6" name="a0cbebc4c8e05d28ba9fbcfbf4cc093d6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0cbebc4c8e05d28ba9fbcfbf4cc093d6">&#9670;&#160;</a></span>jit_x64_backend_tu</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Contains code macros for miscellaneous processor instructions. </p>
+<p>Based on ARM chapter 4.11.</p>
+<p>$Id$</p>
+<p>X-1.12 Camiel Vanderhoeven 14-MAR-2008</p><ol type="1">
+<li>More meaningful exceptions replace throwing (int) 1.</li>
+<li>U64 macro replaces X64 macro.</li>
+</ol>
+<p>X-1.11 Camiel Vanderhoeven 05-MAR-2008 Multi-threading version.</p>
+<p>X-1.10 Camiel Vanderhoeven 30-JAN-2008 Always use set_pc or add_pc to change the program counter.</p>
+<p>X-1.9 Camiel Vanderhoeven 30-JAN-2008 Remember number of instructions left in current memory page, so that the translation-buffer doens't need to be consulted on every instruction fetch when the Icache is disabled.</p>
+<p>X-1.8 Camiel Vanderhoeven 2-DEC-2007 Use vmspal_call functions.</p>
+<p>X-1.7 Camiel Vanderhoeven 16-NOV-2007 Avoid more compiler warnings.</p>
+<p>X-1.6 Camiel Vanderhoeven 14-NOV-2007 Bug-fix in CALL_PAL RSCC.</p>
+<p>X-1.5 Camiel Vanderhoeven 14-NOV-2007 Implemented most simple PALcode routines in C++.</p>
+<p>X-1.4 Camiel Vanderhoeven 12-NOV-2007 Made a start with implementing PALcode routines in C++.</p>
+<p>X-1.3 Camiel Vanderhoeven 11-APR-2007 Moved all data that should be saved to a state file to a structure "state".</p>
+<p>X-1.2 Camiel Vanderhoeven 30-MAR-2007 Added old changelog comments.</p>
+<p>X-1.1 Camiel Vanderhoeven 18-FEB-2007 File created. Contains code previously found in <a class="el" href="../../de/d00/a00185.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor.">AlphaCPU.h</a> </p>
+
+<p class="definition">Definition in file <a class="el" href="../../d7/d00/a00254_source.html">cpu_misc.h</a>.</p>
+</div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
+<a id="a1551be9c2752014edf0d9116c9861590" name="a1551be9c2752014edf0d9116c9861590"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1551be9c2752014edf0d9116c9861590">&#9670;&#160;</a></span>DO_AMASK</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const char jit_x64_backend_tu = 0</td>
+          <td class="memname">#define DO_AMASK</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">do</span> {                                            \</div>
+<div class="line">              \</div>
+<div class="line">  if (<a class="code hl_define" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> != 31) {                            \</div>
+<div class="line">    GO_PAL(<a class="code hl_enumvalue" href="../../dc/d00/a00218.html#a5c9934e3a54f06127616037536160abda63458a13f289bb736a9af99d72741952">AlphaPALException::OpcodeDecode</a>);                                \</div>
+<div class="line">  } <span class="keywordflow">else</span> {                                      \</div>
+<div class="line">    state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#a14e5d5a6641dfac1ed51225a7b87bc92">REG_3</a>] = <a class="code hl_define" href="../../d7/d00/a00236.html#a100362a825d9eb8f8cc30179894bcdc3">V_2</a> &amp; ~get_profile().amask; \</div>
+<div class="line">  }                                             \</div>
+<div class="line">} <span class="keywordflow">while</span> (0)</div>
+<div class="ttc" id="aa00218_html_a5c9934e3a54f06127616037536160abda63458a13f289bb736a9af99d72741952"><div class="ttname"><a href="../../dc/d00/a00218.html#a5c9934e3a54f06127616037536160abda63458a13f289bb736a9af99d72741952">AlphaPALException::OpcodeDecode</a></div><div class="ttdeci">@ OpcodeDecode</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00218_source.html#l00041">AlphaPAL.h:41</a></div></div>
+<div class="ttc" id="aa00236_html_a100362a825d9eb8f8cc30179894bcdc3"><div class="ttname"><a href="../../d7/d00/a00236.html#a100362a825d9eb8f8cc30179894bcdc3">V_2</a></div><div class="ttdeci">#define V_2</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00831">cpu_defs.h:831</a></div></div>
+<div class="ttc" id="aa00236_html_a14e5d5a6641dfac1ed51225a7b87bc92"><div class="ttname"><a href="../../d7/d00/a00236.html#a14e5d5a6641dfac1ed51225a7b87bc92">REG_3</a></div><div class="ttdeci">#define REG_3</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00823">cpu_defs.h:823</a></div></div>
+<div class="ttc" id="aa00236_html_a3cc7326bd3140cc269e686fc46179a21"><div class="ttname"><a href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a></div><div class="ttdeci">#define REG_1</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00821">cpu_defs.h:821</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00254_source.html#l00077">77</a> of file <a class="el" href="../../d7/d00/a00254_source.html">cpu_misc.h</a>.</p>
+
+</div>
+</div>
+<a id="ad5cb6ed3d167e6e2e1f5db9e4c64c8ff" name="ad5cb6ed3d167e6e2e1f5db9e4c64c8ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5cb6ed3d167e6e2e1f5db9e4c64c8ff">&#9670;&#160;</a></span>DO_CALL_PAL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_CALL_PAL</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00254_source.html#l03866">3866</a> of file <a class="el" href="../../d7/d00/a00254_source.html">jitengine_x64.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00254_source.html#l00094">94</a> of file <a class="el" href="../../d7/d00/a00254_source.html">cpu_misc.h</a>.</p>
+
+</div>
+</div>
+<a id="a24217b6a1cfcd3b3d5f659af57eace19" name="a24217b6a1cfcd3b3d5f659af57eace19"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24217b6a1cfcd3b3d5f659af57eace19">&#9670;&#160;</a></span>DO_ECB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_ECB&#160;&#160;&#160;;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00254_source.html#l00352">352</a> of file <a class="el" href="../../d7/d00/a00254_source.html">cpu_misc.h</a>.</p>
+
+</div>
+</div>
+<a id="ad0443843c170ca308169ea500ea0a521" name="ad0443843c170ca308169ea500ea0a521"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0443843c170ca308169ea500ea0a521">&#9670;&#160;</a></span>DO_EXCB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_EXCB&#160;&#160;&#160;std::atomic_thread_fence(std::memory_order_seq_cst);</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00254_source.html#l00341">341</a> of file <a class="el" href="../../d7/d00/a00254_source.html">cpu_misc.h</a>.</p>
+
+</div>
+</div>
+<a id="a76fdee6a43c18514cbb7eb0ef839fa15" name="a76fdee6a43c18514cbb7eb0ef839fa15"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a76fdee6a43c18514cbb7eb0ef839fa15">&#9670;&#160;</a></span>DO_FETCH</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_FETCH&#160;&#160;&#160;;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00254_source.html#l00350">350</a> of file <a class="el" href="../../d7/d00/a00254_source.html">cpu_misc.h</a>.</p>
+
+</div>
+</div>
+<a id="a372ccbae35bf1b423149bfb9ed0118ce" name="a372ccbae35bf1b423149bfb9ed0118ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a372ccbae35bf1b423149bfb9ed0118ce">&#9670;&#160;</a></span>DO_FETCH_M</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_FETCH_M&#160;&#160;&#160;;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00254_source.html#l00351">351</a> of file <a class="el" href="../../d7/d00/a00254_source.html">cpu_misc.h</a>.</p>
+
+</div>
+</div>
+<a id="af832bbabef7025d50ceb2c1b85120094" name="af832bbabef7025d50ceb2c1b85120094"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af832bbabef7025d50ceb2c1b85120094">&#9670;&#160;</a></span>DO_IMB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_IMB&#160;&#160;&#160;do { flush_icache(); tbia(<a class="el" href="../../d7/d00/a00236.html#a50cb336402eca0f18fa5c8344b6af341">ACCESS_EXEC</a>); } while (0)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00254_source.html#l00358">358</a> of file <a class="el" href="../../d7/d00/a00254_source.html">cpu_misc.h</a>.</p>
+
+</div>
+</div>
+<a id="afc5cbeed1b87bfe62eb3f12f9ebce8af" name="afc5cbeed1b87bfe62eb3f12f9ebce8af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc5cbeed1b87bfe62eb3f12f9ebce8af">&#9670;&#160;</a></span>DO_IMPLVER</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_IMPLVER&#160;&#160;&#160;state.r[<a class="el" href="../../d7/d00/a00236.html#a14e5d5a6641dfac1ed51225a7b87bc92">REG_3</a>] = get_profile().implver;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00254_source.html#l00327">327</a> of file <a class="el" href="../../d7/d00/a00254_source.html">cpu_misc.h</a>.</p>
+
+</div>
+</div>
+<a id="a984b2e637d57c3343a4ab8f98f9953e4" name="a984b2e637d57c3343a4ab8f98f9953e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a984b2e637d57c3343a4ab8f98f9953e4">&#9670;&#160;</a></span>DO_MB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_MB&#160;&#160;&#160;std::atomic_thread_fence(std::memory_order_seq_cst);</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00254_source.html#l00342">342</a> of file <a class="el" href="../../d7/d00/a00254_source.html">cpu_misc.h</a>.</p>
+
+</div>
+</div>
+<a id="a7b84b1644227e47426c32e3ce2395ff5" name="a7b84b1644227e47426c32e3ce2395ff5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b84b1644227e47426c32e3ce2395ff5">&#9670;&#160;</a></span>DO_RPCC</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_RPCC&#160;&#160;&#160;{ state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>] = rpcc_read(); }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00254_source.html#l00333">333</a> of file <a class="el" href="../../d7/d00/a00254_source.html">cpu_misc.h</a>.</p>
+
+</div>
+</div>
+<a id="ad85b264ab70048fa0241949dc50ad2dd" name="ad85b264ab70048fa0241949dc50ad2dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad85b264ab70048fa0241949dc50ad2dd">&#9670;&#160;</a></span>DO_TRAPB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_TRAPB&#160;&#160;&#160;std::atomic_thread_fence(std::memory_order_seq_cst);</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00254_source.html#l00339">339</a> of file <a class="el" href="../../d7/d00/a00254_source.html">cpu_misc.h</a>.</p>
+
+</div>
+</div>
+<a id="abd999677c1203a257788601d3c29be23" name="abd999677c1203a257788601d3c29be23"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd999677c1203a257788601d3c29be23">&#9670;&#160;</a></span>DO_WH64</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_WH64&#160;&#160;&#160;;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00254_source.html#l00353">353</a> of file <a class="el" href="../../d7/d00/a00254_source.html">cpu_misc.h</a>.</p>
+
+</div>
+</div>
+<a id="af0507a22d73d61f6618e6b0735002a55" name="af0507a22d73d61f6618e6b0735002a55"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af0507a22d73d61f6618e6b0735002a55">&#9670;&#160;</a></span>DO_WH64EN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_WH64EN&#160;&#160;&#160;;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00254_source.html#l00354">354</a> of file <a class="el" href="../../d7/d00/a00254_source.html">cpu_misc.h</a>.</p>
+
+</div>
+</div>
+<a id="a5e4a6d6c44fc93fac88b784ab08e348f" name="a5e4a6d6c44fc93fac88b784ab08e348f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e4a6d6c44fc93fac88b784ab08e348f">&#9670;&#160;</a></span>DO_WMB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_WMB&#160;&#160;&#160;std::atomic_thread_fence(std::memory_order_seq_cst);</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00254_source.html#l00348">348</a> of file <a class="el" href="../../d7/d00/a00254_source.html">cpu_misc.h</a>.</p>
+
+</div>
+</div>
+<a id="a20dfe7400f7f63664fb544376d8b4700" name="a20dfe7400f7f63664fb544376d8b4700"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20dfe7400f7f63664fb544376d8b4700">&#9670;&#160;</a></span>ENTER_NATIVE_CALL_PAL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ENTER_NATIVE_CALL_PAL</td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">do</span> {                                                                \</div>
+<div class="line">  enter_native_call_pal(function);                                  \</div>
+<div class="line">  TRC(<span class="keyword">true</span>, <span class="keyword">false</span>)                                                  \</div>
+<div class="line">} <span class="keywordflow">while</span> (0)</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d7/d00/a00254_source.html#l00087">87</a> of file <a class="el" href="../../d7/d00/a00254_source.html">cpu_misc.h</a>.</p>
 
 </div>
 </div>
@@ -149,7 +451,7 @@ Variables</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../dir_2c260bc9952edac4006fc3f88bbf2931.html">jit</a></li><li class="navelem"><a href="../../d7/d00/a00254.html">jitengine_x64.cpp</a></li>
+    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d7/d00/a00254.html">cpu_misc.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: base/RWLock.h Source File</title>
+<title>ES40: audio/MPU401.cpp Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,363 +109,183 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d4/d00/a00035_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">RWLock.h</div></div>
+  <div class="headertitle"><div class="title">MPU401.cpp</div></div>
 </div><!--header-->
 <div class="contents">
 <a href="../../d4/d00/a00035.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator.</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2007-2008 by the ES40 Emulator Project</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2026 by Cacodemon345</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright (C) 2026 by gdwnldsKSC</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * </span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * This program is free software; you can redistribute it and/or</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * modify it under the terms of the GNU General Public License</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * as published by the Free Software Foundation; either version 2</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * of the License, or (at your option) any later version.</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * </span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * This program is distributed in the hope that it will be useful,</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * GNU General Public License for more details.</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * </span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * You should have received a copy of the GNU General Public License</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * along with this program; if not, write to the Free Software</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * </span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * Although this is not required, the author would appreciate being notified of, </span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * and receiving any modifications you may make to the source code that might serve</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> * the general public.</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> * Parts of this file based upon the Poco C++ Libraries, which is Copyright (C) </span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> * 2004-2006, Applied Informatics Software Engineering GmbH. and Contributors.</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment">//</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment">// RWLock.h</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment">//</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment">// $Id$</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="comment">//</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="comment">// Library: Foundation</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="comment">// Package: Threading</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="comment">// Module:  RWLock</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment">//</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="comment">// Definition of the RWLock class.</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="comment">//</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment">// Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment">// and Contributors.</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment">//</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment">// Permission is hereby granted, free of charge, to any person or organization</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment">// obtaining a copy of the software and accompanying documentation covered by</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="comment">// this license (the &quot;Software&quot;) to use, reproduce, display, distribute,</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="comment">// execute, and transmit the Software, and to prepare derivative works of the</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="comment">// Software, and to permit third-parties to whom the Software is furnished to</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment">// do so, all subject to the following:</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="comment">// </span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="comment">// The copyright notices in the Software and this entire statement, including</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="comment">// the above license grant, this restriction and the following disclaimer,</span></div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="comment">// must be included in all copies of the Software, in whole or in part, and</span></div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="comment">// all derivative works of the Software, unless such copies or derivative</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="comment">// works are solely in the form of machine-executable object code generated by</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="comment">// a source language processor.</span></div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="comment">// </span></div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="comment">// THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="comment">// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment">// FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT</span></div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="comment">// SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="comment">// FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="comment">// ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER</span></div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="comment">// DEALINGS IN THE SOFTWARE.</span></div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="comment">//</span></div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">#ifndef ES40_RWLOCK_INCLUDED</span></div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="preprocessor">#define ES40_RWLOCK_INCLUDED</span></div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="preprocessor">#include &lt;shared_mutex&gt;</span></div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#include &lt;atomic&gt;</span></div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="preprocessor">#include &lt;chrono&gt;</span></div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="preprocessor">#include &lt;thread&gt;</span></div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">#include &lt;cstdio&gt;</span></div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="preprocessor">#include &lt;stdexcept&gt;</span></div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="preprocessor">#include &quot;<a class="code" href="../../d5/d00/a00029.html">Mutex.h</a>&quot;</span>   </div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="keyword">class </span><a class="code hl_class" href="../../d8/d00/a00773.html">CScopedRWLock</a>;</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
-<div class="foldopen" id="foldopen00081" data-start="{" data-end="};">
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html">   81</a></span><span class="keyword">class </span><a class="code hl_function" href="../../dd/d00/a00769.html#a2f739b2d2fa1f4c85919d6d9f4dfb088">CRWLock</a></div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>{</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html#a73e1350988c4adbc065bd81534a6764b">   84</a></span>  <span class="keyword">typedef</span> <a class="code hl_class" href="../../d8/d00/a00773.html">CScopedRWLock</a> <a class="code hl_typedef" href="../../dd/d00/a00769.html#a73e1350988c4adbc065bd81534a6764b">CScopedLock</a>;</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html#a2f739b2d2fa1f4c85919d6d9f4dfb088">   86</a></span>  <a class="code hl_function" href="../../dd/d00/a00769.html#a2f739b2d2fa1f4c85919d6d9f4dfb088">CRWLock</a>() : <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>(const_cast&lt;char*&gt;(<span class="stringliteral">&quot;?&quot;</span>)) {}</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
-<div class="foldopen" id="foldopen00088" data-start="{" data-end="}">
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html#a4d5d808aa121faeedb43e2499dd4a31e">   88</a></span>  <span class="keyword">explicit</span> <a class="code hl_function" href="../../dd/d00/a00769.html#a4d5d808aa121faeedb43e2499dd4a31e">CRWLock</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* lName)</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    : <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>(const_cast&lt;char*&gt;(lName)) {</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  }</div>
-</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html#a31c613d73071126d58610dffae467af6">   92</a></span>  <a class="code hl_function" href="../../dd/d00/a00769.html#a31c613d73071126d58610dffae467af6">~CRWLock</a>() = <span class="keywordflow">default</span>;</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
-<div class="foldopen" id="foldopen00094" data-start="{" data-end="}">
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html#ac6a77b3c2572f3731d131255ba489e9d">   94</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../dd/d00/a00769.html#ac6a77b3c2572f3731d131255ba489e9d">readLock</a>()</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  {</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="preprocessor">#if defined(DEBUG_LOCKS)</span></div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    printf(<span class="stringliteral">&quot;   READ LOCK mutex %s from thread %s.\n&quot;</span>, <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>, <a class="code hl_define" href="../../d5/d00/a00029.html#ad6eeeb3c1d19d219258c8ba36a25c828">CURRENT_THREAD_NAME</a>);</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    <a class="code hl_variable" href="../../dd/d00/a00769.html#a854be1ace1f9330a34fd15bafbdead42">_mutex</a>.lock_shared();</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    <a class="code hl_variable" href="../../dd/d00/a00769.html#a8fc6b04b9c4d370959d124c373c2464e">_exclusiveHeld</a>.store(<span class="keyword">false</span>, std::memory_order_release);</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="preprocessor">#if defined(DEBUG_LOCKS)</span></div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    printf(<span class="stringliteral">&quot; READ LOCKED mutex %s from thread %s.\n&quot;</span>, <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>, <a class="code hl_define" href="../../d5/d00/a00029.html#ad6eeeb3c1d19d219258c8ba36a25c828">CURRENT_THREAD_NAME</a>);</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  }</div>
-</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
-<div class="foldopen" id="foldopen00106" data-start="{" data-end="}">
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html#a1a8109fcb5867f6e06711a397026b9cf">  106</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../dd/d00/a00769.html#a1a8109fcb5867f6e06711a397026b9cf">writeLock</a>()</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>  {</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="preprocessor">#if defined(DEBUG_LOCKS)</span></div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    printf(<span class="stringliteral">&quot;  WRITE LOCK mutex %s from thread %s.\n&quot;</span>, <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>, <a class="code hl_define" href="../../d5/d00/a00029.html#ad6eeeb3c1d19d219258c8ba36a25c828">CURRENT_THREAD_NAME</a>);</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    <a class="code hl_variable" href="../../dd/d00/a00769.html#a854be1ace1f9330a34fd15bafbdead42">_mutex</a>.lock();</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    <a class="code hl_variable" href="../../dd/d00/a00769.html#a8fc6b04b9c4d370959d124c373c2464e">_exclusiveHeld</a>.store(<span class="keyword">true</span>, std::memory_order_release);</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="preprocessor">#if defined(DEBUG_LOCKS)</span></div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    printf(<span class="stringliteral">&quot;WRITE LOCKED mutex %s from thread %s.\n&quot;</span>, <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>, <a class="code hl_define" href="../../d5/d00/a00029.html#ad6eeeb3c1d19d219258c8ba36a25c828">CURRENT_THREAD_NAME</a>);</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>  }</div>
-</div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
-<div class="foldopen" id="foldopen00118" data-start="{" data-end="}">
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html#a025ab7e2fc5b8670745ee9355b5bce9f">  118</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../dd/d00/a00769.html#a025ab7e2fc5b8670745ee9355b5bce9f">readLock</a>(<span class="keywordtype">long</span> milliseconds)</div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>  {</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span><span class="preprocessor">#if defined(DEBUG_LOCKS)</span></div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    printf(<span class="stringliteral">&quot;   READ LOCK mutex %s from thread %s (%ld ms).\n&quot;</span>, <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>, <a class="code hl_define" href="../../d5/d00/a00029.html#ad6eeeb3c1d19d219258c8ba36a25c828">CURRENT_THREAD_NAME</a>, milliseconds);</div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../dd/d00/a00769.html#a26b2590f5ed37d5912750cfc9e116341">tryReadLock</a>(milliseconds))</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    {</div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>      printf(<span class="stringliteral">&quot;TIMEOUT read-locking %s from thread %s after %ld ms.\n&quot;</span>,</div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>        <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>, <a class="code hl_define" href="../../d5/d00/a00029.html#ad6eeeb3c1d19d219258c8ba36a25c828">CURRENT_THREAD_NAME</a>, milliseconds);</div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>      <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;CRWLock::readLock: timeout&quot;</span>);</div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    }</div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span><span class="preprocessor">#if defined(DEBUG_LOCKS)</span></div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    printf(<span class="stringliteral">&quot; READ LOCKED mutex %s from thread %s.\n&quot;</span>, <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>, <a class="code hl_define" href="../../d5/d00/a00029.html#ad6eeeb3c1d19d219258c8ba36a25c828">CURRENT_THREAD_NAME</a>);</div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>  }</div>
-</div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span> </div>
-<div class="foldopen" id="foldopen00134" data-start="{" data-end="}">
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html#a40af17d2cd33d24c4c905ad772d002fe">  134</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../dd/d00/a00769.html#a40af17d2cd33d24c4c905ad772d002fe">writeLock</a>(<span class="keywordtype">long</span> milliseconds)</div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>  {</div>
-<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span><span class="preprocessor">#if defined(DEBUG_LOCKS)</span></div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    printf(<span class="stringliteral">&quot;  WRITE LOCK mutex %s from thread %s (%ld ms).\n&quot;</span>, <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>, <a class="code hl_define" href="../../d5/d00/a00029.html#ad6eeeb3c1d19d219258c8ba36a25c828">CURRENT_THREAD_NAME</a>, milliseconds);</div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../dd/d00/a00769.html#aa2f491bb0b17ae34e1e59f154a1c648d">tryWriteLock</a>(milliseconds))</div>
-<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>    {</div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>      printf(<span class="stringliteral">&quot;TIMEOUT write-locking %s from thread %s after %ld ms.\n&quot;</span>,</div>
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>        <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>, <a class="code hl_define" href="../../d5/d00/a00029.html#ad6eeeb3c1d19d219258c8ba36a25c828">CURRENT_THREAD_NAME</a>, milliseconds);</div>
-<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>      <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;CRWLock::writeLock: timeout&quot;</span>);</div>
-<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    }</div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span><span class="preprocessor">#if defined(DEBUG_LOCKS)</span></div>
-<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>    printf(<span class="stringliteral">&quot;WRITE LOCKED mutex %s from thread %s.\n&quot;</span>, <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>, <a class="code hl_define" href="../../d5/d00/a00029.html#ad6eeeb3c1d19d219258c8ba36a25c828">CURRENT_THREAD_NAME</a>);</div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>  }</div>
-</div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
-<div class="foldopen" id="foldopen00150" data-start="{" data-end="}">
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html#a26b2590f5ed37d5912750cfc9e116341">  150</a></span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="../../dd/d00/a00769.html#a26b2590f5ed37d5912750cfc9e116341">tryReadLock</a>()</div>
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>  {</div>
-<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    <span class="keywordtype">bool</span> res = <a class="code hl_variable" href="../../dd/d00/a00769.html#a854be1ace1f9330a34fd15bafbdead42">_mutex</a>.try_lock_shared();</div>
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>    <span class="keywordflow">if</span> (res)</div>
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>      <a class="code hl_variable" href="../../dd/d00/a00769.html#a8fc6b04b9c4d370959d124c373c2464e">_exclusiveHeld</a>.store(<span class="keyword">false</span>, std::memory_order_release);</div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span><span class="preprocessor">#if defined(DEBUG_LOCKS)</span></div>
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>    printf(<span class="stringliteral">&quot;  %s mutex %s from thread %s.\n&quot;</span>,</div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>      res ? <span class="stringliteral">&quot;  RD LOCKED&quot;</span> : <span class="stringliteral">&quot;CAN&#39;T LOCK&quot;</span>, <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>, <a class="code hl_define" href="../../d5/d00/a00029.html#ad6eeeb3c1d19d219258c8ba36a25c828">CURRENT_THREAD_NAME</a>);</div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * SPDX-License-Identifier: GPL-2.0-only</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * This program is free software; you can redistribute it and/or</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * modify it under the terms of the GNU General Public License</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * version 2 as published by the Free Software Foundation.</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * This program is distributed in the hope that it will be useful,</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * GNU General Public License for more details.</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * Derived from the formerly stubbed MPU-401 emulation of VSBHDA</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * (https://github.com/Baron-von-Riedesel/VSBHDA), a fork of SBEMU, both</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * distributed under the GNU General Public License version 2.</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;<a class="code" href="../../d8/d00/a00038.html">MPU401.h</a>&quot;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#ifdef _WIN32</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;<a class="code" href="../../db/d00/a00074.html">chipset/AliM1543C.h</a>&quot;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#pragma comment(lib, &quot;winmm.lib&quot;)</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="keyword">const</span> <a class="code hl_class" href="../../d7/d00/a01373.html">CSystemComponent</a>* CMPU401::memory_decode_owner() const noexcept</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>{</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <span class="keywordflow">return</span> isa_bridge ? <span class="keyword">static_cast&lt;</span><span class="keyword">const </span><a class="code hl_class" href="../../d7/d00/a01373.html">CSystemComponent</a>*<span class="keyword">&gt;</span>(isa_bridge) : this;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>}</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="keywordtype">bool</span> CMPU401::decodes_memory_access(<span class="keywordtype">int</span> <a class="code hl_define" href="../../da/d00/a00149.html#a4da57af702c29650efdb4449c5266f8f">index</a>, <a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> address, <span class="keywordtype">int</span>, <span class="keywordtype">bool</span>) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>{</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <span class="keywordflow">if</span> (!((<a class="code hl_define" href="../../da/d00/a00149.html#a4da57af702c29650efdb4449c5266f8f">index</a> == 0 || <a class="code hl_define" href="../../da/d00/a00149.html#a4da57af702c29650efdb4449c5266f8f">index</a> == 1) &amp;&amp; address == 0))</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        <span class="keywordflow">if</span> (!isa_bridge)</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>                <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        <span class="keyword">const</span> <a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> port = 0x330u + (<a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>)<a class="code hl_define" href="../../da/d00/a00149.html#a4da57af702c29650efdb4449c5266f8f">index</a>;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        <span class="keywordflow">return</span> isa_bridge-&gt;isa_io_decode(port) != <a class="code hl_enumvalue" href="../../df/d00/a00949.html#a0e042b34d472ff4de678908db9f97538a6adf97f83acf6453d4a6a4b1070f3754">CAliM1543C::IsaIoDecode::None</a>;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>}</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="keywordtype">bool</span> CMPU401::uses_subtractive_decode(<span class="keywordtype">int</span> <a class="code hl_define" href="../../da/d00/a00149.html#a4da57af702c29650efdb4449c5266f8f">index</a>, <a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> address, <span class="keywordtype">int</span> dsize,</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        <span class="keywordtype">bool</span> write) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>{</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        <span class="keywordflow">if</span> (!isa_bridge || !decodes_memory_access(<a class="code hl_define" href="../../da/d00/a00149.html#a4da57af702c29650efdb4449c5266f8f">index</a>, address, dsize, write))</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        <span class="keyword">const</span> <a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> port = 0x330u + (<a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>)<a class="code hl_define" href="../../da/d00/a00149.html#a4da57af702c29650efdb4449c5266f8f">index</a>;</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        <span class="keywordflow">return</span> isa_bridge-&gt;isa_io_decode(port) == <a class="code hl_enumvalue" href="../../df/d00/a00949.html#a0e042b34d472ff4de678908db9f97538a34d485a1469ebe369d365350a8c87e88">CAliM1543C::IsaIoDecode::Subtractive</a>;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>}</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> CMPU401::ReadMem(<span class="keywordtype">int</span> <a class="code hl_define" href="../../da/d00/a00149.html#a4da57af702c29650efdb4449c5266f8f">index</a>, <a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> address, <span class="keywordtype">int</span> dsize)</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>{</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        <span class="comment">//fprintf(stderr, &quot;MPU401: ReadMem: index=%d, address=0x%llx, dsize=%d\n&quot;, index, address, dsize);</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        <span class="keywordflow">if</span> (dsize == 16 &amp;&amp; !(address &amp; 1))</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        {</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>                <a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> res = 0;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>                res |= ReadMem(<a class="code hl_define" href="../../da/d00/a00149.html#a4da57af702c29650efdb4449c5266f8f">index</a>, address, 8) &lt;&lt; 0;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>                res |= ReadMem(<a class="code hl_define" href="../../da/d00/a00149.html#a4da57af702c29650efdb4449c5266f8f">index</a>, address + 1, 16) &lt;&lt; 0;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>                <span class="keywordflow">return</span> res;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        }</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        <span class="keywordflow">if</span> (dsize &gt; 16)</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        {</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>                <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        }</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        <span class="keywordflow">if</span> (address &amp; 1)</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        {</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>                midi_mpu_status |= 0x80;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>                <span class="keywordflow">if</span> (bReset) {</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>                        bReset = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>                        <span class="keywordflow">return</span> 0xfe;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>                }</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>                <span class="keywordflow">return</span> 0xfe; <span class="comment">// Always return Active Sensing.</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        }</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        {</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>                <span class="keywordflow">return</span> midi_mpu_status;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        }</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>}</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><span class="keywordtype">void</span> CMPU401::WriteMem(<span class="keywordtype">int</span> <a class="code hl_define" href="../../da/d00/a00149.html#a4da57af702c29650efdb4449c5266f8f">index</a>, <a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> address, <span class="keywordtype">int</span> dsize, <a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> data)</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>{</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        <span class="comment">//fprintf(stderr, &quot;MPU401: WriteMem: index=%d, address=0x%llx, dsize=%d, data=0x%llX\n&quot;, index, address, dsize, data);</span></div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        <span class="keywordflow">if</span> (dsize == 16 &amp;&amp; !(address &amp; 1))</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        {</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>                WriteMem(<a class="code hl_define" href="../../da/d00/a00149.html#a4da57af702c29650efdb4449c5266f8f">index</a>, address, 8, (data &gt;&gt; 0) &amp; 0xff);</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>                WriteMem(<a class="code hl_define" href="../../da/d00/a00149.html#a4da57af702c29650efdb4449c5266f8f">index</a>, address + 1, 8, (data &gt;&gt; 8) &amp; 0xff);</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>                <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        }</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        <span class="keywordflow">if</span> (dsize &gt; 16)</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        {</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>                <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        }</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        <span class="comment">// Byte I/O ignores upper bits of the CPU register supplied by the caller.</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>        <span class="keyword">const</span> <a class="code hl_typedef" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> <span class="keywordtype">byte</span> = <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a><span class="keyword">&gt;</span>(data);</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>        <span class="keywordflow">if</span> (address &amp; 1)</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        {</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>                <span class="keywordflow">if</span> (<span class="keywordtype">byte</span> == 0x3f)</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>                {</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>                        midi_mpu_status &amp;= ~0x80;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>                }</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>                <span class="keywordflow">if</span> (<span class="keywordtype">byte</span> == 0xff)</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>                {</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>                        bReset = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>                        midi_ptr = 0;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>                        midi_mpu_status &amp;= ~0x80;</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>                }</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>        }</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>        <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>        {</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>                <span class="keywordflow">if</span> (!bReset)</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>                {</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>                        <span class="keywordflow">if</span> (midi_status_byte == 0xF0 &amp;&amp; <span class="keywordtype">byte</span> != 0xF7)</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>                        {</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>                                sysex_data.push_back(<span class="keywordtype">byte</span>);</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>                                <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>                        }</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>                        <span class="keywordflow">if</span> (midi_status_byte == 0xF0 &amp;&amp; <span class="keywordtype">byte</span> == 0xF7)</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>                        {</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>                                sysex_data.push_back(<span class="keywordtype">byte</span>);</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>                                hdr.dwBufferLength = sysex_data.size();</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>                                hdr.lpData = (LPSTR)sysex_data.data();</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>                                midiOutPrepareHeader(hmo, &amp;hdr, <span class="keyword">sizeof</span>(hdr));</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>                                midiOutLongMsg(hmo, &amp;hdr, <span class="keyword">sizeof</span>(hdr));</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>                                midi_status_byte = 0x80;</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>                                midi_buffer[0] = 0x80;</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>                                midi_ptr = 0;</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>                                <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>                        }</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>                        <span class="keywordflow">if</span> ((<span class="keywordtype">byte</span> &amp; 0xF0) &lt; 0x80 &amp;&amp; midi_ptr == 0)</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>                        {</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>                                midi_buffer[0] = midi_status_byte;</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>                                midi_ptr = 1;</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>                        }</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>                        midi_buffer[midi_ptr++] = byte;</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>                        midi_status_byte = midi_buffer[0];</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span> </div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>                        <span class="keywordflow">if</span> (midi_buffer[0] == 0xF0)</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>                        {</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>                                sysex_data.clear();</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>                                sysex_data.push_back(0xF0);</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>                                <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>                        }</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span> </div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>                        <span class="keywordflow">if</span> (midi_ptr &gt;= midi_lengths[(midi_buffer[0] &gt;&gt; 4) - 0x8])</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>                        {</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>                                midiOutShortMsg(hmo, *(DWORD*)(&amp;midi_buffer[0]));</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>                                midi_ptr = 0;</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>                        }</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>                }</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>        }</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>}</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span> </div>
 <div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    <span class="keywordflow">return</span> res;</div>
-<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>  }</div>
-</div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span> </div>
-<div class="foldopen" id="foldopen00162" data-start="{" data-end="}">
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html#aa2f491bb0b17ae34e1e59f154a1c648d">  162</a></span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="../../dd/d00/a00769.html#aa2f491bb0b17ae34e1e59f154a1c648d">tryWriteLock</a>()</div>
-<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>  {</div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>    <span class="keywordtype">bool</span> res = <a class="code hl_variable" href="../../dd/d00/a00769.html#a854be1ace1f9330a34fd15bafbdead42">_mutex</a>.try_lock();</div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    <span class="keywordflow">if</span> (res)</div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>      <a class="code hl_variable" href="../../dd/d00/a00769.html#a8fc6b04b9c4d370959d124c373c2464e">_exclusiveHeld</a>.store(<span class="keyword">true</span>, std::memory_order_release);</div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span><span class="preprocessor">#if defined(DEBUG_LOCKS)</span></div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>    printf(<span class="stringliteral">&quot;  %s mutex %s from thread %s.\n&quot;</span>,</div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>      res ? <span class="stringliteral">&quot;  WR LOCKED&quot;</span> : <span class="stringliteral">&quot;CAN&#39;T LOCK&quot;</span>, <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>, <a class="code hl_define" href="../../d5/d00/a00029.html#ad6eeeb3c1d19d219258c8ba36a25c828">CURRENT_THREAD_NAME</a>);</div>
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    <span class="keywordflow">return</span> res;</div>
-<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>  }</div>
-</div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span> </div>
-<div class="foldopen" id="foldopen00174" data-start="{" data-end="}">
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html#a1a2c94055869d16996472f785a1a5966">  174</a></span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="../../dd/d00/a00769.html#a1a2c94055869d16996472f785a1a5966">tryReadLock</a>(<span class="keywordtype">long</span> milliseconds)</div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>  {</div>
-<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>    <span class="keyword">auto</span> deadline = std::chrono::steady_clock::now()</div>
-<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>      + std::chrono::milliseconds(milliseconds);</div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>    <span class="keywordflow">do</span></div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    {</div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>      <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../dd/d00/a00769.html#a854be1ace1f9330a34fd15bafbdead42">_mutex</a>.try_lock_shared())</div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>      {</div>
-<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>        <a class="code hl_variable" href="../../dd/d00/a00769.html#a8fc6b04b9c4d370959d124c373c2464e">_exclusiveHeld</a>.store(<span class="keyword">false</span>, std::memory_order_release);</div>
-<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span><span class="preprocessor">#if defined(DEBUG_LOCKS)</span></div>
-<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>        printf(<span class="stringliteral">&quot;  RD LOCKED mutex %s from thread %s.\n&quot;</span>, <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>, <a class="code hl_define" href="../../d5/d00/a00029.html#ad6eeeb3c1d19d219258c8ba36a25c828">CURRENT_THREAD_NAME</a>);</div>
-<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>      }</div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>      std::this_thread::sleep_for(std::chrono::milliseconds(5));</div>
-<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>    } <span class="keywordflow">while</span> (std::chrono::steady_clock::now() &lt; deadline);</div>
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span><span class="preprocessor">#if defined(DEBUG_LOCKS)</span></div>
-<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>    printf(<span class="stringliteral">&quot;CAN&#39;T LOCK mutex %s from thread %s.\n&quot;</span>, <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>, <a class="code hl_define" href="../../d5/d00/a00029.html#ad6eeeb3c1d19d219258c8ba36a25c828">CURRENT_THREAD_NAME</a>);</div>
-<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>  }</div>
-</div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span> </div>
-<div class="foldopen" id="foldopen00196" data-start="{" data-end="}">
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html#a94bff5930d0028c7c60694d3dca8f25c">  196</a></span>  <span class="keywordtype">bool</span> <a class="code hl_function" href="../../dd/d00/a00769.html#a94bff5930d0028c7c60694d3dca8f25c">tryWriteLock</a>(<span class="keywordtype">long</span> milliseconds)</div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>  {</div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>    <span class="keyword">auto</span> deadline = std::chrono::steady_clock::now()</div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>      + std::chrono::milliseconds(milliseconds);</div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>    <span class="keywordflow">do</span></div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>    {</div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>      <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../dd/d00/a00769.html#a854be1ace1f9330a34fd15bafbdead42">_mutex</a>.try_lock())</div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>      {</div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>        <a class="code hl_variable" href="../../dd/d00/a00769.html#a8fc6b04b9c4d370959d124c373c2464e">_exclusiveHeld</a>.store(<span class="keyword">true</span>, std::memory_order_release);</div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span><span class="preprocessor">#if defined(DEBUG_LOCKS)</span></div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>        printf(<span class="stringliteral">&quot;  WR LOCKED mutex %s from thread %s.\n&quot;</span>, <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>, <a class="code hl_define" href="../../d5/d00/a00029.html#ad6eeeb3c1d19d219258c8ba36a25c828">CURRENT_THREAD_NAME</a>);</div>
-<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>      }</div>
-<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>      std::this_thread::sleep_for(std::chrono::milliseconds(5));</div>
-<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>    } <span class="keywordflow">while</span> (std::chrono::steady_clock::now() &lt; deadline);</div>
-<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span><span class="preprocessor">#if defined(DEBUG_LOCKS)</span></div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>    printf(<span class="stringliteral">&quot;CAN&#39;T LOCK mutex %s from thread %s.\n&quot;</span>, <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>, <a class="code hl_define" href="../../d5/d00/a00029.html#ad6eeeb3c1d19d219258c8ba36a25c828">CURRENT_THREAD_NAME</a>);</div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>  }</div>
-</div>
-<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span> </div>
-<div class="foldopen" id="foldopen00218" data-start="{" data-end="}">
-<div class="line"><a id="l00218" name="l00218"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html#aec0b4a6a1c658ea6ab627e114c23b08a">  218</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../dd/d00/a00769.html#aec0b4a6a1c658ea6ab627e114c23b08a">unlockRead</a>()</div>
-<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>  {</div>
-<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span><span class="preprocessor">#if defined(DEBUG_LOCKS)</span></div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>    printf(<span class="stringliteral">&quot;    UNLOCKRD mutex %s from thread %s.\n&quot;</span>, <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>, <a class="code hl_define" href="../../d5/d00/a00029.html#ad6eeeb3c1d19d219258c8ba36a25c828">CURRENT_THREAD_NAME</a>);</div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>    <a class="code hl_variable" href="../../dd/d00/a00769.html#a854be1ace1f9330a34fd15bafbdead42">_mutex</a>.unlock_shared();</div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>  }</div>
-</div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span> </div>
-<div class="foldopen" id="foldopen00226" data-start="{" data-end="}">
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html#ac2b25b703f63a592f5be473a079384ff">  226</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../dd/d00/a00769.html#ac2b25b703f63a592f5be473a079384ff">unlockWrite</a>()</div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>  {</div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span><span class="preprocessor">#if defined(DEBUG_LOCKS)</span></div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>    printf(<span class="stringliteral">&quot;    UNLOCKWR mutex %s from thread %s.\n&quot;</span>, <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>, <a class="code hl_define" href="../../d5/d00/a00029.html#ad6eeeb3c1d19d219258c8ba36a25c828">CURRENT_THREAD_NAME</a>);</div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>    <a class="code hl_variable" href="../../dd/d00/a00769.html#a854be1ace1f9330a34fd15bafbdead42">_mutex</a>.unlock();</div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>  }</div>
-</div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span> </div>
-<div class="foldopen" id="foldopen00234" data-start="{" data-end="}">
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html#aa7a6b222965f55b7555b7fce1bbbbf5c">  234</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../dd/d00/a00769.html#aa7a6b222965f55b7555b7fce1bbbbf5c">unlock</a>()</div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>  {</div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../dd/d00/a00769.html#a8fc6b04b9c4d370959d124c373c2464e">_exclusiveHeld</a>.load(std::memory_order_acquire))</div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>      <a class="code hl_function" href="../../dd/d00/a00769.html#ac2b25b703f63a592f5be473a079384ff">unlockWrite</a>();</div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>      <a class="code hl_function" href="../../dd/d00/a00769.html#aec0b4a6a1c658ea6ab627e114c23b08a">unlockRead</a>();</div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>  }</div>
-</div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span> </div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">  242</a></span>  <span class="keywordtype">char</span>* <a class="code hl_variable" href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">lockName</a>;</div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span> </div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html#a854be1ace1f9330a34fd15bafbdead42">  245</a></span>  std::shared_mutex   <a class="code hl_variable" href="../../dd/d00/a00769.html#a854be1ace1f9330a34fd15bafbdead42">_mutex</a>;</div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html#a8fc6b04b9c4d370959d124c373c2464e">  246</a></span>  std::atomic&lt;bool&gt;   <a class="code hl_variable" href="../../dd/d00/a00769.html#a8fc6b04b9c4d370959d124c373c2464e">_exclusiveHeld</a>{ <span class="keyword">false</span> };</div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span> </div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html#a95c38286de6576805f91e12a443b6f60">  248</a></span>  <a class="code hl_function" href="../../dd/d00/a00769.html#a95c38286de6576805f91e12a443b6f60">CRWLock</a>(<span class="keyword">const</span> <a class="code hl_function" href="../../dd/d00/a00769.html#a2f739b2d2fa1f4c85919d6d9f4dfb088">CRWLock</a>&amp;) = <span class="keyword">delete</span>;</div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno"><a class="line" href="../../dd/d00/a00769.html#aaa44308146f0284d3a2a417200f5457d">  249</a></span>  <a class="code hl_function" href="../../dd/d00/a00769.html#a2f739b2d2fa1f4c85919d6d9f4dfb088">CRWLock</a>&amp; <a class="code hl_function" href="../../dd/d00/a00769.html#aaa44308146f0284d3a2a417200f5457d">operator=</a>(<span class="keyword">const</span> <a class="code hl_function" href="../../dd/d00/a00769.html#a2f739b2d2fa1f4c85919d6d9f4dfb088">CRWLock</a>&amp;) = <span class="keyword">delete</span>;</div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>};</div>
-</div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span> </div>
-<div class="foldopen" id="foldopen00252" data-start="{" data-end="};">
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno"><a class="line" href="../../d8/d00/a00773.html">  252</a></span><span class="keyword">class </span><a class="code hl_function" href="../../d8/d00/a00773.html#a116b042bb25e902bbbff40200db4199f">CScopedRWLock</a></div>
-<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>{</div>
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span><span class="keyword">public</span>:</div>
-<div class="foldopen" id="foldopen00255" data-start="{" data-end="}">
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno"><a class="line" href="../../d8/d00/a00773.html#a116b042bb25e902bbbff40200db4199f">  255</a></span>  <a class="code hl_function" href="../../d8/d00/a00773.html#a116b042bb25e902bbbff40200db4199f">CScopedRWLock</a>(<a class="code hl_class" href="../../dd/d00/a00769.html">CRWLock</a>* rwl, <span class="keywordtype">bool</span> write = <span class="keyword">false</span>)</div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>    : <a class="code hl_variable" href="../../d8/d00/a00773.html#a8d180e2ac6a5ccad19a1f2e0e4c056c3">_rwl</a>(rwl), <a class="code hl_variable" href="../../d8/d00/a00773.html#a20f2d0fa29c47332b4bcad628736a31c">_write</a>(write)</div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>  {</div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d8/d00/a00773.html#a20f2d0fa29c47332b4bcad628736a31c">_write</a>)</div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>      <a class="code hl_variable" href="../../d8/d00/a00773.html#a8d180e2ac6a5ccad19a1f2e0e4c056c3">_rwl</a>-&gt;<a class="code hl_function" href="../../dd/d00/a00769.html#a1a8109fcb5867f6e06711a397026b9cf">writeLock</a>();</div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>    <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>      <a class="code hl_variable" href="../../d8/d00/a00773.html#a8d180e2ac6a5ccad19a1f2e0e4c056c3">_rwl</a>-&gt;<a class="code hl_function" href="../../dd/d00/a00769.html#ac6a77b3c2572f3731d131255ba489e9d">readLock</a>();</div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>  }</div>
-</div>
-<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span> </div>
-<div class="foldopen" id="foldopen00264" data-start="{" data-end="}">
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno"><a class="line" href="../../d8/d00/a00773.html#a9ef85316e97214b84519fbcc20b38199">  264</a></span>  <a class="code hl_function" href="../../d8/d00/a00773.html#a9ef85316e97214b84519fbcc20b38199">~CScopedRWLock</a>()</div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>  {</div>
-<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d8/d00/a00773.html#a20f2d0fa29c47332b4bcad628736a31c">_write</a>)</div>
-<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>      <a class="code hl_variable" href="../../d8/d00/a00773.html#a8d180e2ac6a5ccad19a1f2e0e4c056c3">_rwl</a>-&gt;<a class="code hl_function" href="../../dd/d00/a00769.html#ac2b25b703f63a592f5be473a079384ff">unlockWrite</a>();</div>
-<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>    <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>      <a class="code hl_variable" href="../../d8/d00/a00773.html#a8d180e2ac6a5ccad19a1f2e0e4c056c3">_rwl</a>-&gt;<a class="code hl_function" href="../../dd/d00/a00769.html#aec0b4a6a1c658ea6ab627e114c23b08a">unlockRead</a>();</div>
-<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>  }</div>
-</div>
-<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span> </div>
-<div class="line"><a id="l00272" name="l00272"></a><span class="lineno"><a class="line" href="../../d8/d00/a00773.html#aa1c1affbefe7645d4843654ad8afa0f9">  272</a></span>  <a class="code hl_function" href="../../d8/d00/a00773.html#aa1c1affbefe7645d4843654ad8afa0f9">CScopedRWLock</a>(<span class="keyword">const</span> <a class="code hl_function" href="../../d8/d00/a00773.html#a116b042bb25e902bbbff40200db4199f">CScopedRWLock</a>&amp;) = <span class="keyword">delete</span>;</div>
-<div class="line"><a id="l00273" name="l00273"></a><span class="lineno"><a class="line" href="../../d8/d00/a00773.html#aedf692251a03ba76ac5af1a4df7dc3a7">  273</a></span>  <a class="code hl_function" href="../../d8/d00/a00773.html#a116b042bb25e902bbbff40200db4199f">CScopedRWLock</a>&amp; <a class="code hl_function" href="../../d8/d00/a00773.html#aedf692251a03ba76ac5af1a4df7dc3a7">operator=</a>(<span class="keyword">const</span> <a class="code hl_function" href="../../d8/d00/a00773.html#a116b042bb25e902bbbff40200db4199f">CScopedRWLock</a>&amp;) = <span class="keyword">delete</span>;</div>
-<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span> </div>
-<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00276" name="l00276"></a><span class="lineno"><a class="line" href="../../d8/d00/a00773.html#a8d180e2ac6a5ccad19a1f2e0e4c056c3">  276</a></span>  <a class="code hl_class" href="../../dd/d00/a00769.html">CRWLock</a>* <a class="code hl_variable" href="../../d8/d00/a00773.html#a8d180e2ac6a5ccad19a1f2e0e4c056c3">_rwl</a>;</div>
-<div class="line"><a id="l00277" name="l00277"></a><span class="lineno"><a class="line" href="../../d8/d00/a00773.html#a20f2d0fa29c47332b4bcad628736a31c">  277</a></span>  <span class="keywordtype">bool</span>     <a class="code hl_variable" href="../../d8/d00/a00773.html#a20f2d0fa29c47332b4bcad628736a31c">_write</a>;</div>
-<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>};</div>
-</div>
-<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span> </div>
-<div class="line"><a id="l00280" name="l00280"></a><span class="lineno"><a class="line" href="../../d4/d00/a00035.html#a374d5d29cb69433d7a6d755b1e929ca7">  280</a></span><span class="preprocessor">#define SCOPED_READ_LOCK(mutex)   CScopedRWLock L_##__LINE__((mutex), false)</span></div>
-<div class="line"><a id="l00281" name="l00281"></a><span class="lineno"><a class="line" href="../../d4/d00/a00035.html#ae467b9ebcbb8b6b0a37429cec6263fc6">  281</a></span><span class="preprocessor">#define SCOPED_WRITE_LOCK(mutex)  CScopedRWLock L_##__LINE__((mutex), true)</span></div>
-<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span> </div>
-<div class="line"><a id="l00283" name="l00283"></a><span class="lineno"><a class="line" href="../../d4/d00/a00035.html#a9f1411b926dd0b76c7eacdc897684c51">  283</a></span><span class="preprocessor">#define MUTEX_READ_UNLOCK(mutex)  (mutex)-&gt;unlockRead()</span></div>
-<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span> </div>
-<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span><span class="preprocessor">#endif </span><span class="comment">// ES40_RWLOCK_INCLUDED</span></div>
-<div class="ttc" id="aa00029_html"><div class="ttname"><a href="../../d5/d00/a00029.html">Mutex.h</a></div></div>
-<div class="ttc" id="aa00029_html_ad6eeeb3c1d19d219258c8ba36a25c828"><div class="ttname"><a href="../../d5/d00/a00029.html#ad6eeeb3c1d19d219258c8ba36a25c828">CURRENT_THREAD_NAME</a></div><div class="ttdeci">#define CURRENT_THREAD_NAME</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00029_source.html#l00048">Mutex.h:48</a></div></div>
-<div class="ttc" id="aa00769_html"><div class="ttname"><a href="../../dd/d00/a00769.html">CRWLock</a></div><div class="ttdef"><b>Definition</b> <a href="#l00081">RWLock.h:82</a></div></div>
-<div class="ttc" id="aa00769_html_a025ab7e2fc5b8670745ee9355b5bce9f"><div class="ttname"><a href="../../dd/d00/a00769.html#a025ab7e2fc5b8670745ee9355b5bce9f">CRWLock::readLock</a></div><div class="ttdeci">void readLock(long milliseconds)</div><div class="ttdef"><b>Definition</b> <a href="#l00118">RWLock.h:118</a></div></div>
-<div class="ttc" id="aa00769_html_a1a2c94055869d16996472f785a1a5966"><div class="ttname"><a href="../../dd/d00/a00769.html#a1a2c94055869d16996472f785a1a5966">CRWLock::tryReadLock</a></div><div class="ttdeci">bool tryReadLock(long milliseconds)</div><div class="ttdef"><b>Definition</b> <a href="#l00174">RWLock.h:174</a></div></div>
-<div class="ttc" id="aa00769_html_a1a8109fcb5867f6e06711a397026b9cf"><div class="ttname"><a href="../../dd/d00/a00769.html#a1a8109fcb5867f6e06711a397026b9cf">CRWLock::writeLock</a></div><div class="ttdeci">void writeLock()</div><div class="ttdef"><b>Definition</b> <a href="#l00106">RWLock.h:106</a></div></div>
-<div class="ttc" id="aa00769_html_a26b2590f5ed37d5912750cfc9e116341"><div class="ttname"><a href="../../dd/d00/a00769.html#a26b2590f5ed37d5912750cfc9e116341">CRWLock::tryReadLock</a></div><div class="ttdeci">bool tryReadLock()</div><div class="ttdef"><b>Definition</b> <a href="#l00150">RWLock.h:150</a></div></div>
-<div class="ttc" id="aa00769_html_a2d8ba07e42d872d243a8a925b63e84a9"><div class="ttname"><a href="../../dd/d00/a00769.html#a2d8ba07e42d872d243a8a925b63e84a9">CRWLock::lockName</a></div><div class="ttdeci">char * lockName</div><div class="ttdef"><b>Definition</b> <a href="#l00242">RWLock.h:242</a></div></div>
-<div class="ttc" id="aa00769_html_a2f739b2d2fa1f4c85919d6d9f4dfb088"><div class="ttname"><a href="../../dd/d00/a00769.html#a2f739b2d2fa1f4c85919d6d9f4dfb088">CRWLock::CRWLock</a></div><div class="ttdeci">CRWLock()</div><div class="ttdef"><b>Definition</b> <a href="#l00086">RWLock.h:86</a></div></div>
-<div class="ttc" id="aa00769_html_a31c613d73071126d58610dffae467af6"><div class="ttname"><a href="../../dd/d00/a00769.html#a31c613d73071126d58610dffae467af6">CRWLock::~CRWLock</a></div><div class="ttdeci">~CRWLock()=default</div></div>
-<div class="ttc" id="aa00769_html_a40af17d2cd33d24c4c905ad772d002fe"><div class="ttname"><a href="../../dd/d00/a00769.html#a40af17d2cd33d24c4c905ad772d002fe">CRWLock::writeLock</a></div><div class="ttdeci">void writeLock(long milliseconds)</div><div class="ttdef"><b>Definition</b> <a href="#l00134">RWLock.h:134</a></div></div>
-<div class="ttc" id="aa00769_html_a4d5d808aa121faeedb43e2499dd4a31e"><div class="ttname"><a href="../../dd/d00/a00769.html#a4d5d808aa121faeedb43e2499dd4a31e">CRWLock::CRWLock</a></div><div class="ttdeci">CRWLock(const char *lName)</div><div class="ttdef"><b>Definition</b> <a href="#l00088">RWLock.h:88</a></div></div>
-<div class="ttc" id="aa00769_html_a73e1350988c4adbc065bd81534a6764b"><div class="ttname"><a href="../../dd/d00/a00769.html#a73e1350988c4adbc065bd81534a6764b">CRWLock::CScopedLock</a></div><div class="ttdeci">CScopedRWLock CScopedLock</div><div class="ttdef"><b>Definition</b> <a href="#l00084">RWLock.h:84</a></div></div>
-<div class="ttc" id="aa00769_html_a854be1ace1f9330a34fd15bafbdead42"><div class="ttname"><a href="../../dd/d00/a00769.html#a854be1ace1f9330a34fd15bafbdead42">CRWLock::_mutex</a></div><div class="ttdeci">std::shared_mutex _mutex</div><div class="ttdef"><b>Definition</b> <a href="#l00245">RWLock.h:245</a></div></div>
-<div class="ttc" id="aa00769_html_a8fc6b04b9c4d370959d124c373c2464e"><div class="ttname"><a href="../../dd/d00/a00769.html#a8fc6b04b9c4d370959d124c373c2464e">CRWLock::_exclusiveHeld</a></div><div class="ttdeci">std::atomic&lt; bool &gt; _exclusiveHeld</div><div class="ttdef"><b>Definition</b> <a href="#l00246">RWLock.h:246</a></div></div>
-<div class="ttc" id="aa00769_html_a94bff5930d0028c7c60694d3dca8f25c"><div class="ttname"><a href="../../dd/d00/a00769.html#a94bff5930d0028c7c60694d3dca8f25c">CRWLock::tryWriteLock</a></div><div class="ttdeci">bool tryWriteLock(long milliseconds)</div><div class="ttdef"><b>Definition</b> <a href="#l00196">RWLock.h:196</a></div></div>
-<div class="ttc" id="aa00769_html_a95c38286de6576805f91e12a443b6f60"><div class="ttname"><a href="../../dd/d00/a00769.html#a95c38286de6576805f91e12a443b6f60">CRWLock::CRWLock</a></div><div class="ttdeci">CRWLock(const CRWLock &amp;)=delete</div></div>
-<div class="ttc" id="aa00769_html_aa2f491bb0b17ae34e1e59f154a1c648d"><div class="ttname"><a href="../../dd/d00/a00769.html#aa2f491bb0b17ae34e1e59f154a1c648d">CRWLock::tryWriteLock</a></div><div class="ttdeci">bool tryWriteLock()</div><div class="ttdef"><b>Definition</b> <a href="#l00162">RWLock.h:162</a></div></div>
-<div class="ttc" id="aa00769_html_aa7a6b222965f55b7555b7fce1bbbbf5c"><div class="ttname"><a href="../../dd/d00/a00769.html#aa7a6b222965f55b7555b7fce1bbbbf5c">CRWLock::unlock</a></div><div class="ttdeci">void unlock()</div><div class="ttdef"><b>Definition</b> <a href="#l00234">RWLock.h:234</a></div></div>
-<div class="ttc" id="aa00769_html_aaa44308146f0284d3a2a417200f5457d"><div class="ttname"><a href="../../dd/d00/a00769.html#aaa44308146f0284d3a2a417200f5457d">CRWLock::operator=</a></div><div class="ttdeci">CRWLock &amp; operator=(const CRWLock &amp;)=delete</div></div>
-<div class="ttc" id="aa00769_html_ac2b25b703f63a592f5be473a079384ff"><div class="ttname"><a href="../../dd/d00/a00769.html#ac2b25b703f63a592f5be473a079384ff">CRWLock::unlockWrite</a></div><div class="ttdeci">void unlockWrite()</div><div class="ttdef"><b>Definition</b> <a href="#l00226">RWLock.h:226</a></div></div>
-<div class="ttc" id="aa00769_html_ac6a77b3c2572f3731d131255ba489e9d"><div class="ttname"><a href="../../dd/d00/a00769.html#ac6a77b3c2572f3731d131255ba489e9d">CRWLock::readLock</a></div><div class="ttdeci">void readLock()</div><div class="ttdef"><b>Definition</b> <a href="#l00094">RWLock.h:94</a></div></div>
-<div class="ttc" id="aa00769_html_aec0b4a6a1c658ea6ab627e114c23b08a"><div class="ttname"><a href="../../dd/d00/a00769.html#aec0b4a6a1c658ea6ab627e114c23b08a">CRWLock::unlockRead</a></div><div class="ttdeci">void unlockRead()</div><div class="ttdef"><b>Definition</b> <a href="#l00218">RWLock.h:218</a></div></div>
-<div class="ttc" id="aa00773_html"><div class="ttname"><a href="../../d8/d00/a00773.html">CScopedRWLock</a></div><div class="ttdef"><b>Definition</b> <a href="#l00252">RWLock.h:253</a></div></div>
-<div class="ttc" id="aa00773_html_a116b042bb25e902bbbff40200db4199f"><div class="ttname"><a href="../../d8/d00/a00773.html#a116b042bb25e902bbbff40200db4199f">CScopedRWLock::CScopedRWLock</a></div><div class="ttdeci">CScopedRWLock(CRWLock *rwl, bool write=false)</div><div class="ttdef"><b>Definition</b> <a href="#l00255">RWLock.h:255</a></div></div>
-<div class="ttc" id="aa00773_html_a20f2d0fa29c47332b4bcad628736a31c"><div class="ttname"><a href="../../d8/d00/a00773.html#a20f2d0fa29c47332b4bcad628736a31c">CScopedRWLock::_write</a></div><div class="ttdeci">bool _write</div><div class="ttdef"><b>Definition</b> <a href="#l00277">RWLock.h:277</a></div></div>
-<div class="ttc" id="aa00773_html_a8d180e2ac6a5ccad19a1f2e0e4c056c3"><div class="ttname"><a href="../../d8/d00/a00773.html#a8d180e2ac6a5ccad19a1f2e0e4c056c3">CScopedRWLock::_rwl</a></div><div class="ttdeci">CRWLock * _rwl</div><div class="ttdef"><b>Definition</b> <a href="#l00276">RWLock.h:276</a></div></div>
-<div class="ttc" id="aa00773_html_a9ef85316e97214b84519fbcc20b38199"><div class="ttname"><a href="../../d8/d00/a00773.html#a9ef85316e97214b84519fbcc20b38199">CScopedRWLock::~CScopedRWLock</a></div><div class="ttdeci">~CScopedRWLock()</div><div class="ttdef"><b>Definition</b> <a href="#l00264">RWLock.h:264</a></div></div>
-<div class="ttc" id="aa00773_html_aa1c1affbefe7645d4843654ad8afa0f9"><div class="ttname"><a href="../../d8/d00/a00773.html#aa1c1affbefe7645d4843654ad8afa0f9">CScopedRWLock::CScopedRWLock</a></div><div class="ttdeci">CScopedRWLock(const CScopedRWLock &amp;)=delete</div></div>
-<div class="ttc" id="aa00773_html_aedf692251a03ba76ac5af1a4df7dc3a7"><div class="ttname"><a href="../../d8/d00/a00773.html#aedf692251a03ba76ac5af1a4df7dc3a7">CScopedRWLock::operator=</a></div><div class="ttdeci">CScopedRWLock &amp; operator=(const CScopedRWLock &amp;)=delete</div></div>
+<div class="ttc" id="aa00038_html"><div class="ttname"><a href="../../d8/d00/a00038.html">MPU401.h</a></div></div>
+<div class="ttc" id="aa00074_html"><div class="ttname"><a href="../../db/d00/a00074.html">AliM1543C.h</a></div><div class="ttdoc">Contains the definitions for the ISA part of the emulated Ali M1543C chipset.</div></div>
+<div class="ttc" id="aa00149_html_a4da57af702c29650efdb4449c5266f8f"><div class="ttname"><a href="../../da/d00/a00149.html#a4da57af702c29650efdb4449c5266f8f">index</a></div><div class="ttdeci">#define index(s, c)</div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00149_source.html#l00042">bsd_compat.h:42</a></div></div>
+<div class="ttc" id="aa00326_html_a1af9f95651e921615e75917a6dd1b574"><div class="ttname"><a href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a></div><div class="ttdeci">uint64_t u64</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00126">datatypes.h:126</a></div></div>
+<div class="ttc" id="aa00326_html_a70c1fcc1a4e96af8f6580f708657cd41"><div class="ttname"><a href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a></div><div class="ttdeci">uint32_t u32</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00125">datatypes.h:125</a></div></div>
+<div class="ttc" id="aa00326_html_a987e4d6cf789cb59dbb390728271e4d6"><div class="ttname"><a href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a></div><div class="ttdeci">uint8_t u8</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00123">datatypes.h:123</a></div></div>
+<div class="ttc" id="aa00949_html_a0e042b34d472ff4de678908db9f97538a34d485a1469ebe369d365350a8c87e88"><div class="ttname"><a href="../../df/d00/a00949.html#a0e042b34d472ff4de678908db9f97538a34d485a1469ebe369d365350a8c87e88">CAliM1543C::IsaIoDecode::Subtractive</a></div><div class="ttdeci">@ Subtractive</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00074_source.html#l00178">AliM1543C.h:178</a></div></div>
+<div class="ttc" id="aa00949_html_a0e042b34d472ff4de678908db9f97538a6adf97f83acf6453d4a6a4b1070f3754"><div class="ttname"><a href="../../df/d00/a00949.html#a0e042b34d472ff4de678908db9f97538a6adf97f83acf6453d4a6a4b1070f3754">CAliM1543C::IsaIoDecode::None</a></div><div class="ttdeci">@ None</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00074_source.html#l00178">AliM1543C.h:178</a></div></div>
+<div class="ttc" id="aa01373_html"><div class="ttname"><a href="../../d7/d00/a01373.html">CSystemComponent</a></div><div class="ttdoc">Abstract base class for devices that connect to the Typhoon chipset.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00356_source.html#l00095">SystemComponent.h:96</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_e914ee4d4a44400f1fdb170cb4ead18a.html">base</a></li><li class="navelem"><a href="../../d4/d00/a00035.html">RWLock.h</a></li>
+    <li class="navelem"><a href="../../dir_a5f32cf82ad289a7dac212f63f40f55b.html">audio</a></li><li class="navelem"><a href="../../d4/d00/a00035.html">MPU401.cpp</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

@@ -1,22 +1,12 @@
 var a01049 =
 [
-    [ "Slot", "dc/d00/a01053.html", "dc/d00/a01053" ],
-    [ "address_map", "d0/d00/a01049.html#ace6a957eeab89171e66e23d11cebf5d4", null ],
-    [ "debug_name", "d0/d00/a01049.html#a162d19df0357ecbd97d0dc895dede3c4", null ],
-    [ "global_mask", "d0/d00/a01049.html#a5641afe03c4fbb0469b66310ff0a53de", null ],
-    [ "has_handler", "d0/d00/a01049.html#a67f3c17e1064411c70f1b8c70eb4f171", null ],
-    [ "install_nop", "d0/d00/a01049.html#a0ea28ebab4443e24b808d123114dc302", null ],
-    [ "install_read", "d0/d00/a01049.html#ad035bd592f91cdfa05eb82e76ca55af5", null ],
-    [ "install_write", "d0/d00/a01049.html#ae60983ef774a687b9dcbb5b676bd9482", null ],
-    [ "operator()", "d0/d00/a01049.html#a0e1024980c14ef0bdeaff2f4a661746f", null ],
-    [ "read_byte", "d0/d00/a01049.html#a60c374ba45d53338be90fd3f0836f29f", null ],
-    [ "size", "d0/d00/a01049.html#ad6fcca7a964cbbbb3b2c0033e7d7e16e", null ],
-    [ "unmap_value_high", "d0/d00/a01049.html#a3a11d05dcc6acc15a89e09a06c87dd43", null ],
-    [ "unmap_value_low", "d0/d00/a01049.html#a025fa4cb5005e8f4e7a9941258429bcc", null ],
-    [ "unmapval", "d0/d00/a01049.html#a4d27566228871477e946abfa43309869", null ],
-    [ "write_byte", "d0/d00/a01049.html#a2359b8c33ad070c186c58051440e5f22", null ],
-    [ "m_globalmask", "d0/d00/a01049.html#abf5e130670d0f838ca84365dbbe3971a", null ],
-    [ "m_size", "d0/d00/a01049.html#aabbd77bc4d24ec83018e3b0530272381", null ],
-    [ "m_slots", "d0/d00/a01049.html#af27166d96de2d0972334c20107576167", null ],
-    [ "m_unmapval", "d0/d00/a01049.html#a0add0be5be2ad16cf0a3f48c932b69f5", null ]
+    [ "Impl", "d0/d00/a01049.html#a513b1b2c66ec8721170deda534e8b609", null ],
+    [ "child_indent", "d0/d00/a01049.html#a06be9f48496a08125bda00b5e19a513e", null ],
+    [ "indent", "d0/d00/a01049.html#abad584c600632ec04bc0bdef4a4c109b", null ],
+    [ "insert", "d0/d00/a01049.html#a7462f33712f2f43014ad4034a46cce16", null ],
+    [ "render", "d0/d00/a01049.html#a90ac42765fd63d89056ec01fa2cae2de", null ],
+    [ "serialize", "d0/d00/a01049.html#a7ff4499f7a684a34a63a763ea14344f6", null ],
+    [ "newline", "d0/d00/a01049.html#a4f2e6f7b641f223f1b77a5947ea274a5", null ],
+    [ "root", "d0/d00/a01049.html#a96f4a1d0e49984574905e3893049c2d2", null ],
+    [ "text", "d0/d00/a01049.html#a7b2c95df78634a41d0ddf1ad1b4ec5bb", null ]
 ];

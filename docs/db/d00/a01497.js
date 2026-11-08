@@ -1,6 +1,8 @@
 var a01497 =
 [
-    [ "blank_floppy_size", "db/d00/a01497.html#a863960b7fc065230fd051d6761091f5f", null ],
-    [ "force_locked", "db/d00/a01497.html#a0cb6885163773a7e91125911f3a22bf3", null ],
-    [ "mailbox", "db/d00/a01497.html#ae80ff6b74fc54329341caa064fe4c1c0", null ]
+    [ "parse", "db/d00/a01497.html#a80e48c491f301446037b3cb27579f46d", null ],
+    [ "bytes", "db/d00/a01497.html#a89038c0a5cb2307f37d98497a5727c13", null ],
+    [ "file_size", "db/d00/a01497.html#ae81e339029a3df206f44da783651192f", null ],
+    [ "image_bytes", "db/d00/a01497.html#ae13938cada71ff266235a27f3c0c544d", null ],
+    [ "pcir_class", "db/d00/a01497.html#a90e3cb6e66221770e93db8c57c4881de", null ]
 ];

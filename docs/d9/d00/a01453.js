@@ -1,15 +1,7 @@
 var a01453 =
 [
-    [ "bx_keymap_c", "d9/d00/a01453.html#ae9d4ae6735f13dfc6247c825a6a52c8c", null ],
-    [ "~bx_keymap_c", "d9/d00/a01453.html#aeeb12d08dac91e1985b5f0826d8f2eb0", null ],
-    [ "convertStringToBXKey", "d9/d00/a01453.html#a0ce7901c7c0a41402827c3ea4f462e44", null ],
-    [ "findAsciiChar", "d9/d00/a01453.html#a208c80ae898f3abadbb8cf2d712770ac", null ],
-    [ "findHostKey", "d9/d00/a01453.html#aab7364d8ec50be3ea8170f8836f1d9d1", null ],
-    [ "getBXKeyName", "d9/d00/a01453.html#a11b6225705f56445a78ba2dee3af1c34", null ],
-    [ "isKeymapLoaded", "d9/d00/a01453.html#a9ba17e2a601febdf4ca20270c18c7321", null ],
-    [ "loadKeymap", "d9/d00/a01453.html#af8224621a0f4e615d6c6dbca9d16c162", null ],
-    [ "loadKeymap", "d9/d00/a01453.html#a33f8cf5b7921c09a88a8d0bbf7a8a854", null ],
-    [ "keymapCount", "d9/d00/a01453.html#a38e2d3a0b4586a96c863010df7391451", null ],
-    [ "keymapTable", "d9/d00/a01453.html#a4681b86f1df1e35654e1f551b51b775f", null ],
-    [ "myCfg", "d9/d00/a01453.html#ab336b407e4d779f7d7acaed87b270e6d", null ]
+    [ "chip_config", "d9/d00/a01453.html#a21e7c5cc204d5b51595522b15f6dbdda", null ],
+    [ "input_fifo_entries", "d9/d00/a01453.html#a0a84217ab424a30a97841eff225972ba", null ],
+    [ "mem_config", "d9/d00/a01453.html#a3d4abdc202e8a997f88c63069228fa04", null ],
+    [ "mem_control", "d9/d00/a01453.html#a3a7d51b457ca394b42454ade597dd195", null ]
 ];

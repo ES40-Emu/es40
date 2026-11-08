@@ -1,8 +1,8 @@
 var a01561 =
 [
-    [ "cur_addr", "d2/d00/a01561.html#a89030c812a4f7fbc0a8f6cb1e49f8788", null ],
-    [ "cur_buf", "d2/d00/a01561.html#a49ea83f1a7a3ebff25c2963ad302879d", null ],
-    [ "cur_buf_len", "d2/d00/a01561.html#aa72dbd10e08cad8711a3c7eceb952ea2", null ],
-    [ "cur_offset", "d2/d00/a01561.html#aa2049166aea5b064347e546050fefe6f", null ],
-    [ "current", "d2/d00/a01561.html#a03f6b788766aaa64a91a2457f253a527", null ]
+    [ "Packet", "d6/d00/a01565.html", "d6/d00/a01565" ],
+    [ "command", "d2/d00/a01561.html#aec0fa3ca3b6a2f56f5b0f290c57e996b", null ],
+    [ "completion", "d2/d00/a01561.html#ada259d109dc0e9be9aeda73222c32702", null ],
+    [ "data", "d2/d00/a01561.html#a8b867aae5878a389f537f3833aa29fb6", null ],
+    [ "packets", "d2/d00/a01561.html#acb667a7c40770f7ecfb011f06a6930d8", null ]
 ];

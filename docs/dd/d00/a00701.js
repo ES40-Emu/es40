@@ -1,7 +1,7 @@
 var a00701 =
 [
-    [ "CRuntimeException", "dd/d00/a00701.html#a34f37915345383466ee5d7d299fe7045", null ],
-    [ "CRuntimeException", "dd/d00/a00701.html#a289d3be8841af849e6e2cd9f9755756d", null ],
-    [ "CRuntimeException", "dd/d00/a00701.html#a8e4516fdfd1d5f48b0c4f46fe6942909", null ],
-    [ "name", "dd/d00/a00701.html#a50c57f4ae1c76abd5118630a675a8b51", null ]
+    [ "CSym53C895", "d0/d00/a02053.html", "d0/d00/a02053" ],
+    [ "CSym53C895::SSym_state", "d2/d00/a02057.html", "d2/d00/a02057" ],
+    [ "CSym53C895::SSym_state::USym_regs", "d8/d00/a02061.html", "d8/d00/a02061" ],
+    [ "CSym53C895::SSym_state::SSym_alu", "d0/d00/a02065.html", "d0/d00/a02065" ]
 ];

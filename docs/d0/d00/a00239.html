@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: CPU/idle_detect.h File Reference</title>
+<title>ES40: CPU/cpu_fp_branch.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,189 +109,215 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d0/d00/a00239.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">idle_detect.h File Reference</div></div>
+  <div class="headertitle"><div class="title">cpu_fp_branch.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;cstring&gt;</code><br />
-</div><div class="textblock"><div class="dynheader">
-Include dependency graph for idle_detect.h:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00240.png" border="0" usemap="#a_c_p_u_2idle__detect_8h" loading="lazy" alt=""/></div>
-<map name="a_c_p_u_2idle__detect_8h" id="a_c_p_u_2idle__detect_8h">
-<area shape="rect" title=" " alt="" coords="5,5,134,32"/>
-<area shape="rect" title=" " alt="" coords="39,80,100,107"/>
-<area shape="poly" title=" " alt="" coords="71,31,72,65,67,64,68,35"/>
-</map>
-</div>
-</div><div class="textblock"><div class="dynheader">
+
+<p>Contains code macros for the processor floating-point branch instructions.  
+<a href="#details">More...</a></p>
+<div class="textblock"><div class="dynheader">
 This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../d6/d00/a00241.png" border="0" usemap="#a_c_p_u_2idle__detect_8hdep" loading="lazy" alt=""/></div>
-<map name="a_c_p_u_2idle__detect_8hdep" id="a_c_p_u_2idle__detect_8hdep">
-<area shape="rect" title=" " alt="" coords="1158,5,1287,32"/>
-<area shape="rect" href="../../d7/d00/a00143.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="1159,80,1286,107"/>
-<area shape="poly" title=" " alt="" coords="1224,46,1225,81,1221,78,1221,50"/>
-<area shape="rect" href="../../d5/d00/a00140.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="5,155,147,181"/>
-<area shape="poly" title=" " alt="" coords="1140,97,722,116,442,133,159,157,148,159,147,153,158,152,442,128,722,111,1146,96"/>
-<area shape="rect" href="../../da/d00/a00149.html" title="Contains IEEE floating point code for the Alpha CPU." alt="" coords="171,155,368,181"/>
-<area shape="poly" title=" " alt="" coords="1141,100,811,124,380,157,368,158,368,153,380,152,811,118,1146,99"/>
-<area shape="rect" href="../../d7/d00/a00152.html" title="Contains VAX floating point code for the Alpha CPU." alt="" coords="392,155,586,181"/>
-<area shape="poly" title=" " alt="" coords="1146,102,599,157,587,159,587,153,598,152,1141,101"/>
-<area shape="rect" href="../../d3/d00/a00155.html" title="Contains routines that replace parts of the VMS PALcode for the emulated DecChip 21264CB EV68 Alpha p..." alt="" coords="610,155,800,181"/>
-<area shape="poly" title=" " alt="" coords="1146,106,796,157,796,151,1141,106"/>
-<area shape="rect" href="../../d5/d00/a00224.html" title=" " alt="" coords="824,155,957,181"/>
-<area shape="poly" title=" " alt="" coords="1152,110,949,157,948,151,1147,111"/>
-<area shape="rect" href="../../d1/d00/a00230.html" title=" " alt="" coords="981,155,1123,181"/>
-<area shape="poly" title=" " alt="" coords="1181,113,1083,157,1081,151,1176,114"/>
-<area shape="rect" href="../../d9/d00/a00257.html" title="Contains the code for the CPU tracing engine." alt="" coords="1146,155,1299,181"/>
-<area shape="poly" title=" " alt="" coords="1225,121,1225,156,1221,152,1221,124"/>
-<area shape="rect" href="../../d1/d00/a00077.html" title="Contains the code for the configuration file interpreter." alt="" coords="1323,155,1480,181"/>
-<area shape="poly" title=" " alt="" coords="1268,110,1373,154,1367,154,1267,115"/>
-<area shape="rect" href="../../d5/d00/a00599.html" title="Contains the code for the emulated Dual Port Ram and RMC devices." alt="" coords="1504,155,1626,181"/>
-<area shape="poly" title=" " alt="" coords="1298,108,1508,154,1503,154,1297,113"/>
-<area shape="rect" href="../../d0/d00/a00605.html" title="Contains the code for the emulated Flash ROM devices." alt="" coords="1651,155,1776,181"/>
-<area shape="poly" title=" " alt="" coords="1302,103,1639,152,1653,157,1648,156,1638,157,1302,108"/>
-<area shape="rect" href="../../d4/d00/a00617.html" title="Contains the code for the emulated Typhoon Chipset devices." alt="" coords="1800,155,1938,181"/>
-<area shape="poly" title=" " alt="" coords="1302,99,1521,121,1788,152,1802,156,1797,156,1788,157,1521,127,1302,105"/>
-<area shape="rect" href="../../df/d00/a00623.html" title="ES40 (Clipper) board: TIGbus registers and DIMM topology." alt="" coords="1963,155,2136,181"/>
-<area shape="poly" title=" " alt="" coords="1302,98,1588,119,1951,152,1965,156,1960,156,1950,157,1588,125,1302,103"/>
-<area shape="rect" href="../../d6/d00/a00626.html" title="Tsunami/Typhoon chipset (Cchip, Dchip, Pchip) CSRs, interrupt delivery and PCI window translation." alt="" coords="2160,155,2352,181"/>
-<area shape="poly" title=" " alt="" coords="1302,96,1668,117,2148,152,2163,156,2157,156,2148,157,1668,122,1302,101"/>
+<div class="center"><img src="../../d6/d00/a00241.png" border="0" usemap="#a_c_p_u_2cpu__fp__branch_8hdep" loading="lazy" alt=""/></div>
+<map name="a_c_p_u_2cpu__fp__branch_8hdep" id="a_c_p_u_2cpu__fp__branch_8hdep">
+<area shape="rect" title="Contains code macros for the processor floating&#45;point branch instructions." alt="" coords="5,5,156,32"/>
+<area shape="rect" href="../../d7/d00/a00182.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="10,80,151,107"/>
+<area shape="poly" title=" " alt="" coords="82,46,83,81,78,79,79,50"/>
 </map>
 </div>
 </div>
 <p><a href="../../d0/d00/a00239_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
-Data Structures</h2></td></tr>
-<tr class="memitem:SIdleMethod" id="r_SIdleMethod"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a01021.html">SIdleMethod</a></td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
-Enumerations</h2></td></tr>
-<tr class="memitem:ae1cb99b7c446a716f09351f157acec25" id="r_ae1cb99b7c446a716f09351f157acec25"><td class="memItemLeft">enum &#160;</td><td class="memItemRight"><a class="el" href="#ae1cb99b7c446a716f09351f157acec25">EIdleRule</a> { <a class="el" href="#ae1cb99b7c446a716f09351f157acec25a592187f3a6746679fc32286eefb524dc">RULE_NONE</a> = 0
-, <a class="el" href="#ae1cb99b7c446a716f09351f157acec25a4eea9d49dcf47b30f12a0029f534f5c4">RULE_SPIN</a> = 1
-, <a class="el" href="#ae1cb99b7c446a716f09351f157acec25ad67b92be79262bd9f85e921c9a6f99af">RULE_SPIN_IPL3</a> = 2
- }</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:a737b2141c4f39691fac007695b10419c" id="r_a737b2141c4f39691fac007695b10419c"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a737b2141c4f39691fac007695b10419c">idle_method_by_name</a> (const char *n)</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:aa859dbb982061717cc9142be2fdcbc87" id="r_aa859dbb982061717cc9142be2fdcbc87"><td class="memItemLeft">static const <a class="el" href="../../d5/d00/a01021.html">SIdleMethod</a>&#160;</td><td class="memItemRight"><a class="el" href="#aa859dbb982061717cc9142be2fdcbc87">idle_methods</a> []</td></tr>
+<tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:a35cbff736c397d624b27c6ba10d4b26e" id="r_a35cbff736c397d624b27c6ba10d4b26e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a35cbff736c397d624b27c6ba10d4b26e">FP_IS_ZERO</a>(val)</td></tr>
+<tr class="memitem:a6f52790b6d3c56191d155e4a701ffd39" id="r_a6f52790b6d3c56191d155e4a701ffd39"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6f52790b6d3c56191d155e4a701ffd39">FP_IS_NEGATIVE</a>(val)</td></tr>
+<tr class="memitem:a9c8f6b0d938a7405cd833d7245454d03" id="r_a9c8f6b0d938a7405cd833d7245454d03"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9c8f6b0d938a7405cd833d7245454d03">DO_FBEQ</a></td></tr>
+<tr class="memitem:a9e049daec1f76e1586c02baaa3094f9f" id="r_a9e049daec1f76e1586c02baaa3094f9f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9e049daec1f76e1586c02baaa3094f9f">DO_FBGE</a></td></tr>
+<tr class="memitem:abd2eeb8d077703b57095d1b1033d41b0" id="r_abd2eeb8d077703b57095d1b1033d41b0"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#abd2eeb8d077703b57095d1b1033d41b0">DO_FBGT</a></td></tr>
+<tr class="memitem:a626450b6b526a8befc122d7a50ea98cc" id="r_a626450b6b526a8befc122d7a50ea98cc"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a626450b6b526a8befc122d7a50ea98cc">DO_FBLE</a></td></tr>
+<tr class="memitem:ac7d7895e1e0e49d90b6e8b269e48c093" id="r_ac7d7895e1e0e49d90b6e8b269e48c093"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac7d7895e1e0e49d90b6e8b269e48c093">DO_FBLT</a></td></tr>
+<tr class="memitem:a13bddfdb496f68a5429ae23fd465237a" id="r_a13bddfdb496f68a5429ae23fd465237a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a13bddfdb496f68a5429ae23fd465237a">DO_FBNE</a></td></tr>
 </table>
-<a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
-<a id="ae1cb99b7c446a716f09351f157acec25" name="ae1cb99b7c446a716f09351f157acec25"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae1cb99b7c446a716f09351f157acec25">&#9670;&#160;</a></span>EIdleRule</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Contains code macros for the processor floating-point branch instructions. </p>
+<p>Based on ARM chapter 4.9.</p>
+<p>$Id$</p>
+<p>X-1.12 Camiel Vanderhoeven 14-MAR-2008</p><ol type="1">
+<li>More meaningful exceptions replace throwing (int) 1.</li>
+<li>U64 macro replaces X64 macro.</li>
+</ol>
+<p>X-1.11 Brian Wheeler 27-FEB-2008 Avoid compiler warnings.</p>
+<p>X-1.10 Camiel Vanderhoeven 06-FEB-2008 Check for FPEN in old floating point code.</p>
+<p>X-1.9 Camiel Vanderhoeven 05-FEB-2008 Only use new floating-point code when HAVE_NEW_FP has been defined.</p>
+<p>X-1.8 Camiel Vanderhoeven 30-JAN-2008 Always use set_pc or add_pc to change the program counter.</p>
+<p>X-1.7 Camiel Vanderhoeven 30-JAN-2008 Remember number of instructions left in current memory page, so that the translation-buffer doens't need to be consulted on every instruction fetch when the Icache is disabled.</p>
+<p>X-1.6 Camiel Vanderhoeven 28-JAN-2008 Better floating-point exception handling.</p>
+<p>X-1.5 Camiel Vanderhoeven 22-JAN-2008 Implement new floating-point code.</p>
+<p>X-1.4 Camiel Vanderhoeven 11-APR-2007 Moved all data that should be saved to a state file to a structure "state".</p>
+<p>X-1.3 Camiel Vanderhoeven 30-MAR-2007 Added old changelog comments.</p>
+<p>X-1.2 Camiel Vanderhoeven 13-MAR-2007 Basic floating point support added.</p>
+<p>X-1.1 Camiel Vanderhoeven 18-FEB-2007 File created. Contains code previously found in <a class="el" href="../../de/d00/a00185.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor.">AlphaCPU.h</a> </p>
+
+<p class="definition">Definition in file <a class="el" href="../../d0/d00/a00239_source.html">cpu_fp_branch.h</a>.</p>
+</div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
+<a id="a9c8f6b0d938a7405cd833d7245454d03" name="a9c8f6b0d938a7405cd833d7245454d03"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c8f6b0d938a7405cd833d7245454d03">&#9670;&#160;</a></span>DO_FBEQ</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">enum <a class="el" href="#ae1cb99b7c446a716f09351f157acec25">EIdleRule</a></td>
+          <td class="memname">#define DO_FBEQ</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ae1cb99b7c446a716f09351f157acec25a592187f3a6746679fc32286eefb524dc" name="ae1cb99b7c446a716f09351f157acec25a592187f3a6746679fc32286eefb524dc"></a>RULE_NONE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ae1cb99b7c446a716f09351f157acec25a4eea9d49dcf47b30f12a0029f534f5c4" name="ae1cb99b7c446a716f09351f157acec25a4eea9d49dcf47b30f12a0029f534f5c4"></a>RULE_SPIN&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ae1cb99b7c446a716f09351f157acec25ad67b92be79262bd9f85e921c9a6f99af" name="ae1cb99b7c446a716f09351f157acec25ad67b92be79262bd9f85e921c9a6f99af"></a>RULE_SPIN_IPL3&#160;</td><td class="fielddoc"></td></tr>
-</table>
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00239_source.html#l00027">27</a> of file <a class="el" href="../../d0/d00/a00239_source.html">idle_detect.h</a>.</p>
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">if(<a class="code hl_define" href="#a35cbff736c397d624b27c6ba10d4b26e">FP_IS_ZERO</a>(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>])) \</div>
+<div class="line">  add_pc(<a class="code hl_define" href="../../d7/d00/a00236.html#a7d990f4991dae437ae9b885db118eebd">DISP_21</a> * 4);</div>
+<div class="ttc" id="aa00236_html_a5591e9ff8152342313b8c38f14c437b7"><div class="ttname"><a href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a></div><div class="ttdeci">#define FREG_1</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00824">cpu_defs.h:824</a></div></div>
+<div class="ttc" id="aa00236_html_a7d990f4991dae437ae9b885db118eebd"><div class="ttname"><a href="../../d7/d00/a00236.html#a7d990f4991dae437ae9b885db118eebd">DISP_21</a></div><div class="ttdeci">#define DISP_21</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00582">cpu_defs.h:582</a></div></div>
+<div class="ttc" id="aa00236_html_adaa245d6bc2073b49c4a609ddcac8d4a"><div class="ttname"><a href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a></div><div class="ttdeci">#define FPSTART</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00850">cpu_defs.h:850</a></div></div>
+<div class="ttc" id="aa00239_html_a35cbff736c397d624b27c6ba10d4b26e"><div class="ttname"><a href="#a35cbff736c397d624b27c6ba10d4b26e">FP_IS_ZERO</a></div><div class="ttdeci">#define FP_IS_ZERO(val)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d00/a00239_source.html#l00074">cpu_fp_branch.h:74</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00239_source.html#l00078">78</a> of file <a class="el" href="../../d0/d00/a00239_source.html">cpu_fp_branch.h</a>.</p>
 
 </div>
 </div>
-<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
-<a id="a737b2141c4f39691fac007695b10419c" name="a737b2141c4f39691fac007695b10419c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a737b2141c4f39691fac007695b10419c">&#9670;&#160;</a></span>idle_method_by_name()</h2>
+<a id="a9e049daec1f76e1586c02baaa3094f9f" name="a9e049daec1f76e1586c02baaa3094f9f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e049daec1f76e1586c02baaa3094f9f">&#9670;&#160;</a></span>DO_FBGE</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int idle_method_by_name </td>
+          <td class="memname">#define DO_FBGE</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">if(!<a class="code hl_define" href="#a6f52790b6d3c56191d155e4a701ffd39">FP_IS_NEGATIVE</a>(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]) || <a class="code hl_define" href="#a35cbff736c397d624b27c6ba10d4b26e">FP_IS_ZERO</a>(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>])) \</div>
+<div class="line">  add_pc(<a class="code hl_define" href="../../d7/d00/a00236.html#a7d990f4991dae437ae9b885db118eebd">DISP_21</a> * 4);</div>
+<div class="ttc" id="aa00239_html_a6f52790b6d3c56191d155e4a701ffd39"><div class="ttname"><a href="#a6f52790b6d3c56191d155e4a701ffd39">FP_IS_NEGATIVE</a></div><div class="ttdeci">#define FP_IS_NEGATIVE(val)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d00/a00239_source.html#l00075">cpu_fp_branch.h:75</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00239_source.html#l00083">83</a> of file <a class="el" href="../../d0/d00/a00239_source.html">cpu_fp_branch.h</a>.</p>
+
+</div>
+</div>
+<a id="abd2eeb8d077703b57095d1b1033d41b0" name="abd2eeb8d077703b57095d1b1033d41b0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd2eeb8d077703b57095d1b1033d41b0">&#9670;&#160;</a></span>DO_FBGT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_FBGT</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">if(!<a class="code hl_define" href="#a6f52790b6d3c56191d155e4a701ffd39">FP_IS_NEGATIVE</a>(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]) &amp;&amp; !<a class="code hl_define" href="#a35cbff736c397d624b27c6ba10d4b26e">FP_IS_ZERO</a>(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>])) \</div>
+<div class="line">  add_pc(<a class="code hl_define" href="../../d7/d00/a00236.html#a7d990f4991dae437ae9b885db118eebd">DISP_21</a> * 4);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00239_source.html#l00088">88</a> of file <a class="el" href="../../d0/d00/a00239_source.html">cpu_fp_branch.h</a>.</p>
+
+</div>
+</div>
+<a id="a626450b6b526a8befc122d7a50ea98cc" name="a626450b6b526a8befc122d7a50ea98cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a626450b6b526a8befc122d7a50ea98cc">&#9670;&#160;</a></span>DO_FBLE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_FBLE</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">if(<a class="code hl_define" href="#a6f52790b6d3c56191d155e4a701ffd39">FP_IS_NEGATIVE</a>(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]) || <a class="code hl_define" href="#a35cbff736c397d624b27c6ba10d4b26e">FP_IS_ZERO</a>(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>])) \</div>
+<div class="line">  add_pc(<a class="code hl_define" href="../../d7/d00/a00236.html#a7d990f4991dae437ae9b885db118eebd">DISP_21</a> * 4);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00239_source.html#l00093">93</a> of file <a class="el" href="../../d0/d00/a00239_source.html">cpu_fp_branch.h</a>.</p>
+
+</div>
+</div>
+<a id="ac7d7895e1e0e49d90b6e8b269e48c093" name="ac7d7895e1e0e49d90b6e8b269e48c093"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7d7895e1e0e49d90b6e8b269e48c093">&#9670;&#160;</a></span>DO_FBLT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_FBLT</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">if(<a class="code hl_define" href="#a6f52790b6d3c56191d155e4a701ffd39">FP_IS_NEGATIVE</a>(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]) &amp;&amp; !<a class="code hl_define" href="#a35cbff736c397d624b27c6ba10d4b26e">FP_IS_ZERO</a>(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>])) \</div>
+<div class="line">  add_pc(<a class="code hl_define" href="../../d7/d00/a00236.html#a7d990f4991dae437ae9b885db118eebd">DISP_21</a> * 4);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00239_source.html#l00098">98</a> of file <a class="el" href="../../d0/d00/a00239_source.html">cpu_fp_branch.h</a>.</p>
+
+</div>
+</div>
+<a id="a13bddfdb496f68a5429ae23fd465237a" name="a13bddfdb496f68a5429ae23fd465237a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13bddfdb496f68a5429ae23fd465237a">&#9670;&#160;</a></span>DO_FBNE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_FBNE</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>; \</div>
+<div class="line">if(!<a class="code hl_define" href="#a35cbff736c397d624b27c6ba10d4b26e">FP_IS_ZERO</a>(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>])) \</div>
+<div class="line">  add_pc(<a class="code hl_define" href="../../d7/d00/a00236.html#a7d990f4991dae437ae9b885db118eebd">DISP_21</a> * 4);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00239_source.html#l00103">103</a> of file <a class="el" href="../../d0/d00/a00239_source.html">cpu_fp_branch.h</a>.</p>
+
+</div>
+</div>
+<a id="a6f52790b6d3c56191d155e4a701ffd39" name="a6f52790b6d3c56191d155e4a701ffd39"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f52790b6d3c56191d155e4a701ffd39">&#9670;&#160;</a></span>FP_IS_NEGATIVE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FP_IS_NEGATIVE</td>
           <td>(</td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>n</em></span></td><td>)</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>val</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00239_source.html#l00066">66</a> of file <a class="el" href="../../d0/d00/a00239_source.html">idle_detect.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d0/d00/a00239_source.html#l00066">idle_method_by_name()</a>, <a class="el" href="../../d0/d00/a00239_source.html#l00057">idle_methods</a>, <a class="el" href="../../d0/d00/a00239_source.html#l00036">SIdleMethod::name</a>, <a class="el" href="../../d0/d00/a00239_source.html#l00037">SIdleMethod::rule</a>, <a class="el" href="../../d0/d00/a00239_source.html#l00029">RULE_NONE</a>, and <a class="el" href="../../df/d00/a00107_source.html#l00043">strcasecmp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d0/d00/a00239_source.html#l00066">idle_method_by_name()</a>, <a class="el" href="../../d5/d00/a00140_source.html#l00645">CAlphaCPU::init()</a>, and <a class="el" href="../../d5/d00/a00140_source.html#l00809">CAlphaCPU::ResetForSystemReset()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d0/d00/a00239_a737b2141c4f39691fac007695b10419c_cgraph.png" border="0" usemap="#ad0/d00/a00239_a737b2141c4f39691fac007695b10419c_cgraph" loading="lazy" alt=""/></div>
-<map name="ad0/d00/a00239_a737b2141c4f39691fac007695b10419c_cgraph" id="ad0/d00/a00239_a737b2141c4f39691fac007695b10419c_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,157,56"/>
-<area shape="poly" title=" " alt="" coords="54,28,50,21,53,11,64,5,81,3,99,5,110,14,105,14,98,10,81,8,66,10,57,14,55,20,60,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d0/d00/a00239_a737b2141c4f39691fac007695b10419c_icgraph.png" border="0" usemap="#ad0/d00/a00239_a737b2141c4f39691fac007695b10419c_icgraph" loading="lazy" alt=""/></div>
-<map name="ad0/d00/a00239_a737b2141c4f39691fac007695b10419c_icgraph" id="ad0/d00/a00239_a737b2141c4f39691fac007695b10419c_icgraph">
-<area shape="rect" title=" " alt="" coords="254,35,405,61"/>
-<area shape="poly" title=" " alt="" coords="366,19,354,16,329,13,306,15,293,20,290,25,296,35,291,33,285,26,289,16,305,10,329,8,356,11,372,20"/>
-<area shape="rect" href="../../dd/d00/a00921.html#aeb341e51ffe7c9fd2876dabca0f03170" title="Initialize the CPU." alt="" coords="46,5,165,32"/>
-<area shape="poly" title=" " alt="" coords="236,37,165,29,165,24,241,35"/>
-<area shape="rect" href="../../dd/d00/a00921.html#a38da15d01931aa95eae064fb6c24244f" title=" " alt="" coords="5,56,206,99"/>
-<area shape="poly" title=" " alt="" coords="235,60,206,67,206,62,241,60"/>
-</map>
-</div>
+<b>Value:</b><div class="fragment"><div class="line">(((val) &amp; <a class="code hl_define" href="../../d7/d00/a00236.html#a48f0868c2774aad1501138b9f9c01ef0">FPR_SIGN</a>) != 0)</div>
+<div class="ttc" id="aa00236_html_a48f0868c2774aad1501138b9f9c01ef0"><div class="ttname"><a href="../../d7/d00/a00236.html#a48f0868c2774aad1501138b9f9c01ef0">FPR_SIGN</a></div><div class="ttdeci">#define FPR_SIGN</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00259">cpu_defs.h:259</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00239_source.html#l00075">75</a> of file <a class="el" href="../../d0/d00/a00239_source.html">cpu_fp_branch.h</a>.</p>
 
 </div>
 </div>
-<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
-<a id="aa859dbb982061717cc9142be2fdcbc87" name="aa859dbb982061717cc9142be2fdcbc87"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa859dbb982061717cc9142be2fdcbc87">&#9670;&#160;</a></span>idle_methods</h2>
+<a id="a35cbff736c397d624b27c6ba10d4b26e" name="a35cbff736c397d624b27c6ba10d4b26e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35cbff736c397d624b27c6ba10d4b26e">&#9670;&#160;</a></span>FP_IS_ZERO</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">const <a class="el" href="../../d5/d00/a01021.html">SIdleMethod</a> idle_methods[]</td>
+          <td class="memname">#define FP_IS_ZERO</td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>val</em></span></td><td>)</td>
+          <td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">                                      =</div>
-<div class="line">{</div>
-<div class="line">  { <span class="stringliteral">&quot;off&quot;</span>,    <a class="code hl_enumvalue" href="#ae1cb99b7c446a716f09351f157acec25a592187f3a6746679fc32286eefb524dc">RULE_NONE</a>,      <span class="stringliteral">&quot;no host-side idle detection (default)&quot;</span> },</div>
-<div class="line">  { <span class="stringliteral">&quot;vms&quot;</span>,    <a class="code hl_enumvalue" href="#ae1cb99b7c446a716f09351f157acec25ad67b92be79262bd9f85e921c9a6f99af">RULE_SPIN_IPL3</a>, <span class="stringliteral">&quot;OpenVMS&quot;</span> },</div>
-<div class="line">  { <span class="stringliteral">&quot;tru64&quot;</span>,  <a class="code hl_enumvalue" href="#ae1cb99b7c446a716f09351f157acec25a4eea9d49dcf47b30f12a0029f534f5c4">RULE_SPIN</a>,      <span class="stringliteral">&quot;Tru64 UNIX&quot;</span> },</div>
-<div class="line">  { <span class="stringliteral">&quot;netbsd&quot;</span>, <a class="code hl_enumvalue" href="#ae1cb99b7c446a716f09351f157acec25a4eea9d49dcf47b30f12a0029f534f5c4">RULE_SPIN</a>,      <span class="stringliteral">&quot;NetBSD/alpha&quot;</span> },</div>
-<div class="line">  { 0, 0, 0 }</div>
-<div class="line">}</div>
-<div class="ttc" id="aa00239_html_ae1cb99b7c446a716f09351f157acec25a4eea9d49dcf47b30f12a0029f534f5c4"><div class="ttname"><a href="#ae1cb99b7c446a716f09351f157acec25a4eea9d49dcf47b30f12a0029f534f5c4">RULE_SPIN</a></div><div class="ttdeci">@ RULE_SPIN</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d00/a00239_source.html#l00030">idle_detect.h:30</a></div></div>
-<div class="ttc" id="aa00239_html_ae1cb99b7c446a716f09351f157acec25a592187f3a6746679fc32286eefb524dc"><div class="ttname"><a href="#ae1cb99b7c446a716f09351f157acec25a592187f3a6746679fc32286eefb524dc">RULE_NONE</a></div><div class="ttdeci">@ RULE_NONE</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d00/a00239_source.html#l00029">idle_detect.h:29</a></div></div>
-<div class="ttc" id="aa00239_html_ae1cb99b7c446a716f09351f157acec25ad67b92be79262bd9f85e921c9a6f99af"><div class="ttname"><a href="#ae1cb99b7c446a716f09351f157acec25ad67b92be79262bd9f85e921c9a6f99af">RULE_SPIN_IPL3</a></div><div class="ttdeci">@ RULE_SPIN_IPL3</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d00/a00239_source.html#l00031">idle_detect.h:31</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line">(((val) &amp; <a class="code hl_define" href="../../d7/d00/a00236.html#a48f0868c2774aad1501138b9f9c01ef0">~FPR_SIGN</a>) == 0)</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00239_source.html#l00057">57</a> of file <a class="el" href="../../d0/d00/a00239_source.html">idle_detect.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d0/d00/a00239_source.html#l00066">idle_method_by_name()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00239_source.html#l00074">74</a> of file <a class="el" href="../../d0/d00/a00239_source.html">cpu_fp_branch.h</a>.</p>
 
 </div>
 </div>
@@ -308,7 +334,7 @@ Here is the caller graph for this function:</div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d0/d00/a00239.html">idle_detect.h</a></li>
+    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d0/d00/a00239.html">cpu_fp_branch.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

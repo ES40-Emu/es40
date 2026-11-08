@@ -1,21 +1,13 @@
 var a01493 =
 [
-    [ "device", "d2/d00/a01493.html#a637c6c3615b6e7db279d0ec1e74a0995", null ],
-    [ "device_selection", "d2/d00/a01493.html#a12bd80d634d923c7df3dfc94b9818a20", null ],
-    [ "devices", "d2/d00/a01493.html#a17608f177f52d3fd653d116590809b53", null ],
-    [ "first_visible", "d2/d00/a01493.html#a2a57ee2c1316c649337b59cf594f2375", null ],
-    [ "height", "d2/d00/a01493.html#a7f709b15751a2350b7163b70be009bb8", null ],
-    [ "locked_return_selection", "d2/d00/a01493.html#a8127d5d1f4c717c27f85ac88e11a6f38", null ],
-    [ "message", "d2/d00/a01493.html#a54985842cd83d3e13e52b3f3060d3365", null ],
-    [ "mode", "d2/d00/a01493.html#a2033bd88d740eecfc83eb11b86245ec9", null ],
-    [ "parent", "d2/d00/a01493.html#a4ef6968283b3ceb4d1301024ac0f42e0", null ],
-    [ "pending_eject", "d2/d00/a01493.html#ac9740706209529f744e6de3477e5f0ae", null ],
-    [ "pending_path", "d2/d00/a01493.html#a9b1c924c46d0a73f1e7c32afa77e8f9a", null ],
-    [ "renderer", "d2/d00/a01493.html#a8af03082c0e5737e1383d5bc3d4260a4", null ],
-    [ "reset_button", "d2/d00/a01493.html#a9de4aaac91d408e0def6a2ab964fe14b", null ],
-    [ "rows", "d2/d00/a01493.html#ad24d398d998f26c3d6078cd1af4966ba", null ],
-    [ "selected", "d2/d00/a01493.html#a293b84fd33584ccdea173a4e9732f29f", null ],
-    [ "width", "d2/d00/a01493.html#a686f4331514497d41be6507c22fff20f", null ],
-    [ "window", "d2/d00/a01493.html#a3c813e994d1a5c944a55069e75dd8d22", null ],
-    [ "window_id", "d2/d00/a01493.html#ab8f37986614e34109c0f523c081aa3dd", null ]
+    [ "config_data", "d2/d00/a01493.html#a9581095de65f343ef959b22208160425", null ],
+    [ "config_mask", "d2/d00/a01493.html#ad47c618df5d1ccdc5f40cf7291ba86dc", null ],
+    [ "bar0_size", "d2/d00/a01493.html#aa152b63391e1eb7a526efa9efd66689f", null ],
+    [ "bar1_size", "d2/d00/a01493.html#ac5591803a24e190c189ba45b393559a4", null ],
+    [ "class_code", "d2/d00/a01493.html#a0f805673fcf68cf02bfbf0ff5f48c0b1", null ],
+    [ "device", "d2/d00/a01493.html#aceec01dcb31e1b711eb45fa98aff076a", null ],
+    [ "revision", "d2/d00/a01493.html#a55926722228c1d98ddc2e696d04a67a7", null ],
+    [ "subsystem_device", "d2/d00/a01493.html#a66ceb9b48986b72895fb013094376025", null ],
+    [ "subsystem_vendor", "d2/d00/a01493.html#a965ca041c5238a853882246c577b8bc8", null ],
+    [ "vendor", "d2/d00/a01493.html#afa47ac054efb6eacb3b37d389a665a72", null ]
 ];

@@ -1,15 +1,10 @@
 var a00530 =
 [
-    [ "CDisk", "d3/d00/a01613.html", "d3/d00/a01613" ],
-    [ "CDisk::SDisk_state", "d6/d00/a01617.html", "d6/d00/a01617" ],
-    [ "CDisk::SDisk_state::SDisk_scsi", "dd/d00/a01621.html", "dd/d00/a01621" ],
-    [ "CDisk::SDisk_state::SDisk_scsi::SDisk_msgi", "d3/d00/a01625.html", "d3/d00/a01625" ],
-    [ "CDisk::SDisk_state::SDisk_scsi::SDisk_msgo", "dc/d00/a01629.html", "dc/d00/a01629" ],
-    [ "CDisk::SDisk_state::SDisk_scsi::SDisk_cmd", "d6/d00/a01633.html", "d6/d00/a01633" ],
-    [ "CDisk::SDisk_state::SDisk_scsi::SDisk_dati", "db/d00/a01637.html", "db/d00/a01637" ],
-    [ "CDisk::SDisk_state::SDisk_scsi::SDisk_dato", "d0/d00/a01641.html", "d0/d00/a01641" ],
-    [ "CDisk::SDisk_state::SDisk_scsi::SDisk_stat", "d7/d00/a01645.html", "d7/d00/a01645" ],
-    [ "CDisk::SDisk_state::SDisk_scsi::SDisk_sense", "dc/d00/a01649.html", "dc/d00/a01649" ],
-    [ "DATI_BUFSZ", "da/d00/a00530.html#a0352579b8ab439d4ee9d727a6f388925", null ],
-    [ "DATO_BUFSZ", "da/d00/a00530.html#a5c14d48b9bdb79a3bbbdc98878d16756", null ]
+    [ "CYCLE_TIME_MS", "da/d00/a00530.html#a53924ae65e21f5262f6e17b586f11ea4", null ],
+    [ "FIFO_SIZE", "da/d00/a00530.html#a6092455278a1ac67204e0dbe08f9d13f", null ],
+    [ "RECV_TICKS", "da/d00/a00530.html#a9931c55ac7e058952f81fd632dd35148", null ],
+    [ "UART_BASE_CLOCK", "da/d00/a00530.html#a3acf06e10a3e1656cdbebb2f2fbf5929", null ],
+    [ "iCounter", "da/d00/a00530.html#aeed5c8cab35e0fd3f9e16d62c41cb41e", null ],
+    [ "srl_magic1", "da/d00/a00530.html#a303e598a37ac2f992df9837c34f9a5d9", null ],
+    [ "srl_magic2", "da/d00/a00530.html#a98f638743272d071e024c342292a45cc", null ]
 ];

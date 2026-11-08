@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: CPU/jit/jitengine.cpp File Reference</title>
+<title>ES40: CPU/cpu_fp_memory.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,11 +109,219 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d2/d00/a00242.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">jitengine.cpp File Reference</div></div>
+  <div class="headertitle"><div class="title">cpu_fp_memory.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
+<p>Contains code macros for the processor floating-point load/store instructions.  
+<a href="#details">More...</a></p>
+<div class="textblock"><div class="dynheader">
+This graph shows which files directly or indirectly include this file:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d6/d00/a00244.png" border="0" usemap="#a_c_p_u_2cpu__fp__memory_8hdep" loading="lazy" alt=""/></div>
+<map name="a_c_p_u_2cpu__fp__memory_8hdep" id="a_c_p_u_2cpu__fp__memory_8hdep">
+<area shape="rect" title="Contains code macros for the processor floating&#45;point load/store instructions." alt="" coords="5,5,163,32"/>
+<area shape="rect" href="../../d7/d00/a00182.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="13,80,155,107"/>
+<area shape="poly" title=" " alt="" coords="86,46,86,81,82,79,82,50"/>
+</map>
+</div>
+</div>
 <p><a href="../../d2/d00/a00242_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:acc2b8b35fa85cc738c3822df08590e1a" id="r_acc2b8b35fa85cc738c3822df08590e1a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#acc2b8b35fa85cc738c3822df08590e1a">DO_LDF</a></td></tr>
+<tr class="memitem:a5b234b248d4e35d0b6bed81bb0785f49" id="r_a5b234b248d4e35d0b6bed81bb0785f49"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5b234b248d4e35d0b6bed81bb0785f49">DO_LDG</a></td></tr>
+<tr class="memitem:a0a4da3503839dd3e22ab3e8347449c31" id="r_a0a4da3503839dd3e22ab3e8347449c31"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0a4da3503839dd3e22ab3e8347449c31">DO_LDS</a></td></tr>
+<tr class="memitem:a189c1b62e80012ea03de47bcb56d915c" id="r_a189c1b62e80012ea03de47bcb56d915c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a189c1b62e80012ea03de47bcb56d915c">DO_LDT</a></td></tr>
+<tr class="memitem:aaa863c79355ef39a83370828022d2c40" id="r_aaa863c79355ef39a83370828022d2c40"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aaa863c79355ef39a83370828022d2c40">DO_STF</a></td></tr>
+<tr class="memitem:aae10ad9ebabaacc0e656333d3bdbc49f" id="r_aae10ad9ebabaacc0e656333d3bdbc49f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aae10ad9ebabaacc0e656333d3bdbc49f">DO_STG</a></td></tr>
+<tr class="memitem:aebeb90b233fd19c1a7fdbfc4690f3ed8" id="r_aebeb90b233fd19c1a7fdbfc4690f3ed8"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aebeb90b233fd19c1a7fdbfc4690f3ed8">DO_STS</a></td></tr>
+<tr class="memitem:a321a3084e9755bdd1a4e8bb01e589907" id="r_a321a3084e9755bdd1a4e8bb01e589907"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a321a3084e9755bdd1a4e8bb01e589907">DO_STT</a></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Contains code macros for the processor floating-point load/store instructions. </p>
+<p>Based on ARM chapter 4.8.</p>
+<p>$Id$</p>
+<p>X-1.16 Camiel Vanderhoeven 12-JUL-2008 Fixed typo in new fp DO_LDT implementation.</p>
+<p>X-1.15 Camiel Vanderhoeven 12-JUN-2008 Support for last written and last read memory locations.</p>
+<p>X-1.14 Camiel Vanderhoeven 14-MAR-2008 Formatting.</p>
+<p>X-1.13 Brian Wheeler 27-FEB-2008 Avoid compiler warnings.</p>
+<p>X-1.12 Camiel Vanderhoeven 06-FEB-2008 Check for FPEN in old floating point code.</p>
+<p>X-1.11 Camiel Vanderhoeven 05-FEB-2008 Only use new floating-point code when HAVE_NEW_FP has been defined.</p>
+<p>X-1.10 Camiel Vanderhoeven 28-JAN-2008 Better floating-point exception handling.</p>
+<p>X-1.9 Camiel Vanderhoeven 25-JAN-2008 Trap on unalogned memory access. The previous implementation where unaligned accesses were silently allowed could go wrong when page boundaries are crossed.</p>
+<p>X-1.8 Camiel Vanderhoeven 21-JAN-2008 Implement new floating-point code.</p>
+<p>X-1.7 Camiel Vanderhoeven 2-DEC-2007 Changed the way translation buffers work.</p>
+<p>X-1.6 Camiel Vanderhoeven 08-NOV-2007 Restructured conversion routines.</p>
+<p>X-1.5 Eduardo Marcelo Serrat 31-OCT-2007 Fixed conversion routines.</p>
+<p>X-1.4 Camiel Vanderhoeven 11-APR-2007 Moved all data that should be saved to a state file to a structure "state".</p>
+<p>X-1.3 Camiel Vanderhoeven 30-MAR-2007 Added old changelog comments.</p>
+<p>X-1.2 Camiel Vanderhoeven 13-MAR-2007 Basic floating point support added.</p>
+<p>X-1.1 Camiel Vanderhoeven 18-FEB-2007 File created. Contains code previously found in <a class="el" href="../../de/d00/a00185.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor.">AlphaCPU.h</a> </p>
+
+<p class="definition">Definition in file <a class="el" href="../../d2/d00/a00242_source.html">cpu_fp_memory.h</a>.</p>
+</div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
+<a id="acc2b8b35fa85cc738c3822df08590e1a" name="acc2b8b35fa85cc738c3822df08590e1a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc2b8b35fa85cc738c3822df08590e1a">&#9670;&#160;</a></span>DO_LDF</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_LDF</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>;                                  \</div>
+<div class="line">if(<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a> != 31)                                        \</div>
+<div class="line">{                                                       \</div>
+<div class="line">  READ_VIRT_F(state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="code hl_define" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 32, state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], vax_ldf);          \</div>
+<div class="line">}</div>
+<div class="ttc" id="aa00236_html_a1077f6bc8474ef39e14e42be631f6634"><div class="ttname"><a href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a></div><div class="ttdeci">#define DISP_16</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00581">cpu_defs.h:581</a></div></div>
+<div class="ttc" id="aa00236_html_a5591e9ff8152342313b8c38f14c437b7"><div class="ttname"><a href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a></div><div class="ttdeci">#define FREG_1</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00824">cpu_defs.h:824</a></div></div>
+<div class="ttc" id="aa00236_html_adaa245d6bc2073b49c4a609ddcac8d4a"><div class="ttname"><a href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a></div><div class="ttdeci">#define FPSTART</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00850">cpu_defs.h:850</a></div></div>
+<div class="ttc" id="aa00236_html_afc0e94c6f29d79352470dfd56076e09f"><div class="ttname"><a href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a></div><div class="ttdeci">#define REG_2</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00822">cpu_defs.h:822</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00242_source.html#l00085">85</a> of file <a class="el" href="../../d2/d00/a00242_source.html">cpu_fp_memory.h</a>.</p>
+
+</div>
+</div>
+<a id="a5b234b248d4e35d0b6bed81bb0785f49" name="a5b234b248d4e35d0b6bed81bb0785f49"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b234b248d4e35d0b6bed81bb0785f49">&#9670;&#160;</a></span>DO_LDG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_LDG</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>;                                  \</div>
+<div class="line">if(<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a> != 31)                                        \</div>
+<div class="line">{                                                       \</div>
+<div class="line">  READ_VIRT_F(state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="code hl_define" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 64, state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], vax_ldg);          \</div>
+<div class="line">}</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00242_source.html#l00091">91</a> of file <a class="el" href="../../d2/d00/a00242_source.html">cpu_fp_memory.h</a>.</p>
+
+</div>
+</div>
+<a id="a0a4da3503839dd3e22ab3e8347449c31" name="a0a4da3503839dd3e22ab3e8347449c31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a4da3503839dd3e22ab3e8347449c31">&#9670;&#160;</a></span>DO_LDS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_LDS</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>;                                  \</div>
+<div class="line">if(<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a> != 31)                                        \</div>
+<div class="line">{                                                       \</div>
+<div class="line">  READ_VIRT_F(state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="code hl_define" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 32, state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>], ieee_lds);          \</div>
+<div class="line">}</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00242_source.html#l00097">97</a> of file <a class="el" href="../../d2/d00/a00242_source.html">cpu_fp_memory.h</a>.</p>
+
+</div>
+</div>
+<a id="a189c1b62e80012ea03de47bcb56d915c" name="a189c1b62e80012ea03de47bcb56d915c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a189c1b62e80012ea03de47bcb56d915c">&#9670;&#160;</a></span>DO_LDT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_LDT</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>;                                      \</div>
+<div class="line">if(<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a> != 31)                                            \</div>
+<div class="line">{                                                           \</div>
+<div class="line">  READ_VIRT(state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="code hl_define" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 64, state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]); \</div>
+<div class="line">}</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00242_source.html#l00103">103</a> of file <a class="el" href="../../d2/d00/a00242_source.html">cpu_fp_memory.h</a>.</p>
+
+</div>
+</div>
+<a id="aaa863c79355ef39a83370828022d2c40" name="aaa863c79355ef39a83370828022d2c40"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa863c79355ef39a83370828022d2c40">&#9670;&#160;</a></span>DO_STF</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_STF</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>;                                \</div>
+<div class="line">WRITE_VIRT(state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="code hl_define" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 32, vax_stf(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]));</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00242_source.html#l00109">109</a> of file <a class="el" href="../../d2/d00/a00242_source.html">cpu_fp_memory.h</a>.</p>
+
+</div>
+</div>
+<a id="aae10ad9ebabaacc0e656333d3bdbc49f" name="aae10ad9ebabaacc0e656333d3bdbc49f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae10ad9ebabaacc0e656333d3bdbc49f">&#9670;&#160;</a></span>DO_STG</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_STG</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>;                                \</div>
+<div class="line">WRITE_VIRT(state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="code hl_define" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 64, vax_stg(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]));</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00242_source.html#l00112">112</a> of file <a class="el" href="../../d2/d00/a00242_source.html">cpu_fp_memory.h</a>.</p>
+
+</div>
+</div>
+<a id="aebeb90b233fd19c1a7fdbfc4690f3ed8" name="aebeb90b233fd19c1a7fdbfc4690f3ed8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aebeb90b233fd19c1a7fdbfc4690f3ed8">&#9670;&#160;</a></span>DO_STS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_STS</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>;                                \</div>
+<div class="line">WRITE_VIRT(state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="code hl_define" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 32, ieee_sts(state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]));</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00242_source.html#l00115">115</a> of file <a class="el" href="../../d2/d00/a00242_source.html">cpu_fp_memory.h</a>.</p>
+
+</div>
+</div>
+<a id="a321a3084e9755bdd1a4e8bb01e589907" name="a321a3084e9755bdd1a4e8bb01e589907"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a321a3084e9755bdd1a4e8bb01e589907">&#9670;&#160;</a></span>DO_STT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DO_STT</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d7/d00/a00236.html#adaa245d6bc2073b49c4a609ddcac8d4a">FPSTART</a>;                                \</div>
+<div class="line">WRITE_VIRT(state.r[<a class="code hl_define" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="code hl_define" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 64, state.f[<a class="code hl_define" href="../../d7/d00/a00236.html#a5591e9ff8152342313b8c38f14c437b7">FREG_1</a>]);</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00242_source.html#l00118">118</a> of file <a class="el" href="../../d2/d00/a00242_source.html">cpu_fp_memory.h</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
@@ -127,7 +335,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d2/d00/a00242.
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../dir_2c260bc9952edac4006fc3f88bbf2931.html">jit</a></li><li class="navelem"><a href="../../d2/d00/a00242.html">jitengine.cpp</a></li>
+    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d2/d00/a00242.html">cpu_fp_memory.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

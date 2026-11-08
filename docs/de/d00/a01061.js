@@ -1,13 +1,17 @@
 var a01061 =
 [
-    [ "rectangle", "de/d00/a01061.html#afad68feaef0a7ce4efa3d17d648e50fa", null ],
-    [ "rectangle", "de/d00/a01061.html#a58f7a9c94410e422b574f61f7ee9e1c4", null ],
-    [ "contains", "de/d00/a01061.html#a7468592216575bc6403b4c4b11057a6c", null ],
-    [ "height", "de/d00/a01061.html#acfc9d1ed99c72fb955432ec6b2e5939f", null ],
-    [ "set", "de/d00/a01061.html#aed62ee58238390ee07a4df578c1c3971", null ],
-    [ "width", "de/d00/a01061.html#aa3ecf4641b812818a9f6588c12f308bf", null ],
-    [ "max_x", "de/d00/a01061.html#aba2ead6ad67ad68de3c4071346241fe3", null ],
-    [ "max_y", "de/d00/a01061.html#afa6dfc6aa4bc78d02cb466fcd3710e14", null ],
-    [ "min_x", "de/d00/a01061.html#a8f7ed03b6ead2db5f09b77d9a6802060", null ],
-    [ "min_y", "de/d00/a01061.html#a808b9e6d591ee4a65d31fad9ffe40908", null ]
+    [ "Type", "de/d00/a01061.html#a6a99f48b4c9542637cde11cf669fa575", [
+      [ "Text", "de/d00/a01061.html#a6a99f48b4c9542637cde11cf669fa575a9dffbf69ffba8bc38bc4e01abf4b1675", null ],
+      [ "Choice", "de/d00/a01061.html#a6a99f48b4c9542637cde11cf669fa575a458b9dcc0921f46b1192427426d59c10", null ],
+      [ "Integer", "de/d00/a01061.html#a6a99f48b4c9542637cde11cf669fa575aa0faef0851b4294c06f2b94bb1cb2044", null ],
+      [ "Number", "de/d00/a01061.html#a6a99f48b4c9542637cde11cf669fa575ab2ee912b91d69b435159c7c3f6df7f5f", null ],
+      [ "Pattern", "de/d00/a01061.html#a6a99f48b4c9542637cde11cf669fa575a57391192dfa1f247ad015a0fe2eca48e", null ]
+    ] ],
+    [ "choices", "de/d00/a01061.html#abf8855dce9a4fab3887b1a625e83f380", null ],
+    [ "maximum", "de/d00/a01061.html#a197dfad6b857f50055860f413e75827b", null ],
+    [ "minimum", "de/d00/a01061.html#a674623c66f78cafc599ac1c6bd4b03db", null ],
+    [ "pattern", "de/d00/a01061.html#a6e8c767ddae6b48fc2bb91ab68546718", null ],
+    [ "precision", "de/d00/a01061.html#a61545fa88b6b93f81fae870cfae97758", null ],
+    [ "type", "de/d00/a01061.html#ae0b722bdc1f1c32bb9f8bc8a9c36833a", null ],
+    [ "value", "de/d00/a01061.html#a3162fa9e094648885b18f7e52bbb36f6", null ]
 ];

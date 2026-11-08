@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: CPU/Ev68MMU.cpp Source File</title>
+<title>ES40: CPU/cpu_control.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d1/d00/a00230_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">Ev68MMU.cpp</div></div>
+  <div class="headertitle"><div class="title">cpu_control.h</div></div>
 </div><!--header-->
 <div class="contents">
 <a href="../../d1/d00/a00230.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 Emulator.</span></div>
@@ -137,136 +137,80 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d1/d00/a00230_
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> * the general public.</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> *</span></div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment">// EV68 address and translation-fill rules extracted from AlphaCPU.cpp.</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d00/a00524.html">StdAfx.h</a>&quot;</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d00/a00143.html">AlphaCPU.h</a>&quot;</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &quot;<a class="code" href="../../d6/d00/a00233.html">Ev68MMU.h</a>&quot;</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="foldopen" id="foldopen00032" data-start="{" data-end="}">
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="../../d3/d00/a01017.html#aa6d4fce70ff132f7e851e110b7694d18">   32</a></span><a class="code hl_struct" href="../../dd/d00/a00981.html">AlphaMMUAccess</a> <a class="code hl_function" href="../../d3/d00/a01017.html#aa6d4fce70ff132f7e851e110b7694d18">Ev68MMU::access</a>(<span class="keyword">const</span> <a class="code hl_class" href="../../dd/d00/a00921.html">CAlphaCPU</a>&amp; <a class="code hl_variable" href="../../d0/d00/a00605.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a>, <span class="keywordtype">int</span> flags)</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>{</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>  <span class="keyword">const</span> <span class="keyword">auto</span>&amp; state = <a class="code hl_variable" href="../../d0/d00/a00605.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a>.<a class="code hl_variable" href="../../dd/d00/a00921.html#a307b49a1344c4073d6cf2600aa96be41">state</a>;</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>  <span class="comment">// HRM 6.4.1: VPTE fetches check kernel permissions; /alt uses DTB_ALT_MODE.</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  <span class="comment">// VPTE takes precedence over ALT. Neither changes the selected lookup ASN.</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  <span class="keywordflow">return</span> {</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    (flags &amp; <a class="code hl_define" href="../../de/d00/a00185.html#a6b11cfc191737a3107b9d196e178601c">VPTE</a>) ? 0 : (flags &amp; <a class="code hl_define" href="../../de/d00/a00185.html#a9d8a33b1a8b82b9913a0ba70438d45be">ALT</a>) ? state.alt_cm : state.cm,</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    (flags &amp; <a class="code hl_define" href="../../de/d00/a00185.html#a50cb336402eca0f18fa5c8344b6af341">ACCESS_EXEC</a>) ? state.asn : state.asn0</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  };</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>}</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span></div>
+<div class="foldopen" id="foldopen00056" data-start="" data-end="">
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="../../d1/d00/a00230.html#aab22bce800b0f647a3a37943a0e837d2">   56</a></span><span class="preprocessor">#define DO_BEQ  if(!state.r[REG_1]) \</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">    add_pc(DISP_21 * 4);</span></div>
 </div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
-<div class="foldopen" id="foldopen00043" data-start="{" data-end="}">
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="../../d3/d00/a01017.html#a0270ba5da2d11e256e0a2bea8eef800e">   43</a></span><a class="code hl_struct" href="../../da/d00/a00985.html">AlphaMMUAddress</a> <a class="code hl_function" href="../../d3/d00/a01017.html#a0270ba5da2d11e256e0a2bea8eef800e">Ev68MMU::map_address</a>(<span class="keyword">const</span> <a class="code hl_class" href="../../dd/d00/a00921.html">CAlphaCPU</a>&amp; <a class="code hl_variable" href="../../d0/d00/a00605.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a>, std::uint64_t virt,</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>                                     <span class="keywordtype">int</span> flags, <span class="keywordtype">int</span> mode)</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>{</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  <span class="keyword">const</span> <span class="keyword">auto</span>&amp; state = <a class="code hl_variable" href="../../d0/d00/a00605.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a>.<a class="code hl_variable" href="../../dd/d00/a00921.html#a307b49a1344c4073d6cf2600aa96be41">state</a>;</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  <span class="keyword">const</span> <span class="keywordtype">bool</span> exec = (flags &amp; <a class="code hl_define" href="../../de/d00/a00185.html#a50cb336402eca0f18fa5c8344b6af341">ACCESS_EXEC</a>) != 0;</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  <span class="keyword">const</span> <span class="keywordtype">bool</span> va48 = (exec ? state.i_ctl_va_mode : state.va_ctl_va_mode) &amp; 1;</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  <span class="keyword">const</span> <a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> canonical = va48 ? <a class="code hl_function" href="../../df/d00/a00263.html#a7a6eb9c5b3f269dd8dd4da3947edf89d">sext_u64_48</a>(virt)</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    : (virt &amp; <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000040000000000)) ? (virt | <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0xfffff80000000000))</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    : (virt &amp; <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x000007ffffffffff));</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  <span class="keywordflow">if</span> (canonical != virt)</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordflow">return</span> {<a class="code hl_enumvalue" href="../../dc/d00/a00167.html#a769a61d38ad4c0cb4717d435ccb7bb29a4bbb8f967da6d1a610596d7257179c2b">AlphaMMUAddressKind::Invalid</a>, 0};</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> spe = exec ? state.i_ctl_spe : state.m_ctl_spe;</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  <a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> phys;</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>  <span class="comment">// HRM 5.3.9: SPE[2] maps VA[43:0], ignoring VA[45:44].</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>  <span class="keywordflow">if</span> ((spe &amp; 4) &amp;&amp; (virt &amp; <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000c00000000000)) == <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000800000000000))</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    phys = virt &amp; <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000fffffffffff);</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  <span class="comment">// SPE[1] maps VA[40:0], sign-extending bit 40 through PA[43:41].</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  <span class="keywordflow">else</span> <span class="keywordflow">if</span> ((spe &amp; 2) &amp;&amp; (virt &amp; <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000fe0000000000)) == <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000fc0000000000))</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    phys = (virt &amp; <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x000001ffffffffff))</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>      | ((virt &amp; <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000010000000000)) ? <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000e0000000000) : 0);</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>  <span class="comment">// SPE[0] maps VA[29:0], clearing PA[43:30].</span></div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>  <span class="keywordflow">else</span> <span class="keywordflow">if</span> ((spe &amp; 1) &amp;&amp; (virt &amp; <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000ffffc0000000)) == <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000ffff80000000))</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    phys = virt &amp; <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x000000003fffffff);</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>  <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keywordflow">return</span> {<a class="code hl_enumvalue" href="../../dc/d00/a00167.html#a769a61d38ad4c0cb4717d435ccb7bb29a0b8ee19c74a2fa51fa00eaf6576ba308">AlphaMMUAddressKind::TranslationBuffer</a>, 0};</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>  <span class="comment">// Superpages are kernel-only even for accesses carrying NO_CHECK.</span></div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  <span class="keywordflow">return</span> mode ? <a class="code hl_struct" href="../../da/d00/a00985.html">AlphaMMUAddress</a>{<a class="code hl_enumvalue" href="../../dc/d00/a00167.html#a769a61d38ad4c0cb4717d435ccb7bb29ac86b6caf254b06854e24c5c4510c5f85">AlphaMMUAddressKind::AccessViolation</a>, 0}</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>              : <a class="code hl_struct" href="../../da/d00/a00985.html">AlphaMMUAddress</a>{<a class="code hl_enumvalue" href="../../dc/d00/a00167.html#a769a61d38ad4c0cb4717d435ccb7bb29afd1dd0c603be8170f9eae0be9f2f6afb">AlphaMMUAddressKind::Direct</a>, phys};</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>}</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="foldopen" id="foldopen00059" data-start="" data-end="">
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="../../d1/d00/a00230.html#a96fa0428c278b3085cda5c7c897466f7">   59</a></span><span class="preprocessor">#define DO_BGE  if((s64) state.r[REG_1] &gt;= 0) \</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="preprocessor">    add_pc(DISP_21 * 4);</span></div>
 </div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
-<div class="foldopen" id="foldopen00075" data-start="{" data-end="}">
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="../../d3/d00/a01017.html#a69771d1846d5b7013b6e7d7ab39b0c7b">   75</a></span><a class="code hl_struct" href="../../d3/d00/a00973.html">AlphaTBFill</a> <a class="code hl_function" href="../../d3/d00/a01017.html#a69771d1846d5b7013b6e7d7ab39b0c7b">Ev68MMU::decode_fill</a>(<span class="keyword">const</span> <a class="code hl_class" href="../../dd/d00/a00921.html">CAlphaCPU</a>&amp;, std::uint64_t virt,</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>                                std::uint64_t pte_phys, std::uint64_t pte_flags,</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>                                <span class="keywordtype">int</span>)</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>{</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  <span class="comment">// EV68CB/EV68DC HRM 5.3.1/5.3.2: VA[47:13], PA[43:13], GH[1:0].</span></div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  <span class="comment">// GH widens the granule by three bits per step (13/16/19/22 offset bits).</span></div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  <span class="keyword">static</span> <span class="keyword">constexpr</span> std::uint64_t match_masks[4] = {</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000ffffffffe000), <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000ffffffff0000),</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000fffffff80000), <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000ffffffc00000)</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  };</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  <span class="keyword">static</span> <span class="keyword">constexpr</span> std::uint64_t phys_masks[4] = {</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000fffffffe000), <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000fffffff0000),</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000ffffff80000), <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000fffffc00000)</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  };</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  <span class="keyword">static</span> <span class="keyword">constexpr</span> std::uint64_t keep_masks[4] = {</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x0000000000001fff), <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x000000000000ffff),</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x000000000007ffff), <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000000003fffff)</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  };</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  <span class="keyword">const</span> <span class="keywordtype">unsigned</span> gh = (unsigned)((pte_flags &gt;&gt; 5) &amp; 3);</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  <a class="code hl_struct" href="../../d3/d00/a00973.html">AlphaTBFill</a> fill{};</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  fill.<a class="code hl_variable" href="../../d3/d00/a00973.html#adddb44443c2501c41ddb5098291752ed">virt</a> = virt;</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>  fill.<a class="code hl_variable" href="../../d3/d00/a00973.html#a7284a81ee5fadc6870343470565bb061">phys</a> = pte_phys &amp; phys_masks[gh];</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>  fill.<a class="code hl_variable" href="../../d3/d00/a00973.html#a159fac4bf9726aedf3304e1959104368">match_mask</a> = match_masks[gh];</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>  fill.<a class="code hl_variable" href="../../d3/d00/a00973.html#adec374be244abbaa05832045fccb8d44">keep_mask</a> = keep_masks[gh];</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>  fill.<a class="code hl_variable" href="../../d3/d00/a00973.html#a885845dc312ae14b1c190a58810d5af2">fault</a>[0] = (int)pte_flags &amp; 2;</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>  fill.<a class="code hl_variable" href="../../d3/d00/a00973.html#a885845dc312ae14b1c190a58810d5af2">fault</a>[1] = (int)pte_flags &amp; 4;</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>  fill.<a class="code hl_variable" href="../../d3/d00/a00973.html#a885845dc312ae14b1c190a58810d5af2">fault</a>[2] = (int)pte_flags &amp; 8;</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>  fill.<a class="code hl_variable" href="../../d3/d00/a00973.html#aaccf486300727cc3fc3b54f7079db9ae">access</a>[0][0] = (int)pte_flags &amp; 0x100;</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  fill.<a class="code hl_variable" href="../../d3/d00/a00973.html#aaccf486300727cc3fc3b54f7079db9ae">access</a>[1][0] = (int)pte_flags &amp; 0x1000;</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>  fill.<a class="code hl_variable" href="../../d3/d00/a00973.html#aaccf486300727cc3fc3b54f7079db9ae">access</a>[0][1] = (int)pte_flags &amp; 0x200;</div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  fill.<a class="code hl_variable" href="../../d3/d00/a00973.html#aaccf486300727cc3fc3b54f7079db9ae">access</a>[1][1] = (int)pte_flags &amp; 0x2000;</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>  fill.<a class="code hl_variable" href="../../d3/d00/a00973.html#aaccf486300727cc3fc3b54f7079db9ae">access</a>[0][2] = (int)pte_flags &amp; 0x400;</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  fill.<a class="code hl_variable" href="../../d3/d00/a00973.html#aaccf486300727cc3fc3b54f7079db9ae">access</a>[1][2] = (int)pte_flags &amp; 0x4000;</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  fill.<a class="code hl_variable" href="../../d3/d00/a00973.html#aaccf486300727cc3fc3b54f7079db9ae">access</a>[0][3] = (int)pte_flags &amp; 0x800;</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>  fill.<a class="code hl_variable" href="../../d3/d00/a00973.html#aaccf486300727cc3fc3b54f7079db9ae">access</a>[1][3] = (int)pte_flags &amp; 0x8000;</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>  fill.<a class="code hl_variable" href="../../d3/d00/a00973.html#aa14fd03bf8a25c052d2430586a2c29de">asm_bit</a> = (int)pte_flags &amp; 0x10;</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>  <span class="keywordflow">return</span> fill;</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>}</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="foldopen" id="foldopen00062" data-start="" data-end="">
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="../../d1/d00/a00230.html#a4915e6e99b4c557025935f7fffbe7046">   62</a></span><span class="preprocessor">#define DO_BGT  if((s64) state.r[REG_1] &gt; 0) \</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="preprocessor">    add_pc(DISP_21 * 4);</span></div>
 </div>
-<div class="ttc" id="aa00143_html"><div class="ttname"><a href="../../d7/d00/a00143.html">AlphaCPU.h</a></div><div class="ttdoc">Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor.</div></div>
-<div class="ttc" id="aa00167_html_a769a61d38ad4c0cb4717d435ccb7bb29a0b8ee19c74a2fa51fa00eaf6576ba308"><div class="ttname"><a href="../../dc/d00/a00167.html#a769a61d38ad4c0cb4717d435ccb7bb29a0b8ee19c74a2fa51fa00eaf6576ba308">AlphaMMUAddressKind::TranslationBuffer</a></div><div class="ttdeci">@ TranslationBuffer</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00167_source.html#l00064">AlphaMMU.h:64</a></div></div>
-<div class="ttc" id="aa00167_html_a769a61d38ad4c0cb4717d435ccb7bb29a4bbb8f967da6d1a610596d7257179c2b"><div class="ttname"><a href="../../dc/d00/a00167.html#a769a61d38ad4c0cb4717d435ccb7bb29a4bbb8f967da6d1a610596d7257179c2b">AlphaMMUAddressKind::Invalid</a></div><div class="ttdeci">@ Invalid</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00167_source.html#l00066">AlphaMMU.h:66</a></div></div>
-<div class="ttc" id="aa00167_html_a769a61d38ad4c0cb4717d435ccb7bb29ac86b6caf254b06854e24c5c4510c5f85"><div class="ttname"><a href="../../dc/d00/a00167.html#a769a61d38ad4c0cb4717d435ccb7bb29ac86b6caf254b06854e24c5c4510c5f85">AlphaMMUAddressKind::AccessViolation</a></div><div class="ttdeci">@ AccessViolation</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00167_source.html#l00067">AlphaMMU.h:67</a></div></div>
-<div class="ttc" id="aa00167_html_a769a61d38ad4c0cb4717d435ccb7bb29afd1dd0c603be8170f9eae0be9f2f6afb"><div class="ttname"><a href="../../dc/d00/a00167.html#a769a61d38ad4c0cb4717d435ccb7bb29afd1dd0c603be8170f9eae0be9f2f6afb">AlphaMMUAddressKind::Direct</a></div><div class="ttdeci">@ Direct</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00167_source.html#l00065">AlphaMMU.h:65</a></div></div>
-<div class="ttc" id="aa00185_html_a50cb336402eca0f18fa5c8344b6af341"><div class="ttname"><a href="../../de/d00/a00185.html#a50cb336402eca0f18fa5c8344b6af341">ACCESS_EXEC</a></div><div class="ttdeci">#define ACCESS_EXEC</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00855">cpu_defs.h:855</a></div></div>
-<div class="ttc" id="aa00185_html_a6b11cfc191737a3107b9d196e178601c"><div class="ttname"><a href="../../de/d00/a00185.html#a6b11cfc191737a3107b9d196e178601c">VPTE</a></div><div class="ttdeci">#define VPTE</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00858">cpu_defs.h:858</a></div></div>
-<div class="ttc" id="aa00185_html_a9d8a33b1a8b82b9913a0ba70438d45be"><div class="ttname"><a href="../../de/d00/a00185.html#a9d8a33b1a8b82b9913a0ba70438d45be">ALT</a></div><div class="ttdeci">#define ALT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00860">cpu_defs.h:860</a></div></div>
-<div class="ttc" id="aa00233_html"><div class="ttname"><a href="../../d6/d00/a00233.html">Ev68MMU.h</a></div></div>
-<div class="ttc" id="aa00263_html_a1af9f95651e921615e75917a6dd1b574"><div class="ttname"><a href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a></div><div class="ttdeci">uint64_t u64</div><div class="ttdef"><b>Definition</b> <a href="../../df/d00/a00263_source.html#l00126">datatypes.h:126</a></div></div>
-<div class="ttc" id="aa00263_html_a7a6eb9c5b3f269dd8dd4da3947edf89d"><div class="ttname"><a href="../../df/d00/a00263.html#a7a6eb9c5b3f269dd8dd4da3947edf89d">sext_u64_48</a></div><div class="ttdeci">u64 sext_u64_48(u64 a)</div><div class="ttdoc">Sign-extend a 48-bit value to 64 bits.</div><div class="ttdef"><b>Definition</b> <a href="../../df/d00/a00263_source.html#l00240">datatypes.h:240</a></div></div>
-<div class="ttc" id="aa00263_html_a87a27db8f6877dc5bbc36ec833e88c58"><div class="ttname"><a href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a></div><div class="ttdeci">#define U64(a)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d00/a00263_source.html#l00119">datatypes.h:119</a></div></div>
-<div class="ttc" id="aa00524_html"><div class="ttname"><a href="../../d9/d00/a00524.html">StdAfx.h</a></div><div class="ttdoc">Standard includes.</div></div>
-<div class="ttc" id="aa00605_html_a4e906a1b455653dd9be3d01ef9aadebb"><div class="ttname"><a href="../../d0/d00/a00605.html#a4e906a1b455653dd9be3d01ef9aadebb">cpu</a></div><div class="ttdeci">CAlphaCPU * cpu[4]</div></div>
-<div class="ttc" id="aa00921_html"><div class="ttname"><a href="../../dd/d00/a00921.html">CAlphaCPU</a></div><div class="ttdoc">Emulated CPU.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00143_source.html#l00258">AlphaCPU.h:259</a></div></div>
-<div class="ttc" id="aa00921_html_a307b49a1344c4073d6cf2600aa96be41"><div class="ttname"><a href="../../dd/d00/a00921.html#a307b49a1344c4073d6cf2600aa96be41">CAlphaCPU::state</a></div><div class="ttdeci">struct CAlphaCPU::SCPU_state state</div><div class="ttdoc">Determines CPU state that needs to be saved to the state file.</div></div>
-<div class="ttc" id="aa00973_html"><div class="ttname"><a href="../../d3/d00/a00973.html">AlphaTBFill</a></div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00167_source.html#l00035">AlphaMMU.h:36</a></div></div>
-<div class="ttc" id="aa00973_html_a159fac4bf9726aedf3304e1959104368"><div class="ttname"><a href="../../d3/d00/a00973.html#a159fac4bf9726aedf3304e1959104368">AlphaTBFill::match_mask</a></div><div class="ttdeci">std::uint64_t match_mask</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00167_source.html#l00039">AlphaMMU.h:39</a></div></div>
-<div class="ttc" id="aa00973_html_a7284a81ee5fadc6870343470565bb061"><div class="ttname"><a href="../../d3/d00/a00973.html#a7284a81ee5fadc6870343470565bb061">AlphaTBFill::phys</a></div><div class="ttdeci">std::uint64_t phys</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00167_source.html#l00038">AlphaMMU.h:38</a></div></div>
-<div class="ttc" id="aa00973_html_a885845dc312ae14b1c190a58810d5af2"><div class="ttname"><a href="../../d3/d00/a00973.html#a885845dc312ae14b1c190a58810d5af2">AlphaTBFill::fault</a></div><div class="ttdeci">int fault[3]</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00167_source.html#l00043">AlphaMMU.h:43</a></div></div>
-<div class="ttc" id="aa00973_html_aa14fd03bf8a25c052d2430586a2c29de"><div class="ttname"><a href="../../d3/d00/a00973.html#aa14fd03bf8a25c052d2430586a2c29de">AlphaTBFill::asm_bit</a></div><div class="ttdeci">int asm_bit</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00167_source.html#l00044">AlphaMMU.h:44</a></div></div>
-<div class="ttc" id="aa00973_html_aaccf486300727cc3fc3b54f7079db9ae"><div class="ttname"><a href="../../d3/d00/a00973.html#aaccf486300727cc3fc3b54f7079db9ae">AlphaTBFill::access</a></div><div class="ttdeci">int access[2][4]</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00167_source.html#l00042">AlphaMMU.h:42</a></div></div>
-<div class="ttc" id="aa00973_html_adddb44443c2501c41ddb5098291752ed"><div class="ttname"><a href="../../d3/d00/a00973.html#adddb44443c2501c41ddb5098291752ed">AlphaTBFill::virt</a></div><div class="ttdeci">std::uint64_t virt</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00167_source.html#l00037">AlphaMMU.h:37</a></div></div>
-<div class="ttc" id="aa00973_html_adec374be244abbaa05832045fccb8d44"><div class="ttname"><a href="../../d3/d00/a00973.html#adec374be244abbaa05832045fccb8d44">AlphaTBFill::keep_mask</a></div><div class="ttdeci">std::uint64_t keep_mask</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00167_source.html#l00040">AlphaMMU.h:40</a></div></div>
-<div class="ttc" id="aa00981_html"><div class="ttname"><a href="../../dd/d00/a00981.html">AlphaMMUAccess</a></div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00167_source.html#l00056">AlphaMMU.h:57</a></div></div>
-<div class="ttc" id="aa00985_html"><div class="ttname"><a href="../../da/d00/a00985.html">AlphaMMUAddress</a></div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00167_source.html#l00070">AlphaMMU.h:71</a></div></div>
-<div class="ttc" id="aa01017_html_a0270ba5da2d11e256e0a2bea8eef800e"><div class="ttname"><a href="../../d3/d00/a01017.html#a0270ba5da2d11e256e0a2bea8eef800e">Ev68MMU::map_address</a></div><div class="ttdeci">static AlphaMMUAddress map_address(const CAlphaCPU &amp;cpu, std::uint64_t virt, int access_flags, int mode)</div><div class="ttdef"><b>Definition</b> <a href="#l00043">Ev68MMU.cpp:43</a></div></div>
-<div class="ttc" id="aa01017_html_a69771d1846d5b7013b6e7d7ab39b0c7b"><div class="ttname"><a href="../../d3/d00/a01017.html#a69771d1846d5b7013b6e7d7ab39b0c7b">Ev68MMU::decode_fill</a></div><div class="ttdeci">static AlphaTBFill decode_fill(const CAlphaCPU &amp;cpu, std::uint64_t virt, std::uint64_t pte_phys, std::uint64_t pte_flags, int access_flags)</div><div class="ttdef"><b>Definition</b> <a href="#l00075">Ev68MMU.cpp:75</a></div></div>
-<div class="ttc" id="aa01017_html_aa6d4fce70ff132f7e851e110b7694d18"><div class="ttname"><a href="../../d3/d00/a01017.html#aa6d4fce70ff132f7e851e110b7694d18">Ev68MMU::access</a></div><div class="ttdeci">static AlphaMMUAccess access(const CAlphaCPU &amp;cpu, int access_flags)</div><div class="ttdef"><b>Definition</b> <a href="#l00032">Ev68MMU.cpp:32</a></div></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="foldopen" id="foldopen00065" data-start="" data-end="">
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="../../d1/d00/a00230.html#a1143cd014febfcad32b82fad501d7450">   65</a></span><span class="preprocessor">#define DO_BLBC if(!(state.r[REG_1] &amp; 1)) \</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="preprocessor">    add_pc(DISP_21 * 4);</span></div>
+</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="foldopen" id="foldopen00068" data-start="" data-end="">
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="../../d1/d00/a00230.html#a848fb2a82c3b6140ae19b1fe7900f8c5">   68</a></span><span class="preprocessor">#define DO_BLBS if(state.r[REG_1] &amp; 1) \</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">    add_pc(DISP_21 * 4);</span></div>
+</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="foldopen" id="foldopen00071" data-start="" data-end="">
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="../../d1/d00/a00230.html#ad13d17a0008b25bc386b66a11d3886f1">   71</a></span><span class="preprocessor">#define DO_BLE  if((s64) state.r[REG_1] &lt;= 0) \</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="preprocessor">    add_pc(DISP_21 * 4);</span></div>
+</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="foldopen" id="foldopen00074" data-start="" data-end="">
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="../../d1/d00/a00230.html#a6606df0fff58285fd5749047c3b3c231">   74</a></span><span class="preprocessor">#define DO_BLT  if((s64) state.r[REG_1] &lt; 0) \</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="preprocessor">    add_pc(DISP_21 * 4);</span></div>
+</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+<div class="foldopen" id="foldopen00077" data-start="" data-end="">
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="../../d1/d00/a00230.html#a371c6b45d7edeb133404b4234b6761df">   77</a></span><span class="preprocessor">#define DO_BNE  if(state.r[REG_1]) \</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="preprocessor">    add_pc(DISP_21 * 4);</span></div>
+</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="comment">/* BR/BSR/JMP link store: per HRM 3.1.1, PC&lt;1:0&gt; read as zero — the</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="comment">   architectural link value has both bits clear. ES40 uses pc&lt;0&gt; internally</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="comment">   as a PALmode marker instead of a environment flag like other emulations</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><span class="comment">   It must be stripped when exposing PC as an integer in a GPR (PAL code, </span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="comment">   dispatch tables, and pointer arithmetic on the link expect a clean byte </span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="comment">   address). */</span></div>
+<div class="foldopen" id="foldopen00086" data-start="" data-end="">
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="../../d1/d00/a00230.html#acb73ad6daba9e9a16e40dd48fd38d682">   86</a></span><span class="preprocessor">#define DO_BR                             \</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="preprocessor">  {                                       \</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="preprocessor">    state.r[REG_1] = state.pc &amp;~U64(0x3); \</span></div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="preprocessor">    add_pc(DISP_21 * 4);                  \</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="preprocessor">  }</span></div>
+</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="../../d1/d00/a00230.html#a225a265a371ea948e278d1e30dc204c1">   92</a></span><span class="preprocessor">#define DO_BSR  DO_BR</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="foldopen" id="foldopen00094" data-start="" data-end="">
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="../../d1/d00/a00230.html#a215411483fa75bd2f0126250e5488dcc">   94</a></span><span class="preprocessor">#define DO_JMP                            \</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="preprocessor">  {                                       \</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="preprocessor">    temp_64 = state.r[REG_2] &amp;~U64(0x3);  \</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="preprocessor">    state.r[REG_1] = state.pc &amp;~U64(0x3); \</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="preprocessor">    set_pc(temp_64 | (state.pc &amp; 3));     \</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="preprocessor">  }</span></div>
+</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>  <span class="comment">// JSR, RET and JSR_COROUTINE is really JMP, just with different prediction bits.</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d1/d00/a00230.html">Ev68MMU.cpp</a></li>
+    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d1/d00/a00230.html">cpu_control.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

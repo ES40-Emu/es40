@@ -1,5 +1,5 @@
 var a01221 =
 [
-    [ "interrupt", "dd/d00/a01221.html#a95a6236023c9d7c604a23923a1edb8db", null ],
-    [ "value", "dd/d00/a01221.html#ad3b55f5f9a82b5c474bcc531f91bbd25", null ]
+    [ "kind", "dd/d00/a01221.html#af4525fb266d40d5be58fd2d45ca40136", null ],
+    [ "phys", "dd/d00/a01221.html#ae3a1899d49753eea3c379426b5d7a16d", null ]
 ];

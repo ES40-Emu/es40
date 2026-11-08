@@ -1,4 +1,6 @@
 var a01921 =
 [
-    [ "reg", "da/d00/a01921.html#aa34c09f1152b45151587a2b9d7f4b528", null ]
+    [ "available", "da/d00/a01921.html#a1558db4d079dfe980031418fcf586e9e", null ],
+    [ "data", "da/d00/a01921.html#a4cc668305d88d9848529d7dda8922b63", null ],
+    [ "read", "da/d00/a01921.html#a1a7503bcd58f53fd6322373b70b4c799", null ]
 ];

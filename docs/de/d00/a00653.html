@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: CES1370::ES1370State Struct Reference</title>
+<title>ES40: storage/DiskFile.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,220 +109,209 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('de/d00/a00653.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">CES1370::ES1370State Struct Reference</div></div>
+  <div class="headertitle"><div class="title">DiskFile.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="dynheader">
-Collaboration diagram for CES1370::ES1370State:</div>
+
+<p>Contains definitions to use a file as a disk image.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d4/d00/a00632_source.html">Disk.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dc/d00/a00656_source.html">DiskFileBinCue.h</a>&quot;</code><br />
+<code>#include &lt;atomic&gt;</code><br />
+<code>#include &lt;deque&gt;</code><br />
+<code>#include &lt;memory&gt;</code><br />
+<code>#include &lt;mutex&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
+</div><div class="textblock"><div class="dynheader">
+Include dependency graph for DiskFile.h:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../de/d00/a00651.png" border="0" usemap="#a_c_e_s1370_1_1_e_s1370_state_coll__map" loading="lazy" alt="Collaboration graph"/></div>
-<map name="a_c_e_s1370_1_1_e_s1370_state_coll__map" id="a_c_e_s1370_1_1_e_s1370_state_coll__map">
-<area shape="rect" title=" " alt="" coords="5,104,168,131"/>
-<area shape="rect" href="../../dd/d00/a00649.html" title=" " alt="" coords="30,5,143,32"/>
-<area shape="poly" title=" " alt="" coords="89,46,89,104,84,103,84,49"/>
+<div class="center"><img src="../../d9/d00/a00654.png" border="0" usemap="#astorage_2_disk_file_8h" loading="lazy" alt=""/></div>
+<map name="astorage_2_disk_file_8h" id="astorage_2_disk_file_8h">
+<area shape="rect" title="Contains definitions to use a file as a disk image." alt="" coords="680,5,808,32"/>
+<area shape="rect" href="../../d4/d00/a00632.html" title="Contains definitions for the disk base class." alt="" coords="418,80,478,107"/>
+<area shape="poly" title=" " alt="" coords="690,34,494,84,492,79,694,31"/>
+<area shape="rect" title=" " alt="" coords="550,229,610,256"/>
+<area shape="poly" title=" " alt="" coords="739,31,693,111,645,183,608,221,605,217,641,180,688,108,735,34"/>
+<area shape="rect" title=" " alt="" coords="634,229,702,256"/>
+<area shape="poly" title=" " alt="" coords="742,31,679,216,675,213,738,34"/>
+<area shape="rect" title=" " alt="" coords="726,229,783,256"/>
+<area shape="poly" title=" " alt="" coords="746,31,756,215,751,213,743,34"/>
+<area shape="rect" title=" " alt="" coords="485,379,539,405"/>
+<area shape="poly" title=" " alt="" coords="757,30,778,54,799,87,817,125,824,166,824,244,822,265,816,285,793,317,760,342,720,361,676,375,632,384,554,392,554,387,631,379,675,370,718,356,758,338,790,314,811,282,817,264,819,244,819,167,812,127,795,89,773,57,755,35"/>
+<area shape="rect" title=" " alt="" coords="247,379,305,405"/>
+<area shape="poly" title=" " alt="" coords="677,20,499,25,388,32,276,44,172,62,86,88,54,104,29,123,13,144,8,167,8,244,14,278,32,306,58,329,91,348,127,362,165,372,234,386,229,387,164,377,126,367,89,352,55,334,28,310,9,280,3,244,3,166,9,141,25,119,51,100,84,83,171,57,275,39,387,27,498,20,682,18"/>
+<area shape="rect" href="../../dc/d00/a00656.html" title="Contains definitions for BIN/CUE CD image support within CDiskFile." alt="" coords="858,80,982,107"/>
+<area shape="poly" title=" " alt="" coords="775,30,878,73,872,74,775,35"/>
+<area shape="rect" title=" " alt="" coords="1005,80,1062,107"/>
+<area shape="poly" title=" " alt="" coords="800,30,993,79,987,80,800,35"/>
+<area shape="rect" href="../../d1/d00/a00638.html" title="Contains definitions for the disk controller base class." alt="" coords="516,155,631,181"/>
+<area shape="poly" title=" " alt="" coords="470,105,541,146,536,147,470,110"/>
+<area shape="rect" href="../../d3/d00/a00647.html" title=" " alt="" coords="404,155,492,181"/>
+<area shape="poly" title=" " alt="" coords="449,105,450,140,446,138,447,109"/>
+<area shape="rect" href="../../d1/d00/a00689.html" title="Contains definitions for the SCSI device base class." alt="" coords="43,229,149,256"/>
+<area shape="poly" title=" " alt="" coords="416,99,321,118,262,134,205,157,158,188,120,221,116,217,155,183,203,152,260,129,320,113,420,96"/>
+<area shape="rect" href="../../db/d00/a00683.html" title="Contains definitions for the SCSI bus class." alt="" coords="216,155,304,181"/>
+<area shape="poly" title=" " alt="" coords="416,108,308,151,306,146,420,105"/>
+<area shape="poly" title=" " alt="" coords="471,179,547,222,541,222,471,185"/>
+<area shape="poly" title=" " alt="" coords="487,179,622,225,616,226,486,185"/>
+<area shape="poly" title=" " alt="" coords="493,176,713,228,708,229,492,182"/>
+<area shape="poly" title=" " alt="" coords="459,179,476,202,489,228,500,264,507,300,513,364,509,361,502,301,495,265,484,230,471,205,457,184"/>
+<area shape="rect" title=" " alt="" coords="422,229,474,256"/>
+<area shape="poly" title=" " alt="" coords="450,180,450,215,446,212,446,184"/>
+<area shape="poly" title=" " alt="" coords="441,180,412,231,398,259,389,283,379,306,361,332,338,354,313,373,311,368,334,350,357,329,374,303,384,281,393,257,407,228,437,184"/>
+<area shape="poly" title=" " alt="" coords="230,184,140,225,137,220,233,180"/>
+<area shape="rect" href="../../d6/d00/a00356.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="173,229,347,256"/>
+<area shape="poly" title=" " alt="" coords="261,180,262,215,258,213,259,184"/>
+<area shape="rect" href="../../d4/d00/a00116.html" title="Contains the definitions for the configuration file interpreter." alt="" coords="205,304,347,331"/>
+<area shape="poly" title=" " alt="" coords="264,254,272,290,267,288,261,259"/>
+<area shape="rect" title=" " alt="" coords="113,304,180,331"/>
+<area shape="poly" title=" " alt="" coords="243,255,181,298,178,293,238,258"/>
+<area shape="poly" title=" " alt="" coords="318,329,473,378,468,379,317,334"/>
+<area shape="poly" title=" " alt="" coords="278,329,278,365,274,362,274,333"/>
 </map>
-<center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
+</div>
+</div><div class="textblock"><div class="dynheader">
+This graph shows which files directly or indirectly include this file:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d8/d00/a00655.png" border="0" usemap="#astorage_2_disk_file_8hdep" loading="lazy" alt=""/></div>
+<map name="astorage_2_disk_file_8hdep" id="astorage_2_disk_file_8hdep">
+<area shape="rect" title="Contains definitions to use a file as a disk image." alt="" coords="333,5,460,32"/>
+<area shape="rect" href="../../d3/d00/a00113.html" title="Contains the code for the configuration file interpreter." alt="" coords="5,80,162,107"/>
+<area shape="poly" title=" " alt="" coords="328,39,139,82,138,77,327,33"/>
+<area shape="rect" href="../../d9/d00/a00476.html" title=" " alt="" coords="186,80,312,107"/>
+<area shape="poly" title=" " alt="" coords="360,39,276,82,274,77,355,40"/>
+<area shape="rect" href="../../da/d00/a00629.html" title="Contains code for the disk base class." alt="" coords="337,80,457,107"/>
+<area shape="poly" title=" " alt="" coords="399,46,399,81,395,78,395,50"/>
+<area shape="rect" href="../../da/d00/a00650.html" title="Contains code to use a file as a disk image." alt="" coords="481,80,622,107"/>
+<area shape="poly" title=" " alt="" coords="438,36,527,80,522,79,437,42"/>
+<area shape="rect" href="../../dc/d00/a00659.html" title=" " alt="" coords="646,80,828,107"/>
+<area shape="poly" title=" " alt="" coords="472,33,680,79,675,80,471,38"/>
+</map>
+</div>
+</div>
+<p><a href="../../de/d00/a00653_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
-Data Fields</h2></td></tr>
-<tr class="memitem:ac48ed14c200fbcd38f24d5e7fbfe0296" id="r_ac48ed14c200fbcd38f24d5e7fbfe0296"><td class="memItemLeft">SDL_AudioDeviceID&#160;</td><td class="memItemRight"><a class="el" href="#ac48ed14c200fbcd38f24d5e7fbfe0296">audio_be_out</a></td></tr>
-<tr class="memitem:a5cf0d319e649bd346569252e9a63d7bd" id="r_a5cf0d319e649bd346569252e9a63d7bd"><td class="memItemLeft">SDL_AudioDeviceID&#160;</td><td class="memItemRight"><a class="el" href="#a5cf0d319e649bd346569252e9a63d7bd">audio_be_in</a></td></tr>
-<tr class="memitem:a4f602b244baf453bea483f4e4b7c7e53" id="r_a4f602b244baf453bea483f4e4b7c7e53"><td class="memItemLeft">struct chan&#160;</td><td class="memItemRight"><a class="el" href="#a4f602b244baf453bea483f4e4b7c7e53">chan</a> [3]</td></tr>
-<tr class="memitem:a6dbe1a4f7a0ff2346d0dd4363ca4ed2f" id="r_a6dbe1a4f7a0ff2346d0dd4363ca4ed2f"><td class="memItemLeft">SDL_AudioStream *&#160;</td><td class="memItemRight"><a class="el" href="#a6dbe1a4f7a0ff2346d0dd4363ca4ed2f">dac_voice</a> [2]</td></tr>
-<tr class="memitem:aab6acb7ded9d0d432c0175e86e20dd6c" id="r_aab6acb7ded9d0d432c0175e86e20dd6c"><td class="memItemLeft">SDL_AudioStream *&#160;</td><td class="memItemRight"><a class="el" href="#aab6acb7ded9d0d432c0175e86e20dd6c">adc_voice</a></td></tr>
-<tr class="memitem:ad8b105c83936b0a113859d719a07f8b2" id="r_ad8b105c83936b0a113859d719a07f8b2"><td class="memItemLeft"><a class="el" href="../../de/d00/a00134.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#ad8b105c83936b0a113859d719a07f8b2">ctl</a></td></tr>
-<tr class="memitem:a1d15862cc416d8630e23ddc493e7d966" id="r_a1d15862cc416d8630e23ddc493e7d966"><td class="memItemLeft"><a class="el" href="../../de/d00/a00134.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#a1d15862cc416d8630e23ddc493e7d966">status</a></td></tr>
-<tr class="memitem:ae81516c90e7778dc9aa4d83b50e37099" id="r_ae81516c90e7778dc9aa4d83b50e37099"><td class="memItemLeft"><a class="el" href="../../de/d00/a00134.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#ae81516c90e7778dc9aa4d83b50e37099">mempage</a></td></tr>
-<tr class="memitem:ae85f60da8e97720f7139a1e1d293a7f4" id="r_ae85f60da8e97720f7139a1e1d293a7f4"><td class="memItemLeft"><a class="el" href="../../de/d00/a00134.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#ae85f60da8e97720f7139a1e1d293a7f4">codec</a></td></tr>
-<tr class="memitem:ac1cd36a7f5108e2d59a4dd92263d28f7" id="r_ac1cd36a7f5108e2d59a4dd92263d28f7"><td class="memItemLeft"><a class="el" href="../../de/d00/a00134.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#ac1cd36a7f5108e2d59a4dd92263d28f7">sctl</a></td></tr>
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Data Structures</h2></td></tr>
+<tr class="memitem:SDiskFileMediaAction" id="r_SDiskFileMediaAction"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d9/d00/a01953.html">SDiskFileMediaAction</a></td></tr>
+<tr class="memitem:CDiskFileMediaMailbox" id="r_CDiskFileMediaMailbox"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../d2/d00/a01957.html">CDiskFileMediaMailbox</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Thread-safe mailbox shared with the UI.  <a href="../../d2/d00/a01957.html#details">More...</a><br /></td></tr>
+<tr class="memitem:CDiskFile" id="r_CDiskFile"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../d2/d00/a01961.html">CDiskFile</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emulated disk that uses an image file.  <a href="../../d2/d00/a01961.html#details">More...</a><br /></td></tr>
+<tr class="memitem:CDiskFile_3A_3AQcow2State" id="r_CDiskFile_3A_3AQcow2State"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d6/d00/a01965.html">CDiskFile::Qcow2State</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:a3a5b88e93995fcb72b420a657325d117" id="r_a3a5b88e93995fcb72b420a657325d117"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#a3a5b88e93995fcb72b420a657325d117">EDiskFileMediaAction</a> { <a class="el" href="#a3a5b88e93995fcb72b420a657325d117a2c161a1721e72d68d96bcf322210a5da">ChangeImage</a>
+, <a class="el" href="#a3a5b88e93995fcb72b420a657325d117a94db933e734bfb5c12a1bd43525bcb86">CreateBlankFloppy</a>
+, <a class="el" href="#a3a5b88e93995fcb72b420a657325d117ab988d4b6f0a70633b29140fbffea2d72">Eject</a>
+, <a class="el" href="#a3a5b88e93995fcb72b420a657325d117a9595c9bd5b34dfbf29595c73137df5af">SetReadOnly</a>
+ }</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a2ae37beae8cfb1891095ac63022475c8" id="r_a2ae37beae8cfb1891095ac63022475c8"><td class="memItemLeft">std::vector&lt; std::shared_ptr&lt; <a class="el" href="../../d2/d00/a01957.html">CDiskFileMediaMailbox</a> &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a2ae37beae8cfb1891095ac63022475c8">disk_file_removable_media</a> ()</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00008_source.html#l00177">177</a> of file <a class="el" href="../../d4/d00/a00008_source.html">ES1370.h</a>.</p>
-</div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Field Documentation</h2>
-<a id="aab6acb7ded9d0d432c0175e86e20dd6c" name="aab6acb7ded9d0d432c0175e86e20dd6c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aab6acb7ded9d0d432c0175e86e20dd6c">&#9670;&#160;</a></span>adc_voice</h2>
+<div class="textblock"><p>Contains definitions to use a file as a disk image. </p>
+<p>$Id$</p>
+<p>X-1.8 Added BIN/CUE support via private extension methods. No changes to public interface or existing behaviour.</p>
+<p>X-1.7 Camiel Vanderhoeven 09-JAN-2008 Save disk state to state file.</p>
+<p>X-1.6 Camiel Vanderhoeven 06-JAN-2008 Support changing the block size (required for SCSI, ATAPI).</p>
+<p>X-1.5 Camiel Vanderhoeven 04-JAN-2008 64-bit file I/O.</p>
+<p>X-1.4 Camiel Vanderhoeven 02-JAN-2008 Comments.</p>
+<p>X-1.3 Camiel Vanderhoeven 28-DEC-2007 Keep the compiler happy.</p>
+<p>X-1.2 Camiel Vanderhoeven 20-DEC-2007 Close files and free memory when the emulator shuts down.</p>
+<p>X-1.1 Camiel Vanderhoeven 12-DEC-2007 Initial version in CVS. </p>
+
+<p class="definition">Definition in file <a class="el" href="../../de/d00/a00653_source.html">DiskFile.h</a>.</p>
+</div><a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
+<a id="a3a5b88e93995fcb72b420a657325d117" name="a3a5b88e93995fcb72b420a657325d117"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3a5b88e93995fcb72b420a657325d117">&#9670;&#160;</a></span>EDiskFileMediaAction</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#a3a5b88e93995fcb72b420a657325d117">EDiskFileMediaAction</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a3a5b88e93995fcb72b420a657325d117a2c161a1721e72d68d96bcf322210a5da" name="a3a5b88e93995fcb72b420a657325d117a2c161a1721e72d68d96bcf322210a5da"></a>ChangeImage&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a3a5b88e93995fcb72b420a657325d117a94db933e734bfb5c12a1bd43525bcb86" name="a3a5b88e93995fcb72b420a657325d117a94db933e734bfb5c12a1bd43525bcb86"></a>CreateBlankFloppy&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a3a5b88e93995fcb72b420a657325d117ab988d4b6f0a70633b29140fbffea2d72" name="a3a5b88e93995fcb72b420a657325d117ab988d4b6f0a70633b29140fbffea2d72"></a>Eject&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a3a5b88e93995fcb72b420a657325d117a9595c9bd5b34dfbf29595c73137df5af" name="a3a5b88e93995fcb72b420a657325d117a9595c9bd5b34dfbf29595c73137df5af"></a>SetReadOnly&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="../../de/d00/a00653_source.html#l00071">71</a> of file <a class="el" href="../../de/d00/a00653_source.html">DiskFile.h</a>.</p>
+
+</div>
+</div>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a2ae37beae8cfb1891095ac63022475c8" name="a2ae37beae8cfb1891095ac63022475c8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ae37beae8cfb1891095ac63022475c8">&#9670;&#160;</a></span>disk_file_removable_media()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">SDL_AudioStream* CES1370::ES1370State::adc_voice</td>
+          <td class="memname">std::vector&lt; std::shared_ptr&lt; <a class="el" href="../../d2/d00/a01957.html">CDiskFileMediaMailbox</a> &gt; &gt; disk_file_removable_media </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00008_source.html#l00182">182</a> of file <a class="el" href="../../d4/d00/a00008_source.html">ES1370.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00650_source.html#l00251">251</a> of file <a class="el" href="../../da/d00/a00650_source.html">DiskFile.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d00/a00005_source.html#l00489">CES1370::es1370_reset()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00830">CES1370::es1370_transfer_audio()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00554">CES1370::es1370_update_voices()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00185">CES1370::reset_audio_request()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00282">CES1370::service_audio_channel()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00163">CES1370::unbind_voices()</a>, and <a class="el" href="../../dd/d00/a00005_source.html#l00144">CES1370::~CES1370()</a>.</p>
+<p class="reference">References <a class="el" href="../../da/d00/a00650_source.html#l00251">disk_file_removable_media()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00650_source.html#l00251">disk_file_removable_media()</a>, <a class="el" href="../../d9/d00/a00476_source.html#l00608">sdl_media_pump()</a>, and <a class="el" href="../../d9/d00/a00476_source.html#l00853">sdl_select_media()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../de/d00/a00653_a2ae37beae8cfb1891095ac63022475c8_cgraph.png" border="0" usemap="#ade/d00/a00653_a2ae37beae8cfb1891095ac63022475c8_cgraph" loading="lazy" alt=""/></div>
+<map name="ade/d00/a00653_a2ae37beae8cfb1891095ac63022475c8_cgraph" id="ade/d00/a00653_a2ae37beae8cfb1891095ac63022475c8_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,142,72"/>
+<area shape="poly" title=" " alt="" coords="47,28,45,19,50,11,59,5,74,3,89,5,99,14,94,14,87,10,73,8,61,10,54,14,51,20,52,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../de/d00/a00653_a2ae37beae8cfb1891095ac63022475c8_icgraph.png" border="0" usemap="#ade/d00/a00653_a2ae37beae8cfb1891095ac63022475c8_icgraph" loading="lazy" alt=""/></div>
+<map name="ade/d00/a00653_a2ae37beae8cfb1891095ac63022475c8_icgraph" id="ade/d00/a00653_a2ae37beae8cfb1891095ac63022475c8_icgraph">
+<area shape="rect" title=" " alt="" coords="752,55,888,97"/>
+<area shape="poly" title=" " alt="" coords="847,39,837,36,820,33,803,35,793,40,789,46,790,56,786,52,784,45,790,36,802,30,820,28,839,30,852,40"/>
+<area shape="rect" href="../../d9/d00/a00476.html#a102bbceeac02e08fa902739c12136bcb" title=" " alt="" coords="402,29,521,56"/>
+<area shape="poly" title=" " alt="" coords="733,67,703,67,521,50,522,45,704,61,739,67"/>
+<area shape="rect" href="../../d9/d00/a00476.html#aa7c8fe8d49a6491dbacac40432cc7b32" title=" " alt="" coords="581,100,704,127"/>
+<area shape="poly" title=" " alt="" coords="739,93,704,103,704,98,734,94"/>
+<area shape="poly" title=" " alt="" coords="491,14,481,10,461,8,442,10,432,15,430,20,435,30,430,28,425,21,428,11,441,5,461,3,483,5,496,14"/>
+<area shape="rect" href="../../d3/d00/a01725.html#a784fe83664832bce336d609f44b787b7" title=" " alt="" coords="197,55,341,97"/>
+<area shape="poly" title=" " alt="" coords="383,56,342,66,341,61,389,55"/>
+<area shape="rect" href="../../d2/d00/a01729.html#a22ab6ced5c7a916d943ea6439aae2a4e" title=" " alt="" coords="5,55,149,97"/>
+<area shape="poly" title=" " alt="" coords="179,77,149,79,149,73,184,75"/>
+<area shape="poly" title=" " alt="" coords="671,84,662,81,642,79,624,81,614,85,612,91,617,101,612,98,607,91,610,82,623,75,643,73,664,76,676,85"/>
+<area shape="rect" href="../../d3/d00/a01725.html#ab05015697272bc69fd519e688a741dbe" title=" " alt="" coords="389,84,533,127"/>
+<area shape="poly" title=" " alt="" coords="563,110,533,111,533,106,568,110"/>
+<area shape="poly" title=" " alt="" coords="371,92,341,90,341,84,376,92"/>
+</map>
+</div>
 
 </div>
 </div>
-<a id="a5cf0d319e649bd346569252e9a63d7bd" name="a5cf0d319e649bd346569252e9a63d7bd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5cf0d319e649bd346569252e9a63d7bd">&#9670;&#160;</a></span>audio_be_in</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">SDL_AudioDeviceID CES1370::ES1370State::audio_be_in</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00008_source.html#l00179">179</a> of file <a class="el" href="../../d4/d00/a00008_source.html">ES1370.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dd/d00/a00005_source.html#l00554">CES1370::es1370_update_voices()</a>, and <a class="el" href="../../dd/d00/a00005_source.html#l00144">CES1370::~CES1370()</a>.</p>
-
-</div>
-</div>
-<a id="ac48ed14c200fbcd38f24d5e7fbfe0296" name="ac48ed14c200fbcd38f24d5e7fbfe0296"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac48ed14c200fbcd38f24d5e7fbfe0296">&#9670;&#160;</a></span>audio_be_out</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">SDL_AudioDeviceID CES1370::ES1370State::audio_be_out</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00008_source.html#l00178">178</a> of file <a class="el" href="../../d4/d00/a00008_source.html">ES1370.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dd/d00/a00005_source.html#l00554">CES1370::es1370_update_voices()</a>, and <a class="el" href="../../dd/d00/a00005_source.html#l00144">CES1370::~CES1370()</a>.</p>
-
-</div>
-</div>
-<a id="a4f602b244baf453bea483f4e4b7c7e53" name="a4f602b244baf453bea483f4e4b7c7e53"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4f602b244baf453bea483f4e4b7c7e53">&#9670;&#160;</a></span>chan</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">struct chan CES1370::ES1370State::chan[3]</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00008_source.html#l00180">180</a> of file <a class="el" href="../../d4/d00/a00008_source.html">ES1370.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dd/d00/a00005_source.html#l00258">CES1370::chan_rate_bps()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00698">CES1370::es1370_read()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00489">CES1370::es1370_reset()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00890">CES1370::es1370_run_channel()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00830">CES1370::es1370_transfer_audio()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00554">CES1370::es1370_update_voices()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00629">CES1370::es1370_write()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00185">CES1370::reset_audio_request()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00437">CES1370::RestoreState()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00404">CES1370::SaveState()</a>, and <a class="el" href="../../dd/d00/a00005_source.html#l00282">CES1370::service_audio_channel()</a>.</p>
-
-</div>
-</div>
-<a id="ae85f60da8e97720f7139a1e1d293a7f4" name="ae85f60da8e97720f7139a1e1d293a7f4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae85f60da8e97720f7139a1e1d293a7f4">&#9670;&#160;</a></span>codec</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../de/d00/a00134.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a> CES1370::ES1370State::codec</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00008_source.html#l00187">187</a> of file <a class="el" href="../../d4/d00/a00008_source.html">ES1370.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dd/d00/a00005_source.html#l00698">CES1370::es1370_read()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00489">CES1370::es1370_reset()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00437">CES1370::RestoreState()</a>, and <a class="el" href="../../dd/d00/a00005_source.html#l00404">CES1370::SaveState()</a>.</p>
-
-</div>
-</div>
-<a id="ad8b105c83936b0a113859d719a07f8b2" name="ad8b105c83936b0a113859d719a07f8b2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad8b105c83936b0a113859d719a07f8b2">&#9670;&#160;</a></span>ctl</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../de/d00/a00134.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a> CES1370::ES1370State::ctl</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00008_source.html#l00184">184</a> of file <a class="el" href="../../d4/d00/a00008_source.html">ES1370.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dd/d00/a00005_source.html#l00258">CES1370::chan_rate_bps()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00535">CES1370::es1370_dac1_calc_freq()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00542">CES1370::es1370_dac2_and_adc_calc_freq()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00698">CES1370::es1370_read()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00489">CES1370::es1370_reset()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00890">CES1370::es1370_run_channel()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00554">CES1370::es1370_update_voices()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00629">CES1370::es1370_write()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00154">CES1370::init()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00437">CES1370::RestoreState()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00404">CES1370::SaveState()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00282">CES1370::service_audio_channel()</a>, and <a class="el" href="../../dd/d00/a00005_source.html#l00220">CES1370::start_threads()</a>.</p>
-
-</div>
-</div>
-<a id="a6dbe1a4f7a0ff2346d0dd4363ca4ed2f" name="a6dbe1a4f7a0ff2346d0dd4363ca4ed2f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6dbe1a4f7a0ff2346d0dd4363ca4ed2f">&#9670;&#160;</a></span>dac_voice</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">SDL_AudioStream* CES1370::ES1370State::dac_voice[2]</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00008_source.html#l00181">181</a> of file <a class="el" href="../../d4/d00/a00008_source.html">ES1370.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dd/d00/a00005_source.html#l00489">CES1370::es1370_reset()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00830">CES1370::es1370_transfer_audio()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00554">CES1370::es1370_update_voices()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00185">CES1370::reset_audio_request()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00282">CES1370::service_audio_channel()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00163">CES1370::unbind_voices()</a>, and <a class="el" href="../../dd/d00/a00005_source.html#l00144">CES1370::~CES1370()</a>.</p>
-
-</div>
-</div>
-<a id="ae81516c90e7778dc9aa4d83b50e37099" name="ae81516c90e7778dc9aa4d83b50e37099"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae81516c90e7778dc9aa4d83b50e37099">&#9670;&#160;</a></span>mempage</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../de/d00/a00134.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a> CES1370::ES1370State::mempage</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00008_source.html#l00186">186</a> of file <a class="el" href="../../d4/d00/a00008_source.html">ES1370.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dd/d00/a00005_source.html#l00620">CES1370::es1370_fixup()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00698">CES1370::es1370_read()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00489">CES1370::es1370_reset()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00629">CES1370::es1370_write()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00437">CES1370::RestoreState()</a>, and <a class="el" href="../../dd/d00/a00005_source.html#l00404">CES1370::SaveState()</a>.</p>
-
-</div>
-</div>
-<a id="ac1cd36a7f5108e2d59a4dd92263d28f7" name="ac1cd36a7f5108e2d59a4dd92263d28f7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac1cd36a7f5108e2d59a4dd92263d28f7">&#9670;&#160;</a></span>sctl</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../de/d00/a00134.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a> CES1370::ES1370State::sctl</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00008_source.html#l00188">188</a> of file <a class="el" href="../../d4/d00/a00008_source.html">ES1370.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dd/d00/a00005_source.html#l00514">CES1370::es1370_maybe_lower_irq()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00698">CES1370::es1370_read()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00489">CES1370::es1370_reset()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00890">CES1370::es1370_run_channel()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00830">CES1370::es1370_transfer_audio()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00554">CES1370::es1370_update_voices()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00629">CES1370::es1370_write()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00154">CES1370::init()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00437">CES1370::RestoreState()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00404">CES1370::SaveState()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00282">CES1370::service_audio_channel()</a>, and <a class="el" href="../../dd/d00/a00005_source.html#l00220">CES1370::start_threads()</a>.</p>
-
-</div>
-</div>
-<a id="a1d15862cc416d8630e23ddc493e7d966" name="a1d15862cc416d8630e23ddc493e7d966"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1d15862cc416d8630e23ddc493e7d966">&#9670;&#160;</a></span>status</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../de/d00/a00134.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a> CES1370::ES1370State::status</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00008_source.html#l00185">185</a> of file <a class="el" href="../../d4/d00/a00008_source.html">ES1370.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dd/d00/a00005_source.html#l00514">CES1370::es1370_maybe_lower_irq()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00698">CES1370::es1370_read()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00489">CES1370::es1370_reset()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00890">CES1370::es1370_run_channel()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00476">CES1370::es1370_update_status()</a>, <a class="el" href="../../dd/d00/a00005_source.html#l00437">CES1370::RestoreState()</a>, and <a class="el" href="../../dd/d00/a00005_source.html#l00404">CES1370::SaveState()</a>.</p>
-
-</div>
-</div>
-<hr/>The documentation for this struct was generated from the following file:<ul>
-<li>audio/<a class="el" href="../../d4/d00/a00008_source.html">ES1370.h</a></li>
-</ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
@@ -336,7 +325,7 @@ Data Fields</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../d6/d00/a00645.html">CES1370</a></li><li class="navelem"><a href="../../de/d00/a00653.html">ES1370State</a></li>
+    <li class="navelem"><a href="../../dir_70f20ecf11358dff00a0daf546d3147e.html">storage</a></li><li class="navelem"><a href="../../de/d00/a00653.html">DiskFile.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

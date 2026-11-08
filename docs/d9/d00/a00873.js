@@ -1,5 +1,7 @@
 var a00873 =
 [
-    [ "name", "d9/d00/a00873.html#a16a52aa3e8917466506481ed6c4df8b0", null ],
-    [ "value", "d9/d00/a00873.html#a62e70c331e2e2ba23e9030b461b1fa10", null ]
+    [ "COutOfMemoryException", "d9/d00/a00873.html#a6c0227f247eadb591d5693269c973565", null ],
+    [ "COutOfMemoryException", "d9/d00/a00873.html#aa79c4b283a1c17e64d3b6037d83f15a6", null ],
+    [ "COutOfMemoryException", "d9/d00/a00873.html#a853d9f1c41288f7f25d8998acf33cd76", null ],
+    [ "name", "d9/d00/a00873.html#a40e482ba2cc80d3e871fb2cb2f4d5af0", null ]
 ];

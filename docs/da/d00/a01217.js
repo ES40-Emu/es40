@@ -1,5 +1,5 @@
 var a01217 =
 [
-    [ "address", "da/d00/a01217.html#a5542af28814feddeaf5872fa0f50b3b1", null ],
-    [ "value", "da/d00/a01217.html#a97eb27ab6ed6bbcb0587b7a7811316d0", null ]
+    [ "asn", "da/d00/a01217.html#ab326072be7bfaa87cb5498238aab0af6", null ],
+    [ "mode", "da/d00/a01217.html#af999e31fc0b42e3feb67551c0eff4eb7", null ]
 ];

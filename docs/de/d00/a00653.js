@@ -1,13 +1,14 @@
 var a00653 =
 [
-    [ "adc_voice", "de/d00/a00653.html#aab6acb7ded9d0d432c0175e86e20dd6c", null ],
-    [ "audio_be_in", "de/d00/a00653.html#a5cf0d319e649bd346569252e9a63d7bd", null ],
-    [ "audio_be_out", "de/d00/a00653.html#ac48ed14c200fbcd38f24d5e7fbfe0296", null ],
-    [ "chan", "de/d00/a00653.html#a4f602b244baf453bea483f4e4b7c7e53", null ],
-    [ "codec", "de/d00/a00653.html#ae85f60da8e97720f7139a1e1d293a7f4", null ],
-    [ "ctl", "de/d00/a00653.html#ad8b105c83936b0a113859d719a07f8b2", null ],
-    [ "dac_voice", "de/d00/a00653.html#a6dbe1a4f7a0ff2346d0dd4363ca4ed2f", null ],
-    [ "mempage", "de/d00/a00653.html#ae81516c90e7778dc9aa4d83b50e37099", null ],
-    [ "sctl", "de/d00/a00653.html#ac1cd36a7f5108e2d59a4dd92263d28f7", null ],
-    [ "status", "de/d00/a00653.html#a1d15862cc416d8630e23ddc493e7d966", null ]
+    [ "SDiskFileMediaAction", "d9/d00/a01953.html", "d9/d00/a01953" ],
+    [ "CDiskFileMediaMailbox", "d2/d00/a01957.html", "d2/d00/a01957" ],
+    [ "CDiskFile", "d2/d00/a01961.html", "d2/d00/a01961" ],
+    [ "CDiskFile::Qcow2State", "d6/d00/a01965.html", "d6/d00/a01965" ],
+    [ "EDiskFileMediaAction", "de/d00/a00653.html#a3a5b88e93995fcb72b420a657325d117", [
+      [ "ChangeImage", "de/d00/a00653.html#a3a5b88e93995fcb72b420a657325d117a2c161a1721e72d68d96bcf322210a5da", null ],
+      [ "CreateBlankFloppy", "de/d00/a00653.html#a3a5b88e93995fcb72b420a657325d117a94db933e734bfb5c12a1bd43525bcb86", null ],
+      [ "Eject", "de/d00/a00653.html#a3a5b88e93995fcb72b420a657325d117ab988d4b6f0a70633b29140fbffea2d72", null ],
+      [ "SetReadOnly", "de/d00/a00653.html#a3a5b88e93995fcb72b420a657325d117a9595c9bd5b34dfbf29595c73137df5af", null ]
+    ] ],
+    [ "disk_file_removable_media", "de/d00/a00653.html#a2ae37beae8cfb1891095ac63022475c8", null ]
 ];

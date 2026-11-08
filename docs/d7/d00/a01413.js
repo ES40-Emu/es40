@@ -1,0 +1,25 @@
+var a01413 =
+[
+    [ "cirrus_gd5428_vga_device", "d7/d00/a01413.html#aa7685b9a0d681cfaa1d09fccfb319b55", null ],
+    [ "cirrus_gd5428_vga_device", "d7/d00/a01413.html#a56e033289929d9d146cc4c7a60bc86bd", null ],
+    [ "blit_byte", "d7/d00/a01413.html#a235d3f729857e3b47b7539c207315bc7", null ],
+    [ "blit_dword", "d7/d00/a01413.html#ac172fe674fe2eddf4c74f7e199d39389", null ],
+    [ "copy_pixel", "d7/d00/a01413.html#a11e3aac973aec579fa1342628c786315", null ],
+    [ "crtc_map", "d7/d00/a01413.html#afb11a178c009be0523cd64239557a735", null ],
+    [ "device_reset", "d7/d00/a01413.html#a2cf47ed632599e582b39ecad365c11b8", null ],
+    [ "device_start", "d7/d00/a01413.html#aeb5ac88fc79f1d5631167a9245a64e32", null ],
+    [ "gc_map", "d7/d00/a01413.html#a50bad1a936f4e0303bc9697d2ceed236", null ],
+    [ "io_3cx_map", "d7/d00/a01413.html#a32826027a5d60240f6a33a834de490dd", null ],
+    [ "mem_r", "d7/d00/a01413.html#ad86ee8b2b402b6f7f3badd35009923ab", null ],
+    [ "mem_w", "d7/d00/a01413.html#aa413a94f823f2bce93c06a09d0a2b00b", null ],
+    [ "offset_select", "d7/d00/a01413.html#aa16d1e291c5e99597c64c265e2d7a485", null ],
+    [ "ramdac_hidden_mask_r", "d7/d00/a01413.html#a090650a03cd928534ec37722eba143aa", null ],
+    [ "ramdac_hidden_mask_w", "d7/d00/a01413.html#a54679a2bfd9e59b1f68b44ddcba6ec65", null ],
+    [ "ramdac_overlay_r", "d7/d00/a01413.html#ae3128134b44d1ac26b1332d9c75ab921", null ],
+    [ "ramdac_overlay_w", "d7/d00/a01413.html#ac9c2f982942de55e5baba3ca146a8347", null ],
+    [ "recompute_params", "d7/d00/a01413.html#a4b72c25de8fb96830690476ae57299db", null ],
+    [ "sequencer_map", "d7/d00/a01413.html#a60235d57df79385ec2def6ff156f0e3a", null ],
+    [ "start_bitblt", "d7/d00/a01413.html#a0b5b8fb4514681e355a222f333b0547d", null ],
+    [ "start_reverse_bitblt", "d7/d00/a01413.html#ac52761f229e2e9f72f1be9df5e9201cd", null ],
+    [ "start_system_bitblt", "d7/d00/a01413.html#aa0a6e27e12da00a0ca8729dc2f8bf58c", null ]
+];

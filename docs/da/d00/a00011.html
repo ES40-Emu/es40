@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: audio/MPU401.cpp File Reference</title>
+<title>ES40: audio/ES1371.cpp File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,25 +109,1821 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('da/d00/a00011.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">MPU401.cpp File Reference</div></div>
+  <div class="headertitle"><div class="title">ES1371.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../d2/d00/a00014_source.html">MPU401.h</a>&quot;</code><br />
-<code>#include &lt;vector&gt;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d2/d00/a00014_source.html">ES1371.h</a>&quot;</code><br />
+<code>#include &lt;algorithm&gt;</code><br />
+<code>#include &lt;mutex&gt;</code><br />
+<code>#include &lt;cmath&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
-Include dependency graph for MPU401.cpp:</div>
+Include dependency graph for ES1371.cpp:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../df/d00/a00012.png" border="0" usemap="#aaudio_2_m_p_u401_8cpp" loading="lazy" alt=""/></div>
-<map name="aaudio_2_m_p_u401_8cpp" id="aaudio_2_m_p_u401_8cpp">
-<area shape="rect" title=" " alt="" coords="28,5,160,32"/>
-<area shape="rect" href="../../d2/d00/a00014.html" title=" " alt="" coords="5,80,89,107"/>
-<area shape="poly" title=" " alt="" coords="88,31,65,69,61,65,83,34"/>
-<area shape="rect" title=" " alt="" coords="113,80,170,107"/>
-<area shape="poly" title=" " alt="" coords="103,30,128,67,122,67,101,35"/>
+<div class="center"><img src="../../df/d00/a00012.png" border="0" usemap="#aaudio_2_e_s1371_8cpp" loading="lazy" alt=""/></div>
+<map name="aaudio_2_e_s1371_8cpp" id="aaudio_2_e_s1371_8cpp">
+<area shape="rect" title=" " alt="" coords="2442,5,2569,32"/>
+<area shape="rect" href="../../d2/d00/a00014.html" title=" " alt="" coords="1282,80,1360,107"/>
+<area shape="poly" title=" " alt="" coords="2439,25,1376,91,1376,86,2444,23"/>
+<area shape="rect" title=" " alt="" coords="2193,379,2250,405"/>
+<area shape="poly" title=" " alt="" coords="2502,31,2483,90,2474,128,2471,167,2471,244,2469,262,2464,277,2445,298,2387,333,2334,356,2265,380,2264,375,2332,352,2384,328,2442,294,2459,275,2464,261,2465,244,2465,167,2469,127,2478,89,2498,34"/>
+<area shape="rect" title=" " alt="" coords="2506,80,2580,107"/>
+<area shape="poly" title=" " alt="" coords="2513,30,2532,67,2527,65,2511,35"/>
+<area shape="rect" title=" " alt="" coords="2603,80,2661,107"/>
+<area shape="poly" title=" " alt="" coords="2528,30,2599,72,2594,72,2527,35"/>
+<area shape="rect" href="../../d6/d00/a00626.html" title="Standard includes." alt="" coords="1569,155,1642,181"/>
+<area shape="poly" title=" " alt="" coords="1361,102,1557,154,1551,154,1361,107"/>
+<area shape="poly" title=" " alt="" coords="1361,92,1484,93,1664,100,1873,118,1981,133,2086,152,2198,176,2244,195,2299,227,2332,249,2360,273,2369,286,2374,300,2373,315,2365,332,2327,353,2265,378,2264,372,2325,348,2361,329,2368,314,2369,301,2364,288,2356,276,2329,254,2296,232,2242,199,2196,181,2085,157,1980,138,1873,123,1663,105,1484,98,1361,97"/>
+<area shape="rect" title=" " alt="" coords="1611,379,1672,405"/>
+<area shape="poly" title=" " alt="" coords="1336,105,1620,369,1614,368,1334,109"/>
+<area shape="rect" title=" " alt="" coords="848,379,909,405"/>
+<area shape="poly" title=" " alt="" coords="1310,106,1218,189,1165,231,1122,258,1085,271,1050,274,986,268,957,266,930,269,903,281,877,306,870,319,867,333,871,366,867,363,862,333,865,317,873,302,900,277,928,264,957,261,987,263,1050,269,1084,265,1120,254,1161,227,1215,185,1305,108"/>
+<area shape="rect" title=" " alt="" coords="2043,379,2168,405"/>
+<area shape="poly" title=" " alt="" coords="1361,93,1576,101,1725,112,1884,130,2038,157,2110,173,2176,193,2233,215,2282,241,2319,270,2344,303,2349,318,2343,332,2323,344,2283,356,2183,378,2183,373,2282,351,2320,339,2339,329,2343,318,2339,305,2315,274,2279,245,2231,220,2174,198,2109,179,2037,162,1883,136,1725,118,1576,106,1361,98"/>
+<area shape="rect" href="../../d8/d00/a00725.html" title="Contains the definitions for the emulated Typhoon Chipset devices." alt="" coords="608,155,733,181"/>
+<area shape="poly" title=" " alt="" coords="1279,100,749,161,748,155,1284,98"/>
+<area shape="rect" href="../../d6/d00/a00356.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="243,229,416,256"/>
+<area shape="poly" title=" " alt="" coords="1279,95,1164,100,994,108,797,126,695,140,597,157,475,190,375,226,373,221,474,185,595,152,695,135,796,121,994,103,1164,95,1284,94"/>
+<area shape="rect" href="../../db/d00/a00350.html" title="Contains the definitions for the PCI Device base class." alt="" coords="301,155,427,181"/>
+<area shape="poly" title=" " alt="" coords="1281,100,516,157,443,163,442,158,516,152,1282,95"/>
+<area shape="rect" href="../../db/d00/a00020.html" title=" " alt="" coords="5,304,99,331"/>
+<area shape="poly" title=" " alt="" coords="1279,95,1083,97,794,103,643,111,501,121,380,137,290,157,225,186,166,223,115,262,77,295,73,291,112,258,163,219,223,181,288,152,379,132,501,116,643,105,794,98,1083,92,1284,94"/>
+<area shape="rect" href="../../d7/d00/a00173.html" title=" " alt="" coords="1832,229,1941,256"/>
+<area shape="poly" title=" " alt="" coords="1642,176,1826,225,1820,225,1642,181"/>
+<area shape="rect" href="../../d8/d00/a00326.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="886,304,975,331"/>
+<area shape="poly" title=" " alt="" coords="1566,172,1416,191,1320,208,1224,232,1195,245,1166,258,1089,281,991,305,990,299,1087,276,1164,254,1193,240,1222,227,1319,203,1416,186,1571,171"/>
+<area shape="rect" title=" " alt="" coords="490,304,558,331"/>
+<area shape="poly" title=" " alt="" coords="1566,171,1313,189,1137,206,959,232,909,245,858,259,703,289,574,311,573,306,702,284,857,253,907,239,958,227,1137,201,1312,184,1571,170"/>
+<area shape="rect" href="../../d6/d00/a00047.html" title=" " alt="" coords="1235,229,1357,256"/>
+<area shape="poly" title=" " alt="" coords="1571,177,1365,228,1364,223,1566,178"/>
+<area shape="rect" href="../../dc/d00/a00053.html" title=" " alt="" coords="1762,304,1862,331"/>
+<area shape="poly" title=" " alt="" coords="1631,179,1712,227,1790,294,1785,292,1709,232,1630,184"/>
+<area shape="rect" href="../../de/d00/a00065.html" title=" " alt="" coords="1253,304,1358,331"/>
+<area shape="poly" title=" " alt="" coords="1590,181,1534,220,1465,258,1411,282,1359,301,1358,296,1409,277,1463,254,1532,215,1585,183"/>
+<area shape="rect" href="../../d9/d00/a00056.html" title=" " alt="" coords="964,379,1052,405"/>
+<area shape="poly" title=" " alt="" coords="1574,182,1242,307,1057,375,1056,370,1240,301,1569,182"/>
+<area shape="rect" href="../../df/d00/a00062.html" title=" " alt="" coords="2199,304,2329,331"/>
+<area shape="poly" title=" " alt="" coords="1642,166,1766,167,1933,174,2019,181,2097,192,2163,207,2211,227,2226,240,2239,256,2257,291,2252,288,2235,259,2223,244,2208,232,2161,212,2096,197,2018,187,1933,179,1766,172,1642,172"/>
+<area shape="rect" href="../../d3/d00/a00059.html" title=" " alt="" coords="1584,229,1698,256"/>
+<area shape="poly" title=" " alt="" coords="1613,180,1631,216,1626,214,1610,184"/>
+<area shape="rect" href="../../dd/d00/a00365.html" title="Contains macro&#39;s and prototypes for debugging." alt="" coords="1965,229,2067,256"/>
+<area shape="poly" title=" " alt="" coords="1642,173,1952,229,1947,229,1642,178"/>
+<area shape="rect" href="../../d8/d00/a00368.html" title="Contains byte&#45;order conversion helpers." alt="" coords="2091,229,2197,256"/>
+<area shape="poly" title=" " alt="" coords="1642,171,1824,192,2079,229,2073,229,1823,197,1642,176"/>
+<area shape="rect" title=" " alt="" coords="1051,304,1128,331"/>
+<area shape="poly" title=" " alt="" coords="1263,256,1140,301,1139,296,1257,257"/>
+<area shape="rect" title=" " alt="" coords="653,379,707,405"/>
+<area shape="poly" title=" " alt="" coords="1237,253,1142,276,1040,306,1015,320,989,333,917,355,844,371,723,389,722,384,843,365,916,349,987,328,1012,315,1038,302,1140,271,1232,254"/>
+<area shape="poly" title=" " alt="" coords="1863,322,2001,342,2180,379,2175,378,2000,348,1862,328"/>
+<area shape="poly" title=" " alt="" coords="1785,331,1686,375,1685,369,1780,332"/>
+<area shape="rect" title=" " alt="" coords="1530,379,1587,405"/>
+<area shape="poly" title=" " alt="" coords="1769,331,1603,380,1602,375,1764,332"/>
+<area shape="rect" title=" " alt="" coords="1449,379,1506,405"/>
+<area shape="poly" title=" " alt="" coords="1764,329,1521,381,1520,376,1759,329"/>
+<area shape="rect" title=" " alt="" coords="1817,379,1895,405"/>
+<area shape="poly" title=" " alt="" coords="1821,329,1843,367,1838,364,1818,334"/>
+<area shape="poly" title=" " alt="" coords="1255,325,722,388,722,383,1250,325"/>
+<area shape="poly" title=" " alt="" coords="1358,318,1759,339,1994,356,2180,379,2175,379,1994,361,1758,344,1358,323"/>
+<area shape="poly" title=" " alt="" coords="1358,325,1465,346,1599,378,1594,378,1464,351,1358,331"/>
+<area shape="poly" title=" " alt="" coords="1350,329,1518,378,1512,378,1350,334"/>
+<area shape="poly" title=" " alt="" coords="1336,329,1438,373,1432,373,1335,334"/>
+<area shape="poly" title=" " alt="" coords="1358,323,1804,384,1799,384,1358,328"/>
+<area shape="poly" title=" " alt="" coords="1256,327,1235,333,924,386,924,380,1234,328,1250,328"/>
+<area shape="rect" title=" " alt="" coords="1258,379,1326,405"/>
+<area shape="poly" title=" " alt="" coords="1305,329,1299,365,1295,361,1301,333"/>
+<area shape="poly" title=" " alt="" coords="1358,321,2030,383,2025,384,1358,326"/>
+<area shape="rect" title=" " alt="" coords="419,379,488,405"/>
+<area shape="poly" title=" " alt="" coords="1253,326,503,389,503,384,1252,320"/>
+<area shape="rect" title=" " alt="" coords="244,379,340,405"/>
+<area shape="poly" title=" " alt="" coords="1256,322,1140,333,773,355,407,381,356,386,355,381,406,376,773,350,1140,328,1250,323"/>
+<area shape="poly" title=" " alt="" coords="1256,331,1067,379,1066,374,1251,332"/>
+<area shape="rect" title=" " alt="" coords="1350,379,1426,405"/>
+<area shape="poly" title=" " alt="" coords="1321,329,1365,369,1360,368,1319,334"/>
+<area shape="rect" title=" " alt="" coords="1076,379,1143,405"/>
+<area shape="poly" title=" " alt="" coords="1274,331,1158,376,1157,370,1269,332"/>
+<area shape="rect" title=" " alt="" coords="1167,379,1233,405"/>
+<area shape="poly" title=" " alt="" coords="1290,330,1232,372,1230,367,1284,332"/>
+<area shape="poly" title=" " alt="" coords="2259,330,2238,368,2235,363,2254,333"/>
+<area shape="poly" title=" " alt="" coords="2201,329,2187,333,1903,367,1687,389,1687,384,1903,362,2186,328,2196,329"/>
+<area shape="poly" title=" " alt="" coords="2201,330,1911,384,1910,378,2196,330"/>
+<area shape="poly" title=" " alt="" coords="2239,331,2148,374,2146,369,2234,332"/>
+<area shape="rect" title=" " alt="" coords="2274,379,2339,405"/>
+<area shape="poly" title=" " alt="" coords="2273,329,2294,367,2289,364,2270,334"/>
+<area shape="poly" title=" " alt="" coords="1672,254,1771,298,1765,297,1671,259"/>
+<area shape="poly" title=" " alt="" coords="1638,255,1628,290,1625,310,1625,330,1633,365,1629,362,1620,331,1619,310,1623,289,1634,258"/>
+<area shape="poly" title=" " alt="" coords="1637,255,1575,367,1572,363,1632,258"/>
+<area shape="poly" title=" " alt="" coords="1630,256,1504,371,1501,366,1625,257"/>
+<area shape="poly" title=" " alt="" coords="1699,252,1808,277,1853,290,1877,302,1884,318,1884,334,1873,367,1870,363,1879,333,1879,319,1873,306,1851,295,1807,282,1699,258"/>
+<area shape="poly" title=" " alt="" coords="1586,250,1429,274,1242,307,1141,333,924,383,924,378,1139,328,1241,301,1428,269,1581,251"/>
+<area shape="rect" title=" " alt="" coords="1635,304,1738,331"/>
+<area shape="poly" title=" " alt="" coords="1650,254,1673,292,1668,290,1648,259"/>
+<area shape="rect" title=" " alt="" coords="1988,304,2057,331"/>
+<area shape="poly" title=" " alt="" coords="2019,255,2022,290,2018,287,2015,259"/>
+<area shape="rect" href="../../db/d00/a00164.html" title=" " alt="" coords="2081,304,2175,331"/>
+<area shape="poly" title=" " alt="" coords="2143,255,2136,291,2132,287,2139,258"/>
+<area shape="poly" title=" " alt="" coords="606,182,575,195,547,211,537,220,530,231,528,242,532,255,550,280,582,310,654,370,649,369,578,314,546,283,527,257,523,242,525,229,532,217,544,207,573,190,611,181"/>
+<area shape="poly" title=" " alt="" coords="733,168,942,173,1225,184,1506,201,1623,213,1711,227,1788,249,1845,274,1902,300,1977,328,2075,353,2180,378,2175,378,2074,358,1975,333,1900,305,1843,278,1786,254,1710,232,1622,218,1506,206,1224,189,942,178,733,173"/>
+<area shape="poly" title=" " alt="" coords="733,167,880,170,1065,178,1244,196,1316,210,1370,227,1405,250,1427,275,1447,302,1479,328,1530,351,1599,377,1594,376,1528,356,1476,333,1443,306,1423,279,1402,254,1368,232,1315,215,1243,202,1065,184,879,175,733,172"/>
+<area shape="poly" title=" " alt="" coords="733,169,767,175,802,185,834,203,860,228,864,242,860,257,850,279,838,295,830,310,832,330,842,349,856,368,851,366,837,352,827,331,825,309,833,292,845,276,855,255,858,242,855,231,830,207,800,190,766,180,733,174"/>
+<area shape="poly" title=" " alt="" coords="617,181,567,203,543,216,522,231,496,261,479,297,467,333,459,365,455,361,462,331,474,295,492,259,518,227,540,211,564,198,612,183"/>
+<area shape="poly" title=" " alt="" coords="608,183,405,228,403,223,613,181"/>
+<area shape="rect" title=" " alt="" coords="134,379,191,405"/>
+<area shape="poly" title=" " alt="" coords="605,172,508,179,392,189,284,206,241,218,211,232,191,246,179,262,164,305,160,335,161,365,156,362,154,334,159,303,175,259,187,243,208,227,240,213,283,201,391,184,508,173,610,170"/>
+<area shape="rect" href="../../de/d00/a00323.html" title="Contains the definitions for the CPU tracing engine." alt="" coords="971,229,1109,256"/>
+<area shape="poly" title=" " alt="" coords="733,179,963,225,958,226,733,184"/>
+<area shape="rect" href="../../dd/d00/a00719.html" title=" " alt="" coords="173,304,251,331"/>
+<area shape="poly" title=" " alt="" coords="606,175,387,198,285,214,251,223,232,231,223,243,217,258,213,290,208,287,212,257,218,241,229,227,249,218,284,209,386,193,610,173"/>
+<area shape="rect" title=" " alt="" coords="541,229,606,256"/>
+<area shape="poly" title=" " alt="" coords="656,181,603,222,601,218,651,183"/>
+<area shape="rect" title=" " alt="" coords="630,229,712,256"/>
+<area shape="poly" title=" " alt="" coords="672,180,673,215,668,212,669,184"/>
+<area shape="rect" title=" " alt="" coords="736,229,846,256"/>
+<area shape="poly" title=" " alt="" coords="692,179,759,221,754,221,691,184"/>
+<area shape="poly" title=" " alt="" coords="364,254,478,298,473,299,363,259"/>
+<area shape="rect" href="../../d4/d00/a00116.html" title="Contains the definitions for the configuration file interpreter." alt="" coords="274,304,416,331"/>
+<area shape="poly" title=" " alt="" coords="334,254,342,290,337,288,331,259"/>
+<area shape="poly" title=" " alt="" coords="404,329,641,381,635,382,404,334"/>
+<area shape="poly" title=" " alt="" coords="316,331,207,376,205,371,311,332"/>
+<area shape="poly" title=" " alt="" coords="1023,256,963,298,961,293,1018,257"/>
+<area shape="poly" title=" " alt="" coords="252,328,407,375,402,377,251,333"/>
+<area shape="poly" title=" " alt="" coords="206,330,182,368,178,364,201,332"/>
+<area shape="rect" title=" " alt="" coords="50,379,110,405"/>
+<area shape="poly" title=" " alt="" coords="192,331,117,373,115,369,186,332"/>
+<area shape="poly" title=" " alt="" coords="360,180,344,217,340,214,356,184"/>
+<area shape="poly" title=" " alt="" coords="94,329,237,372,233,376,93,334"/>
+<area shape="poly" title=" " alt="" coords="72,329,133,369,128,371,70,334"/>
+<area shape="poly" title=" " alt="" coords="58,329,72,364,67,364,55,333"/>
 </map>
 </div>
 </div>
 <p><a href="../../da/d00/a00011_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Data Structures</h2></td></tr>
+<tr class="memitem:CES1371StreamLock" id="r_CES1371StreamLock"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../d6/d00/a00781.html">CES1371StreamLock</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:a15d5cca94df496bedc004c2d639fcbac" id="r_a15d5cca94df496bedc004c2d639fcbac"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a15d5cca94df496bedc004c2d639fcbac">ES1371_REG_CONTROL</a>&#160;&#160;&#160;0x00</td></tr>
+<tr class="memitem:a39f5c797e5ee3c9081349a21d421ba59" id="r_a39f5c797e5ee3c9081349a21d421ba59"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a39f5c797e5ee3c9081349a21d421ba59">ES1371_REG_STATUS</a>&#160;&#160;&#160;0x04</td></tr>
+<tr class="memitem:acfa61c40a32d49ae26436ec19ce04465" id="r_acfa61c40a32d49ae26436ec19ce04465"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#acfa61c40a32d49ae26436ec19ce04465">ES1371_REG_UART_DATA</a>&#160;&#160;&#160;0x08</td></tr>
+<tr class="memitem:ad9232afe4f363bdbfe6adacf8c965164" id="r_ad9232afe4f363bdbfe6adacf8c965164"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad9232afe4f363bdbfe6adacf8c965164">ES1371_REG_UART_STATUS</a>&#160;&#160;&#160;0x09</td></tr>
+<tr class="memitem:a4995a98fecf899bea36d495a3af86e1c" id="r_a4995a98fecf899bea36d495a3af86e1c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a4995a98fecf899bea36d495a3af86e1c">ES1371_REG_UART_CONTROL</a>&#160;&#160;&#160;0x09</td></tr>
+<tr class="memitem:a16eaa0071a5eb0d01e3a1516e3f0aef8" id="r_a16eaa0071a5eb0d01e3a1516e3f0aef8"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a16eaa0071a5eb0d01e3a1516e3f0aef8">ES1371_REG_UART_TEST</a>&#160;&#160;&#160;0x0a</td></tr>
+<tr class="memitem:af644b8eb0ebd51f17d55afd7580f2f59" id="r_af644b8eb0ebd51f17d55afd7580f2f59"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af644b8eb0ebd51f17d55afd7580f2f59">ES1371_REG_MEMPAGE</a>&#160;&#160;&#160;0x0c</td></tr>
+<tr class="memitem:a748fa2475b205f4bd1b321b163c4556f" id="r_a748fa2475b205f4bd1b321b163c4556f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a748fa2475b205f4bd1b321b163c4556f">ES1371_REG_SRC</a>&#160;&#160;&#160;0x10</td></tr>
+<tr class="memitem:ad307bee42695763628683e5f541cebe7" id="r_ad307bee42695763628683e5f541cebe7"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad307bee42695763628683e5f541cebe7">ES1371_REG_CODEC</a>&#160;&#160;&#160;0x14</td></tr>
+<tr class="memitem:a8bd72df3fef441b6fe4ee27c6c5ba5df" id="r_a8bd72df3fef441b6fe4ee27c6c5ba5df"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a8bd72df3fef441b6fe4ee27c6c5ba5df">ES1371_REG_LEGACY</a>&#160;&#160;&#160;0x18</td></tr>
+<tr class="memitem:a3221c9c2b78712701f2b05a83504aefb" id="r_a3221c9c2b78712701f2b05a83504aefb"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a3221c9c2b78712701f2b05a83504aefb">ES1371_REG_SERIAL_CONTROL</a>&#160;&#160;&#160;0x20</td></tr>
+<tr class="memitem:ae0cce0d04286f3430e7f0fc92f2491e5" id="r_ae0cce0d04286f3430e7f0fc92f2491e5"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae0cce0d04286f3430e7f0fc92f2491e5">ES1371_REG_DAC1_SCOUNT</a>&#160;&#160;&#160;0x24</td></tr>
+<tr class="memitem:a56e07e45b5c142db637aa339e49e5364" id="r_a56e07e45b5c142db637aa339e49e5364"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a56e07e45b5c142db637aa339e49e5364">ES1371_REG_DAC2_SCOUNT</a>&#160;&#160;&#160;0x28</td></tr>
+<tr class="memitem:a12a4a6a527c229402864840f88500d2c" id="r_a12a4a6a527c229402864840f88500d2c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a12a4a6a527c229402864840f88500d2c">ES1371_REG_ADC_SCOUNT</a>&#160;&#160;&#160;0x2c</td></tr>
+<tr class="memitem:a7a4bfb1d3f3759247a0d887bde7f6372" id="r_a7a4bfb1d3f3759247a0d887bde7f6372"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a7a4bfb1d3f3759247a0d887bde7f6372">ES1371_REG_DAC1_FRAMEADR</a>&#160;&#160;&#160;0xc30</td></tr>
+<tr class="memitem:a7d99602d82d44091516a237c9b29f743" id="r_a7d99602d82d44091516a237c9b29f743"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a7d99602d82d44091516a237c9b29f743">ES1371_REG_DAC1_FRAMECNT</a>&#160;&#160;&#160;0xc34</td></tr>
+<tr class="memitem:a4e9cd83bde5133d17c2004cf876e1090" id="r_a4e9cd83bde5133d17c2004cf876e1090"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a4e9cd83bde5133d17c2004cf876e1090">ES1371_REG_DAC2_FRAMEADR</a>&#160;&#160;&#160;0xc38</td></tr>
+<tr class="memitem:a8c1751c55dbd3a81a8306cc3fd4acca8" id="r_a8c1751c55dbd3a81a8306cc3fd4acca8"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a8c1751c55dbd3a81a8306cc3fd4acca8">ES1371_REG_DAC2_FRAMECNT</a>&#160;&#160;&#160;0xc3c</td></tr>
+<tr class="memitem:a42077397699a0ee61e9cb02bb8ed5a28" id="r_a42077397699a0ee61e9cb02bb8ed5a28"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a42077397699a0ee61e9cb02bb8ed5a28">ES1371_REG_ADC_FRAMEADR</a>&#160;&#160;&#160;0xd30</td></tr>
+<tr class="memitem:a7d9e4c3bd865114d22e57482f9977cf1" id="r_a7d9e4c3bd865114d22e57482f9977cf1"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a7d9e4c3bd865114d22e57482f9977cf1">ES1371_REG_ADC_FRAMECNT</a>&#160;&#160;&#160;0xd34</td></tr>
+<tr class="memitem:af7981dba9a5bbff039cab93a90aae536" id="r_af7981dba9a5bbff039cab93a90aae536"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af7981dba9a5bbff039cab93a90aae536">ES1371_REG_PHANTOM_FRAMEADR</a>&#160;&#160;&#160;0xd38</td></tr>
+<tr class="memitem:a2e56a74ee27f2d2a8b7f348d236f2df3" id="r_a2e56a74ee27f2d2a8b7f348d236f2df3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a2e56a74ee27f2d2a8b7f348d236f2df3">ES1371_REG_PHANTOM_FRAMECNT</a>&#160;&#160;&#160;0xd3c</td></tr>
+<tr class="memitem:a6545b5d955abcaaa74625795e0b9281d" id="r_a6545b5d955abcaaa74625795e0b9281d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6545b5d955abcaaa74625795e0b9281d">CTRL_ADC_STOP</a>&#160;&#160;&#160;0x00002000</td></tr>
+<tr class="memitem:a249962a02441218394bf37ea2bc94b80" id="r_a249962a02441218394bf37ea2bc94b80"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a249962a02441218394bf37ea2bc94b80">CTRL_SYNC_RES</a>&#160;&#160;&#160;0x00004000</td></tr>
+<tr class="memitem:a11236c441cb1971103d2a4ef93724f79" id="r_a11236c441cb1971103d2a4ef93724f79"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a11236c441cb1971103d2a4ef93724f79">CTRL_DAC1_EN</a>&#160;&#160;&#160;0x00000040</td></tr>
+<tr class="memitem:ad6d29878f7ac7d858317443ad2e0eaff" id="r_ad6d29878f7ac7d858317443ad2e0eaff"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad6d29878f7ac7d858317443ad2e0eaff">CTRL_DAC2_EN</a>&#160;&#160;&#160;0x00000020</td></tr>
+<tr class="memitem:a423fc7bb588d4bdf7d7fa74df32f9f6f" id="r_a423fc7bb588d4bdf7d7fa74df32f9f6f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a423fc7bb588d4bdf7d7fa74df32f9f6f">CTRL_ADC_EN</a>&#160;&#160;&#160;0x00000010</td></tr>
+<tr class="memitem:ada2dae1e4d269bdb7670606c84aacf31" id="r_ada2dae1e4d269bdb7670606c84aacf31"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ada2dae1e4d269bdb7670606c84aacf31">CTRL_UART_EN</a>&#160;&#160;&#160;0x00000008</td></tr>
+<tr class="memitem:a45d56a472e899a5f1588a3e82416b8ec" id="r_a45d56a472e899a5f1588a3e82416b8ec"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a45d56a472e899a5f1588a3e82416b8ec">CTRL_PWR_INTRM</a>&#160;&#160;&#160;0x00001000</td></tr>
+<tr class="memitem:ab1800dd35f83e5ba84551625d3d2f310" id="r_ab1800dd35f83e5ba84551625d3d2f310"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab1800dd35f83e5ba84551625d3d2f310">SRC_DISABLE</a>&#160;&#160;&#160;0x00400000</td></tr>
+<tr class="memitem:a9ee3421420d0090a4eeb15c5a3027440" id="r_a9ee3421420d0090a4eeb15c5a3027440"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9ee3421420d0090a4eeb15c5a3027440">SRC_DIS_DAC1</a>&#160;&#160;&#160;0x00200000</td></tr>
+<tr class="memitem:a6323ec4843d64ff17c2e85f6e0db855a" id="r_a6323ec4843d64ff17c2e85f6e0db855a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6323ec4843d64ff17c2e85f6e0db855a">SRC_DIS_DAC2</a>&#160;&#160;&#160;0x00100000</td></tr>
+<tr class="memitem:a0a6fb994721cf43820dec6c40ce75e57" id="r_a0a6fb994721cf43820dec6c40ce75e57"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0a6fb994721cf43820dec6c40ce75e57">SRC_DIS_ADC</a>&#160;&#160;&#160;0x00080000</td></tr>
+<tr class="memitem:ae08b267cf12322d6df145efadb9bab89" id="r_ae08b267cf12322d6df145efadb9bab89"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae08b267cf12322d6df145efadb9bab89">SRC_WRITE</a>&#160;&#160;&#160;0x01000000</td></tr>
+<tr class="memitem:af12de16857ed01dd7753a98fd77a51db" id="r_af12de16857ed01dd7753a98fd77a51db"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af12de16857ed01dd7753a98fd77a51db">SRC_STATE</a>&#160;&#160;&#160;0x00010000</td></tr>
+<tr class="memitem:ab8c6b5dc38893f2d5d0f7022aea04b70" id="r_ab8c6b5dc38893f2d5d0f7022aea04b70"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab8c6b5dc38893f2d5d0f7022aea04b70">CODEC_READ</a>&#160;&#160;&#160;0x00800000</td></tr>
+<tr class="memitem:a314651aea53afe8c8ca7ea02ff7fae71" id="r_a314651aea53afe8c8ca7ea02ff7fae71"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a314651aea53afe8c8ca7ea02ff7fae71">CODEC_READY</a>&#160;&#160;&#160;0x80000000</td></tr>
+<tr class="memitem:a6997b2c69a22a554161d0f2352a19580" id="r_a6997b2c69a22a554161d0f2352a19580"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6997b2c69a22a554161d0f2352a19580">STAT_INTR</a>&#160;&#160;&#160;0x80000000</td></tr>
+<tr class="memitem:a47edf337678daeccb0fd8d6c1e2421f5" id="r_a47edf337678daeccb0fd8d6c1e2421f5"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a47edf337678daeccb0fd8d6c1e2421f5">STAT_MPWR</a>&#160;&#160;&#160;0x00000020</td></tr>
+<tr class="memitem:a62f135480da5f1b2b3ec21384ddcc70a" id="r_a62f135480da5f1b2b3ec21384ddcc70a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a62f135480da5f1b2b3ec21384ddcc70a">STAT_UART</a>&#160;&#160;&#160;0x00000008</td></tr>
+<tr class="memitem:ae967eac1ff8e67257445217bb334a304" id="r_ae967eac1ff8e67257445217bb334a304"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae967eac1ff8e67257445217bb334a304">STAT_DAC1</a>&#160;&#160;&#160;0x00000004</td></tr>
+<tr class="memitem:a12d0308ae3fcd75cb51627da66656d6e" id="r_a12d0308ae3fcd75cb51627da66656d6e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a12d0308ae3fcd75cb51627da66656d6e">STAT_DAC2</a>&#160;&#160;&#160;0x00000002</td></tr>
+<tr class="memitem:afe3a7927a663de6d4cda3b062057a33a" id="r_afe3a7927a663de6d4cda3b062057a33a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#afe3a7927a663de6d4cda3b062057a33a">STAT_ADC</a>&#160;&#160;&#160;0x00000001</td></tr>
+<tr class="memitem:a5ab9909992cee8ff5776b4101fc6dd4a" id="r_a5ab9909992cee8ff5776b4101fc6dd4a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5ab9909992cee8ff5776b4101fc6dd4a">USTAT_RXINT</a>&#160;&#160;&#160;0x80</td></tr>
+<tr class="memitem:a414a6cf4fb276124033da281ca462585" id="r_a414a6cf4fb276124033da281ca462585"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a414a6cf4fb276124033da281ca462585">USTAT_TXINT</a>&#160;&#160;&#160;0x04</td></tr>
+<tr class="memitem:a6a4d921e178b514811a9b5dc663e9723" id="r_a6a4d921e178b514811a9b5dc663e9723"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6a4d921e178b514811a9b5dc663e9723">USTAT_TXRDY</a>&#160;&#160;&#160;0x02</td></tr>
+<tr class="memitem:a8a5419cca6e6cee80e1c1fc9889e27e3" id="r_a8a5419cca6e6cee80e1c1fc9889e27e3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a8a5419cca6e6cee80e1c1fc9889e27e3">USTAT_RXRDY</a>&#160;&#160;&#160;0x01</td></tr>
+<tr class="memitem:a6d6e780a52b23ac53bf0de7c54edf0e2" id="r_a6d6e780a52b23ac53bf0de7c54edf0e2"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6d6e780a52b23ac53bf0de7c54edf0e2">UCTRL_RXINTEN</a>&#160;&#160;&#160;0x80</td></tr>
+<tr class="memitem:a1257a1160481a16a96c90d7c2be436bc" id="r_a1257a1160481a16a96c90d7c2be436bc"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a1257a1160481a16a96c90d7c2be436bc">UCTRL_TXINTEN</a>&#160;&#160;&#160;0x60</td></tr>
+<tr class="memitem:abb75f0fd213bc52b04f02ddb092c65b1" id="r_abb75f0fd213bc52b04f02ddb092c65b1"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#abb75f0fd213bc52b04f02ddb092c65b1">UCTRL_ENA_TXINT</a>&#160;&#160;&#160;0x20</td></tr>
+<tr class="memitem:a829232dcc5882f076624d51c297e7200" id="r_a829232dcc5882f076624d51c297e7200"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a829232dcc5882f076624d51c297e7200">UCTRL_CNTRL</a>&#160;&#160;&#160;0x03</td></tr>
+<tr class="memitem:a2742eb8131ffb941f689c8c061ea7fb4" id="r_a2742eb8131ffb941f689c8c061ea7fb4"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a2742eb8131ffb941f689c8c061ea7fb4">UCTRL_CNTRL_SWR</a>&#160;&#160;&#160;0x03</td></tr>
+<tr class="memitem:a0c945514b9ca89d21e464e3da428d4d2" id="r_a0c945514b9ca89d21e464e3da428d4d2"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0c945514b9ca89d21e464e3da428d4d2">SCTRL_P2ENDINC</a>&#160;&#160;&#160;0x00380000</td></tr>
+<tr class="memitem:a3ef10279deb4c92e07026a105c9f2998" id="r_a3ef10279deb4c92e07026a105c9f2998"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a3ef10279deb4c92e07026a105c9f2998">SCTRL_SH_P2ENDINC</a>&#160;&#160;&#160;19</td></tr>
+<tr class="memitem:acc106bce95f01ef0a97ac0c2ec5c8eb3" id="r_acc106bce95f01ef0a97ac0c2ec5c8eb3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#acc106bce95f01ef0a97ac0c2ec5c8eb3">SCTRL_P2STINC</a>&#160;&#160;&#160;0x00070000</td></tr>
+<tr class="memitem:a90cdc7a2f0a1f6c64d20fe0b113d88c3" id="r_a90cdc7a2f0a1f6c64d20fe0b113d88c3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a90cdc7a2f0a1f6c64d20fe0b113d88c3">SCTRL_SH_P2STINC</a>&#160;&#160;&#160;16</td></tr>
+<tr class="memitem:a5fb67d8537ab853d11a39a59b5947f8a" id="r_a5fb67d8537ab853d11a39a59b5947f8a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5fb67d8537ab853d11a39a59b5947f8a">SCTRL_R1LOOPSEL</a>&#160;&#160;&#160;0x00008000</td></tr>
+<tr class="memitem:aa6287dc2339e7d355ce68c07f45a353b" id="r_aa6287dc2339e7d355ce68c07f45a353b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aa6287dc2339e7d355ce68c07f45a353b">SCTRL_P2LOOPSEL</a>&#160;&#160;&#160;0x00004000</td></tr>
+<tr class="memitem:acae21ff82a7f3eca1dce35f7ff0dda1a" id="r_acae21ff82a7f3eca1dce35f7ff0dda1a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#acae21ff82a7f3eca1dce35f7ff0dda1a">SCTRL_P1LOOPSEL</a>&#160;&#160;&#160;0x00002000</td></tr>
+<tr class="memitem:addf8ec25cfe2d5ce4efc4e3d6f4f5c68" id="r_addf8ec25cfe2d5ce4efc4e3d6f4f5c68"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#addf8ec25cfe2d5ce4efc4e3d6f4f5c68">SCTRL_P2PAUSE</a>&#160;&#160;&#160;0x00001000</td></tr>
+<tr class="memitem:ae45f514dba29ec4abe6c4eeaba87387b" id="r_ae45f514dba29ec4abe6c4eeaba87387b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae45f514dba29ec4abe6c4eeaba87387b">SCTRL_P1PAUSE</a>&#160;&#160;&#160;0x00000800</td></tr>
+<tr class="memitem:a4e3b8e8c4d29411f2c891bef907e7099" id="r_a4e3b8e8c4d29411f2c891bef907e7099"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a4e3b8e8c4d29411f2c891bef907e7099">SCTRL_R1INTEN</a>&#160;&#160;&#160;0x00000400</td></tr>
+<tr class="memitem:a1a686ce524e4c045e137b3977e6e395b" id="r_a1a686ce524e4c045e137b3977e6e395b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a1a686ce524e4c045e137b3977e6e395b">SCTRL_P2INTEN</a>&#160;&#160;&#160;0x00000200</td></tr>
+<tr class="memitem:a0ffc838fd1b4533c206661910f843dfd" id="r_a0ffc838fd1b4533c206661910f843dfd"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0ffc838fd1b4533c206661910f843dfd">SCTRL_P1INTEN</a>&#160;&#160;&#160;0x00000100</td></tr>
+<tr class="memitem:a707fe27c6282ec97c830f2b24ed6debf" id="r_a707fe27c6282ec97c830f2b24ed6debf"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a707fe27c6282ec97c830f2b24ed6debf">SCTRL_P1SCTRLD</a>&#160;&#160;&#160;0x00000080</td></tr>
+<tr class="memitem:a4728a93b02b3f6ced15e7bbf56422b05" id="r_a4728a93b02b3f6ced15e7bbf56422b05"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a4728a93b02b3f6ced15e7bbf56422b05">SCTRL_P2DACSEN</a>&#160;&#160;&#160;0x00000040</td></tr>
+<tr class="memitem:a0e22a9820280596854933dc30550f95c" id="r_a0e22a9820280596854933dc30550f95c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0e22a9820280596854933dc30550f95c">SCTRL_R1SEB</a>&#160;&#160;&#160;0x00000020</td></tr>
+<tr class="memitem:aff4dbc83536539c8ba91c6a3bae69599" id="r_aff4dbc83536539c8ba91c6a3bae69599"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aff4dbc83536539c8ba91c6a3bae69599">SCTRL_R1SMB</a>&#160;&#160;&#160;0x00000010</td></tr>
+<tr class="memitem:a5af0473f498fb8616f7e15f91d98a408" id="r_a5af0473f498fb8616f7e15f91d98a408"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5af0473f498fb8616f7e15f91d98a408">SCTRL_R1FMT</a>&#160;&#160;&#160;0x00000030</td></tr>
+<tr class="memitem:a9f0b04fd8f0a0102c5bed093a103c7c4" id="r_a9f0b04fd8f0a0102c5bed093a103c7c4"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9f0b04fd8f0a0102c5bed093a103c7c4">SCTRL_SH_R1FMT</a>&#160;&#160;&#160;4</td></tr>
+<tr class="memitem:a6f2bb6121df5ebc92624e2fcd89078a2" id="r_a6f2bb6121df5ebc92624e2fcd89078a2"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6f2bb6121df5ebc92624e2fcd89078a2">SCTRL_P2SEB</a>&#160;&#160;&#160;0x00000008</td></tr>
+<tr class="memitem:a5ecbd8e277dcbb81f2da8c10b109c7c9" id="r_a5ecbd8e277dcbb81f2da8c10b109c7c9"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5ecbd8e277dcbb81f2da8c10b109c7c9">SCTRL_P2SMB</a>&#160;&#160;&#160;0x00000004</td></tr>
+<tr class="memitem:a0db4226163e49fb13789e1ab3a1b39ce" id="r_a0db4226163e49fb13789e1ab3a1b39ce"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0db4226163e49fb13789e1ab3a1b39ce">SCTRL_P2FMT</a>&#160;&#160;&#160;0x0000000c</td></tr>
+<tr class="memitem:a3b8b5d6ba9b3228479ff478a4d67c71c" id="r_a3b8b5d6ba9b3228479ff478a4d67c71c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a3b8b5d6ba9b3228479ff478a4d67c71c">SCTRL_SH_P2FMT</a>&#160;&#160;&#160;2</td></tr>
+<tr class="memitem:a0b7ad939ae3e6db155e8c28bd442654d" id="r_a0b7ad939ae3e6db155e8c28bd442654d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0b7ad939ae3e6db155e8c28bd442654d">SCTRL_P1SEB</a>&#160;&#160;&#160;0x00000002</td></tr>
+<tr class="memitem:a84f8a1942dab139896b087a17e8fa723" id="r_a84f8a1942dab139896b087a17e8fa723"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a84f8a1942dab139896b087a17e8fa723">SCTRL_P1SMB</a>&#160;&#160;&#160;0x00000001</td></tr>
+<tr class="memitem:ac72a05fd4c56e706d5b7ccfa097bfa57" id="r_ac72a05fd4c56e706d5b7ccfa097bfa57"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac72a05fd4c56e706d5b7ccfa097bfa57">SCTRL_P1FMT</a>&#160;&#160;&#160;0x00000003</td></tr>
+<tr class="memitem:a59bb7d0dbd3061f6e0f58b8fba716c18" id="r_a59bb7d0dbd3061f6e0f58b8fba716c18"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a59bb7d0dbd3061f6e0f58b8fba716c18">SCTRL_SH_P1FMT</a>&#160;&#160;&#160;0</td></tr>
+<tr class="memitem:a4559069a0477805f310137e5a551b7a0" id="r_a4559069a0477805f310137e5a551b7a0"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a4559069a0477805f310137e5a551b7a0">NB_CHANNELS</a>&#160;&#160;&#160;3</td></tr>
+<tr class="memitem:a9db9b381adf95835c6a321580d0d8c94" id="r_a9db9b381adf95835c6a321580d0d8c94"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9db9b381adf95835c6a321580d0d8c94">DAC1_CHANNEL</a>&#160;&#160;&#160;0</td></tr>
+<tr class="memitem:ae48e74bc9d656c3aa324228eda90d732" id="r_ae48e74bc9d656c3aa324228eda90d732"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae48e74bc9d656c3aa324228eda90d732">DAC2_CHANNEL</a>&#160;&#160;&#160;1</td></tr>
+<tr class="memitem:a7fb9fde533f9b9bc8e4ae31524c9ea51" id="r_a7fb9fde533f9b9bc8e4ae31524c9ea51"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a7fb9fde533f9b9bc8e4ae31524c9ea51">ADC_CHANNEL</a>&#160;&#160;&#160;2</td></tr>
+<tr class="memitem:afa99ec4acc4ecb2dc3c2d05da15d0e3f" id="r_afa99ec4acc4ecb2dc3c2d05da15d0e3f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#afa99ec4acc4ecb2dc3c2d05da15d0e3f">MAX</a>(a,  b)</td></tr>
+<tr class="memitem:a3acffbd305ee72dcd4593c0d8af64a4f" id="r_a3acffbd305ee72dcd4593c0d8af64a4f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a3acffbd305ee72dcd4593c0d8af64a4f">MIN</a>(a,  b)</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a1b7eadd4715f59a865bc79e5ce5b8ca6" id="r_a1b7eadd4715f59a865bc79e5ce5b8ca6"><td class="memItemLeft">static <a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a1b7eadd4715f59a865bc79e5ce5b8ca6">es1371_cfg_data</a> [64]</td></tr>
+<tr class="memdesc:a1b7eadd4715f59a865bc79e5ce5b8ca6"><td class="mdescLeft">&#160;</td><td class="mdescRight">PCI Configuration Data Block.  <br /></td></tr>
+<tr class="memitem:ac70c8b02d342bb952f30f2b3c048a48d" id="r_ac70c8b02d342bb952f30f2b3c048a48d"><td class="memItemLeft">static <a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#ac70c8b02d342bb952f30f2b3c048a48d">es1371_cfg_mask</a> [64]</td></tr>
+<tr class="memdesc:ac70c8b02d342bb952f30f2b3c048a48d"><td class="mdescLeft">&#160;</td><td class="mdescRight">PCI Configuration Mask Block.  <br /></td></tr>
+<tr class="memitem:a455936088d97e15de294a38d68933d05" id="r_a455936088d97e15de294a38d68933d05"><td class="memItemLeft">static const <a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a455936088d97e15de294a38d68933d05">es1371_magic1</a> = 0x45533171</td></tr>
+<tr class="memitem:ae47a2de77b0974517fc894512fe6efcc" id="r_ae47a2de77b0974517fc894512fe6efcc"><td class="memItemLeft">static const <a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#ae47a2de77b0974517fc894512fe6efcc">es1371_magic2</a> = 0x71315345</td></tr>
+</table>
+<a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
+<a id="a7fb9fde533f9b9bc8e4ae31524c9ea51" name="a7fb9fde533f9b9bc8e4ae31524c9ea51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7fb9fde533f9b9bc8e4ae31524c9ea51">&#9670;&#160;</a></span>ADC_CHANNEL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ADC_CHANNEL&#160;&#160;&#160;2</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00125">125</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ab8c6b5dc38893f2d5d0f7022aea04b70" name="ab8c6b5dc38893f2d5d0f7022aea04b70"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab8c6b5dc38893f2d5d0f7022aea04b70">&#9670;&#160;</a></span>CODEC_READ</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CODEC_READ&#160;&#160;&#160;0x00800000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00074">74</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00792">CES1371::write_codec()</a>.</p>
+
+</div>
+</div>
+<a id="a314651aea53afe8c8ca7ea02ff7fae71" name="a314651aea53afe8c8ca7ea02ff7fae71"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a314651aea53afe8c8ca7ea02ff7fae71">&#9670;&#160;</a></span>CODEC_READY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CODEC_READY&#160;&#160;&#160;0x80000000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00075">75</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00792">CES1371::write_codec()</a>.</p>
+
+</div>
+</div>
+<a id="a423fc7bb588d4bdf7d7fa74df32f9f6f" name="a423fc7bb588d4bdf7d7fa74df32f9f6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a423fc7bb588d4bdf7d7fa74df32f9f6f">&#9670;&#160;</a></span>CTRL_ADC_EN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CTRL_ADC_EN&#160;&#160;&#160;0x00000010</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00065">65</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a6545b5d955abcaaa74625795e0b9281d" name="a6545b5d955abcaaa74625795e0b9281d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6545b5d955abcaaa74625795e0b9281d">&#9670;&#160;</a></span>CTRL_ADC_STOP</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CTRL_ADC_STOP&#160;&#160;&#160;0x00002000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00061">61</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a11236c441cb1971103d2a4ef93724f79" name="a11236c441cb1971103d2a4ef93724f79"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a11236c441cb1971103d2a4ef93724f79">&#9670;&#160;</a></span>CTRL_DAC1_EN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CTRL_DAC1_EN&#160;&#160;&#160;0x00000040</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00063">63</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ad6d29878f7ac7d858317443ad2e0eaff" name="ad6d29878f7ac7d858317443ad2e0eaff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad6d29878f7ac7d858317443ad2e0eaff">&#9670;&#160;</a></span>CTRL_DAC2_EN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CTRL_DAC2_EN&#160;&#160;&#160;0x00000020</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00064">64</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a45d56a472e899a5f1588a3e82416b8ec" name="a45d56a472e899a5f1588a3e82416b8ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45d56a472e899a5f1588a3e82416b8ec">&#9670;&#160;</a></span>CTRL_PWR_INTRM</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CTRL_PWR_INTRM&#160;&#160;&#160;0x00001000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00067">67</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00615">CES1371::es1371_update_status()</a>.</p>
+
+</div>
+</div>
+<a id="a249962a02441218394bf37ea2bc94b80" name="a249962a02441218394bf37ea2bc94b80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a249962a02441218394bf37ea2bc94b80">&#9670;&#160;</a></span>CTRL_SYNC_RES</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CTRL_SYNC_RES&#160;&#160;&#160;0x00004000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00062">62</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ada2dae1e4d269bdb7670606c84aacf31" name="ada2dae1e4d269bdb7670606c84aacf31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ada2dae1e4d269bdb7670606c84aacf31">&#9670;&#160;</a></span>CTRL_UART_EN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CTRL_UART_EN&#160;&#160;&#160;0x00000008</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00066">66</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a9db9b381adf95835c6a321580d0d8c94" name="a9db9b381adf95835c6a321580d0d8c94"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9db9b381adf95835c6a321580d0d8c94">&#9670;&#160;</a></span>DAC1_CHANNEL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DAC1_CHANNEL&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00123">123</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ae48e74bc9d656c3aa324228eda90d732" name="ae48e74bc9d656c3aa324228eda90d732"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae48e74bc9d656c3aa324228eda90d732">&#9670;&#160;</a></span>DAC2_CHANNEL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DAC2_CHANNEL&#160;&#160;&#160;1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00124">124</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a42077397699a0ee61e9cb02bb8ed5a28" name="a42077397699a0ee61e9cb02bb8ed5a28"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42077397699a0ee61e9cb02bb8ed5a28">&#9670;&#160;</a></span>ES1371_REG_ADC_FRAMEADR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_ADC_FRAMEADR&#160;&#160;&#160;0xd30</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00056">56</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00989">CES1371::es1371_read()</a>, and <a class="el" href="../../da/d00/a00011_source.html#l00901">CES1371::es1371_write()</a>.</p>
+
+</div>
+</div>
+<a id="a7d9e4c3bd865114d22e57482f9977cf1" name="a7d9e4c3bd865114d22e57482f9977cf1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d9e4c3bd865114d22e57482f9977cf1">&#9670;&#160;</a></span>ES1371_REG_ADC_FRAMECNT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_ADC_FRAMECNT&#160;&#160;&#160;0xd34</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00057">57</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00989">CES1371::es1371_read()</a>, and <a class="el" href="../../da/d00/a00011_source.html#l00901">CES1371::es1371_write()</a>.</p>
+
+</div>
+</div>
+<a id="a12a4a6a527c229402864840f88500d2c" name="a12a4a6a527c229402864840f88500d2c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a12a4a6a527c229402864840f88500d2c">&#9670;&#160;</a></span>ES1371_REG_ADC_SCOUNT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_ADC_SCOUNT&#160;&#160;&#160;0x2c</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00050">50</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00989">CES1371::es1371_read()</a>, and <a class="el" href="../../da/d00/a00011_source.html#l00901">CES1371::es1371_write()</a>.</p>
+
+</div>
+</div>
+<a id="ad307bee42695763628683e5f541cebe7" name="ad307bee42695763628683e5f541cebe7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad307bee42695763628683e5f541cebe7">&#9670;&#160;</a></span>ES1371_REG_CODEC</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_CODEC&#160;&#160;&#160;0x14</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00045">45</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00989">CES1371::es1371_read()</a>, and <a class="el" href="../../da/d00/a00011_source.html#l00901">CES1371::es1371_write()</a>.</p>
+
+</div>
+</div>
+<a id="a15d5cca94df496bedc004c2d639fcbac" name="a15d5cca94df496bedc004c2d639fcbac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a15d5cca94df496bedc004c2d639fcbac">&#9670;&#160;</a></span>ES1371_REG_CONTROL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_CONTROL&#160;&#160;&#160;0x00</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00037">37</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00989">CES1371::es1371_read()</a>, and <a class="el" href="../../da/d00/a00011_source.html#l00901">CES1371::es1371_write()</a>.</p>
+
+</div>
+</div>
+<a id="a7a4bfb1d3f3759247a0d887bde7f6372" name="a7a4bfb1d3f3759247a0d887bde7f6372"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a4bfb1d3f3759247a0d887bde7f6372">&#9670;&#160;</a></span>ES1371_REG_DAC1_FRAMEADR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_DAC1_FRAMEADR&#160;&#160;&#160;0xc30</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00052">52</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00989">CES1371::es1371_read()</a>, and <a class="el" href="../../da/d00/a00011_source.html#l00901">CES1371::es1371_write()</a>.</p>
+
+</div>
+</div>
+<a id="a7d99602d82d44091516a237c9b29f743" name="a7d99602d82d44091516a237c9b29f743"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d99602d82d44091516a237c9b29f743">&#9670;&#160;</a></span>ES1371_REG_DAC1_FRAMECNT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_DAC1_FRAMECNT&#160;&#160;&#160;0xc34</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00053">53</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00989">CES1371::es1371_read()</a>, and <a class="el" href="../../da/d00/a00011_source.html#l00901">CES1371::es1371_write()</a>.</p>
+
+</div>
+</div>
+<a id="ae0cce0d04286f3430e7f0fc92f2491e5" name="ae0cce0d04286f3430e7f0fc92f2491e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae0cce0d04286f3430e7f0fc92f2491e5">&#9670;&#160;</a></span>ES1371_REG_DAC1_SCOUNT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_DAC1_SCOUNT&#160;&#160;&#160;0x24</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00048">48</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00989">CES1371::es1371_read()</a>, and <a class="el" href="../../da/d00/a00011_source.html#l00901">CES1371::es1371_write()</a>.</p>
+
+</div>
+</div>
+<a id="a4e9cd83bde5133d17c2004cf876e1090" name="a4e9cd83bde5133d17c2004cf876e1090"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4e9cd83bde5133d17c2004cf876e1090">&#9670;&#160;</a></span>ES1371_REG_DAC2_FRAMEADR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_DAC2_FRAMEADR&#160;&#160;&#160;0xc38</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00054">54</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00989">CES1371::es1371_read()</a>, and <a class="el" href="../../da/d00/a00011_source.html#l00901">CES1371::es1371_write()</a>.</p>
+
+</div>
+</div>
+<a id="a8c1751c55dbd3a81a8306cc3fd4acca8" name="a8c1751c55dbd3a81a8306cc3fd4acca8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c1751c55dbd3a81a8306cc3fd4acca8">&#9670;&#160;</a></span>ES1371_REG_DAC2_FRAMECNT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_DAC2_FRAMECNT&#160;&#160;&#160;0xc3c</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00055">55</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00989">CES1371::es1371_read()</a>, and <a class="el" href="../../da/d00/a00011_source.html#l00901">CES1371::es1371_write()</a>.</p>
+
+</div>
+</div>
+<a id="a56e07e45b5c142db637aa339e49e5364" name="a56e07e45b5c142db637aa339e49e5364"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a56e07e45b5c142db637aa339e49e5364">&#9670;&#160;</a></span>ES1371_REG_DAC2_SCOUNT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_DAC2_SCOUNT&#160;&#160;&#160;0x28</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00049">49</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00989">CES1371::es1371_read()</a>, and <a class="el" href="../../da/d00/a00011_source.html#l00901">CES1371::es1371_write()</a>.</p>
+
+</div>
+</div>
+<a id="a8bd72df3fef441b6fe4ee27c6c5ba5df" name="a8bd72df3fef441b6fe4ee27c6c5ba5df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8bd72df3fef441b6fe4ee27c6c5ba5df">&#9670;&#160;</a></span>ES1371_REG_LEGACY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_LEGACY&#160;&#160;&#160;0x18</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00046">46</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00989">CES1371::es1371_read()</a>, and <a class="el" href="../../da/d00/a00011_source.html#l00901">CES1371::es1371_write()</a>.</p>
+
+</div>
+</div>
+<a id="af644b8eb0ebd51f17d55afd7580f2f59" name="af644b8eb0ebd51f17d55afd7580f2f59"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af644b8eb0ebd51f17d55afd7580f2f59">&#9670;&#160;</a></span>ES1371_REG_MEMPAGE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_MEMPAGE&#160;&#160;&#160;0x0c</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00043">43</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00989">CES1371::es1371_read()</a>, and <a class="el" href="../../da/d00/a00011_source.html#l00901">CES1371::es1371_write()</a>.</p>
+
+</div>
+</div>
+<a id="af7981dba9a5bbff039cab93a90aae536" name="af7981dba9a5bbff039cab93a90aae536"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af7981dba9a5bbff039cab93a90aae536">&#9670;&#160;</a></span>ES1371_REG_PHANTOM_FRAMEADR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_PHANTOM_FRAMEADR&#160;&#160;&#160;0xd38</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00058">58</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00989">CES1371::es1371_read()</a>, and <a class="el" href="../../da/d00/a00011_source.html#l00901">CES1371::es1371_write()</a>.</p>
+
+</div>
+</div>
+<a id="a2e56a74ee27f2d2a8b7f348d236f2df3" name="a2e56a74ee27f2d2a8b7f348d236f2df3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e56a74ee27f2d2a8b7f348d236f2df3">&#9670;&#160;</a></span>ES1371_REG_PHANTOM_FRAMECNT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_PHANTOM_FRAMECNT&#160;&#160;&#160;0xd3c</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00059">59</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00989">CES1371::es1371_read()</a>, and <a class="el" href="../../da/d00/a00011_source.html#l00901">CES1371::es1371_write()</a>.</p>
+
+</div>
+</div>
+<a id="a3221c9c2b78712701f2b05a83504aefb" name="a3221c9c2b78712701f2b05a83504aefb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3221c9c2b78712701f2b05a83504aefb">&#9670;&#160;</a></span>ES1371_REG_SERIAL_CONTROL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_SERIAL_CONTROL&#160;&#160;&#160;0x20</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00047">47</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00989">CES1371::es1371_read()</a>, and <a class="el" href="../../da/d00/a00011_source.html#l00901">CES1371::es1371_write()</a>.</p>
+
+</div>
+</div>
+<a id="a748fa2475b205f4bd1b321b163c4556f" name="a748fa2475b205f4bd1b321b163c4556f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a748fa2475b205f4bd1b321b163c4556f">&#9670;&#160;</a></span>ES1371_REG_SRC</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_SRC&#160;&#160;&#160;0x10</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00044">44</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00989">CES1371::es1371_read()</a>, and <a class="el" href="../../da/d00/a00011_source.html#l00901">CES1371::es1371_write()</a>.</p>
+
+</div>
+</div>
+<a id="a39f5c797e5ee3c9081349a21d421ba59" name="a39f5c797e5ee3c9081349a21d421ba59"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a39f5c797e5ee3c9081349a21d421ba59">&#9670;&#160;</a></span>ES1371_REG_STATUS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_STATUS&#160;&#160;&#160;0x04</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00038">38</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00989">CES1371::es1371_read()</a>.</p>
+
+</div>
+</div>
+<a id="a4995a98fecf899bea36d495a3af86e1c" name="a4995a98fecf899bea36d495a3af86e1c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4995a98fecf899bea36d495a3af86e1c">&#9670;&#160;</a></span>ES1371_REG_UART_CONTROL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_UART_CONTROL&#160;&#160;&#160;0x09</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00041">41</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="acfa61c40a32d49ae26436ec19ce04465" name="acfa61c40a32d49ae26436ec19ce04465"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acfa61c40a32d49ae26436ec19ce04465">&#9670;&#160;</a></span>ES1371_REG_UART_DATA</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_UART_DATA&#160;&#160;&#160;0x08</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00039">39</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00989">CES1371::es1371_read()</a>, and <a class="el" href="../../da/d00/a00011_source.html#l00901">CES1371::es1371_write()</a>.</p>
+
+</div>
+</div>
+<a id="ad9232afe4f363bdbfe6adacf8c965164" name="ad9232afe4f363bdbfe6adacf8c965164"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad9232afe4f363bdbfe6adacf8c965164">&#9670;&#160;</a></span>ES1371_REG_UART_STATUS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_UART_STATUS&#160;&#160;&#160;0x09</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00040">40</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a16eaa0071a5eb0d01e3a1516e3f0aef8" name="a16eaa0071a5eb0d01e3a1516e3f0aef8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a16eaa0071a5eb0d01e3a1516e3f0aef8">&#9670;&#160;</a></span>ES1371_REG_UART_TEST</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ES1371_REG_UART_TEST&#160;&#160;&#160;0x0a</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00042">42</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="afa99ec4acc4ecb2dc3c2d05da15d0e3f" name="afa99ec4acc4ecb2dc3c2d05da15d0e3f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afa99ec4acc4ecb2dc3c2d05da15d0e3f">&#9670;&#160;</a></span>MAX</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MAX</td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>a</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>b</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">(((a) &gt; (b)) ? (a) : (b))</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00131">131</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a3acffbd305ee72dcd4593c0d8af64a4f" name="a3acffbd305ee72dcd4593c0d8af64a4f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3acffbd305ee72dcd4593c0d8af64a4f">&#9670;&#160;</a></span>MIN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MIN</td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>a</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>b</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">(((a) &lt; (b)) ? (a) : (b))</div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00135">135</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a4559069a0477805f310137e5a551b7a0" name="a4559069a0477805f310137e5a551b7a0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4559069a0477805f310137e5a551b7a0">&#9670;&#160;</a></span>NB_CHANNELS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define NB_CHANNELS&#160;&#160;&#160;3</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00122">122</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ac72a05fd4c56e706d5b7ccfa097bfa57" name="ac72a05fd4c56e706d5b7ccfa097bfa57"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac72a05fd4c56e706d5b7ccfa097bfa57">&#9670;&#160;</a></span>SCTRL_P1FMT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_P1FMT&#160;&#160;&#160;0x00000003</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00118">118</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a0ffc838fd1b4533c206661910f843dfd" name="a0ffc838fd1b4533c206661910f843dfd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ffc838fd1b4533c206661910f843dfd">&#9670;&#160;</a></span>SCTRL_P1INTEN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_P1INTEN&#160;&#160;&#160;0x00000100</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00105">105</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="acae21ff82a7f3eca1dce35f7ff0dda1a" name="acae21ff82a7f3eca1dce35f7ff0dda1a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acae21ff82a7f3eca1dce35f7ff0dda1a">&#9670;&#160;</a></span>SCTRL_P1LOOPSEL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_P1LOOPSEL&#160;&#160;&#160;0x00002000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00100">100</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ae45f514dba29ec4abe6c4eeaba87387b" name="ae45f514dba29ec4abe6c4eeaba87387b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae45f514dba29ec4abe6c4eeaba87387b">&#9670;&#160;</a></span>SCTRL_P1PAUSE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_P1PAUSE&#160;&#160;&#160;0x00000800</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00102">102</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a707fe27c6282ec97c830f2b24ed6debf" name="a707fe27c6282ec97c830f2b24ed6debf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a707fe27c6282ec97c830f2b24ed6debf">&#9670;&#160;</a></span>SCTRL_P1SCTRLD</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_P1SCTRLD&#160;&#160;&#160;0x00000080</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00106">106</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a0b7ad939ae3e6db155e8c28bd442654d" name="a0b7ad939ae3e6db155e8c28bd442654d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b7ad939ae3e6db155e8c28bd442654d">&#9670;&#160;</a></span>SCTRL_P1SEB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_P1SEB&#160;&#160;&#160;0x00000002</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00116">116</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a84f8a1942dab139896b087a17e8fa723" name="a84f8a1942dab139896b087a17e8fa723"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a84f8a1942dab139896b087a17e8fa723">&#9670;&#160;</a></span>SCTRL_P1SMB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_P1SMB&#160;&#160;&#160;0x00000001</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00117">117</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a4728a93b02b3f6ced15e7bbf56422b05" name="a4728a93b02b3f6ced15e7bbf56422b05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4728a93b02b3f6ced15e7bbf56422b05">&#9670;&#160;</a></span>SCTRL_P2DACSEN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_P2DACSEN&#160;&#160;&#160;0x00000040</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00107">107</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a0c945514b9ca89d21e464e3da428d4d2" name="a0c945514b9ca89d21e464e3da428d4d2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c945514b9ca89d21e464e3da428d4d2">&#9670;&#160;</a></span>SCTRL_P2ENDINC</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_P2ENDINC&#160;&#160;&#160;0x00380000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00094">94</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a0db4226163e49fb13789e1ab3a1b39ce" name="a0db4226163e49fb13789e1ab3a1b39ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0db4226163e49fb13789e1ab3a1b39ce">&#9670;&#160;</a></span>SCTRL_P2FMT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_P2FMT&#160;&#160;&#160;0x0000000c</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00114">114</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a1a686ce524e4c045e137b3977e6e395b" name="a1a686ce524e4c045e137b3977e6e395b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1a686ce524e4c045e137b3977e6e395b">&#9670;&#160;</a></span>SCTRL_P2INTEN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_P2INTEN&#160;&#160;&#160;0x00000200</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00104">104</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="aa6287dc2339e7d355ce68c07f45a353b" name="aa6287dc2339e7d355ce68c07f45a353b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6287dc2339e7d355ce68c07f45a353b">&#9670;&#160;</a></span>SCTRL_P2LOOPSEL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_P2LOOPSEL&#160;&#160;&#160;0x00004000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00099">99</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="addf8ec25cfe2d5ce4efc4e3d6f4f5c68" name="addf8ec25cfe2d5ce4efc4e3d6f4f5c68"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#addf8ec25cfe2d5ce4efc4e3d6f4f5c68">&#9670;&#160;</a></span>SCTRL_P2PAUSE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_P2PAUSE&#160;&#160;&#160;0x00001000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00101">101</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a6f2bb6121df5ebc92624e2fcd89078a2" name="a6f2bb6121df5ebc92624e2fcd89078a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f2bb6121df5ebc92624e2fcd89078a2">&#9670;&#160;</a></span>SCTRL_P2SEB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_P2SEB&#160;&#160;&#160;0x00000008</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00112">112</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a5ecbd8e277dcbb81f2da8c10b109c7c9" name="a5ecbd8e277dcbb81f2da8c10b109c7c9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ecbd8e277dcbb81f2da8c10b109c7c9">&#9670;&#160;</a></span>SCTRL_P2SMB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_P2SMB&#160;&#160;&#160;0x00000004</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00113">113</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="acc106bce95f01ef0a97ac0c2ec5c8eb3" name="acc106bce95f01ef0a97ac0c2ec5c8eb3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc106bce95f01ef0a97ac0c2ec5c8eb3">&#9670;&#160;</a></span>SCTRL_P2STINC</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_P2STINC&#160;&#160;&#160;0x00070000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00096">96</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a5af0473f498fb8616f7e15f91d98a408" name="a5af0473f498fb8616f7e15f91d98a408"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5af0473f498fb8616f7e15f91d98a408">&#9670;&#160;</a></span>SCTRL_R1FMT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_R1FMT&#160;&#160;&#160;0x00000030</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00110">110</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a4e3b8e8c4d29411f2c891bef907e7099" name="a4e3b8e8c4d29411f2c891bef907e7099"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4e3b8e8c4d29411f2c891bef907e7099">&#9670;&#160;</a></span>SCTRL_R1INTEN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_R1INTEN&#160;&#160;&#160;0x00000400</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00103">103</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a5fb67d8537ab853d11a39a59b5947f8a" name="a5fb67d8537ab853d11a39a59b5947f8a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5fb67d8537ab853d11a39a59b5947f8a">&#9670;&#160;</a></span>SCTRL_R1LOOPSEL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_R1LOOPSEL&#160;&#160;&#160;0x00008000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00098">98</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a0e22a9820280596854933dc30550f95c" name="a0e22a9820280596854933dc30550f95c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0e22a9820280596854933dc30550f95c">&#9670;&#160;</a></span>SCTRL_R1SEB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_R1SEB&#160;&#160;&#160;0x00000020</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00108">108</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="aff4dbc83536539c8ba91c6a3bae69599" name="aff4dbc83536539c8ba91c6a3bae69599"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff4dbc83536539c8ba91c6a3bae69599">&#9670;&#160;</a></span>SCTRL_R1SMB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_R1SMB&#160;&#160;&#160;0x00000010</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00109">109</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a59bb7d0dbd3061f6e0f58b8fba716c18" name="a59bb7d0dbd3061f6e0f58b8fba716c18"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a59bb7d0dbd3061f6e0f58b8fba716c18">&#9670;&#160;</a></span>SCTRL_SH_P1FMT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_SH_P1FMT&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00119">119</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a3ef10279deb4c92e07026a105c9f2998" name="a3ef10279deb4c92e07026a105c9f2998"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ef10279deb4c92e07026a105c9f2998">&#9670;&#160;</a></span>SCTRL_SH_P2ENDINC</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_SH_P2ENDINC&#160;&#160;&#160;19</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00095">95</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a3b8b5d6ba9b3228479ff478a4d67c71c" name="a3b8b5d6ba9b3228479ff478a4d67c71c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b8b5d6ba9b3228479ff478a4d67c71c">&#9670;&#160;</a></span>SCTRL_SH_P2FMT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_SH_P2FMT&#160;&#160;&#160;2</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00115">115</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a90cdc7a2f0a1f6c64d20fe0b113d88c3" name="a90cdc7a2f0a1f6c64d20fe0b113d88c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90cdc7a2f0a1f6c64d20fe0b113d88c3">&#9670;&#160;</a></span>SCTRL_SH_P2STINC</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_SH_P2STINC&#160;&#160;&#160;16</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00097">97</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a9f0b04fd8f0a0102c5bed093a103c7c4" name="a9f0b04fd8f0a0102c5bed093a103c7c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f0b04fd8f0a0102c5bed093a103c7c4">&#9670;&#160;</a></span>SCTRL_SH_R1FMT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCTRL_SH_R1FMT&#160;&#160;&#160;4</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00111">111</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a0a6fb994721cf43820dec6c40ce75e57" name="a0a6fb994721cf43820dec6c40ce75e57"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a6fb994721cf43820dec6c40ce75e57">&#9670;&#160;</a></span>SRC_DIS_ADC</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SRC_DIS_ADC&#160;&#160;&#160;0x00080000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00071">71</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a9ee3421420d0090a4eeb15c5a3027440" name="a9ee3421420d0090a4eeb15c5a3027440"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ee3421420d0090a4eeb15c5a3027440">&#9670;&#160;</a></span>SRC_DIS_DAC1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SRC_DIS_DAC1&#160;&#160;&#160;0x00200000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00069">69</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00717">CES1371::channel_enabled()</a>.</p>
+
+</div>
+</div>
+<a id="a6323ec4843d64ff17c2e85f6e0db855a" name="a6323ec4843d64ff17c2e85f6e0db855a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6323ec4843d64ff17c2e85f6e0db855a">&#9670;&#160;</a></span>SRC_DIS_DAC2</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SRC_DIS_DAC2&#160;&#160;&#160;0x00100000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00070">70</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ab1800dd35f83e5ba84551625d3d2f310" name="ab1800dd35f83e5ba84551625d3d2f310"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1800dd35f83e5ba84551625d3d2f310">&#9670;&#160;</a></span>SRC_DISABLE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SRC_DISABLE&#160;&#160;&#160;0x00400000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00068">68</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00717">CES1371::channel_enabled()</a>.</p>
+
+</div>
+</div>
+<a id="af12de16857ed01dd7753a98fd77a51db" name="af12de16857ed01dd7753a98fd77a51db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af12de16857ed01dd7753a98fd77a51db">&#9670;&#160;</a></span>SRC_STATE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SRC_STATE&#160;&#160;&#160;0x00010000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00073">73</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00989">CES1371::es1371_read()</a>.</p>
+
+</div>
+</div>
+<a id="ae08b267cf12322d6df145efadb9bab89" name="ae08b267cf12322d6df145efadb9bab89"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae08b267cf12322d6df145efadb9bab89">&#9670;&#160;</a></span>SRC_WRITE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SRC_WRITE&#160;&#160;&#160;0x01000000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00072">72</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00901">CES1371::es1371_write()</a>.</p>
+
+</div>
+</div>
+<a id="afe3a7927a663de6d4cda3b062057a33a" name="afe3a7927a663de6d4cda3b062057a33a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe3a7927a663de6d4cda3b062057a33a">&#9670;&#160;</a></span>STAT_ADC</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define STAT_ADC&#160;&#160;&#160;0x00000001</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00081">81</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ae967eac1ff8e67257445217bb334a304" name="ae967eac1ff8e67257445217bb334a304"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae967eac1ff8e67257445217bb334a304">&#9670;&#160;</a></span>STAT_DAC1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define STAT_DAC1&#160;&#160;&#160;0x00000004</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00079">79</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a12d0308ae3fcd75cb51627da66656d6e" name="a12d0308ae3fcd75cb51627da66656d6e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a12d0308ae3fcd75cb51627da66656d6e">&#9670;&#160;</a></span>STAT_DAC2</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define STAT_DAC2&#160;&#160;&#160;0x00000002</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00080">80</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a6997b2c69a22a554161d0f2352a19580" name="a6997b2c69a22a554161d0f2352a19580"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6997b2c69a22a554161d0f2352a19580">&#9670;&#160;</a></span>STAT_INTR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define STAT_INTR&#160;&#160;&#160;0x80000000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00076">76</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a47edf337678daeccb0fd8d6c1e2421f5" name="a47edf337678daeccb0fd8d6c1e2421f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a47edf337678daeccb0fd8d6c1e2421f5">&#9670;&#160;</a></span>STAT_MPWR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define STAT_MPWR&#160;&#160;&#160;0x00000020</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00077">77</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00615">CES1371::es1371_update_status()</a>.</p>
+
+</div>
+</div>
+<a id="a62f135480da5f1b2b3ec21384ddcc70a" name="a62f135480da5f1b2b3ec21384ddcc70a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62f135480da5f1b2b3ec21384ddcc70a">&#9670;&#160;</a></span>STAT_UART</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define STAT_UART&#160;&#160;&#160;0x00000008</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00078">78</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a829232dcc5882f076624d51c297e7200" name="a829232dcc5882f076624d51c297e7200"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a829232dcc5882f076624d51c297e7200">&#9670;&#160;</a></span>UCTRL_CNTRL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define UCTRL_CNTRL&#160;&#160;&#160;0x03</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00091">91</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a2742eb8131ffb941f689c8c061ea7fb4" name="a2742eb8131ffb941f689c8c061ea7fb4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2742eb8131ffb941f689c8c061ea7fb4">&#9670;&#160;</a></span>UCTRL_CNTRL_SWR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define UCTRL_CNTRL_SWR&#160;&#160;&#160;0x03</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00092">92</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="abb75f0fd213bc52b04f02ddb092c65b1" name="abb75f0fd213bc52b04f02ddb092c65b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb75f0fd213bc52b04f02ddb092c65b1">&#9670;&#160;</a></span>UCTRL_ENA_TXINT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define UCTRL_ENA_TXINT&#160;&#160;&#160;0x20</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00090">90</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a6d6e780a52b23ac53bf0de7c54edf0e2" name="a6d6e780a52b23ac53bf0de7c54edf0e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d6e780a52b23ac53bf0de7c54edf0e2">&#9670;&#160;</a></span>UCTRL_RXINTEN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define UCTRL_RXINTEN&#160;&#160;&#160;0x80</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00088">88</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a1257a1160481a16a96c90d7c2be436bc" name="a1257a1160481a16a96c90d7c2be436bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1257a1160481a16a96c90d7c2be436bc">&#9670;&#160;</a></span>UCTRL_TXINTEN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define UCTRL_TXINTEN&#160;&#160;&#160;0x60</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00089">89</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a5ab9909992cee8ff5776b4101fc6dd4a" name="a5ab9909992cee8ff5776b4101fc6dd4a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ab9909992cee8ff5776b4101fc6dd4a">&#9670;&#160;</a></span>USTAT_RXINT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define USTAT_RXINT&#160;&#160;&#160;0x80</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00083">83</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a8a5419cca6e6cee80e1c1fc9889e27e3" name="a8a5419cca6e6cee80e1c1fc9889e27e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a5419cca6e6cee80e1c1fc9889e27e3">&#9670;&#160;</a></span>USTAT_RXRDY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define USTAT_RXRDY&#160;&#160;&#160;0x01</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00086">86</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a414a6cf4fb276124033da281ca462585" name="a414a6cf4fb276124033da281ca462585"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a414a6cf4fb276124033da281ca462585">&#9670;&#160;</a></span>USTAT_TXINT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define USTAT_TXINT&#160;&#160;&#160;0x04</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00084">84</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a6a4d921e178b514811a9b5dc663e9723" name="a6a4d921e178b514811a9b5dc663e9723"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a4d921e178b514811a9b5dc663e9723">&#9670;&#160;</a></span>USTAT_TXRDY</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define USTAT_TXRDY&#160;&#160;&#160;0x02</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00085">85</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+</div>
+</div>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="a1b7eadd4715f59a865bc79e5ce5b8ca6" name="a1b7eadd4715f59a865bc79e5ce5b8ca6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1b7eadd4715f59a865bc79e5ce5b8ca6">&#9670;&#160;</a></span>es1371_cfg_data</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> es1371_cfg_data[64]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">                           =</div>
+<div class="line">{</div>
+<div class="line">      0x13711274,         </div>
+<div class="line">      0x04100000,         </div>
+<div class="line">      0x04010002,         </div>
+<div class="line">      0x00000000,         </div>
+<div class="line">      0x00000001,         </div>
+<div class="line">      0x00000000,         </div>
+<div class="line">      0x00000000,         </div>
+<div class="line">      0x00000000,         </div>
+<div class="line">      0x00000000,         </div>
+<div class="line">      0x00000000,         </div>
+<div class="line">      0x00000000,         </div>
+<div class="line">      0x13711274,         </div>
+<div class="line">      0x00000000,         </div>
+<div class="line">      0x000000dc,         </div>
+<div class="line">      0x00000000,</div>
+<div class="line">      0x800c01ff,         </div>
+<div class="line">    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,</div>
+<div class="line">    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,</div>
+<div class="line">    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0</div>
+<div class="line">}</div>
+</div><!-- fragment -->
+<p>PCI Configuration Data Block. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00142">142</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00247">CES1371::init()</a>.</p>
+
+</div>
+</div>
+<a id="ac70c8b02d342bb952f30f2b3c048a48d" name="ac70c8b02d342bb952f30f2b3c048a48d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac70c8b02d342bb952f30f2b3c048a48d">&#9670;&#160;</a></span>es1371_cfg_mask</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> es1371_cfg_mask[64]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">                           = {</div>
+<div class="line">     0x00000000,  </div>
+<div class="line">     0x00000105,  </div>
+<div class="line">     0x00000000,  </div>
+<div class="line">     0x0000ffff,  </div>
+<div class="line">     0xffffffc0,  </div>
+<div class="line">     0x00000000,  </div>
+<div class="line">     0x00000000,  </div>
+<div class="line">     0x00000000,  </div>
+<div class="line">     0x00000000,  </div>
+<div class="line">     0x00000000,  </div>
+<div class="line">     0x00000000,  </div>
+<div class="line">     0x00000000,  </div>
+<div class="line">     0x00000000,  </div>
+<div class="line">     0x00000000,  </div>
+<div class="line">     0x00000000,</div>
+<div class="line">     0x000000ff,  </div>
+<div class="line">    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,</div>
+<div class="line">    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,</div>
+<div class="line">    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0</div>
+<div class="line">}</div>
+</div><!-- fragment -->
+<p>PCI Configuration Mask Block. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00168">168</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00247">CES1371::init()</a>.</p>
+
+</div>
+</div>
+<a id="a455936088d97e15de294a38d68933d05" name="a455936088d97e15de294a38d68933d05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a455936088d97e15de294a38d68933d05">&#9670;&#160;</a></span>es1371_magic1</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> es1371_magic1 = 0x45533171</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00518">518</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00564">CES1371::RestoreState()</a>, and <a class="el" href="../../da/d00/a00011_source.html#l00521">CES1371::SaveState()</a>.</p>
+
+</div>
+</div>
+<a id="ae47a2de77b0974517fc894512fe6efcc" name="ae47a2de77b0974517fc894512fe6efcc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae47a2de77b0974517fc894512fe6efcc">&#9670;&#160;</a></span>es1371_magic2</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> es1371_magic2 = 0x71315345</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../da/d00/a00011_source.html#l00519">519</a> of file <a class="el" href="../../da/d00/a00011_source.html">ES1371.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00011_source.html#l00564">CES1371::RestoreState()</a>, and <a class="el" href="../../da/d00/a00011_source.html#l00521">CES1371::SaveState()</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
@@ -141,7 +1937,7 @@ Include dependency graph for MPU401.cpp:</div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_a5f32cf82ad289a7dac212f63f40f55b.html">audio</a></li><li class="navelem"><a href="../../da/d00/a00011.html">MPU401.cpp</a></li>
+    <li class="navelem"><a href="../../dir_a5f32cf82ad289a7dac212f63f40f55b.html">audio</a></li><li class="navelem"><a href="../../da/d00/a00011.html">ES1371.cpp</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

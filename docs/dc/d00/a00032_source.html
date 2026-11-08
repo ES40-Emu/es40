@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: base/Runnable.h Source File</title>
+<title>ES40: audio/HostAudioSDL.cpp Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,99 +109,231 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('dc/d00/a00032_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">Runnable.h</div></div>
+  <div class="headertitle"><div class="title">HostAudioSDL.cpp</div></div>
 </div><!--header-->
 <div class="contents">
 <a href="../../dc/d00/a00032.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator.</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2007-2008 by the ES40 Emulator Project</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * </span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * This program is free software; you can redistribute it and/or</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * modify it under the terms of the GNU General Public License</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * as published by the Free Software Foundation; either version 2</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * of the License, or (at your option) any later version.</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * </span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * This program is distributed in the hope that it will be useful,</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * GNU General Public License for more details.</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * </span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * You should have received a copy of the GNU General Public License</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * along with this program; if not, write to the Free Software</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * </span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * Although this is not required, the author would appreciate being notified of, </span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * and receiving any modifications you may make to the source code that might serve</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * the general public.</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> * Parts of this file based upon the Poco C++ Libraries, which is Copyright (C) </span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> * 2004-2006, Applied Informatics Software Engineering GmbH. and Contributors.</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">//</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment">// Runnable.h</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment">//</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment">// $Id$</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment">//</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="comment">// Library: Foundation</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="comment">// Package: Threading</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="comment">// Module:  Thread</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="comment">//</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment">// Definition of the Runnable class.</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="comment">//</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="comment">// Copyright (c) 2004-2006, Applied Informatics Software Engineering GmbH.</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment">// and Contributors.</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment">//</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment">// Permission is hereby granted, free of charge, to any person or organization</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment">// obtaining a copy of the software and accompanying documentation covered by</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment">// this license (the &quot;Software&quot;) to use, reproduce, display, distribute,</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="comment">// execute, and transmit the Software, and to prepare derivative works of the</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="comment">// Software, and to permit third-parties to whom the Software is furnished to</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="comment">// do so, all subject to the following:</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment">// </span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="comment">// The copyright notices in the Software and this entire statement, including</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="comment">// the above license grant, this restriction and the following disclaimer,</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="comment">// must be included in all copies of the Software, in whole or in part, and</span></div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="comment">// all derivative works of the Software, unless such copies or derivative</span></div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="comment">// works are solely in the form of machine-executable object code generated by</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="comment">// a source language processor.</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="comment">// </span></div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="comment">// THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span></div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="comment">// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="comment">// FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment">// SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE</span></div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="comment">// FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="comment">// ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="comment">// DEALINGS IN THE SOFTWARE.</span></div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="comment">//</span></div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="preprocessor">#ifndef Foundation_Runnable_INCLUDED</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">#define Foundation_Runnable_INCLUDED</span></div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
-<div class="foldopen" id="foldopen00069" data-start="{" data-end="};">
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="../../dc/d00/a00765.html">   69</a></span><span class="keyword">class </span><a class="code hl_function" href="../../dc/d00/a00765.html#a665d0c4e13c49979107b1777d55a4bc7">CRunnable</a></div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>{</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="keyword">public</span>: </div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="../../dc/d00/a00765.html#a665d0c4e13c49979107b1777d55a4bc7">   72</a></span>  <a class="code hl_function" href="../../dc/d00/a00765.html#a665d0c4e13c49979107b1777d55a4bc7">CRunnable</a>() {}</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="../../dc/d00/a00765.html#ae679a861e81d54e0bf6787b170e046c2">   73</a></span>  <span class="keyword">virtual</span> <a class="code hl_function" href="../../dc/d00/a00765.html#ae679a861e81d54e0bf6787b170e046c2">~CRunnable</a>() {}</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        </div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="../../dc/d00/a00765.html#a008dd73cf080fb79641f955456fbc440">   75</a></span>        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../dc/d00/a00765.html#a008dd73cf080fb79641f955456fbc440">run</a>() = 0;</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>};</div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2026 by gdwnldsKSC</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * SPDX-License-Identifier: BSD-1-Clause</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * Redistribution and use in source and binary forms, with or without</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * modification, are permitted provided that the following conditions are met:</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * 1. Redistributions of source code must retain the above copyright notice,</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> *    this list of conditions and the following disclaimer.</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * POSSIBILITY OF SUCH DAMAGE.</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#ifdef HAVE_SDL</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;<a class="code" href="../../d3/d00/a00023.html">HostAudioBackend.h</a>&quot;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;SDL3/SDL.h&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d1/d00/a00738.html">host_audio</a></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>{</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../dc/d00/a00740.html">detail</a></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>{</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="keyword">namespace</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>{</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>SDL_AudioStream* native(Stream&amp; stream)</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>{</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>SDL_AudioStream*<span class="keyword">&gt;</span>(stream.native);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>}</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>SDL_AudioSpec native_format(<span class="keyword">const</span> Format&amp; format)</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>{</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    SDL_AudioSpec spec;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    spec.freq = format.freq;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    spec.channels = format.channels;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    spec.format = format.format == <a class="code hl_enumvalue" href="../../d1/d00/a00738.html#ac3486c8e7411e90c98ae3e18f38b90ada077393852be20e37026d6281827662f2">SampleFormat::u8</a> ? SDL_AUDIO_U8 : SDL_AUDIO_S16LE;</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keywordflow">return</span> spec;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>}</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="keywordtype">void</span> SDLCALL stream_callback(<span class="keywordtype">void</span>* userdata, SDL_AudioStream*, <span class="keywordtype">int</span>, <span class="keywordtype">int</span>)</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>{</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keyword">auto</span>&amp; stream = *<span class="keyword">static_cast&lt;</span>Stream*<span class="keyword">&gt;</span>(userdata);</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="comment">// Forward on SDL&#39;s thread under its existing stream lock.</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    stream.callback(stream.userdata);</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>}</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="keywordtype">bool</span> <a class="code hl_function" href="../../d1/d00/a00738.html#a827e367190171cbe95d128cea42a109c">initialize</a>()</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>{</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keywordflow">return</span> SDL_Init(SDL_INIT_AUDIO);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>}</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="keywordtype">bool</span> <a class="code hl_function" href="../../d1/d00/a00738.html#a04b2ced850e4e6774aaa4c442bdc672f">set_sample_frames_hint</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* frames)</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>{</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="keywordflow">return</span> SDL_SetHint(SDL_HINT_AUDIO_DEVICE_SAMPLE_FRAMES, frames);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>}</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>std::uintptr_t <a class="code hl_function" href="../../d1/d00/a00738.html#a29adbb39808cac5019b4a002545b341c">open_input_device</a>()</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>{</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keywordflow">return</span> SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_RECORDING, <span class="keyword">nullptr</span>);</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>}</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>std::uintptr_t <a class="code hl_function" href="../../d1/d00/a00738.html#a874602540caeaf31d3fdabc6fde4ed4f">open_output_device</a>()</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>{</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="keywordflow">return</span> SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, <span class="keyword">nullptr</span>);</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>}</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="keywordtype">bool</span> <a class="code hl_function" href="../../d1/d00/a00738.html#aa0c40f691c135158af079d0f558a5244">output_device_format</a>(std::uintptr_t device, <span class="keywordtype">int</span>* frequency, <span class="keywordtype">int</span>* sample_frames)</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>{</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    SDL_AudioSpec spec;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <span class="keyword">const</span> <span class="keywordtype">bool</span> result = SDL_GetAudioDeviceFormat(<span class="keyword">static_cast&lt;</span>SDL_AudioDeviceID<span class="keyword">&gt;</span>(device), &amp;spec, sample_frames);</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="keywordflow">if</span> (result) *frequency = spec.freq;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keywordflow">return</span> result;</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>}</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../d1/d00/a00738.html#a990648322a1add323059d298095ddc62">close_device</a>(std::uintptr_t device)</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>{</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    SDL_CloseAudioDevice(<span class="keyword">static_cast&lt;</span>SDL_AudioDeviceID<span class="keyword">&gt;</span>(device));</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>}</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="../../d1/d00/a00738.html#a96f7e878aac6d449eac8abe83ca0647a">error</a>()</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>{</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keywordflow">return</span> SDL_GetError();</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>}</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../d1/d00/a00738.html#a045e7a48558c2e104db7ecd357b21b37">create_stream</a>(Stream&amp; stream, <span class="keyword">const</span> Format* source, <span class="keyword">const</span> Format* target)</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>{</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    SDL_AudioSpec src, dst;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="keywordflow">if</span> (source) src = native_format(*source);</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="keywordflow">if</span> (target) dst = native_format(*target);</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    stream.native = SDL_CreateAudioStream(source ? &amp;src : <span class="keyword">nullptr</span>, target ? &amp;dst : <span class="keyword">nullptr</span>);</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>}</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../d1/d00/a00738.html#ac2a60024d7f5c7531c146944ef0ee513">destroy_stream</a>(Stream&amp; stream)</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>{</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    SDL_DestroyAudioStream(native(stream));</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>}</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="keywordtype">bool</span> <a class="code hl_function" href="../../d1/d00/a00738.html#a798c66cab92a545b0d10c268949fcc0a">set_input_callback</a>(Stream&amp; stream, <a class="code hl_typedef" href="../../d1/d00/a00738.html#adfe09b66063cb90fea46426f48850a97">Callback</a> callback, <span class="keywordtype">void</span>* userdata)</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>{</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    stream.callback = callback;</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    stream.userdata = userdata;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <span class="keywordflow">return</span> SDL_SetAudioStreamPutCallback(native(stream), stream_callback, &amp;stream);</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>}</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="keywordtype">bool</span> <a class="code hl_function" href="../../d1/d00/a00738.html#a127070b0aba0867ffabbbe6d90736f8c">set_output_callback</a>(Stream&amp; stream, <a class="code hl_typedef" href="../../d1/d00/a00738.html#adfe09b66063cb90fea46426f48850a97">Callback</a> callback, <span class="keywordtype">void</span>* userdata)</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>{</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    stream.callback = callback;</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    stream.userdata = userdata;</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <span class="keywordflow">return</span> SDL_SetAudioStreamGetCallback(native(stream), stream_callback, &amp;stream);</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>}</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span><span class="keywordtype">bool</span> <a class="code hl_function" href="../../d1/d00/a00738.html#aaa2facd8158cffc1bcef4756ee227fdf">set_format</a>(Stream&amp; stream, <span class="keyword">const</span> Format* source, <span class="keyword">const</span> Format* target)</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>{</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    SDL_AudioSpec src, dst;</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    <span class="keywordflow">if</span> (source) src = native_format(*source);</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    <span class="keywordflow">if</span> (target) dst = native_format(*target);</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>    <span class="keywordflow">return</span> SDL_SetAudioStreamFormat(native(stream), source ? &amp;src : <span class="keyword">nullptr</span>, target ? &amp;dst : <span class="keyword">nullptr</span>);</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>}</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span><span class="keywordtype">bool</span> <a class="code hl_function" href="../../d1/d00/a00738.html#a40249397a8164381e22505c288b3ae84">bind_stream</a>(std::uintptr_t device, Stream&amp; stream)</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>{</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <span class="keywordflow">return</span> SDL_BindAudioStream(<span class="keyword">static_cast&lt;</span>SDL_AudioDeviceID<span class="keyword">&gt;</span>(device), native(stream));</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>}</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span> </div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../d1/d00/a00738.html#a885bf75f4de2fa9561fbdbd4704c687d">unbind_stream</a>(Stream&amp; stream)</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>{</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    SDL_UnbindAudioStream(native(stream));</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>}</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span><span class="keywordtype">bool</span> <a class="code hl_function" href="../../d1/d00/a00738.html#a4117bd3f6857b9e025fc86f3553b70cb">lock_stream</a>(Stream&amp; stream)</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>{</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    <span class="keywordflow">return</span> SDL_LockAudioStream(native(stream));</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>}</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span> </div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span><span class="keywordtype">bool</span> <a class="code hl_function" href="../../d1/d00/a00738.html#a1d40626a510464e1ad251e5c4e7aa376">unlock_stream</a>(Stream&amp; stream)</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>{</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>    <span class="keywordflow">return</span> SDL_UnlockAudioStream(native(stream));</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>}</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span> </div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span><span class="keywordtype">bool</span> <a class="code hl_function" href="../../d1/d00/a00738.html#ad7f0cb857285f358a47d9712195dd499">clear_stream</a>(Stream&amp; stream)</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>{</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    <span class="keywordflow">return</span> SDL_ClearAudioStream(native(stream));</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>}</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span> </div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span><span class="keywordtype">int</span> <a class="code hl_function" href="../../d1/d00/a00738.html#ae60503ec33830f96030faf66cd7ccfd9">available</a>(Stream&amp; stream)</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>{</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>    <span class="keywordflow">return</span> SDL_GetAudioStreamAvailable(native(stream));</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>}</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span> </div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span><span class="keywordtype">int</span> <a class="code hl_function" href="../../d1/d00/a00738.html#a93759bfdcad86eba330f63e96f904b68">queued</a>(Stream&amp; stream)</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>{</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>    <span class="keywordflow">return</span> SDL_GetAudioStreamQueued(native(stream));</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>}</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span> </div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span><span class="keywordtype">int</span> <a class="code hl_function" href="../../d1/d00/a00738.html#a09be41bd3782f2cc65355993cad3cebd">read</a>(Stream&amp; stream, <span class="keywordtype">void</span>* data, <span class="keywordtype">int</span> bytes)</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>{</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>    <span class="keywordflow">return</span> SDL_GetAudioStreamData(native(stream), data, bytes);</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>}</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span><span class="keywordtype">bool</span> <a class="code hl_function" href="../../d1/d00/a00738.html#ae25f98df986d5b8c730574fa88fdfc6c">write</a>(Stream&amp; stream, <span class="keyword">const</span> <span class="keywordtype">void</span>* data, <span class="keywordtype">int</span> bytes)</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>{</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>    <span class="keywordflow">return</span> SDL_PutAudioStreamData(native(stream), data, bytes);</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>}</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>}</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span> </div>
+<div class="foldopen" id="foldopen00172" data-start="{" data-end="}">
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno"><a class="line" href="../../dc/d00/a00740.html#aaab95942de282bad0096fe1ea70688d6">  172</a></span><span class="keyword">const</span> <a class="code hl_struct" href="../../dd/d00/a00825.html">Driver</a>&amp; <a class="code hl_function" href="../../dc/d00/a00740.html#aaab95942de282bad0096fe1ea70688d6">sdl_driver</a>()</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>{</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>    <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_struct" href="../../dd/d00/a00825.html">Driver</a> value = {</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>        <a class="code hl_function" href="../../d1/d00/a00738.html#a827e367190171cbe95d128cea42a109c">initialize</a>, <a class="code hl_function" href="../../d1/d00/a00738.html#a04b2ced850e4e6774aaa4c442bdc672f">set_sample_frames_hint</a>, <a class="code hl_function" href="../../d1/d00/a00738.html#a29adbb39808cac5019b4a002545b341c">open_input_device</a>, <a class="code hl_function" href="../../d1/d00/a00738.html#a874602540caeaf31d3fdabc6fde4ed4f">open_output_device</a>,</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>        <a class="code hl_function" href="../../d1/d00/a00738.html#aa0c40f691c135158af079d0f558a5244">output_device_format</a>, <a class="code hl_function" href="../../d1/d00/a00738.html#a990648322a1add323059d298095ddc62">close_device</a>, <a class="code hl_function" href="../../d1/d00/a00738.html#a96f7e878aac6d449eac8abe83ca0647a">error</a>, <a class="code hl_function" href="../../d1/d00/a00738.html#a045e7a48558c2e104db7ecd357b21b37">create_stream</a>, <a class="code hl_function" href="../../d1/d00/a00738.html#ac2a60024d7f5c7531c146944ef0ee513">destroy_stream</a>,</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>        <a class="code hl_function" href="../../d1/d00/a00738.html#a798c66cab92a545b0d10c268949fcc0a">set_input_callback</a>, <a class="code hl_function" href="../../d1/d00/a00738.html#a127070b0aba0867ffabbbe6d90736f8c">set_output_callback</a>, <a class="code hl_function" href="../../d1/d00/a00738.html#aaa2facd8158cffc1bcef4756ee227fdf">set_format</a>, <a class="code hl_function" href="../../d1/d00/a00738.html#a40249397a8164381e22505c288b3ae84">bind_stream</a>,</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>        <a class="code hl_function" href="../../d1/d00/a00738.html#a885bf75f4de2fa9561fbdbd4704c687d">unbind_stream</a>, <a class="code hl_function" href="../../d1/d00/a00738.html#a4117bd3f6857b9e025fc86f3553b70cb">lock_stream</a>, <a class="code hl_function" href="../../d1/d00/a00738.html#a1d40626a510464e1ad251e5c4e7aa376">unlock_stream</a>, <a class="code hl_function" href="../../d1/d00/a00738.html#ad7f0cb857285f358a47d9712195dd499">clear_stream</a>, <a class="code hl_function" href="../../d1/d00/a00738.html#ae60503ec33830f96030faf66cd7ccfd9">available</a>,</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>        <a class="code hl_function" href="../../d1/d00/a00738.html#a93759bfdcad86eba330f63e96f904b68">queued</a>, <a class="code hl_function" href="../../d1/d00/a00738.html#a09be41bd3782f2cc65355993cad3cebd">read</a>, <a class="code hl_function" href="../../d1/d00/a00738.html#ae25f98df986d5b8c730574fa88fdfc6c">write</a></div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>    };</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>    <span class="keywordflow">return</span> value;</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>}</div>
 </div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="preprocessor">#endif </span><span class="comment">// Foundation_Runnable_INCLUDED</span></div>
-<div class="ttc" id="aa00765_html_a008dd73cf080fb79641f955456fbc440"><div class="ttname"><a href="../../dc/d00/a00765.html#a008dd73cf080fb79641f955456fbc440">CRunnable::run</a></div><div class="ttdeci">virtual void run()=0</div></div>
-<div class="ttc" id="aa00765_html_a665d0c4e13c49979107b1777d55a4bc7"><div class="ttname"><a href="../../dc/d00/a00765.html#a665d0c4e13c49979107b1777d55a4bc7">CRunnable::CRunnable</a></div><div class="ttdeci">CRunnable()</div><div class="ttdef"><b>Definition</b> <a href="#l00072">Runnable.h:72</a></div></div>
-<div class="ttc" id="aa00765_html_ae679a861e81d54e0bf6787b170e046c2"><div class="ttname"><a href="../../dc/d00/a00765.html#ae679a861e81d54e0bf6787b170e046c2">CRunnable::~CRunnable</a></div><div class="ttdeci">virtual ~CRunnable()</div><div class="ttdef"><b>Definition</b> <a href="#l00073">Runnable.h:73</a></div></div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>}</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>}</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span><span class="preprocessor">#endif </span><span class="comment">// HAVE_SDL</span></div>
+<div class="ttc" id="aa00023_html"><div class="ttname"><a href="../../d3/d00/a00023.html">HostAudioBackend.h</a></div></div>
+<div class="ttc" id="aa00738_html"><div class="ttname"><a href="../../d1/d00/a00738.html">host_audio</a></div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00028">HostAudio.cpp:29</a></div></div>
+<div class="ttc" id="aa00738_html_a045e7a48558c2e104db7ecd357b21b37"><div class="ttname"><a href="../../d1/d00/a00738.html#a045e7a48558c2e104db7ecd357b21b37">host_audio::create_stream</a></div><div class="ttdeci">void create_stream(Stream &amp;stream, const Format *source, const Format *target, Backend backend)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00147">HostAudio.cpp:147</a></div></div>
+<div class="ttc" id="aa00738_html_a04b2ced850e4e6774aaa4c442bdc672f"><div class="ttname"><a href="../../d1/d00/a00738.html#a04b2ced850e4e6774aaa4c442bdc672f">host_audio::set_sample_frames_hint</a></div><div class="ttdeci">bool set_sample_frames_hint(const char *frames, Backend backend)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00094">HostAudio.cpp:94</a></div></div>
+<div class="ttc" id="aa00738_html_a09be41bd3782f2cc65355993cad3cebd"><div class="ttname"><a href="../../d1/d00/a00738.html#a09be41bd3782f2cc65355993cad3cebd">host_audio::read</a></div><div class="ttdeci">int read(Stream &amp;stream, void *data, int bytes)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00223">HostAudio.cpp:223</a></div></div>
+<div class="ttc" id="aa00738_html_a127070b0aba0867ffabbbe6d90736f8c"><div class="ttname"><a href="../../d1/d00/a00738.html#a127070b0aba0867ffabbbe6d90736f8c">host_audio::set_output_callback</a></div><div class="ttdeci">bool set_output_callback(Stream &amp;stream, Callback callback, void *userdata)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00168">HostAudio.cpp:168</a></div></div>
+<div class="ttc" id="aa00738_html_a1d40626a510464e1ad251e5c4e7aa376"><div class="ttname"><a href="../../d1/d00/a00738.html#a1d40626a510464e1ad251e5c4e7aa376">host_audio::unlock_stream</a></div><div class="ttdeci">bool unlock_stream(Stream &amp;stream)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00199">HostAudio.cpp:199</a></div></div>
+<div class="ttc" id="aa00738_html_a29adbb39808cac5019b4a002545b341c"><div class="ttname"><a href="../../d1/d00/a00738.html#a29adbb39808cac5019b4a002545b341c">host_audio::open_input_device</a></div><div class="ttdeci">DeviceId open_input_device(Backend backend)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00100">HostAudio.cpp:100</a></div></div>
+<div class="ttc" id="aa00738_html_a40249397a8164381e22505c288b3ae84"><div class="ttname"><a href="../../d1/d00/a00738.html#a40249397a8164381e22505c288b3ae84">host_audio::bind_stream</a></div><div class="ttdeci">bool bind_stream(DeviceId device, Stream &amp;stream)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00180">HostAudio.cpp:180</a></div></div>
+<div class="ttc" id="aa00738_html_a4117bd3f6857b9e025fc86f3553b70cb"><div class="ttname"><a href="../../d1/d00/a00738.html#a4117bd3f6857b9e025fc86f3553b70cb">host_audio::lock_stream</a></div><div class="ttdeci">bool lock_stream(Stream &amp;stream)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00193">HostAudio.cpp:193</a></div></div>
+<div class="ttc" id="aa00738_html_a798c66cab92a545b0d10c268949fcc0a"><div class="ttname"><a href="../../d1/d00/a00738.html#a798c66cab92a545b0d10c268949fcc0a">host_audio::set_input_callback</a></div><div class="ttdeci">bool set_input_callback(Stream &amp;stream, Callback callback, void *userdata)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00162">HostAudio.cpp:162</a></div></div>
+<div class="ttc" id="aa00738_html_a827e367190171cbe95d128cea42a109c"><div class="ttname"><a href="../../d1/d00/a00738.html#a827e367190171cbe95d128cea42a109c">host_audio::initialize</a></div><div class="ttdeci">bool initialize(Backend backend)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00088">HostAudio.cpp:88</a></div></div>
+<div class="ttc" id="aa00738_html_a874602540caeaf31d3fdabc6fde4ed4f"><div class="ttname"><a href="../../d1/d00/a00738.html#a874602540caeaf31d3fdabc6fde4ed4f">host_audio::open_output_device</a></div><div class="ttdeci">DeviceId open_output_device(Backend backend)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00106">HostAudio.cpp:106</a></div></div>
+<div class="ttc" id="aa00738_html_a885bf75f4de2fa9561fbdbd4704c687d"><div class="ttname"><a href="../../d1/d00/a00738.html#a885bf75f4de2fa9561fbdbd4704c687d">host_audio::unbind_stream</a></div><div class="ttdeci">void unbind_stream(Stream &amp;stream)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00187">HostAudio.cpp:187</a></div></div>
+<div class="ttc" id="aa00738_html_a93759bfdcad86eba330f63e96f904b68"><div class="ttname"><a href="../../d1/d00/a00738.html#a93759bfdcad86eba330f63e96f904b68">host_audio::queued</a></div><div class="ttdeci">int queued(Stream &amp;stream)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00217">HostAudio.cpp:217</a></div></div>
+<div class="ttc" id="aa00738_html_a96f7e878aac6d449eac8abe83ca0647a"><div class="ttname"><a href="../../d1/d00/a00738.html#a96f7e878aac6d449eac8abe83ca0647a">host_audio::error</a></div><div class="ttdeci">const char * error(Backend backend)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00124">HostAudio.cpp:124</a></div></div>
+<div class="ttc" id="aa00738_html_a990648322a1add323059d298095ddc62"><div class="ttname"><a href="../../d1/d00/a00738.html#a990648322a1add323059d298095ddc62">host_audio::close_device</a></div><div class="ttdeci">void close_device(DeviceId device)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00118">HostAudio.cpp:118</a></div></div>
+<div class="ttc" id="aa00738_html_aa0c40f691c135158af079d0f558a5244"><div class="ttname"><a href="../../d1/d00/a00738.html#aa0c40f691c135158af079d0f558a5244">host_audio::output_device_format</a></div><div class="ttdeci">bool output_device_format(DeviceId device, int *frequency, int *sample_frames)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00112">HostAudio.cpp:112</a></div></div>
+<div class="ttc" id="aa00738_html_aaa2facd8158cffc1bcef4756ee227fdf"><div class="ttname"><a href="../../d1/d00/a00738.html#aaa2facd8158cffc1bcef4756ee227fdf">host_audio::set_format</a></div><div class="ttdeci">bool set_format(Stream &amp;stream, const Format *source, const Format *target)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00174">HostAudio.cpp:174</a></div></div>
+<div class="ttc" id="aa00738_html_ac2a60024d7f5c7531c146944ef0ee513"><div class="ttname"><a href="../../d1/d00/a00738.html#ac2a60024d7f5c7531c146944ef0ee513">host_audio::destroy_stream</a></div><div class="ttdeci">void destroy_stream(Stream &amp;stream)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00156">HostAudio.cpp:156</a></div></div>
+<div class="ttc" id="aa00738_html_ac3486c8e7411e90c98ae3e18f38b90ada077393852be20e37026d6281827662f2"><div class="ttname"><a href="../../d1/d00/a00738.html#ac3486c8e7411e90c98ae3e18f38b90ada077393852be20e37026d6281827662f2">host_audio::SampleFormat::u8</a></div><div class="ttdeci">@ u8</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00020_source.html#l00040">HostAudio.h:40</a></div></div>
+<div class="ttc" id="aa00738_html_ad7f0cb857285f358a47d9712195dd499"><div class="ttname"><a href="../../d1/d00/a00738.html#ad7f0cb857285f358a47d9712195dd499">host_audio::clear_stream</a></div><div class="ttdeci">bool clear_stream(Stream &amp;stream)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00205">HostAudio.cpp:205</a></div></div>
+<div class="ttc" id="aa00738_html_adfe09b66063cb90fea46426f48850a97"><div class="ttname"><a href="../../d1/d00/a00738.html#adfe09b66063cb90fea46426f48850a97">host_audio::Callback</a></div><div class="ttdeci">void(*)(void *userdata) Callback</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00020_source.html#l00048">HostAudio.h:48</a></div></div>
+<div class="ttc" id="aa00738_html_ae25f98df986d5b8c730574fa88fdfc6c"><div class="ttname"><a href="../../d1/d00/a00738.html#ae25f98df986d5b8c730574fa88fdfc6c">host_audio::write</a></div><div class="ttdeci">bool write(Stream &amp;stream, const void *data, int bytes)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00229">HostAudio.cpp:229</a></div></div>
+<div class="ttc" id="aa00738_html_ae60503ec33830f96030faf66cd7ccfd9"><div class="ttname"><a href="../../d1/d00/a00738.html#ae60503ec33830f96030faf66cd7ccfd9">host_audio::available</a></div><div class="ttdeci">int available(Stream &amp;stream)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00017_source.html#l00211">HostAudio.cpp:211</a></div></div>
+<div class="ttc" id="aa00740_html"><div class="ttname"><a href="../../dc/d00/a00740.html">host_audio::detail</a></div><div class="ttdef"><b>Definition</b> <a href="../../d3/d00/a00023_source.html#l00029">HostAudioBackend.h:30</a></div></div>
+<div class="ttc" id="aa00740_html_aaab95942de282bad0096fe1ea70688d6"><div class="ttname"><a href="../../dc/d00/a00740.html#aaab95942de282bad0096fe1ea70688d6">host_audio::detail::sdl_driver</a></div><div class="ttdeci">const Driver &amp; sdl_driver()</div><div class="ttdef"><b>Definition</b> <a href="#l00172">HostAudioSDL.cpp:172</a></div></div>
+<div class="ttc" id="aa00825_html"><div class="ttname"><a href="../../dd/d00/a00825.html">host_audio::detail::Driver</a></div><div class="ttdef"><b>Definition</b> <a href="../../d3/d00/a00023_source.html#l00031">HostAudioBackend.h:32</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_e914ee4d4a44400f1fdb170cb4ead18a.html">base</a></li><li class="navelem"><a href="../../dc/d00/a00032.html">Runnable.h</a></li>
+    <li class="navelem"><a href="../../dir_a5f32cf82ad289a7dac212f63f40f55b.html">audio</a></li><li class="navelem"><a href="../../dc/d00/a00032.html">HostAudioSDL.cpp</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

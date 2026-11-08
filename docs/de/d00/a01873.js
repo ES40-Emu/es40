@@ -1,11 +1,13 @@
 var a01873 =
 [
-    [ "command", "de/d00/a01873.html#a6c6ad789dfa6886315702644b91871b1", null ],
-    [ "cylinder_no", "de/d00/a01873.html#a22f5fa7f63956ebb78197e21b8f1dcbc", null ],
-    [ "error", "de/d00/a01873.html#a74e4ed2ebbcb325feaac33cbcf4f3f79", null ],
-    [ "features", "de/d00/a01873.html#a7144ddc7aea67b14ad12d5c990ea607f", null ],
-    [ "head_no", "de/d00/a01873.html#aa68a5a02d7b6c494c87cd36cd03dbca4", null ],
-    [ "lba_mode", "de/d00/a01873.html#a3fbee3801e20189a4053d1189f5d6c15", null ],
-    [ "sector_count", "de/d00/a01873.html#ad0d09c80b8b67daa0c8f3d35f91523ea", null ],
-    [ "sector_no", "de/d00/a01873.html#ad00413ecac74d572ae5fc7fd7d4af348", null ]
+    [ "CNetworkVmnetIPC", "de/d00/a01873.html#a640dc5d9d7b52c1769a2b9bebebfba0b", null ],
+    [ "~CNetworkVmnetIPC", "de/d00/a01873.html#a374cb0fcd3d3a1eb16cd6e96b77f0d8c", null ],
+    [ "close", "de/d00/a01873.html#a0357e16dcf6fa3513b34f83857bde525", null ],
+    [ "get_helper_path", "de/d00/a01873.html#ad688555bbf24c5a0d64a47883839fa45", null ],
+    [ "receive", "de/d00/a01873.html#a722515a089b6235aa14e26668ea342e2", null ],
+    [ "send_packet", "de/d00/a01873.html#a69b8625acf77fdeee430953fcbba5bf7", null ],
+    [ "start", "de/d00/a01873.html#aab65511cef2bed1445656ff7e2d99154", null ],
+    [ "fd", "de/d00/a01873.html#a79030b56c8cc300f61f612fc29a3808f", null ],
+    [ "helper_path", "de/d00/a01873.html#a3dcaeb194aaa68e1e5ee2409beb23a7a", null ],
+    [ "helper_pid", "de/d00/a01873.html#a8f45a3abb9da2088a181abee7bcd4dff", null ]
 ];

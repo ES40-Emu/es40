@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: network/es40_vmnet_helper.cpp File Reference</title>
+<title>ES40: gui/keymap.cpp File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,11 +109,496 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d1/d00/a00452.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">es40_vmnet_helper.cpp File Reference</div></div>
+  <div class="headertitle"><div class="title">keymap.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
+<p>Contains the code for the <a class="el" href="../../d2/d00/a01713.html" title="Keymap, used to map host keys to scancodes.">bx_keymap_c</a> class used for keyboard interfacing with SDL and other device interfaces.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d6/d00/a00626_source.html">../StdAfx.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../de/d00/a00440_source.html">gui.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dd/d00/a00455_source.html">keymap.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d8/d00/a00725_source.html">system/System.h</a>&quot;</code><br />
+</div><div class="textblock"><div class="dynheader">
+Include dependency graph for keymap.cpp:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../da/d00/a00453.png" border="0" usemap="#agui_2keymap_8cpp" loading="lazy" alt=""/></div>
+<map name="agui_2keymap_8cpp" id="agui_2keymap_8cpp">
+<area shape="rect" title="Contains the code for the bx_keymap_c class used for keyboard interfacing with SDL and other device i..." alt="" coords="1766,5,1880,32"/>
+<area shape="rect" href="../../d6/d00/a00626.html" title="Standard includes." alt="" coords="566,80,651,107"/>
+<area shape="poly" title=" " alt="" coords="1766,26,666,91,665,86,1767,21"/>
+<area shape="rect" href="../../de/d00/a00440.html" title="Contains the definitions for the bx_gui_c base class used for interfacing with SDL and other device i..." alt="" coords="2186,80,2236,107"/>
+<area shape="poly" title=" " alt="" coords="1880,28,2174,85,2168,85,1880,33"/>
+<area shape="rect" href="../../dd/d00/a00455.html" title="Contains the definitions for the bx_keymap_c class used for keyboard interfacing with SDL and other d..." alt="" coords="1876,80,1954,107"/>
+<area shape="poly" title=" " alt="" coords="1840,30,1890,71,1885,70,1838,35"/>
+<area shape="rect" href="../../d8/d00/a00725.html" title="Contains the definitions for the emulated Typhoon Chipset devices." alt="" coords="1580,80,1704,107"/>
+<area shape="poly" title=" " alt="" coords="1794,32,1688,76,1687,71,1789,33"/>
+<area shape="rect" href="../../d7/d00/a00173.html" title=" " alt="" coords="622,155,731,181"/>
+<area shape="poly" title=" " alt="" coords="621,105,657,144,652,143,619,110"/>
+<area shape="rect" href="../../d8/d00/a00326.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="1289,229,1378,256"/>
+<area shape="poly" title=" " alt="" coords="651,92,740,94,859,102,994,120,1062,134,1128,152,1154,165,1179,179,1286,224,1280,223,1177,184,1152,169,1126,157,1061,140,993,126,859,108,739,99,651,97"/>
+<area shape="rect" title=" " alt="" coords="1581,229,1649,256"/>
+<area shape="poly" title=" " alt="" coords="651,92,770,95,941,104,1140,121,1242,135,1341,152,1466,185,1572,224,1566,223,1465,190,1340,157,1241,140,1139,127,941,109,770,100,651,97"/>
+<area shape="rect" href="../../d6/d00/a00047.html" title=" " alt="" coords="993,155,1115,181"/>
+<area shape="poly" title=" " alt="" coords="651,99,980,154,974,155,651,104"/>
+<area shape="rect" href="../../dc/d00/a00053.html" title=" " alt="" coords="452,229,552,256"/>
+<area shape="poly" title=" " alt="" coords="563,102,515,121,492,136,473,156,468,170,470,185,484,218,479,216,465,187,463,170,469,153,488,132,513,116,568,100"/>
+<area shape="rect" href="../../de/d00/a00065.html" title=" " alt="" coords="958,229,1062,256"/>
+<area shape="poly" title=" " alt="" coords="643,105,963,223,958,224,642,110"/>
+<area shape="rect" href="../../d9/d00/a00056.html" title=" " alt="" coords="187,304,275,331"/>
+<area shape="poly" title=" " alt="" coords="563,97,435,105,268,116,117,134,65,144,37,157,18,180,9,204,11,228,25,254,43,264,80,276,174,301,171,305,79,282,41,269,21,258,6,230,4,203,13,177,33,153,63,139,116,128,267,111,435,100,568,95"/>
+<area shape="rect" href="../../df/d00/a00062.html" title=" " alt="" coords="297,229,427,256"/>
+<area shape="poly" title=" " alt="" coords="565,108,516,129,462,157,420,188,385,221,382,216,416,184,459,152,514,125,570,106"/>
+<area shape="rect" href="../../d3/d00/a00059.html" title=" " alt="" coords="483,155,598,181"/>
+<area shape="poly" title=" " alt="" coords="599,106,564,145,561,141,594,109"/>
+<area shape="rect" href="../../dd/d00/a00365.html" title="Contains macro&#39;s and prototypes for debugging." alt="" coords="47,155,149,181"/>
+<area shape="poly" title=" " alt="" coords="565,103,165,160,164,155,566,98"/>
+<area shape="rect" href="../../d8/d00/a00368.html" title="Contains byte&#45;order conversion helpers." alt="" coords="218,155,324,181"/>
+<area shape="poly" title=" " alt="" coords="563,105,339,155,338,150,568,102"/>
+<area shape="rect" title=" " alt="" coords="1136,229,1214,256"/>
+<area shape="poly" title=" " alt="" coords="1075,179,1143,221,1138,221,1074,184"/>
+<area shape="rect" title=" " alt="" coords="1459,304,1512,331"/>
+<area shape="poly" title=" " alt="" coords="1095,179,1158,200,1227,227,1279,254,1359,279,1447,304,1441,303,1358,284,1277,258,1225,232,1156,205,1095,185"/>
+<area shape="rect" title=" " alt="" coords="401,304,458,331"/>
+<area shape="poly" title=" " alt="" coords="492,256,454,295,452,291,487,258"/>
+<area shape="rect" title=" " alt="" coords="633,304,693,331"/>
+<area shape="poly" title=" " alt="" coords="530,254,624,297,618,297,529,259"/>
+<area shape="rect" title=" " alt="" coords="717,304,774,331"/>
+<area shape="poly" title=" " alt="" coords="545,254,705,303,699,303,544,259"/>
+<area shape="rect" title=" " alt="" coords="799,304,855,331"/>
+<area shape="poly" title=" " alt="" coords="553,251,656,271,786,303,781,303,655,277,552,256"/>
+<area shape="rect" title=" " alt="" coords="299,304,377,331"/>
+<area shape="poly" title=" " alt="" coords="476,256,381,300,380,295,471,257"/>
+<area shape="poly" title=" " alt="" coords="1062,247,1254,271,1446,304,1441,304,1253,277,1062,253"/>
+<area shape="poly" title=" " alt="" coords="960,248,716,275,582,291,474,307,473,301,581,285,716,270,954,249"/>
+<area shape="poly" title=" " alt="" coords="960,253,847,276,709,306,708,301,846,271,955,253"/>
+<area shape="poly" title=" " alt="" coords="965,256,790,306,789,301,959,257"/>
+<area shape="poly" title=" " alt="" coords="981,256,870,302,869,297,975,257"/>
+<area shape="poly" title=" " alt="" coords="955,247,717,267,558,284,393,307,392,301,557,279,717,262,960,247"/>
+<area shape="rect" title=" " alt="" coords="1374,304,1435,331"/>
+<area shape="poly" title=" " alt="" coords="1063,250,1362,304,1356,304,1062,256"/>
+<area shape="rect" title=" " alt="" coords="880,304,948,331"/>
+<area shape="poly" title=" " alt="" coords="996,256,943,297,942,292,990,257"/>
+<area shape="rect" title=" " alt="" coords="483,304,608,331"/>
+<area shape="poly" title=" " alt="" coords="960,252,624,306,624,301,955,252"/>
+<area shape="rect" title=" " alt="" coords="1537,304,1605,331"/>
+<area shape="poly" title=" " alt="" coords="1062,247,1304,274,1524,304,1519,304,1304,279,1062,252"/>
+<area shape="rect" title=" " alt="" coords="972,304,1069,331"/>
+<area shape="poly" title=" " alt="" coords="1013,255,1018,290,1014,287,1010,259"/>
+<area shape="poly" title=" " alt="" coords="955,246,677,265,487,282,290,306,290,301,486,277,676,260,960,246"/>
+<area shape="rect" title=" " alt="" coords="1092,304,1167,331"/>
+<area shape="poly" title=" " alt="" coords="1031,254,1098,296,1093,295,1030,259"/>
+<area shape="rect" title=" " alt="" coords="1192,304,1259,331"/>
+<area shape="poly" title=" " alt="" coords="1048,254,1180,300,1175,300,1047,259"/>
+<area shape="rect" title=" " alt="" coords="1283,304,1350,331"/>
+<area shape="poly" title=" " alt="" coords="1063,253,1271,303,1265,303,1062,258"/>
+<area shape="poly" title=" " alt="" coords="375,254,410,293,405,292,373,259"/>
+<area shape="poly" title=" " alt="" coords="420,254,620,303,615,304,419,259"/>
+<area shape="poly" title=" " alt="" coords="360,255,349,291,345,287,355,258"/>
+<area shape="poly" title=" " alt="" coords="394,254,502,298,497,298,393,259"/>
+<area shape="rect" title=" " alt="" coords="99,304,163,331"/>
+<area shape="poly" title=" " alt="" coords="324,257,179,304,178,299,319,256"/>
+<area shape="poly" title=" " alt="" coords="536,180,517,218,514,214,531,183"/>
+<area shape="poly" title=" " alt="" coords="595,179,688,204,725,216,745,228,751,248,743,267,725,284,704,299,702,294,722,280,738,264,746,248,741,231,723,221,686,209,595,185"/>
+<area shape="poly" title=" " alt="" coords="549,179,577,216,617,254,660,280,705,302,700,301,657,285,613,258,573,219,547,184"/>
+<area shape="poly" title=" " alt="" coords="598,178,693,200,736,213,766,227,796,257,817,292,812,289,792,260,763,232,734,218,692,205,598,183"/>
+<area shape="poly" title=" " alt="" coords="480,175,427,185,368,196,317,211,299,221,287,231,281,246,285,261,296,277,311,294,306,293,292,281,280,263,276,245,282,228,296,216,315,206,367,191,426,179,486,174"/>
+<area shape="poly" title=" " alt="" coords="598,177,610,179,681,186,741,190,844,191,947,198,1006,209,1075,227,1100,240,1125,254,1188,272,1239,281,1292,288,1362,304,1356,303,1291,294,1238,286,1187,277,1123,258,1098,245,1073,232,1005,214,946,203,844,196,741,195,680,192,609,184,598,182"/>
+<area shape="rect" title=" " alt="" coords="627,229,731,256"/>
+<area shape="poly" title=" " alt="" coords="565,179,644,222,639,222,564,184"/>
+<area shape="rect" title=" " alt="" coords="36,229,104,256"/>
+<area shape="poly" title=" " alt="" coords="94,180,82,216,78,214,92,184"/>
+<area shape="rect" href="../../db/d00/a00164.html" title=" " alt="" coords="128,229,222,256"/>
+<area shape="poly" title=" " alt="" coords="257,180,205,222,202,218,252,183"/>
+<area shape="poly" title=" " alt="" coords="2219,105,2231,142,2231,164,2222,183,2208,194,2183,205,2111,225,2014,243,1904,259,1528,307,1528,301,1903,254,2013,238,2109,220,2181,200,2205,190,2218,180,2226,163,2226,143,2216,109"/>
+<area shape="rect" title=" " alt="" coords="2144,155,2209,181"/>
+<area shape="poly" title=" " alt="" coords="2207,106,2191,143,2187,138,2203,109"/>
+<area shape="rect" href="../../de/d00/a02256.html" title="Definitions for VGA cards." alt="" coords="2283,155,2336,181"/>
+<area shape="poly" title=" " alt="" coords="2229,105,2283,146,2278,145,2227,110"/>
+<area shape="rect" href="../../d4/d00/a00116.html" title="Contains the definitions for the configuration file interpreter." alt="" coords="1736,229,1878,256"/>
+<area shape="poly" title=" " alt="" coords="1937,105,1958,120,1977,139,1988,160,1988,172,1983,183,1965,202,1943,217,1894,235,1893,230,1940,212,1961,198,1978,180,1982,171,1983,161,1973,142,1955,124,1936,110"/>
+<area shape="poly" title=" " alt="" coords="1742,256,1643,279,1528,306,1527,301,1642,274,1737,257"/>
+<area shape="rect" title=" " alt="" coords="2024,304,2081,331"/>
+<area shape="poly" title=" " alt="" coords="1850,254,2012,304,2006,303,1849,259"/>
+<area shape="poly" title=" " alt="" coords="1603,107,1563,128,1546,141,1531,156,1511,188,1499,224,1488,290,1485,286,1494,223,1507,186,1526,153,1542,137,1561,124,1597,108"/>
+<area shape="poly" title=" " alt="" coords="1577,97,1431,105,1242,116,1059,133,984,144,928,157,874,180,836,206,798,233,744,258,671,279,612,287,551,293,474,306,473,301,550,288,611,282,670,274,742,254,795,229,833,202,872,175,926,152,983,139,1059,128,1242,111,1431,100,1582,96"/>
+<area shape="poly" title=" " alt="" coords="1577,96,1441,104,1267,115,1100,132,1032,143,981,157,939,179,909,204,881,231,839,258,782,281,709,305,708,299,780,276,836,254,877,227,906,200,936,175,979,152,1031,138,1099,126,1267,109,1441,99,1582,96"/>
+<area shape="poly" title=" " alt="" coords="1599,107,1552,129,1509,157,1478,188,1453,224,1417,291,1414,287,1448,222,1474,185,1505,153,1550,124,1594,108"/>
+<area shape="poly" title=" " alt="" coords="1606,106,1571,128,1557,141,1545,156,1539,172,1535,190,1537,226,1547,260,1559,292,1555,289,1542,262,1532,227,1530,189,1533,171,1541,153,1553,137,1568,124,1601,108"/>
+<area shape="poly" title=" " alt="" coords="1704,98,1894,118,2126,152,2132,155,2126,155,2125,157,1893,123,1704,103"/>
+<area shape="poly" title=" " alt="" coords="1704,96,1778,103,1859,114,1932,130,1961,141,1982,153,2010,183,2030,219,2043,256,2050,290,2046,287,2038,257,2025,221,2006,186,1979,157,1959,146,1931,136,1858,120,1778,108,1705,101"/>
+<area shape="rect" href="../../d6/d00/a00356.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="1555,155,1728,181"/>
+<area shape="poly" title=" " alt="" coords="1644,105,1644,141,1640,137,1640,109"/>
+<area shape="rect" href="../../de/d00/a00323.html" title="Contains the definitions for the CPU tracing engine." alt="" coords="1190,155,1328,181"/>
+<area shape="poly" title=" " alt="" coords="1582,106,1342,154,1341,149,1576,107"/>
+<area shape="rect" href="../../dd/d00/a00719.html" title=" " alt="" coords="2094,229,2171,256"/>
+<area shape="poly" title=" " alt="" coords="1704,94,1798,100,1907,111,2007,128,2047,139,2076,152,2092,165,2106,181,2125,216,2120,214,2101,184,2089,169,2074,157,2045,144,2006,133,1906,116,1798,105,1704,100"/>
+<area shape="rect" title=" " alt="" coords="1753,155,1835,181"/>
+<area shape="poly" title=" " alt="" coords="1669,105,1756,148,1751,147,1668,110"/>
+<area shape="rect" title=" " alt="" coords="1859,155,1969,181"/>
+<area shape="poly" title=" " alt="" coords="1689,105,1854,150,1849,150,1689,110"/>
+<area shape="poly" title=" " alt="" coords="1639,180,1627,217,1623,213,1635,183"/>
+<area shape="poly" title=" " alt="" coords="1671,179,1767,223,1761,222,1670,184"/>
+<area shape="poly" title=" " alt="" coords="1273,179,1313,219,1308,218,1271,184"/>
+<area shape="poly" title=" " alt="" coords="2096,249,1621,312,1621,307,2091,249"/>
+<area shape="poly" title=" " alt="" coords="2121,256,2078,296,2076,291,2116,257"/>
+<area shape="rect" title=" " alt="" coords="2105,304,2165,331"/>
+<area shape="poly" title=" " alt="" coords="2135,255,2136,290,2132,287,2131,258"/>
+</map>
+</div>
+</div>
 <p><a href="../../d1/d00/a00452_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a1290229bb991e9ed1a26a46030585e05" id="r_a1290229bb991e9ed1a26a46030585e05"><td class="memItemLeft">static void&#160;</td><td class="memItemRight"><a class="el" href="#a1290229bb991e9ed1a26a46030585e05">init_parse</a> ()</td></tr>
+<tr class="memitem:af8d6a35e21af2b5bdbb8789a222c9893" id="r_af8d6a35e21af2b5bdbb8789a222c9893"><td class="memItemLeft">static void&#160;</td><td class="memItemRight"><a class="el" href="#af8d6a35e21af2b5bdbb8789a222c9893">init_parse_line</a> (char *line_to_parse)</td></tr>
+<tr class="memitem:a8e3f3ed3640193ffe72f197d557c4866" id="r_a8e3f3ed3640193ffe72f197d557c4866"><td class="memItemLeft">static <a class="el" href="../../d8/d00/a00326.html#ae5300ed9eabeae78ee9d0c704a9c412a">s32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a8e3f3ed3640193ffe72f197d557c4866">get_next_word</a> (char *output)</td></tr>
+<tr class="memitem:a74727fe29eb5775e126503c25257f0d5" id="r_a74727fe29eb5775e126503c25257f0d5"><td class="memItemLeft">static <a class="el" href="../../d8/d00/a00326.html#ae5300ed9eabeae78ee9d0c704a9c412a">s32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a74727fe29eb5775e126503c25257f0d5">get_next_keymap_line</a> (FILE *fp, char *bxsym, char *modsym, <a class="el" href="../../d8/d00/a00326.html#ae5300ed9eabeae78ee9d0c704a9c412a">s32</a> *ascii, char *hostsym)</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a0bd6c265b58e14450173f6d941d28f24" id="r_a0bd6c265b58e14450173f6d941d28f24"><td class="memItemLeft">const char *&#160;</td><td class="memItemRight"><a class="el" href="#a0bd6c265b58e14450173f6d941d28f24">bx_key_symbol</a> [119]</td></tr>
+<tr class="memitem:a22fa2cedc0d2a8c49e35953f581847ab" id="r_a22fa2cedc0d2a8c49e35953f581847ab"><td class="memItemLeft"><a class="el" href="../../d2/d00/a01713.html">bx_keymap_c</a> *&#160;</td><td class="memItemRight"><a class="el" href="#a22fa2cedc0d2a8c49e35953f581847ab">bx_keymap</a></td></tr>
+<tr class="memitem:a13fe685f1aff8f1cd7917076e8c09bb9" id="r_a13fe685f1aff8f1cd7917076e8c09bb9"><td class="memItemLeft">static unsigned char *&#160;</td><td class="memItemRight"><a class="el" href="#a13fe685f1aff8f1cd7917076e8c09bb9">lineptr</a> = NULL</td></tr>
+<tr class="memitem:addc99401340ecb10778277e17c36c77d" id="r_addc99401340ecb10778277e17c36c77d"><td class="memItemLeft">static int&#160;</td><td class="memItemRight"><a class="el" href="#addc99401340ecb10778277e17c36c77d">lineCount</a></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Contains the code for the <a class="el" href="../../d2/d00/a01713.html" title="Keymap, used to map host keys to scancodes.">bx_keymap_c</a> class used for keyboard interfacing with SDL and other device interfaces. </p>
+<p>$Id$</p>
+<p>X-1.9 Camiel Vanderhoeven 26-MAR-2008 Fix compiler warnings.</p>
+<p>X-1.8 Camiel Vanderhoeven 14-MAR-2008 Formatting.</p>
+<p>X-1.4 Camiel Vanderhoeven 02-JAN-2008 Comments.</p>
+<p>X-1.3 Camiel Vanderhoeven 10-DEC-2007 Use Configurator.</p>
+<p>X-1.2 Camiel Vanderhoeven 7-DEC-2007 Code cleanup.</p>
+<p>X-1.1 Camiel Vanderhoeven 6-DEC-2007 Initial version for ES40 emulator. </p>
+
+<p class="definition">Definition in file <a class="el" href="../../d1/d00/a00452_source.html">keymap.cpp</a>.</p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a74727fe29eb5775e126503c25257f0d5" name="a74727fe29eb5775e126503c25257f0d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74727fe29eb5775e126503c25257f0d5">&#9670;&#160;</a></span>get_next_keymap_line()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d8/d00/a00326.html#ae5300ed9eabeae78ee9d0c704a9c412a">s32</a> get_next_keymap_line </td>
+          <td>(</td>
+          <td class="paramtype">FILE *</td>          <td class="paramname"><span class="paramname"><em>fp</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>bxsym</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>modsym</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="../../d8/d00/a00326.html#ae5300ed9eabeae78ee9d0c704a9c412a">s32</a> *</td>          <td class="paramname"><span class="paramname"><em>ascii</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>hostsym</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00452_source.html#l00189">189</a> of file <a class="el" href="../../d1/d00/a00452_source.html">keymap.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../de/d00/a00440_source.html#l00078">BX_PANIC</a>, <a class="el" href="../../d1/d00/a00452_source.html#l00189">get_next_keymap_line()</a>, <a class="el" href="../../d1/d00/a00452_source.html#l00166">get_next_word()</a>, <a class="el" href="../../d1/d00/a00452_source.html#l00153">init_parse_line()</a>, and <a class="el" href="../../d1/d00/a00452_source.html#l00146">lineCount</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d1/d00/a00452_source.html#l00189">get_next_keymap_line()</a>, and <a class="el" href="../../d1/d00/a00452_source.html#l00270">bx_keymap_c::loadKeymap()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d1/d00/a00452_a74727fe29eb5775e126503c25257f0d5_cgraph.png" border="0" usemap="#ad1/d00/a00452_a74727fe29eb5775e126503c25257f0d5_cgraph" loading="lazy" alt=""/></div>
+<map name="ad1/d00/a00452_a74727fe29eb5775e126503c25257f0d5_cgraph" id="ad1/d00/a00452_a74727fe29eb5775e126503c25257f0d5_cgraph">
+<area shape="rect" title=" " alt="" coords="5,67,157,93"/>
+<area shape="poly" title=" " alt="" coords="50,66,45,58,49,48,61,42,81,40,102,43,115,51,110,52,101,48,81,45,63,47,53,52,51,57,56,66"/>
+<area shape="rect" href="../../d1/d00/a00452.html#a8e3f3ed3640193ffe72f197d557c4866" title=" " alt="" coords="205,29,311,56"/>
+<area shape="poly" title=" " alt="" coords="146,64,192,56,187,58,148,69"/>
+<area shape="rect" href="../../d1/d00/a00452.html#af8d6a35e21af2b5bdbb8789a222c9893" title=" " alt="" coords="206,104,310,131"/>
+<area shape="poly" title=" " alt="" coords="147,91,193,103,188,103,147,97"/>
+<area shape="poly" title=" " alt="" coords="227,28,222,21,226,11,238,5,258,3,279,5,292,14,286,14,277,10,258,8,240,10,230,15,227,20,232,30"/>
+<area shape="poly" title=" " alt="" coords="227,102,222,95,226,86,238,79,258,77,279,80,292,89,286,88,277,85,258,83,240,85,230,89,227,95,232,105"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d1/d00/a00452_a74727fe29eb5775e126503c25257f0d5_icgraph.png" border="0" usemap="#ad1/d00/a00452_a74727fe29eb5775e126503c25257f0d5_icgraph" loading="lazy" alt=""/></div>
+<map name="ad1/d00/a00452_a74727fe29eb5775e126503c25257f0d5_icgraph" id="ad1/d00/a00452_a74727fe29eb5775e126503c25257f0d5_icgraph">
+<area shape="rect" title=" " alt="" coords="236,29,387,56"/>
+<area shape="poly" title=" " alt="" coords="347,14,335,10,311,8,289,10,277,15,274,20,280,30,275,28,268,21,273,11,288,5,311,3,337,5,352,14"/>
+<area shape="rect" href="../../d2/d00/a01713.html#a33f8cf5b7921c09a88a8d0bbf7a8a854" title="Loads the specified keymap file using convertStringToSymbol to convert strings to client constants." alt="" coords="5,29,188,56"/>
+<area shape="poly" title=" " alt="" coords="217,43,188,45,188,40,223,43"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a8e3f3ed3640193ffe72f197d557c4866" name="a8e3f3ed3640193ffe72f197d557c4866"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e3f3ed3640193ffe72f197d557c4866">&#9670;&#160;</a></span>get_next_word()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d8/d00/a00326.html#ae5300ed9eabeae78ee9d0c704a9c412a">s32</a> get_next_word </td>
+          <td>(</td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>output</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00452_source.html#l00166">166</a> of file <a class="el" href="../../d1/d00/a00452_source.html">keymap.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d1/d00/a00452_source.html#l00166">get_next_word()</a>, and <a class="el" href="../../d1/d00/a00452_source.html#l00145">lineptr</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d1/d00/a00452_source.html#l00189">get_next_keymap_line()</a>, and <a class="el" href="../../d1/d00/a00452_source.html#l00166">get_next_word()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d1/d00/a00452_a8e3f3ed3640193ffe72f197d557c4866_cgraph.png" border="0" usemap="#ad1/d00/a00452_a8e3f3ed3640193ffe72f197d557c4866_cgraph" loading="lazy" alt=""/></div>
+<map name="ad1/d00/a00452_a8e3f3ed3640193ffe72f197d557c4866_cgraph" id="ad1/d00/a00452_a8e3f3ed3640193ffe72f197d557c4866_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,112,56"/>
+<area shape="poly" title=" " alt="" coords="39,29,36,20,38,11,46,5,59,3,72,5,80,14,74,14,69,10,58,8,48,10,43,14,41,20,44,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d1/d00/a00452_a8e3f3ed3640193ffe72f197d557c4866_icgraph.png" border="0" usemap="#ad1/d00/a00452_a8e3f3ed3640193ffe72f197d557c4866_icgraph" loading="lazy" alt=""/></div>
+<map name="ad1/d00/a00452_a8e3f3ed3640193ffe72f197d557c4866_icgraph" id="ad1/d00/a00452_a8e3f3ed3640193ffe72f197d557c4866_icgraph">
+<area shape="rect" title=" " alt="" coords="435,29,541,56"/>
+<area shape="poly" title=" " alt="" coords="517,14,508,10,488,8,470,10,460,15,458,20,462,30,458,28,452,21,456,11,468,5,488,3,509,5,522,15"/>
+<area shape="rect" href="../../d1/d00/a00452.html#a74727fe29eb5775e126503c25257f0d5" title=" " alt="" coords="236,29,387,56"/>
+<area shape="poly" title=" " alt="" coords="417,43,387,45,387,40,422,43"/>
+<area shape="poly" title=" " alt="" coords="340,14,331,10,311,8,293,10,283,15,281,20,286,30,281,28,276,21,279,11,292,5,311,3,333,5,345,15"/>
+<area shape="rect" href="../../d2/d00/a01713.html#a33f8cf5b7921c09a88a8d0bbf7a8a854" title="Loads the specified keymap file using convertStringToSymbol to convert strings to client constants." alt="" coords="5,29,188,56"/>
+<area shape="poly" title=" " alt="" coords="217,43,188,45,188,40,223,43"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a1290229bb991e9ed1a26a46030585e05" name="a1290229bb991e9ed1a26a46030585e05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1290229bb991e9ed1a26a46030585e05">&#9670;&#160;</a></span>init_parse()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void init_parse </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00452_source.html#l00148">148</a> of file <a class="el" href="../../d1/d00/a00452_source.html">keymap.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d1/d00/a00452_source.html#l00148">init_parse()</a>, and <a class="el" href="../../d1/d00/a00452_source.html#l00146">lineCount</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d1/d00/a00452_source.html#l00148">init_parse()</a>, and <a class="el" href="../../d1/d00/a00452_source.html#l00270">bx_keymap_c::loadKeymap()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d1/d00/a00452_a1290229bb991e9ed1a26a46030585e05_cgraph.png" border="0" usemap="#ad1/d00/a00452_a1290229bb991e9ed1a26a46030585e05_cgraph" loading="lazy" alt=""/></div>
+<map name="ad1/d00/a00452_a1290229bb991e9ed1a26a46030585e05_cgraph" id="ad1/d00/a00452_a1290229bb991e9ed1a26a46030585e05_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,83,56"/>
+<area shape="poly" title=" " alt="" coords="29,28,28,12,34,5,44,3,54,5,60,14,55,14,51,10,44,8,37,10,33,14,34,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d1/d00/a00452_a1290229bb991e9ed1a26a46030585e05_icgraph.png" border="0" usemap="#ad1/d00/a00452_a1290229bb991e9ed1a26a46030585e05_icgraph" loading="lazy" alt=""/></div>
+<map name="ad1/d00/a00452_a1290229bb991e9ed1a26a46030585e05_icgraph" id="ad1/d00/a00452_a1290229bb991e9ed1a26a46030585e05_icgraph">
+<area shape="rect" title=" " alt="" coords="236,29,313,56"/>
+<area shape="poly" title=" " alt="" coords="303,14,294,10,274,8,256,10,246,15,244,20,249,30,244,28,238,21,242,11,254,5,274,3,296,5,308,15"/>
+<area shape="rect" href="../../d2/d00/a01713.html#a33f8cf5b7921c09a88a8d0bbf7a8a854" title="Loads the specified keymap file using convertStringToSymbol to convert strings to client constants." alt="" coords="5,29,188,56"/>
+<area shape="poly" title=" " alt="" coords="218,43,188,45,188,40,223,43"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="af8d6a35e21af2b5bdbb8789a222c9893" name="af8d6a35e21af2b5bdbb8789a222c9893"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af8d6a35e21af2b5bdbb8789a222c9893">&#9670;&#160;</a></span>init_parse_line()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void init_parse_line </td>
+          <td>(</td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>line_to_parse</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00452_source.html#l00153">153</a> of file <a class="el" href="../../d1/d00/a00452_source.html">keymap.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d1/d00/a00452_source.html#l00153">init_parse_line()</a>, and <a class="el" href="../../d1/d00/a00452_source.html#l00145">lineptr</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d1/d00/a00452_source.html#l00189">get_next_keymap_line()</a>, and <a class="el" href="../../d1/d00/a00452_source.html#l00153">init_parse_line()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d1/d00/a00452_af8d6a35e21af2b5bdbb8789a222c9893_cgraph.png" border="0" usemap="#ad1/d00/a00452_af8d6a35e21af2b5bdbb8789a222c9893_cgraph" loading="lazy" alt=""/></div>
+<map name="ad1/d00/a00452_af8d6a35e21af2b5bdbb8789a222c9893_cgraph" id="ad1/d00/a00452_af8d6a35e21af2b5bdbb8789a222c9893_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,110,56"/>
+<area shape="poly" title=" " alt="" coords="38,29,35,20,37,11,45,5,58,3,70,5,78,14,73,14,68,10,57,8,47,10,42,14,41,20,44,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d1/d00/a00452_af8d6a35e21af2b5bdbb8789a222c9893_icgraph.png" border="0" usemap="#ad1/d00/a00452_af8d6a35e21af2b5bdbb8789a222c9893_icgraph" loading="lazy" alt=""/></div>
+<map name="ad1/d00/a00452_af8d6a35e21af2b5bdbb8789a222c9893_icgraph" id="ad1/d00/a00452_af8d6a35e21af2b5bdbb8789a222c9893_icgraph">
+<area shape="rect" title=" " alt="" coords="435,29,539,56"/>
+<area shape="poly" title=" " alt="" coords="516,14,507,10,487,8,469,10,459,15,457,20,462,30,457,28,452,21,455,11,467,5,487,3,508,5,521,15"/>
+<area shape="rect" href="../../d1/d00/a00452.html#a74727fe29eb5775e126503c25257f0d5" title=" " alt="" coords="236,29,387,56"/>
+<area shape="poly" title=" " alt="" coords="416,43,387,45,387,40,422,43"/>
+<area shape="poly" title=" " alt="" coords="340,14,331,10,311,8,293,10,283,15,281,20,286,30,281,28,276,21,279,11,292,5,311,3,332,5,345,15"/>
+<area shape="rect" href="../../d2/d00/a01713.html#a33f8cf5b7921c09a88a8d0bbf7a8a854" title="Loads the specified keymap file using convertStringToSymbol to convert strings to client constants." alt="" coords="5,29,188,56"/>
+<area shape="poly" title=" " alt="" coords="217,43,188,45,188,40,223,43"/>
+</map>
+</div>
+
+</div>
+</div>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="a0bd6c265b58e14450173f6d941d28f24" name="a0bd6c265b58e14450173f6d941d28f24"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0bd6c265b58e14450173f6d941d28f24">&#9670;&#160;</a></span>bx_key_symbol</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char* bx_key_symbol[119]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00452_source.html#l00062">62</a> of file <a class="el" href="../../d1/d00/a00452_source.html">keymap.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d1/d00/a00452_source.html#l00348">bx_keymap_c::convertStringToBXKey()</a>, and <a class="el" href="../../d1/d00/a00452_source.html#l00411">bx_keymap_c::getBXKeyName()</a>.</p>
+
+</div>
+</div>
+<a id="a22fa2cedc0d2a8c49e35953f581847ab" name="a22fa2cedc0d2a8c49e35953f581847ab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a22fa2cedc0d2a8c49e35953f581847ab">&#9670;&#160;</a></span>bx_keymap</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d2/d00/a01713.html">bx_keymap_c</a>* bx_keymap</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00452_source.html#l00105">105</a> of file <a class="el" href="../../d1/d00/a00452_source.html">keymap.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d5/d00/a00518_source.html#l00239">CKeyboard::gen_scancode()</a>, <a class="el" href="../../d7/d00/a00467_source.html#l01557">bx_sdl_gui_c::handle_keyboard_event_impl()</a>, <a class="el" href="../../d7/d00/a00467_source.html#l00732">sdl_application::initialize_keymap()</a>, <a class="el" href="../../d7/d00/a00467_source.html#l00769">libsdl_LTX_plugin_init()</a>, and <a class="el" href="../../d7/d00/a00467_source.html#l00655">sdl_application::~sdl_application()</a>.</p>
+
+</div>
+</div>
+<a id="addc99401340ecb10778277e17c36c77d" name="addc99401340ecb10778277e17c36c77d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#addc99401340ecb10778277e17c36c77d">&#9670;&#160;</a></span>lineCount</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int lineCount</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00452_source.html#l00146">146</a> of file <a class="el" href="../../d1/d00/a00452_source.html">keymap.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d1/d00/a00452_source.html#l00189">get_next_keymap_line()</a>, <a class="el" href="../../d1/d00/a00452_source.html#l00148">init_parse()</a>, and <a class="el" href="../../d1/d00/a00452_source.html#l00270">bx_keymap_c::loadKeymap()</a>.</p>
+
+</div>
+</div>
+<a id="a13fe685f1aff8f1cd7917076e8c09bb9" name="a13fe685f1aff8f1cd7917076e8c09bb9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13fe685f1aff8f1cd7917076e8c09bb9">&#9670;&#160;</a></span>lineptr</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned char* lineptr = NULL</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00452_source.html#l00145">145</a> of file <a class="el" href="../../d1/d00/a00452_source.html">keymap.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d1/d00/a00452_source.html#l00166">get_next_word()</a>, and <a class="el" href="../../d1/d00/a00452_source.html#l00153">init_parse_line()</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
@@ -127,7 +612,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d1/d00/a00452.
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_c901c14b65aa229498a52b725b3d4a2c.html">network</a></li><li class="navelem"><a href="../../d1/d00/a00452.html">es40_vmnet_helper.cpp</a></li>
+    <li class="navelem"><a href="../../dir_11bc0974ce736ce9a6fadebbeb7a8314.html">gui</a></li><li class="navelem"><a href="../../d1/d00/a00452.html">keymap.cpp</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

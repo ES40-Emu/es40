@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: CPU/AlphaCPU.cpp File Reference</title>
+<title>ES40: config/Question.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,463 +109,37 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d5/d00/a00140.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">AlphaCPU.cpp File Reference</div></div>
+  <div class="headertitle"><div class="title">Question.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>Contains the code for the emulated DecChip 21264CB EV68 Alpha processor.  
+<p><a class="el" href="../../dd/d00/a01121.html" title="Abstract Question base class.">Question</a> class for Configuration file creator.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &quot;<a class="el" href="../../d9/d00/a00524_source.html">StdAfx.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d7/d00/a00143_source.html">AlphaCPU.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d6/d00/a00245_source.html">jit/jitengine.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d5/d00/a00050_source.html">chipset/AliM1543C.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dd/d00/a00260_source.html">TraceEngine.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d2/d00/a00464_source.html">network/lockstep.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d3/d00/a00200_source.html">cpu_memory.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../db/d00/a00179_source.html">cpu_control.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d7/d00/a00173_source.html">cpu_arith.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../de/d00/a00197_source.html">cpu_logical.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d5/d00/a00176_source.html">cpu_bwx.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d9/d00/a00191_source.html">cpu_fp_memory.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../da/d00/a00188_source.html">cpu_fp_branch.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dc/d00/a00194_source.html">cpu_fp_operate.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../de/d00/a00203_source.html">cpu_misc.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dd/d00/a00212_source.html">cpu_vax.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d5/d00/a00206_source.html">cpu_mvi.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d3/d00/a00209_source.html">cpu_pal.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d7/d00/a00182_source.html">cpu_debug.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d3/d00/a00215_source.html">diag_rpcc.h</a>&quot;</code><br />
-<code>#include &lt;thread&gt;</code><br />
-</div><div class="textblock"><div class="dynheader">
-Include dependency graph for AlphaCPU.cpp:</div>
+<div class="textblock"><div class="dynheader">
+This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../d5/d00/a00141.png" border="0" usemap="#a_c_p_u_2_alpha_c_p_u_8cpp" loading="lazy" alt=""/></div>
-<map name="a_c_p_u_2_alpha_c_p_u_8cpp" id="a_c_p_u_2_alpha_c_p_u_8cpp">
-<area shape="rect" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="2665,5,2807,32"/>
-<area shape="rect" href="../../d9/d00/a00524.html" title="Standard includes." alt="" coords="510,80,583,107"/>
-<area shape="poly" title=" " alt="" coords="2665,25,599,93,598,88,2665,20"/>
-<area shape="rect" title=" " alt="" coords="821,304,878,331"/>
-<area shape="poly" title=" " alt="" coords="2663,21,2512,28,2301,38,2060,55,1816,83,1622,113,1471,144,1131,232,1001,269,894,304,892,299,1000,264,1130,227,1470,139,1621,108,1816,77,2059,50,2300,32,2511,23,2668,21"/>
-<area shape="rect" href="../../d7/d00/a00143.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="1553,155,1647,181"/>
-<area shape="poly" title=" " alt="" coords="2663,22,2531,29,2352,39,2150,56,1946,83,1787,116,1655,152,1654,147,1786,111,1945,77,2149,51,2352,33,2531,23,2668,21"/>
-<area shape="rect" href="../../dd/d00/a00260.html" title="Contains the definitions for the CPU tracing engine." alt="" coords="1975,304,2113,331"/>
-<area shape="poly" title=" " alt="" coords="2662,21,2491,26,2278,35,2176,43,2089,53,2025,66,2004,74,1991,82,1988,92,1992,106,2006,141,2025,166,2044,192,2059,229,2061,260,2055,291,2051,287,2055,260,2053,230,2039,195,2021,170,2002,144,1987,108,1983,92,1987,78,2001,69,2023,61,2089,48,2176,37,2277,30,2491,21,2668,20"/>
-<area shape="rect" href="../../d6/d00/a00245.html" title=" " alt="" coords="2001,80,2095,107"/>
-<area shape="poly" title=" " alt="" coords="2662,25,2420,48,2114,83,2111,83,2110,78,2113,77,2420,42,2667,25"/>
-<area shape="rect" href="../../d5/d00/a00050.html" title="Contains the definitions for the ISA part of the emulated Ali M1543C chipset." alt="" coords="2061,155,2203,181"/>
-<area shape="poly" title=" " alt="" coords="2663,23,2530,33,2371,45,2233,61,2185,71,2159,82,2149,94,2142,108,2134,141,2131,137,2137,107,2144,91,2156,78,2183,66,2232,56,2371,39,2529,28,2668,23"/>
-<area shape="rect" href="../../d2/d00/a00464.html" title="Contains telnet declarations for the lock&#45;step code." alt="" coords="2169,80,2300,107"/>
-<area shape="poly" title=" " alt="" coords="2667,29,2316,82,2316,77,2662,30"/>
-<area shape="rect" href="../../d3/d00/a00200.html" title="Contains code macros for the processor memory load/store instructions." alt="" coords="2324,80,2430,107"/>
-<area shape="poly" title=" " alt="" coords="2676,32,2446,81,2445,76,2670,33"/>
-<area shape="rect" href="../../db/d00/a00179.html" title="Contains code macros for the processor control instructions." alt="" coords="2454,80,2554,107"/>
-<area shape="poly" title=" " alt="" coords="2698,32,2559,78,2558,72,2693,33"/>
-<area shape="rect" href="../../d7/d00/a00173.html" title="Contains code macros for the processor integer arithmetic instructions." alt="" coords="2577,80,2663,107"/>
-<area shape="poly" title=" " alt="" coords="2718,32,2654,74,2652,69,2713,33"/>
-<area shape="rect" href="../../de/d00/a00197.html" title="Contains code macros for the processor logical instructions." alt="" coords="2687,80,2785,107"/>
-<area shape="poly" title=" " alt="" coords="2738,31,2738,66,2734,63,2734,35"/>
-<area shape="rect" href="../../d5/d00/a00176.html" title="Contains code macros for the processor BWX (byte and word extension) instructions." alt="" coords="2808,80,2893,107"/>
-<area shape="poly" title=" " alt="" coords="2757,30,2820,72,2815,71,2755,35"/>
-<area shape="rect" href="../../d9/d00/a00191.html" title="Contains code macros for the processor floating&#45;point load/store instructions." alt="" coords="2916,80,3041,107"/>
-<area shape="poly" title=" " alt="" coords="2779,30,2924,75,2919,75,2778,35"/>
-<area shape="rect" href="../../da/d00/a00188.html" title="Contains code macros for the processor floating&#45;point branch instructions." alt="" coords="3065,80,3183,107"/>
-<area shape="poly" title=" " alt="" coords="2804,30,3053,78,3047,78,2804,35"/>
-<area shape="rect" href="../../dc/d00/a00194.html" title="Contains code macros for the processor floating&#45;point operate instructions." alt="" coords="3207,80,3329,107"/>
-<area shape="poly" title=" " alt="" coords="2807,26,3195,80,3189,80,2807,31"/>
-<area shape="rect" href="../../de/d00/a00203.html" title="Contains code macros for miscellaneous processor instructions." alt="" coords="2818,155,2907,181"/>
-<area shape="poly" title=" " alt="" coords="2807,19,2950,25,3118,35,3265,52,3315,64,3343,78,3350,91,3348,103,3338,113,3321,122,3272,136,3207,147,3055,162,2923,168,2922,163,3055,156,3206,142,3271,131,3319,117,3335,109,3343,100,3345,92,3339,82,3314,69,3264,58,3118,41,2949,30,2807,24"/>
-<area shape="rect" href="../../dd/d00/a00212.html" title="Contains code macros for the processor VAX compatibility instructions." alt="" coords="3405,80,3486,107"/>
-<area shape="poly" title=" " alt="" coords="2807,21,3063,41,3224,57,3386,77,3392,81,3387,81,3385,83,3223,62,3062,46,2807,27"/>
-<area shape="rect" href="../../d5/d00/a00206.html" title="Contains code macros for the processor MVI (multimedia) instructions." alt="" coords="3510,80,3591,107"/>
-<area shape="poly" title=" " alt="" coords="2807,19,3103,35,3296,52,3497,80,3492,80,3296,57,3103,41,2807,25"/>
-<area shape="rect" href="../../d3/d00/a00209.html" title="Contains code macros for the processor PALmode instructions." alt="" coords="3616,80,3693,107"/>
-<area shape="poly" title=" " alt="" coords="2807,18,2951,22,3146,32,3370,49,3603,80,3598,80,3370,55,3146,37,2951,28,2807,24"/>
-<area shape="rect" href="../../d7/d00/a00182.html" title="Contains debugging macros used by AlphaCPU.cpp." alt="" coords="3718,80,3813,107"/>
-<area shape="poly" title=" " alt="" coords="2807,18,2965,23,3186,33,3441,50,3706,80,3700,80,3440,55,3185,38,2965,28,2807,24"/>
-<area shape="rect" href="../../d3/d00/a00215.html" title=" " alt="" coords="3368,155,3456,181"/>
-<area shape="poly" title=" " alt="" coords="2807,19,3061,24,3392,36,3685,53,3782,64,3812,71,3827,78,3834,93,3827,108,3803,127,3766,141,3721,151,3671,159,3564,167,3472,170,3472,164,3564,162,3670,154,3720,146,3765,135,3800,122,3823,105,3829,93,3823,82,3810,76,3781,70,3684,58,3391,41,3061,30,2807,24"/>
-<area shape="rect" href="../../d7/d00/a00131.html" title=" " alt="" coords="5,155,115,181"/>
-<area shape="poly" title=" " alt="" coords="509,102,134,157,132,157,128,153,133,152,511,97"/>
-<area shape="rect" href="../../df/d00/a00263.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="813,379,902,405"/>
-<area shape="poly" title=" " alt="" coords="508,96,430,101,332,110,241,127,208,140,186,156,158,200,150,222,148,243,150,265,157,286,169,307,186,329,197,336,216,343,275,356,447,373,641,383,800,390,794,390,640,388,447,379,275,361,215,349,195,341,182,333,165,310,152,288,145,266,143,243,145,221,153,198,182,153,205,136,240,122,331,104,429,95,512,94"/>
-<area shape="rect" title=" " alt="" coords="1280,379,1347,405"/>
-<area shape="poly" title=" " alt="" coords="508,98,445,108,364,129,325,146,287,168,255,196,230,231,224,252,222,280,226,308,238,328,277,335,376,344,679,361,1267,388,1262,390,679,366,375,349,277,341,234,333,221,310,216,280,218,251,226,228,251,193,284,164,322,142,363,124,443,103,513,96"/>
-<area shape="rect" href="../../d3/d00/a00023.html" title=" " alt="" coords="240,229,362,256"/>
-<area shape="poly" title=" " alt="" coords="507,104,448,124,415,139,383,157,348,187,320,219,317,215,344,183,380,152,412,134,447,119,512,101"/>
-<area shape="rect" href="../../d5/d00/a00029.html" title=" " alt="" coords="667,229,768,256"/>
-<area shape="poly" title=" " alt="" coords="553,105,575,141,606,179,638,203,673,223,667,223,635,207,602,183,570,144,552,110"/>
-<area shape="rect" href="../../dd/d00/a00041.html" title=" " alt="" coords="488,229,592,256"/>
-<area shape="poly" title=" " alt="" coords="548,105,544,215,539,213,544,109"/>
-<area shape="rect" href="../../dc/d00/a00032.html" title=" " alt="" coords="350,304,437,331"/>
-<area shape="poly" title=" " alt="" coords="540,106,412,293,409,289,535,108"/>
-<area shape="rect" href="../../d8/d00/a00038.html" title=" " alt="" coords="792,229,922,256"/>
-<area shape="poly" title=" " alt="" coords="558,105,597,142,622,162,649,179,713,206,780,227,775,227,712,211,647,184,619,166,594,146,557,110"/>
-<area shape="rect" href="../../d4/d00/a00035.html" title=" " alt="" coords="660,155,774,181"/>
-<area shape="poly" title=" " alt="" coords="577,105,676,148,671,148,576,110"/>
-<area shape="rect" href="../../d0/d00/a00302.html" title="Contains macro&#39;s and prototypes for debugging." alt="" coords="798,155,900,181"/>
-<area shape="poly" title=" " alt="" coords="583,101,785,150,780,152,583,106"/>
-<area shape="rect" href="../../d3/d00/a00305.html" title="Contains byte&#45;order conversion helpers." alt="" coords="925,155,1030,181"/>
-<area shape="poly" title=" " alt="" coords="583,98,912,153,907,155,583,103"/>
-<area shape="rect" title=" " alt="" coords="248,304,325,331"/>
-<area shape="poly" title=" " alt="" coords="301,255,294,290,290,287,297,259"/>
-<area shape="rect" title=" " alt="" coords="461,304,515,331"/>
-<area shape="poly" title=" " alt="" coords="334,254,449,300,444,301,334,259"/>
-<area shape="rect" title=" " alt="" coords="902,304,959,331"/>
-<area shape="poly" title=" " alt="" coords="755,254,890,301,884,301,754,259"/>
-<area shape="rect" title=" " alt="" coords="986,304,1046,331"/>
-<area shape="poly" title=" " alt="" coords="768,253,973,304,968,304,768,258"/>
-<area shape="poly" title=" " alt="" coords="741,254,816,297,811,296,740,259"/>
-<area shape="rect" title=" " alt="" coords="632,304,688,331"/>
-<area shape="poly" title=" " alt="" coords="710,255,681,294,678,290,705,258"/>
-<area shape="rect" title=" " alt="" coords="713,304,791,331"/>
-<area shape="poly" title=" " alt="" coords="725,254,742,291,737,289,722,259"/>
-<area shape="poly" title=" " alt="" coords="533,255,507,294,504,289,529,258"/>
-<area shape="poly" title=" " alt="" coords="592,248,723,269,889,304,884,304,722,274,592,254"/>
-<area shape="poly" title=" " alt="" coords="593,247,757,267,973,304,968,305,756,272,593,252"/>
-<area shape="poly" title=" " alt="" coords="593,253,803,301,808,305,803,305,802,307,592,258"/>
-<area shape="poly" title=" " alt="" coords="561,254,629,296,623,295,560,259"/>
-<area shape="poly" title=" " alt="" coords="577,254,703,298,698,299,577,259"/>
-<area shape="rect" title=" " alt="" coords="1418,304,1478,331"/>
-<area shape="poly" title=" " alt="" coords="592,247,655,253,1090,288,1405,313,1400,313,1089,294,654,259,593,252"/>
-<area shape="rect" title=" " alt="" coords="539,304,608,331"/>
-<area shape="poly" title=" " alt="" coords="547,254,564,291,559,289,545,259"/>
-<area shape="poly" title=" " alt="" coords="517,256,434,299,432,294,512,257"/>
-<area shape="poly" title=" " alt="" coords="871,254,910,294,905,292,869,259"/>
-<area shape="poly" title=" " alt="" coords="885,254,977,297,972,297,884,259"/>
-<area shape="poly" title=" " alt="" coords="841,256,784,297,782,292,836,257"/>
-<area shape="poly" title=" " alt="" coords="719,180,720,215,715,212,716,184"/>
-<area shape="poly" title=" " alt="" coords="775,179,885,204,931,217,957,227,987,257,1007,292,1002,289,983,260,955,232,930,222,884,210,775,184"/>
-<area shape="poly" title=" " alt="" coords="775,179,875,203,915,216,937,227,942,238,943,249,934,268,915,285,892,299,891,294,912,280,929,264,938,248,937,239,933,231,913,221,873,208,775,184"/>
-<area shape="poly" title=" " alt="" coords="657,176,553,197,506,212,489,221,478,231,473,243,478,254,619,302,614,303,474,258,468,243,474,228,486,217,504,208,552,192,662,175"/>
-<area shape="poly" title=" " alt="" coords="699,181,680,198,663,216,654,236,654,245,657,255,677,278,704,298,698,297,673,282,652,257,648,246,649,234,659,213,676,194,695,183"/>
-<area shape="poly" title=" " alt="" coords="775,178,1405,306,1400,308,774,183"/>
-<area shape="poly" title=" " alt="" coords="1550,173,1411,194,1325,210,1240,232,1211,244,1182,258,1062,303,1060,298,1180,254,1209,239,1238,227,1323,205,1410,188,1555,173"/>
-<area shape="poly" title=" " alt="" coords="1550,171,1480,178,1386,188,1284,206,1182,232,1157,245,1132,258,1067,277,1015,286,961,293,894,306,893,301,960,288,1014,281,1066,272,1130,254,1155,240,1180,227,1282,200,1386,183,1479,173,1555,171"/>
-<area shape="poly" title=" " alt="" coords="1555,181,1512,202,1492,215,1475,231,1460,259,1452,291,1448,287,1455,257,1471,228,1489,211,1509,197,1550,182"/>
-<area shape="rect" href="../../d6/d00/a00026.html" title=" " alt="" coords="1251,229,1410,256"/>
-<area shape="poly" title=" " alt="" coords="1556,181,1393,227,1392,222,1550,182"/>
-<area shape="rect" href="../../d0/d00/a00239.html" title=" " alt="" coords="1486,229,1581,256"/>
-<area shape="poly" title=" " alt="" coords="1591,181,1556,220,1554,216,1586,183"/>
-<area shape="rect" href="../../d6/d00/a00293.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="1617,304,1791,331"/>
-<area shape="poly" title=" " alt="" coords="1648,173,1700,191,1724,207,1744,228,1749,245,1747,262,1728,295,1725,290,1742,261,1744,245,1739,231,1721,211,1698,196,1647,179"/>
-<area shape="rect" href="../../dc/d00/a00620.html" title="Contains the definitions for the emulated Typhoon Chipset devices." alt="" coords="1604,229,1729,256"/>
-<area shape="poly" title=" " alt="" coords="1613,179,1647,219,1642,217,1611,184"/>
-<area shape="rect" href="../../de/d00/a00185.html" title="Contains some macro definitions and some inline functions for the Alpha CPU." alt="" coords="1804,229,1889,256"/>
-<area shape="poly" title=" " alt="" coords="1643,179,1792,225,1786,224,1643,185"/>
-<area shape="rect" href="../../d9/d00/a00146.html" title=" " alt="" coords="1913,229,2044,256"/>
-<area shape="poly" title=" " alt="" coords="1648,176,1900,226,1895,226,1647,181"/>
-<area shape="poly" title=" " alt="" coords="1253,255,1125,277,975,307,974,301,1125,272,1248,255"/>
-<area shape="poly" title=" " alt="" coords="1278,256,1062,308,1061,303,1273,257"/>
-<area shape="rect" title=" " alt="" coords="1890,304,1950,331"/>
-<area shape="poly" title=" " alt="" coords="1411,251,1877,310,1872,311,1411,256"/>
-<area shape="poly" title=" " alt="" coords="1638,331,1363,384,1362,379,1633,332"/>
-<area shape="poly" title=" " alt="" coords="1607,254,1594,259,1433,271,1296,275,1062,271,949,269,828,272,691,284,531,307,530,301,690,278,827,267,948,264,1062,266,1296,270,1433,266,1593,253,1601,255"/>
-<area shape="poly" title=" " alt="" coords="1607,254,1594,259,1422,273,1286,277,1149,284,1069,293,975,307,974,302,1068,287,1149,279,1285,272,1421,268,1593,253,1601,255"/>
-<area shape="poly" title=" " alt="" coords="1607,254,1594,259,1291,293,1062,315,1062,310,1290,288,1593,253,1601,255"/>
-<area shape="poly" title=" " alt="" coords="1631,256,1494,304,1492,299,1626,257"/>
-<area shape="poly" title=" " alt="" coords="1675,254,1693,292,1688,289,1672,259"/>
-<area shape="poly" title=" " alt="" coords="1730,253,1966,301,1960,300,1729,259"/>
-<area shape="poly" title=" " alt="" coords="1977,329,1963,333,1655,359,1353,376,917,392,917,387,1353,371,1655,354,1962,328,1972,330"/>
-<area shape="poly" title=" " alt="" coords="1971,255,1941,294,1938,289,1966,258"/>
-<area shape="poly" title=" " alt="" coords="2128,180,2101,222,2081,242,2057,258,2009,267,1909,276,1615,293,1062,317,1062,312,1615,288,1909,271,2008,262,2055,254,2078,238,2097,218,2123,183"/>
-<area shape="rect" href="../../d6/d00/a00287.html" title="Contains the definitions for the PCI Device base class." alt="" coords="2169,229,2295,256"/>
-<area shape="poly" title=" " alt="" coords="2150,179,2205,221,2200,219,2149,184"/>
-<area shape="poly" title=" " alt="" coords="2172,253,2151,259,1806,305,1805,300,2150,253,2166,254"/>
-<area shape="rect" href="../../dc/d00/a00515.html" title="Contains TCP/IP declarations used by the serial port emulator and lock&#45;step code." alt="" coords="2228,155,2292,181"/>
-<area shape="poly" title=" " alt="" coords="2241,105,2253,141,2248,138,2238,109"/>
-<area shape="poly" title=" " alt="" coords="2821,173,2641,197,2415,232,2361,246,2307,259,2111,283,1957,292,1803,296,1606,307,1494,315,1494,310,1605,301,1803,291,1957,287,2110,278,2306,253,2360,241,2414,227,2641,192,2815,174"/>
-<area shape="poly" title=" " alt="" coords="3370,173,2657,236,2237,276,1966,307,1965,301,2236,270,2657,231,3365,173"/>
+<div class="center"><img src="../../d2/d00/a00142.png" border="0" usemap="#aconfig_2_question_8hdep" loading="lazy" alt=""/></div>
+<map name="aconfig_2_question_8hdep" id="aconfig_2_question_8hdep">
+<area shape="rect" title="Question class for Configuration file creator." alt="" coords="11,5,135,32"/>
+<area shape="rect" href="../../d1/d00/a00128.html" title="Configuration file creator." alt="" coords="5,80,141,107"/>
+<area shape="poly" title=" " alt="" coords="75,46,76,80,70,79,71,50"/>
 </map>
 </div>
 </div>
 <p><a href="../../d5/d00/a00140_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:a0ec8cc45e9c157359d5516d2eddd4f6f" id="r_a0ec8cc45e9c157359d5516d2eddd4f6f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0ec8cc45e9c157359d5516d2eddd4f6f">TB_ASN_MATCH</a>(entry)</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:a2e979322f8598ecd72ea12d725c02cf0" id="r_a2e979322f8598ecd72ea12d725c02cf0"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a2e979322f8598ecd72ea12d725c02cf0">handle_debug_string</a> (char *s)</td></tr>
-<tr class="memdesc:a2e979322f8598ecd72ea12d725c02cf0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do whatever needs to be done to a debug-string.  <br /></td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:a44c69c496db2b301dfe775ca621ed0ec" id="r_a44c69c496db2b301dfe775ca621ed0ec"><td class="memItemLeft">char&#160;</td><td class="memItemRight"><a class="el" href="#a44c69c496db2b301dfe775ca621ed0ec">dbg_string</a> [1000]</td></tr>
-<tr class="memitem:a4f8b5d8df71b7c95fa4163f773be3665" id="r_a4f8b5d8df71b7c95fa4163f773be3665"><td class="memItemLeft">static <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a4f8b5d8df71b7c95fa4163f773be3665">cpu_magic1</a> = 0x2126468C</td></tr>
-<tr class="memitem:a4bb3e9f50ad1051903db016567329ca7" id="r_a4bb3e9f50ad1051903db016567329ca7"><td class="memItemLeft">static <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a4bb3e9f50ad1051903db016567329ca7">cpu_magic2</a> = 0xC8646212</td></tr>
-<tr id="var-members-0" class="groupHeader"><td colspan="2"><div class="groupHeader">TB</div></td></tr>
-<tr><td colspan="2" class="ititle"><div class="groupText"><p>Translation Buffer related functions </p>
-</div></td></tr>
-<tr class="memitem:a3f0d3ad7c7154bd2768d6e4be7f01651" id="r_a3f0d3ad7c7154bd2768d6e4be7f01651"><td class="memItemLeft">const char *&#160;</td><td class="memItemRight"><a class="el" href="#a3f0d3ad7c7154bd2768d6e4be7f01651">PAL_NAME</a> []</td></tr>
-<tr class="memitem:ac5c7bc8ea0ac6b09a8fa5d9de79c5335" id="r_ac5c7bc8ea0ac6b09a8fa5d9de79c5335"><td class="memItemLeft">const char *&#160;</td><td class="memItemRight"><a class="el" href="#ac5c7bc8ea0ac6b09a8fa5d9de79c5335">IPR_NAME</a> []</td></tr>
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Data Structures</h2></td></tr>
+<tr class="memitem:Question" id="r_Question"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../dd/d00/a01121.html">Question</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abstract <a class="el" href="../../dd/d00/a01121.html" title="Abstract Question base class.">Question</a> base class.  <a href="../../dd/d00/a01121.html#details">More...</a><br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Contains the code for the emulated DecChip 21264CB EV68 Alpha processor. </p>
+<div class="textblock"><p><a class="el" href="../../dd/d00/a01121.html" title="Abstract Question base class.">Question</a> class for Configuration file creator. </p>
 <p>$Id$</p>
-<p>X-1.82 Camiel Vanderhoeven 15-MAR-2008 a) Added CONSTANT_TIME_FACTOR define to lock the CPU timing. b) Fixed a bug in SPE0 handling, spotted by David Hittner.</p>
-<p>X-1.81 Camiel Vanderhoeven 12-JUN-2008 a) Support to keep secondary CPUs waiting until activated from primary. b) New unaligned memory access handling. c) Fixed support for current_pc_physical handling with new icache.</p>
-<p>X-1.80 Camiel Vanderhoeven 31-MAY-2008 Changes to include parts of Poco.</p>
-<p>X-1.79 Camiel Vanderhoeven 26-MAR-2008 Fix compiler warnings.</p>
-<p>X-1.78 Camiel Vanderhoeven 19-MAR-2008 IDB versions compileable again.</p>
-<p>X-1.77 Camiel Vanderhoeven 15-MAR-2008 Remove confusing outer for-loop in <a class="el" href="../../dd/d00/a00921.html#a920854ec4029c667ee80ec021d526065">CAlphaCPU::run()</a>.</p>
-<p>X-1.76 Camiel Vanderhoeven 14-MAR-2008 Formatting.</p>
-<p>X-1.75 Camiel Vanderhoeven 14-MAR-2008</p><ol type="1">
-<li>More meaningful exceptions replace throwing (int) 1.</li>
-<li>U64 macro replaces X64 macro.</li>
-</ol>
-<p>X-1.74 Camiel Vanderhoeven 13-MAR-2008 Create init(), start_threads() and stop_threads() functions.</p>
-<p>X-1.73 Camiel Vanderhoeven 11-MAR-2008 Don't printf calibration loop.</p>
-<p>X-1.72 Camiel Vanderhoeven 05-MAR-2008 Multi-threading version.</p>
-<p>X-1.71 Camiel Vanderhoeven 04-MAR-2008 Support some basic MP features. (CPUID read from C-Chip MISC register, inter-processor interrupts)</p>
-<p>X-1.70 Camiel Vanderhoeven 29-FEB-2008 Comments.</p>
-<p>X-1.69 Brian Wheeler 29-FEB-2008 Add BREAKPOINT INSTRUCTION command to IDB.</p>
-<p>X-1.68 Brian Wheeler 27-FEB-2008 Avoid compiler warnings.</p>
-<p>X-1.67 Camiel Vanderhoeven 08-FEB-2008 Show originating device name on memory errors.</p>
-<p>X-1.66 Camiel Vanderhoeven 05-FEB-2008 Only use new floating-point code when HAVE_NEW_FP has been defined.</p>
-<p>X-1.65 Camiel Vanderhoeven 01-FEB-2008 Avoid unnecessary shift-operations to calculate constant values.</p>
-<p>X-1.64 Camiel Vanderhoeven 30-JAN-2008 Always use set_pc or add_pc to change the program counter.</p>
-<p>X-1.63 Camiel Vanderhoeven 30-JAN-2008 Remember number of instructions left in current memory page, so that the translation-buffer doens't need to be consulted on every instruction fetch when the Icache is disabled.</p>
-<p>X-1.62 Camiel Vanderhoeven 29-JAN-2008 Comments.</p>
-<p>X-1.61 Camiel Vanderhoeven 29-JAN-2008 Undid last change, remember separate last found translation-buffer entries for read and wrote operations. This should help with memory copy operations.</p>
-<p>X-1.60 Camiel Vanderhoeven 27-JAN-2008 Have GO_PAL throw an exception, so we don't continue doing what we were doing before the exception was taken.</p>
-<p>X-1.59 Camiel Vanderhoeven 26-JAN-2008 Made IDB compile again.</p>
-<p>X-1.58 Camiel Vanderhoeven 25-JAN-2008 Added option to disable the icache.</p>
-<p>X-1.57 Camiel Vanderhoeven 22-JAN-2008 Nicer initialization of "state" structure.</p>
-<p>X-1.56 Camiel Vanderhoeven 22-JAN-2008 Implemented missing /V integer instructions.</p>
-<p>X-1.55 Camiel Vanderhoeven 21-JAN-2008 Moved some macro's to <a class="el" href="../../de/d00/a00185.html" title="Contains some macro definitions and some inline functions for the Alpha CPU.">cpu_defs.h</a>; implement new floating-point code.</p>
-<p>X-1.54 Camiel Vanderhoeven 19-JAN-2008 Run CPU in a separate thread if CPU_THREADS is defined. NOTA BENE: This is very experimental, and has several problems.</p>
-<p>X-1.53 Camiel Vanderhoeven 18-JAN-2008 Replaced sext_64 inlines with sext_u64_&lt;bits&gt; inlines for performance reasons (thanks to David Hittner for spotting this!); Process device interrupts after a 100-cpu-cycle delay.</p>
-<p>X-1.52 David Hittner 16-JAN-2008 Added ADDL/V instruction, added MIPS estimate (define MIPS_ESTIMATE)</p>
-<p>X-1.51 Camiel Vanderhoeven 08-JAN-2008 Removed last references to IDE disk read SRM replacement.</p>
-<p>X-1.50 Camiel Vanderhoeven 30-DEC-2007 Print file id on initialization.</p>
-<p>X-1.49 Camiel Vanderhoeven 28-DEC-2007 Keep the compiler happy.</p>
-<p>X-1.48 Camiel Vanderhoeven 17-DEC-2007 SaveState file format 2.1</p>
-<p>X-1.47 Camiel Vanderhoeven 10-DEC-2007 Use configurator.</p>
-<p>X-1.46 Camiel Vanderhoeven 2-DEC-2007 Changed the way translation buffers work, the way interrupts work.</p>
-<p>X-1.45 Brian Wheeler 1-DEC-2007 Added support for instruction counting, underlined lines in listings, corrected some unsigned/signed issues.</p>
-<p>X-1.44 Camiel Vanderhoeven 16-NOV-2007 Avoid more compiler warnings.</p>
-<p>X-1.43 Camiel Vanderhoeven 16-NOV-2007 Avoid compiler warning about default without any cases.</p>
-<p>X-1.42 Camiel Vanderhoeven 08-NOV-2007 Instruction set complete now.</p>
-<p>X-1.41 Camiel Vanderhoeven 06-NOV-2007 Performance improvements to ICACHE: last result is kept; cache lines are larger (512 DWORDS in stead of 16 DWORDS), cache size is configurable (both number of cache lines and size of each cache line), memcpy is used to move memory into the ICACHE. CAVEAT: ICACHE can only be filled from memory (not from I/O).</p>
-<p>X-1.40 Camiel Vanderhoeven 02-NOV-2007 Added integer /V instructions.</p>
-<p>X-1.39 Camiel Vanderhoeven 02-NOV-2007 Added missing floating point instructions.</p>
-<p>X-1.38 Eduardo Marcelo Ferrat 31-OCT-2007 EXC_SUM contained the wrong register (3 in stead of 1) on a DTBM exception. Added instructions for CVTDG, CVTGD, MULG, CVTGF.</p>
-<p>X-1.37 Camiel Vanderhoeven 18-APR-2007 Faster lockstep mechanism (send info 50 cpu cycles at a time)</p>
-<p>X-1.36 Camiel Vanderhoeven 11-APR-2007 Moved all data that should be saved to a state file to a structure "state".</p>
-<p>X-1.35 Camiel Vanderhoeven 10-APR-2007 New mechanism for SRM replacements. Where these need to be executed, <a class="el" href="../../d4/d00/a01817.html#a390eeea8f34b1dcc08338563e803d738" title="Load ROM contents from file.">CSystem::LoadROM()</a> puts a special opcode (a CALL_PAL instruction with an otherwise illegal operand of 0x01234xx) in memory. CAlphaCPU::DoClock() recognizes these opcodes and performs the SRM action.</p>
-<p>X-1.34 Camiel Vanderhoeven 10-APR-2007 Unintentional version number increase.</p>
-<p>X-1.33 Camiel Vanderhoeven 30-MAR-2007 Formatting.</p>
-<p>X-1.32 Camiel Vanderhoeven 29-MAR-2007 Added AST to the list of conditions that cause the processor to go to the interrupt PAL vector (680).</p>
-<p>X-1.31 Brian Wheeler 28-MAR-2007 Fixed missing ) after #if !defined(SRM_NO_SPEEDUPS</p>
-<p>X-1.30 Camiel Vanderhoeven 26-MAR-2007 a) Possibility to disable SRM-code replacements with the defines SRM_NO_IDE, SRM_NO_SRL, and SRM_NO_SPEEDUPS b) Possibility to send SRM-code replacement debugging messages to the console, with the defines DEBUG_SRM_IDE and DEBUG_SRM_SRL c) Added software-interrupts to the list of conditions that can cause the processot to go to the interrupt PAL vector (680)</p>
-<p>X-1.29 Camiel Vanderhoeven 14-MAR-2007 Formatting.</p>
-<p>X-1.28 Camiel Vanderhoeven 14-MAR-2007 Fixed typo in "case 0x22: OP(CPYSE,F12_f3);"</p>
-<p>X-1.27 Camiel Vanderhoeven 13-MAR-2007 Added some floating-point opcodes, added es_float.h inclusion</p>
-<p>X-1.26 Camiel Vanderhoeven 12-MAR-2007 a) Changed call to CTranslationBuffer::convert_address (arguments list changed) b) Set values for EXC_SUM and MM_STAT on various exceptions</p>
-<p>X-1.25 Camiel Vanderhoeven 9-MAR-2007 In the listing-process, addresses were executed twice</p>
-<p>X-1.24 Camiel Vanderhoeven 8-MAR-2007 a) Changed call to CTranslationBuffer::write_pte (arguments list changed) b) Backed-out X-1.23 as real problem was solved. (X-1.3 in <a class="el" href="../../d5/d00/a00176.html" title="Contains code macros for the processor BWX (byte and word extension) instructions.">cpu_bwx.h</a>)</p>
-<p>X-1.23 Camiel Vanderhoeven 7-MAR-2007 HACK to stop APB.EXE from crashing when passing bootflags</p>
-<p>X-1.22 Camiel Vanderhoeven 3-MAR-2007 Wrote code to be executed in stead of SRM console code for writing to the serial port, and reading from IDE disks. Mechanism is based on recognition of the PC value. Should be replaced with a better mechanism in the future.</p>
-<p>X-1.21 Camiel Vanderhoeven 2-MAR-2007 Initialize debug_string to "".</p>
-<p>X-1.20 Camiel Vanderhoeven 2-MAR-2007 Fixed problem in Save and RestoreState; argument f conflicted with class member f.</p>
-<p>X-1.19 Camiel Vanderhoeven 28-FEB-2007 Added support for the lockstep-mechanism.</p>
-<p>X-1.18 Camiel Vanderhoeven 27-FEB-2007 Removed an unreachable "return 0;" line from DoClock</p>
-<p>X-1.17 Camiel Vanderhoeven 22-FEB-2007 E_FAULT returned from translation buffer now causes DFAULT exception</p>
-<p>X-1.16 Camiel Vanderhoven 22-FEB-2007 a) Changed call to CTranslationBuffer::convert_address (arguments list changed) b) Fixed HW_MTPR and HW_MFPR opcodes</p>
-<p>X-1.15 Camiel Vanderhoeven 19-FEB-2007 Fixed preprocessor macro concatenation bug (used ## both before and after the literal; changed this to only before).</p>
-<p>X-1.14 Camiel Vanderhoeven 18-FEB-2007 Put all actual code behind the processor opcodes in cpu_xxx.h include files, and replaced them with <a class="el" href="../../d7/d00/a00182.html#a2ed3c9a3e24f996d9d0c1944f4ff059e">OP(...,...)</a> macro's in this file.</p>
-<p>X-1.13 Camiel Vanderhoeven 16-FEB-2007 a) Added <a class="el" href="../../dd/d00/a00921.html#a9ed4ccedc35d2fd10325ade59834b363" title="Produce disassembly-listing without marker.">CAlphaCPU::listing</a>. b) Clocking changes (due to changes in <a class="el" href="../../d4/d00/a01817.html" title="Emulated Typhoon 21272 chipset.">CSystem</a>): CAlphaCPU::DoClock now returns a value, and the CPU is registered as a fast clocked device.</p>
-<p>X-1.12 Brian Wheeler 13-FEB-2007 Different algorithm used for UMULH (previous algorithm suffered from portability issues).</p>
-<p>X-1.11 Camiel Vanderhoeven 13-FEB-2007 a) Bugfix in the UMULH instruction. b) Bugfix in the HW_MTPR VA_CTL instruction. Now updates va_ctl_va_mode instead of i_ctl_va_mode.</p>
-<p>X-1.10 Camiel Vanderhoeven 12-FEB-2007 a) Moved debugging macro's to <a class="el" href="../../d7/d00/a00182.html" title="Contains debugging macros used by AlphaCPU.cpp.">cpu_debug.h</a> b) Cleaned up SEXT and REG macro's (a lot neater now) c) Moved <a class="el" href="../../dd/d00/a00921.html#af620fa1cf9b5fe7a1b0e23acb8e934ee" title="Get a register value.">CAlphaCPU::get_r</a> and <a class="el" href="../../dd/d00/a00921.html#ab5bdcfdcd6eb2b5f555cab875edbcb09" title="Get the processor base register.">CAlphaCPU::get_prbr</a> to <a class="el" href="../../d7/d00/a00143.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor.">AlphaCPU.h</a> as inline functions d) Use SEXT macro in a some places where exotic constructions were used previously</p>
-<p>X-1.9 Camiel Vanderhoeven 12-FEB-2007 a) Added X64_BYTE, X64_WORD, X64_LONG and X64_QUAD, and used these instead of the corresponding values. b) Added ier to the variables that are saved to the state file.</p>
-<p>X-1.8 Camiel Vanderhoeven 9-FEB-2007 a) Moved debugging flags (booleans) to CSystem.cpp. b) Removed loggin of last_write_loc and last_write_val</p>
-<p>X-1.7 Camiel Vanderhoeven 7-FEB-2007 Made various dubugging-related statements dependent on the definition of IDB (interactive debugger)</p>
-<p>X-1.6 Camiel Vanderhoeven 3-FEB-2007 Inline function printable moved to <a class="el" href="../../d9/d00/a00524.html" title="Standard includes.">StdAfx.h</a></p>
-<p>X-1.5 Brian Wheeler 3-FEB-2007 Formatting.</p>
-<p>X-1.4 Brian Wheeler 3-FEB-2007 More scanf and printf statements made compatible with Linux/GCC/glibc.</p>
-<p>X-1.3 Brian Wheeler 3-FEB-2007 Scanf and printf statements made compatible with Linux/GCC/glibc.</p>
-<p>X-1.2 Brian Wheeler 3-FEB-2007 Includes are now case-correct (necessary on Linux)</p>
-<p>X-1.1 Camiel Vanderhoeven 19-JAN-2007 Initial version in CVS. </p>
+<p>X-1.1 Camiel Vanderhoeven 28-MAR-2008 File created. </p>
 
-<p class="definition">Definition in file <a class="el" href="../../d5/d00/a00140_source.html">AlphaCPU.cpp</a>.</p>
-</div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
-<a id="a0ec8cc45e9c157359d5516d2eddd4f6f" name="a0ec8cc45e9c157359d5516d2eddd4f6f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0ec8cc45e9c157359d5516d2eddd4f6f">&#9670;&#160;</a></span>TB_ASN_MATCH</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TB_ASN_MATCH</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>entry</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">((entry).asm_bit || (entry).asn == asn)</div>
-</div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="../../d5/d00/a00140_source.html#l04179">CAlphaCPU::FindTBEntry()</a>.</p>
-
-</div>
-</div>
-<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
-<a id="a2e979322f8598ecd72ea12d725c02cf0" name="a2e979322f8598ecd72ea12d725c02cf0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2e979322f8598ecd72ea12d725c02cf0">&#9670;&#160;</a></span>handle_debug_string()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void handle_debug_string </td>
-          <td>(</td>
-          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>s</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Do whatever needs to be done to a debug-string. </p>
-<p>Used in IDB-mode to handle the disassembly- string. In es40_idb, it is written to the standard output.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>Pointer to the debug string. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-<p class="definition">Definition at line <a class="el" href="../../d5/d00/a00140_source.html#l01004">1004</a> of file <a class="el" href="../../d5/d00/a00140_source.html">AlphaCPU.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d4/d00/a00617_source.html#l00347">dbg_strptr</a>, and <a class="el" href="../../d5/d00/a00140_source.html#l01004">handle_debug_string()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d5/d00/a00140_source.html#l01004">handle_debug_string()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d5/d00/a00140_a2e979322f8598ecd72ea12d725c02cf0_cgraph.png" border="0" usemap="#ad5/d00/a00140_a2e979322f8598ecd72ea12d725c02cf0_cgraph" loading="lazy" alt=""/></div>
-<map name="ad5/d00/a00140_a2e979322f8598ecd72ea12d725c02cf0_cgraph" id="ad5/d00/a00140_a2e979322f8598ecd72ea12d725c02cf0_cgraph">
-<area shape="rect" title="Do whatever needs to be done to a debug&#45;string." alt="" coords="5,29,146,56"/>
-<area shape="poly" title=" " alt="" coords="51,28,47,21,50,11,59,5,76,3,93,5,103,14,98,14,91,10,75,8,61,10,54,14,52,20,56,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d5/d00/a00140_a2e979322f8598ecd72ea12d725c02cf0_icgraph.png" border="0" usemap="#ad5/d00/a00140_a2e979322f8598ecd72ea12d725c02cf0_icgraph" loading="lazy" alt=""/></div>
-<map name="ad5/d00/a00140_a2e979322f8598ecd72ea12d725c02cf0_icgraph" id="ad5/d00/a00140_a2e979322f8598ecd72ea12d725c02cf0_icgraph">
-<area shape="rect" title="Do whatever needs to be done to a debug&#45;string." alt="" coords="5,29,146,56"/>
-<area shape="poly" title=" " alt="" coords="98,14,91,10,75,8,61,10,54,14,52,20,56,29,51,28,47,21,50,11,59,5,76,3,93,5,103,14"/>
-</map>
-</div>
-
-</div>
-</div>
-<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
-<a id="a4f8b5d8df71b7c95fa4163f773be3665" name="a4f8b5d8df71b7c95fa4163f773be3665"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4f8b5d8df71b7c95fa4163f773be3665">&#9670;&#160;</a></span>cpu_magic1</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> cpu_magic1 = 0x2126468C</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d5/d00/a00140_source.html#l04058">4058</a> of file <a class="el" href="../../d5/d00/a00140_source.html">AlphaCPU.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d5/d00/a00140_source.html#l04079">CAlphaCPU::RestoreState()</a>, and <a class="el" href="../../d5/d00/a00140_source.html#l04064">CAlphaCPU::SaveState()</a>.</p>
-
-</div>
-</div>
-<a id="a4bb3e9f50ad1051903db016567329ca7" name="a4bb3e9f50ad1051903db016567329ca7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4bb3e9f50ad1051903db016567329ca7">&#9670;&#160;</a></span>cpu_magic2</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> cpu_magic2 = 0xC8646212</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d5/d00/a00140_source.html#l04059">4059</a> of file <a class="el" href="../../d5/d00/a00140_source.html">AlphaCPU.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d5/d00/a00140_source.html#l04079">CAlphaCPU::RestoreState()</a>, and <a class="el" href="../../d5/d00/a00140_source.html#l04064">CAlphaCPU::SaveState()</a>.</p>
-
-</div>
-</div>
-<a id="a44c69c496db2b301dfe775ca621ed0ec" name="a44c69c496db2b301dfe775ca621ed0ec"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a44c69c496db2b301dfe775ca621ed0ec">&#9670;&#160;</a></span>dbg_string</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">char dbg_string[1000]</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d5/d00/a00140_source.html#l00991">991</a> of file <a class="el" href="../../d5/d00/a00140_source.html">AlphaCPU.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d5/d00/a00140_source.html#l02949">CAlphaCPU::execute()</a>.</p>
-
-</div>
-</div>
-<a id="ac5c7bc8ea0ac6b09a8fa5d9de79c5335" name="ac5c7bc8ea0ac6b09a8fa5d9de79c5335"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac5c7bc8ea0ac6b09a8fa5d9de79c5335">&#9670;&#160;</a></span>IPR_NAME</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char* IPR_NAME[]</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d5/d00/a00140_source.html#l04997">4997</a> of file <a class="el" href="../../d5/d00/a00140_source.html">AlphaCPU.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a3f0d3ad7c7154bd2768d6e4be7f01651" name="a3f0d3ad7c7154bd2768d6e4be7f01651"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3f0d3ad7c7154bd2768d6e4be7f01651">&#9670;&#160;</a></span>PAL_NAME</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char* PAL_NAME[]</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d5/d00/a00140_source.html#l04960">4960</a> of file <a class="el" href="../../d5/d00/a00140_source.html">AlphaCPU.cpp</a>.</p>
-
-</div>
-</div>
-</div><!-- contents -->
+<p class="definition">Definition in file <a class="el" href="../../d5/d00/a00140_source.html">Question.h</a>.</p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
 <div id="page-nav-resize-handle"></div>
@@ -578,7 +152,7 @@ Here is the caller graph for this function:</div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d5/d00/a00140.html">AlphaCPU.cpp</a></li>
+    <li class="navelem"><a href="../../dir_9f351d46ce3cc29445a41dc3a31e6919.html">config</a></li><li class="navelem"><a href="../../d5/d00/a00140.html">Question.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

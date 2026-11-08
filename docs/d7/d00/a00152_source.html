@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: CPU/AlphaCPU_vaxfloat.cpp Source File</title>
+<title>ES40: config/tui_win32/include/err.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,548 +109,67 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d7/d00/a00152_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">AlphaCPU_vaxfloat.cpp</div></div>
+  <div class="headertitle"><div class="title">err.h</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../d7/d00/a00152.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 Emulator.</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2007-2008 by the ES40 Emulator Project</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * This program is free software; you can redistribute it and/or</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * modify it under the terms of the GNU General Public License</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * as published by the Free Software Foundation; either version 2</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * of the License, or (at your option) any later version.</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * This program is distributed in the hope that it will be useful,</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * GNU General Public License for more details.</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * You should have received a copy of the GNU General Public License</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * along with this program; if not, write to the Free Software</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * Although this is not required, the author would appreciate being notified of,</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * and receiving any modifications you may make to the source code that might serve</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * the general public.</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> * Parts of this file are based upon the SIMH Alpha simulator:</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> * Copyright (c) 2003-2006, Robert M Supnik</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment"> * Permission is hereby granted, free of charge, to any person obtaining a</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment"> * copy of this software and associated documentation files (the &quot;Software&quot;),</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment"> * to deal in the Software without restriction, including without limitation</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment"> * the rights to use, copy, modify, merge, publish, distribute, sublicense,</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment"> * and/or sell copies of the Software, and to permit persons to whom the</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="comment"> * Software is furnished to do so, subject to the following conditions:</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="comment"> * The above copyright notice and this permission notice shall be included in</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="comment"> * all copies or substantial portions of the Software.</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="comment"> * THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="comment"> * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment"> * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment"> * ROBERT M SUPNIK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment"> * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment"> * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="comment"> * Except as contained in this notice, the name of Robert M Supnik shall not be</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="comment"> * used in advertising or otherwise to promote the sale, use or other dealings</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="comment"> * in this Software without prior written authorization from Robert M Supnik.</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span></div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d00/a00524.html">StdAfx.h</a>&quot;</span></div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d00/a00143.html">AlphaCPU.h</a>&quot;</span></div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d00/a00182.html">cpu_debug.h</a>&quot;</span></div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="../../d7/d00/a00152.html#afb569f4db71c53f996d4ebce81ed87c8">   90</a></span><span class="preprocessor">#define IPMAX U64(0x7FFFFFFFFFFFFFFF)   </span><span class="comment">/* plus MAX (int) */</span><span class="preprocessor"></span></div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="../../d7/d00/a00152.html#a7180e1755053a1bcd81db85436adc44f">   91</a></span><span class="preprocessor">#define IMMAX U64(0x8000000000000000)   </span><span class="comment">/* minus MAX (int) */</span><span class="preprocessor"></span></div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  <span class="comment">/* Unpacked rounding constants */</span></div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="../../d7/d00/a00152.html#a8be1a575c58da2c6951bfaa2437bd4c9">   94</a></span><span class="preprocessor">#define UF_FRND U64(0x0000008000000000) </span><span class="comment">/* F round */</span><span class="preprocessor"></span></div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="../../d7/d00/a00152.html#ad888ca326a788c5b916f5d4eb3cc5222">   95</a></span><span class="preprocessor">#define UF_DRND U64(0x0000000000000080) </span><span class="comment">/* D round */</span><span class="preprocessor"></span></div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno"><a class="line" href="../../d7/d00/a00152.html#a5838f04ab837aad98094822c4de2da1d">   96</a></span><span class="preprocessor">#define UF_GRND U64(0x0000000000000400) </span><span class="comment">/* G round */</span><span class="preprocessor"></span></div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="comment">/***************************************************************************/</span></div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span></div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> <span class="comment">//\{</span></div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span></div>
-<div class="foldopen" id="foldopen00117" data-start="{" data-end="}">
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno"><a class="line" href="../../dd/d00/a00921.html#a66a23a9caea9102cc791d6309da4251c">  117</a></span><a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> <a class="code hl_function" href="../../dd/d00/a00921.html#a66a23a9caea9102cc791d6309da4251c">CAlphaCPU::vax_ldf</a>(<a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> op)</div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>{</div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>        <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> exp = <a class="code hl_define" href="../../de/d00/a00185.html#ae833b74b2134aead46c3102da0892181">F_GETEXP</a>(op);</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>        <span class="keywordflow">if</span> (exp != 0)</div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>                exp = exp + <a class="code hl_define" href="../../de/d00/a00185.html#af0a4328aca063b55dd121d5e02e363e3">G_BIAS</a> - <a class="code hl_define" href="../../de/d00/a00185.html#a61804a1b3483dbcc64f2b7aeb5bdcb76">F_BIAS</a>;  <span class="comment">/* zero? */</span></div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        <a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> res = (((<a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a>)(op &amp; <a class="code hl_define" href="../../de/d00/a00185.html#a3a6a154759329d0b276b8b5aade28321">F_SIGN</a>)) ? <a class="code hl_define" href="../../de/d00/a00185.html#a48f0868c2774aad1501138b9f9c01ef0">FPR_SIGN</a> : 0) |  <span class="comment">/* finite non-zero */</span></div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>                (((<a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a>)exp) &lt;&lt; <a class="code hl_define" href="../../de/d00/a00185.html#a8413bd09f5542b8516474500dd3950d9">FPR_V_EXP</a>) | (((<a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a>)<a class="code hl_define" href="../../de/d00/a00185.html#aa57d8839405fb974153684a006535b97">SWAP_VAXF</a>(op &amp; ~(<a class="code hl_define" href="../../de/d00/a00185.html#a3a6a154759329d0b276b8b5aade28321">F_SIGN</a> | <a class="code hl_define" href="../../de/d00/a00185.html#a6188f41eb199f07394a149275db5c7ef">F_EXP</a>))) &lt;&lt; <a class="code hl_define" href="../../de/d00/a00185.html#af4bb6e46799dbed1525499cd75e5f979">F_V_FRAC</a>);</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>        <span class="comment">//printf(&quot;vax_ldf: %08x -&gt; %016&quot; PRIx64 &quot;.\n&quot;, op, res);</span></div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>        <span class="keywordflow">return</span> res;</div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>}</div>
+<a href="../../d7/d00/a00152.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator.</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2026 by gdwnldsKSC</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * All rights reserved.</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * SPDX-License-Identifier: BSD-1-Clause</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * Redistribution and use in source and binary forms, with or without</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * modification, are permitted provided that the following conditions are met:</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * 1. Redistributions of source code must retain the above copyright notice,</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> *    this list of conditions and the following disclaimer.</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS AND CONTRIBUTORS BE</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> * POSSIBILITY OF SUCH DAMAGE.</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">/* MSVC has no &lt;err.h&gt;; NetBSD libform only calls warn() on its debug-file path. */</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#ifndef ES40_TUI_ERR_H</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#define ES40_TUI_ERR_H</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &lt;errno.h&gt;</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &lt;stdarg.h&gt;</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &lt;stdio.h&gt;</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &lt;string.h&gt;</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="foldopen" id="foldopen00037" data-start="{" data-end="}">
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="../../d7/d00/a00152.html#a52b4123a4033a7117f5a317289bff0d9">   37</a></span><span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d7/d00/a00152.html#a52b4123a4033a7117f5a317289bff0d9">warn</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *fmt, ...)</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>{</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keywordtype">int</span> saved_errno = errno;</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    va_list ap;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    va_start(ap, fmt);</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    vfprintf(stderr, fmt, ap);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    va_end(ap);</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    fprintf(stderr, <span class="stringliteral">&quot;: %s\n&quot;</span>, strerror(saved_errno));</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>}</div>
 </div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span></div>
-<div class="foldopen" id="foldopen00138" data-start="{" data-end="}">
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno"><a class="line" href="../../dd/d00/a00921.html#af65652318bd52c6d0aee9b473787072e">  138</a></span><a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> <a class="code hl_function" href="../../dd/d00/a00921.html#af65652318bd52c6d0aee9b473787072e">CAlphaCPU::vax_ldg</a>(<a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> op)</div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>{</div>
-<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="../../de/d00/a00185.html#a376f123ad31e122d6571d052559c4f1d">SWAP_VAXG</a>(op); <span class="comment">/* swizzle bits */</span></div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>}</div>
-</div>
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span></div>
-<div class="foldopen" id="foldopen00153" data-start="{" data-end="}">
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno"><a class="line" href="../../dd/d00/a00921.html#a8d7803275493c877723fe9610672a291">  153</a></span><a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> <a class="code hl_function" href="../../dd/d00/a00921.html#a8d7803275493c877723fe9610672a291">CAlphaCPU::vax_stf</a>(<a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> op)</div>
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>{</div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>        <span class="keywordflow">return</span> (<a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>)((((op &gt;&gt; 29) &amp; 0xFFFF) &lt;&lt; 16) | (((op &gt;&gt; 62) &amp; 0x3) &lt;&lt; 14) | ((op &gt;&gt; 45) &amp; 0x3FFF));</div>
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>}</div>
-</div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span></div>
-<div class="foldopen" id="foldopen00167" data-start="{" data-end="}">
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno"><a class="line" href="../../dd/d00/a00921.html#a20cdd1a0e19fb67fcc71d7c9a5b7264e">  167</a></span><a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> <a class="code hl_function" href="../../dd/d00/a00921.html#a20cdd1a0e19fb67fcc71d7c9a5b7264e">CAlphaCPU::vax_stg</a>(<a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> op)</div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>{</div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="../../de/d00/a00185.html#a376f123ad31e122d6571d052559c4f1d">SWAP_VAXG</a>(op); <span class="comment">/* swizzle bits */</span></div>
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>}</div>
-</div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span> </div>
-<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span><span class="comment">//\}</span></div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span> </div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span><span class="comment">/***************************************************************************/</span></div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span></div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span> </div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span> <span class="comment">//\{</span></div>
-<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span></div>
-<div class="foldopen" id="foldopen00192" data-start="{" data-end="}">
-<div class="line"><a id="l00192" name="l00192"></a><span class="lineno"><a class="line" href="../../dd/d00/a00921.html#a301c0813e82b29ea7c32c18f73ed2e1e">  192</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="../../dd/d00/a00921.html#a301c0813e82b29ea7c32c18f73ed2e1e">CAlphaCPU::vax_fcmp</a>(<a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> s1, <a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> s2, <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> ins)</div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>{</div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>        UFP a;</div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span> </div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>        UFP b;</div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span> </div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>        <a class="code hl_function" href="../../dd/d00/a00921.html#a5f02bef6d1c34dde4e092abdf5f1ff19">vax_unpack</a>(s1, &amp;a, ins);</div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>        <a class="code hl_function" href="../../dd/d00/a00921.html#a5f02bef6d1c34dde4e092abdf5f1ff19">vax_unpack</a>(s2, &amp;b, ins);</div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>        <span class="keywordflow">if</span> (s1 == s2)</div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>                <span class="keywordflow">return</span> 0; <span class="comment">/* equal? */</span></div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>        <span class="keywordflow">if</span> (a.sign != b.sign)</div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>                <span class="keywordflow">return</span>(a.sign ? -1 : +1); <span class="comment">/* opp signs? */</span></div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>        <span class="keywordflow">return</span>(((s1 &lt; s2) ^ a.sign) ? -1 : +1); <span class="comment">/* like signs */</span></div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>}</div>
-</div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span></div>
-<div class="foldopen" id="foldopen00216" data-start="{" data-end="}">
-<div class="line"><a id="l00216" name="l00216"></a><span class="lineno"><a class="line" href="../../dd/d00/a00921.html#ad050a27d6616c78dc617f2d23569dacf">  216</a></span><a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> <a class="code hl_function" href="../../dd/d00/a00921.html#ad050a27d6616c78dc617f2d23569dacf">CAlphaCPU::vax_cvtif</a>(<a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> val, <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> ins, <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> dp)</div>
-<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>{</div>
-<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>        <a class="code hl_typedef" href="../../df/d00/a00263.html#aaab2ef2ca1576408739fdb8e9f52ae0f">s64</a> num = (<a class="code hl_typedef" href="../../df/d00/a00263.html#aaab2ef2ca1576408739fdb8e9f52ae0f">s64</a>)val;</div>
-<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>        UFP a;</div>
-<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span> </div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>        <span class="keywordflow">if</span> (num == 0)</div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>                <span class="keywordflow">return</span> 0;   <span class="comment">/* 0? return +0 */</span></div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>        <span class="keywordflow">if</span> (num &lt; 0)</div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>        {             <span class="comment">/* &lt; 0? */</span></div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>                a.sign = 1; <span class="comment">/* set sign */</span></div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>                val = <a class="code hl_define" href="../../de/d00/a00185.html#a6545d11b9066766bec6dff2a7b6e4a6e">NEG_Q</a>(val);</div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>        } <span class="comment">/* |val| */</span></div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>        <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>                a.sign = 0;</div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>        a.exp = 64 + <a class="code hl_define" href="../../de/d00/a00185.html#af0a4328aca063b55dd121d5e02e363e3">G_BIAS</a>;            <span class="comment">/* set exp */</span></div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>        a.frac = val;                   <span class="comment">/* set frac */</span></div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>        <a class="code hl_function" href="../../dd/d00/a00921.html#af8f0e111be398fda25a6e85c458bb259">vax_norm</a>(&amp;a);                   <span class="comment">/* normalize */</span></div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../dd/d00/a00921.html#a9eb6aaa4d9bd1ee240fd860778af8071">vax_rpack</a>(&amp;a, ins, dp);  <span class="comment">/* round and pack */</span></div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>}</div>
-</div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span></div>
-<div class="foldopen" id="foldopen00247" data-start="{" data-end="}">
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno"><a class="line" href="../../dd/d00/a00921.html#a28ca67733cf3c14b1e7234f3ee791cbf">  247</a></span><a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> <a class="code hl_function" href="../../dd/d00/a00921.html#a28ca67733cf3c14b1e7234f3ee791cbf">CAlphaCPU::vax_cvtfi</a>(<a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> op, <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> ins)</div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>{</div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>        UFP a;</div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>        <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> rndm = <a class="code hl_define" href="../../de/d00/a00185.html#acfd0b16035fd005e2d047f33eae7c1ac">I_GETFRND</a>(ins);</div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>        <a class="code hl_typedef" href="../../df/d00/a00263.html#ae5300ed9eabeae78ee9d0c704a9c412a">s32</a> ubexp;</div>
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span> </div>
-<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>        <a class="code hl_function" href="../../dd/d00/a00921.html#a5f02bef6d1c34dde4e092abdf5f1ff19">vax_unpack</a>(op, &amp;a, ins);</div>
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>        ubexp = a.exp - <a class="code hl_define" href="../../de/d00/a00185.html#af0a4328aca063b55dd121d5e02e363e3">G_BIAS</a>; <span class="comment">/* unbiased exp */</span></div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        <span class="keywordflow">if</span> (ubexp &lt; 0)</div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>                <span class="keywordflow">return</span> 0; <span class="comment">/* zero or too small? */</span></div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>        <span class="keywordflow">if</span> (ubexp &lt;= <a class="code hl_define" href="../../de/d00/a00185.html#a505c6fe92f821e7a12e0d5f77eb2981f">UF_V_NM</a>)</div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>        {           <span class="comment">/* in range? */</span></div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>                a.frac = a.frac &gt;&gt; (<a class="code hl_define" href="../../de/d00/a00185.html#a505c6fe92f821e7a12e0d5f77eb2981f">UF_V_NM</a> - ubexp); <span class="comment">/* leave rnd bit */</span></div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>                <span class="keywordflow">if</span> (rndm)</div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>                        a.frac = a.frac + 1;  <span class="comment">/* not chopped, round */</span></div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>                a.frac = a.frac &gt;&gt; 1;   <span class="comment">/* now justified */</span></div>
-<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>                <span class="keywordflow">if</span> ((a.frac &gt; (a.sign ? <a class="code hl_define" href="../../da/d00/a00149.html#a7180e1755053a1bcd81db85436adc44f">IMMAX</a> : <a class="code hl_define" href="../../da/d00/a00149.html#afb569f4db71c53f996d4ebce81ed87c8">IPMAX</a>))  <span class="comment">/* out of range? */</span></div>
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>                        &amp;&amp; (ins &amp; <a class="code hl_define" href="../../de/d00/a00185.html#a25cad10602d7583e985e0e96938286bd">I_FTRP_V</a>)) <span class="comment">/* trap enabled? */</span><a class="code hl_function" href="../../dd/d00/a00921.html#a2b32b7cc4f2fab7092fd42a60dcedd17">vax_trap</a>(<a class="code hl_define" href="../../de/d00/a00185.html#a161e193f4ff9d271b7cc6ed12c4463ac">TRAP_IOV</a>, ins);</div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>        } <span class="comment">/* set overflow */</span></div>
-<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>        <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>        {</div>
-<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>                <span class="keywordflow">if</span> (ubexp &gt; (<a class="code hl_define" href="../../de/d00/a00185.html#a505c6fe92f821e7a12e0d5f77eb2981f">UF_V_NM</a> + 64))</div>
-<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>                        a.frac = 0; <span class="comment">/* out of range */</span></div>
-<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>                <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>                        a.frac = (a.frac &lt;&lt; (ubexp - <a class="code hl_define" href="../../de/d00/a00185.html#a505c6fe92f821e7a12e0d5f77eb2981f">UF_V_NM</a> - 1)) &amp; <a class="code hl_define" href="../../de/d00/a00185.html#ac6522d535177e673b18ac636f4c6df1e">X64_QUAD</a>;  <span class="comment">/* no rnd bit */</span></div>
-<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>                <span class="keywordflow">if</span> (ins &amp; <a class="code hl_define" href="../../de/d00/a00185.html#a25cad10602d7583e985e0e96938286bd">I_FTRP_V</a>)  <span class="comment">/* trap enabled? */</span></div>
-<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>                        <a class="code hl_function" href="../../dd/d00/a00921.html#a2b32b7cc4f2fab7092fd42a60dcedd17">vax_trap</a>(<a class="code hl_define" href="../../de/d00/a00185.html#a161e193f4ff9d271b7cc6ed12c4463ac">TRAP_IOV</a>, ins);</div>
-<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>        } <span class="comment">/* set overflow */</span></div>
-<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span> </div>
-<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>        <span class="keywordflow">return</span>(a.sign ? <a class="code hl_define" href="../../de/d00/a00185.html#a6545d11b9066766bec6dff2a7b6e4a6e">NEG_Q</a>(a.frac) : a.frac);</div>
-<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>}</div>
-</div>
-<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span></div>
-<div class="foldopen" id="foldopen00290" data-start="{" data-end="}">
-<div class="line"><a id="l00290" name="l00290"></a><span class="lineno"><a class="line" href="../../dd/d00/a00921.html#ab7357cca6e68b695d1a2ceab797e7531">  290</a></span><a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> <a class="code hl_function" href="../../dd/d00/a00921.html#ab7357cca6e68b695d1a2ceab797e7531">CAlphaCPU::vax_fadd</a>(<a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> s1, <a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> s2, <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> ins, <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> dp, <span class="keywordtype">bool</span> sub)</div>
-<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>{</div>
-<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>        UFP a;</div>
-<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span> </div>
-<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>        UFP b;</div>
-<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span> </div>
-<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>        UFP t;</div>
-<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>        <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> sticky;</div>
-<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>        <a class="code hl_typedef" href="../../df/d00/a00263.html#ae5300ed9eabeae78ee9d0c704a9c412a">s32</a> ediff;</div>
-<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span> </div>
-<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>        <a class="code hl_function" href="../../dd/d00/a00921.html#a5f02bef6d1c34dde4e092abdf5f1ff19">vax_unpack</a>(s1, &amp;a, ins);</div>
-<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>        <a class="code hl_function" href="../../dd/d00/a00921.html#a5f02bef6d1c34dde4e092abdf5f1ff19">vax_unpack</a>(s2, &amp;b, ins);</div>
-<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>        <span class="keywordflow">if</span> (sub)</div>
-<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>                b.sign = b.sign ^ 1;  <span class="comment">/* sub? invert b sign */</span></div>
-<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>        <span class="keywordflow">if</span> (a.exp == 0)</div>
-<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>                a = b;        <span class="comment">/* s1 = 0? */</span></div>
-<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (b.exp)  <span class="comment">/* s2 != 0? */</span></div>
-<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>        {</div>
-<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>                <span class="keywordflow">if</span> ((a.exp &lt; b.exp)      <span class="comment">/* |s1| &lt; |s2|? swap */</span></div>
-<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>                        || ((a.exp == b.exp) &amp;&amp; (a.frac &lt; b.frac)))</div>
-<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>                {</div>
-<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>                        t = a;</div>
-<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>                        a = b;</div>
-<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>                        b = t;</div>
-<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>                }</div>
-<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span> </div>
-<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>                ediff = a.exp - b.exp;  <span class="comment">/* exp diff */</span></div>
-<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>                <span class="keywordflow">if</span> (a.sign ^ b.sign)     <span class="comment">/* eff sub? */</span></div>
-<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span>                {</div>
-<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>                        <span class="keywordflow">if</span> (ediff &gt; 63)</div>
-<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>                                b.frac = 1;         <span class="comment">/* &gt;63? retain sticky */</span></div>
-<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>                        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (ediff)        <span class="comment">/* [1,63]? shift */</span></div>
-<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>                        {</div>
-<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span>                                sticky = ((b.frac &lt;&lt; (64 - ediff)) &amp; <a class="code hl_define" href="../../de/d00/a00185.html#ac6522d535177e673b18ac636f4c6df1e">X64_QUAD</a>) ? 1 : 0; <span class="comment">/* lost bits */</span></div>
-<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>                                b.frac = (b.frac &gt;&gt; ediff) | sticky;</div>
-<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>                        }</div>
-<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span> </div>
-<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>                        a.frac = (a.frac - b.frac) &amp; <a class="code hl_define" href="../../de/d00/a00185.html#ac6522d535177e673b18ac636f4c6df1e">X64_QUAD</a>;  <span class="comment">/* subtract fractions */</span></div>
-<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span>                        <a class="code hl_function" href="../../dd/d00/a00921.html#af8f0e111be398fda25a6e85c458bb259">vax_norm</a>(&amp;a); <span class="comment">/* normalize */</span></div>
-<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span>                }</div>
-<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>                <span class="keywordflow">else</span>            <span class="comment">/* eff add */</span></div>
-<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>                {</div>
-<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>                        <span class="keywordflow">if</span> (ediff &gt; 63)</div>
-<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>                                b.frac = 0; <span class="comment">/* &gt;63? b disappears */</span></div>
-<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span>                        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (ediff)</div>
-<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>                                b.frac = b.frac &gt;&gt; ediff; <span class="comment">/* denormalize */</span></div>
-<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>                        a.frac = (a.frac + b.frac) &amp; <a class="code hl_define" href="../../de/d00/a00185.html#ac6522d535177e673b18ac636f4c6df1e">X64_QUAD</a>;  <span class="comment">/* add frac */</span></div>
-<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span>                        <span class="keywordflow">if</span> (a.frac &lt; b.frac) <span class="comment">/* chk for carry */</span></div>
-<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span>                        {</div>
-<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>                                a.frac = <a class="code hl_define" href="../../de/d00/a00185.html#a27c4d6400c517115657a490ac7fb7d4f">UF_NM</a> | (a.frac &gt;&gt; 1); <span class="comment">/* shift in carry */</span></div>
-<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span>                                a.exp = a.exp + 1;  <span class="comment">/* skip norm */</span></div>
-<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>                        }</div>
-<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>                }</div>
-<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>        } <span class="comment">/* end else if */</span></div>
-<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span> </div>
-<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../dd/d00/a00921.html#a9eb6aaa4d9bd1ee240fd860778af8071">vax_rpack</a>(&amp;a, ins, dp);  <span class="comment">/* round and pack */</span></div>
-<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>}</div>
-</div>
-<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span></div>
-<div class="foldopen" id="foldopen00358" data-start="{" data-end="}">
-<div class="line"><a id="l00358" name="l00358"></a><span class="lineno"><a class="line" href="../../dd/d00/a00921.html#a19f7cad3734956ffb91a334062123bb5">  358</a></span><a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> <a class="code hl_function" href="../../dd/d00/a00921.html#a19f7cad3734956ffb91a334062123bb5">CAlphaCPU::vax_fmul</a>(<a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> s1, <a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> s2, <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> ins, <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> dp)</div>
-<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>{</div>
-<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>        UFP a;</div>
-<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span> </div>
-<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span>        UFP b;</div>
-<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span> </div>
-<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>        <a class="code hl_function" href="../../dd/d00/a00921.html#a5f02bef6d1c34dde4e092abdf5f1ff19">vax_unpack</a>(s1, &amp;a, ins);</div>
-<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>        <a class="code hl_function" href="../../dd/d00/a00921.html#a5f02bef6d1c34dde4e092abdf5f1ff19">vax_unpack</a>(s2, &amp;b, ins);</div>
-<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span>        <span class="keywordflow">if</span> ((a.exp == 0) || (b.exp == 0))</div>
-<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>                <span class="keywordflow">return</span> 0; <span class="comment">/* zero argument? */</span></div>
-<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>        a.sign = a.sign ^ b.sign;         <span class="comment">/* sign of result */</span></div>
-<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>        a.exp = a.exp + b.exp - <a class="code hl_define" href="../../de/d00/a00185.html#af0a4328aca063b55dd121d5e02e363e3">G_BIAS</a>;   <span class="comment">/* add exponents */</span></div>
-<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>        <a class="code hl_function" href="../../de/d00/a00185.html#af7fe3030783d36c253fefe0241c4e594">uemul64</a>(a.frac, b.frac, &amp;a.frac); <span class="comment">/* mpy fractions */</span></div>
-<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>        <a class="code hl_function" href="../../dd/d00/a00921.html#af8f0e111be398fda25a6e85c458bb259">vax_norm</a>(&amp;a); <span class="comment">/* normalize */</span></div>
-<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../dd/d00/a00921.html#a9eb6aaa4d9bd1ee240fd860778af8071">vax_rpack</a>(&amp;a, ins, dp);  <span class="comment">/* round and pack */</span></div>
-<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>}</div>
-</div>
-<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span></div>
-<div class="foldopen" id="foldopen00389" data-start="{" data-end="}">
-<div class="line"><a id="l00389" name="l00389"></a><span class="lineno"><a class="line" href="../../dd/d00/a00921.html#a558eae03cec5658f7c59d416b7d962b2">  389</a></span><a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> <a class="code hl_function" href="../../dd/d00/a00921.html#a558eae03cec5658f7c59d416b7d962b2">CAlphaCPU::vax_fdiv</a>(<a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> s1, <a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> s2, <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> ins, <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> dp)</div>
-<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>{</div>
-<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>        UFP a;</div>
-<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span> </div>
-<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>        UFP b;</div>
-<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span> </div>
-<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>        <a class="code hl_function" href="../../dd/d00/a00921.html#a5f02bef6d1c34dde4e092abdf5f1ff19">vax_unpack</a>(s1, &amp;a, ins);</div>
-<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>        <a class="code hl_function" href="../../dd/d00/a00921.html#a5f02bef6d1c34dde4e092abdf5f1ff19">vax_unpack</a>(s2, &amp;b, ins);</div>
-<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>        <span class="keywordflow">if</span> (b.exp == 0)</div>
-<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>        { <span class="comment">/* divr = 0? */</span></div>
-<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>                <a class="code hl_function" href="../../dd/d00/a00921.html#a2b32b7cc4f2fab7092fd42a60dcedd17">vax_trap</a>(<a class="code hl_define" href="../../de/d00/a00185.html#a882910ee06acdf72ac4b6c90e0b53dcd">TRAP_DZE</a>, ins);  <span class="comment">/* dze trap */</span></div>
-<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>                <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>        }</div>
-<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span> </div>
-<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span>        <span class="keywordflow">if</span> (a.exp == 0)</div>
-<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span>                <span class="keywordflow">return</span> 0; <span class="comment">/* divd = 0? */</span></div>
-<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span>        a.sign = a.sign ^ b.sign;           <span class="comment">/* result sign */</span></div>
-<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span>        a.exp = a.exp - b.exp + <a class="code hl_define" href="../../de/d00/a00185.html#af0a4328aca063b55dd121d5e02e363e3">G_BIAS</a> + 1; <span class="comment">/* unbiased exp */</span></div>
-<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>        a.frac = a.frac &gt;&gt; 1; <span class="comment">/* allow 1 bit left */</span></div>
-<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span>        b.frac = b.frac &gt;&gt; 1;</div>
-<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>        a.frac = <a class="code hl_function" href="../../de/d00/a00185.html#a9ba32866f4a6e8feaa7759e6a455cfe8">ufdiv64</a>(a.frac, b.frac, 55, NULL); <span class="comment">/* divide */</span></div>
-<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span>        <a class="code hl_function" href="../../dd/d00/a00921.html#af8f0e111be398fda25a6e85c458bb259">vax_norm</a>(&amp;a); <span class="comment">/* normalize */</span></div>
-<div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../dd/d00/a00921.html#a9eb6aaa4d9bd1ee240fd860778af8071">vax_rpack</a>(&amp;a, ins, dp);  <span class="comment">/* round and pack */</span></div>
-<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span>}</div>
-</div>
-<div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span></div>
-<div class="foldopen" id="foldopen00423" data-start="{" data-end="}">
-<div class="line"><a id="l00423" name="l00423"></a><span class="lineno"><a class="line" href="../../dd/d00/a00921.html#a22ef0f331498d7ab3106a8c76e72725e">  423</a></span><a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> <a class="code hl_function" href="../../dd/d00/a00921.html#a22ef0f331498d7ab3106a8c76e72725e">CAlphaCPU::vax_sqrt</a>(<a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> op, <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> ins, <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> dp)</div>
-<div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span>{</div>
-<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span>        UFP b;</div>
-<div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span> </div>
-<div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span>        <a class="code hl_function" href="../../dd/d00/a00921.html#a5f02bef6d1c34dde4e092abdf5f1ff19">vax_unpack</a>(op, &amp;b, ins);</div>
-<div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span>        <span class="keywordflow">if</span> (b.exp == 0)</div>
-<div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span>                <span class="keywordflow">return</span> 0; <span class="comment">/* zero? */</span></div>
-<div class="line"><a id="l00430" name="l00430"></a><span class="lineno">  430</span>        <span class="keywordflow">if</span> (b.sign)</div>
-<div class="line"><a id="l00431" name="l00431"></a><span class="lineno">  431</span>        {           <span class="comment">/* minus? */</span></div>
-<div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span>                <a class="code hl_function" href="../../dd/d00/a00921.html#a2b32b7cc4f2fab7092fd42a60dcedd17">vax_trap</a>(<a class="code hl_define" href="../../de/d00/a00185.html#a6fe8cf2dc64f45a66b5cf12adb6e6278">TRAP_INV</a>, ins);  <span class="comment">/* invalid operand */</span></div>
-<div class="line"><a id="l00433" name="l00433"></a><span class="lineno">  433</span>                <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span>        }</div>
-<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span> </div>
-<div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span>        <span class="keyword">const</span> <a class="code hl_typedef" href="../../df/d00/a00263.html#ae5300ed9eabeae78ee9d0c704a9c412a">s32</a> in_exp = b.exp;                     <span class="comment">/* fsqrt64 keys on INPUT exp parity */</span></div>
-<div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span>        b.exp = ((b.exp + 1 - <a class="code hl_define" href="../../de/d00/a00185.html#af0a4328aca063b55dd121d5e02e363e3">G_BIAS</a>) &gt;&gt; 1) + <a class="code hl_define" href="../../de/d00/a00185.html#af0a4328aca063b55dd121d5e02e363e3">G_BIAS</a>; <span class="comment">/* result exponent */</span></div>
-<div class="line"><a id="l00438" name="l00438"></a><span class="lineno">  438</span>        b.frac = <a class="code hl_function" href="../../de/d00/a00185.html#a789015280a2e58042d054eb62225f22a">fsqrt64</a>(b.frac, in_exp); <span class="comment">/* result fraction */</span></div>
-<div class="line"><a id="l00439" name="l00439"></a><span class="lineno">  439</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../dd/d00/a00921.html#a9eb6aaa4d9bd1ee240fd860778af8071">vax_rpack</a>(&amp;b, ins, dp);    <span class="comment">/* round and pack */</span></div>
-<div class="line"><a id="l00440" name="l00440"></a><span class="lineno">  440</span>}</div>
-</div>
-<div class="line"><a id="l00441" name="l00441"></a><span class="lineno">  441</span> </div>
-<div class="line"><a id="l00442" name="l00442"></a><span class="lineno">  442</span><span class="comment">//\}</span></div>
-<div class="line"><a id="l00443" name="l00443"></a><span class="lineno">  443</span> </div>
-<div class="line"><a id="l00444" name="l00444"></a><span class="lineno">  444</span><span class="comment">/***************************************************************************/</span></div>
-<div class="line"><a id="l00445" name="l00445"></a><span class="lineno">  445</span></div>
-<div class="line"><a id="l00450" name="l00450"></a><span class="lineno">  450</span> </div>
-<div class="line"><a id="l00451" name="l00451"></a><span class="lineno">  451</span> <span class="comment">//\{</span></div>
-<div class="line"><a id="l00452" name="l00452"></a><span class="lineno">  452</span></div>
-<div class="foldopen" id="foldopen00463" data-start="{" data-end="}">
-<div class="line"><a id="l00463" name="l00463"></a><span class="lineno"><a class="line" href="../../dd/d00/a00921.html#a2b32b7cc4f2fab7092fd42a60dcedd17">  463</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="../../dd/d00/a00921.html#a2b32b7cc4f2fab7092fd42a60dcedd17">CAlphaCPU::vax_trap</a>(<a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> mask, <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> ins)</div>
-<div class="line"><a id="l00464" name="l00464"></a><span class="lineno">  464</span>{</div>
-<div class="line"><a id="l00465" name="l00465"></a><span class="lineno">  465</span>        <a class="code hl_define" href="../../de/d00/a00185.html#ae6853f714eb398ca0594833075ffb532">ARITH_TRAP</a>(mask | ((ins &amp; <a class="code hl_define" href="../../de/d00/a00185.html#a2a6e1a417b2aad8ed3e6e3cbbdb2509e">I_FTRP_S</a>) ? <a class="code hl_define" href="../../de/d00/a00185.html#a1766eb7d01470580b75f67e64caf1bf9">TRAP_SWC</a> : 0), <a class="code hl_define" href="../../de/d00/a00185.html#a465b4cec325c6328ac3d6cab4544e095">I_GETRC</a>(ins));</div>
-<div class="line"><a id="l00466" name="l00466"></a><span class="lineno">  466</span>}</div>
-</div>
-<div class="line"><a id="l00467" name="l00467"></a><span class="lineno">  467</span></div>
-<div class="foldopen" id="foldopen00480" data-start="{" data-end="}">
-<div class="line"><a id="l00480" name="l00480"></a><span class="lineno"><a class="line" href="../../dd/d00/a00921.html#a5f02bef6d1c34dde4e092abdf5f1ff19">  480</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="../../dd/d00/a00921.html#a5f02bef6d1c34dde4e092abdf5f1ff19">CAlphaCPU::vax_unpack</a>(<a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> op, UFP* r, <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> ins)</div>
-<div class="line"><a id="l00481" name="l00481"></a><span class="lineno">  481</span>{</div>
-<div class="line"><a id="l00482" name="l00482"></a><span class="lineno">  482</span>        r-&gt;sign = <a class="code hl_define" href="../../de/d00/a00185.html#a22aca3bf34a94c41f8db01ef670bce1b">FPR_GETSIGN</a>(op);  <span class="comment">/* get sign */</span></div>
-<div class="line"><a id="l00483" name="l00483"></a><span class="lineno">  483</span>        r-&gt;exp = <a class="code hl_define" href="../../de/d00/a00185.html#a01620859eb30b6178c3bcf4406cde8df">FPR_GETEXP</a>(op);    <span class="comment">/* get exponent */</span></div>
-<div class="line"><a id="l00484" name="l00484"></a><span class="lineno">  484</span>        r-&gt;frac = <a class="code hl_define" href="../../de/d00/a00185.html#a5465c9a96858a7543384933130eb7a44">FPR_GETFRAC</a>(op);  <span class="comment">/* get fraction */</span></div>
-<div class="line"><a id="l00485" name="l00485"></a><span class="lineno">  485</span>        <span class="keywordflow">if</span> (r-&gt;exp == 0)     <span class="comment">/* exp = 0? */</span></div>
-<div class="line"><a id="l00486" name="l00486"></a><span class="lineno">  486</span>        {</div>
-<div class="line"><a id="l00487" name="l00487"></a><span class="lineno">  487</span>                <span class="keywordflow">if</span> (r-&gt;sign != 0)  <span class="comment">/* rsvd op? */</span></div>
-<div class="line"><a id="l00488" name="l00488"></a><span class="lineno">  488</span>                        <a class="code hl_function" href="../../dd/d00/a00921.html#a2b32b7cc4f2fab7092fd42a60dcedd17">vax_trap</a>(<a class="code hl_define" href="../../de/d00/a00185.html#a6fe8cf2dc64f45a66b5cf12adb6e6278">TRAP_INV</a>, ins);</div>
-<div class="line"><a id="l00489" name="l00489"></a><span class="lineno">  489</span> </div>
-<div class="line"><a id="l00490" name="l00490"></a><span class="lineno">  490</span>                <span class="comment">// zero</span></div>
-<div class="line"><a id="l00491" name="l00491"></a><span class="lineno">  491</span>                r-&gt;frac = r-&gt;sign = 0;</div>
-<div class="line"><a id="l00492" name="l00492"></a><span class="lineno">  492</span>                <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00493" name="l00493"></a><span class="lineno">  493</span>        }</div>
-<div class="line"><a id="l00494" name="l00494"></a><span class="lineno">  494</span> </div>
-<div class="line"><a id="l00495" name="l00495"></a><span class="lineno">  495</span>        r-&gt;frac = (r-&gt;frac | <a class="code hl_define" href="../../de/d00/a00185.html#a222420695bdc5a0f02dacea27acb937a">FPR_HB</a>) &lt;&lt; <a class="code hl_define" href="../../de/d00/a00185.html#ac20674d9ce278b6a29b6e6aa5a83752a">FPR_GUARD</a>;  <span class="comment">/* ins hidden bit, guard */</span></div>
-<div class="line"><a id="l00496" name="l00496"></a><span class="lineno">  496</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00497" name="l00497"></a><span class="lineno">  497</span>}</div>
-</div>
-<div class="line"><a id="l00498" name="l00498"></a><span class="lineno">  498</span></div>
-<div class="foldopen" id="foldopen00511" data-start="{" data-end="}">
-<div class="line"><a id="l00511" name="l00511"></a><span class="lineno"><a class="line" href="../../dd/d00/a00921.html#a877b18f576f142800ee90e42e7f10ed1">  511</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="../../dd/d00/a00921.html#a877b18f576f142800ee90e42e7f10ed1">CAlphaCPU::vax_unpack_d</a>(<a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> op, UFP* r, <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> ins)</div>
-<div class="line"><a id="l00512" name="l00512"></a><span class="lineno">  512</span>{</div>
-<div class="line"><a id="l00513" name="l00513"></a><span class="lineno">  513</span>        r-&gt;sign = <a class="code hl_define" href="../../de/d00/a00185.html#af4df65f763e63c8ff41006e226fa2dfb">FDR_GETSIGN</a>(op);  <span class="comment">/* get sign */</span></div>
-<div class="line"><a id="l00514" name="l00514"></a><span class="lineno">  514</span>        r-&gt;exp = <a class="code hl_define" href="../../de/d00/a00185.html#a33e99d0c641ca4730e78dd93a479ddc0">FDR_GETEXP</a>(op);    <span class="comment">/* get exponent */</span></div>
-<div class="line"><a id="l00515" name="l00515"></a><span class="lineno">  515</span>        r-&gt;frac = <a class="code hl_define" href="../../de/d00/a00185.html#acaa98934c762ea1d58751d2f3a74e6ba">FDR_GETFRAC</a>(op);  <span class="comment">/* get fraction */</span></div>
-<div class="line"><a id="l00516" name="l00516"></a><span class="lineno">  516</span>        <span class="keywordflow">if</span> (r-&gt;exp == 0) <span class="comment">/* exp = 0? */</span></div>
-<div class="line"><a id="l00517" name="l00517"></a><span class="lineno">  517</span>        {</div>
-<div class="line"><a id="l00518" name="l00518"></a><span class="lineno">  518</span>                <span class="keywordflow">if</span> (r-&gt;sign != 0)   <span class="comment">/* rsvd op? */</span></div>
-<div class="line"><a id="l00519" name="l00519"></a><span class="lineno">  519</span>                        <a class="code hl_function" href="../../dd/d00/a00921.html#a2b32b7cc4f2fab7092fd42a60dcedd17">vax_trap</a>(<a class="code hl_define" href="../../de/d00/a00185.html#a6fe8cf2dc64f45a66b5cf12adb6e6278">TRAP_INV</a>, ins);</div>
-<div class="line"><a id="l00520" name="l00520"></a><span class="lineno">  520</span>                r-&gt;frac = r-&gt;sign = 0;</div>
-<div class="line"><a id="l00521" name="l00521"></a><span class="lineno">  521</span>                <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00522" name="l00522"></a><span class="lineno">  522</span>        }</div>
-<div class="line"><a id="l00523" name="l00523"></a><span class="lineno">  523</span> </div>
-<div class="line"><a id="l00524" name="l00524"></a><span class="lineno">  524</span>        r-&gt;exp = r-&gt;exp + <a class="code hl_define" href="../../de/d00/a00185.html#af0a4328aca063b55dd121d5e02e363e3">G_BIAS</a> - <a class="code hl_define" href="../../de/d00/a00185.html#a0bf990429b1f3e3d1899771cf16e240e">D_BIAS</a>;          <span class="comment">/* change to G bias */</span></div>
-<div class="line"><a id="l00525" name="l00525"></a><span class="lineno">  525</span>        r-&gt;frac = (r-&gt;frac | <a class="code hl_define" href="../../de/d00/a00185.html#a04d199411da06c953e6a48b93d57668c">FDR_HB</a>) &lt;&lt; <a class="code hl_define" href="../../de/d00/a00185.html#abeb1676f565180e62ed4f48ca1a452db">FDR_GUARD</a>;  <span class="comment">/* ins hidden bit, guard */</span></div>
-<div class="line"><a id="l00526" name="l00526"></a><span class="lineno">  526</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00527" name="l00527"></a><span class="lineno">  527</span>}</div>
-</div>
-<div class="line"><a id="l00528" name="l00528"></a><span class="lineno">  528</span></div>
-<div class="foldopen" id="foldopen00538" data-start="{" data-end="}">
-<div class="line"><a id="l00538" name="l00538"></a><span class="lineno"><a class="line" href="../../dd/d00/a00921.html#af8f0e111be398fda25a6e85c458bb259">  538</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="../../dd/d00/a00921.html#af8f0e111be398fda25a6e85c458bb259">CAlphaCPU::vax_norm</a>(UFP* r)</div>
-<div class="line"><a id="l00539" name="l00539"></a><span class="lineno">  539</span>{</div>
-<div class="line"><a id="l00540" name="l00540"></a><span class="lineno">  540</span>        <a class="code hl_typedef" href="../../df/d00/a00263.html#ae5300ed9eabeae78ee9d0c704a9c412a">s32</a>         i;</div>
-<div class="line"><a id="l00541" name="l00541"></a><span class="lineno">  541</span>        <span class="keyword">static</span> <a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a>  normmask[5] = {</div>
-<div class="line"><a id="l00542" name="l00542"></a><span class="lineno">  542</span>          <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0xc000000000000000), <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0xf000000000000000), <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0xff00000000000000),</div>
-<div class="line"><a id="l00543" name="l00543"></a><span class="lineno">  543</span>          <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0xffff000000000000), <a class="code hl_define" href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0xffffffff00000000) };</div>
-<div class="line"><a id="l00544" name="l00544"></a><span class="lineno">  544</span>        <span class="keyword">static</span> <a class="code hl_typedef" href="../../df/d00/a00263.html#ae5300ed9eabeae78ee9d0c704a9c412a">s32</a>  normtab[6] = { 1, 2, 4, 8, 16, 32 };</div>
-<div class="line"><a id="l00545" name="l00545"></a><span class="lineno">  545</span> </div>
-<div class="line"><a id="l00546" name="l00546"></a><span class="lineno">  546</span>        r-&gt;frac = r-&gt;frac &amp; <a class="code hl_define" href="../../de/d00/a00185.html#ac6522d535177e673b18ac636f4c6df1e">X64_QUAD</a>;</div>
-<div class="line"><a id="l00547" name="l00547"></a><span class="lineno">  547</span>        <span class="keywordflow">if</span> (r-&gt;frac == 0)</div>
-<div class="line"><a id="l00548" name="l00548"></a><span class="lineno">  548</span>        { <span class="comment">/* if fraction = 0 */</span></div>
-<div class="line"><a id="l00549" name="l00549"></a><span class="lineno">  549</span>                r-&gt;sign = r-&gt;exp = 0; <span class="comment">/* result is 0 */</span></div>
-<div class="line"><a id="l00550" name="l00550"></a><span class="lineno">  550</span>                <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00551" name="l00551"></a><span class="lineno">  551</span>        }</div>
-<div class="line"><a id="l00552" name="l00552"></a><span class="lineno">  552</span> </div>
-<div class="line"><a id="l00553" name="l00553"></a><span class="lineno">  553</span>        <span class="keywordflow">while</span> ((r-&gt;frac &amp; <a class="code hl_define" href="../../de/d00/a00185.html#a27c4d6400c517115657a490ac7fb7d4f">UF_NM</a>) == 0)</div>
-<div class="line"><a id="l00554" name="l00554"></a><span class="lineno">  554</span>        {   <span class="comment">/* normalized? */</span></div>
-<div class="line"><a id="l00555" name="l00555"></a><span class="lineno">  555</span>                <span class="keywordflow">for</span> (i = 0; i &lt; 5; i++)</div>
-<div class="line"><a id="l00556" name="l00556"></a><span class="lineno">  556</span>                { <span class="comment">/* find first 1 */</span></div>
-<div class="line"><a id="l00557" name="l00557"></a><span class="lineno">  557</span>                        <span class="keywordflow">if</span> (r-&gt;frac &amp; normmask[i])</div>
-<div class="line"><a id="l00558" name="l00558"></a><span class="lineno">  558</span>                                <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00559" name="l00559"></a><span class="lineno">  559</span>                }</div>
-<div class="line"><a id="l00560" name="l00560"></a><span class="lineno">  560</span> </div>
-<div class="line"><a id="l00561" name="l00561"></a><span class="lineno">  561</span>                r-&gt;frac = r-&gt;frac &lt;&lt; normtab[i];  <span class="comment">/* shift frac */</span></div>
-<div class="line"><a id="l00562" name="l00562"></a><span class="lineno">  562</span>                r-&gt;exp = r-&gt;exp - normtab[i];</div>
-<div class="line"><a id="l00563" name="l00563"></a><span class="lineno">  563</span>        } <span class="comment">/* decr exp */</span></div>
-<div class="line"><a id="l00564" name="l00564"></a><span class="lineno">  564</span> </div>
-<div class="line"><a id="l00565" name="l00565"></a><span class="lineno">  565</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00566" name="l00566"></a><span class="lineno">  566</span>}</div>
-</div>
-<div class="line"><a id="l00567" name="l00567"></a><span class="lineno">  567</span></div>
-<div class="foldopen" id="foldopen00581" data-start="{" data-end="}">
-<div class="line"><a id="l00581" name="l00581"></a><span class="lineno"><a class="line" href="../../dd/d00/a00921.html#a9eb6aaa4d9bd1ee240fd860778af8071">  581</a></span><a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> <a class="code hl_function" href="../../dd/d00/a00921.html#a9eb6aaa4d9bd1ee240fd860778af8071">CAlphaCPU::vax_rpack</a>(UFP* r, <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> ins, <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> dp)</div>
-<div class="line"><a id="l00582" name="l00582"></a><span class="lineno">  582</span>{</div>
-<div class="line"><a id="l00583" name="l00583"></a><span class="lineno">  583</span>        <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>               rndm = <a class="code hl_define" href="../../de/d00/a00185.html#acfd0b16035fd005e2d047f33eae7c1ac">I_GETFRND</a>(ins);</div>
-<div class="line"><a id="l00584" name="l00584"></a><span class="lineno">  584</span>        <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a>  roundbit[2] = { <a class="code hl_define" href="../../d7/d00/a00152.html#a8be1a575c58da2c6951bfaa2437bd4c9">UF_FRND</a>, <a class="code hl_define" href="../../d7/d00/a00152.html#a5838f04ab837aad98094822c4de2da1d">UF_GRND</a> };</div>
-<div class="line"><a id="l00585" name="l00585"></a><span class="lineno">  585</span>        <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_typedef" href="../../df/d00/a00263.html#ae5300ed9eabeae78ee9d0c704a9c412a">s32</a>  expmax[2] = { <a class="code hl_define" href="../../de/d00/a00185.html#af0a4328aca063b55dd121d5e02e363e3">G_BIAS</a> - <a class="code hl_define" href="../../de/d00/a00185.html#a61804a1b3483dbcc64f2b7aeb5bdcb76">F_BIAS</a> + <a class="code hl_define" href="../../de/d00/a00185.html#a477a3b909af5e168c8b0d021f42d978f">F_M_EXP</a>, <a class="code hl_define" href="../../de/d00/a00185.html#a484a9e914bcb91267cd1be3c44378e87">G_M_EXP</a> };</div>
-<div class="line"><a id="l00586" name="l00586"></a><span class="lineno">  586</span>        <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_typedef" href="../../df/d00/a00263.html#ae5300ed9eabeae78ee9d0c704a9c412a">s32</a>  expmin[2] = { <a class="code hl_define" href="../../de/d00/a00185.html#af0a4328aca063b55dd121d5e02e363e3">G_BIAS</a> - <a class="code hl_define" href="../../de/d00/a00185.html#a61804a1b3483dbcc64f2b7aeb5bdcb76">F_BIAS</a>, 0 };</div>
-<div class="line"><a id="l00587" name="l00587"></a><span class="lineno">  587</span> </div>
-<div class="line"><a id="l00588" name="l00588"></a><span class="lineno">  588</span>        <span class="keywordflow">if</span> (r-&gt;frac == 0)</div>
-<div class="line"><a id="l00589" name="l00589"></a><span class="lineno">  589</span>                <span class="keywordflow">return</span> 0; <span class="comment">/* result 0? */</span></div>
-<div class="line"><a id="l00590" name="l00590"></a><span class="lineno">  590</span>        <span class="keywordflow">if</span> (rndm)</div>
-<div class="line"><a id="l00591" name="l00591"></a><span class="lineno">  591</span>        {           <span class="comment">/* round? */</span></div>
-<div class="line"><a id="l00592" name="l00592"></a><span class="lineno">  592</span>                r-&gt;frac = (r-&gt;frac + roundbit[dp]) &amp; <a class="code hl_define" href="../../de/d00/a00185.html#ac6522d535177e673b18ac636f4c6df1e">X64_QUAD</a>;  <span class="comment">/* add round bit */</span></div>
-<div class="line"><a id="l00593" name="l00593"></a><span class="lineno">  593</span>                <span class="keywordflow">if</span> ((r-&gt;frac &amp; <a class="code hl_define" href="../../de/d00/a00185.html#a27c4d6400c517115657a490ac7fb7d4f">UF_NM</a>) == 0)</div>
-<div class="line"><a id="l00594" name="l00594"></a><span class="lineno">  594</span>                { <span class="comment">/* carry out? */</span></div>
-<div class="line"><a id="l00595" name="l00595"></a><span class="lineno">  595</span>                        r-&gt;frac = (r-&gt;frac &gt;&gt; 1) | <a class="code hl_define" href="../../de/d00/a00185.html#a27c4d6400c517115657a490ac7fb7d4f">UF_NM</a>; <span class="comment">/* renormalize */</span></div>
-<div class="line"><a id="l00596" name="l00596"></a><span class="lineno">  596</span>                        r-&gt;exp = r-&gt;exp + 1;</div>
-<div class="line"><a id="l00597" name="l00597"></a><span class="lineno">  597</span>                }</div>
-<div class="line"><a id="l00598" name="l00598"></a><span class="lineno">  598</span>        }</div>
-<div class="line"><a id="l00599" name="l00599"></a><span class="lineno">  599</span> </div>
-<div class="line"><a id="l00600" name="l00600"></a><span class="lineno">  600</span>        <span class="keywordflow">if</span> (r-&gt;exp &gt; expmax[dp])</div>
-<div class="line"><a id="l00601" name="l00601"></a><span class="lineno">  601</span>        { <span class="comment">/* ovflo? */</span></div>
-<div class="line"><a id="l00602" name="l00602"></a><span class="lineno">  602</span>                <a class="code hl_function" href="../../dd/d00/a00921.html#a2b32b7cc4f2fab7092fd42a60dcedd17">vax_trap</a>(<a class="code hl_define" href="../../de/d00/a00185.html#a99901d7b7a44c83699010ada8a8b116b">TRAP_OVF</a>, ins);  <span class="comment">/* set trap */</span></div>
-<div class="line"><a id="l00603" name="l00603"></a><span class="lineno">  603</span>                r-&gt;exp = expmax[dp];</div>
-<div class="line"><a id="l00604" name="l00604"></a><span class="lineno">  604</span>        } <span class="comment">/* return max */</span></div>
-<div class="line"><a id="l00605" name="l00605"></a><span class="lineno">  605</span> </div>
-<div class="line"><a id="l00606" name="l00606"></a><span class="lineno">  606</span>        <span class="keywordflow">if</span> (r-&gt;exp &lt;= expmin[dp])</div>
-<div class="line"><a id="l00607" name="l00607"></a><span class="lineno">  607</span>        { <span class="comment">/* underflow? */</span></div>
-<div class="line"><a id="l00608" name="l00608"></a><span class="lineno">  608</span>                <span class="keywordflow">if</span> (ins &amp; <a class="code hl_define" href="../../de/d00/a00185.html#a25cad10602d7583e985e0e96938286bd">I_FTRP_V</a>)</div>
-<div class="line"><a id="l00609" name="l00609"></a><span class="lineno">  609</span>                        <a class="code hl_function" href="../../dd/d00/a00921.html#a2b32b7cc4f2fab7092fd42a60dcedd17">vax_trap</a>(<a class="code hl_define" href="../../de/d00/a00185.html#a8f432877b4f7a3d37a36b250beb94acd">TRAP_UNF</a>, ins);  <span class="comment">/* enabled? set trap */</span></div>
-<div class="line"><a id="l00610" name="l00610"></a><span class="lineno">  610</span>                <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00611" name="l00611"></a><span class="lineno">  611</span>        } <span class="comment">/* underflow to 0 */</span></div>
-<div class="line"><a id="l00612" name="l00612"></a><span class="lineno">  612</span> </div>
-<div class="line"><a id="l00613" name="l00613"></a><span class="lineno">  613</span>        <span class="keywordflow">return</span>(((<a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a>)r-&gt;sign) &lt;&lt; <a class="code hl_define" href="../../de/d00/a00185.html#ae47ccc9971e2eccd6ab432ffa470fae0">FPR_V_SIGN</a>) | (((<a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a>)r-&gt;exp) &lt;&lt; <a class="code hl_define" href="../../de/d00/a00185.html#a8413bd09f5542b8516474500dd3950d9">FPR_V_EXP</a>) | ((r-&gt;frac &gt;&gt; <a class="code hl_define" href="../../de/d00/a00185.html#ac20674d9ce278b6a29b6e6aa5a83752a">FPR_GUARD</a>) &amp; <a class="code hl_define" href="../../de/d00/a00185.html#a73cc5f682e9dbe8a76fbd4273646a60c">FPR_FRAC</a>);</div>
-<div class="line"><a id="l00614" name="l00614"></a><span class="lineno">  614</span>}</div>
-</div>
-<div class="line"><a id="l00615" name="l00615"></a><span class="lineno">  615</span></div>
-<div class="foldopen" id="foldopen00628" data-start="{" data-end="}">
-<div class="line"><a id="l00628" name="l00628"></a><span class="lineno"><a class="line" href="../../dd/d00/a00921.html#aafa76d1334b3c500f3af42e5819cc4f7">  628</a></span><a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> <a class="code hl_function" href="../../dd/d00/a00921.html#aafa76d1334b3c500f3af42e5819cc4f7">CAlphaCPU::vax_rpack_d</a>(UFP* r, <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> ins)</div>
-<div class="line"><a id="l00629" name="l00629"></a><span class="lineno">  629</span>{</div>
-<div class="line"><a id="l00630" name="l00630"></a><span class="lineno">  630</span>        <span class="keywordflow">if</span> (r-&gt;frac == 0)</div>
-<div class="line"><a id="l00631" name="l00631"></a><span class="lineno">  631</span>                <span class="keywordflow">return</span> 0; <span class="comment">/* result 0? */</span></div>
-<div class="line"><a id="l00632" name="l00632"></a><span class="lineno">  632</span>        r-&gt;exp = r-&gt;exp + <a class="code hl_define" href="../../de/d00/a00185.html#a0bf990429b1f3e3d1899771cf16e240e">D_BIAS</a> - <a class="code hl_define" href="../../de/d00/a00185.html#af0a4328aca063b55dd121d5e02e363e3">G_BIAS</a>;  <span class="comment">/* rebias */</span></div>
-<div class="line"><a id="l00633" name="l00633"></a><span class="lineno">  633</span>        <span class="keywordflow">if</span> (r-&gt;exp &gt; <a class="code hl_define" href="../../de/d00/a00185.html#aa0234b154bfcf8ec6e6012c5e259d5ca">FDR_M_EXP</a>)</div>
-<div class="line"><a id="l00634" name="l00634"></a><span class="lineno">  634</span>        { <span class="comment">/* ovflo? */</span></div>
-<div class="line"><a id="l00635" name="l00635"></a><span class="lineno">  635</span>                <a class="code hl_function" href="../../dd/d00/a00921.html#a2b32b7cc4f2fab7092fd42a60dcedd17">vax_trap</a>(<a class="code hl_define" href="../../de/d00/a00185.html#a99901d7b7a44c83699010ada8a8b116b">TRAP_OVF</a>, ins);  <span class="comment">/* set trap */</span></div>
-<div class="line"><a id="l00636" name="l00636"></a><span class="lineno">  636</span>                r-&gt;exp = <a class="code hl_define" href="../../de/d00/a00185.html#aa0234b154bfcf8ec6e6012c5e259d5ca">FDR_M_EXP</a>;</div>
-<div class="line"><a id="l00637" name="l00637"></a><span class="lineno">  637</span>        } <span class="comment">/* return max */</span></div>
-<div class="line"><a id="l00638" name="l00638"></a><span class="lineno">  638</span> </div>
-<div class="line"><a id="l00639" name="l00639"></a><span class="lineno">  639</span>        <span class="keywordflow">if</span> (r-&gt;exp &lt;= 0)</div>
-<div class="line"><a id="l00640" name="l00640"></a><span class="lineno">  640</span>        { <span class="comment">/* underflow? */</span></div>
-<div class="line"><a id="l00641" name="l00641"></a><span class="lineno">  641</span>                <span class="keywordflow">if</span> (ins &amp; <a class="code hl_define" href="../../de/d00/a00185.html#a25cad10602d7583e985e0e96938286bd">I_FTRP_V</a>)</div>
-<div class="line"><a id="l00642" name="l00642"></a><span class="lineno">  642</span>                        <a class="code hl_function" href="../../dd/d00/a00921.html#a2b32b7cc4f2fab7092fd42a60dcedd17">vax_trap</a>(<a class="code hl_define" href="../../de/d00/a00185.html#a8f432877b4f7a3d37a36b250beb94acd">TRAP_UNF</a>, ins);  <span class="comment">/* enabled? set trap */</span></div>
-<div class="line"><a id="l00643" name="l00643"></a><span class="lineno">  643</span>                <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00644" name="l00644"></a><span class="lineno">  644</span>        } <span class="comment">/* underflow to 0 */</span></div>
-<div class="line"><a id="l00645" name="l00645"></a><span class="lineno">  645</span> </div>
-<div class="line"><a id="l00646" name="l00646"></a><span class="lineno">  646</span>        <span class="keywordflow">return</span>(((<a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a>)r-&gt;sign) &lt;&lt; <a class="code hl_define" href="../../de/d00/a00185.html#ae515817a2df8a7b19110291c3170fc99">FDR_V_SIGN</a>) | (((<a class="code hl_typedef" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a>)r-&gt;exp) &lt;&lt; <a class="code hl_define" href="../../de/d00/a00185.html#a1fa0dfab8247d653a7f4f1da91892491">FDR_V_EXP</a>) | ((r-&gt;frac &gt;&gt; <a class="code hl_define" href="../../de/d00/a00185.html#abeb1676f565180e62ed4f48ca1a452db">FDR_GUARD</a>) &amp; <a class="code hl_define" href="../../de/d00/a00185.html#a3cd1a1f9041c3de0fd5d407c88ebbb2a">FDR_FRAC</a>);</div>
-<div class="line"><a id="l00647" name="l00647"></a><span class="lineno">  647</span>}</div>
-</div>
-<div class="line"><a id="l00648" name="l00648"></a><span class="lineno">  648</span> </div>
-<div class="line"><a id="l00649" name="l00649"></a><span class="lineno">  649</span><span class="comment">//\}</span></div>
-<div class="ttc" id="aa00143_html"><div class="ttname"><a href="../../d7/d00/a00143.html">AlphaCPU.h</a></div><div class="ttdoc">Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor.</div></div>
-<div class="ttc" id="aa00149_html_a7180e1755053a1bcd81db85436adc44f"><div class="ttname"><a href="../../da/d00/a00149.html#a7180e1755053a1bcd81db85436adc44f">IMMAX</a></div><div class="ttdeci">#define IMMAX</div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00149_source.html#l00207">AlphaCPU_ieeefloat.cpp:207</a></div></div>
-<div class="ttc" id="aa00149_html_afb569f4db71c53f996d4ebce81ed87c8"><div class="ttname"><a href="../../da/d00/a00149.html#afb569f4db71c53f996d4ebce81ed87c8">IPMAX</a></div><div class="ttdeci">#define IPMAX</div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00149_source.html#l00206">AlphaCPU_ieeefloat.cpp:206</a></div></div>
-<div class="ttc" id="aa00152_html_a5838f04ab837aad98094822c4de2da1d"><div class="ttname"><a href="../../d7/d00/a00152.html#a5838f04ab837aad98094822c4de2da1d">UF_GRND</a></div><div class="ttdeci">#define UF_GRND</div><div class="ttdef"><b>Definition</b> <a href="#l00096">AlphaCPU_vaxfloat.cpp:96</a></div></div>
-<div class="ttc" id="aa00152_html_a8be1a575c58da2c6951bfaa2437bd4c9"><div class="ttname"><a href="../../d7/d00/a00152.html#a8be1a575c58da2c6951bfaa2437bd4c9">UF_FRND</a></div><div class="ttdeci">#define UF_FRND</div><div class="ttdef"><b>Definition</b> <a href="#l00094">AlphaCPU_vaxfloat.cpp:94</a></div></div>
-<div class="ttc" id="aa00182_html"><div class="ttname"><a href="../../d7/d00/a00182.html">cpu_debug.h</a></div><div class="ttdoc">Contains debugging macros used by AlphaCPU.cpp.</div></div>
-<div class="ttc" id="aa00185_html_a01620859eb30b6178c3bcf4406cde8df"><div class="ttname"><a href="../../de/d00/a00185.html#a01620859eb30b6178c3bcf4406cde8df">FPR_GETEXP</a></div><div class="ttdeci">#define FPR_GETEXP(x)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00268">cpu_defs.h:268</a></div></div>
-<div class="ttc" id="aa00185_html_a04d199411da06c953e6a48b93d57668c"><div class="ttname"><a href="../../de/d00/a00185.html#a04d199411da06c953e6a48b93d57668c">FDR_HB</a></div><div class="ttdeci">#define FDR_HB</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00278">cpu_defs.h:278</a></div></div>
-<div class="ttc" id="aa00185_html_a0bf990429b1f3e3d1899771cf16e240e"><div class="ttname"><a href="../../de/d00/a00185.html#a0bf990429b1f3e3d1899771cf16e240e">D_BIAS</a></div><div class="ttdeci">#define D_BIAS</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00284">cpu_defs.h:284</a></div></div>
-<div class="ttc" id="aa00185_html_a161e193f4ff9d271b7cc6ed12c4463ac"><div class="ttname"><a href="../../de/d00/a00185.html#a161e193f4ff9d271b7cc6ed12c4463ac">TRAP_IOV</a></div><div class="ttdeci">#define TRAP_IOV</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00882">cpu_defs.h:882</a></div></div>
-<div class="ttc" id="aa00185_html_a1766eb7d01470580b75f67e64caf1bf9"><div class="ttname"><a href="../../de/d00/a00185.html#a1766eb7d01470580b75f67e64caf1bf9">TRAP_SWC</a></div><div class="ttdeci">#define TRAP_SWC</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00876">cpu_defs.h:876</a></div></div>
-<div class="ttc" id="aa00185_html_a1fa0dfab8247d653a7f4f1da91892491"><div class="ttname"><a href="../../de/d00/a00185.html#a1fa0dfab8247d653a7f4f1da91892491">FDR_V_EXP</a></div><div class="ttdeci">#define FDR_V_EXP</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00275">cpu_defs.h:275</a></div></div>
-<div class="ttc" id="aa00185_html_a222420695bdc5a0f02dacea27acb937a"><div class="ttname"><a href="../../de/d00/a00185.html#a222420695bdc5a0f02dacea27acb937a">FPR_HB</a></div><div class="ttdeci">#define FPR_HB</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00264">cpu_defs.h:264</a></div></div>
-<div class="ttc" id="aa00185_html_a22aca3bf34a94c41f8db01ef670bce1b"><div class="ttname"><a href="../../de/d00/a00185.html#a22aca3bf34a94c41f8db01ef670bce1b">FPR_GETSIGN</a></div><div class="ttdeci">#define FPR_GETSIGN(x)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00267">cpu_defs.h:267</a></div></div>
-<div class="ttc" id="aa00185_html_a25cad10602d7583e985e0e96938286bd"><div class="ttname"><a href="../../de/d00/a00185.html#a25cad10602d7583e985e0e96938286bd">I_FTRP_V</a></div><div class="ttdeci">#define I_FTRP_V</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00157">cpu_defs.h:157</a></div></div>
-<div class="ttc" id="aa00185_html_a27c4d6400c517115657a490ac7fb7d4f"><div class="ttname"><a href="../../de/d00/a00185.html#a27c4d6400c517115657a490ac7fb7d4f">UF_NM</a></div><div class="ttdeci">#define UF_NM</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00349">cpu_defs.h:349</a></div></div>
-<div class="ttc" id="aa00185_html_a2a6e1a417b2aad8ed3e6e3cbbdb2509e"><div class="ttname"><a href="../../de/d00/a00185.html#a2a6e1a417b2aad8ed3e6e3cbbdb2509e">I_FTRP_S</a></div><div class="ttdeci">#define I_FTRP_S</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00159">cpu_defs.h:159</a></div></div>
-<div class="ttc" id="aa00185_html_a33e99d0c641ca4730e78dd93a479ddc0"><div class="ttname"><a href="../../de/d00/a00185.html#a33e99d0c641ca4730e78dd93a479ddc0">FDR_GETEXP</a></div><div class="ttdeci">#define FDR_GETEXP(x)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00282">cpu_defs.h:282</a></div></div>
-<div class="ttc" id="aa00185_html_a376f123ad31e122d6571d052559c4f1d"><div class="ttname"><a href="../../de/d00/a00185.html#a376f123ad31e122d6571d052559c4f1d">SWAP_VAXG</a></div><div class="ttdeci">#define SWAP_VAXG(x)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00227">cpu_defs.h:227</a></div></div>
-<div class="ttc" id="aa00185_html_a3a6a154759329d0b276b8b5aade28321"><div class="ttname"><a href="../../de/d00/a00185.html#a3a6a154759329d0b276b8b5aade28321">F_SIGN</a></div><div class="ttdeci">#define F_SIGN</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00210">cpu_defs.h:210</a></div></div>
-<div class="ttc" id="aa00185_html_a3cd1a1f9041c3de0fd5d407c88ebbb2a"><div class="ttname"><a href="../../de/d00/a00185.html#a3cd1a1f9041c3de0fd5d407c88ebbb2a">FDR_FRAC</a></div><div class="ttdeci">#define FDR_FRAC</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00279">cpu_defs.h:279</a></div></div>
-<div class="ttc" id="aa00185_html_a465b4cec325c6328ac3d6cab4544e095"><div class="ttname"><a href="../../de/d00/a00185.html#a465b4cec325c6328ac3d6cab4544e095">I_GETRC</a></div><div class="ttdeci">#define I_GETRC(x)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00197">cpu_defs.h:197</a></div></div>
-<div class="ttc" id="aa00185_html_a477a3b909af5e168c8b0d021f42d978f"><div class="ttname"><a href="../../de/d00/a00185.html#a477a3b909af5e168c8b0d021f42d978f">F_M_EXP</a></div><div class="ttdeci">#define F_M_EXP</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00212">cpu_defs.h:212</a></div></div>
-<div class="ttc" id="aa00185_html_a484a9e914bcb91267cd1be3c44378e87"><div class="ttname"><a href="../../de/d00/a00185.html#a484a9e914bcb91267cd1be3c44378e87">G_M_EXP</a></div><div class="ttdeci">#define G_M_EXP</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00223">cpu_defs.h:223</a></div></div>
-<div class="ttc" id="aa00185_html_a48f0868c2774aad1501138b9f9c01ef0"><div class="ttname"><a href="../../de/d00/a00185.html#a48f0868c2774aad1501138b9f9c01ef0">FPR_SIGN</a></div><div class="ttdeci">#define FPR_SIGN</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00259">cpu_defs.h:259</a></div></div>
-<div class="ttc" id="aa00185_html_a505c6fe92f821e7a12e0d5f77eb2981f"><div class="ttname"><a href="../../de/d00/a00185.html#a505c6fe92f821e7a12e0d5f77eb2981f">UF_V_NM</a></div><div class="ttdeci">#define UF_V_NM</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00348">cpu_defs.h:348</a></div></div>
-<div class="ttc" id="aa00185_html_a5465c9a96858a7543384933130eb7a44"><div class="ttname"><a href="../../de/d00/a00185.html#a5465c9a96858a7543384933130eb7a44">FPR_GETFRAC</a></div><div class="ttdeci">#define FPR_GETFRAC(x)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00269">cpu_defs.h:269</a></div></div>
-<div class="ttc" id="aa00185_html_a61804a1b3483dbcc64f2b7aeb5bdcb76"><div class="ttname"><a href="../../de/d00/a00185.html#a61804a1b3483dbcc64f2b7aeb5bdcb76">F_BIAS</a></div><div class="ttdeci">#define F_BIAS</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00213">cpu_defs.h:213</a></div></div>
-<div class="ttc" id="aa00185_html_a6188f41eb199f07394a149275db5c7ef"><div class="ttname"><a href="../../de/d00/a00185.html#a6188f41eb199f07394a149275db5c7ef">F_EXP</a></div><div class="ttdeci">#define F_EXP</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00214">cpu_defs.h:214</a></div></div>
-<div class="ttc" id="aa00185_html_a6545d11b9066766bec6dff2a7b6e4a6e"><div class="ttname"><a href="../../de/d00/a00185.html#a6545d11b9066766bec6dff2a7b6e4a6e">NEG_Q</a></div><div class="ttdeci">#define NEG_Q(x)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00383">cpu_defs.h:383</a></div></div>
-<div class="ttc" id="aa00185_html_a6fe8cf2dc64f45a66b5cf12adb6e6278"><div class="ttname"><a href="../../de/d00/a00185.html#a6fe8cf2dc64f45a66b5cf12adb6e6278">TRAP_INV</a></div><div class="ttdeci">#define TRAP_INV</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00877">cpu_defs.h:877</a></div></div>
-<div class="ttc" id="aa00185_html_a73cc5f682e9dbe8a76fbd4273646a60c"><div class="ttname"><a href="../../de/d00/a00185.html#a73cc5f682e9dbe8a76fbd4273646a60c">FPR_FRAC</a></div><div class="ttdeci">#define FPR_FRAC</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00265">cpu_defs.h:265</a></div></div>
-<div class="ttc" id="aa00185_html_a789015280a2e58042d054eb62225f22a"><div class="ttname"><a href="../../de/d00/a00185.html#a789015280a2e58042d054eb62225f22a">fsqrt64</a></div><div class="ttdeci">u64 fsqrt64(u64 asig, s32 exp)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00502">cpu_defs.h:502</a></div></div>
-<div class="ttc" id="aa00185_html_a8413bd09f5542b8516474500dd3950d9"><div class="ttname"><a href="../../de/d00/a00185.html#a8413bd09f5542b8516474500dd3950d9">FPR_V_EXP</a></div><div class="ttdeci">#define FPR_V_EXP</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00260">cpu_defs.h:260</a></div></div>
-<div class="ttc" id="aa00185_html_a882910ee06acdf72ac4b6c90e0b53dcd"><div class="ttname"><a href="../../de/d00/a00185.html#a882910ee06acdf72ac4b6c90e0b53dcd">TRAP_DZE</a></div><div class="ttdeci">#define TRAP_DZE</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00878">cpu_defs.h:878</a></div></div>
-<div class="ttc" id="aa00185_html_a8f432877b4f7a3d37a36b250beb94acd"><div class="ttname"><a href="../../de/d00/a00185.html#a8f432877b4f7a3d37a36b250beb94acd">TRAP_UNF</a></div><div class="ttdeci">#define TRAP_UNF</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00880">cpu_defs.h:880</a></div></div>
-<div class="ttc" id="aa00185_html_a99901d7b7a44c83699010ada8a8b116b"><div class="ttname"><a href="../../de/d00/a00185.html#a99901d7b7a44c83699010ada8a8b116b">TRAP_OVF</a></div><div class="ttdeci">#define TRAP_OVF</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00879">cpu_defs.h:879</a></div></div>
-<div class="ttc" id="aa00185_html_a9ba32866f4a6e8feaa7759e6a455cfe8"><div class="ttname"><a href="../../de/d00/a00185.html#a9ba32866f4a6e8feaa7759e6a455cfe8">ufdiv64</a></div><div class="ttdeci">u64 ufdiv64(u64 dvd, u64 dvr, u32 prec, u32 *sticky)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00452">cpu_defs.h:452</a></div></div>
-<div class="ttc" id="aa00185_html_aa0234b154bfcf8ec6e6012c5e259d5ca"><div class="ttname"><a href="../../de/d00/a00185.html#aa0234b154bfcf8ec6e6012c5e259d5ca">FDR_M_EXP</a></div><div class="ttdeci">#define FDR_M_EXP</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00276">cpu_defs.h:276</a></div></div>
-<div class="ttc" id="aa00185_html_aa57d8839405fb974153684a006535b97"><div class="ttname"><a href="../../de/d00/a00185.html#aa57d8839405fb974153684a006535b97">SWAP_VAXF</a></div><div class="ttdeci">#define SWAP_VAXF(x)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00217">cpu_defs.h:217</a></div></div>
-<div class="ttc" id="aa00185_html_abeb1676f565180e62ed4f48ca1a452db"><div class="ttname"><a href="../../de/d00/a00185.html#abeb1676f565180e62ed4f48ca1a452db">FDR_GUARD</a></div><div class="ttdeci">#define FDR_GUARD</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00280">cpu_defs.h:280</a></div></div>
-<div class="ttc" id="aa00185_html_ac20674d9ce278b6a29b6e6aa5a83752a"><div class="ttname"><a href="../../de/d00/a00185.html#ac20674d9ce278b6a29b6e6aa5a83752a">FPR_GUARD</a></div><div class="ttdeci">#define FPR_GUARD</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00266">cpu_defs.h:266</a></div></div>
-<div class="ttc" id="aa00185_html_ac6522d535177e673b18ac636f4c6df1e"><div class="ttname"><a href="../../de/d00/a00185.html#ac6522d535177e673b18ac636f4c6df1e">X64_QUAD</a></div><div class="ttdeci">#define X64_QUAD</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00355">cpu_defs.h:355</a></div></div>
-<div class="ttc" id="aa00185_html_acaa98934c762ea1d58751d2f3a74e6ba"><div class="ttname"><a href="../../de/d00/a00185.html#acaa98934c762ea1d58751d2f3a74e6ba">FDR_GETFRAC</a></div><div class="ttdeci">#define FDR_GETFRAC(x)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00283">cpu_defs.h:283</a></div></div>
-<div class="ttc" id="aa00185_html_acfd0b16035fd005e2d047f33eae7c1ac"><div class="ttname"><a href="../../de/d00/a00185.html#acfd0b16035fd005e2d047f33eae7c1ac">I_GETFRND</a></div><div class="ttdeci">#define I_GETFRND(x)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00195">cpu_defs.h:195</a></div></div>
-<div class="ttc" id="aa00185_html_ae47ccc9971e2eccd6ab432ffa470fae0"><div class="ttname"><a href="../../de/d00/a00185.html#ae47ccc9971e2eccd6ab432ffa470fae0">FPR_V_SIGN</a></div><div class="ttdeci">#define FPR_V_SIGN</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00258">cpu_defs.h:258</a></div></div>
-<div class="ttc" id="aa00185_html_ae515817a2df8a7b19110291c3170fc99"><div class="ttname"><a href="../../de/d00/a00185.html#ae515817a2df8a7b19110291c3170fc99">FDR_V_SIGN</a></div><div class="ttdeci">#define FDR_V_SIGN</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00273">cpu_defs.h:273</a></div></div>
-<div class="ttc" id="aa00185_html_ae6853f714eb398ca0594833075ffb532"><div class="ttname"><a href="../../de/d00/a00185.html#ae6853f714eb398ca0594833075ffb532">ARITH_TRAP</a></div><div class="ttdeci">#define ARITH_TRAP(flags, reg)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00886">cpu_defs.h:886</a></div></div>
-<div class="ttc" id="aa00185_html_ae833b74b2134aead46c3102da0892181"><div class="ttname"><a href="../../de/d00/a00185.html#ae833b74b2134aead46c3102da0892181">F_GETEXP</a></div><div class="ttdeci">#define F_GETEXP(x)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00216">cpu_defs.h:216</a></div></div>
-<div class="ttc" id="aa00185_html_af0a4328aca063b55dd121d5e02e363e3"><div class="ttname"><a href="../../de/d00/a00185.html#af0a4328aca063b55dd121d5e02e363e3">G_BIAS</a></div><div class="ttdeci">#define G_BIAS</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00224">cpu_defs.h:224</a></div></div>
-<div class="ttc" id="aa00185_html_af4bb6e46799dbed1525499cd75e5f979"><div class="ttname"><a href="../../de/d00/a00185.html#af4bb6e46799dbed1525499cd75e5f979">F_V_FRAC</a></div><div class="ttdeci">#define F_V_FRAC</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00215">cpu_defs.h:215</a></div></div>
-<div class="ttc" id="aa00185_html_af4df65f763e63c8ff41006e226fa2dfb"><div class="ttname"><a href="../../de/d00/a00185.html#af4df65f763e63c8ff41006e226fa2dfb">FDR_GETSIGN</a></div><div class="ttdeci">#define FDR_GETSIGN(x)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00281">cpu_defs.h:281</a></div></div>
-<div class="ttc" id="aa00185_html_af7fe3030783d36c253fefe0241c4e594"><div class="ttname"><a href="../../de/d00/a00185.html#af7fe3030783d36c253fefe0241c4e594">uemul64</a></div><div class="ttdeci">u64 uemul64(u64 a, u64 b, u64 *hi)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00185_source.html#l00397">cpu_defs.h:397</a></div></div>
-<div class="ttc" id="aa00263_html_a1af9f95651e921615e75917a6dd1b574"><div class="ttname"><a href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a></div><div class="ttdeci">uint64_t u64</div><div class="ttdef"><b>Definition</b> <a href="../../df/d00/a00263_source.html#l00126">datatypes.h:126</a></div></div>
-<div class="ttc" id="aa00263_html_a70c1fcc1a4e96af8f6580f708657cd41"><div class="ttname"><a href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a></div><div class="ttdeci">uint32_t u32</div><div class="ttdef"><b>Definition</b> <a href="../../df/d00/a00263_source.html#l00125">datatypes.h:125</a></div></div>
-<div class="ttc" id="aa00263_html_a87a27db8f6877dc5bbc36ec833e88c58"><div class="ttname"><a href="../../df/d00/a00263.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a></div><div class="ttdeci">#define U64(a)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d00/a00263_source.html#l00119">datatypes.h:119</a></div></div>
-<div class="ttc" id="aa00263_html_aaab2ef2ca1576408739fdb8e9f52ae0f"><div class="ttname"><a href="../../df/d00/a00263.html#aaab2ef2ca1576408739fdb8e9f52ae0f">s64</a></div><div class="ttdeci">int64_t s64</div><div class="ttdef"><b>Definition</b> <a href="../../df/d00/a00263_source.html#l00131">datatypes.h:131</a></div></div>
-<div class="ttc" id="aa00263_html_ae5300ed9eabeae78ee9d0c704a9c412a"><div class="ttname"><a href="../../df/d00/a00263.html#ae5300ed9eabeae78ee9d0c704a9c412a">s32</a></div><div class="ttdeci">int32_t s32</div><div class="ttdef"><b>Definition</b> <a href="../../df/d00/a00263_source.html#l00130">datatypes.h:130</a></div></div>
-<div class="ttc" id="aa00524_html"><div class="ttname"><a href="../../d9/d00/a00524.html">StdAfx.h</a></div><div class="ttdoc">Standard includes.</div></div>
-<div class="ttc" id="aa00921_html_a19f7cad3734956ffb91a334062123bb5"><div class="ttname"><a href="../../dd/d00/a00921.html#a19f7cad3734956ffb91a334062123bb5">CAlphaCPU::vax_fmul</a></div><div class="ttdeci">u64 vax_fmul(u64 s1, u64 s2, u32 ins, u32 dp)</div><div class="ttdoc">Multiply 2 VAX floating-point values.</div><div class="ttdef"><b>Definition</b> <a href="#l00358">AlphaCPU_vaxfloat.cpp:358</a></div></div>
-<div class="ttc" id="aa00921_html_a20cdd1a0e19fb67fcc71d7c9a5b7264e"><div class="ttname"><a href="../../dd/d00/a00921.html#a20cdd1a0e19fb67fcc71d7c9a5b7264e">CAlphaCPU::vax_stg</a></div><div class="ttdeci">u64 vax_stg(u64 op)</div><div class="ttdoc">Convert the VAX floating register format to the VAX G-floating memory format.</div><div class="ttdef"><b>Definition</b> <a href="#l00167">AlphaCPU_vaxfloat.cpp:167</a></div></div>
-<div class="ttc" id="aa00921_html_a22ef0f331498d7ab3106a8c76e72725e"><div class="ttname"><a href="../../dd/d00/a00921.html#a22ef0f331498d7ab3106a8c76e72725e">CAlphaCPU::vax_sqrt</a></div><div class="ttdeci">u64 vax_sqrt(u64 op, u32 ins, u32 dp)</div><div class="ttdoc">Determine principal square root of a VAX floating-point value.</div><div class="ttdef"><b>Definition</b> <a href="#l00423">AlphaCPU_vaxfloat.cpp:423</a></div></div>
-<div class="ttc" id="aa00921_html_a28ca67733cf3c14b1e7234f3ee791cbf"><div class="ttname"><a href="../../dd/d00/a00921.html#a28ca67733cf3c14b1e7234f3ee791cbf">CAlphaCPU::vax_cvtfi</a></div><div class="ttdeci">u64 vax_cvtfi(u64 op, u32 ins)</div><div class="ttdoc">Convert VAX floating-point value to 64-bit signed integer.</div><div class="ttdef"><b>Definition</b> <a href="#l00247">AlphaCPU_vaxfloat.cpp:247</a></div></div>
-<div class="ttc" id="aa00921_html_a2b32b7cc4f2fab7092fd42a60dcedd17"><div class="ttname"><a href="../../dd/d00/a00921.html#a2b32b7cc4f2fab7092fd42a60dcedd17">CAlphaCPU::vax_trap</a></div><div class="ttdeci">void vax_trap(u64 mask, u32 ins)</div><div class="ttdoc">Set VAX floating-point trap.</div><div class="ttdef"><b>Definition</b> <a href="#l00463">AlphaCPU_vaxfloat.cpp:463</a></div></div>
-<div class="ttc" id="aa00921_html_a301c0813e82b29ea7c32c18f73ed2e1e"><div class="ttname"><a href="../../dd/d00/a00921.html#a301c0813e82b29ea7c32c18f73ed2e1e">CAlphaCPU::vax_fcmp</a></div><div class="ttdeci">int vax_fcmp(u64 s1, u64 s2, u32 ins)</div><div class="ttdoc">Compare 2 VAX floating-point values.</div><div class="ttdef"><b>Definition</b> <a href="#l00192">AlphaCPU_vaxfloat.cpp:192</a></div></div>
-<div class="ttc" id="aa00921_html_a558eae03cec5658f7c59d416b7d962b2"><div class="ttname"><a href="../../dd/d00/a00921.html#a558eae03cec5658f7c59d416b7d962b2">CAlphaCPU::vax_fdiv</a></div><div class="ttdeci">u64 vax_fdiv(u64 s1, u64 s2, u32 ins, u32 dp)</div><div class="ttdoc">Divide 2 VAX floating-point values.</div><div class="ttdef"><b>Definition</b> <a href="#l00389">AlphaCPU_vaxfloat.cpp:389</a></div></div>
-<div class="ttc" id="aa00921_html_a5f02bef6d1c34dde4e092abdf5f1ff19"><div class="ttname"><a href="../../dd/d00/a00921.html#a5f02bef6d1c34dde4e092abdf5f1ff19">CAlphaCPU::vax_unpack</a></div><div class="ttdeci">void vax_unpack(u64 op, UFP *r, u32 ins)</div><div class="ttdoc">Unpack VAX floating-point value.</div><div class="ttdef"><b>Definition</b> <a href="#l00480">AlphaCPU_vaxfloat.cpp:480</a></div></div>
-<div class="ttc" id="aa00921_html_a66a23a9caea9102cc791d6309da4251c"><div class="ttname"><a href="../../dd/d00/a00921.html#a66a23a9caea9102cc791d6309da4251c">CAlphaCPU::vax_ldf</a></div><div class="ttdeci">u64 vax_ldf(u32 op)</div><div class="ttdoc">Convert the VAX F-floating memory format to the VAX floating register format.</div><div class="ttdef"><b>Definition</b> <a href="#l00117">AlphaCPU_vaxfloat.cpp:117</a></div></div>
-<div class="ttc" id="aa00921_html_a877b18f576f142800ee90e42e7f10ed1"><div class="ttname"><a href="../../dd/d00/a00921.html#a877b18f576f142800ee90e42e7f10ed1">CAlphaCPU::vax_unpack_d</a></div><div class="ttdeci">void vax_unpack_d(u64 op, UFP *r, u32 ins)</div><div class="ttdoc">Unpack VAX D-floating-point value.</div><div class="ttdef"><b>Definition</b> <a href="#l00511">AlphaCPU_vaxfloat.cpp:511</a></div></div>
-<div class="ttc" id="aa00921_html_a8d7803275493c877723fe9610672a291"><div class="ttname"><a href="../../dd/d00/a00921.html#a8d7803275493c877723fe9610672a291">CAlphaCPU::vax_stf</a></div><div class="ttdeci">u32 vax_stf(u64 op)</div><div class="ttdoc">Convert the VAX floating register format to the VAX F-floating memory format.</div><div class="ttdef"><b>Definition</b> <a href="#l00153">AlphaCPU_vaxfloat.cpp:153</a></div></div>
-<div class="ttc" id="aa00921_html_a9eb6aaa4d9bd1ee240fd860778af8071"><div class="ttname"><a href="../../dd/d00/a00921.html#a9eb6aaa4d9bd1ee240fd860778af8071">CAlphaCPU::vax_rpack</a></div><div class="ttdeci">u64 vax_rpack(UFP *r, u32 ins, u32 dp)</div><div class="ttdoc">Round and pack VAX floating-point value.</div><div class="ttdef"><b>Definition</b> <a href="#l00581">AlphaCPU_vaxfloat.cpp:581</a></div></div>
-<div class="ttc" id="aa00921_html_aafa76d1334b3c500f3af42e5819cc4f7"><div class="ttname"><a href="../../dd/d00/a00921.html#aafa76d1334b3c500f3af42e5819cc4f7">CAlphaCPU::vax_rpack_d</a></div><div class="ttdeci">u64 vax_rpack_d(UFP *r, u32 ins)</div><div class="ttdoc">Round and pack VAX D-floating-point value.</div><div class="ttdef"><b>Definition</b> <a href="#l00628">AlphaCPU_vaxfloat.cpp:628</a></div></div>
-<div class="ttc" id="aa00921_html_ab7357cca6e68b695d1a2ceab797e7531"><div class="ttname"><a href="../../dd/d00/a00921.html#ab7357cca6e68b695d1a2ceab797e7531">CAlphaCPU::vax_fadd</a></div><div class="ttdeci">u64 vax_fadd(u64 s1, u64 s2, u32 ins, u32 dp, bool sub)</div><div class="ttdoc">Add or subtract 2 VAX floating-point values.</div><div class="ttdef"><b>Definition</b> <a href="#l00290">AlphaCPU_vaxfloat.cpp:290</a></div></div>
-<div class="ttc" id="aa00921_html_ad050a27d6616c78dc617f2d23569dacf"><div class="ttname"><a href="../../dd/d00/a00921.html#ad050a27d6616c78dc617f2d23569dacf">CAlphaCPU::vax_cvtif</a></div><div class="ttdeci">u64 vax_cvtif(u64 val, u32 ins, u32 dp)</div><div class="ttdoc">Convert 64-bit signed integer to VAX floating-point value.</div><div class="ttdef"><b>Definition</b> <a href="#l00216">AlphaCPU_vaxfloat.cpp:216</a></div></div>
-<div class="ttc" id="aa00921_html_af65652318bd52c6d0aee9b473787072e"><div class="ttname"><a href="../../dd/d00/a00921.html#af65652318bd52c6d0aee9b473787072e">CAlphaCPU::vax_ldg</a></div><div class="ttdeci">u64 vax_ldg(u64 op)</div><div class="ttdoc">Convert the VAX G-floating memory format to the VAX floating register format.</div><div class="ttdef"><b>Definition</b> <a href="#l00138">AlphaCPU_vaxfloat.cpp:138</a></div></div>
-<div class="ttc" id="aa00921_html_af8f0e111be398fda25a6e85c458bb259"><div class="ttname"><a href="../../dd/d00/a00921.html#af8f0e111be398fda25a6e85c458bb259">CAlphaCPU::vax_norm</a></div><div class="ttdeci">void vax_norm(UFP *r)</div><div class="ttdoc">Normalize VAX floating-point value.</div><div class="ttdef"><b>Definition</b> <a href="#l00538">AlphaCPU_vaxfloat.cpp:538</a></div></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aa00152_html_a52b4123a4033a7117f5a317289bff0d9"><div class="ttname"><a href="../../d7/d00/a00152.html#a52b4123a4033a7117f5a317289bff0d9">warn</a></div><div class="ttdeci">static void warn(const char *fmt,...)</div><div class="ttdef"><b>Definition</b> <a href="#l00037">err.h:37</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d7/d00/a00152.html">AlphaCPU_vaxfloat.cpp</a></li>
+    <li class="navelem"><a href="../../dir_9f351d46ce3cc29445a41dc3a31e6919.html">config</a></li><li class="navelem"><a href="../../dir_6b7d1cab4fc1513651fc64c4a9a49cf4.html">tui_win32</a></li><li class="navelem"><a href="../../dir_2c38ba4e84cb869759378366b3e67103.html">include</a></li><li class="navelem"><a href="../../d7/d00/a00152.html">err.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

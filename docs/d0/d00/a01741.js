@@ -1,13 +1,8 @@
 var a01741 =
 [
-    [ "a", "d0/d00/a01741.html#a6985c7fee57696f8ee8ae3b28d048964", null ],
-    [ "b", "d0/d00/a01741.html#a470f3d6a08fb5312737e7a8124f7d026", null ],
-    [ "dsp", "d0/d00/a01741.html#a823afd8235ec3e8533af40fb24e7f2c2", null ],
-    [ "kind", "d0/d00/a01741.html#ab3560a65b97169fbe371780fe2dda801", null ],
-    [ "last_ms", "d0/d00/a01741.html#a1952c0c7f4983bbd39e7a02142495177", null ],
-    [ "ms", "d0/d00/a01741.html#afe702ef78c1a7533c8f8aab51adc95da", null ],
-    [ "reg", "d0/d00/a01741.html#aa9e91b4850143965ad68997ae1a2abce", null ],
-    [ "rep", "d0/d00/a01741.html#a4e9d9adaecccba05edd427f578e60eb5", null ],
-    [ "thr", "d0/d00/a01741.html#a3bf0a5df0181d922a4ac8f6d1a2e1819", null ],
-    [ "val", "d0/d00/a01741.html#afe0bb1d8c0fa89b6bcf5616634874469", null ]
+    [ "fullscreen_hotkey_pressed", "d0/d00/a01741.html#a1fc1aaa8028dc486ae8982c56668c879", null ],
+    [ "guest_key_by_scancode", "d0/d00/a01741.html#a37dfae45211fd45afa4d7abd034db403", null ],
+    [ "guest_key_pressed", "d0/d00/a01741.html#acfbc06ff1a1eb2879472e550f005b9c0", null ],
+    [ "reconciled_key_releases", "d0/d00/a01741.html#ab3ba315b0825c1de9c114d2a184ef06d", null ],
+    [ "swallowed_hotkey_releases", "d0/d00/a01741.html#aa6d4f44e08f7a06a1a6713b601a5391f", null ]
 ];

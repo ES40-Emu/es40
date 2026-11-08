@@ -1,6 +1,4 @@
 var a00317 =
 [
-    [ "CGloriaSynergy", "dc/d00/a01177.html", "dc/d00/a01177" ],
-    [ "CGloriaSynergy::PCIConfig", "de/d00/a01181.html", "de/d00/a01181" ],
-    [ "CGloriaSynergy::OptionROM", "d3/d00/a01185.html", "d3/d00/a01185" ]
+    [ "jit_x64_backend_tu", "da/d00/a00317.html#a0cbebc4c8e05d28ba9fbcfbf4cc093d6", null ]
 ];

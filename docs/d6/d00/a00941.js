@@ -1,15 +1,16 @@
 var a00941 =
 [
-    [ "amask", "d6/d00/a00941.html#a74097b8e195271d3406fc8a8c847332f", null ],
-    [ "chip_id", "d6/d00/a00941.html#a61e4b59e73095ee8bd9c6df2a0b62494", null ],
-    [ "hw_load", "d6/d00/a00941.html#a3433074097fe349ccc9222f5fe927fd1", null ],
-    [ "hw_store", "d6/d00/a00941.html#a398e14d8dc58877b3b703d6100e6aae8", null ],
-    [ "implver", "d6/d00/a00941.html#acac881b224550b602574b93493d93a4c", null ],
-    [ "ipr_read", "d6/d00/a00941.html#acd33c29c96427cf5fab28b6737410c4a", null ],
-    [ "ipr_write", "d6/d00/a00941.html#aae3a0175b2bbb39f9c1781393bf640e8", null ],
-    [ "mmu_address", "d6/d00/a00941.html#a55781580b5b173191a9acea8afabba20", null ],
-    [ "pal", "d6/d00/a00941.html#a3334f53fb5326aa873b46512c95df4e3", null ],
-    [ "tb_fill", "d6/d00/a00941.html#a571d1e5d66e62d3c34b9fd3ac213eb31", null ],
-    [ "type_major", "d6/d00/a00941.html#aa9ae9cb957761dd793c5e54834e07f9d", null ],
-    [ "type_minor", "d6/d00/a00941.html#a36cfe1cf0fdf434d8f324d6862b9e864", null ]
+    [ "CSemaphore", "d6/d00/a00941.html#a910fe4de7c75a7ad60bd9a43fad016da", null ],
+    [ "CSemaphore", "d6/d00/a00941.html#a93de78b6680bd3df74685b89ff99a5d1", null ],
+    [ "~CSemaphore", "d6/d00/a00941.html#ac9ca04f6c08e0f995968d6e392d0e0f5", null ],
+    [ "CSemaphore", "d6/d00/a00941.html#abf9e09282e0484f7168e75a362dc1b9c", null ],
+    [ "operator=", "d6/d00/a00941.html#ac5baaa056b5b4cbe38c1b80c4b612dde", null ],
+    [ "set", "d6/d00/a00941.html#a1f27417ae7edfd3a568b06efd2e2672b", null ],
+    [ "tryWait", "d6/d00/a00941.html#a9705e17b65c13d0cc6179f4777a005c0", null ],
+    [ "wait", "d6/d00/a00941.html#a1c108bd981fe68527ec8ef5e7b0d116c", null ],
+    [ "wait", "d6/d00/a00941.html#ae5333faa4d3476ad589f58b0adf988e0", null ],
+    [ "_cond", "d6/d00/a00941.html#ad0f5877f89fab5dd94a517d5d05313a2", null ],
+    [ "_max", "d6/d00/a00941.html#abf4fed5d1708116f2398fa23b0e9236b", null ],
+    [ "_mutex", "d6/d00/a00941.html#a6d86eb813080d55e96d84f09df4d0db6", null ],
+    [ "_n", "d6/d00/a00941.html#a7d7fabdf521bc80e2bba3aa538591fef", null ]
 ];

@@ -1,19 +1,14 @@
 var a00200 =
 [
-    [ "DO_LDA", "d3/d00/a00200.html#ad6c2ce1595743e99ecebf293ddd11762", null ],
-    [ "DO_LDAH", "d3/d00/a00200.html#a1c14c5e964d75e960d4eaa31185ca85b", null ],
-    [ "DO_LDBU", "d3/d00/a00200.html#a4b0286cdceae2046cedcbdcbac9c0ff3", null ],
-    [ "DO_LDL", "d3/d00/a00200.html#a230d81c25ea9ac2305daccfd7aa948a8", null ],
-    [ "DO_LDL_L", "d3/d00/a00200.html#ad1c950685502f9d91dd34eef28ac726c", null ],
-    [ "DO_LDQ", "d3/d00/a00200.html#a89cc147b8014c5389ea88f3a1201dec4", null ],
-    [ "DO_LDQ_L", "d3/d00/a00200.html#afdc241bb54a7c6ceed68a9d6dc9ae7d7", null ],
-    [ "DO_LDQ_U", "d3/d00/a00200.html#adf10d78636e0d0affd4cb838ce2077ac", null ],
-    [ "DO_LDWU", "d3/d00/a00200.html#ae2e28af2ad1c5c1f7f8c3d4f57f758c4", null ],
-    [ "DO_STB", "d3/d00/a00200.html#a1f7a4a70490bd9acb19456665018e618", null ],
-    [ "DO_STL", "d3/d00/a00200.html#a5c397e695d26479299fdeaf59f6bf8a7", null ],
-    [ "DO_STL_C", "d3/d00/a00200.html#a501cc9911d2b12cb106e22a1eb6685df", null ],
-    [ "DO_STQ", "d3/d00/a00200.html#a1515fceebf9204fd33f68584abf0af03", null ],
-    [ "DO_STQ_C", "d3/d00/a00200.html#ab62d39e51141126f026ad0a11c28a03a", null ],
-    [ "DO_STQ_U", "d3/d00/a00200.html#a1cedafe5a38adf67da48864060200da9", null ],
-    [ "DO_STW", "d3/d00/a00200.html#a9da60541b4a571faa5c8f612999dde38", null ]
+    [ "AlphaHWLoadDescriptor", "d8/d00/a01165.html", "d8/d00/a01165" ],
+    [ "AlphaHWLoadPolicy", "d7/d00/a01169.html", "d7/d00/a01169" ],
+    [ "AlphaHWLoadAddress", "d3/d00/a00200.html#aa3ad26f561afb9009c452480177375e7", [
+      [ "Invalid", "d3/d00/a00200.html#aa3ad26f561afb9009c452480177375e7a4bbb8f967da6d1a610596d7257179c2b", null ],
+      [ "Physical", "d3/d00/a00200.html#aa3ad26f561afb9009c452480177375e7ace898d62ed9ca7653a01fe0c781e97e9", null ],
+      [ "Virtual", "d3/d00/a00200.html#aa3ad26f561afb9009c452480177375e7a615e6f9baca5553d44683a098d342b70", null ]
+    ] ],
+    [ "alpha_decode_hw_load", "d3/d00/a00200.html#a39e6fb8b9481dd0277a58ffa8fddcbd9", null ],
+    [ "alpha_hw_load_compilable", "d3/d00/a00200.html#a7187fb36cd6b9bab1a96611f696057a2", null ],
+    [ "alpha_hw_load_helper_descriptor", "d3/d00/a00200.html#a49822d70c34b3143f691d658e1d66c28", null ],
+    [ "alpha_hw_load_valid", "d3/d00/a00200.html#a443860ab83551bf77dad9bf4efcaa6b7", null ]
 ];

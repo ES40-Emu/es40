@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: gui/sdl.cpp File Reference</title>
+<title>ES40: graphics/PowerStorm3xx.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,179 +109,177 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d9/d00/a00398.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">sdl.cpp File Reference</div></div>
+  <div class="headertitle"><div class="title">PowerStorm3xx.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-
-<p>Contains the code for the <a class="el" href="../../d9/d00/a01469.html" title="GUI implementation using SDL3.">bx_sdl_gui_c</a> class used for interfacing with SDL.  
-<a href="#details">More...</a></p>
-<div class="textblock"><code>#include &quot;<a class="el" href="../../d9/d00/a00524_source.html">../StdAfx.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dd/d00/a00386_source.html">keymap.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d8/d00/a00410_source.html">sdl_media.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dc/d00/a01929_source.html">../graphics/VGA.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dc/d00/a00620_source.html">system/System.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d3/d00/a00419_source.html">io/Keyboard.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../da/d00/a00080_source.html">config/Configurator.h</a>&quot;</code><br />
-<code>#include &lt;stdlib.h&gt;</code><br />
-<code>#include &lt;string.h&gt;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d4/d00/a00428_source.html">SVGA.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d8/d00/a00410_source.html">REALimage2100.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d9/d00/a00056_source.html">base/Runnable.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../de/d00/a00440_source.html">gui/gui.h</a>&quot;</code><br />
+<code>#include &lt;array&gt;</code><br />
 <code>#include &lt;atomic&gt;</code><br />
-<code>#include &lt;cctype&gt;</code><br />
-<code>#include &lt;exception&gt;</code><br />
-<code>#include &lt;map&gt;</code><br />
-<code>#include &lt;memory&gt;</code><br />
-<code>#include &lt;mutex&gt;</code><br />
+<code>#include &lt;fstream&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
-<code>#include &lt;utility&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
-<code>#include &lt;SDL3/SDL.h&gt;</code><br />
-<code>#include &quot;<a class="el" href="../../d9/d00/a00404_source.html">sdl_fonts.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d7/d00/a00401_source.html">sdlkeys.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
-Include dependency graph for sdl.cpp:</div>
+Include dependency graph for PowerStorm3xx.h:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../d1/d00/a00399.png" border="0" usemap="#agui_2sdl_8cpp" loading="lazy" alt=""/></div>
-<map name="agui_2sdl_8cpp" id="agui_2sdl_8cpp">
-<area shape="rect" title="Contains the code for the bx_sdl_gui_c class used for interfacing with SDL." alt="" coords="1377,5,1461,32"/>
-<area shape="rect" href="../../d9/d00/a00524.html" title="Standard includes." alt="" coords="1218,304,1303,331"/>
-<area shape="poly" title=" " alt="" coords="1374,26,1318,41,1249,64,1214,81,1182,102,1153,126,1129,156,1122,176,1123,195,1131,215,1145,233,1183,267,1225,297,1220,296,1180,272,1141,237,1126,217,1118,197,1116,175,1125,153,1149,123,1179,97,1212,76,1247,59,1317,35,1379,25"/>
-<area shape="rect" title=" " alt="" coords="578,453,655,480"/>
-<area shape="poly" title=" " alt="" coords="1374,21,1208,27,981,37,773,55,699,67,674,74,660,82,645,118,623,191,591,304,591,331,591,368,595,405,606,440,601,438,590,406,585,368,586,331,586,304,618,189,640,116,656,78,673,69,698,62,772,49,981,32,1208,22,1379,20"/>
-<area shape="rect" title=" " alt="" coords="439,453,492,480"/>
-<area shape="poly" title=" " alt="" coords="1375,22,787,42,469,60,363,71,330,76,314,82,298,100,291,118,290,167,290,318,293,343,303,365,319,385,338,402,382,430,427,452,422,452,379,435,334,407,315,388,299,368,288,345,285,319,285,167,285,117,293,97,311,78,329,71,362,65,469,55,786,37,1379,19"/>
-<area shape="rect" title=" " alt="" coords="1017,528,1074,555"/>
-<area shape="poly" title=" " alt="" coords="1374,20,1313,24,1230,30,1133,44,1030,67,927,102,878,125,831,152,787,183,748,219,714,260,686,305,682,317,685,329,717,356,781,405,882,478,944,506,1005,528,999,528,942,511,879,482,778,410,713,360,681,332,676,317,681,303,709,256,744,215,784,179,828,148,875,121,925,97,1029,62,1133,39,1230,25,1313,19,1379,19"/>
-<area shape="rect" title=" " alt="" coords="917,453,977,480"/>
-<area shape="poly" title=" " alt="" coords="1374,22,1330,28,1276,38,1219,55,1167,82,1148,98,1135,113,1116,156,1108,181,1106,205,1108,248,1106,289,1098,310,1082,332,1065,347,1047,354,1010,356,975,358,960,366,945,380,939,393,937,408,940,440,936,437,932,408,934,392,941,377,957,361,974,353,1010,351,1046,349,1063,342,1079,329,1093,308,1101,288,1102,248,1100,205,1103,180,1111,154,1131,110,1144,94,1164,78,1217,50,1275,33,1330,23,1379,20"/>
-<area shape="rect" title=" " alt="" coords="2024,453,2092,480"/>
-<area shape="poly" title=" " alt="" coords="1462,17,1551,19,1672,27,1807,46,1876,60,1943,78,1969,90,1994,104,2021,113,2046,117,2090,120,2132,127,2155,137,2179,153,2202,172,2217,190,2226,212,2228,241,2228,319,2225,342,2217,364,2203,383,2187,400,2148,429,2107,450,2106,444,2145,424,2183,396,2199,380,2212,361,2220,341,2223,318,2223,241,2221,214,2213,193,2198,175,2176,157,2153,141,2131,132,2089,125,2045,122,2020,118,1991,109,1966,95,1941,82,1875,65,1807,51,1671,33,1551,24,1462,22"/>
-<area shape="rect" href="../../d6/d00/a00371.html" title="Contains the definitions for the bx_gui_c base class used for interfacing with SDL and other device i..." alt="" coords="200,155,249,181"/>
-<area shape="poly" title=" " alt="" coords="1374,20,1134,23,784,29,609,36,454,47,336,62,295,72,270,82,257,94,246,109,233,141,228,139,242,106,253,90,267,78,294,67,335,57,454,42,609,31,784,24,1134,17,1379,19"/>
-<area shape="rect" href="../../dd/d00/a00386.html" title="Contains the definitions for the bx_keymap_c class used for keyboard interfacing with SDL and other d..." alt="" coords="69,304,148,331"/>
-<area shape="poly" title=" " alt="" coords="1374,21,1129,24,772,32,592,39,433,50,311,64,268,73,242,82,214,101,191,125,171,153,154,182,130,241,117,289,111,288,125,239,150,180,166,150,187,122,211,97,239,78,267,68,310,59,432,45,592,34,772,27,1129,19,1379,19"/>
-<area shape="rect" href="../../da/d00/a00080.html" title="Contains the definitions for the configuration file interpreter." alt="" coords="5,379,148,405"/>
-<area shape="poly" title=" " alt="" coords="1374,20,1146,23,804,29,624,36,455,47,309,62,201,83,140,94,87,103,66,110,49,123,39,141,35,167,35,244,38,277,46,309,66,364,61,365,41,311,33,278,30,244,30,166,34,139,45,119,63,106,85,97,140,88,200,77,309,57,454,42,624,31,804,24,1146,17,1379,19"/>
-<area shape="rect" href="../../d8/d00/a00410.html" title=" " alt="" coords="1839,80,1930,107"/>
-<area shape="poly" title=" " alt="" coords="1461,23,1821,77,1826,80,1821,81,1820,83,1461,28"/>
-<area shape="rect" href="../../dc/d00/a01929.html" title=" " alt="" coords="1300,80,1426,107"/>
-<area shape="poly" title=" " alt="" coords="1412,31,1384,70,1380,66,1407,34"/>
-<area shape="rect" title=" " alt="" coords="2029,379,2086,405"/>
-<area shape="poly" title=" " alt="" coords="1460,30,1603,79,1691,113,1778,152,1840,188,1899,227,1962,259,1988,275,2017,302,2038,332,2051,365,2047,363,2033,335,2013,306,1985,280,1959,264,1896,232,1837,192,1775,157,1689,118,1601,84,1460,35"/>
-<area shape="rect" title=" " alt="" coords="1290,229,1343,256"/>
-<area shape="poly" title=" " alt="" coords="1427,30,1439,65,1442,86,1440,107,1427,148,1403,183,1379,205,1354,223,1352,219,1376,201,1398,180,1423,146,1435,106,1437,86,1434,67,1424,35"/>
-<area shape="rect" href="../../dc/d00/a00620.html" title="Contains the definitions for the emulated Typhoon Chipset devices." alt="" coords="889,229,1013,256"/>
-<area shape="poly" title=" " alt="" coords="1374,22,1293,30,1192,40,1097,57,1060,69,1034,82,1005,111,984,147,969,183,959,216,955,212,964,181,979,144,1001,108,1031,78,1058,64,1096,52,1191,35,1293,25,1379,21"/>
-<area shape="rect" href="../../d3/d00/a00419.html" title="Contains the definitions for the emulated Keyboard and mouse devices and controller." alt="" coords="324,80,426,107"/>
-<area shape="poly" title=" " alt="" coords="1376,25,442,90,441,85,1378,20"/>
-<area shape="rect" title=" " alt="" coords="2005,80,2068,107"/>
-<area shape="poly" title=" " alt="" coords="1461,20,1687,39,1836,55,1986,77,1993,81,1987,81,1985,83,1835,61,1686,44,1462,25"/>
-<area shape="rect" title=" " alt="" coords="2092,80,2157,107"/>
-<area shape="poly" title=" " alt="" coords="1461,19,1719,33,1895,51,2080,80,2074,80,1894,56,1718,39,1462,24"/>
-<area shape="rect" title=" " alt="" coords="2181,80,2241,107"/>
-<area shape="poly" title=" " alt="" coords="1461,18,1581,21,1753,30,1956,48,2168,80,2163,80,1955,53,1753,36,1581,27,1462,23"/>
-<area shape="rect" title=" " alt="" coords="2265,80,2312,107"/>
-<area shape="poly" title=" " alt="" coords="1461,17,1593,17,1787,23,2015,42,2133,57,2253,80,2247,80,2133,62,2014,47,1786,29,1593,22,1462,22"/>
-<area shape="rect" title=" " alt="" coords="2336,80,2431,107"/>
-<area shape="poly" title=" " alt="" coords="1461,18,1812,32,2062,50,2323,80,2318,80,2061,55,1812,38,1462,23"/>
-<area shape="rect" href="../../d9/d00/a00404.html" title="Contains fonts used by SDL." alt="" coords="2455,80,2540,107"/>
-<area shape="poly" title=" " alt="" coords="1461,17,1619,20,1858,28,2144,46,2293,60,2443,80,2437,80,2292,65,2144,51,1858,33,1619,25,1462,23"/>
-<area shape="rect" href="../../d7/d00/a00401.html" title="This file is simply a list of SDL key symbols taken from &lt;SDL/SDL_keysym.h&gt;." alt="" coords="2564,80,2642,107"/>
-<area shape="poly" title=" " alt="" coords="1461,17,1634,17,1900,24,2219,42,2385,57,2552,80,2547,80,2385,63,2218,47,1899,29,1634,23,1462,22"/>
-<area shape="rect" href="../../d7/d00/a00131.html" title=" " alt="" coords="1348,379,1458,405"/>
-<area shape="poly" title=" " alt="" coords="1286,329,1367,372,1362,371,1285,334"/>
-<area shape="rect" href="../../df/d00/a00263.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="954,379,1044,405"/>
-<area shape="poly" title=" " alt="" coords="1221,330,1059,377,1058,372,1215,331"/>
-<area shape="rect" title=" " alt="" coords="362,379,429,405"/>
-<area shape="poly" title=" " alt="" coords="1218,325,445,389,444,384,1218,320"/>
-<area shape="rect" href="../../d3/d00/a00023.html" title=" " alt="" coords="605,379,727,405"/>
-<area shape="poly" title=" " alt="" coords="1215,325,743,384,742,379,1220,323"/>
-<area shape="rect" href="../../d5/d00/a00029.html" title=" " alt="" coords="1401,453,1501,480"/>
-<area shape="poly" title=" " alt="" coords="1270,329,1299,365,1338,403,1372,426,1409,447,1404,446,1370,431,1335,407,1295,368,1268,334"/>
-<area shape="rect" href="../../dd/d00/a00041.html" title=" " alt="" coords="1068,379,1173,405"/>
-<area shape="poly" title=" " alt="" coords="1239,330,1160,374,1158,368,1234,332"/>
-<area shape="rect" href="../../dc/d00/a00032.html" title=" " alt="" coords="1134,453,1222,480"/>
-<area shape="poly" title=" " alt="" coords="1256,330,1194,442,1191,437,1251,333"/>
-<area shape="rect" href="../../d8/d00/a00038.html" title=" " alt="" coords="1246,453,1376,480"/>
-<area shape="poly" title=" " alt="" coords="1266,329,1304,440,1300,437,1263,333"/>
-<area shape="rect" href="../../d4/d00/a00035.html" title=" " alt="" coords="1482,379,1596,405"/>
-<area shape="poly" title=" " alt="" coords="1303,327,1478,374,1473,374,1303,332"/>
-<area shape="rect" href="../../d0/d00/a00302.html" title="Contains macro&#39;s and prototypes for debugging." alt="" coords="1620,379,1722,405"/>
-<area shape="poly" title=" " alt="" coords="1303,323,1607,378,1602,378,1303,328"/>
-<area shape="rect" href="../../d3/d00/a00305.html" title="Contains byte&#45;order conversion helpers." alt="" coords="1746,379,1852,405"/>
-<area shape="poly" title=" " alt="" coords="1303,321,1485,342,1734,378,1728,378,1484,347,1303,326"/>
-<area shape="poly" title=" " alt="" coords="660,404,635,443,632,438,655,407"/>
-<area shape="poly" title=" " alt="" coords="634,405,507,453,506,448,628,407"/>
-<area shape="poly" title=" " alt="" coords="1403,477,1389,483,1090,535,1089,530,1388,477,1398,478"/>
-<area shape="rect" title=" " alt="" coords="1421,528,1481,555"/>
-<area shape="poly" title=" " alt="" coords="1453,479,1453,514,1449,511,1449,482"/>
-<area shape="poly" title=" " alt="" coords="1070,403,1057,408,919,425,812,435,566,456,508,463,507,457,566,451,811,429,919,420,1056,403,1065,404"/>
-<area shape="poly" title=" " alt="" coords="1113,404,1080,455,1055,516,1052,511,1075,452,1108,407"/>
-<area shape="poly" title=" " alt="" coords="1118,404,1113,442,1115,461,1124,478,1142,492,1171,504,1247,521,1332,531,1408,539,1403,539,1332,537,1246,526,1169,509,1140,497,1120,482,1110,463,1108,442,1114,407"/>
-<area shape="poly" title=" " alt="" coords="1093,405,992,449,991,444,1088,406"/>
-<area shape="poly" title=" " alt="" coords="1173,395,2011,461,2006,462,1173,400"/>
-<area shape="poly" title=" " alt="" coords="1132,403,1161,442,1156,440,1129,408"/>
-<area shape="poly" title=" " alt="" coords="1268,480,1090,531,1089,525,1262,481"/>
-<area shape="poly" title=" " alt="" coords="1336,478,1416,521,1410,520,1335,483"/>
-<area shape="poly" title=" " alt="" coords="1526,405,1479,446,1477,441,1521,407"/>
-<area shape="poly" title=" " alt="" coords="1540,404,1533,441,1516,481,1500,502,1481,520,1479,515,1496,499,1512,479,1528,440,1536,408"/>
-<area shape="poly" title=" " alt="" coords="1484,403,1470,408,1200,442,993,464,993,458,1199,437,1469,403,1479,404"/>
-<area shape="poly" title=" " alt="" coords="211,184,199,204,187,230,185,243,187,255,200,303,214,339,235,371,270,403,307,426,348,442,388,453,427,462,421,462,387,458,346,448,305,431,267,407,231,374,209,342,195,305,182,257,179,243,182,229,195,202,214,180"/>
-<area shape="rect" title=" " alt="" coords="375,229,439,256"/>
-<area shape="poly" title=" " alt="" coords="249,177,364,222,359,224,250,182"/>
-<area shape="rect" href="../../d8/d00/a01932.html" title="Definitions for VGA cards." alt="" coords="196,229,250,256"/>
-<area shape="poly" title=" " alt="" coords="225,179,226,214,221,213,223,184"/>
-<area shape="poly" title=" " alt="" coords="102,334,91,366,86,363,104,329"/>
-<area shape="poly" title=" " alt="" coords="145,403,425,455,422,460,145,409"/>
-<area shape="poly" title=" " alt="" coords="1931,101,2066,129,2151,152,2168,173,2176,193,2178,241,2178,319,2176,339,2169,359,2148,394,2120,423,2092,447,2090,442,2117,420,2144,391,2164,357,2170,338,2173,319,2173,241,2171,194,2164,176,2148,157,2064,135,1931,107"/>
-<area shape="rect" title=" " alt="" coords="1839,155,1980,181"/>
-<area shape="poly" title=" " alt="" coords="1890,105,1903,141,1898,139,1888,110"/>
-<area shape="rect" title=" " alt="" coords="2004,155,2138,181"/>
-<area shape="poly" title=" " alt="" coords="1917,105,2027,149,2022,148,1917,110"/>
-<area shape="poly" title=" " alt="" coords="1298,105,1174,132,1004,172,911,199,816,230,722,266,632,306,577,338,530,381,504,411,483,442,479,438,500,408,527,377,574,334,630,302,720,261,814,225,910,193,1003,167,1173,126,1303,104"/>
-<area shape="rect" href="../../d6/d00/a00287.html" title="Contains the definitions for the PCI Device base class." alt="" coords="463,229,588,256"/>
-<area shape="poly" title=" " alt="" coords="1298,98,993,120,828,137,760,146,709,157,668,171,628,188,560,223,558,219,625,183,666,166,708,152,759,141,827,131,993,115,1303,97"/>
-<area shape="rect" href="../../d2/d00/a00281.html" title=" " alt="" coords="1488,229,1628,256"/>
-<area shape="poly" title=" " alt="" coords="1380,105,1532,220,1526,219,1379,110"/>
-<area shape="rect" href="../../d5/d00/a00269.html" title=" " alt="" coords="1626,155,1765,181"/>
-<area shape="poly" title=" " alt="" coords="1421,105,1625,151,1620,151,1421,110"/>
-<area shape="rect" href="../../d3/d00/a00275.html" title=" " alt="" coords="1140,155,1251,181"/>
-<area shape="poly" title=" " alt="" coords="1336,106,1240,151,1238,146,1331,108"/>
-<area shape="rect" href="../../de/d00/a00323.html" title=" " alt="" coords="1514,155,1602,181"/>
-<area shape="poly" title=" " alt="" coords="1397,105,1512,149,1507,149,1397,110"/>
-<area shape="rect" title=" " alt="" coords="1276,155,1315,181"/>
-<area shape="poly" title=" " alt="" coords="1354,106,1319,145,1316,141,1349,109"/>
-<area shape="rect" title=" " alt="" coords="1338,155,1388,181"/>
-<area shape="poly" title=" " alt="" coords="1365,105,1365,141,1361,137,1362,109"/>
-<area shape="rect" href="../../d6/d00/a00293.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="324,304,469,331"/>
-<area shape="poly" title=" " alt="" coords="501,258,434,298,431,294,506,255"/>
-<area shape="poly" title=" " alt="" coords="398,329,398,364,393,362,395,333"/>
-<area shape="poly" title=" " alt="" coords="339,334,148,377,146,372,342,329"/>
-<area shape="poly" title=" " alt="" coords="1508,256,1318,305,1317,300,1503,257"/>
-<area shape="poly" title=" " alt="" coords="1628,242,1696,247,1776,257,1860,275,1942,302,1994,332,2037,369,2032,367,1991,336,1939,306,1859,280,1775,262,1695,252,1628,248"/>
-<area shape="poly" title=" " alt="" coords="1753,179,1824,199,1899,227,1961,260,2017,302,2066,333,2085,350,2102,378,2105,395,2102,413,2082,444,2080,440,2097,411,2100,395,2097,380,2081,354,2063,338,2014,306,1958,265,1897,232,1823,204,1753,185"/>
-<area shape="poly" title=" " alt="" coords="1674,181,1596,224,1594,219,1669,183"/>
-<area shape="poly" title=" " alt="" coords="1735,179,1851,226,1919,260,1983,302,2016,332,2043,367,2038,365,2013,336,1980,306,1917,265,1849,230,1734,185"/>
-<area shape="poly" title=" " alt="" coords="1137,171,1018,177,850,187,655,204,455,232,454,227,655,199,849,181,1017,172,1142,170"/>
-<area shape="poly" title=" " alt="" coords="1217,179,1285,221,1280,221,1216,185"/>
-<area shape="poly" title=" " alt="" coords="1560,180,1560,215,1556,212,1556,184"/>
-<area shape="poly" title=" " alt="" coords="886,251,791,271,736,286,684,306,626,338,572,376,490,445,488,441,569,372,624,334,682,302,735,281,789,266,891,250"/>
-<area shape="poly" title=" " alt="" coords="937,255,915,279,898,305,878,354,871,396,873,416,880,436,907,478,927,497,952,512,1005,533,1000,532,950,517,924,502,902,482,875,438,868,417,866,396,873,352,893,303,911,275,933,258"/>
-<area shape="poly" title=" " alt="" coords="1014,246,1222,263,1492,292,1623,310,1736,331,1821,353,1849,364,1866,377,1882,399,1887,420,1883,439,1872,456,1853,471,1829,483,1769,504,1698,519,1624,530,1497,541,1497,535,1623,525,1697,514,1768,499,1827,479,1850,466,1868,452,1878,437,1882,420,1877,402,1863,381,1847,369,1819,358,1735,336,1622,316,1492,298,1222,269,1014,251"/>
-<area shape="poly" title=" " alt="" coords="943,255,925,285,907,322,896,363,896,384,900,404,910,424,924,443,919,441,906,426,895,406,891,385,891,362,902,320,921,282,939,258"/>
-<area shape="poly" title=" " alt="" coords="1014,243,1385,261,1590,278,1675,289,1739,301,1768,313,1796,328,1853,351,1910,376,2028,445,2022,444,1907,381,1851,356,1794,333,1766,318,1737,307,1674,294,1590,283,1385,266,1014,249"/>
-<area shape="poly" title=" " alt="" coords="887,254,485,307,484,302,891,250"/>
-<area shape="poly" title=" " alt="" coords="1014,244,1498,265,1751,282,1843,292,1897,301,1921,313,1942,328,2021,372,2016,371,1939,333,1918,318,1896,307,1842,297,1751,288,1498,271,1014,249"/>
-<area shape="rect" href="../../dd/d00/a00260.html" title="Contains the definitions for the CPU tracing engine." alt="" coords="930,304,1068,331"/>
-<area shape="poly" title=" " alt="" coords="961,254,985,292,980,290,959,259"/>
-<area shape="rect" href="../../d7/d00/a00614.html" title=" " alt="" coords="1807,304,1884,331"/>
-<area shape="poly" title=" " alt="" coords="1014,243,1346,259,1566,276,1789,301,1795,305,1790,305,1788,307,1566,281,1346,264,1014,248"/>
-<area shape="rect" title=" " alt="" coords="695,304,805,331"/>
-<area shape="poly" title=" " alt="" coords="919,256,800,301,799,296,914,257"/>
-<area shape="poly" title=" " alt="" coords="1001,329,1001,365,997,361,997,333"/>
-<area shape="poly" title=" " alt="" coords="1874,329,1916,350,1961,376,2002,409,2038,444,2033,442,1999,413,1958,381,1914,354,1873,334"/>
-<area shape="poly" title=" " alt="" coords="1883,329,2017,376,2012,376,1882,334"/>
-<area shape="poly" title=" " alt="" coords="347,109,265,150,261,146,351,105"/>
-<area shape="poly" title=" " alt="" coords="373,105,362,172,360,214,366,255,381,291,376,290,361,257,355,214,357,171,370,109"/>
+<div class="center"><img src="../../d1/d00/a00399.png" border="0" usemap="#agraphics_2_power_storm3xx_8h" loading="lazy" alt=""/></div>
+<map name="agraphics_2_power_storm3xx_8h" id="agraphics_2_power_storm3xx_8h">
+<area shape="rect" title=" " alt="" coords="1823,5,2001,32"/>
+<area shape="rect" href="../../d4/d00/a00428.html" title=" " alt="" coords="1123,80,1192,107"/>
+<area shape="poly" title=" " alt="" coords="1820,30,1208,90,1207,85,1825,28"/>
+<area shape="rect" title=" " alt="" coords="367,528,420,555"/>
+<area shape="poly" title=" " alt="" coords="1820,23,1124,43,724,60,557,71,431,83,357,85,283,79,146,62,90,63,66,68,46,77,30,91,18,110,11,135,8,167,8,393,11,406,18,418,47,441,89,463,141,482,255,512,354,533,349,534,254,517,140,487,87,468,44,446,14,421,6,408,3,394,3,167,5,134,13,107,26,87,43,73,65,63,89,58,146,57,284,74,357,80,430,77,557,66,724,55,1124,38,1825,21"/>
+<area shape="rect" title=" " alt="" coords="1794,453,1851,480"/>
+<area shape="poly" title=" " alt="" coords="1921,30,1949,88,1961,127,1965,167,1965,319,1963,341,1955,361,1930,397,1897,426,1863,448,1861,443,1894,422,1926,393,1950,359,1957,339,1960,319,1960,167,1955,128,1944,90,1918,35"/>
+<area shape="rect" title=" " alt="" coords="1570,528,1630,555"/>
+<area shape="poly" title=" " alt="" coords="1929,30,1956,53,1984,85,2007,123,2013,144,2016,167,2016,319,2013,349,2004,376,1991,401,1973,423,1927,460,1871,488,1810,509,1749,524,1646,539,1645,534,1748,519,1808,504,1869,483,1924,455,1969,419,1986,398,1999,374,2008,348,2011,319,2011,167,2008,146,2002,125,1980,88,1952,57,1928,35"/>
+<area shape="rect" href="../../d9/d00/a00056.html" title=" " alt="" coords="1848,528,1936,555"/>
+<area shape="poly" title=" " alt="" coords="1955,30,1997,49,2017,62,2034,78,2051,99,2061,118,2065,140,2067,167,2067,394,2063,417,2055,439,2041,458,2024,475,1984,504,1943,524,1942,519,1982,499,2021,471,2037,455,2050,436,2058,416,2061,393,2061,167,2060,140,2056,120,2046,102,2030,82,2013,66,1994,53,1955,35"/>
+<area shape="rect" title=" " alt="" coords="1848,379,1898,405"/>
+<area shape="poly" title=" " alt="" coords="1914,31,1915,167,1915,244,1912,277,1905,310,1887,366,1883,362,1900,309,1907,276,1909,244,1909,167,1910,35"/>
+<area shape="rect" href="../../d8/d00/a00410.html" title=" " alt="" coords="1507,155,1637,181"/>
+<area shape="poly" title=" " alt="" coords="1886,32,1616,151,1614,146,1880,33"/>
+<area shape="rect" href="../../de/d00/a00440.html" title="Contains the definitions for the bx_gui_c base class used for interfacing with SDL and other device i..." alt="" coords="77,304,147,331"/>
+<area shape="poly" title=" " alt="" coords="1820,25,1508,46,1310,62,1111,83,963,94,834,94,719,89,612,87,509,94,457,103,404,116,349,135,291,160,231,192,167,231,153,244,141,259,124,290,119,288,136,256,149,240,164,227,228,187,289,155,347,130,402,111,456,97,508,89,612,82,719,84,835,88,963,88,1110,77,1309,57,1507,41,1825,24"/>
+<area shape="rect" title=" " alt="" coords="2102,80,2167,107"/>
+<area shape="poly" title=" " alt="" coords="1951,30,2090,77,2085,77,1951,35"/>
+<area shape="rect" href="../../db/d00/a02253.html" title=" " alt="" coords="820,155,881,181"/>
+<area shape="poly" title=" " alt="" coords="1120,104,897,159,895,154,1125,102"/>
+<area shape="rect" href="../../db/d00/a00350.html" title="Contains the definitions for the PCI Device base class." alt="" coords="451,229,576,256"/>
+<area shape="poly" title=" " alt="" coords="818,177,588,228,586,223,822,175"/>
+<area shape="poly" title=" " alt="" coords="818,171,751,176,655,185,547,203,439,232,366,257,338,274,312,306,298,331,292,353,294,376,301,404,315,437,333,467,373,517,367,516,329,470,310,439,296,406,288,377,287,352,293,329,307,302,335,270,363,252,438,227,546,198,654,180,750,171,823,169"/>
+<area shape="rect" href="../../d8/d00/a00344.html" title=" " alt="" coords="1116,304,1255,331"/>
+<area shape="poly" title=" " alt="" coords="863,179,904,217,930,237,959,254,1030,282,1103,302,1098,303,1028,287,956,258,927,241,901,221,862,185"/>
+<area shape="rect" href="../../dc/d00/a00332.html" title=" " alt="" coords="1329,229,1468,256"/>
+<area shape="poly" title=" " alt="" coords="881,171,1316,229,1311,231,881,176"/>
+<area shape="rect" href="../../dc/d00/a00338.html" title=" " alt="" coords="714,304,825,331"/>
+<area shape="poly" title=" " alt="" coords="838,180,817,204,797,231,784,260,776,290,772,287,779,258,792,228,812,201,834,183"/>
+<area shape="rect" href="../../dd/d00/a00386.html" title=" " alt="" coords="806,229,895,256"/>
+<area shape="poly" title=" " alt="" coords="852,180,853,215,848,212,849,184"/>
+<area shape="rect" title=" " alt="" coords="970,229,1009,256"/>
+<area shape="poly" title=" " alt="" coords="875,179,958,224,953,224,875,185"/>
+<area shape="rect" title=" " alt="" coords="682,229,731,256"/>
+<area shape="poly" title=" " alt="" coords="823,183,747,224,744,219,828,181"/>
+<area shape="rect" href="../../d6/d00/a00356.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="321,304,466,331"/>
+<area shape="poly" title=" " alt="" coords="490,258,429,298,426,293,495,255"/>
+<area shape="rect" href="../../d4/d00/a00116.html" title="Contains the definitions for the configuration file interpreter." alt="" coords="322,379,464,405"/>
+<area shape="poly" title=" " alt="" coords="395,329,396,364,391,362,392,334"/>
+<area shape="rect" title=" " alt="" coords="636,453,703,480"/>
+<area shape="poly" title=" " alt="" coords="364,333,342,348,320,366,308,385,308,394,313,404,333,419,364,431,447,449,540,458,623,464,618,465,540,464,447,454,362,436,330,423,309,407,302,396,302,384,316,362,339,344,368,330"/>
+<area shape="poly" title=" " alt="" coords="395,404,396,514,391,511,391,408"/>
+<area shape="poly" title=" " alt="" coords="464,401,478,403,668,417,829,425,1104,428,1379,430,1540,437,1731,451,1781,459,1776,459,1730,456,1540,443,1378,436,1104,433,829,430,668,423,477,408,465,407"/>
+<area shape="poly" title=" " alt="" coords="1232,329,1299,349,1372,376,1397,390,1422,403,1474,417,1518,426,1596,434,1674,438,1774,451,1782,455,1776,454,1773,456,1674,443,1595,439,1518,432,1473,423,1420,408,1394,395,1370,381,1297,354,1232,334"/>
+<area shape="rect" href="../../d6/d00/a00626.html" title="Standard includes." alt="" coords="1286,379,1359,405"/>
+<area shape="poly" title=" " alt="" coords="1210,329,1288,371,1283,371,1209,334"/>
+<area shape="rect" title=" " alt="" coords="1510,379,1570,405"/>
+<area shape="poly" title=" " alt="" coords="1255,327,1365,347,1497,378,1492,378,1364,353,1255,333"/>
+<area shape="rect" title=" " alt="" coords="1103,379,1164,405"/>
+<area shape="poly" title=" " alt="" coords="1179,330,1153,368,1150,364,1174,333"/>
+<area shape="rect" title=" " alt="" coords="1188,379,1262,405"/>
+<area shape="poly" title=" " alt="" coords="1193,329,1214,366,1209,364,1191,334"/>
+<area shape="rect" title=" " alt="" coords="1595,379,1672,405"/>
+<area shape="poly" title=" " alt="" coords="1256,325,1401,345,1582,378,1577,378,1400,351,1256,330"/>
+<area shape="rect" title=" " alt="" coords="1022,379,1079,405"/>
+<area shape="poly" title=" " alt="" coords="1164,330,1089,373,1087,368,1159,332"/>
+<area shape="rect" title=" " alt="" coords="777,379,842,405"/>
+<area shape="poly" title=" " alt="" coords="1117,332,858,384,856,379,1122,331"/>
+<area shape="rect" title=" " alt="" coords="916,379,998,405"/>
+<area shape="poly" title=" " alt="" coords="1148,330,1013,376,1011,371,1143,332"/>
+<area shape="rect" title=" " alt="" coords="1434,379,1486,405"/>
+<area shape="poly" title=" " alt="" coords="1234,329,1415,376,1422,380,1417,380,1414,381,1233,334"/>
+<area shape="poly" title=" " alt="" coords="1289,403,1275,408,1120,427,998,433,877,438,722,456,719,456,717,451,721,451,876,433,998,427,1120,422,1274,403,1283,404"/>
+<area shape="rect" href="../../d7/d00/a00173.html" title=" " alt="" coords="828,453,937,480"/>
+<area shape="poly" title=" " alt="" coords="1289,402,1275,408,1116,433,953,455,953,450,1115,428,1274,403,1283,403"/>
+<area shape="rect" href="../../d8/d00/a00326.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="1217,453,1306,480"/>
+<area shape="poly" title=" " alt="" coords="1314,405,1283,444,1280,439,1310,407"/>
+<area shape="rect" href="../../d6/d00/a00047.html" title=" " alt="" coords="1330,453,1452,480"/>
+<area shape="poly" title=" " alt="" coords="1335,403,1371,443,1366,441,1334,408"/>
+<area shape="rect" href="../../dc/d00/a00053.html" title=" " alt="" coords="1394,528,1494,555"/>
+<area shape="poly" title=" " alt="" coords="1289,403,1275,408,1223,413,1150,417,981,424,904,430,845,441,825,449,814,457,811,466,818,478,829,485,848,492,906,502,1072,515,1381,528,1376,528,1072,520,906,508,847,497,827,490,814,482,806,467,809,454,822,444,843,436,903,425,981,418,1150,411,1223,408,1274,403,1283,404"/>
+<area shape="rect" href="../../de/d00/a00065.html" title=" " alt="" coords="1614,453,1719,480"/>
+<area shape="poly" title=" " alt="" coords="1359,399,1378,403,1602,452,1597,452,1377,408,1359,404"/>
+<area shape="poly" title=" " alt="" coords="1359,399,1378,403,1477,415,1556,419,1634,426,1679,436,1732,451,1859,521,1854,520,1730,456,1678,441,1633,432,1556,424,1477,420,1377,408,1359,404"/>
+<area shape="rect" href="../../df/d00/a00062.html" title=" " alt="" coords="1138,528,1268,555"/>
+<area shape="poly" title=" " alt="" coords="1289,403,1275,408,1178,414,1017,420,859,432,803,442,784,448,774,455,769,467,774,478,796,495,830,508,873,519,922,527,1026,535,1125,541,1119,541,1026,541,921,532,872,524,829,513,794,500,770,482,763,467,770,452,782,444,802,437,858,427,1017,415,1178,408,1274,403,1283,404"/>
+<area shape="rect" href="../../d3/d00/a00059.html" title=" " alt="" coords="1476,453,1590,480"/>
+<area shape="poly" title=" " alt="" coords="1360,403,1485,448,1479,448,1359,409"/>
+<area shape="rect" href="../../dd/d00/a00365.html" title="Contains macro&#39;s and prototypes for debugging." alt="" coords="961,453,1063,480"/>
+<area shape="poly" title=" " alt="" coords="1289,402,1275,408,1079,453,1078,448,1274,403,1283,403"/>
+<area shape="rect" href="../../d8/d00/a00368.html" title="Contains byte&#45;order conversion helpers." alt="" coords="1087,453,1193,480"/>
+<area shape="poly" title=" " alt="" coords="1293,405,1187,450,1186,445,1288,407"/>
+<area shape="poly" title=" " alt="" coords="1332,478,1319,483,1056,508,799,525,436,541,435,536,799,520,1056,502,1318,477,1326,479"/>
+<area shape="rect" title=" " alt="" coords="1292,528,1369,555"/>
+<area shape="poly" title=" " alt="" coords="1383,479,1352,519,1349,514,1378,482"/>
+<area shape="rect" title=" " alt="" coords="1415,603,1473,629"/>
+<area shape="poly" title=" " alt="" coords="1446,553,1446,589,1442,585,1442,557"/>
+<area shape="rect" title=" " alt="" coords="1499,603,1560,629"/>
+<area shape="poly" title=" " alt="" coords="1460,553,1506,594,1501,592,1458,558"/>
+<area shape="rect" title=" " alt="" coords="1061,603,1139,629"/>
+<area shape="poly" title=" " alt="" coords="1396,553,1155,606,1154,601,1391,554"/>
+<area shape="poly" title=" " alt="" coords="1617,478,1603,483,1428,501,1250,515,907,533,619,541,435,543,435,537,619,535,906,527,1250,509,1428,495,1602,477,1611,479"/>
+<area shape="poly" title=" " alt="" coords="1669,479,1665,518,1657,538,1644,557,1488,605,1487,599,1641,553,1652,536,1659,516,1665,482"/>
+<area shape="poly" title=" " alt="" coords="1676,478,1694,515,1696,536,1689,556,1665,580,1636,597,1605,607,1575,614,1574,608,1604,602,1634,592,1662,576,1684,553,1690,536,1688,516,1674,483"/>
+<area shape="poly" title=" " alt="" coords="1617,478,1603,483,1555,486,1495,487,1355,487,1285,490,1220,497,1166,510,1144,519,1127,530,1117,542,1110,556,1102,589,1099,585,1105,555,1112,539,1124,526,1142,514,1164,504,1219,491,1284,484,1355,481,1495,482,1555,481,1602,477,1611,479"/>
+<area shape="poly" title=" " alt="" coords="1657,479,1623,519,1621,514,1653,482"/>
+<area shape="rect" title=" " alt="" coords="1756,528,1825,555"/>
+<area shape="poly" title=" " alt="" coords="1689,478,1759,521,1754,519,1688,483"/>
+<area shape="poly" title=" " alt="" coords="1706,478,1841,523,1835,523,1706,483"/>
+<area shape="poly" title=" " alt="" coords="1245,553,1403,602,1398,601,1244,558"/>
+<area shape="poly" title=" " alt="" coords="1268,553,1486,603,1481,602,1267,558"/>
+<area shape="poly" title=" " alt="" coords="1187,554,1132,596,1130,591,1182,556"/>
+<area shape="poly" title=" " alt="" coords="1520,480,1472,520,1470,516,1515,481"/>
+<area shape="poly" title=" " alt="" coords="1535,479,1532,589,1528,585,1531,482"/>
+<area shape="poly" title=" " alt="" coords="1479,478,1464,483,1376,486,1262,487,1205,491,1154,498,1112,510,1083,530,1077,543,1076,557,1086,591,1082,588,1071,558,1072,541,1079,526,1109,506,1153,493,1205,485,1262,482,1376,481,1464,477,1473,478"/>
+<area shape="poly" title=" " alt="" coords="1546,478,1581,517,1576,516,1544,483"/>
+<area shape="poly" title=" " alt="" coords="1428,254,1536,302,1611,337,1685,376,1794,445,1788,444,1683,381,1609,342,1534,306,1428,259"/>
+<area shape="poly" title=" " alt="" coords="1364,256,1238,301,1236,296,1359,257"/>
+<area shape="poly" title=" " alt="" coords="1469,249,1565,267,1620,283,1677,303,1732,330,1784,363,1829,403,1866,452,1871,472,1863,491,1848,508,1829,522,1827,517,1844,504,1858,488,1865,472,1862,454,1826,407,1781,367,1730,334,1675,308,1619,288,1564,272,1469,254"/>
+<area shape="poly" title=" " alt="" coords="1412,254,1520,368,1515,367,1410,259"/>
+<area shape="poly" title=" " alt="" coords="1419,254,1603,370,1598,370,1418,259"/>
+<area shape="poly" title=" " alt="" coords="1326,252,1222,273,1162,288,1105,306,1041,338,987,372,985,367,1038,333,1103,302,1161,282,1220,268,1331,251"/>
+<area shape="poly" title=" " alt="" coords="1405,254,1437,330,1451,366,1447,363,1432,332,1402,259"/>
+<area shape="poly" title=" " alt="" coords="711,323,478,344,369,361,332,370,312,381,279,408,265,420,257,433,258,450,273,474,304,508,356,552,394,567,462,579,659,597,876,607,1048,614,1042,614,876,612,658,602,462,584,392,572,353,557,301,511,269,477,253,451,252,431,261,416,275,404,309,376,330,365,368,356,478,339,716,321"/>
+<area shape="poly" title=" " alt="" coords="777,329,798,366,793,364,775,334"/>
+<area shape="poly" title=" " alt="" coords="802,329,913,372,907,373,802,334"/>
+<area shape="poly" title=" " alt="" coords="825,321,1063,343,1371,376,1421,385,1416,385,1370,381,1063,349,826,326"/>
+<area shape="poly" title=" " alt="" coords="826,320,1834,386,1831,390,826,325"/>
+<area shape="rect" title=" " alt="" coords="692,379,753,405"/>
+<area shape="poly" title=" " alt="" coords="763,330,741,368,737,364,759,333"/>
+<area shape="rect" title=" " alt="" coords="489,379,556,405"/>
+<area shape="poly" title=" " alt="" coords="724,332,572,379,570,374,729,330"/>
+<area shape="rect" title=" " alt="" coords="580,379,668,405"/>
+<area shape="poly" title=" " alt="" coords="746,330,664,374,662,369,742,332"/>
+<area shape="poly" title=" " alt="" coords="895,251,1114,300,1109,301,895,256"/>
+<area shape="poly" title=" " alt="" coords="1507,183,1302,232,1171,264,1115,280,1045,306,854,408,791,426,740,434,689,441,625,456,522,491,435,525,433,520,520,486,623,451,688,436,739,429,790,421,852,403,1043,302,1114,275,1170,258,1301,227,1512,181"/>
+<area shape="poly" title=" " alt="" coords="1621,179,1666,198,1708,227,1750,279,1782,337,1805,393,1818,439,1814,437,1800,395,1777,339,1746,282,1705,231,1664,203,1620,185"/>
+<area shape="poly" title=" " alt="" coords="1562,180,1546,204,1533,230,1527,265,1526,301,1535,365,1530,362,1521,301,1521,265,1528,228,1541,202,1558,183"/>
+<area shape="poly" title=" " alt="" coords="1619,179,1657,198,1673,211,1686,228,1694,246,1696,265,1690,303,1674,338,1654,368,1651,364,1669,336,1685,301,1691,265,1689,247,1682,231,1669,215,1654,202,1619,184"/>
+<area shape="poly" title=" " alt="" coords="1504,176,1396,197,1348,212,1331,221,1319,231,1310,250,1310,269,1319,288,1334,307,1376,342,1423,372,1418,371,1373,346,1330,311,1314,291,1305,270,1305,249,1315,228,1328,217,1346,207,1395,192,1509,175"/>
+<area shape="poly" title=" " alt="" coords="1544,181,1444,225,1442,220,1539,183"/>
+<area shape="poly" title=" " alt="" coords="1638,174,1710,192,1746,207,1780,227,1812,258,1837,294,1855,331,1867,365,1863,362,1850,333,1832,297,1808,261,1777,231,1744,212,1708,197,1638,179"/>
+<area shape="poly" title=" " alt="" coords="1504,173,1293,192,1161,209,1029,232,1025,233,1023,228,1027,227,1160,204,1292,187,1509,172"/>
+<area shape="rect" title=" " alt="" coords="1542,229,1602,256"/>
+<area shape="poly" title=" " alt="" coords="1574,180,1574,215,1570,212,1570,184"/>
+<area shape="rect" title=" " alt="" coords="1626,229,1672,256"/>
+<area shape="poly" title=" " alt="" coords="1586,179,1628,219,1622,218,1585,184"/>
+<area shape="poly" title=" " alt="" coords="117,328,138,365,167,403,213,442,263,474,355,523,350,524,260,479,210,446,163,407,134,368,117,334"/>
+<area shape="poly" title=" " alt="" coords="147,318,444,341,622,358,765,378,759,379,621,363,444,347,148,324"/>
+<area shape="rect" href="../../de/d00/a02256.html" title="Definitions for VGA cards." alt="" coords="43,379,96,405"/>
+<area shape="poly" title=" " alt="" coords="104,334,87,366,82,364,106,329"/>
+</map>
+</div>
+</div><div class="textblock"><div class="dynheader">
+This graph shows which files directly or indirectly include this file:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d9/d00/a00400.png" border="0" usemap="#agraphics_2_power_storm3xx_8hdep" loading="lazy" alt=""/></div>
+<map name="agraphics_2_power_storm3xx_8hdep" id="agraphics_2_power_storm3xx_8hdep">
+<area shape="rect" title=" " alt="" coords="93,5,271,32"/>
+<area shape="rect" href="../../d3/d00/a00113.html" title="Contains the code for the configuration file interpreter." alt="" coords="5,80,162,107"/>
+<area shape="poly" title=" " alt="" coords="155,41,102,82,99,77,150,42"/>
+<area shape="rect" href="../../db/d00/a00395.html" title=" " alt="" coords="186,80,378,107"/>
+<area shape="poly" title=" " alt="" coords="213,39,267,79,262,79,211,44"/>
 </map>
 </div>
 </div>
@@ -289,1614 +287,10 @@ Include dependency graph for sdl.cpp:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Data Structures</h2></td></tr>
-<tr class="memitem:sdl_5Fhotkey_5Fbinding" id="r_sdl_5Fhotkey_5Fbinding"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../dc/d00/a01461.html">sdl_hotkey_binding</a></td></tr>
-<tr class="memitem:sdl_5Fevent_5Fdispatcher" id="r_sdl_5Fevent_5Fdispatcher"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../d4/d00/a01465.html">sdl_event_dispatcher</a></td></tr>
-<tr class="memitem:bx_5Fsdl_5Fgui_5Fc" id="r_bx_5Fsdl_5Fgui_5Fc"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../d9/d00/a01469.html">bx_sdl_gui_c</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">GUI implementation using SDL3.  <a href="../../d9/d00/a01469.html#details">More...</a><br /></td></tr>
-<tr class="memitem:sdl_5Fapplication" id="r_sdl_5Fapplication"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../de/d00/a01473.html">sdl_application</a></td></tr>
-<tr class="memitem:sdl_5Fmouse_5Finput_5Fstate" id="r_sdl_5Fmouse_5Finput_5Fstate"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d8/d00/a01477.html">sdl_mouse_input_state</a></td></tr>
-<tr class="memitem:sdl_5Fkeyboard_5Finput_5Fstate" id="r_sdl_5Fkeyboard_5Finput_5Fstate"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d1/d00/a01481.html">sdl_keyboard_input_state</a></td></tr>
-<tr class="memitem:keyTableEntry" id="r_keyTableEntry"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d4/d00/a01485.html">keyTableEntry</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">key mapping for SDL  <a href="../../d4/d00/a01485.html#details">More...</a><br /></td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:a20d9793c92cb6f447d8dc115c87d7a72" id="r_a20d9793c92cb6f447d8dc115c87d7a72"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a20d9793c92cb6f447d8dc115c87d7a72">_MULTI_THREAD</a></td></tr>
-<tr class="memitem:ae91175b7adaad5dc07694afd195c42ff" id="r_ae91175b7adaad5dc07694afd195c42ff"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae91175b7adaad5dc07694afd195c42ff">BX_PLUGGABLE</a></td></tr>
-<tr class="memitem:a09afb17631341fb7f9aeb31793219e4c" id="r_a09afb17631341fb7f9aeb31793219e4c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a09afb17631341fb7f9aeb31793219e4c">DEF_SDL_KEY</a>(key)</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
-Enumerations</h2></td></tr>
-<tr class="memitem:a75a97059a084dfd13ab4a49022541e3f" id="r_a75a97059a084dfd13ab4a49022541e3f"><td class="memItemLeft"><a class="el" href="#a75a97059a084dfd13ab4a49022541e3f">enum </a>&#160;</td><td class="memItemRight">{ <br />
-&#160;&#160;<a class="el" href="#a75a97059a084dfd13ab4a49022541e3fa436b12a1830ee1f6afab8b2210a3fb78">SDL_HOTKEY_MOD_CTRL</a> = 1u &lt;&lt; 0
-, <a class="el" href="#a75a97059a084dfd13ab4a49022541e3fa4131228788424821149d440be996368f">SDL_HOTKEY_MOD_ALT</a> = 1u &lt;&lt; 1
-, <a class="el" href="#a75a97059a084dfd13ab4a49022541e3fa1f731a18f99ec31d49e1229487785fe0">SDL_HOTKEY_MOD_SHIFT</a> = 1u &lt;&lt; 2
-, <a class="el" href="#a75a97059a084dfd13ab4a49022541e3fa96c4379484385baf2b361ae056839ad5">SDL_HOTKEY_MOD_GUI</a> = 1u &lt;&lt; 3
-, <br />
-&#160;&#160;<a class="el" href="#a75a97059a084dfd13ab4a49022541e3fa56a91339eceb27ad8fddb8eca6f32450">SDL_HOTKEY_MOD_UNSUPPORTED</a> = 1u &lt;&lt; 31
-<br />
- }</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:a58eb15024a2774d48145fdd62a1a95c9" id="r_a58eb15024a2774d48145fdd62a1a95c9"><td class="memItemLeft">static unsigned&#160;</td><td class="memItemRight"><a class="el" href="#a58eb15024a2774d48145fdd62a1a95c9">sdl_hotkey_modifiers</a> (SDL_Keymod modifiers)</td></tr>
-<tr class="memitem:ac743cac6cf224ac9be3819c34fbb913e" id="r_ac743cac6cf224ac9be3819c34fbb913e"><td class="memItemLeft">static <a class="el" href="../../dc/d00/a01461.html">sdl_hotkey_binding</a>&#160;</td><td class="memItemRight"><a class="el" href="#ac743cac6cf224ac9be3819c34fbb913e">parse_sdl_hotkey</a> (<a class="el" href="../../d3/d00/a00869.html">CConfigurator</a> *cfg, const char *config_name, const char *default_value)</td></tr>
-<tr class="memitem:a910dde4603f321af3c7aba743de5b8bb" id="r_a910dde4603f321af3c7aba743de5b8bb"><td class="memItemLeft">static <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a910dde4603f321af3c7aba743de5b8bb">convertStringToSDLKey</a> (const char *string)</td></tr>
-<tr class="memitem:a9f40541ca4d74a93e42e846bfe457a65" id="r_a9f40541ca4d74a93e42e846bfe457a65"><td class="memItemLeft">static std::atomic&lt; bool &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a9f40541ca4d74a93e42e846bfe457a65">sdl_main_thread_owns_sdl</a> (false)</td></tr>
-<tr class="memdesc:a9f40541ca4d74a93e42e846bfe457a65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set once <a class="el" href="../../d7/d00/a00002.html#a0ddf1224851353fc92bfbff6f499fa97" title="Entry point for the application.">main()</a> has taken ownership of SDL and is driving main_thread_pump() on our behalf, so <a class="el" href="#aae67517088432ae8cd0de57d5373a48c" title="Run fn on the thread that called main().">on_main_thread()</a> must bounce SDL calls across to it.  <br /></td></tr>
-<tr class="memitem:aae67517088432ae8cd0de57d5373a48c" id="r_aae67517088432ae8cd0de57d5373a48c"><td class="memTemplParams" colspan="2">template&lt;typename F&gt; </td></tr>
-<tr class="memitem:aae67517088432ae8cd0de57d5373a48c template"><td class="memItemLeft">static void&#160;</td><td class="memItemRight"><a class="el" href="#aae67517088432ae8cd0de57d5373a48c">on_main_thread</a> (F fn)</td></tr>
-<tr class="memdesc:aae67517088432ae8cd0de57d5373a48c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run fn on the thread that called <a class="el" href="../../d7/d00/a00002.html#a0ddf1224851353fc92bfbff6f499fa97" title="Entry point for the application.">main()</a>.  <br /></td></tr>
-<tr class="memitem:a074321ae27848077cdfcd04bdae72528" id="r_a074321ae27848077cdfcd04bdae72528"><td class="memItemLeft">static std::string&#160;</td><td class="memItemRight"><a class="el" href="#a074321ae27848077cdfcd04bdae72528">trim_hotkey_text</a> (const std::string &amp;value)</td></tr>
-<tr class="memitem:a9f2c467b5a45949cdb5426b8b293c76f" id="r_a9f2c467b5a45949cdb5426b8b293c76f"><td class="memItemLeft">static bool&#160;</td><td class="memItemRight"><a class="el" href="#a9f2c467b5a45949cdb5426b8b293c76f">hotkey_text_equals</a> (const std::string &amp;lhs, const char *rhs)</td></tr>
-<tr class="memitem:ab4b22a65cd2e6e5bb4585c7530356b91" id="r_ab4b22a65cd2e6e5bb4585c7530356b91"><td class="memItemLeft">static bool&#160;</td><td class="memItemRight"><a class="el" href="#ab4b22a65cd2e6e5bb4585c7530356b91">parse_hotkey_modifier</a> (const std::string &amp;token, unsigned *modifier)</td></tr>
-<tr class="memitem:a950c2805fc426520eff7ea2d29ed4a83" id="r_a950c2805fc426520eff7ea2d29ed4a83"><td class="memItemLeft">static std::string&#160;</td><td class="memItemRight"><a class="el" href="#a950c2805fc426520eff7ea2d29ed4a83">normalize_hotkey_key_name</a> (const std::string &amp;name)</td></tr>
-<tr class="memitem:a2d96b51e8e8481264954264be47e04cc" id="r_a2d96b51e8e8481264954264be47e04cc"><td class="memItemLeft">static bool&#160;</td><td class="memItemRight"><a class="el" href="#a2d96b51e8e8481264954264be47e04cc">is_hotkey_modifier_key</a> (SDL_Keycode key)</td></tr>
-<tr class="memitem:a8256e45104a21ca374ffdafd6d5e1ecc" id="r_a8256e45104a21ca374ffdafd6d5e1ecc"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a8256e45104a21ca374ffdafd6d5e1ecc">libsdl_LTX_plugin_init</a> (<a class="el" href="../../d3/d00/a00869.html">CConfigurator</a> *cfg)</td></tr>
-<tr class="memitem:a735dfe40839179fe90ce899a35423e69" id="r_a735dfe40839179fe90ce899a35423e69"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a735dfe40839179fe90ce899a35423e69">libsdl_LTX_plugin_fini</a> ()</td></tr>
-<tr class="memitem:a15712a49056800473ae09980a1afcff9" id="r_a15712a49056800473ae09980a1afcff9"><td class="memItemLeft">static <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a15712a49056800473ae09980a1afcff9">sdl_scan_to_bx_key</a> (SDL_Scancode sym)</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:a57a9dba5f823841bfa6409fcb73fddb3" id="r_a57a9dba5f823841bfa6409fcb73fddb3"><td class="memItemLeft">static std::mutex&#160;</td><td class="memItemRight"><a class="el" href="#a57a9dba5f823841bfa6409fcb73fddb3">sdl_window_owners_mutex</a></td></tr>
-<tr class="memitem:a84ce50a9dc461b975f878405abb8c8f9" id="r_a84ce50a9dc461b975f878405abb8c8f9"><td class="memItemLeft">static std::map&lt; SDL_WindowID, <a class="el" href="../../d9/d00/a01469.html">bx_sdl_gui_c</a> * &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a84ce50a9dc461b975f878405abb8c8f9">sdl_window_owners</a></td></tr>
-<tr class="memitem:a5a412317805ff50a30b8a6e55c1aaa83" id="r_a5a412317805ff50a30b8a6e55c1aaa83"><td class="memItemLeft">static unsigned&#160;</td><td class="memItemRight"><a class="el" href="#a5a412317805ff50a30b8a6e55c1aaa83">prev_cursor_x</a> = 0</td></tr>
-<tr class="memitem:a26f0e5ec118a52bbaf5a9a5f4fac5027" id="r_a26f0e5ec118a52bbaf5a9a5f4fac5027"><td class="memItemLeft">static unsigned&#160;</td><td class="memItemRight"><a class="el" href="#a26f0e5ec118a52bbaf5a9a5f4fac5027">prev_cursor_y</a> = 0</td></tr>
-<tr class="memitem:a60221a571430f92004dafc337f905c9f" id="r_a60221a571430f92004dafc337f905c9f"><td class="memItemLeft">static <a class="el" href="../../db/d00/a01501.html">CKeyboard</a> *&#160;</td><td class="memItemRight"><a class="el" href="#a60221a571430f92004dafc337f905c9f">sdl_guest_keyboard</a> = NULL</td></tr>
-<tr class="memitem:adba7e876de80652dd0dbe605c610032b" id="r_adba7e876de80652dd0dbe605c610032b"><td class="memItemLeft">static bool&#160;</td><td class="memItemRight"><a class="el" href="#adba7e876de80652dd0dbe605c610032b">sdl_guest_input_paused</a> = false</td></tr>
-<tr class="memitem:ae00b9cff446b580da9122e5cf5bc4f7b" id="r_ae00b9cff446b580da9122e5cf5bc4f7b"><td class="memItemLeft">static bool&#160;</td><td class="memItemRight"><a class="el" href="#ae00b9cff446b580da9122e5cf5bc4f7b">sdl_poll_in_progress</a> = false</td></tr>
-<tr class="memitem:a758d54abbde0acb182b7836f5c654ba6" id="r_a758d54abbde0acb182b7836f5c654ba6"><td class="memItemLeft">static SDL_Event&#160;</td><td class="memItemRight"><a class="el" href="#a758d54abbde0acb182b7836f5c654ba6">sdl_deferred_event</a> = {}</td></tr>
-<tr class="memitem:a61be7b8f092a19a27b17d91daa8634f8" id="r_a61be7b8f092a19a27b17d91daa8634f8"><td class="memItemLeft">static bool&#160;</td><td class="memItemRight"><a class="el" href="#a61be7b8f092a19a27b17d91daa8634f8">sdl_has_deferred_event</a> = false</td></tr>
-<tr class="memitem:ac34c5c13782198dfdeabe5c1138d44f2" id="r_ac34c5c13782198dfdeabe5c1138d44f2"><td class="memItemLeft">static const int&#160;</td><td class="memItemRight"><a class="el" href="#ac34c5c13782198dfdeabe5c1138d44f2">sdl_pump_idle_ms</a> = 10</td></tr>
-<tr class="memdesc:ac34c5c13782198dfdeabe5c1138d44f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">How long main_thread_pump() blocks waiting for work before looping. Only caps how quickly it notices main_thread_stop(); callbacks wake it at once.  <br /></td></tr>
-<tr class="memitem:a5312932d4a1f719984a75d0a8765f648" id="r_a5312932d4a1f719984a75d0a8765f648"><td class="memItemLeft">static const int&#160;</td><td class="memItemRight"><a class="el" href="#a5312932d4a1f719984a75d0a8765f648">runtime_scale_min</a> = 1</td></tr>
-<tr class="memitem:ac3c7679dce7495bc7f78a86d17dbdd8a" id="r_ac3c7679dce7495bc7f78a86d17dbdd8a"><td class="memItemLeft">static const int&#160;</td><td class="memItemRight"><a class="el" href="#ac3c7679dce7495bc7f78a86d17dbdd8a">runtime_scale_max</a> = 8</td></tr>
-<tr class="memitem:abf027e7d519dbac3f20277a7b13d8ab7" id="r_abf027e7d519dbac3f20277a7b13d8ab7"><td class="memItemLeft"><a class="el" href="../../df/d00/a00263.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a>&#160;</td><td class="memItemRight"><a class="el" href="#abf027e7d519dbac3f20277a7b13d8ab7">old_mousebuttons</a> = 0</td></tr>
-<tr class="memitem:aeaabe654a7e627269777a2be280d4d9c" id="r_aeaabe654a7e627269777a2be280d4d9c"><td class="memItemLeft"><a class="el" href="../../df/d00/a00263.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a>&#160;</td><td class="memItemRight"><a class="el" href="#aeaabe654a7e627269777a2be280d4d9c">new_mousebuttons</a> = 0</td></tr>
-<tr class="memitem:abb21fea4395715a33b891657605cec6a" id="r_abb21fea4395715a33b891657605cec6a"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#abb21fea4395715a33b891657605cec6a">old_mousex</a> = 0</td></tr>
-<tr class="memitem:a302a01e6f308f3e0bcde67d66da18f67" id="r_a302a01e6f308f3e0bcde67d66da18f67"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a302a01e6f308f3e0bcde67d66da18f67">new_mousex</a> = 0</td></tr>
-<tr class="memitem:aaec2206fad91fa8e0805f779cfc1a83b" id="r_aaec2206fad91fa8e0805f779cfc1a83b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aaec2206fad91fa8e0805f779cfc1a83b">old_mousey</a> = 0</td></tr>
-<tr class="memitem:af632719140280ffe2a258df0aaa306ac" id="r_af632719140280ffe2a258df0aaa306ac"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#af632719140280ffe2a258df0aaa306ac">new_mousey</a> = 0</td></tr>
-<tr class="memitem:aecd7e09d6bc8abbade8e36ecbfce5271" id="r_aecd7e09d6bc8abbade8e36ecbfce5271"><td class="memItemLeft">static <a class="el" href="../../d8/d00/a01477.html">sdl_mouse_input_state</a>&#160;</td><td class="memItemRight"><a class="el" href="#aecd7e09d6bc8abbade8e36ecbfce5271">sdl_mouse_input</a></td></tr>
-<tr class="memitem:a3ba5f0a89a25bd5e4b1db0fc3ed58ce6" id="r_a3ba5f0a89a25bd5e4b1db0fc3ed58ce6"><td class="memItemLeft">static <a class="el" href="../../d1/d00/a01481.html">sdl_keyboard_input_state</a>&#160;</td><td class="memItemRight"><a class="el" href="#a3ba5f0a89a25bd5e4b1db0fc3ed58ce6">sdl_keyboard_input</a></td></tr>
-<tr class="memitem:a333897cad8c2189fa90db7debea4f03d" id="r_a333897cad8c2189fa90db7debea4f03d"><td class="memItemLeft">static std::unique_ptr&lt; <a class="el" href="../../de/d00/a01473.html">sdl_application</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a333897cad8c2189fa90db7debea4f03d">sdl_app</a></td></tr>
-<tr class="memitem:a846bd4d04834769f39b6ae4c1837c58b" id="r_a846bd4d04834769f39b6ae4c1837c58b"><td class="memItemLeft"><a class="el" href="../../d4/d00/a01485.html">keyTableEntry</a>&#160;</td><td class="memItemRight"><a class="el" href="#a846bd4d04834769f39b6ae4c1837c58b">keytable</a> []</td></tr>
+<tr class="memitem:CPowerStorm3xx" id="r_CPowerStorm3xx"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../d2/d00/a01489.html">CPowerStorm3xx</a></td></tr>
+<tr class="memitem:CPowerStorm3xx_3A_3APCIConfig" id="r_CPowerStorm3xx_3A_3APCIConfig"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d2/d00/a01493.html">CPowerStorm3xx::PCIConfig</a></td></tr>
+<tr class="memitem:CPowerStorm3xx_3A_3AOptionROM" id="r_CPowerStorm3xx_3A_3AOptionROM"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../db/d00/a01497.html">CPowerStorm3xx::OptionROM</a></td></tr>
 </table>
-<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Contains the code for the <a class="el" href="../../d9/d00/a01469.html" title="GUI implementation using SDL3.">bx_sdl_gui_c</a> class used for interfacing with SDL. </p>
-<p>$Id$</p>
-<p>X-1.18 Martin Borgman 10-APR-2008 Handle SDL support on OS X through OS_X/SDLMain.m.</p>
-<p>X-1.15 Camiel Vanderhoeven 29-FEB-2008 Comments</p>
-<p>X-1.14 Camiel Vanderhoeven 12-FEB-2008 Moved keyboard code into it's own class (<a class="el" href="../../db/d00/a01501.html" title="Emulated keyboard controller, keyboard and mouse.">CKeyboard</a>)</p>
-<p>X-1.13 Camiel Vanderhoeven 22-JAN-2008 Minor cleanups.</p>
-<p>X-1.12 Fang Zhe 05-JAN-2008 Last patch was applied incompletely.</p>
-<p>X-1.11 Fang Zhe 04-JAN-2008 Improved compatibility with Apple OS X; keyboard works now.</p>
-<p>X-1.10 Fang Zhe 03-JAN-2008 Compatibility with Apple OS X.</p>
-<p>X-1.9 Camiel Vanderhoeven 02-JAN-2008 Comments.</p>
-<p>X-1.4 Camiel Vanderhoeven 10-DEC-2007 Use Configurator.</p>
-<p>X-1.3 Camiel Vanderhoeven 7-DEC-2007 Made keyboard messages conditional.</p>
-<p>X-1.2 Camiel Vanderhoeven 7-DEC-2007 Code cleanup.</p>
-<p>X-1.1 Camiel Vanderhoeven 6-DEC-2007 Initial version for ES40 emulator. </p>
-
-<p class="definition">Definition in file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-</div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
-<a id="a20d9793c92cb6f447d8dc115c87d7a72" name="a20d9793c92cb6f447d8dc115c87d7a72"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a20d9793c92cb6f447d8dc115c87d7a72">&#9670;&#160;</a></span>_MULTI_THREAD</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define _MULTI_THREAD</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00092">92</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-</div>
-</div>
-<a id="ae91175b7adaad5dc07694afd195c42ff" name="ae91175b7adaad5dc07694afd195c42ff"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae91175b7adaad5dc07694afd195c42ff">&#9670;&#160;</a></span>BX_PLUGGABLE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_PLUGGABLE</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00097">97</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a09afb17631341fb7f9aeb31793219e4c" name="a09afb17631341fb7f9aeb31793219e4c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a09afb17631341fb7f9aeb31793219e4c">&#9670;&#160;</a></span>DEF_SDL_KEY</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define DEF_SDL_KEY</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>key</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">{                      \</div>
-<div class="line"><span class="preprocessor">  #key, key            \</span></div>
-<div class="line"><span class="preprocessor">},</span></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l02150">2150</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-</div>
-</div>
-<a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
-<a id="a75a97059a084dfd13ab4a49022541e3f" name="a75a97059a084dfd13ab4a49022541e3f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a75a97059a084dfd13ab4a49022541e3f">&#9670;&#160;</a></span>anonymous enum</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">anonymous enum</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a75a97059a084dfd13ab4a49022541e3fa436b12a1830ee1f6afab8b2210a3fb78" name="a75a97059a084dfd13ab4a49022541e3fa436b12a1830ee1f6afab8b2210a3fb78"></a>SDL_HOTKEY_MOD_CTRL&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a75a97059a084dfd13ab4a49022541e3fa4131228788424821149d440be996368f" name="a75a97059a084dfd13ab4a49022541e3fa4131228788424821149d440be996368f"></a>SDL_HOTKEY_MOD_ALT&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a75a97059a084dfd13ab4a49022541e3fa1f731a18f99ec31d49e1229487785fe0" name="a75a97059a084dfd13ab4a49022541e3fa1f731a18f99ec31d49e1229487785fe0"></a>SDL_HOTKEY_MOD_SHIFT&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a75a97059a084dfd13ab4a49022541e3fa96c4379484385baf2b361ae056839ad5" name="a75a97059a084dfd13ab4a49022541e3fa96c4379484385baf2b361ae056839ad5"></a>SDL_HOTKEY_MOD_GUI&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a75a97059a084dfd13ab4a49022541e3fa56a91339eceb27ad8fddb8eca6f32450" name="a75a97059a084dfd13ab4a49022541e3fa56a91339eceb27ad8fddb8eca6f32450"></a>SDL_HOTKEY_MOD_UNSUPPORTED&#160;</td><td class="fielddoc"></td></tr>
-</table>
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00114">114</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-</div>
-</div>
-<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
-<a id="a910dde4603f321af3c7aba743de5b8bb" name="a910dde4603f321af3c7aba743de5b8bb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a910dde4603f321af3c7aba743de5b8bb">&#9670;&#160;</a></span>convertStringToSDLKey()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> convertStringToSDLKey </td>
-          <td>(</td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>string</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l02167">2167</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d9/d00/a00398_source.html#l02167">convertStringToSDLKey()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l02155">keytable</a>, <a class="el" href="../../d9/d00/a00398_source.html#l02146">keyTableEntry::name</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l02147">keyTableEntry::value</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l02167">convertStringToSDLKey()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l00724">sdl_application::initialize_keymap()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_a910dde4603f321af3c7aba743de5b8bb_cgraph.png" border="0" usemap="#ad9/d00/a00398_a910dde4603f321af3c7aba743de5b8bb_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_a910dde4603f321af3c7aba743de5b8bb_cgraph" id="ad9/d00/a00398_a910dde4603f321af3c7aba743de5b8bb_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,167,56"/>
-<area shape="poly" title=" " alt="" coords="58,28,53,21,57,11,68,5,86,3,106,5,117,14,112,14,104,10,86,8,69,10,61,15,58,20,63,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_a910dde4603f321af3c7aba743de5b8bb_icgraph.png" border="0" usemap="#ad9/d00/a00398_a910dde4603f321af3c7aba743de5b8bb_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_a910dde4603f321af3c7aba743de5b8bb_icgraph" id="ad9/d00/a00398_a910dde4603f321af3c7aba743de5b8bb_icgraph">
-<area shape="rect" title=" " alt="" coords="845,47,1006,73"/>
-<area shape="poly" title=" " alt="" coords="960,31,949,28,925,25,903,27,891,32,889,37,894,47,890,45,883,38,888,28,902,22,925,20,950,23,965,32"/>
-<area shape="rect" href="../../de/d00/a01473.html#a4439aaf19dc0f001e5f40599061f5922" title=" " alt="" coords="634,39,797,81"/>
-<area shape="poly" title=" " alt="" coords="827,60,797,63,797,57,832,60"/>
-<area shape="rect" href="../../d9/d00/a01469.html#ad7f63edc3f77c04d123533ee562de8da" title=" " alt="" coords="444,5,578,48"/>
-<area shape="poly" title=" " alt="" coords="616,44,578,40,578,35,622,44"/>
-<area shape="rect" href="../../d9/d00/a01469.html#ade7154c9f9301e629454606247ae168d" title=" " alt="" coords="436,72,586,115"/>
-<area shape="poly" title=" " alt="" coords="622,75,587,84,586,78,616,76"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a34b4ec9e9589d3c2918ad466596e2db8" title=" " alt="" coords="214,80,388,107"/>
-<area shape="poly" title=" " alt="" coords="418,93,388,96,388,91,423,93"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a86f8155148512b94045daf1f961c127b" title=" " alt="" coords="5,80,166,107"/>
-<area shape="poly" title=" " alt="" coords="195,94,166,96,166,91,201,93"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a9f2c467b5a45949cdb5426b8b293c76f" name="a9f2c467b5a45949cdb5426b8b293c76f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9f2c467b5a45949cdb5426b8b293c76f">&#9670;&#160;</a></span>hotkey_text_equals()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool hotkey_text_equals </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>lhs</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>rhs</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00487">487</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d9/d00/a00398_source.html#l00487">hotkey_text_equals()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l00487">hotkey_text_equals()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00526">normalize_hotkey_key_name()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00501">parse_hotkey_modifier()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l00567">parse_sdl_hotkey()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_a9f2c467b5a45949cdb5426b8b293c76f_cgraph.png" border="0" usemap="#ad9/d00/a00398_a9f2c467b5a45949cdb5426b8b293c76f_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_a9f2c467b5a45949cdb5426b8b293c76f_cgraph" id="ad9/d00/a00398_a9f2c467b5a45949cdb5426b8b293c76f_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,140,56"/>
-<area shape="poly" title=" " alt="" coords="49,28,45,21,48,11,57,5,73,3,89,5,99,14,94,14,87,10,72,8,59,10,52,14,50,20,54,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_a9f2c467b5a45949cdb5426b8b293c76f_icgraph.png" border="0" usemap="#ad9/d00/a00398_a9f2c467b5a45949cdb5426b8b293c76f_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_a9f2c467b5a45949cdb5426b8b293c76f_icgraph" id="ad9/d00/a00398_a9f2c467b5a45949cdb5426b8b293c76f_icgraph">
-<area shape="rect" title=" " alt="" coords="1221,80,1356,107"/>
-<area shape="poly" title=" " alt="" coords="1323,64,1312,61,1288,59,1266,61,1255,65,1252,71,1258,81,1253,78,1246,71,1251,62,1265,55,1289,53,1314,56,1328,65"/>
-<area shape="rect" href="../../d9/d00/a00398.html#a950c2805fc426520eff7ea2d29ed4a83" title=" " alt="" coords="983,29,1173,56"/>
-<area shape="poly" title=" " alt="" coords="1212,76,1136,59,1137,54,1218,76"/>
-<area shape="rect" href="../../d9/d00/a00398.html#ac743cac6cf224ac9be3819c34fbb913e" title=" " alt="" coords="812,80,935,107"/>
-<area shape="poly" title=" " alt="" coords="1203,94,935,96,935,91,1209,93"/>
-<area shape="rect" href="../../d9/d00/a00398.html#ab4b22a65cd2e6e5bb4585c7530356b91" title=" " alt="" coords="1002,155,1154,181"/>
-<area shape="poly" title=" " alt="" coords="1237,112,1119,157,1118,151,1232,113"/>
-<area shape="poly" title=" " alt="" coords="1112,14,1101,10,1078,8,1057,10,1045,15,1042,20,1048,30,1043,28,1037,21,1041,11,1055,5,1078,3,1103,5,1117,14"/>
-<area shape="poly" title=" " alt="" coords="1009,60,931,82,930,77,1004,61"/>
-<area shape="poly" title=" " alt="" coords="902,64,893,61,873,59,855,61,846,65,843,71,848,81,843,78,838,71,842,62,854,56,873,53,894,56,907,65"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a20ecd7db32a1da31d04456f7ea169ba3" title=" " alt="" coords="634,72,764,115"/>
-<area shape="poly" title=" " alt="" coords="794,93,764,96,764,91,799,93"/>
-<area shape="rect" href="../../d9/d00/a01469.html#ade7154c9f9301e629454606247ae168d" title=" " alt="" coords="436,72,586,115"/>
-<area shape="poly" title=" " alt="" coords="616,94,587,96,586,91,621,93"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a34b4ec9e9589d3c2918ad466596e2db8" title=" " alt="" coords="214,80,388,107"/>
-<area shape="poly" title=" " alt="" coords="418,94,389,96,388,91,423,93"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a86f8155148512b94045daf1f961c127b" title=" " alt="" coords="5,80,166,107"/>
-<area shape="poly" title=" " alt="" coords="195,94,167,96,166,91,200,93"/>
-<area shape="poly" title=" " alt="" coords="1022,149,912,110,913,105,1028,149"/>
-<area shape="poly" title=" " alt="" coords="1112,139,1101,136,1078,133,1057,135,1045,140,1042,145,1048,155,1043,153,1037,146,1041,136,1055,130,1078,128,1103,131,1117,140"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a2d96b51e8e8481264954264be47e04cc" name="a2d96b51e8e8481264954264be47e04cc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2d96b51e8e8481264954264be47e04cc">&#9670;&#160;</a></span>is_hotkey_modifier_key()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool is_hotkey_modifier_key </td>
-          <td>(</td>
-          <td class="paramtype">SDL_Keycode</td>          <td class="paramname"><span class="paramname"><em>key</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00541">541</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d9/d00/a00398_source.html#l00541">is_hotkey_modifier_key()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l00541">is_hotkey_modifier_key()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l00567">parse_sdl_hotkey()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_a2d96b51e8e8481264954264be47e04cc_cgraph.png" border="0" usemap="#ad9/d00/a00398_a2d96b51e8e8481264954264be47e04cc_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_a2d96b51e8e8481264954264be47e04cc_cgraph" id="ad9/d00/a00398_a2d96b51e8e8481264954264be47e04cc_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,164,56"/>
-<area shape="poly" title=" " alt="" coords="57,28,52,21,56,11,67,5,85,3,104,5,115,14,110,14,102,10,84,8,68,10,60,15,58,20,62,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_a2d96b51e8e8481264954264be47e04cc_icgraph.png" border="0" usemap="#ad9/d00/a00398_a2d96b51e8e8481264954264be47e04cc_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_a2d96b51e8e8481264954264be47e04cc_icgraph" id="ad9/d00/a00398_a2d96b51e8e8481264954264be47e04cc_icgraph">
-<area shape="rect" title=" " alt="" coords="983,29,1141,56"/>
-<area shape="poly" title=" " alt="" coords="1093,13,1083,10,1062,8,1043,10,1032,15,1029,20,1035,30,1030,28,1024,21,1028,11,1041,5,1062,3,1085,5,1098,15"/>
-<area shape="rect" href="../../d9/d00/a00398.html#ac743cac6cf224ac9be3819c34fbb913e" title=" " alt="" coords="812,29,935,56"/>
-<area shape="poly" title=" " alt="" coords="965,43,935,45,935,40,970,43"/>
-<area shape="poly" title=" " alt="" coords="902,13,893,10,873,8,855,10,846,15,843,20,848,30,843,28,838,21,842,11,854,5,873,3,894,5,907,15"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a20ecd7db32a1da31d04456f7ea169ba3" title=" " alt="" coords="634,21,764,64"/>
-<area shape="poly" title=" " alt="" coords="794,43,764,45,764,40,799,43"/>
-<area shape="rect" href="../../d9/d00/a01469.html#ade7154c9f9301e629454606247ae168d" title=" " alt="" coords="436,21,586,64"/>
-<area shape="poly" title=" " alt="" coords="616,43,587,45,586,40,621,43"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a34b4ec9e9589d3c2918ad466596e2db8" title=" " alt="" coords="214,29,388,56"/>
-<area shape="poly" title=" " alt="" coords="418,43,388,45,388,40,423,43"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a86f8155148512b94045daf1f961c127b" title=" " alt="" coords="5,29,166,56"/>
-<area shape="poly" title=" " alt="" coords="195,43,166,45,166,40,201,42"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a735dfe40839179fe90ce899a35423e69" name="a735dfe40839179fe90ce899a35423e69"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a735dfe40839179fe90ce899a35423e69">&#9670;&#160;</a></span>libsdl_LTX_plugin_fini()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void libsdl_LTX_plugin_fini </td>
-          <td>(</td>
-          <td class="paramtype">void</td>          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00775">775</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d9/d00/a00398_source.html#l00775">libsdl_LTX_plugin_fini()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l00775">libsdl_LTX_plugin_fini()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_a735dfe40839179fe90ce899a35423e69_cgraph.png" border="0" usemap="#ad9/d00/a00398_a735dfe40839179fe90ce899a35423e69_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_a735dfe40839179fe90ce899a35423e69_cgraph" id="ad9/d00/a00398_a735dfe40839179fe90ce899a35423e69_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,152,56"/>
-<area shape="poly" title=" " alt="" coords="53,28,48,21,52,11,62,5,79,3,96,5,107,14,102,14,94,10,78,8,64,10,56,14,54,20,58,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_a735dfe40839179fe90ce899a35423e69_icgraph.png" border="0" usemap="#ad9/d00/a00398_a735dfe40839179fe90ce899a35423e69_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_a735dfe40839179fe90ce899a35423e69_icgraph" id="ad9/d00/a00398_a735dfe40839179fe90ce899a35423e69_icgraph">
-<area shape="rect" title=" " alt="" coords="5,29,152,56"/>
-<area shape="poly" title=" " alt="" coords="102,14,94,10,78,8,64,10,56,14,54,20,58,29,53,28,48,21,52,11,62,5,79,3,96,5,107,14"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a8256e45104a21ca374ffdafd6d5e1ecc" name="a8256e45104a21ca374ffdafd6d5e1ecc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8256e45104a21ca374ffdafd6d5e1ecc">&#9670;&#160;</a></span>libsdl_LTX_plugin_init()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int libsdl_LTX_plugin_init </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="../../d3/d00/a00869.html">CConfigurator</a> *</td>          <td class="paramname"><span class="paramname"><em>cfg</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00761">761</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d8/d00/a00368_source.html#l00080">bx_gui</a>, <a class="el" href="../../da/d00/a00383_source.html#l00105">bx_keymap</a>, <a class="el" href="../../d0/d00/a00302_source.html#l00099">FAILURE</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00761">libsdl_LTX_plugin_init()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l00452">sdl_app</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l00761">libsdl_LTX_plugin_init()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_a8256e45104a21ca374ffdafd6d5e1ecc_cgraph.png" border="0" usemap="#ad9/d00/a00398_a8256e45104a21ca374ffdafd6d5e1ecc_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_a8256e45104a21ca374ffdafd6d5e1ecc_cgraph" id="ad9/d00/a00398_a8256e45104a21ca374ffdafd6d5e1ecc_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,152,56"/>
-<area shape="poly" title=" " alt="" coords="53,28,48,21,52,11,62,5,79,3,96,5,107,14,102,14,94,10,78,8,64,10,56,14,54,20,58,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_a8256e45104a21ca374ffdafd6d5e1ecc_icgraph.png" border="0" usemap="#ad9/d00/a00398_a8256e45104a21ca374ffdafd6d5e1ecc_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_a8256e45104a21ca374ffdafd6d5e1ecc_icgraph" id="ad9/d00/a00398_a8256e45104a21ca374ffdafd6d5e1ecc_icgraph">
-<area shape="rect" title=" " alt="" coords="5,29,152,56"/>
-<area shape="poly" title=" " alt="" coords="102,14,94,10,78,8,64,10,56,14,54,20,58,29,53,28,48,21,52,11,62,5,79,3,96,5,107,14"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a950c2805fc426520eff7ea2d29ed4a83" name="a950c2805fc426520eff7ea2d29ed4a83"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a950c2805fc426520eff7ea2d29ed4a83">&#9670;&#160;</a></span>normalize_hotkey_key_name()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::string normalize_hotkey_key_name </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>name</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00526">526</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d9/d00/a00398_source.html#l00487">hotkey_text_equals()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l00526">normalize_hotkey_key_name()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l00526">normalize_hotkey_key_name()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l00567">parse_sdl_hotkey()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_a950c2805fc426520eff7ea2d29ed4a83_cgraph.png" border="0" usemap="#ad9/d00/a00398_a950c2805fc426520eff7ea2d29ed4a83_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_a950c2805fc426520eff7ea2d29ed4a83_cgraph" id="ad9/d00/a00398_a950c2805fc426520eff7ea2d29ed4a83_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,196,56"/>
-<area shape="poly" title=" " alt="" coords="64,29,58,21,63,11,77,5,101,3,126,5,140,14,135,14,124,10,100,8,78,10,67,15,64,20,70,29"/>
-<area shape="rect" href="../../d9/d00/a00398.html#a9f2c467b5a45949cdb5426b8b293c76f" title=" " alt="" coords="244,29,378,56"/>
-<area shape="poly" title=" " alt="" coords="196,40,231,43,225,43,196,45"/>
-<area shape="poly" title=" " alt="" coords="275,28,269,21,273,11,288,5,311,3,336,5,351,14,345,14,334,10,311,8,289,10,277,15,274,20,280,30"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_a950c2805fc426520eff7ea2d29ed4a83_icgraph.png" border="0" usemap="#ad9/d00/a00398_a950c2805fc426520eff7ea2d29ed4a83_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_a950c2805fc426520eff7ea2d29ed4a83_icgraph" id="ad9/d00/a00398_a950c2805fc426520eff7ea2d29ed4a83_icgraph">
-<area shape="rect" title=" " alt="" coords="983,29,1173,56"/>
-<area shape="poly" title=" " alt="" coords="1112,14,1101,10,1078,8,1057,10,1045,15,1042,20,1048,30,1043,28,1037,21,1041,11,1055,5,1078,3,1103,5,1117,15"/>
-<area shape="rect" href="../../d9/d00/a00398.html#ac743cac6cf224ac9be3819c34fbb913e" title=" " alt="" coords="812,29,935,56"/>
-<area shape="poly" title=" " alt="" coords="965,43,936,45,935,40,970,43"/>
-<area shape="poly" title=" " alt="" coords="902,13,893,10,873,8,855,10,846,15,843,20,848,30,843,28,838,21,842,11,854,5,873,3,894,5,907,15"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a20ecd7db32a1da31d04456f7ea169ba3" title=" " alt="" coords="634,21,764,64"/>
-<area shape="poly" title=" " alt="" coords="794,43,764,45,764,40,799,43"/>
-<area shape="rect" href="../../d9/d00/a01469.html#ade7154c9f9301e629454606247ae168d" title=" " alt="" coords="436,21,586,64"/>
-<area shape="poly" title=" " alt="" coords="616,43,587,45,586,40,621,43"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a34b4ec9e9589d3c2918ad466596e2db8" title=" " alt="" coords="214,29,388,56"/>
-<area shape="poly" title=" " alt="" coords="418,43,388,45,388,40,423,43"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a86f8155148512b94045daf1f961c127b" title=" " alt="" coords="5,29,166,56"/>
-<area shape="poly" title=" " alt="" coords="195,43,166,45,166,40,201,42"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="aae67517088432ae8cd0de57d5373a48c" name="aae67517088432ae8cd0de57d5373a48c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aae67517088432ae8cd0de57d5373a48c">&#9670;&#160;</a></span>on_main_thread()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename F&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void on_main_thread </td>
-          <td>(</td>
-          <td class="paramtype">F</td>          <td class="paramname"><span class="paramname"><em>fn</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Run fn on the thread that called <a class="el" href="../../d7/d00/a00002.html#a0ddf1224851353fc92bfbff6f499fa97" title="Entry point for the application.">main()</a>. </p>
-<p>SDL wants the video subsystem, the window and the event pump all touched from that one thread. The emulator drives the GUI from the VGA card's thread instead, so every SDL call made from there is bounced across with SDL_RunOnMainThread(). Exceptions (FAILURE_*) must not escape into SDL's C event loop, so they are caught and rethrown on the calling thread. The inline path only covers calls made before <a class="el" href="../../d7/d00/a00002.html#a0ddf1224851353fc92bfbff6f499fa97" title="Entry point for the application.">main()</a> takes ownership and calls that already run on the main thread (e.g. from within a bounced callback). </p>
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00331">331</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d0/d00/a00302_source.html#l00107">FAILURE_1</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00331">on_main_thread()</a>, and <a class="el" href="#a9f40541ca4d74a93e42e846bfe457a65">sdl_main_thread_owns_sdl()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01817">bx_sdl_gui_c::clear_screen()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00387">bx_sdl_gui_c::detach_guest_input()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01843">bx_sdl_gui_c::dimension_update()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l02108">bx_sdl_gui_c::exit()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l02113">bx_sdl_gui_c::exit_application()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00969">bx_sdl_gui_c::graphics_frame_update()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01243">bx_sdl_gui_c::handle_events()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01995">sdl_event_dispatcher::mouse_enabled_changed()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00331">on_main_thread()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00377">bx_sdl_gui_c::pause_guest_input()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00382">bx_sdl_gui_c::resume_guest_input()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l00924">bx_sdl_gui_c::specific_init()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_aae67517088432ae8cd0de57d5373a48c_cgraph.png" border="0" usemap="#ad9/d00/a00398_aae67517088432ae8cd0de57d5373a48c_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_aae67517088432ae8cd0de57d5373a48c_cgraph" id="ad9/d00/a00398_aae67517088432ae8cd0de57d5373a48c_cgraph">
-<area shape="rect" title="Run fn on the thread that called main()." alt="" coords="5,29,119,56"/>
-<area shape="poly" title=" " alt="" coords="29,29,23,21,27,11,40,5,62,3,85,5,99,14,94,14,84,10,62,8,42,10,31,15,28,20,34,29"/>
-<area shape="rect" href="../../d9/d00/a00398.html#a9f40541ca4d74a93e42e846bfe457a65" title="Set once main() has taken ownership of SDL and is driving main_thread_pump() on our behalf,..." alt="" coords="167,29,345,56"/>
-<area shape="poly" title=" " alt="" coords="119,40,154,42,149,43,119,45"/>
-<area shape="poly" title=" " alt="" coords="223,28,217,21,221,11,234,5,256,3,279,5,293,14,287,14,277,10,256,8,236,10,225,15,222,20,227,30"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_aae67517088432ae8cd0de57d5373a48c_icgraph.png" border="0" usemap="#ad9/d00/a00398_aae67517088432ae8cd0de57d5373a48c_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_aae67517088432ae8cd0de57d5373a48c_icgraph" id="ad9/d00/a00398_aae67517088432ae8cd0de57d5373a48c_icgraph">
-<area shape="rect" title="Run fn on the thread that called main()." alt="" coords="1711,299,1824,325"/>
-<area shape="poly" title=" " alt="" coords="1799,283,1789,280,1768,277,1748,279,1737,284,1734,289,1740,299,1735,297,1729,290,1733,280,1746,274,1768,272,1791,275,1804,284"/>
-<area shape="rect" href="../../d9/d00/a01469.html#aa254a0f15d09941047fe191174d7ce66" title="Clear sdl_screen display, and flush it." alt="" coords="1508,5,1642,48"/>
-<area shape="poly" title=" " alt="" coords="1760,282,1749,236,1731,177,1702,116,1683,87,1661,62,1642,48,1642,42,1665,58,1688,84,1707,113,1736,175,1755,235,1764,285"/>
-<area shape="rect" href="../../d9/d00/a01469.html#afb0f6119a96f3d77f7dbd696abed31f5" title=" " alt="" coords="1503,72,1647,115"/>
-<area shape="poly" title=" " alt="" coords="1754,283,1719,212,1693,171,1661,135,1636,118,1637,113,1665,131,1697,168,1724,209,1759,285"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a9a020203c92e832c80c92596a1a02392" title=" " alt="" coords="1493,357,1657,400"/>
-<area shape="poly" title=" " alt="" coords="1715,330,1640,359,1638,354,1710,332"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a22ab6ced5c7a916d943ea6439aae2a4e" title=" " alt="" coords="5,249,149,292"/>
-<area shape="poly" title=" " alt="" coords="1745,285,1710,248,1687,228,1662,212,1580,175,1512,159,1440,154,1349,155,460,155,411,157,362,165,268,190,184,222,121,251,117,247,182,217,266,185,361,160,411,152,460,149,1349,149,1441,149,1513,153,1582,170,1664,207,1690,224,1713,244,1750,287"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a34b4ec9e9589d3c2918ad466596e2db8" title=" " alt="" coords="1018,240,1193,267"/>
-<area shape="poly" title=" " alt="" coords="1714,293,1662,281,1535,264,1408,255,1290,252,1194,253,1193,248,1290,247,1408,250,1536,259,1664,276,1720,293"/>
-<area shape="rect" href="../../d9/d00/a01469.html#ab76899f4b07b347d4aec1ee71b7ca6c8" title=" " alt="" coords="596,240,722,267"/>
-<area shape="poly" title=" " alt="" coords="1733,289,1701,270,1662,252,1577,224,1509,211,1439,206,1349,205,1104,205,944,211,785,231,722,242,720,237,784,225,944,205,1104,200,1349,200,1439,201,1510,205,1579,219,1664,247,1703,265,1739,289"/>
-<area shape="rect" href="../../d9/d00/a01469.html#ad9a01f0592ace66b861f7f283bb7be22" title=" " alt="" coords="1512,424,1638,467"/>
-<area shape="poly" title=" " alt="" coords="1748,336,1711,377,1664,414,1639,427,1637,422,1662,410,1708,373,1743,338"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a834d42452d7e07612082060c330effc9" title=" " alt="" coords="1498,491,1652,533"/>
-<area shape="poly" title=" " alt="" coords="1758,338,1723,410,1697,448,1665,481,1647,493,1645,488,1661,477,1693,444,1719,407,1754,341"/>
-<area shape="rect" href="../../d4/d00/a01465.html#a13fc4d0fa4224db325097aecead7be10" title=" " alt="" coords="1487,291,1663,333"/>
-<area shape="poly" title=" " alt="" coords="1693,312,1664,315,1663,309,1698,312"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a271f57b0969d81c522bc17f8919b9c43" title=" " alt="" coords="1505,557,1645,600"/>
-<area shape="poly" title=" " alt="" coords="1763,339,1752,386,1733,441,1705,497,1686,524,1665,547,1647,560,1645,556,1661,543,1682,520,1700,495,1728,439,1747,384,1759,342"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a487608bf72448bf870875ed8b678fc92" title=" " alt="" coords="1501,624,1649,667"/>
-<area shape="poly" title=" " alt="" coords="1766,338,1759,397,1742,470,1729,508,1712,546,1691,582,1665,614,1650,626,1648,621,1661,610,1687,579,1707,544,1724,506,1737,468,1754,396,1763,342"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a804ef692d624657e4592952e49671322" title=" " alt="" coords="1036,631,1176,673"/>
-<area shape="poly" title=" " alt="" coords="1490,409,1489,414,1473,438,1466,462,1468,510,1470,535,1468,559,1459,583,1441,606,1411,628,1379,644,1345,655,1309,663,1239,668,1176,665,1176,660,1239,663,1308,657,1343,650,1377,639,1409,623,1437,602,1455,580,1463,558,1464,535,1463,511,1461,461,1468,436,1485,410,1486,412"/>
-<area shape="rect" href="../../d9/d00/a01469.html#aa3b6b58b123d7b50a6bf1911c1ebe88a" title=" " alt="" coords="1276,703,1420,745"/>
-<area shape="poly" title=" " alt="" coords="1490,409,1489,414,1469,444,1460,473,1458,502,1461,530,1463,560,1463,590,1457,623,1441,657,1418,684,1391,705,1389,700,1415,680,1436,655,1452,621,1458,590,1458,560,1455,531,1453,502,1455,472,1464,442,1485,410,1486,412"/>
-<area shape="rect" href="../../d9/d00/a01469.html#ade7154c9f9301e629454606247ae168d" title=" " alt="" coords="1273,341,1423,384"/>
-<area shape="poly" title=" " alt="" coords="1475,372,1424,371,1424,365,1480,372"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a745838e6633262f5bbd450fa999cb09f" title=" " alt="" coords="583,664,735,707"/>
-<area shape="poly" title=" " alt="" coords="1017,659,735,682,735,677,1023,658"/>
-<area shape="rect" href="../../d4/d00/a01465.html#ab05015697272bc69fd519e688a741dbe" title=" " alt="" coords="389,531,533,573"/>
-<area shape="poly" title=" " alt="" coords="586,656,580,654,526,614,484,576,485,571,529,610,583,650,592,657"/>
-<area shape="rect" href="../../d4/d00/a01465.html#a784fe83664832bce336d609f44b787b7" title=" " alt="" coords="197,356,341,399"/>
-<area shape="poly" title=" " alt="" coords="423,521,293,401,294,396,428,519"/>
-<area shape="poly" title=" " alt="" coords="213,349,118,295,117,290,218,347"/>
-<area shape="poly" title=" " alt="" coords="1264,747,1124,776,1040,787,949,792,855,790,760,779,668,757,623,741,580,721,558,707,539,690,507,650,483,609,469,576,472,571,488,607,511,647,543,686,562,703,583,716,625,736,669,752,761,774,855,785,949,787,1040,781,1124,771,1259,747"/>
-<area shape="poly" title=" " alt="" coords="1302,332,1258,306,1208,281,1176,270,1176,265,1210,276,1261,302,1307,332"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a86f8155148512b94045daf1f961c127b" title=" " alt="" coords="789,240,950,267"/>
-<area shape="poly" title=" " alt="" coords="1000,254,951,256,949,251,1005,253"/>
-<area shape="rect" href="../../d4/d00/a01465.html#aca5029ce4ca13fbffb99d8a1352c0225" title=" " alt="" coords="1276,432,1420,475"/>
-<area shape="poly" title=" " alt="" coords="1523,339,1488,360,1474,372,1464,383,1440,410,1407,434,1405,429,1437,406,1460,380,1470,368,1485,355,1518,341"/>
-<area shape="rect" href="../../d4/d00/a01465.html#af0445d5ddb3383f9e7e317bbabd35603" title=" " alt="" coords="1034,539,1178,581"/>
-<area shape="poly" title=" " alt="" coords="1491,342,1489,347,1476,365,1469,382,1467,418,1463,453,1455,471,1440,489,1404,504,1336,520,1179,551,1178,545,1335,515,1402,499,1437,485,1451,468,1458,452,1461,417,1464,381,1471,362,1485,344,1486,345"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a241dd2bbaeb54197938d2475954cf9f5" title=" " alt="" coords="1257,549,1439,592"/>
-<area shape="poly" title=" " alt="" coords="1490,342,1489,347,1473,370,1466,392,1465,437,1464,484,1457,508,1441,532,1418,551,1415,546,1437,529,1452,506,1459,483,1459,437,1460,391,1468,368,1485,344,1486,345"/>
-<area shape="poly" title=" " alt="" coords="1258,459,905,487,718,504,582,521,533,533,532,528,581,516,717,498,904,481,1263,458"/>
-<area shape="poly" title=" " alt="" coords="1383,421,1437,382,1460,356,1469,344,1484,335,1488,332,1473,348,1464,360,1440,386,1385,425"/>
-<area shape="poly" title=" " alt="" coords="1383,416,1371,413,1348,411,1327,413,1314,417,1308,423,1310,433,1305,430,1303,422,1310,413,1325,407,1348,405,1372,408,1388,417"/>
-<area shape="rect" href="../../d4/d00/a01465.html#ab604dfd3b127a15e9a0a0da1c76d8484" title=" " alt="" coords="1002,291,1209,333"/>
-<area shape="poly" title=" " alt="" coords="1275,423,1256,410,1232,387,1208,366,1176,350,1145,337,1146,331,1179,345,1211,362,1236,383,1259,406,1281,423"/>
-<area shape="rect" href="../../d4/d00/a01465.html#a3f0ac51e06b4d9b6a4651c02cf9aadb1" title=" " alt="" coords="581,356,737,399"/>
-<area shape="poly" title=" " alt="" coords="1257,449,1209,444,950,415,737,393,737,388,950,409,1210,439,1263,449"/>
-<area shape="poly" title=" " alt="" coords="1308,481,1259,508,1211,534,1179,548,1177,543,1208,530,1256,503,1303,483"/>
-<area shape="poly" title=" " alt="" coords="1224,309,1489,311,1484,313,1225,315"/>
-<area shape="poly" title=" " alt="" coords="1212,339,1237,361,1259,382,1328,432,1322,431,1256,386,1234,365,1211,345"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a7cb6e96ffb1aae1759b5065e6527995a" title=" " alt="" coords="791,293,948,320"/>
-<area shape="poly" title=" " alt="" coords="984,310,949,311,948,306,989,309"/>
-<area shape="poly" title=" " alt="" coords="797,290,715,270,714,265,802,288"/>
-<area shape="poly" title=" " alt="" coords="564,379,342,380,341,375,568,376"/>
-<area shape="poly" title=" " alt="" coords="752,373,962,387,1210,415,1293,431,1287,432,1209,420,961,393,752,378"/>
-<area shape="poly" title=" " alt="" coords="1152,530,1208,506,1256,479,1273,474,1278,472,1259,484,1211,510,1154,535"/>
-<area shape="rect" href="../../d4/d00/a01465.html#ab64e552374da0b5b00b73b493a3b06c6" title=" " alt="" coords="790,421,948,464"/>
-<area shape="poly" title=" " alt="" coords="1045,532,914,467,915,462,1050,531"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a7efe0527a64b9e67351e1e1f2b360998" title=" " alt="" coords="785,539,954,581"/>
-<area shape="poly" title=" " alt="" coords="1015,560,955,563,954,557,1021,560"/>
-<area shape="poly" title=" " alt="" coords="772,443,680,454,630,463,582,477,531,503,489,533,487,528,529,498,580,472,629,458,679,448,777,441"/>
-<area shape="poly" title=" " alt="" coords="964,442,1278,451,1273,452,964,447"/>
-<area shape="poly" title=" " alt="" coords="781,417,730,402,730,397,787,416"/>
-<area shape="poly" title=" " alt="" coords="831,590,787,624,738,654,715,666,714,661,735,650,784,620,826,592"/>
-<area shape="poly" title=" " alt="" coords="830,529,684,402,686,396,835,528"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a7fa1c53d0bc87e26917407d7eaefa2cf" title=" " alt="" coords="587,597,731,640"/>
-<area shape="poly" title=" " alt="" coords="779,585,732,601,731,596,774,587"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a80519867fcbf8a7d1f4ef651e2530926" title=" " alt="" coords="587,531,731,573"/>
-<area shape="poly" title=" " alt="" coords="767,557,732,557,731,552,772,556"/>
-<area shape="poly" title=" " alt="" coords="577,592,526,577,527,571,582,592"/>
-<area shape="poly" title=" " alt="" coords="570,553,534,555,533,549,575,551"/>
-<area shape="poly" title=" " alt="" coords="1239,566,1179,566,1178,561,1245,566"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="ab4b22a65cd2e6e5bb4585c7530356b91" name="ab4b22a65cd2e6e5bb4585c7530356b91"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab4b22a65cd2e6e5bb4585c7530356b91">&#9670;&#160;</a></span>parse_hotkey_modifier()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool parse_hotkey_modifier </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>token</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">unsigned *</td>          <td class="paramname"><span class="paramname"><em>modifier</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00501">501</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d9/d00/a00398_source.html#l00487">hotkey_text_equals()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00501">parse_hotkey_modifier()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00117">SDL_HOTKEY_MOD_ALT</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00116">SDL_HOTKEY_MOD_CTRL</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00119">SDL_HOTKEY_MOD_GUI</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l00118">SDL_HOTKEY_MOD_SHIFT</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l00501">parse_hotkey_modifier()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l00567">parse_sdl_hotkey()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_ab4b22a65cd2e6e5bb4585c7530356b91_cgraph.png" border="0" usemap="#ad9/d00/a00398_ab4b22a65cd2e6e5bb4585c7530356b91_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_ab4b22a65cd2e6e5bb4585c7530356b91_cgraph" id="ad9/d00/a00398_ab4b22a65cd2e6e5bb4585c7530356b91_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,158,56"/>
-<area shape="poly" title=" " alt="" coords="48,29,43,21,47,11,60,5,82,3,104,5,118,14,113,14,103,10,81,8,62,10,51,15,48,20,54,29"/>
-<area shape="rect" href="../../d9/d00/a00398.html#a9f2c467b5a45949cdb5426b8b293c76f" title=" " alt="" coords="206,29,340,56"/>
-<area shape="poly" title=" " alt="" coords="158,40,193,43,187,43,158,45"/>
-<area shape="poly" title=" " alt="" coords="240,28,234,21,238,11,252,5,273,3,296,5,309,14,304,14,294,10,273,8,253,10,242,15,240,20,245,30"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_ab4b22a65cd2e6e5bb4585c7530356b91_icgraph.png" border="0" usemap="#ad9/d00/a00398_ab4b22a65cd2e6e5bb4585c7530356b91_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_ab4b22a65cd2e6e5bb4585c7530356b91_icgraph" id="ad9/d00/a00398_ab4b22a65cd2e6e5bb4585c7530356b91_icgraph">
-<area shape="rect" title=" " alt="" coords="983,29,1135,56"/>
-<area shape="poly" title=" " alt="" coords="1089,13,1080,10,1059,8,1040,10,1029,15,1027,20,1032,30,1027,28,1022,21,1026,11,1038,5,1059,3,1081,5,1095,15"/>
-<area shape="rect" href="../../d9/d00/a00398.html#ac743cac6cf224ac9be3819c34fbb913e" title=" " alt="" coords="812,29,935,56"/>
-<area shape="poly" title=" " alt="" coords="965,43,935,45,935,40,970,43"/>
-<area shape="poly" title=" " alt="" coords="902,13,893,10,873,8,855,10,846,15,843,20,848,30,843,28,838,21,842,11,854,5,873,3,894,5,907,15"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a20ecd7db32a1da31d04456f7ea169ba3" title=" " alt="" coords="634,21,764,64"/>
-<area shape="poly" title=" " alt="" coords="794,43,764,45,764,40,799,43"/>
-<area shape="rect" href="../../d9/d00/a01469.html#ade7154c9f9301e629454606247ae168d" title=" " alt="" coords="436,21,586,64"/>
-<area shape="poly" title=" " alt="" coords="616,43,587,45,586,40,621,43"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a34b4ec9e9589d3c2918ad466596e2db8" title=" " alt="" coords="214,29,388,56"/>
-<area shape="poly" title=" " alt="" coords="418,43,388,45,388,40,423,43"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a86f8155148512b94045daf1f961c127b" title=" " alt="" coords="5,29,166,56"/>
-<area shape="poly" title=" " alt="" coords="195,43,166,45,166,40,201,42"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="ac743cac6cf224ac9be3819c34fbb913e" name="ac743cac6cf224ac9be3819c34fbb913e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac743cac6cf224ac9be3819c34fbb913e">&#9670;&#160;</a></span>parse_sdl_hotkey()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../dc/d00/a01461.html">sdl_hotkey_binding</a> parse_sdl_hotkey </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="../../d3/d00/a00869.html">CConfigurator</a> *</td>          <td class="paramname"><span class="paramname"><em>cfg</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>config_name</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>default_value</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00567">567</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d9/d00/a00398_source.html#l00128">sdl_hotkey_binding::config_name</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00132">sdl_hotkey_binding::display</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00131">sdl_hotkey_binding::enabled</a>, <a class="el" href="../../da/d00/a00080_source.html#l00152">CConfigurator::get_text_value()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00487">hotkey_text_equals()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00541">is_hotkey_modifier_key()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00129">sdl_hotkey_binding::key</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00130">sdl_hotkey_binding::modifiers</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00526">normalize_hotkey_key_name()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00501">parse_hotkey_modifier()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00567">parse_sdl_hotkey()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00117">SDL_HOTKEY_MOD_ALT</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00116">SDL_HOTKEY_MOD_CTRL</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00119">SDL_HOTKEY_MOD_GUI</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00118">SDL_HOTKEY_MOD_SHIFT</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l00473">trim_hotkey_text()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l00836">bx_sdl_gui_c::load_hotkeys()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l00567">parse_sdl_hotkey()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_ac743cac6cf224ac9be3819c34fbb913e_cgraph.png" border="0" usemap="#ad9/d00/a00398_ac743cac6cf224ac9be3819c34fbb913e_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_ac743cac6cf224ac9be3819c34fbb913e_cgraph" id="ad9/d00/a00398_ac743cac6cf224ac9be3819c34fbb913e_cgraph">
-<area shape="rect" title=" " alt="" coords="5,208,129,235"/>
-<area shape="poly" title=" " alt="" coords="32,208,26,199,30,190,44,183,67,181,91,184,106,192,101,194,90,189,67,187,46,189,34,193,31,199,37,207"/>
-<area shape="rect" href="../../d3/d00/a00869.html#a36498889497191fbc49ebf533c0d3d36" title=" " alt="" coords="208,29,336,72"/>
-<area shape="poly" title=" " alt="" coords="74,206,113,151,142,118,175,89,196,77,192,81,178,93,146,122,118,154,79,209"/>
-<area shape="rect" href="../../d9/d00/a00398.html#a9f2c467b5a45949cdb5426b8b293c76f" title=" " alt="" coords="415,245,549,272"/>
-<area shape="poly" title=" " alt="" coords="78,206,118,167,145,147,176,132,229,115,273,109,316,114,368,132,400,152,428,178,468,232,463,232,424,181,397,156,366,137,315,119,273,114,230,121,178,137,148,152,121,171,82,209"/>
-<area shape="rect" href="../../d9/d00/a00398.html#a2d96b51e8e8481264954264be47e04cc" title=" " alt="" coords="193,171,351,197"/>
-<area shape="poly" title=" " alt="" coords="128,208,182,199,178,202,130,212"/>
-<area shape="rect" href="../../d9/d00/a00398.html#a950c2805fc426520eff7ea2d29ed4a83" title=" " alt="" coords="177,245,367,272"/>
-<area shape="poly" title=" " alt="" coords="128,230,182,241,178,243,130,235"/>
-<area shape="rect" href="../../d9/d00/a00398.html#ab4b22a65cd2e6e5bb4585c7530356b91" title=" " alt="" coords="196,320,348,347"/>
-<area shape="poly" title=" " alt="" coords="92,233,178,282,233,312,227,313,175,286,92,238"/>
-<area shape="rect" href="../../d9/d00/a00398.html#a074321ae27848077cdfcd04bdae72528" title=" " alt="" coords="213,395,331,421"/>
-<area shape="poly" title=" " alt="" coords="77,232,118,291,146,325,178,357,225,387,219,388,175,361,142,329,113,294,76,238"/>
-<area shape="poly" title=" " alt="" coords="233,28,231,19,238,10,251,5,272,3,294,5,309,13,303,14,292,10,272,8,253,10,241,15,236,21,238,29"/>
-<area shape="poly" title=" " alt="" coords="446,244,440,237,445,227,459,221,482,219,507,221,522,230,517,230,506,226,482,224,460,226,448,231,445,236,451,246"/>
-<area shape="poly" title=" " alt="" coords="237,170,231,162,235,152,249,146,272,144,296,147,311,155,305,156,295,152,272,149,250,151,239,156,236,161,242,170"/>
-<area shape="poly" title=" " alt="" coords="367,256,402,258,397,259,368,261"/>
-<area shape="poly" title=" " alt="" coords="237,245,231,237,235,227,249,221,272,219,296,221,311,230,305,230,295,226,272,224,250,226,239,231,236,236,242,245"/>
-<area shape="poly" title=" " alt="" coords="311,317,425,279,430,277,313,322"/>
-<area shape="poly" title=" " alt="" coords="237,319,231,311,235,302,249,295,272,293,296,296,311,305,305,305,295,301,272,299,250,301,239,305,236,311,242,320"/>
-<area shape="poly" title=" " alt="" coords="237,393,231,386,235,376,249,370,272,368,296,371,311,380,305,379,295,376,272,373,250,375,239,380,236,385,242,395"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_ac743cac6cf224ac9be3819c34fbb913e_icgraph.png" border="0" usemap="#ad9/d00/a00398_ac743cac6cf224ac9be3819c34fbb913e_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_ac743cac6cf224ac9be3819c34fbb913e_icgraph" id="ad9/d00/a00398_ac743cac6cf224ac9be3819c34fbb913e_icgraph">
-<area shape="rect" title=" " alt="" coords="812,29,935,56"/>
-<area shape="poly" title=" " alt="" coords="902,13,893,10,873,8,855,10,846,15,843,20,848,30,843,28,838,21,842,11,854,5,873,3,894,5,907,15"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a20ecd7db32a1da31d04456f7ea169ba3" title=" " alt="" coords="634,21,764,64"/>
-<area shape="poly" title=" " alt="" coords="794,43,764,45,764,40,799,43"/>
-<area shape="rect" href="../../d9/d00/a01469.html#ade7154c9f9301e629454606247ae168d" title=" " alt="" coords="436,21,586,64"/>
-<area shape="poly" title=" " alt="" coords="616,43,587,45,586,40,621,43"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a34b4ec9e9589d3c2918ad466596e2db8" title=" " alt="" coords="214,29,388,56"/>
-<area shape="poly" title=" " alt="" coords="418,43,388,45,388,40,423,43"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a86f8155148512b94045daf1f961c127b" title=" " alt="" coords="5,29,166,56"/>
-<area shape="poly" title=" " alt="" coords="195,43,166,45,166,40,201,42"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a58eb15024a2774d48145fdd62a1a95c9" name="a58eb15024a2774d48145fdd62a1a95c9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a58eb15024a2774d48145fdd62a1a95c9">&#9670;&#160;</a></span>sdl_hotkey_modifiers()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">unsigned sdl_hotkey_modifiers </td>
-          <td>(</td>
-          <td class="paramtype">SDL_Keymod</td>          <td class="paramname"><span class="paramname"><em>modifiers</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00549">549</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d9/d00/a00398_source.html#l00117">SDL_HOTKEY_MOD_ALT</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00116">SDL_HOTKEY_MOD_CTRL</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00119">SDL_HOTKEY_MOD_GUI</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00118">SDL_HOTKEY_MOD_SHIFT</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00123">SDL_HOTKEY_MOD_UNSUPPORTED</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l00549">sdl_hotkey_modifiers()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l00561">sdl_hotkey_binding::matches()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l00549">sdl_hotkey_modifiers()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_a58eb15024a2774d48145fdd62a1a95c9_cgraph.png" border="0" usemap="#ad9/d00/a00398_a58eb15024a2774d48145fdd62a1a95c9_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_a58eb15024a2774d48145fdd62a1a95c9_cgraph" id="ad9/d00/a00398_a58eb15024a2774d48145fdd62a1a95c9_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,150,56"/>
-<area shape="poly" title=" " alt="" coords="52,28,48,21,51,11,61,5,78,3,95,5,106,14,100,14,93,10,77,8,63,10,55,14,53,20,57,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_a58eb15024a2774d48145fdd62a1a95c9_icgraph.png" border="0" usemap="#ad9/d00/a00398_a58eb15024a2774d48145fdd62a1a95c9_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_a58eb15024a2774d48145fdd62a1a95c9_icgraph" id="ad9/d00/a00398_a58eb15024a2774d48145fdd62a1a95c9_icgraph">
-<area shape="rect" title=" " alt="" coords="961,29,1105,56"/>
-<area shape="poly" title=" " alt="" coords="1063,14,1054,10,1033,8,1014,10,1003,15,1001,20,1006,30,1001,28,996,21,1000,11,1012,5,1033,3,1055,5,1069,15"/>
-<area shape="rect" href="../../dc/d00/a01461.html#aff545396c571c29a9498d1e43df237d7" title=" " alt="" coords="781,21,913,64"/>
-<area shape="poly" title=" " alt="" coords="943,43,914,45,914,40,948,43"/>
-<area shape="rect" href="../../d4/d00/a01465.html#ab05015697272bc69fd519e688a741dbe" title=" " alt="" coords="389,21,533,64"/>
-<area shape="poly" title=" " alt="" coords="763,40,733,41,581,41,534,43,533,37,581,36,733,36,768,39"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a745838e6633262f5bbd450fa999cb09f" title=" " alt="" coords="581,51,733,93"/>
-<area shape="poly" title=" " alt="" coords="768,55,733,63,733,58,763,56"/>
-<area shape="rect" href="../../d4/d00/a01465.html#a784fe83664832bce336d609f44b787b7" title=" " alt="" coords="197,21,341,64"/>
-<area shape="poly" title=" " alt="" coords="371,43,341,45,341,40,376,42"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a22ab6ced5c7a916d943ea6439aae2a4e" title=" " alt="" coords="5,21,149,64"/>
-<area shape="poly" title=" " alt="" coords="179,43,149,45,149,40,184,42"/>
-<area shape="poly" title=" " alt="" coords="563,58,534,56,534,51,569,58"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a9f40541ca4d74a93e42e846bfe457a65" name="a9f40541ca4d74a93e42e846bfe457a65"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9f40541ca4d74a93e42e846bfe457a65">&#9670;&#160;</a></span>sdl_main_thread_owns_sdl()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::atomic&lt; bool &gt; sdl_main_thread_owns_sdl </td>
-          <td>(</td>
-          <td class="paramtype">false</td>          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Set once <a class="el" href="../../d7/d00/a00002.html#a0ddf1224851353fc92bfbff6f499fa97" title="Entry point for the application.">main()</a> has taken ownership of SDL and is driving main_thread_pump() on our behalf, so <a class="el" href="#aae67517088432ae8cd0de57d5373a48c" title="Run fn on the thread that called main().">on_main_thread()</a> must bounce SDL calls across to it. </p>
-
-<p class="reference">References <a class="el" href="#a9f40541ca4d74a93e42e846bfe457a65">sdl_main_thread_owns_sdl()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l00367">bx_sdl_gui_c::main_thread_init()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00393">bx_sdl_gui_c::main_thread_pump()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00413">bx_sdl_gui_c::main_thread_stop()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00331">on_main_thread()</a>, and <a class="el" href="#a9f40541ca4d74a93e42e846bfe457a65">sdl_main_thread_owns_sdl()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_a9f40541ca4d74a93e42e846bfe457a65_cgraph.png" border="0" usemap="#ad9/d00/a00398_a9f40541ca4d74a93e42e846bfe457a65_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_a9f40541ca4d74a93e42e846bfe457a65_cgraph" id="ad9/d00/a00398_a9f40541ca4d74a93e42e846bfe457a65_cgraph">
-<area shape="rect" title="Set once main() has taken ownership of SDL and is driving main_thread_pump() on our behalf,..." alt="" coords="5,29,184,56"/>
-<area shape="poly" title=" " alt="" coords="64,28,58,21,62,11,75,5,95,3,116,5,129,14,123,14,114,10,94,8,76,10,66,15,64,20,69,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_a9f40541ca4d74a93e42e846bfe457a65_icgraph.png" border="0" usemap="#ad9/d00/a00398_a9f40541ca4d74a93e42e846bfe457a65_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_a9f40541ca4d74a93e42e846bfe457a65_icgraph" id="ad9/d00/a00398_a9f40541ca4d74a93e42e846bfe457a65_icgraph">
-<area shape="rect" title="Set once main() has taken ownership of SDL and is driving main_thread_pump() on our behalf,..." alt="" coords="1892,183,2071,209"/>
-<area shape="poly" title=" " alt="" coords="2015,167,2004,164,1981,161,1960,163,1949,168,1946,173,1952,183,1947,181,1941,174,1945,164,1959,158,1982,156,2006,159,2020,168"/>
-<area shape="rect" href="../../d9/d00/a01469.html#ad7f63edc3f77c04d123533ee562de8da" title=" " alt="" coords="1711,75,1844,117"/>
-<area shape="poly" title=" " alt="" coords="1936,175,1823,121,1823,115,1941,175"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a4e53a225220533528db666f783bf5e7d" title=" " alt="" coords="1711,141,1844,184"/>
-<area shape="poly" title=" " alt="" coords="1878,180,1845,176,1844,171,1884,179"/>
-<area shape="rect" href="../../d9/d00/a01469.html#af8a1b14018691c8ffd150f9d43415a5e" title=" " alt="" coords="1711,208,1844,251"/>
-<area shape="poly" title=" " alt="" coords="1878,213,1845,221,1844,216,1884,212"/>
-<area shape="rect" href="../../d9/d00/a00398.html#aae67517088432ae8cd0de57d5373a48c" title="Run fn on the thread that called main()." alt="" coords="1721,299,1834,325"/>
-<area shape="poly" title=" " alt="" coords="1945,216,1804,301,1802,296,1941,218"/>
-<area shape="poly" title=" " alt="" coords="1811,283,1800,280,1778,277,1756,279,1745,284,1742,289,1748,299,1743,297,1737,290,1741,280,1755,274,1778,272,1802,275,1816,284"/>
-<area shape="rect" href="../../d9/d00/a01469.html#aa254a0f15d09941047fe191174d7ce66" title="Clear sdl_screen display, and flush it." alt="" coords="1508,5,1642,48"/>
-<area shape="poly" title=" " alt="" coords="1735,289,1709,264,1694,235,1688,208,1688,158,1689,134,1686,111,1678,87,1661,62,1642,46,1642,41,1665,58,1683,84,1692,110,1694,134,1694,158,1693,208,1699,234,1713,261,1740,290"/>
-<area shape="rect" href="../../d9/d00/a01469.html#afb0f6119a96f3d77f7dbd696abed31f5" title=" " alt="" coords="1503,72,1647,115"/>
-<area shape="poly" title=" " alt="" coords="1737,289,1709,264,1698,246,1691,229,1686,197,1680,166,1673,151,1661,135,1639,118,1640,113,1665,131,1678,148,1685,165,1692,196,1696,227,1703,244,1713,261,1742,290"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a9a020203c92e832c80c92596a1a02392" title=" " alt="" coords="1493,357,1657,400"/>
-<area shape="poly" title=" " alt="" coords="1722,330,1643,359,1641,354,1717,332"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a22ab6ced5c7a916d943ea6439aae2a4e" title=" " alt="" coords="5,249,149,292"/>
-<area shape="poly" title=" " alt="" coords="1741,289,1709,265,1695,249,1686,235,1677,223,1662,212,1581,174,1546,163,1513,157,1441,154,1349,155,460,155,411,157,362,165,268,190,184,222,121,251,117,247,182,217,266,185,361,160,411,152,460,149,1349,149,1441,149,1513,152,1547,158,1583,169,1664,207,1681,219,1691,232,1700,246,1713,261,1746,290"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a34b4ec9e9589d3c2918ad466596e2db8" title=" " alt="" coords="1018,240,1193,267"/>
-<area shape="poly" title=" " alt="" coords="1720,294,1663,281,1535,265,1408,256,1194,254,1193,248,1408,251,1536,260,1663,276,1726,293"/>
-<area shape="rect" href="../../d9/d00/a01469.html#ab76899f4b07b347d4aec1ee71b7ca6c8" title=" " alt="" coords="596,240,722,267"/>
-<area shape="poly" title=" " alt="" coords="1741,290,1705,271,1662,252,1577,226,1509,212,1439,206,1349,205,1104,205,944,211,785,231,722,242,720,237,784,225,944,205,1104,200,1349,200,1439,201,1509,206,1578,220,1664,247,1707,266,1747,290"/>
-<area shape="rect" href="../../d9/d00/a01469.html#ad9a01f0592ace66b861f7f283bb7be22" title=" " alt="" coords="1512,424,1638,467"/>
-<area shape="poly" title=" " alt="" coords="1756,335,1715,377,1664,414,1640,427,1638,422,1662,410,1712,372,1752,337"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a834d42452d7e07612082060c330effc9" title=" " alt="" coords="1498,491,1652,533"/>
-<area shape="poly" title=" " alt="" coords="1766,338,1727,410,1699,448,1665,481,1646,493,1644,488,1661,477,1695,444,1723,407,1762,341"/>
-<area shape="rect" href="../../d4/d00/a01465.html#a13fc4d0fa4224db325097aecead7be10" title=" " alt="" coords="1487,291,1663,333"/>
-<area shape="poly" title=" " alt="" coords="1703,312,1664,315,1663,309,1708,312"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a271f57b0969d81c522bc17f8919b9c43" title=" " alt="" coords="1505,557,1645,600"/>
-<area shape="poly" title=" " alt="" coords="1772,338,1759,385,1738,440,1707,497,1687,524,1665,547,1646,560,1644,555,1661,543,1683,520,1702,494,1733,438,1754,384,1768,342"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a487608bf72448bf870875ed8b678fc92" title=" " alt="" coords="1501,624,1649,667"/>
-<area shape="poly" title=" " alt="" coords="1775,339,1766,397,1747,470,1714,546,1692,582,1665,614,1649,626,1647,621,1661,610,1687,579,1709,544,1742,468,1761,396,1771,342"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a804ef692d624657e4592952e49671322" title=" " alt="" coords="1036,631,1176,673"/>
-<area shape="poly" title=" " alt="" coords="1490,409,1489,414,1473,438,1466,462,1468,510,1470,535,1468,559,1459,583,1441,606,1411,628,1379,644,1345,655,1309,663,1239,668,1176,665,1176,660,1239,663,1308,657,1343,650,1377,639,1409,623,1437,602,1455,580,1463,558,1464,535,1463,511,1461,461,1468,436,1485,410,1486,412"/>
-<area shape="rect" href="../../d9/d00/a01469.html#aa3b6b58b123d7b50a6bf1911c1ebe88a" title=" " alt="" coords="1276,703,1420,745"/>
-<area shape="poly" title=" " alt="" coords="1490,409,1489,414,1469,444,1460,473,1458,502,1461,530,1463,560,1463,590,1457,623,1441,657,1418,684,1391,705,1389,700,1415,680,1436,655,1452,621,1458,590,1458,560,1455,531,1453,502,1455,472,1464,442,1485,410,1486,412"/>
-<area shape="rect" href="../../d9/d00/a01469.html#ade7154c9f9301e629454606247ae168d" title=" " alt="" coords="1273,341,1423,384"/>
-<area shape="poly" title=" " alt="" coords="1475,372,1424,371,1424,365,1480,372"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a745838e6633262f5bbd450fa999cb09f" title=" " alt="" coords="583,664,735,707"/>
-<area shape="poly" title=" " alt="" coords="1017,659,735,682,735,677,1023,658"/>
-<area shape="rect" href="../../d4/d00/a01465.html#ab05015697272bc69fd519e688a741dbe" title=" " alt="" coords="389,531,533,573"/>
-<area shape="poly" title=" " alt="" coords="586,656,580,654,526,614,484,576,485,571,529,610,583,650,592,657"/>
-<area shape="rect" href="../../d4/d00/a01465.html#a784fe83664832bce336d609f44b787b7" title=" " alt="" coords="197,356,341,399"/>
-<area shape="poly" title=" " alt="" coords="423,521,293,401,294,396,428,519"/>
-<area shape="poly" title=" " alt="" coords="213,349,118,295,117,290,218,347"/>
-<area shape="poly" title=" " alt="" coords="1264,747,1124,776,1040,787,949,792,855,790,760,779,668,757,623,741,580,721,558,707,539,690,507,650,483,609,469,576,472,571,488,607,511,647,543,686,562,703,583,716,625,736,669,752,761,774,855,785,949,787,1040,781,1124,771,1259,747"/>
-<area shape="poly" title=" " alt="" coords="1302,332,1258,306,1208,281,1176,270,1176,265,1210,276,1261,302,1307,332"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a86f8155148512b94045daf1f961c127b" title=" " alt="" coords="789,240,950,267"/>
-<area shape="poly" title=" " alt="" coords="1000,254,951,256,949,251,1005,253"/>
-<area shape="rect" href="../../d4/d00/a01465.html#aca5029ce4ca13fbffb99d8a1352c0225" title=" " alt="" coords="1276,432,1420,475"/>
-<area shape="poly" title=" " alt="" coords="1523,339,1488,360,1474,372,1464,383,1440,410,1407,434,1405,429,1437,406,1460,380,1470,368,1485,355,1518,341"/>
-<area shape="rect" href="../../d4/d00/a01465.html#af0445d5ddb3383f9e7e317bbabd35603" title=" " alt="" coords="1034,539,1178,581"/>
-<area shape="poly" title=" " alt="" coords="1491,342,1489,347,1476,365,1469,382,1467,418,1463,453,1455,471,1440,489,1404,504,1336,520,1179,551,1178,545,1335,515,1402,499,1437,485,1451,468,1458,452,1461,417,1464,381,1471,362,1485,344,1486,345"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a241dd2bbaeb54197938d2475954cf9f5" title=" " alt="" coords="1257,549,1439,592"/>
-<area shape="poly" title=" " alt="" coords="1490,342,1489,347,1473,370,1466,392,1465,437,1464,484,1457,508,1441,532,1418,551,1415,546,1437,529,1452,506,1459,483,1459,437,1460,391,1468,368,1485,344,1486,345"/>
-<area shape="poly" title=" " alt="" coords="1258,459,905,487,718,504,582,521,533,533,532,528,581,516,717,498,904,481,1263,458"/>
-<area shape="poly" title=" " alt="" coords="1383,421,1437,382,1460,356,1469,344,1484,335,1488,332,1473,348,1464,360,1440,386,1385,425"/>
-<area shape="poly" title=" " alt="" coords="1383,416,1371,413,1348,411,1327,413,1314,417,1308,423,1310,433,1305,430,1303,422,1310,413,1325,407,1348,405,1372,408,1388,417"/>
-<area shape="rect" href="../../d4/d00/a01465.html#ab604dfd3b127a15e9a0a0da1c76d8484" title=" " alt="" coords="1002,291,1209,333"/>
-<area shape="poly" title=" " alt="" coords="1275,423,1256,410,1232,387,1208,366,1176,350,1145,337,1146,331,1179,345,1211,362,1236,383,1259,406,1281,423"/>
-<area shape="rect" href="../../d4/d00/a01465.html#a3f0ac51e06b4d9b6a4651c02cf9aadb1" title=" " alt="" coords="581,356,737,399"/>
-<area shape="poly" title=" " alt="" coords="1257,449,1209,444,950,415,737,393,737,388,950,409,1210,439,1263,449"/>
-<area shape="poly" title=" " alt="" coords="1308,481,1259,508,1211,534,1179,548,1177,543,1208,530,1256,503,1303,483"/>
-<area shape="poly" title=" " alt="" coords="1224,309,1489,311,1484,313,1225,315"/>
-<area shape="poly" title=" " alt="" coords="1212,339,1237,361,1259,382,1328,432,1322,431,1256,386,1234,365,1211,345"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a7cb6e96ffb1aae1759b5065e6527995a" title=" " alt="" coords="791,293,948,320"/>
-<area shape="poly" title=" " alt="" coords="984,310,949,311,948,306,989,309"/>
-<area shape="poly" title=" " alt="" coords="797,290,715,270,714,265,802,288"/>
-<area shape="poly" title=" " alt="" coords="564,379,342,380,341,375,568,376"/>
-<area shape="poly" title=" " alt="" coords="752,373,962,387,1210,415,1293,431,1287,432,1209,420,961,393,752,378"/>
-<area shape="poly" title=" " alt="" coords="1152,530,1208,506,1256,479,1273,474,1278,472,1259,484,1211,510,1154,535"/>
-<area shape="rect" href="../../d4/d00/a01465.html#ab64e552374da0b5b00b73b493a3b06c6" title=" " alt="" coords="790,421,948,464"/>
-<area shape="poly" title=" " alt="" coords="1045,532,914,467,915,462,1050,531"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a7efe0527a64b9e67351e1e1f2b360998" title=" " alt="" coords="785,539,954,581"/>
-<area shape="poly" title=" " alt="" coords="1015,560,955,563,954,557,1021,560"/>
-<area shape="poly" title=" " alt="" coords="772,443,680,454,630,463,582,477,531,503,489,533,487,528,529,498,580,472,629,458,679,448,777,441"/>
-<area shape="poly" title=" " alt="" coords="964,442,1278,451,1273,452,964,447"/>
-<area shape="poly" title=" " alt="" coords="781,417,730,402,730,397,787,416"/>
-<area shape="poly" title=" " alt="" coords="831,590,787,624,738,654,715,666,714,661,735,650,784,620,826,592"/>
-<area shape="poly" title=" " alt="" coords="830,529,684,402,686,396,835,528"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a7fa1c53d0bc87e26917407d7eaefa2cf" title=" " alt="" coords="587,597,731,640"/>
-<area shape="poly" title=" " alt="" coords="779,585,732,601,731,596,774,587"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a80519867fcbf8a7d1f4ef651e2530926" title=" " alt="" coords="587,531,731,573"/>
-<area shape="poly" title=" " alt="" coords="767,557,732,557,731,552,772,556"/>
-<area shape="poly" title=" " alt="" coords="577,592,526,577,527,571,582,592"/>
-<area shape="poly" title=" " alt="" coords="570,553,534,555,533,549,575,551"/>
-<area shape="poly" title=" " alt="" coords="1239,566,1179,566,1178,561,1245,566"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a15712a49056800473ae09980a1afcff9" name="a15712a49056800473ae09980a1afcff9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a15712a49056800473ae09980a1afcff9">&#9670;&#160;</a></span>sdl_scan_to_bx_key()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> sdl_scan_to_bx_key </td>
-          <td>(</td>
-          <td class="paramtype">SDL_Scancode</td>          <td class="paramname"><span class="paramname"><em>sym</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l01011">1011</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d6/d00/a00371_source.html#l00079">BX_ERROR</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00289">BX_KEY_0</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00290">BX_KEY_1</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00291">BX_KEY_2</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00292">BX_KEY_3</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00293">BX_KEY_4</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00294">BX_KEY_5</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00295">BX_KEY_6</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00296">BX_KEY_7</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00297">BX_KEY_8</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00298">BX_KEY_9</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00262">BX_KEY_A</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00259">BX_KEY_ALT_L</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00260">BX_KEY_ALT_R</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00263">BX_KEY_B</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00312">BX_KEY_BACKSLASH</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00317">BX_KEY_BACKSPACE</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00264">BX_KEY_C</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00257">BX_KEY_CAPS_LOCK</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00304">BX_KEY_COMMA</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00239">BX_KEY_CTRL_L</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00255">BX_KEY_CTRL_R</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00265">BX_KEY_D</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00327">BX_KEY_DELETE</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00348">BX_KEY_DOWN</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00266">BX_KEY_E</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00329">BX_KEY_END</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00318">BX_KEY_ENTER</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00309">BX_KEY_EQUALS</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00300">BX_KEY_ESC</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00267">BX_KEY_F</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00242">BX_KEY_F1</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00251">BX_KEY_F10</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00252">BX_KEY_F11</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00253">BX_KEY_F12</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00243">BX_KEY_F2</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00244">BX_KEY_F3</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00245">BX_KEY_F4</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00246">BX_KEY_F5</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00247">BX_KEY_F6</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00248">BX_KEY_F7</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00249">BX_KEY_F8</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00250">BX_KEY_F9</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00268">BX_KEY_G</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00315">BX_KEY_GRAVE</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00269">BX_KEY_H</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00328">BX_KEY_HOME</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00270">BX_KEY_I</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00326">BX_KEY_INSERT</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00271">BX_KEY_J</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00272">BX_KEY_K</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00345">BX_KEY_KP_5</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00333">BX_KEY_KP_ADD</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00344">BX_KEY_KP_DELETE</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00354">BX_KEY_KP_DIVIDE</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00336">BX_KEY_KP_DOWN</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00335">BX_KEY_KP_END</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00352">BX_KEY_KP_ENTER</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00340">BX_KEY_KP_HOME</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00343">BX_KEY_KP_INSERT</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00338">BX_KEY_KP_LEFT</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00353">BX_KEY_KP_MULTIPLY</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00337">BX_KEY_KP_PAGE_DOWN</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00342">BX_KEY_KP_PAGE_UP</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00339">BX_KEY_KP_RIGHT</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00334">BX_KEY_KP_SUBTRACT</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00341">BX_KEY_KP_UP</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00273">BX_KEY_L</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00349">BX_KEY_LEFT</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00311">BX_KEY_LEFT_BRACKET</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00274">BX_KEY_M</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00358">BX_KEY_MENU</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00314">BX_KEY_MINUS</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00275">BX_KEY_N</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00258">BX_KEY_NUM_LOCK</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00276">BX_KEY_O</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00277">BX_KEY_P</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00331">BX_KEY_PAGE_DOWN</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00330">BX_KEY_PAGE_UP</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00324">BX_KEY_PAUSE</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00305">BX_KEY_PERIOD</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00322">BX_KEY_PRINT</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00278">BX_KEY_Q</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00279">BX_KEY_R</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00350">BX_KEY_RIGHT</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00313">BX_KEY_RIGHT_BRACKET</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00280">BX_KEY_S</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00323">BX_KEY_SCRL_LOCK</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00308">BX_KEY_SEMICOLON</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00240">BX_KEY_SHIFT_L</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00256">BX_KEY_SHIFT_R</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00303">BX_KEY_SINGLE_QUOTE</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00306">BX_KEY_SLASH</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00302">BX_KEY_SPACE</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00281">BX_KEY_T</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00319">BX_KEY_TAB</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00282">BX_KEY_U</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00237">BX_KEY_UNHANDLED</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00347">BX_KEY_UP</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00283">BX_KEY_V</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00284">BX_KEY_W</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00356">BX_KEY_WIN_L</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00357">BX_KEY_WIN_R</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00285">BX_KEY_X</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00286">BX_KEY_Y</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00287">BX_KEY_Z</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01538">bx_sdl_gui_c::handle_keyboard_event_impl()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_a15712a49056800473ae09980a1afcff9_cgraph.png" border="0" usemap="#ad9/d00/a00398_a15712a49056800473ae09980a1afcff9_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_a15712a49056800473ae09980a1afcff9_cgraph" id="ad9/d00/a00398_a15712a49056800473ae09980a1afcff9_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,146,56"/>
-<area shape="poly" title=" " alt="" coords="51,28,47,21,50,11,59,5,76,3,93,5,103,14,98,14,91,10,75,8,61,10,54,14,52,20,56,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_a15712a49056800473ae09980a1afcff9_icgraph.png" border="0" usemap="#ad9/d00/a00398_a15712a49056800473ae09980a1afcff9_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_a15712a49056800473ae09980a1afcff9_icgraph" id="ad9/d00/a00398_a15712a49056800473ae09980a1afcff9_icgraph">
-<area shape="rect" title=" " alt="" coords="781,29,921,56"/>
-<area shape="poly" title=" " alt="" coords="882,14,872,10,851,8,831,10,820,15,817,20,822,30,818,28,812,21,816,11,829,5,851,3,874,5,888,15"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a745838e6633262f5bbd450fa999cb09f" title=" " alt="" coords="581,21,733,64"/>
-<area shape="poly" title=" " alt="" coords="763,43,733,45,733,40,768,43"/>
-<area shape="rect" href="../../d4/d00/a01465.html#ab05015697272bc69fd519e688a741dbe" title=" " alt="" coords="389,21,533,64"/>
-<area shape="poly" title=" " alt="" coords="563,43,534,45,534,40,569,43"/>
-<area shape="rect" href="../../d4/d00/a01465.html#a784fe83664832bce336d609f44b787b7" title=" " alt="" coords="197,21,341,64"/>
-<area shape="poly" title=" " alt="" coords="371,43,341,45,341,40,376,43"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a22ab6ced5c7a916d943ea6439aae2a4e" title=" " alt="" coords="5,21,149,64"/>
-<area shape="poly" title=" " alt="" coords="179,43,149,45,149,40,184,42"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a074321ae27848077cdfcd04bdae72528" name="a074321ae27848077cdfcd04bdae72528"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a074321ae27848077cdfcd04bdae72528">&#9670;&#160;</a></span>trim_hotkey_text()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::string trim_hotkey_text </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>value</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00473">473</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d9/d00/a00398_source.html#l00473">trim_hotkey_text()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l00567">parse_sdl_hotkey()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l00473">trim_hotkey_text()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_a074321ae27848077cdfcd04bdae72528_cgraph.png" border="0" usemap="#ad9/d00/a00398_a074321ae27848077cdfcd04bdae72528_cgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_a074321ae27848077cdfcd04bdae72528_cgraph" id="ad9/d00/a00398_a074321ae27848077cdfcd04bdae72528_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,124,56"/>
-<area shape="poly" title=" " alt="" coords="43,29,40,20,42,11,51,5,65,3,79,5,88,14,83,14,77,10,64,8,53,10,47,14,45,20,48,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00398_a074321ae27848077cdfcd04bdae72528_icgraph.png" border="0" usemap="#ad9/d00/a00398_a074321ae27848077cdfcd04bdae72528_icgraph" loading="lazy" alt=""/></div>
-<map name="ad9/d00/a00398_a074321ae27848077cdfcd04bdae72528_icgraph" id="ad9/d00/a00398_a074321ae27848077cdfcd04bdae72528_icgraph">
-<area shape="rect" title=" " alt="" coords="983,29,1101,56"/>
-<area shape="poly" title=" " alt="" coords="1069,13,1061,10,1042,8,1025,10,1015,15,1013,20,1018,30,1013,28,1008,21,1011,11,1023,5,1042,3,1063,5,1075,15"/>
-<area shape="rect" href="../../d9/d00/a00398.html#ac743cac6cf224ac9be3819c34fbb913e" title=" " alt="" coords="812,29,935,56"/>
-<area shape="poly" title=" " alt="" coords="965,43,935,45,935,40,970,43"/>
-<area shape="poly" title=" " alt="" coords="901,13,892,10,873,8,856,10,847,15,844,20,849,30,844,28,839,21,843,11,854,5,873,3,894,5,906,15"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a20ecd7db32a1da31d04456f7ea169ba3" title=" " alt="" coords="634,21,764,64"/>
-<area shape="poly" title=" " alt="" coords="794,43,764,45,764,40,799,43"/>
-<area shape="rect" href="../../d9/d00/a01469.html#ade7154c9f9301e629454606247ae168d" title=" " alt="" coords="436,21,586,64"/>
-<area shape="poly" title=" " alt="" coords="616,43,587,45,586,40,621,43"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a34b4ec9e9589d3c2918ad466596e2db8" title=" " alt="" coords="214,29,388,56"/>
-<area shape="poly" title=" " alt="" coords="418,43,388,45,388,40,423,43"/>
-<area shape="rect" href="../../d9/d00/a01469.html#a86f8155148512b94045daf1f961c127b" title=" " alt="" coords="5,29,166,56"/>
-<area shape="poly" title=" " alt="" coords="195,43,166,45,166,40,201,42"/>
-</map>
-</div>
-
-</div>
-</div>
-<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
-<a id="a846bd4d04834769f39b6ae4c1837c58b" name="a846bd4d04834769f39b6ae4c1837c58b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a846bd4d04834769f39b6ae4c1837c58b">&#9670;&#160;</a></span>keytable</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../d4/d00/a01485.html">keyTableEntry</a> keytable[]</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l02155">2155</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l02167">convertStringToSDLKey()</a>.</p>
-
-</div>
-</div>
-<a id="aeaabe654a7e627269777a2be280d4d9c" name="aeaabe654a7e627269777a2be280d4d9c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aeaabe654a7e627269777a2be280d4d9c">&#9670;&#160;</a></span>new_mousebuttons</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../df/d00/a00263.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> new_mousebuttons = 0</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00420">420</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a302a01e6f308f3e0bcde67d66da18f67" name="a302a01e6f308f3e0bcde67d66da18f67"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a302a01e6f308f3e0bcde67d66da18f67">&#9670;&#160;</a></span>new_mousex</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int new_mousex = 0</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00421">421</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-</div>
-</div>
-<a id="af632719140280ffe2a258df0aaa306ac" name="af632719140280ffe2a258df0aaa306ac"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af632719140280ffe2a258df0aaa306ac">&#9670;&#160;</a></span>new_mousey</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int new_mousey = 0</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00422">422</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-</div>
-</div>
-<a id="abf027e7d519dbac3f20277a7b13d8ab7" name="abf027e7d519dbac3f20277a7b13d8ab7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abf027e7d519dbac3f20277a7b13d8ab7">&#9670;&#160;</a></span>old_mousebuttons</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../df/d00/a00263.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> old_mousebuttons = 0</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00420">420</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-</div>
-</div>
-<a id="abb21fea4395715a33b891657605cec6a" name="abb21fea4395715a33b891657605cec6a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abb21fea4395715a33b891657605cec6a">&#9670;&#160;</a></span>old_mousex</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int old_mousex = 0</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00421">421</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-</div>
-</div>
-<a id="aaec2206fad91fa8e0805f779cfc1a83b" name="aaec2206fad91fa8e0805f779cfc1a83b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaec2206fad91fa8e0805f779cfc1a83b">&#9670;&#160;</a></span>old_mousey</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int old_mousey = 0</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00422">422</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a5a412317805ff50a30b8a6e55c1aaa83" name="a5a412317805ff50a30b8a6e55c1aaa83"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5a412317805ff50a30b8a6e55c1aaa83">&#9670;&#160;</a></span>prev_cursor_x</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">unsigned prev_cursor_x = 0</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00297">297</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a26f0e5ec118a52bbaf5a9a5f4fac5027" name="a26f0e5ec118a52bbaf5a9a5f4fac5027"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a26f0e5ec118a52bbaf5a9a5f4fac5027">&#9670;&#160;</a></span>prev_cursor_y</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">unsigned prev_cursor_y = 0</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00298">298</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-</div>
-</div>
-<a id="ac3c7679dce7495bc7f78a86d17dbdd8a" name="ac3c7679dce7495bc7f78a86d17dbdd8a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac3c7679dce7495bc7f78a86d17dbdd8a">&#9670;&#160;</a></span>runtime_scale_max</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const int runtime_scale_max = 8</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00419">419</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01961">bx_sdl_gui_c::adjust_window_scale()</a>.</p>
-
-</div>
-</div>
-<a id="a5312932d4a1f719984a75d0a8765f648" name="a5312932d4a1f719984a75d0a8765f648"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5312932d4a1f719984a75d0a8765f648">&#9670;&#160;</a></span>runtime_scale_min</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const int runtime_scale_min = 1</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00418">418</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01961">bx_sdl_gui_c::adjust_window_scale()</a>.</p>
-
-</div>
-</div>
-<a id="a333897cad8c2189fa90db7debea4f03d" name="a333897cad8c2189fa90db7debea4f03d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a333897cad8c2189fa90db7debea4f03d">&#9670;&#160;</a></span>sdl_app</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::unique_ptr&lt;<a class="el" href="../../de/d00/a01473.html">sdl_application</a>&gt; sdl_app</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00452">452</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l00761">libsdl_LTX_plugin_init()</a>.</p>
-
-</div>
-</div>
-<a id="a758d54abbde0acb182b7836f5c654ba6" name="a758d54abbde0acb182b7836f5c654ba6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a758d54abbde0acb182b7836f5c654ba6">&#9670;&#160;</a></span>sdl_deferred_event</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">SDL_Event sdl_deferred_event = {}</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00311">311</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01299">sdl_event_dispatcher::defer_event()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l01248">sdl_event_dispatcher::poll()</a>.</p>
-
-</div>
-</div>
-<a id="adba7e876de80652dd0dbe605c610032b" name="adba7e876de80652dd0dbe605c610032b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adba7e876de80652dd0dbe605c610032b">&#9670;&#160;</a></span>sdl_guest_input_paused</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool sdl_guest_input_paused = false</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00307">307</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01330">sdl_event_dispatcher::dispatch()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01995">sdl_event_dispatcher::mouse_enabled_changed()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01154">sdl_event_dispatcher::notify_guest_capture()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00377">bx_sdl_gui_c::pause_guest_input()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01248">sdl_event_dispatcher::poll()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00382">bx_sdl_gui_c::resume_guest_input()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01142">sdl_event_dispatcher::send_guest_key()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01148">sdl_event_dispatcher::send_guest_mouse()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l02027">sdl_event_dispatcher::set_mouse_capture()</a>.</p>
-
-</div>
-</div>
-<a id="a60221a571430f92004dafc337f905c9f" name="a60221a571430f92004dafc337f905c9f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a60221a571430f92004dafc337f905c9f">&#9670;&#160;</a></span>sdl_guest_keyboard</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../db/d00/a01501.html">CKeyboard</a>* sdl_guest_keyboard = NULL</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00306">306</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l00387">bx_sdl_gui_c::detach_guest_input()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00367">bx_sdl_gui_c::main_thread_init()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01154">sdl_event_dispatcher::notify_guest_capture()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01142">sdl_event_dispatcher::send_guest_key()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l01148">sdl_event_dispatcher::send_guest_mouse()</a>.</p>
-
-</div>
-</div>
-<a id="a61be7b8f092a19a27b17d91daa8634f8" name="a61be7b8f092a19a27b17d91daa8634f8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a61be7b8f092a19a27b17d91daa8634f8">&#9670;&#160;</a></span>sdl_has_deferred_event</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool sdl_has_deferred_event = false</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00312">312</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01299">sdl_event_dispatcher::defer_event()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l01248">sdl_event_dispatcher::poll()</a>.</p>
-
-</div>
-</div>
-<a id="a3ba5f0a89a25bd5e4b1db0fc3ed58ce6" name="a3ba5f0a89a25bd5e4b1db0fc3ed58ce6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3ba5f0a89a25bd5e4b1db0fc3ed58ce6">&#9670;&#160;</a></span>sdl_keyboard_input</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../d1/d00/a01481.html">sdl_keyboard_input_state</a> sdl_keyboard_input</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00448">448</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01177">sdl_event_dispatcher::clear_hotkey_release_state()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01330">sdl_event_dispatcher::dispatch()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01538">bx_sdl_gui_c::handle_keyboard_event_impl()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01183">sdl_event_dispatcher::reconcile_hotkey_release_state()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01498">sdl_event_dispatcher::reconcile_input_releases()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01160">sdl_event_dispatcher::release_guest_key()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l01196">sdl_event_dispatcher::suppress_hotkey_releases()</a>.</p>
-
-</div>
-</div>
-<a id="aecd7e09d6bc8abbade8e36ecbfce5271" name="aecd7e09d6bc8abbade8e36ecbfce5271"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aecd7e09d6bc8abbade8e36ecbfce5271">&#9670;&#160;</a></span>sdl_mouse_input</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../d8/d00/a01477.html">sdl_mouse_input_state</a> sdl_mouse_input</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00436">436</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01330">sdl_event_dispatcher::dispatch()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l02118">bx_sdl_gui_c::exit_impl()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01455">bx_sdl_gui_c::handle_focus_event_impl()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01538">bx_sdl_gui_c::handle_keyboard_event_impl()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01687">bx_sdl_gui_c::handle_mouse_event_impl()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01995">sdl_event_dispatcher::mouse_enabled_changed()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l02046">sdl_event_dispatcher::mouse_enabled_changed_impl()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01466">sdl_event_dispatcher::reconcile_input_focus()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01498">sdl_event_dispatcher::reconcile_input_releases()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01481">sdl_event_dispatcher::release_input_session()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00463">bx_sdl_gui_c::reset_absolute_mouse_motion()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l02027">sdl_event_dispatcher::set_mouse_capture()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l00812">bx_sdl_gui_c::unregister_window()</a>.</p>
-
-</div>
-</div>
-<a id="ae00b9cff446b580da9122e5cf5bc4f7b" name="ae00b9cff446b580da9122e5cf5bc4f7b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae00b9cff446b580da9122e5cf5bc4f7b">&#9670;&#160;</a></span>sdl_poll_in_progress</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool sdl_poll_in_progress = false</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00308">308</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01248">sdl_event_dispatcher::poll()</a>.</p>
-
-</div>
-</div>
-<a id="ac34c5c13782198dfdeabe5c1138d44f2" name="ac34c5c13782198dfdeabe5c1138d44f2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac34c5c13782198dfdeabe5c1138d44f2">&#9670;&#160;</a></span>sdl_pump_idle_ms</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const int sdl_pump_idle_ms = 10</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>How long main_thread_pump() blocks waiting for work before looping. Only caps how quickly it notices main_thread_stop(); callbacks wake it at once. </p>
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00316">316</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l00393">bx_sdl_gui_c::main_thread_pump()</a>.</p>
-
-</div>
-</div>
-<a id="a84ce50a9dc461b975f878405abb8c8f9" name="a84ce50a9dc461b975f878405abb8c8f9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a84ce50a9dc461b975f878405abb8c8f9">&#9670;&#160;</a></span>sdl_window_owners</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::map&lt;SDL_WindowID, <a class="el" href="../../d9/d00/a01469.html">bx_sdl_gui_c</a>*&gt; sdl_window_owners</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00295">295</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l00829">bx_sdl_gui_c::find_window_owner()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00791">bx_sdl_gui_c::register_window()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01481">sdl_event_dispatcher::release_input_session()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l00812">bx_sdl_gui_c::unregister_window()</a>.</p>
-
-</div>
-</div>
-<a id="a57a9dba5f823841bfa6409fcb73fddb3" name="a57a9dba5f823841bfa6409fcb73fddb3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a57a9dba5f823841bfa6409fcb73fddb3">&#9670;&#160;</a></span>sdl_window_owners_mutex</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::mutex sdl_window_owners_mutex</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d00/a00398_source.html#l00294">294</a> of file <a class="el" href="../../d9/d00/a00398_source.html">sdl.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l00829">bx_sdl_gui_c::find_window_owner()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00791">bx_sdl_gui_c::register_window()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01481">sdl_event_dispatcher::release_input_session()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l00812">bx_sdl_gui_c::unregister_window()</a>.</p>
-
-</div>
-</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
@@ -1910,7 +304,7 @@ Here is the caller graph for this function:</div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_11bc0974ce736ce9a6fadebbeb7a8314.html">gui</a></li><li class="navelem"><a href="../../d9/d00/a00398.html">sdl.cpp</a></li>
+    <li class="navelem"><a href="../../dir_e79632891301b850df87e9c0030293fa.html">graphics</a></li><li class="navelem"><a href="../../d9/d00/a00398.html">PowerStorm3xx.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

@@ -1,6 +1,6 @@
 var a01273 =
 [
-    [ "argb", "de/d00/a01273.html#a9eb065dd57ffcc83656f281bf812fdd4", null ],
-    [ "height", "de/d00/a01273.html#aca390837830c05ab180b15a9c4aac944", null ],
-    [ "width", "de/d00/a01273.html#ad1c19ee9e95f8d86d64c0ab4574a2b20", null ]
+    [ "from", "de/d00/a01273.html#a415a860ae2f91f991234e31443196b36", null ],
+    [ "pNext", "de/d00/a01273.html#a496e4f7e7ef34f9959ca539e29e735b5", null ],
+    [ "to", "de/d00/a01273.html#a12e2bc77a118eea0ddd4fcdc98c0bf3f", null ]
 ];

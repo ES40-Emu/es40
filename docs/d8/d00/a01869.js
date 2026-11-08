@@ -1,15 +1,16 @@
 var a01869 =
 [
-    [ "alt_status", "d8/d00/a01869.html#a942f4d27c9749db0cfe70837b0d9cffb", null ],
-    [ "bit_2", "d8/d00/a01869.html#a8e4e2f6b766bf7a53dc92404eed3d3b7", null ],
-    [ "busy", "d8/d00/a01869.html#a5c22123ab3badf8578a955f85059cdd2", null ],
-    [ "debug_last_status", "d8/d00/a01869.html#ac3bfefcf09ded7ca085e5189f6470488", null ],
-    [ "debug_status_update", "d8/d00/a01869.html#a84127f2e8afd6a7c59e859d9771571f5", null ],
-    [ "drive_ready", "d8/d00/a01869.html#aa8e3246c29065912960bbe78831aa53a", null ],
-    [ "drq", "d8/d00/a01869.html#a03627724910877807ce6b13ae481a967", null ],
-    [ "err", "d8/d00/a01869.html#afb08b41a81fa52637e324641746fa1ae", null ],
-    [ "fault", "d8/d00/a01869.html#a7a9c1784cab7dc781e7cb9312886bad6", null ],
-    [ "index_pulse", "d8/d00/a01869.html#a544f5369f4c3178c6f5110759abb4ff0", null ],
-    [ "index_pulse_count", "d8/d00/a01869.html#a40da9162891b7054cc5f5b62ee0eaa52", null ],
-    [ "seek_complete", "d8/d00/a01869.html#a0d96889ef98439355df5551aba713a0d", null ]
+    [ "CNetworkPcap", "d8/d00/a01869.html#a9e927a32f0fc996e71cc628303fe80f2", null ],
+    [ "~CNetworkPcap", "d8/d00/a01869.html#a09406d5d7d23b00d3d69b3841e91b0a0", null ],
+    [ "close", "d8/d00/a01869.html#a6311938576899a89713130b3af73d416", null ],
+    [ "init", "d8/d00/a01869.html#a0fd2da71d97b01f483d41fd7e37fb91d", null ],
+    [ "receive", "d8/d00/a01869.html#a8b8dd82acc3be5e2706322b49ee02970", null ],
+    [ "send", "d8/d00/a01869.html#ae0c18c0919eb9cdcaf35ffd5be341072", null ],
+    [ "set_filter", "d8/d00/a01869.html#a56b7553321c773ecd281d96c92e05b33", null ],
+    [ "fcode", "d8/d00/a01869.html#aa00a8bb1bbf7981945c285a57462b460", null ],
+    [ "filter_active", "d8/d00/a01869.html#af48899f3e494822203a47a04f6144e41", null ],
+    [ "fp", "d8/d00/a01869.html#a20bba90dcb46834abfa37398fd4c1b36", null ],
+    [ "linktype", "d8/d00/a01869.html#a7c7e874ddbb7f8ea2bb6999d32ff5283", null ],
+    [ "nonether_filter_warned", "d8/d00/a01869.html#a366f8baba8f3a1d0fafe3176aa2b6651", null ],
+    [ "opened", "d8/d00/a01869.html#a07cf9a93e2d21f905760056acd074728", null ]
 ];

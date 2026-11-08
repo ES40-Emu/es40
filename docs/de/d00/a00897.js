@@ -1,11 +1,7 @@
 var a00897 =
 [
-    [ "addAnswer", "de/d00/a00897.html#aa4773c34891246ce027ce92d7e13b1d7", null ],
-    [ "ask", "de/d00/a00897.html#a98a7fffbb7b45cbb4ff3b6200a881575", null ],
-    [ "countAnswers", "de/d00/a00897.html#a58a2015f7dce182742c284ba5a8bad0f", null ],
-    [ "dropChoice", "de/d00/a00897.html#a0229dcf7f41643b75a1e5598b5dfe260", null ],
-    [ "explain", "de/d00/a00897.html#a22fccc34db142fd474274e39fc183a87", null ],
-    [ "getFirstChoice", "de/d00/a00897.html#aa0dafb39fade0ff64364cbcadfe542d3", null ],
-    [ "haveChosen", "de/d00/a00897.html#ad10c9a14e4b91a1da05a4e90b665cda3", null ],
-    [ "mAnswerSet", "de/d00/a00897.html#abda73d7a3501339bda759ab2246a48c1", null ]
+    [ "CWin32Exception", "de/d00/a00897.html#a129f60e31a71797fbcba60767b5853e5", null ],
+    [ "CWin32Exception", "de/d00/a00897.html#abd70246c44f51d9a1854cdaaa454b514", null ],
+    [ "CWin32Exception", "de/d00/a00897.html#a928b733fe3798b4f9bc33ef7cf38a8cc", null ],
+    [ "name", "de/d00/a00897.html#aa414fba58478419d1602f01c29921ae9", null ]
 ];

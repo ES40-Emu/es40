@@ -1,4 +1,5 @@
 var a01917 =
 [
-    [ "visible", "d2/d00/a01917.html#af36177257af72eee4bd9896ce09acee7", null ]
+    [ "data", "d2/d00/a01917.html#a99e638c63f70aaeb198cfb351a6821d7", null ],
+    [ "written", "d2/d00/a01917.html#afac29a40c14f7d22e276259a3ac4065c", null ]
 ];

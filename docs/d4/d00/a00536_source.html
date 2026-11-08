@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: storage/DiskController.h Source File</title>
+<title>ES40: io/SerialListenAddress.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,68 +109,136 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d4/d00/a00536_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">DiskController.h</div></div>
+  <div class="headertitle"><div class="title">SerialListenAddress.h</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../d4/d00/a00536.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 Emulator.</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2007-2008 by the ES40 Emulator Project</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * This program is free software; you can redistribute it and/or</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * modify it under the terms of the GNU General Public License</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * as published by the Free Software Foundation; either version 2</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * of the License, or (at your option) any later version.</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * This program is distributed in the hope that it will be useful,</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * GNU General Public License for more details.</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * You should have received a copy of the GNU General Public License</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * along with this program; if not, write to the Free Software</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * Although this is not required, the author would appreciate being notified of,</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * and receiving any modifications you may make to the source code that might serve</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * the general public.</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#if !defined(__DISKCONTROLLER_H__)</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#define __DISKCONTROLLER_H__</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span></div>
-<div class="foldopen" id="foldopen00054" data-start="{" data-end="};">
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="../../d1/d00/a01653.html">   54</a></span><span class="keyword">class </span><a class="code hl_function" href="../../d1/d00/a01653.html#a1398c117af66c357023503d50c5d11bb">CDiskController</a></div>
+<a href="../../d4/d00/a00536.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator.</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (c) 2026 the ES40 Emulator Project contributors</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * All rights reserved.</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * SPDX-License-Identifier: BSD-1-Clause</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * Redistribution and use in source and binary forms, with or without</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * modification, are permitted provided that the following conditions are met:</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * 1. Redistributions of source code must retain the above copyright notice,</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> *    this list of conditions and the following disclaimer.</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS AND CONTRIBUTORS BE</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> * POSSIBILITY OF SUCH DAMAGE.</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#ifndef ES40_SERIAL_LISTEN_ADDRESS_H</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#define ES40_SERIAL_LISTEN_ADDRESS_H</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#include &lt;algorithm&gt;</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#if defined(_WIN32)</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#include &lt;winsock2.h&gt;</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#include &lt;ws2tcpip.h&gt;</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#elif defined(__VMS)</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#include &lt;socket.h&gt;</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#include &lt;in.h&gt;</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#include &lt;in6.h&gt;</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#include &lt;inet.h&gt;</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">#include &lt;netdb.h&gt;</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#include &lt;arpa/inet.h&gt;</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#include &lt;netdb.h&gt;</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
+<div class="foldopen" id="foldopen00053" data-start="{" data-end="}">
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="../../d4/d00/a00536.html#a0a12845456a3657a5a5256bb48ef95aa">   53</a></span><span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/d00/a00536.html#a0a12845456a3657a5a5256bb48ef95aa">serial_parse_listen_addresses</a>(<span class="keyword">const</span> std::string &amp;value,</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    std::vector&lt;std::string&gt; &amp;addresses, std::string &amp;error)</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>{</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>  <a class="code hl_function" href="../../d1/d00/a01653.html#a1398c117af66c357023503d50c5d11bb">CDiskController</a>(<span class="keywordtype">int</span> num_busses, <span class="keywordtype">int</span> num_devs);</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>  <a class="code hl_function" href="../../d1/d00/a01653.html#a1398c117af66c357023503d50c5d11bb">~CDiskController</a>(<span class="keywordtype">void</span>);</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  <span class="keyword">virtual</span> <span class="keywordtype">void</span>  <a class="code hl_function" href="../../d1/d00/a01653.html#a7f9321bb332e6815a3923c9d4a6188cd">register_disk</a>(<span class="keyword">class</span> <a class="code hl_class" href="../../d3/d00/a01613.html">CDisk</a>* dsk, <span class="keywordtype">int</span> bus, <span class="keywordtype">int</span> dev);</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  <span class="keyword">class </span><a class="code hl_class" href="../../d3/d00/a01613.html">CDisk</a>* <a class="code hl_function" href="../../d1/d00/a01653.html#a555f2a1c8ddcbd2474fd5d9ad9c61653">get_disk</a>(<span class="keywordtype">int</span> bus, <span class="keywordtype">int</span> dev);</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="../../d1/d00/a01653.html#a306c9cb261aac7505a1a64fd816423c5">   63</a></span>  <span class="keywordtype">int</span>             <a class="code hl_variable" href="../../d1/d00/a01653.html#a306c9cb261aac7505a1a64fd816423c5">num_bus</a>;</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="../../d1/d00/a01653.html#a65bc3406df2e4f9fc125f50fce75f766">   64</a></span>  <span class="keywordtype">int</span>             <a class="code hl_variable" href="../../d1/d00/a01653.html#a65bc3406df2e4f9fc125f50fce75f766">num_dev</a>;</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="../../d1/d00/a01653.html#ae74709d865eeaeaf386fd8ea3c373072">   66</a></span>  <span class="keyword">class </span><a class="code hl_class" href="../../d3/d00/a01613.html">CDisk</a>** <a class="code hl_variable" href="../../d1/d00/a01653.html#ae74709d865eeaeaf386fd8ea3c373072">disks</a>;</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>};</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    addresses.clear();</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    error.clear();</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordflow">if</span> (value.find_first_not_of(<span class="stringliteral">&quot; \t\r\n&quot;</span>) == std::string::npos) {</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        addresses.push_back(<span class="stringliteral">&quot;0.0.0.0&quot;</span>);</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        addresses.push_back(<span class="stringliteral">&quot;::&quot;</span>);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    }</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="keywordtype">size_t</span> start = 0;</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keywordflow">for</span> (;;) {</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        <span class="keyword">const</span> <span class="keywordtype">size_t</span> end = value.find(<span class="charliteral">&#39;,&#39;</span>, start);</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        std::string address = value.substr(start,</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>            end == std::string::npos ? std::string::npos : end - start);</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        <span class="keyword">const</span> <span class="keywordtype">size_t</span> first = address.find_first_not_of(<span class="stringliteral">&quot; \t\r\n&quot;</span>);</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <span class="keywordflow">if</span> (first == std::string::npos) {</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>            error = <span class="stringliteral">&quot;Empty address in listen_address&quot;</span>;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>            addresses.clear();</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        }</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        address = address.substr(first,</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>            address.find_last_not_of(<span class="stringliteral">&quot; \t\r\n&quot;</span>) - first + 1);</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        addrinfo hints = {};</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        hints.ai_family = AF_UNSPEC;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        hints.ai_socktype = SOCK_STREAM;</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        hints.ai_flags = AI_NUMERICHOST;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        addrinfo *resolved = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        <span class="keywordtype">char</span> canonical[NI_MAXHOST];</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="preprocessor">#if defined(_WIN32)</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>        WSADATA wsa;</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> startup_error = WSAStartup(MAKEWORD(2, 2), &amp;wsa);</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        <span class="keywordflow">if</span> (startup_error != 0) {</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>            error = <span class="stringliteral">&quot;Winsock startup failed (error &quot;</span> + std::to_string(startup_error) + <span class="stringliteral">&quot;)&quot;</span>;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>            addresses.clear();</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        }</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        <span class="keywordtype">int</span> result = address.find(<span class="stringliteral">&quot;]:&quot;</span>) != std::string::npos</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>            ? EAI_NONAME : getaddrinfo(address.c_str(), <span class="keyword">nullptr</span>, &amp;hints, &amp;resolved);</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        <span class="keywordflow">if</span> (result == 0) {</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>            <span class="keywordflow">if</span> (resolved-&gt;ai_family == AF_INET &amp;&amp;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>                ((sockaddr_in *)resolved-&gt;ai_addr)-&gt;sin_addr.s_addr == INADDR_BROADCAST)</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>                result = EAI_NONAME;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>            <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>                result = getnameinfo(resolved-&gt;ai_addr, (socklen_t)resolved-&gt;ai_addrlen,</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>                    canonical, <span class="keyword">sizeof</span>(canonical), <span class="keyword">nullptr</span>, 0, NI_NUMERICHOST);</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>        }</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        <span class="keywordflow">if</span> (resolved)</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>            freeaddrinfo(resolved);</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="preprocessor">#if defined(_WIN32)</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>        WSACleanup();</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>        <span class="keywordflow">if</span> (result != 0) {</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>            error = <span class="stringliteral">&quot;Invalid IPv4/IPv6 address: \&quot;&quot;</span> + address + <span class="stringliteral">&quot;\&quot;&quot;</span>;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>            addresses.clear();</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>        }</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>        <span class="keyword">const</span> std::string canonical_address = canonical;</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>        <span class="keywordflow">if</span> (std::find(addresses.begin(), addresses.end(), canonical_address) ==</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>            addresses.end())</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>            addresses.push_back(canonical_address);</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>        <span class="keywordflow">if</span> (end == std::string::npos)</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>        start = end + 1;</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    }</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>}</div>
 </div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="preprocessor">#endif </span></div>
-<div class="ttc" id="aa01613_html"><div class="ttname"><a href="../../d3/d00/a01613.html">CDisk</a></div><div class="ttdoc">Abstract base class for disks (connects to a CDiskController).</div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00530_source.html#l00093">Disk.h:94</a></div></div>
-<div class="ttc" id="aa01653_html_a1398c117af66c357023503d50c5d11bb"><div class="ttname"><a href="../../d1/d00/a01653.html#a1398c117af66c357023503d50c5d11bb">CDiskController::CDiskController</a></div><div class="ttdeci">CDiskController(int num_busses, int num_devs)</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00533_source.html#l00080">DiskController.cpp:80</a></div></div>
-<div class="ttc" id="aa01653_html_a306c9cb261aac7505a1a64fd816423c5"><div class="ttname"><a href="../../d1/d00/a01653.html#a306c9cb261aac7505a1a64fd816423c5">CDiskController::num_bus</a></div><div class="ttdeci">int num_bus</div><div class="ttdef"><b>Definition</b> <a href="#l00063">DiskController.h:63</a></div></div>
-<div class="ttc" id="aa01653_html_a555f2a1c8ddcbd2474fd5d9ad9c61653"><div class="ttname"><a href="../../d1/d00/a01653.html#a555f2a1c8ddcbd2474fd5d9ad9c61653">CDiskController::get_disk</a></div><div class="ttdeci">class CDisk * get_disk(int bus, int dev)</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00533_source.html#l00103">DiskController.cpp:103</a></div></div>
-<div class="ttc" id="aa01653_html_a65bc3406df2e4f9fc125f50fce75f766"><div class="ttname"><a href="../../d1/d00/a01653.html#a65bc3406df2e4f9fc125f50fce75f766">CDiskController::num_dev</a></div><div class="ttdeci">int num_dev</div><div class="ttdef"><b>Definition</b> <a href="#l00064">DiskController.h:64</a></div></div>
-<div class="ttc" id="aa01653_html_a7f9321bb332e6815a3923c9d4a6188cd"><div class="ttname"><a href="../../d1/d00/a01653.html#a7f9321bb332e6815a3923c9d4a6188cd">CDiskController::register_disk</a></div><div class="ttdeci">virtual void register_disk(class CDisk *dsk, int bus, int dev)</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00533_source.html#l00093">DiskController.cpp:93</a></div></div>
-<div class="ttc" id="aa01653_html_ae74709d865eeaeaf386fd8ea3c373072"><div class="ttname"><a href="../../d1/d00/a01653.html#ae74709d865eeaeaf386fd8ea3c373072">CDiskController::disks</a></div><div class="ttdeci">class CDisk ** disks</div><div class="ttdef"><b>Definition</b> <a href="#l00066">DiskController.h:66</a></div></div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aa00536_html_a0a12845456a3657a5a5256bb48ef95aa"><div class="ttname"><a href="../../d4/d00/a00536.html#a0a12845456a3657a5a5256bb48ef95aa">serial_parse_listen_addresses</a></div><div class="ttdeci">static bool serial_parse_listen_addresses(const std::string &amp;value, std::vector&lt; std::string &gt; &amp;addresses, std::string &amp;error)</div><div class="ttdef"><b>Definition</b> <a href="#l00053">SerialListenAddress.h:53</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_70f20ecf11358dff00a0daf546d3147e.html">storage</a></li><li class="navelem"><a href="../../d4/d00/a00536.html">DiskController.h</a></li>
+    <li class="navelem"><a href="../../dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a href="../../d4/d00/a00536.html">SerialListenAddress.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

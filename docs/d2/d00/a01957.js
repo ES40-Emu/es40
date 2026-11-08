@@ -1,0 +1,28 @@
+var a01957 =
+[
+    [ "CDiskFileMediaMailbox", "d2/d00/a01957.html#a6e1230647103c0b1eb400ba77488599b", null ],
+    [ "deactivate", "d2/d00/a01957.html#a9a0d8ebbc38fe8042c854e483676cbce", null ],
+    [ "displayed_read_only", "d2/d00/a01957.html#add2571c89b72e9fd6500afc764bfa037", null ],
+    [ "has_pending_actions", "d2/d00/a01957.html#a560236e31c6a469e015e92db04612194", null ],
+    [ "is_floppy", "d2/d00/a01957.html#a881d4457a80011414a04c189b6248fe0", null ],
+    [ "label", "d2/d00/a01957.html#abd1a0d26de952253f73acc62e095c86c", null ],
+    [ "media_locked", "d2/d00/a01957.html#a2c50225211a323907f21951b6f56ea87", null ],
+    [ "mounted_image_name", "d2/d00/a01957.html#ad1f235da44fd90c1c371299dd5bac877", null ],
+    [ "reconcile_read_only", "d2/d00/a01957.html#a8d00dde9b006b6284f954cde5c911505", null ],
+    [ "request_blank_floppy", "d2/d00/a01957.html#ab0ddc9b34bb370fc4a19a03d543564c3", null ],
+    [ "request_eject", "d2/d00/a01957.html#a30c72c3cc723d841b77699d1261143ae", null ],
+    [ "request_image_change", "d2/d00/a01957.html#ab7f6a68f3dd733ee31c4b5f64eed4c80", null ],
+    [ "request_read_only_toggle", "d2/d00/a01957.html#ad2a8f071f28814c01d97943ffa4eeb68", null ],
+    [ "take_pending_actions", "d2/d00/a01957.html#adc45849c040dd0e565d9268a818ed2af", null ],
+    [ "update_media_lock", "d2/d00/a01957.html#a03bcba286682b7d3f6b93136c2d5055d", null ],
+    [ "update_mounted_image", "d2/d00/a01957.html#abdae8c02d28790ed3769bdaf8550858e", null ],
+    [ "actions_pending", "d2/d00/a01957.html#a90340093caf07e45547e4a63d60706ba", null ],
+    [ "active", "d2/d00/a01957.html#ac1cf7e6ed1f4251f7926efa6d5f56563", null ],
+    [ "device_label", "d2/d00/a01957.html#a1c7b947b7b46676daaa04a88076c8469", null ],
+    [ "floppy_device", "d2/d00/a01957.html#ab63efe3ee9d04308ba763f7a7530b634", null ],
+    [ "guest_locked", "d2/d00/a01957.html#a0b9a06fe0051e5836fb89ed223b4da40", null ],
+    [ "mounted_image", "d2/d00/a01957.html#a3d630a50c49ccaa5344950f6a52e9bdc", null ],
+    [ "mutex", "d2/d00/a01957.html#afff616fdfe20443075238c6c250bf85a", null ],
+    [ "pending_actions", "d2/d00/a01957.html#a996231920eae0541bc72fa657071c317", null ],
+    [ "read_only", "d2/d00/a01957.html#a2e00ee68a1014c18b596cd53106a3ad9", null ]
+];

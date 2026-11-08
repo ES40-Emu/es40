@@ -1,12 +1,5 @@
 var a00209 =
 [
-    [ "DO_HW_LD", "d3/d00/a00209.html#abd0b56ca5396b7b92637d902950fe025", null ],
-    [ "DO_HW_LDL", "d3/d00/a00209.html#a41aaf5a161f59edf22d88343c803fac3", null ],
-    [ "DO_HW_LDQ", "d3/d00/a00209.html#a1598675c4277fd941cd62f5abcb83352", null ],
-    [ "DO_HW_MFPR", "d3/d00/a00209.html#a63424986d034c055c7fa2ce2ec4ccee3", null ],
-    [ "DO_HW_MTPR", "d3/d00/a00209.html#a7cc9a5a8927d10c3b99ff386f4122de8", null ],
-    [ "DO_HW_RET", "d3/d00/a00209.html#ab419c1e6cc4997b8b1c5e70776dd95ea", null ],
-    [ "DO_HW_ST", "d3/d00/a00209.html#a9d731021c936ebb6c0713bec736cab68", null ],
-    [ "DO_HW_STL", "d3/d00/a00209.html#aef54823c2658de763890af0c6e5cb133", null ],
-    [ "DO_HW_STQ", "d3/d00/a00209.html#a0b0b30254f90a750e277f77a5ceea836", null ]
+    [ "AlphaInstructionSourceView", "d3/d00/a01189.html", "d3/d00/a01189" ],
+    [ "AlphaInstructionSource", "dd/d00/a01193.html", "dd/d00/a01193" ]
 ];

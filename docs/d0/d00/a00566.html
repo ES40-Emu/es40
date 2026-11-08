@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: storage/FloppyController.h File Reference</title>
+<title>ES40: network/lockstep.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,684 +109,453 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d0/d00/a00566.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">FloppyController.h File Reference</div></div>
+  <div class="headertitle"><div class="title">lockstep.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>Contains the definitions for the emulated Floppy Controller devices.  
+<p>Contains telnet declarations for the lock-step code.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &quot;<a class="el" href="../../d4/d00/a00536_source.html">DiskController.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d6/d00/a00293_source.html">emu/SystemComponent.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../db/d00/a00074_source.html">chipset/DMA.h</a>&quot;</code><br />
-<code>#include &lt;mutex&gt;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d4/d00/a00617_source.html">telnet.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
-Include dependency graph for FloppyController.h:</div>
+Include dependency graph for lockstep.h:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../d2/d00/a00567.png" border="0" usemap="#astorage_2_floppy_controller_8h" loading="lazy" alt=""/></div>
-<map name="astorage_2_floppy_controller_8h" id="astorage_2_floppy_controller_8h">
-<area shape="rect" title="Contains the definitions for the emulated Floppy Controller devices." alt="" coords="116,5,290,32"/>
-<area shape="rect" href="../../d4/d00/a00536.html" title="Contains definitions for the disk controller base class." alt="" coords="5,80,121,107"/>
-<area shape="poly" title=" " alt="" coords="177,35,103,74,99,70,180,30"/>
-<area shape="rect" href="../../d6/d00/a00293.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="116,155,290,181"/>
-<area shape="poly" title=" " alt="" coords="199,30,186,80,186,111,194,141,189,140,181,112,180,80,196,35"/>
-<area shape="rect" href="../../db/d00/a00074.html" title="Contains the definitions for the emulated DMA controller." alt="" coords="196,80,304,107"/>
-<area shape="poly" title=" " alt="" coords="211,30,236,67,231,67,211,35"/>
-<area shape="rect" title=" " alt="" coords="328,80,385,107"/>
-<area shape="poly" title=" " alt="" coords="230,30,318,72,313,74,230,35"/>
-<area shape="rect" href="../../da/d00/a00080.html" title="Contains the definitions for the configuration file interpreter." alt="" coords="68,229,210,256"/>
-<area shape="poly" title=" " alt="" coords="194,180,162,219,158,216,190,184"/>
-<area shape="rect" title=" " alt="" coords="235,229,302,256"/>
-<area shape="poly" title=" " alt="" coords="215,179,250,218,244,218,214,184"/>
-<area shape="rect" title=" " alt="" coords="112,304,166,331"/>
-<area shape="poly" title=" " alt="" coords="141,255,141,290,137,287,137,258"/>
-<area shape="poly" title=" " alt="" coords="243,105,221,143,217,140,240,109"/>
+<div class="center"><img src="../../d2/d00/a00567.png" border="0" usemap="#anetwork_2lockstep_8h" loading="lazy" alt=""/></div>
+<map name="anetwork_2lockstep_8h" id="anetwork_2lockstep_8h">
+<area shape="rect" title="Contains telnet declarations for the lock&#45;step code." alt="" coords="5,5,137,32"/>
+<area shape="rect" href="../../d4/d00/a00617.html" title="Contains TCP/IP declarations used by the serial port emulator and lock&#45;step code." alt="" coords="39,80,103,107"/>
+<area shape="poly" title=" " alt="" coords="73,31,74,65,68,64,69,35"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
 This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../dc/d00/a00568.png" border="0" usemap="#astorage_2_floppy_controller_8hdep" loading="lazy" alt=""/></div>
-<map name="astorage_2_floppy_controller_8hdep" id="astorage_2_floppy_controller_8hdep">
-<area shape="rect" title="Contains the definitions for the emulated Floppy Controller devices." alt="" coords="94,5,268,32"/>
-<area shape="rect" href="../../d1/d00/a00077.html" title="Contains the code for the configuration file interpreter." alt="" coords="5,80,162,107"/>
-<area shape="poly" title=" " alt="" coords="155,41,102,82,99,77,149,42"/>
-<area shape="rect" href="../../dc/d00/a00563.html" title="Contains the code for the emulated Floppy Controller devices." alt="" coords="185,80,374,107"/>
-<area shape="poly" title=" " alt="" coords="211,39,265,80,260,80,209,44"/>
+<div class="center"><img src="../../dc/d00/a00568.png" border="0" usemap="#anetwork_2lockstep_8hdep" loading="lazy" alt=""/></div>
+<map name="anetwork_2lockstep_8hdep" id="anetwork_2lockstep_8hdep">
+<area shape="rect" title="Contains telnet declarations for the lock&#45;step code." alt="" coords="380,5,512,32"/>
+<area shape="rect" href="../../d7/d00/a00002.html" title="Defines the entry point for the application." alt="" coords="5,80,108,107"/>
+<area shape="poly" title=" " alt="" coords="366,37,120,83,109,85,108,79,119,77,365,32"/>
+<area shape="rect" href="../../d7/d00/a00182.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="131,80,272,107"/>
+<area shape="poly" title=" " alt="" coords="392,37,245,82,244,77,386,37"/>
+<area shape="rect" href="../../dd/d00/a00320.html" title="Contains the code for the CPU tracing engine." alt="" coords="296,80,449,107"/>
+<area shape="poly" title=" " alt="" coords="425,42,386,82,384,77,420,44"/>
+<area shape="rect" href="../../da/d00/a00530.html" title="Contains the code for the emulated Serial Port devices." alt="" coords="472,80,566,107"/>
+<area shape="poly" title=" " alt="" coords="471,41,509,80,504,79,468,46"/>
+<area shape="rect" href="../../dc/d00/a00563.html" title="Contains the code for the lockstep debugging mechanism." alt="" coords="590,80,736,107"/>
+<area shape="poly" title=" " alt="" coords="498,35,628,79,622,79,498,40"/>
+<area shape="rect" href="../../db/d00/a00722.html" title="Contains the code for the emulated Typhoon Chipset devices." alt="" coords="759,80,898,107"/>
+<area shape="poly" title=" " alt="" coords="527,33,764,79,759,80,527,38"/>
 </map>
 </div>
 </div>
 <p><a href="../../d0/d00/a00566_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
-Data Structures</h2></td></tr>
-<tr class="memitem:CFloppyController" id="r_CFloppyController"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../da/d00/a01689.html">CFloppyController</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emulated floppy-drive controller.  <a href="../../da/d00/a01689.html#details">More...</a><br /></td></tr>
-<tr class="memitem:CFloppyController_3A_3ASFloppyGeometry" id="r_CFloppyController_3A_3ASFloppyGeometry"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../dd/d00/a01693.html">CFloppyController::SFloppyGeometry</a></td></tr>
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:aa72983489060743593655a52e3c05484" id="r_aa72983489060743593655a52e3c05484"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#aa72983489060743593655a52e3c05484">lockstep_init</a> ()</td></tr>
+<tr class="memitem:a4c1259e01d22f15dad0840da4fe2f348" id="r_a4c1259e01d22f15dad0840da4fe2f348"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a4c1259e01d22f15dad0840da4fe2f348">lockstep_sync_m2s</a> (const char *s)</td></tr>
+<tr class="memitem:aa292ee0b71c185d28fbc01d97f2dd7bf" id="r_aa292ee0b71c185d28fbc01d97f2dd7bf"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#aa292ee0b71c185d28fbc01d97f2dd7bf">lockstep_sync_s2m</a> (char *s)</td></tr>
+<tr class="memitem:a019bbfcd3f60ab4df0ad2578cd73f636" id="r_a019bbfcd3f60ab4df0ad2578cd73f636"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a019bbfcd3f60ab4df0ad2578cd73f636">lockstep_compare</a> (char *s)</td></tr>
+<tr class="memitem:a1b33b32a1570638720de82e5f7b3cfed" id="r_a1b33b32a1570638720de82e5f7b3cfed"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a1b33b32a1570638720de82e5f7b3cfed">lockstep_send</a> (const char *s)</td></tr>
+<tr class="memitem:a12d841b7884a5b067928f9365cf4f659" id="r_a12d841b7884a5b067928f9365cf4f659"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a12d841b7884a5b067928f9365cf4f659">lockstep_receive</a> (char *s, int sz)</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:af7ef06c5e64b89a467eec0e722ac86e3" id="r_af7ef06c5e64b89a467eec0e722ac86e3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af7ef06c5e64b89a467eec0e722ac86e3">FDC_REG_STATUS_A</a>&#160;&#160;&#160;0</td></tr>
-<tr class="memitem:a6b7c3f0efd37e85e8b2e62762b0de5ab" id="r_a6b7c3f0efd37e85e8b2e62762b0de5ab"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6b7c3f0efd37e85e8b2e62762b0de5ab">FDC_REG_STATUS_B</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:abd003357e31c5ea9b90c33e96fb1cdac" id="r_abd003357e31c5ea9b90c33e96fb1cdac"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#abd003357e31c5ea9b90c33e96fb1cdac">FDC_REG_DOR</a>&#160;&#160;&#160;2</td></tr>
-<tr class="memitem:ad401283ff7564dc0ac2e4541237b96b9" id="r_ad401283ff7564dc0ac2e4541237b96b9"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad401283ff7564dc0ac2e4541237b96b9">FDC_REG_TAPE</a>&#160;&#160;&#160;3</td></tr>
-<tr class="memitem:a0528572e35dd68ba098321fa132473d3" id="r_a0528572e35dd68ba098321fa132473d3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0528572e35dd68ba098321fa132473d3">FDC_REG_STATUS</a>&#160;&#160;&#160;4</td></tr>
-<tr class="memitem:a9e819084da55cacfe7ccd28122aedcc7" id="r_a9e819084da55cacfe7ccd28122aedcc7"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9e819084da55cacfe7ccd28122aedcc7">FDC_REG_COMMAND</a>&#160;&#160;&#160;5</td></tr>
-<tr class="memitem:a8ed8664b5720e860697a091e0bf66359" id="r_a8ed8664b5720e860697a091e0bf66359"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a8ed8664b5720e860697a091e0bf66359">FDC_REG_DIR</a>&#160;&#160;&#160;7</td></tr>
-<tr class="memitem:a880caef28323f4c73a991120084445d6" id="r_a880caef28323f4c73a991120084445d6"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a880caef28323f4c73a991120084445d6">SEL_DRIVE</a>&#160;&#160;&#160;state.drive[state.drive_select]</td></tr>
-<tr class="memitem:a5468b42b4dc0f9e193fa75d673fa2d6d" id="r_a5468b42b4dc0f9e193fa75d673fa2d6d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5468b42b4dc0f9e193fa75d673fa2d6d">SEL_FDISK</a>&#160;&#160;&#160;get_disk(0,state.drive_select)</td></tr>
-<tr class="memitem:a0fd118dbbd7cc25197318f5f7d2ff68c" id="r_a0fd118dbbd7cc25197318f5f7d2ff68c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0fd118dbbd7cc25197318f5f7d2ff68c">DRIVE</a>(i)</td></tr>
-<tr class="memitem:a7d29c7a6cb1d8a6fcf1408825c03fb6c" id="r_a7d29c7a6cb1d8a6fcf1408825c03fb6c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a7d29c7a6cb1d8a6fcf1408825c03fb6c">FDISK</a>(i)</td></tr>
-<tr class="memitem:a46e283a49fcf0179a8130d2157beb150" id="r_a46e283a49fcf0179a8130d2157beb150"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a46e283a49fcf0179a8130d2157beb150">ST0_DS</a>&#160;&#160;&#160;0x03</td></tr>
-<tr class="memitem:a868259f991ded1e98d7084dc2c731904" id="r_a868259f991ded1e98d7084dc2c731904"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a868259f991ded1e98d7084dc2c731904">ST0_HA</a>&#160;&#160;&#160;0x04</td></tr>
-<tr class="memitem:ac9456fed5ff3a2af4684657906c96892" id="r_ac9456fed5ff3a2af4684657906c96892"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac9456fed5ff3a2af4684657906c96892">ST0_NR</a>&#160;&#160;&#160;0x08</td></tr>
-<tr class="memitem:a24eb59d5a0bb9e6de01e4a6c0d5ce60a" id="r_a24eb59d5a0bb9e6de01e4a6c0d5ce60a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a24eb59d5a0bb9e6de01e4a6c0d5ce60a">ST0_ECE</a>&#160;&#160;&#160;0x10</td></tr>
-<tr class="memitem:a996ca20d0ada749b62de98e24d6bcd71" id="r_a996ca20d0ada749b62de98e24d6bcd71"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a996ca20d0ada749b62de98e24d6bcd71">ST0_SE</a>&#160;&#160;&#160;0x20</td></tr>
-<tr class="memitem:a194214997d33bf53bf68a69e4aca2f39" id="r_a194214997d33bf53bf68a69e4aca2f39"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a194214997d33bf53bf68a69e4aca2f39">ST0_INTR</a>&#160;&#160;&#160;0xC0</td></tr>
-<tr class="memitem:aff06e8be5696e84299f27b13e7b3c9c7" id="r_aff06e8be5696e84299f27b13e7b3c9c7"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aff06e8be5696e84299f27b13e7b3c9c7">ST1_MAM</a>&#160;&#160;&#160;0x01</td></tr>
-<tr class="memitem:a0e8594af940b796b56450c3a282d33f6" id="r_a0e8594af940b796b56450c3a282d33f6"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0e8594af940b796b56450c3a282d33f6">ST1_WP</a>&#160;&#160;&#160;0x02</td></tr>
-<tr class="memitem:a2f671aa8ff31a480b1786407e35adddd" id="r_a2f671aa8ff31a480b1786407e35adddd"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a2f671aa8ff31a480b1786407e35adddd">ST1_ND</a>&#160;&#160;&#160;0x04</td></tr>
-<tr class="memitem:a187865caec7a4fc36b348a47e3ea6404" id="r_a187865caec7a4fc36b348a47e3ea6404"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a187865caec7a4fc36b348a47e3ea6404">ST1_OR</a>&#160;&#160;&#160;0x10</td></tr>
-<tr class="memitem:a76e8a063c61714f58e092e55a0d39652" id="r_a76e8a063c61714f58e092e55a0d39652"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a76e8a063c61714f58e092e55a0d39652">ST1_CRC</a>&#160;&#160;&#160;0x20</td></tr>
-<tr class="memitem:a268958c14befd2ea4a0430f81320739e" id="r_a268958c14befd2ea4a0430f81320739e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a268958c14befd2ea4a0430f81320739e">ST1_EOC</a>&#160;&#160;&#160;0x80</td></tr>
-<tr class="memitem:a1919306138dc1d8202182f50c8f108fa" id="r_a1919306138dc1d8202182f50c8f108fa"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a1919306138dc1d8202182f50c8f108fa">ST2_MAM</a>&#160;&#160;&#160;0x01</td></tr>
-<tr class="memitem:aa338e529b7226d05ec8fe80c0a1a570d" id="r_aa338e529b7226d05ec8fe80c0a1a570d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aa338e529b7226d05ec8fe80c0a1a570d">ST2_BC</a>&#160;&#160;&#160;0x02</td></tr>
-<tr class="memitem:af501a57321b5c2a5d3942a1a6cfd5ecd" id="r_af501a57321b5c2a5d3942a1a6cfd5ecd"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af501a57321b5c2a5d3942a1a6cfd5ecd">ST2_SNS</a>&#160;&#160;&#160;0x04</td></tr>
-<tr class="memitem:a9634180d44225e3f83dcd00c58012906" id="r_a9634180d44225e3f83dcd00c58012906"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9634180d44225e3f83dcd00c58012906">ST2_SEH</a>&#160;&#160;&#160;0x08</td></tr>
-<tr class="memitem:aa0c9e3ab6ea7b5225ca6a97ae72ae85f" id="r_aa0c9e3ab6ea7b5225ca6a97ae72ae85f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aa0c9e3ab6ea7b5225ca6a97ae72ae85f">ST2_WC</a>&#160;&#160;&#160;0x10</td></tr>
-<tr class="memitem:ac3fb32be62990710d861bb2409e10963" id="r_ac3fb32be62990710d861bb2409e10963"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac3fb32be62990710d861bb2409e10963">ST2_CRC</a>&#160;&#160;&#160;0x20</td></tr>
-<tr class="memitem:a0fa3281ca7b1efd6f073817486290bb9" id="r_a0fa3281ca7b1efd6f073817486290bb9"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0fa3281ca7b1efd6f073817486290bb9">ST2_CM</a>&#160;&#160;&#160;0x40</td></tr>
-<tr class="memitem:a38013e2c2858eb6c807e9d38dcfb918d" id="r_a38013e2c2858eb6c807e9d38dcfb918d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a38013e2c2858eb6c807e9d38dcfb918d">ST3_HA</a>&#160;&#160;&#160;0x04</td></tr>
-<tr class="memitem:abaf0250f0f61551095a4853ed82c35e2" id="r_abaf0250f0f61551095a4853ed82c35e2"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#abaf0250f0f61551095a4853ed82c35e2">ST3_TZ</a>&#160;&#160;&#160;0x10</td></tr>
-<tr class="memitem:a08cb08c33bfea756cc42189c4c469c06" id="r_a08cb08c33bfea756cc42189c4c469c06"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a08cb08c33bfea756cc42189c4c469c06">ST3_WP</a>&#160;&#160;&#160;0x40</td></tr>
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a420e694f3bd69046e6c5cd282519546a" id="r_a420e694f3bd69046e6c5cd282519546a"><td class="memItemLeft"><a class="el" href="../../d5/d00/a00176.html#a414156feea104f8f75b4ed9e3121b2f6">int64_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#a420e694f3bd69046e6c5cd282519546a">ls_Socket</a></td></tr>
+<tr class="memitem:a21aaefc0affb27d517fd6f5db5775c35" id="r_a21aaefc0affb27d517fd6f5db5775c35"><td class="memItemLeft">char&#160;</td><td class="memItemRight"><a class="el" href="#a21aaefc0affb27d517fd6f5db5775c35">ls_IP</a> [30]</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Contains the definitions for the emulated Floppy Controller devices. </p>
-<p>$Id$</p>
-<p>X-1.13 Camiel Vanderhoeven 29-APR-2008 Make floppy disk use <a class="el" href="../../d3/d00/a01613.html" title="Abstract base class for disks (connects to a CDiskController).">CDisk</a> images.</p>
-<p>X-1.12 Brian Wheeler 29-APR-2008 Fixed floppy disk implementation.</p>
-<p>X-1.11 Brian Wheeler 29-APR-2008 Floppy disk implementation.</p>
-<p>X-1.10 Camiel Vanderhoeven 14-MAR-2008 Formatting.</p>
-<p>X-1.9 Camiel Vanderhoeven 14-MAR-2008</p><ol type="1">
-<li>More meaningful exceptions replace throwing (int) 1.</li>
-<li>U64 macro replaces X64 macro.</li>
-</ol>
-<p>X-1.8 Camiel Vanderhoeven 02-JAN-2008 Comments.</p>
-<p>X-1.7 Camiel Vanderhoeven 10-DEC-2007 Use configurator.</p>
-<p>X-1.6 Camiel Vanderhoeven 30-MAR-2007 Added old changelog comments.</p>
-<p>X-1.5 Camiel Vanderhoeven 16-FEB-2007 Changed header guards</p>
-<p>X-1.4 Camiel Vanderhoeven 12-FEB-2007 Added comments.</p>
-<p>X-1.3 Camiel Vanderhoeven 7-FEB-2007 Added comments.</p>
-<p>X-1.2 Brian Wheeler 3-FEB-2007 Formatting.</p>
-<p>X-1.1 Camiel Vanderhoeven 19-JAN-2007 Initial version in CVS.</p>
+<div class="textblock"><p>Contains telnet declarations for the lock-step code. </p>
+<p>X-1.2 Camiel Vanderhoeven 30-MAR-2007 Added old changelog comments.</p>
+<p>X-1.1 Camiel Vanderhoeven 28-FEB-2007 Created to support lockstep debugging.</p>
 <dl class="section author"><dt>Author</dt><dd>Camiel Vanderhoeven </dd></dl>
 
-<p class="definition">Definition in file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-</div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
-<a id="a0fd118dbbd7cc25197318f5f7d2ff68c" name="a0fd118dbbd7cc25197318f5f7d2ff68c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0fd118dbbd7cc25197318f5f7d2ff68c">&#9670;&#160;</a></span>DRIVE</h2>
+<p class="definition">Definition in file <a class="el" href="../../d0/d00/a00566_source.html">lockstep.h</a>.</p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a019bbfcd3f60ab4df0ad2578cd73f636" name="a019bbfcd3f60ab4df0ad2578cd73f636"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a019bbfcd3f60ab4df0ad2578cd73f636">&#9670;&#160;</a></span>lockstep_compare()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define DRIVE</td>
+          <td class="memname">void lockstep_compare </td>
           <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>i</em></span></td><td>)</td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>s</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">state.drive[i]</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00197">197</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="../../dc/d00/a00563_source.html#l00165">165</a> of file <a class="el" href="../../dc/d00/a00563_source.html">lockstep.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../dc/d00/a00563_source.html#l00163">cmpbuffer</a>, <a class="el" href="../../dc/d00/a00563_source.html#l00165">lockstep_compare()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00049">ls_Socket</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l00165">lockstep_compare()</a>, and <a class="el" href="../../db/d00/a00722_source.html#l01005">CSystem::SingleStep()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d0/d00/a00566_a019bbfcd3f60ab4df0ad2578cd73f636_cgraph.png" border="0" usemap="#ad0/d00/a00566_a019bbfcd3f60ab4df0ad2578cd73f636_cgraph" loading="lazy" alt=""/></div>
+<map name="ad0/d00/a00566_a019bbfcd3f60ab4df0ad2578cd73f636_cgraph" id="ad0/d00/a00566_a019bbfcd3f60ab4df0ad2578cd73f636_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,133,56"/>
+<area shape="poly" title=" " alt="" coords="46,28,43,21,45,11,54,5,69,3,85,5,94,14,89,14,83,10,69,8,56,10,50,14,48,20,51,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d0/d00/a00566_a019bbfcd3f60ab4df0ad2578cd73f636_icgraph.png" border="0" usemap="#ad0/d00/a00566_a019bbfcd3f60ab4df0ad2578cd73f636_icgraph" loading="lazy" alt=""/></div>
+<map name="ad0/d00/a00566_a019bbfcd3f60ab4df0ad2578cd73f636_icgraph" id="ad0/d00/a00566_a019bbfcd3f60ab4df0ad2578cd73f636_icgraph">
+<area shape="rect" title=" " alt="" coords="1589,43,1717,69"/>
+<area shape="poly" title=" " alt="" coords="1683,27,1674,24,1653,21,1634,23,1623,28,1621,33,1626,43,1621,41,1616,34,1620,24,1632,18,1653,16,1675,19,1688,28"/>
+<area shape="rect" href="../../d7/d00/a02109.html#a6f662062bc316b82491050ba08a60df0" title="Do one clock tick." alt="" coords="1394,43,1541,69"/>
+<area shape="poly" title=" " alt="" coords="1571,56,1541,59,1541,53,1576,56"/>
+<area shape="rect" href="../../d9/d00/a01289.html#ad0519606483dddcd3a7964f55d8d053f" title="Parse an IDB command." alt="" coords="562,5,706,32"/>
+<area shape="poly" title=" " alt="" coords="1376,47,1346,47,986,29,706,22,706,17,987,24,1346,41,1382,47"/>
+<area shape="rect" href="../../db/d00/a00722.html#abd5e968a4201d6c14e21977fe4ea280e" title="Run one progress chunk of the SRM self&#45;decompressor on CPU 0." alt="" coords="1208,80,1346,107"/>
+<area shape="poly" title=" " alt="" coords="1384,73,1347,82,1346,77,1379,73"/>
+<area shape="rect" href="../../d9/d00/a01289.html#a0baf94f44b4686e2dadfd9401009a121" title="Run an IDB script, or prompt user for input." alt="" coords="344,5,514,32"/>
+<area shape="poly" title=" " alt="" coords="543,28,514,30,514,25,549,27"/>
+<area shape="poly" title=" " alt="" coords="529,7,564,10,559,10,530,12"/>
+<area shape="rect" href="../../d7/d00/a00002.html#a103d46ddda22631adbfcee6fe3b9e48d" title="Run the emulator, and clean up after it terminates." alt="" coords="200,56,296,83"/>
+<area shape="poly" title=" " alt="" coords="367,36,297,59,296,53,362,37"/>
+<area shape="poly" title=" " alt="" coords="267,40,261,37,248,35,236,37,230,41,228,47,231,57,227,54,223,47,225,38,234,32,248,29,263,32,272,41"/>
+<area shape="rect" href="../../d7/d00/a00002.html#a0ddf1224851353fc92bfbff6f499fa97" title="Entry point for the application." alt="" coords="103,81,152,108"/>
+<area shape="poly" title=" " alt="" coords="187,82,153,92,152,87,182,83"/>
+<area shape="poly" title=" " alt="" coords="142,65,137,62,127,60,118,62,113,66,112,72,114,82,109,80,106,72,108,63,116,57,127,55,140,57,147,66"/>
+<area shape="rect" href="../../df/d00/a00119.html#a3c04138a5bfe5d72780bb7e82a18e627" title=" " alt="" coords="5,81,55,108"/>
+<area shape="poly" title=" " alt="" coords="85,96,55,97,55,92,89,93"/>
+<area shape="poly" title=" " alt="" coords="1308,64,1298,61,1277,59,1257,61,1247,65,1244,71,1249,81,1244,78,1239,71,1243,62,1256,55,1277,53,1299,56,1313,65"/>
+<area shape="rect" href="../../d7/d00/a02109.html#a390eeea8f34b1dcc08338563e803d738" title="Load ROM contents from file." alt="" coords="1016,80,1160,107"/>
+<area shape="poly" title=" " alt="" coords="1190,93,1160,96,1160,91,1195,93"/>
+<area shape="poly" title=" " alt="" coords="1003,101,832,116,635,123,428,123,348,120,270,114,152,101,153,95,271,109,349,115,428,117,635,117,832,111,998,102"/>
+<area shape="rect" href="../../d7/d00/a02109.html#a6f6f008fbad719e2227708fc07def6c5" title=" " alt="" coords="754,56,968,83"/>
+<area shape="poly" title=" " alt="" coords="998,84,968,83,969,78,1003,84"/>
+<area shape="poly" title=" " alt="" coords="780,52,697,35,697,30,786,52"/>
+<area shape="rect" href="../../d7/d00/a02109.html#ad5d2be74cd6988c52f4172dcf66d8dfd" title="Run the system by clocking the CPU(s) and devices." alt="" coords="375,56,483,83"/>
+<area shape="poly" title=" " alt="" coords="736,70,484,72,484,67,741,69"/>
+<area shape="poly" title=" " alt="" coords="357,70,297,72,297,67,362,69"/>
+</map>
+</div>
 
 </div>
 </div>
-<a id="a9e819084da55cacfe7ccd28122aedcc7" name="a9e819084da55cacfe7ccd28122aedcc7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9e819084da55cacfe7ccd28122aedcc7">&#9670;&#160;</a></span>FDC_REG_COMMAND</h2>
+<a id="aa72983489060743593655a52e3c05484" name="aa72983489060743593655a52e3c05484"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa72983489060743593655a52e3c05484">&#9670;&#160;</a></span>lockstep_init()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define FDC_REG_COMMAND&#160;&#160;&#160;5</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00192">192</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l01158">CFloppyController::ReadMem()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00539">CFloppyController::WriteMem()</a>.</p>
-
-</div>
-</div>
-<a id="a8ed8664b5720e860697a091e0bf66359" name="a8ed8664b5720e860697a091e0bf66359"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8ed8664b5720e860697a091e0bf66359">&#9670;&#160;</a></span>FDC_REG_DIR</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define FDC_REG_DIR&#160;&#160;&#160;7</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00193">193</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l01158">CFloppyController::ReadMem()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00539">CFloppyController::WriteMem()</a>.</p>
-
-</div>
-</div>
-<a id="abd003357e31c5ea9b90c33e96fb1cdac" name="abd003357e31c5ea9b90c33e96fb1cdac"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abd003357e31c5ea9b90c33e96fb1cdac">&#9670;&#160;</a></span>FDC_REG_DOR</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define FDC_REG_DOR&#160;&#160;&#160;2</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00189">189</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l01158">CFloppyController::ReadMem()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00539">CFloppyController::WriteMem()</a>.</p>
-
-</div>
-</div>
-<a id="a0528572e35dd68ba098321fa132473d3" name="a0528572e35dd68ba098321fa132473d3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0528572e35dd68ba098321fa132473d3">&#9670;&#160;</a></span>FDC_REG_STATUS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define FDC_REG_STATUS&#160;&#160;&#160;4</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00191">191</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l01158">CFloppyController::ReadMem()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00539">CFloppyController::WriteMem()</a>.</p>
-
-</div>
-</div>
-<a id="af7ef06c5e64b89a467eec0e722ac86e3" name="af7ef06c5e64b89a467eec0e722ac86e3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af7ef06c5e64b89a467eec0e722ac86e3">&#9670;&#160;</a></span>FDC_REG_STATUS_A</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define FDC_REG_STATUS_A&#160;&#160;&#160;0</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00187">187</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l01158">CFloppyController::ReadMem()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00539">CFloppyController::WriteMem()</a>.</p>
-
-</div>
-</div>
-<a id="a6b7c3f0efd37e85e8b2e62762b0de5ab" name="a6b7c3f0efd37e85e8b2e62762b0de5ab"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6b7c3f0efd37e85e8b2e62762b0de5ab">&#9670;&#160;</a></span>FDC_REG_STATUS_B</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define FDC_REG_STATUS_B&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00188">188</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l01158">CFloppyController::ReadMem()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00539">CFloppyController::WriteMem()</a>.</p>
-
-</div>
-</div>
-<a id="ad401283ff7564dc0ac2e4541237b96b9" name="ad401283ff7564dc0ac2e4541237b96b9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad401283ff7564dc0ac2e4541237b96b9">&#9670;&#160;</a></span>FDC_REG_TAPE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define FDC_REG_TAPE&#160;&#160;&#160;3</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00190">190</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l01158">CFloppyController::ReadMem()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00539">CFloppyController::WriteMem()</a>.</p>
-
-</div>
-</div>
-<a id="a7d29c7a6cb1d8a6fcf1408825c03fb6c" name="a7d29c7a6cb1d8a6fcf1408825c03fb6c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7d29c7a6cb1d8a6fcf1408825c03fb6c">&#9670;&#160;</a></span>FDISK</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define FDISK</td>
+          <td class="memname">void lockstep_init </td>
           <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>i</em></span></td><td>)</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">get_disk(0,i)</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00198">198</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l00175">CFloppyController::check_state()</a>, <a class="el" href="../../dc/d00/a00563_source.html#l00477">CFloppyController::finish_pio_transfer()</a>, <a class="el" href="../../dc/d00/a00563_source.html#l00407">CFloppyController::format_track()</a>, <a class="el" href="../../dc/d00/a00563_source.html#l00266">CFloppyController::get_geometry()</a>, <a class="el" href="../../dc/d00/a00563_source.html#l01361">CFloppyController::init()</a>, <a class="el" href="../../dc/d00/a00563_source.html#l01158">CFloppyController::ReadMem()</a>, <a class="el" href="../../dc/d00/a00563_source.html#l00152">CFloppyController::service_pending_media_actions_if_idle()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00539">CFloppyController::WriteMem()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dc/d00/a00563_source.html#l00056">56</a> of file <a class="el" href="../../dc/d00/a00563_source.html">lockstep.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d4/d00/a00617_source.html#l00171">INVALID_SOCKET</a>, <a class="el" href="../../dc/d00/a00563_source.html#l00056">lockstep_init()</a>, <a class="el" href="../../dc/d00/a00563_source.html#l00052">ls_IP</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00049">ls_Socket</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l00056">lockstep_init()</a>, and <a class="el" href="../../d7/d00/a00002_source.html#l00308">main()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d0/d00/a00566_aa72983489060743593655a52e3c05484_cgraph.png" border="0" usemap="#ad0/d00/a00566_aa72983489060743593655a52e3c05484_cgraph" loading="lazy" alt=""/></div>
+<map name="ad0/d00/a00566_aa72983489060743593655a52e3c05484_cgraph" id="ad0/d00/a00566_aa72983489060743593655a52e3c05484_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,100,56"/>
+<area shape="poly" title=" " alt="" coords="35,29,32,20,34,11,41,5,53,3,64,5,72,14,66,14,62,10,52,8,44,10,39,14,38,20,40,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d0/d00/a00566_aa72983489060743593655a52e3c05484_icgraph.png" border="0" usemap="#ad0/d00/a00566_aa72983489060743593655a52e3c05484_icgraph" loading="lazy" alt=""/></div>
+<map name="ad0/d00/a00566_aa72983489060743593655a52e3c05484_icgraph" id="ad0/d00/a00566_aa72983489060743593655a52e3c05484_icgraph">
+<area shape="rect" title=" " alt="" coords="200,29,294,56"/>
+<area shape="poly" title=" " alt="" coords="266,13,260,10,247,8,235,10,229,14,227,20,230,30,226,28,222,20,225,11,233,5,247,3,262,5,271,15"/>
+<area shape="rect" href="../../d7/d00/a00002.html#a0ddf1224851353fc92bfbff6f499fa97" title="Entry point for the application." alt="" coords="103,29,152,56"/>
+<area shape="poly" title=" " alt="" coords="182,43,153,45,152,40,187,43"/>
+<area shape="poly" title=" " alt="" coords="142,13,137,10,127,8,118,10,113,14,112,20,114,30,109,28,106,20,108,11,116,5,127,3,140,5,147,14"/>
+<area shape="rect" href="../../df/d00/a00119.html#a3c04138a5bfe5d72780bb7e82a18e627" title=" " alt="" coords="5,29,55,56"/>
+<area shape="poly" title=" " alt="" coords="84,44,55,45,55,40,89,42"/>
+</map>
+</div>
 
 </div>
 </div>
-<a id="a880caef28323f4c73a991120084445d6" name="a880caef28323f4c73a991120084445d6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a880caef28323f4c73a991120084445d6">&#9670;&#160;</a></span>SEL_DRIVE</h2>
+<a id="a12d841b7884a5b067928f9365cf4f659" name="a12d841b7884a5b067928f9365cf4f659"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a12d841b7884a5b067928f9365cf4f659">&#9670;&#160;</a></span>lockstep_receive()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define SEL_DRIVE&#160;&#160;&#160;state.drive[state.drive_select]</td>
+          <td class="memname">void lockstep_receive </td>
+          <td>(</td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>s</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>sz</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00195">195</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dc/d00/a00563_source.html#l00238">238</a> of file <a class="el" href="../../dc/d00/a00563_source.html">lockstep.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../dc/d00/a00563_source.html#l00238">lockstep_receive()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00049">ls_Socket</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l00238">lockstep_receive()</a>, and <a class="el" href="../../dd/d00/a00320_source.html#l00791">CTraceEngine::run_script()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d0/d00/a00566_a12d841b7884a5b067928f9365cf4f659_cgraph.png" border="0" usemap="#ad0/d00/a00566_a12d841b7884a5b067928f9365cf4f659_cgraph" loading="lazy" alt=""/></div>
+<map name="ad0/d00/a00566_a12d841b7884a5b067928f9365cf4f659_cgraph" id="ad0/d00/a00566_a12d841b7884a5b067928f9365cf4f659_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,125,56"/>
+<area shape="poly" title=" " alt="" coords="43,29,40,20,43,11,51,5,65,3,80,5,89,14,83,14,78,10,65,8,53,10,47,14,45,20,49,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d0/d00/a00566_a12d841b7884a5b067928f9365cf4f659_icgraph.png" border="0" usemap="#ad0/d00/a00566_a12d841b7884a5b067928f9365cf4f659_icgraph" loading="lazy" alt=""/></div>
+<map name="ad0/d00/a00566_a12d841b7884a5b067928f9365cf4f659_icgraph" id="ad0/d00/a00566_a12d841b7884a5b067928f9365cf4f659_icgraph">
+<area shape="rect" title=" " alt="" coords="610,29,729,56"/>
+<area shape="poly" title=" " alt="" coords="701,14,691,10,669,8,649,10,639,15,636,20,641,30,636,28,631,21,635,11,648,5,669,3,692,5,706,14"/>
+<area shape="rect" href="../../d9/d00/a01289.html#a0baf94f44b4686e2dadfd9401009a121" title="Run an IDB script, or prompt user for input." alt="" coords="392,29,562,56"/>
+<area shape="poly" title=" " alt="" coords="591,43,562,45,562,40,597,42"/>
+<area shape="rect" href="../../d9/d00/a01289.html#ad0519606483dddcd3a7964f55d8d053f" title="Parse an IDB command." alt="" coords="200,29,344,56"/>
+<area shape="poly" title=" " alt="" coords="374,52,345,54,344,49,379,51"/>
+<area shape="rect" href="../../d7/d00/a00002.html#a103d46ddda22631adbfcee6fe3b9e48d" title="Run the emulator, and clean up after it terminates." alt="" coords="224,104,320,131"/>
+<area shape="poly" title=" " alt="" coords="426,61,312,106,310,101,421,62"/>
+<area shape="poly" title=" " alt="" coords="360,31,394,33,389,34,360,36"/>
+<area shape="poly" title=" " alt="" coords="295,88,288,85,272,83,257,85,250,89,248,95,252,105,247,102,242,95,245,86,256,80,272,77,290,80,300,89"/>
+<area shape="rect" href="../../d7/d00/a00002.html#a0ddf1224851353fc92bfbff6f499fa97" title="Entry point for the application." alt="" coords="103,104,152,131"/>
+<area shape="poly" title=" " alt="" coords="206,118,152,120,152,115,211,117"/>
+<area shape="poly" title=" " alt="" coords="142,88,137,85,127,83,118,84,113,89,112,95,114,105,109,102,106,95,108,86,116,80,127,77,140,80,147,89"/>
+<area shape="rect" href="../../df/d00/a00119.html#a3c04138a5bfe5d72780bb7e82a18e627" title=" " alt="" coords="5,104,55,131"/>
+<area shape="poly" title=" " alt="" coords="84,118,55,120,55,115,89,116"/>
+</map>
+</div>
 
 </div>
 </div>
-<a id="a5468b42b4dc0f9e193fa75d673fa2d6d" name="a5468b42b4dc0f9e193fa75d673fa2d6d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5468b42b4dc0f9e193fa75d673fa2d6d">&#9670;&#160;</a></span>SEL_FDISK</h2>
+<a id="a1b33b32a1570638720de82e5f7b3cfed" name="a1b33b32a1570638720de82e5f7b3cfed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1b33b32a1570638720de82e5f7b3cfed">&#9670;&#160;</a></span>lockstep_send()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define SEL_FDISK&#160;&#160;&#160;get_disk(0,state.drive_select)</td>
+          <td class="memname">void lockstep_send </td>
+          <td>(</td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>s</em></span></td><td>)</td>
+          <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00196">196</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dc/d00/a00563_source.html#l00214">214</a> of file <a class="el" href="../../dc/d00/a00563_source.html">lockstep.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../dc/d00/a00563_source.html#l00214">lockstep_send()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00049">ls_Socket</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l00214">lockstep_send()</a>, and <a class="el" href="../../dd/d00/a00320_source.html#l00791">CTraceEngine::run_script()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d0/d00/a00566_a1b33b32a1570638720de82e5f7b3cfed_cgraph.png" border="0" usemap="#ad0/d00/a00566_a1b33b32a1570638720de82e5f7b3cfed_cgraph" loading="lazy" alt=""/></div>
+<map name="ad0/d00/a00566_a1b33b32a1570638720de82e5f7b3cfed_cgraph" id="ad0/d00/a00566_a1b33b32a1570638720de82e5f7b3cfed_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,111,56"/>
+<area shape="poly" title=" " alt="" coords="39,29,36,20,38,11,46,5,58,3,71,5,79,14,74,14,69,10,58,8,48,10,42,14,41,20,44,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d0/d00/a00566_a1b33b32a1570638720de82e5f7b3cfed_icgraph.png" border="0" usemap="#ad0/d00/a00566_a1b33b32a1570638720de82e5f7b3cfed_icgraph" loading="lazy" alt=""/></div>
+<map name="ad0/d00/a00566_a1b33b32a1570638720de82e5f7b3cfed_icgraph" id="ad0/d00/a00566_a1b33b32a1570638720de82e5f7b3cfed_icgraph">
+<area shape="rect" title=" " alt="" coords="610,29,715,56"/>
+<area shape="poly" title=" " alt="" coords="692,14,683,10,662,8,643,10,633,15,630,20,635,30,630,28,625,21,629,11,642,5,662,3,685,5,698,14"/>
+<area shape="rect" href="../../d9/d00/a01289.html#a0baf94f44b4686e2dadfd9401009a121" title="Run an IDB script, or prompt user for input." alt="" coords="392,29,562,56"/>
+<area shape="poly" title=" " alt="" coords="591,43,562,45,562,40,597,42"/>
+<area shape="rect" href="../../d9/d00/a01289.html#ad0519606483dddcd3a7964f55d8d053f" title="Parse an IDB command." alt="" coords="200,29,344,56"/>
+<area shape="poly" title=" " alt="" coords="374,52,345,54,344,49,379,51"/>
+<area shape="rect" href="../../d7/d00/a00002.html#a103d46ddda22631adbfcee6fe3b9e48d" title="Run the emulator, and clean up after it terminates." alt="" coords="224,104,320,131"/>
+<area shape="poly" title=" " alt="" coords="426,61,312,106,310,101,421,62"/>
+<area shape="poly" title=" " alt="" coords="360,31,394,33,389,34,360,36"/>
+<area shape="poly" title=" " alt="" coords="295,88,288,85,272,83,257,85,250,89,248,95,252,105,247,102,242,95,245,86,256,80,272,77,290,80,300,89"/>
+<area shape="rect" href="../../d7/d00/a00002.html#a0ddf1224851353fc92bfbff6f499fa97" title="Entry point for the application." alt="" coords="103,104,152,131"/>
+<area shape="poly" title=" " alt="" coords="206,118,152,120,152,115,211,117"/>
+<area shape="poly" title=" " alt="" coords="142,88,137,85,127,83,118,84,113,89,112,95,114,105,109,102,106,95,108,86,116,80,127,77,140,80,147,89"/>
+<area shape="rect" href="../../df/d00/a00119.html#a3c04138a5bfe5d72780bb7e82a18e627" title=" " alt="" coords="5,104,55,131"/>
+<area shape="poly" title=" " alt="" coords="84,118,55,120,55,115,89,116"/>
+</map>
+</div>
 
 </div>
 </div>
-<a id="a46e283a49fcf0179a8130d2157beb150" name="a46e283a49fcf0179a8130d2157beb150"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a46e283a49fcf0179a8130d2157beb150">&#9670;&#160;</a></span>ST0_DS</h2>
+<a id="a4c1259e01d22f15dad0840da4fe2f348" name="a4c1259e01d22f15dad0840da4fe2f348"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c1259e01d22f15dad0840da4fe2f348">&#9670;&#160;</a></span>lockstep_sync_m2s()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define ST0_DS&#160;&#160;&#160;0x03</td>
+          <td class="memname">void lockstep_sync_m2s </td>
+          <td>(</td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>s</em></span></td><td>)</td>
+          <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00204">204</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dc/d00/a00563_source.html#l00111">111</a> of file <a class="el" href="../../dc/d00/a00563_source.html">lockstep.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l00477">CFloppyController::finish_pio_transfer()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00539">CFloppyController::WriteMem()</a>.</p>
+<p class="reference">References <a class="el" href="../../dc/d00/a00563_source.html#l00111">lockstep_sync_m2s()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00049">ls_Socket</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l00111">lockstep_sync_m2s()</a>, and <a class="el" href="../../db/d00/a00722_source.html#l01005">CSystem::SingleStep()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d0/d00/a00566_a4c1259e01d22f15dad0840da4fe2f348_cgraph.png" border="0" usemap="#ad0/d00/a00566_a4c1259e01d22f15dad0840da4fe2f348_cgraph" loading="lazy" alt=""/></div>
+<map name="ad0/d00/a00566_a4c1259e01d22f15dad0840da4fe2f348_cgraph" id="ad0/d00/a00566_a4c1259e01d22f15dad0840da4fe2f348_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,143,56"/>
+<area shape="poly" title=" " alt="" coords="50,28,46,21,49,11,58,5,74,3,91,5,101,14,96,14,89,10,74,8,60,10,53,14,51,20,55,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d0/d00/a00566_a4c1259e01d22f15dad0840da4fe2f348_icgraph.png" border="0" usemap="#ad0/d00/a00566_a4c1259e01d22f15dad0840da4fe2f348_icgraph" loading="lazy" alt=""/></div>
+<map name="ad0/d00/a00566_a4c1259e01d22f15dad0840da4fe2f348_icgraph" id="ad0/d00/a00566_a4c1259e01d22f15dad0840da4fe2f348_icgraph">
+<area shape="rect" title=" " alt="" coords="1589,43,1727,69"/>
+<area shape="poly" title=" " alt="" coords="1689,27,1679,24,1658,21,1638,23,1628,28,1625,33,1630,43,1625,41,1620,34,1624,24,1637,18,1658,16,1681,19,1694,28"/>
+<area shape="rect" href="../../d7/d00/a02109.html#a6f662062bc316b82491050ba08a60df0" title="Do one clock tick." alt="" coords="1394,43,1541,69"/>
+<area shape="poly" title=" " alt="" coords="1571,56,1542,59,1542,53,1576,56"/>
+<area shape="rect" href="../../d9/d00/a01289.html#ad0519606483dddcd3a7964f55d8d053f" title="Parse an IDB command." alt="" coords="562,5,706,32"/>
+<area shape="poly" title=" " alt="" coords="1376,47,1346,47,986,29,706,22,706,17,987,24,1346,41,1382,47"/>
+<area shape="rect" href="../../db/d00/a00722.html#abd5e968a4201d6c14e21977fe4ea280e" title="Run one progress chunk of the SRM self&#45;decompressor on CPU 0." alt="" coords="1208,80,1346,107"/>
+<area shape="poly" title=" " alt="" coords="1384,73,1347,82,1346,77,1379,73"/>
+<area shape="rect" href="../../d9/d00/a01289.html#a0baf94f44b4686e2dadfd9401009a121" title="Run an IDB script, or prompt user for input." alt="" coords="344,5,514,32"/>
+<area shape="poly" title=" " alt="" coords="543,28,514,30,514,25,549,27"/>
+<area shape="poly" title=" " alt="" coords="529,7,564,10,559,10,530,12"/>
+<area shape="rect" href="../../d7/d00/a00002.html#a103d46ddda22631adbfcee6fe3b9e48d" title="Run the emulator, and clean up after it terminates." alt="" coords="200,56,296,83"/>
+<area shape="poly" title=" " alt="" coords="367,36,297,59,296,53,362,37"/>
+<area shape="poly" title=" " alt="" coords="267,40,261,37,248,35,236,37,230,41,228,47,231,57,227,54,223,47,225,38,234,32,248,29,263,32,272,41"/>
+<area shape="rect" href="../../d7/d00/a00002.html#a0ddf1224851353fc92bfbff6f499fa97" title="Entry point for the application." alt="" coords="103,81,152,108"/>
+<area shape="poly" title=" " alt="" coords="187,82,153,92,152,87,182,83"/>
+<area shape="poly" title=" " alt="" coords="142,65,137,62,127,60,118,62,113,66,112,72,114,82,109,80,106,72,108,63,116,57,127,55,140,57,147,66"/>
+<area shape="rect" href="../../df/d00/a00119.html#a3c04138a5bfe5d72780bb7e82a18e627" title=" " alt="" coords="5,81,55,108"/>
+<area shape="poly" title=" " alt="" coords="85,96,55,97,55,92,89,93"/>
+<area shape="poly" title=" " alt="" coords="1308,64,1298,61,1277,59,1257,61,1247,65,1244,71,1249,81,1244,78,1239,71,1243,62,1256,55,1277,53,1299,56,1313,65"/>
+<area shape="rect" href="../../d7/d00/a02109.html#a390eeea8f34b1dcc08338563e803d738" title="Load ROM contents from file." alt="" coords="1016,80,1160,107"/>
+<area shape="poly" title=" " alt="" coords="1190,93,1160,96,1160,91,1195,93"/>
+<area shape="poly" title=" " alt="" coords="1003,101,832,116,635,123,428,123,348,120,270,114,152,101,153,95,271,109,349,115,428,117,635,117,832,111,998,102"/>
+<area shape="rect" href="../../d7/d00/a02109.html#a6f6f008fbad719e2227708fc07def6c5" title=" " alt="" coords="754,56,968,83"/>
+<area shape="poly" title=" " alt="" coords="998,84,968,83,969,78,1003,84"/>
+<area shape="poly" title=" " alt="" coords="780,52,697,35,697,30,786,52"/>
+<area shape="rect" href="../../d7/d00/a02109.html#ad5d2be74cd6988c52f4172dcf66d8dfd" title="Run the system by clocking the CPU(s) and devices." alt="" coords="375,56,483,83"/>
+<area shape="poly" title=" " alt="" coords="736,70,484,72,484,67,741,69"/>
+<area shape="poly" title=" " alt="" coords="357,70,297,72,297,67,362,69"/>
+</map>
+</div>
 
 </div>
 </div>
-<a id="a24eb59d5a0bb9e6de01e4a6c0d5ce60a" name="a24eb59d5a0bb9e6de01e4a6c0d5ce60a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a24eb59d5a0bb9e6de01e4a6c0d5ce60a">&#9670;&#160;</a></span>ST0_ECE</h2>
+<a id="aa292ee0b71c185d28fbc01d97f2dd7bf" name="aa292ee0b71c185d28fbc01d97f2dd7bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa292ee0b71c185d28fbc01d97f2dd7bf">&#9670;&#160;</a></span>lockstep_sync_s2m()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define ST0_ECE&#160;&#160;&#160;0x10</td>
+          <td class="memname">void lockstep_sync_s2m </td>
+          <td>(</td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>s</em></span></td><td>)</td>
+          <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00207">207</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dc/d00/a00563_source.html#l00137">137</a> of file <a class="el" href="../../dc/d00/a00563_source.html">lockstep.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../dc/d00/a00563_source.html#l00137">lockstep_sync_s2m()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00049">ls_Socket</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l00137">lockstep_sync_s2m()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d0/d00/a00566_aa292ee0b71c185d28fbc01d97f2dd7bf_cgraph.png" border="0" usemap="#ad0/d00/a00566_aa292ee0b71c185d28fbc01d97f2dd7bf_cgraph" loading="lazy" alt=""/></div>
+<map name="ad0/d00/a00566_aa292ee0b71c185d28fbc01d97f2dd7bf_cgraph" id="ad0/d00/a00566_aa292ee0b71c185d28fbc01d97f2dd7bf_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,143,56"/>
+<area shape="poly" title=" " alt="" coords="50,28,46,21,49,11,58,5,74,3,91,5,101,14,96,14,89,10,74,8,60,10,53,14,51,20,55,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d0/d00/a00566_aa292ee0b71c185d28fbc01d97f2dd7bf_icgraph.png" border="0" usemap="#ad0/d00/a00566_aa292ee0b71c185d28fbc01d97f2dd7bf_icgraph" loading="lazy" alt=""/></div>
+<map name="ad0/d00/a00566_aa292ee0b71c185d28fbc01d97f2dd7bf_icgraph" id="ad0/d00/a00566_aa292ee0b71c185d28fbc01d97f2dd7bf_icgraph">
+<area shape="rect" title=" " alt="" coords="5,29,143,56"/>
+<area shape="poly" title=" " alt="" coords="96,14,89,10,74,8,60,10,53,14,51,20,55,29,50,28,46,21,49,11,58,5,74,3,91,5,101,14"/>
+</map>
+</div>
 
 </div>
 </div>
-<a id="a868259f991ded1e98d7084dc2c731904" name="a868259f991ded1e98d7084dc2c731904"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a868259f991ded1e98d7084dc2c731904">&#9670;&#160;</a></span>ST0_HA</h2>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="a21aaefc0affb27d517fd6f5db5775c35" name="a21aaefc0affb27d517fd6f5db5775c35"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a21aaefc0affb27d517fd6f5db5775c35">&#9670;&#160;</a></span>ls_IP</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">#define ST0_HA&#160;&#160;&#160;0x04</td>
+          <td class="memname">char ls_IP[30]</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00205">205</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dc/d00/a00563_source.html#l00052">52</a> of file <a class="el" href="../../dc/d00/a00563_source.html">lockstep.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l00477">CFloppyController::finish_pio_transfer()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00539">CFloppyController::WriteMem()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d00/a00530_source.html#l00276">CSerial::init()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00056">lockstep_init()</a>.</p>
 
 </div>
 </div>
-<a id="a194214997d33bf53bf68a69e4aca2f39" name="a194214997d33bf53bf68a69e4aca2f39"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a194214997d33bf53bf68a69e4aca2f39">&#9670;&#160;</a></span>ST0_INTR</h2>
+<a id="a420e694f3bd69046e6c5cd282519546a" name="a420e694f3bd69046e6c5cd282519546a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a420e694f3bd69046e6c5cd282519546a">&#9670;&#160;</a></span>ls_Socket</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">#define ST0_INTR&#160;&#160;&#160;0xC0</td>
+          <td class="memname"><a class="el" href="../../d5/d00/a00176.html#a414156feea104f8f75b4ed9e3121b2f6">int64_t</a> ls_Socket</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00209">209</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dc/d00/a00563_source.html#l00049">49</a> of file <a class="el" href="../../dc/d00/a00563_source.html">lockstep.cpp</a>.</p>
 
-</div>
-</div>
-<a id="ac9456fed5ff3a2af4684657906c96892" name="ac9456fed5ff3a2af4684657906c96892"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac9456fed5ff3a2af4684657906c96892">&#9670;&#160;</a></span>ST0_NR</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ST0_NR&#160;&#160;&#160;0x08</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00206">206</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l00407">CFloppyController::format_track()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00539">CFloppyController::WriteMem()</a>.</p>
-
-</div>
-</div>
-<a id="a996ca20d0ada749b62de98e24d6bcd71" name="a996ca20d0ada749b62de98e24d6bcd71"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a996ca20d0ada749b62de98e24d6bcd71">&#9670;&#160;</a></span>ST0_SE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ST0_SE&#160;&#160;&#160;0x20</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00208">208</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-</div>
-</div>
-<a id="a76e8a063c61714f58e092e55a0d39652" name="a76e8a063c61714f58e092e55a0d39652"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a76e8a063c61714f58e092e55a0d39652">&#9670;&#160;</a></span>ST1_CRC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ST1_CRC&#160;&#160;&#160;0x20</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00216">216</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-</div>
-</div>
-<a id="a268958c14befd2ea4a0430f81320739e" name="a268958c14befd2ea4a0430f81320739e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a268958c14befd2ea4a0430f81320739e">&#9670;&#160;</a></span>ST1_EOC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ST1_EOC&#160;&#160;&#160;0x80</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00217">217</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l00539">CFloppyController::WriteMem()</a>.</p>
-
-</div>
-</div>
-<a id="aff06e8be5696e84299f27b13e7b3c9c7" name="aff06e8be5696e84299f27b13e7b3c9c7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aff06e8be5696e84299f27b13e7b3c9c7">&#9670;&#160;</a></span>ST1_MAM</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ST1_MAM&#160;&#160;&#160;0x01</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00212">212</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l00539">CFloppyController::WriteMem()</a>.</p>
-
-</div>
-</div>
-<a id="a2f671aa8ff31a480b1786407e35adddd" name="a2f671aa8ff31a480b1786407e35adddd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2f671aa8ff31a480b1786407e35adddd">&#9670;&#160;</a></span>ST1_ND</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ST1_ND&#160;&#160;&#160;0x04</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00214">214</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l00477">CFloppyController::finish_pio_transfer()</a>, <a class="el" href="../../dc/d00/a00563_source.html#l00407">CFloppyController::format_track()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00539">CFloppyController::WriteMem()</a>.</p>
-
-</div>
-</div>
-<a id="a187865caec7a4fc36b348a47e3ea6404" name="a187865caec7a4fc36b348a47e3ea6404"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a187865caec7a4fc36b348a47e3ea6404">&#9670;&#160;</a></span>ST1_OR</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ST1_OR&#160;&#160;&#160;0x10</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00215">215</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l00539">CFloppyController::WriteMem()</a>.</p>
-
-</div>
-</div>
-<a id="a0e8594af940b796b56450c3a282d33f6" name="a0e8594af940b796b56450c3a282d33f6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0e8594af940b796b56450c3a282d33f6">&#9670;&#160;</a></span>ST1_WP</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ST1_WP&#160;&#160;&#160;0x02</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00213">213</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l00407">CFloppyController::format_track()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00539">CFloppyController::WriteMem()</a>.</p>
-
-</div>
-</div>
-<a id="aa338e529b7226d05ec8fe80c0a1a570d" name="aa338e529b7226d05ec8fe80c0a1a570d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa338e529b7226d05ec8fe80c0a1a570d">&#9670;&#160;</a></span>ST2_BC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ST2_BC&#160;&#160;&#160;0x02</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00221">221</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-</div>
-</div>
-<a id="a0fa3281ca7b1efd6f073817486290bb9" name="a0fa3281ca7b1efd6f073817486290bb9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0fa3281ca7b1efd6f073817486290bb9">&#9670;&#160;</a></span>ST2_CM</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ST2_CM&#160;&#160;&#160;0x40</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00226">226</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-</div>
-</div>
-<a id="ac3fb32be62990710d861bb2409e10963" name="ac3fb32be62990710d861bb2409e10963"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac3fb32be62990710d861bb2409e10963">&#9670;&#160;</a></span>ST2_CRC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ST2_CRC&#160;&#160;&#160;0x20</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00225">225</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-</div>
-</div>
-<a id="a1919306138dc1d8202182f50c8f108fa" name="a1919306138dc1d8202182f50c8f108fa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1919306138dc1d8202182f50c8f108fa">&#9670;&#160;</a></span>ST2_MAM</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ST2_MAM&#160;&#160;&#160;0x01</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00220">220</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-</div>
-</div>
-<a id="a9634180d44225e3f83dcd00c58012906" name="a9634180d44225e3f83dcd00c58012906"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9634180d44225e3f83dcd00c58012906">&#9670;&#160;</a></span>ST2_SEH</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ST2_SEH&#160;&#160;&#160;0x08</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00223">223</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-</div>
-</div>
-<a id="af501a57321b5c2a5d3942a1a6cfd5ecd" name="af501a57321b5c2a5d3942a1a6cfd5ecd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af501a57321b5c2a5d3942a1a6cfd5ecd">&#9670;&#160;</a></span>ST2_SNS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ST2_SNS&#160;&#160;&#160;0x04</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00222">222</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-</div>
-</div>
-<a id="aa0c9e3ab6ea7b5225ca6a97ae72ae85f" name="aa0c9e3ab6ea7b5225ca6a97ae72ae85f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa0c9e3ab6ea7b5225ca6a97ae72ae85f">&#9670;&#160;</a></span>ST2_WC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ST2_WC&#160;&#160;&#160;0x10</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00224">224</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-</div>
-</div>
-<a id="a38013e2c2858eb6c807e9d38dcfb918d" name="a38013e2c2858eb6c807e9d38dcfb918d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a38013e2c2858eb6c807e9d38dcfb918d">&#9670;&#160;</a></span>ST3_HA</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ST3_HA&#160;&#160;&#160;0x04</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00229">229</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-</div>
-</div>
-<a id="abaf0250f0f61551095a4853ed82c35e2" name="abaf0250f0f61551095a4853ed82c35e2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abaf0250f0f61551095a4853ed82c35e2">&#9670;&#160;</a></span>ST3_TZ</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ST3_TZ&#160;&#160;&#160;0x10</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00230">230</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
-
-</div>
-</div>
-<a id="a08cb08c33bfea756cc42189c4c469c06" name="a08cb08c33bfea756cc42189c4c469c06"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a08cb08c33bfea756cc42189c4c469c06">&#9670;&#160;</a></span>ST3_WP</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ST3_WP&#160;&#160;&#160;0x40</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d0/d00/a00566_source.html#l00231">231</a> of file <a class="el" href="../../d0/d00/a00566_source.html">FloppyController.h</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00563_source.html#l00165">lockstep_compare()</a>, <a class="el" href="../../dc/d00/a00563_source.html#l00056">lockstep_init()</a>, <a class="el" href="../../dc/d00/a00563_source.html#l00238">lockstep_receive()</a>, <a class="el" href="../../dc/d00/a00563_source.html#l00214">lockstep_send()</a>, <a class="el" href="../../dc/d00/a00563_source.html#l00111">lockstep_sync_m2s()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00137">lockstep_sync_s2m()</a>.</p>
 
 </div>
 </div>
@@ -803,7 +572,7 @@ Macros</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_70f20ecf11358dff00a0daf546d3147e.html">storage</a></li><li class="navelem"><a href="../../d0/d00/a00566.html">FloppyController.h</a></li>
+    <li class="navelem"><a href="../../dir_c901c14b65aa229498a52b725b3d4a2c.html">network</a></li><li class="navelem"><a href="../../d0/d00/a00566.html">lockstep.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

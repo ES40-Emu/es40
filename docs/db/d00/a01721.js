@@ -1,7 +1,9 @@
 var a01721 =
 [
-    [ "data_in_len", "db/d00/a01721.html#adf8daa352663a6762d0dc376717b9c07", null ],
-    [ "data_out_short", "db/d00/a01721.html#ac5732e2ea093424776de064dda023142", null ],
-    [ "data_out_used", "db/d00/a01721.html#a8222375c4885a3f36d3b020b93ec5d26", null ],
-    [ "status", "db/d00/a01721.html#ab24705c32895585ad1b06d74025741da", null ]
+    [ "matches", "db/d00/a01721.html#aff545396c571c29a9498d1e43df237d7", null ],
+    [ "config_name", "db/d00/a01721.html#ab5ae216cf7e52876d8865706f1ee5269", null ],
+    [ "display", "db/d00/a01721.html#a9943260d1c12c51b5c8f75c752e136f6", null ],
+    [ "enabled", "db/d00/a01721.html#a0ec78f676c57b1a3258d86b109d6f4f1", null ],
+    [ "key", "db/d00/a01721.html#a815a673c66d688f333b08b2b3f9bb134", null ],
+    [ "modifiers", "db/d00/a01721.html#a88465ed0be53033dabc37e129542bb39", null ]
 ];

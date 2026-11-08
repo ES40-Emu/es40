@@ -1,19 +1,12 @@
 var a00260 =
 [
-    [ "STraceFunction", "d0/d00/a01029.html", "d0/d00/a01029" ],
-    [ "STracePRBR", "d2/d00/a01033.html", "d2/d00/a01033" ],
-    [ "STraceCPU", "d2/d00/a01037.html", "d2/d00/a01037" ],
-    [ "CTraceEngine", "d1/d00/a01041.html", "d1/d00/a01041" ],
-    [ "DO_ACTION", "dd/d00/a00260.html#a5eae87ad68d6e1dbcacbbd1c2099db89", null ],
-    [ "TRC_DEV", "dd/d00/a00260.html#a5685fe0c3777ae5d0444ca732a98046a", null ],
-    [ "TRC_DEV2", "dd/d00/a00260.html#a5f8e5ecd8d3f2eb00e0f9de3f7b9d8cf", null ],
-    [ "TRC_DEV3", "dd/d00/a00260.html#a5d061a8de02a24892767941c7f75b46f", null ],
-    [ "TRC_DEV4", "dd/d00/a00260.html#a8c446219d3805aaef70060c06e7c69ab", null ],
-    [ "TRC_DEV5", "dd/d00/a00260.html#a3ec1c203f03b3a88cff7f3f1b89b0a69", null ],
-    [ "TRC_DEV6", "dd/d00/a00260.html#a45513d2b22c442cd4d08456d2a982904", null ],
-    [ "bDisassemble", "dd/d00/a00260.html#a9c3cfa2b0c665b04458d1d148bc10e17", null ],
-    [ "bHashing", "dd/d00/a00260.html#aab8239a91148ca640a60179bce466daf", null ],
-    [ "bListing", "dd/d00/a00260.html#a5783a67942e298401dd23cddf8f3448a", null ],
-    [ "bTrace", "dd/d00/a00260.html#aec440ea495e89a5b3c1c6020761c31d7", null ],
-    [ "trc", "dd/d00/a00260.html#a68bf49d9a6ffe37d4e0ebb6a7d175d5c", null ]
+    [ "DO_HW_LD", "dd/d00/a00260.html#abd0b56ca5396b7b92637d902950fe025", null ],
+    [ "DO_HW_LDL", "dd/d00/a00260.html#a41aaf5a161f59edf22d88343c803fac3", null ],
+    [ "DO_HW_LDQ", "dd/d00/a00260.html#a1598675c4277fd941cd62f5abcb83352", null ],
+    [ "DO_HW_MFPR", "dd/d00/a00260.html#a63424986d034c055c7fa2ce2ec4ccee3", null ],
+    [ "DO_HW_MTPR", "dd/d00/a00260.html#a7cc9a5a8927d10c3b99ff386f4122de8", null ],
+    [ "DO_HW_RET", "dd/d00/a00260.html#ab419c1e6cc4997b8b1c5e70776dd95ea", null ],
+    [ "DO_HW_ST", "dd/d00/a00260.html#a9d731021c936ebb6c0713bec736cab68", null ],
+    [ "DO_HW_STL", "dd/d00/a00260.html#aef54823c2658de763890af0c6e5cb133", null ],
+    [ "DO_HW_STQ", "dd/d00/a00260.html#a0b0b30254f90a750e277f77a5ceea836", null ]
 ];

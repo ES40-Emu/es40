@@ -1,11 +1,8 @@
 var a01257 =
 [
-    [ "config_data", "d9/d00/a01257.html#a4d4d0d34b75e7d1aea4e43506db9da57", null ],
-    [ "config_mask", "d9/d00/a01257.html#a5569dafac147bff230eb1e266f3d9239", null ],
-    [ "class_code", "d9/d00/a01257.html#a08d19e9378d1945aafbcb9e022b992a3", null ],
-    [ "device", "d9/d00/a01257.html#aafa99fe8d808088d6e0cf2ed9954051d", null ],
-    [ "revision", "d9/d00/a01257.html#a8deaf36383eb198ca287a81baccaa756", null ],
-    [ "subsystem_device", "d9/d00/a01257.html#a00837681e8cf4ce43f8e71d50a45b378", null ],
-    [ "subsystem_vendor", "d9/d00/a01257.html#aac9fc79dc37be9079fa8dfaa37a8cea3", null ],
-    [ "vendor", "d9/d00/a01257.html#a3f86b23b7ef868fd506da08331effcad", null ]
+    [ "describe", "d9/d00/a01257.html#ab1f9fdab225d3feea8454dd60176dd07", null ],
+    [ "describe_write", "d9/d00/a01257.html#a64e93adefc3abef23c59262919db31f6", null ],
+    [ "read", "d9/d00/a01257.html#a57e7288237a4c3e406a338922e4c379b", null ],
+    [ "selector", "d9/d00/a01257.html#a3edb59a5656b48f4a812f4636c736505", null ],
+    [ "write", "d9/d00/a01257.html#a643fa16d85802843c6e813d27403c612", null ]
 ];

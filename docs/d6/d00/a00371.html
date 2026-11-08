@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: gui/gui.h File Reference</title>
+<title>ES40: graphics/Cirrus.cpp File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,2577 +109,435 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d6/d00/a00371.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">gui.h File Reference</div></div>
+  <div class="headertitle"><div class="title">Cirrus.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-
-<p>Contains the definitions for the <a class="el" href="../../d2/d00/a01433.html" title="Abstract base class for GUI implementations.">bx_gui_c</a> base class used for interfacing with SDL and other device interfaces.  
-<a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;cstddef&gt;</code><br />
-<code>#include &lt;string&gt;</code><br />
-<code>#include &quot;<a class="el" href="../../d8/d00/a01932_source.html">vga.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d6/d00/a00626_source.html">StdAfx.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d00/a00341_source.html">emu.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d5/d00/a00374_source.html">Cirrus.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d8/d00/a00725_source.html">system/System.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d00/a00359_source.html">emu/xtal.h</a>&quot;</code><br />
+<code>#include &lt;chrono&gt;</code><br />
+<code>#include &lt;type_traits&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d00/a00539_source.html">logmacro.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
-Include dependency graph for gui.h:</div>
+Include dependency graph for Cirrus.cpp:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../db/d00/a00372.png" border="0" usemap="#agui_2gui_8h" loading="lazy" alt=""/></div>
-<map name="agui_2gui_8h" id="agui_2gui_8h">
-<area shape="rect" title="Contains the definitions for the bx_gui_c base class used for interfacing with SDL and other device i..." alt="" coords="85,5,155,32"/>
-<area shape="rect" title=" " alt="" coords="5,80,70,107"/>
-<area shape="poly" title=" " alt="" coords="108,32,65,72,61,68,103,33"/>
-<area shape="rect" title=" " alt="" coords="94,80,147,107"/>
-<area shape="poly" title=" " alt="" coords="122,31,123,65,118,63,118,35"/>
-<area shape="rect" href="../../d8/d00/a01932.html" title="Definitions for VGA cards." alt="" coords="171,80,224,107"/>
-<area shape="poly" title=" " alt="" coords="135,30,176,69,170,69,133,35"/>
-</map>
-</div>
-</div><div class="textblock"><div class="dynheader">
-This graph shows which files directly or indirectly include this file:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../dc/d00/a00373.png" border="0" usemap="#agui_2gui_8hdep" loading="lazy" alt=""/></div>
-<map name="agui_2gui_8hdep" id="agui_2gui_8hdep">
-<area shape="rect" title="Contains the definitions for the bx_gui_c base class used for interfacing with SDL and other device i..." alt="" coords="1005,5,1076,32"/>
-<area shape="rect" href="../../d7/d00/a00002.html" title="Defines the entry point for the application." alt="" coords="5,80,108,107"/>
-<area shape="poly" title=" " alt="" coords="987,22,626,39,376,56,121,83,109,84,107,79,120,77,375,51,626,34,992,21"/>
-<area shape="rect" href="../../d5/d00/a00308.html" title="Contains the code for the emulated Cirrus CL GD&#45;5434 Video Card device." alt="" coords="132,80,266,107"/>
-<area shape="poly" title=" " alt="" coords="987,23,688,45,485,62,278,83,268,84,266,79,278,77,484,56,688,40,992,22"/>
-<area shape="rect" href="../../da/d00/a00317.html" title=" " alt="" coords="675,80,841,107"/>
-<area shape="poly" title=" " alt="" coords="993,32,808,82,807,77,988,33"/>
-<area shape="rect" href="../../df/d00/a00335.html" title=" " alt="" coords="290,80,468,107"/>
-<area shape="poly" title=" " alt="" coords="989,28,481,83,469,84,468,79,480,77,991,23"/>
-<area shape="rect" href="../../d3/d00/a00341.html" title=" " alt="" coords="492,80,650,107"/>
-<area shape="poly" title=" " alt="" coords="987,28,651,82,650,77,993,27"/>
-<area shape="rect" href="../../d6/d00/a00356.html" title=" " alt="" coords="894,155,1046,181"/>
-<area shape="poly" title=" " alt="" coords="1037,45,1030,77,1018,108,1001,134,983,157,980,152,997,131,1013,105,1025,76,1033,49"/>
-<area shape="rect" href="../../d4/d00/a00359.html" title=" " alt="" coords="865,80,1002,107"/>
-<area shape="poly" title=" " alt="" coords="1012,40,954,82,952,77,1007,42"/>
-<area shape="rect" href="../../d8/d00/a00368.html" title="Contains code for the bx_gui_c base class used for interfacing with SDL and other device interfaces." alt="" coords="1069,155,1153,181"/>
-<area shape="poly" title=" " alt="" coords="1055,44,1108,155,1103,153,1052,48"/>
-<area shape="rect" href="../../da/d00/a00383.html" title="Contains the code for the bx_keymap_c class used for keyboard interfacing with SDL and other device i..." alt="" coords="1445,80,1558,107"/>
-<area shape="poly" title=" " alt="" coords="1091,25,1434,77,1447,82,1442,82,1433,83,1090,30"/>
-<area shape="rect" href="../../db/d00/a00395.html" title="Contains definitions for scancode table." alt="" coords="1305,80,1421,107"/>
-<area shape="poly" title=" " alt="" coords="1091,29,1309,79,1304,79,1091,34"/>
-<area shape="rect" href="../../d9/d00/a00398.html" title="Contains the code for the bx_sdl_gui_c class used for interfacing with SDL." alt="" coords="1177,155,1261,181"/>
-<area shape="poly" title=" " alt="" coords="1091,17,1130,21,1172,31,1212,49,1229,62,1244,79,1251,98,1249,120,1230,156,1227,152,1243,118,1246,99,1240,81,1226,66,1209,54,1171,36,1129,26,1091,22"/>
-<area shape="rect" href="../../d3/d00/a00419.html" title="Contains the definitions for the emulated Keyboard and mouse devices and controller." alt="" coords="1128,80,1230,107"/>
-<area shape="poly" title=" " alt="" coords="1079,37,1157,80,1152,79,1078,42"/>
-<area shape="rect" href="../../d4/d00/a00617.html" title="Contains the code for the emulated Typhoon Chipset devices." alt="" coords="1582,80,1720,107"/>
-<area shape="poly" title=" " alt="" coords="1091,22,1301,45,1572,77,1584,81,1579,81,1571,83,1300,50,1091,28"/>
-<area shape="rect" href="../../d1/d00/a00077.html" title="Contains the code for the configuration file interpreter." alt="" coords="714,155,871,181"/>
-<area shape="poly" title=" " alt="" coords="772,119,789,156,784,153,769,123"/>
-<area shape="rect" href="../../d0/d00/a00314.html" title=" " alt="" coords="510,155,691,181"/>
-<area shape="poly" title=" " alt="" coords="719,113,629,157,627,151,714,114"/>
-<area shape="poly" title=" " alt="" coords="467,107,723,154,717,155,466,113"/>
-<area shape="rect" href="../../dc/d00/a00332.html" title=" " alt="" coords="98,155,290,181"/>
-<area shape="poly" title=" " alt="" coords="336,112,227,157,226,151,330,113"/>
-<area shape="poly" title=" " alt="" coords="625,109,756,154,751,154,624,115"/>
-<area shape="rect" href="../../dc/d00/a00338.html" title=" " alt="" coords="314,155,487,181"/>
-<area shape="poly" title=" " alt="" coords="530,113,431,157,430,151,525,114"/>
-<area shape="poly" title=" " alt="" coords="898,113,818,157,817,151,893,115"/>
-<area shape="poly" title=" " alt="" coords="948,118,966,156,961,153,945,123"/>
-<area shape="rect" href="../../dc/d00/a00053.html" title="Contains the code for the emulated Ali M1543C IDE chipset part." alt="" coords="1425,155,1605,181"/>
-<area shape="poly" title=" " alt="" coords="1404,111,1491,155,1486,154,1403,116"/>
-<area shape="rect" href="../../d4/d00/a00392.html" title="Contains scancodes used to translate host keys to scancodes for the emulated keyboard controller." alt="" coords="1630,155,1760,181"/>
-<area shape="poly" title=" " alt="" coords="1436,108,1640,154,1634,154,1436,113"/>
-<area shape="rect" href="../../df/d00/a00416.html" title="Contains the code for the emulated Keyboard and mouse devices and controller." alt="" coords="1286,155,1401,181"/>
-<area shape="poly" title=" " alt="" coords="1358,120,1348,156,1345,152,1354,123"/>
-<area shape="poly" title=" " alt="" coords="1116,107,861,157,860,151,1111,107"/>
-<area shape="poly" title=" " alt="" coords="1159,117,1124,157,1122,152,1154,119"/>
-<area shape="poly" title=" " alt="" coords="1222,111,1317,154,1312,154,1221,116"/>
-<area shape="poly" title=" " alt="" coords="1195,118,1215,156,1210,153,1192,123"/>
+<div class="center"><img src="../../db/d00/a00372.png" border="0" usemap="#agraphics_2_cirrus_8cpp" loading="lazy" alt=""/></div>
+<map name="agraphics_2_cirrus_8cpp" id="agraphics_2_cirrus_8cpp">
+<area shape="rect" title=" " alt="" coords="1526,5,1660,32"/>
+<area shape="rect" href="../../d6/d00/a00626.html" title="Standard includes." alt="" coords="1268,304,1340,331"/>
+<area shape="poly" title=" " alt="" coords="1575,31,1507,82,1428,151,1359,231,1319,293,1316,288,1355,228,1424,148,1504,78,1570,34"/>
+<area shape="rect" title=" " alt="" coords="1770,528,1830,555"/>
+<area shape="poly" title=" " alt="" coords="1661,18,1829,24,1930,33,2031,45,2125,64,2202,89,2232,105,2255,123,2269,143,2275,166,2275,393,2272,423,2263,445,2248,464,2224,482,2194,497,2152,509,2048,526,1936,536,1845,541,1845,536,1936,531,2047,521,2151,503,2192,492,2221,478,2244,460,2259,443,2267,421,2269,393,2269,167,2265,146,2251,127,2229,110,2200,94,2123,69,2030,51,1929,38,1829,30,1661,23"/>
+<area shape="rect" href="../../d3/d00/a00341.html" title=" " alt="" coords="1565,80,1622,107"/>
+<area shape="poly" title=" " alt="" coords="1595,30,1596,66,1591,63,1592,35"/>
+<area shape="rect" title=" " alt="" coords="246,379,303,405"/>
+<area shape="poly" title=" " alt="" coords="1523,23,1160,42,652,73,407,93,201,116,120,128,59,141,20,155,11,161,8,167,8,244,14,278,32,306,58,329,91,347,127,362,164,372,233,385,228,388,163,377,125,367,88,352,55,333,28,309,9,280,3,244,3,166,7,158,18,150,58,136,119,123,200,111,406,88,652,68,1160,37,1528,22"/>
+<area shape="rect" title=" " alt="" coords="1567,304,1649,331"/>
+<area shape="poly" title=" " alt="" coords="1581,31,1540,73,1496,129,1479,160,1469,192,1469,224,1481,255,1495,271,1513,284,1554,305,1549,304,1510,289,1491,275,1476,257,1464,225,1464,192,1474,158,1492,126,1536,69,1576,34"/>
+<area shape="rect" href="../../d4/d00/a00359.html" title=" " alt="" coords="2077,229,2131,256"/>
+<area shape="poly" title=" " alt="" coords="1661,23,1786,38,1932,64,2003,81,2065,101,2115,125,2148,153,2154,170,2151,188,2130,220,2127,216,2146,186,2148,170,2143,156,2112,130,2063,106,2001,86,1931,69,1785,44,1661,29"/>
+<area shape="rect" href="../../d5/d00/a00374.html" title=" " alt="" coords="1809,80,1876,107"/>
+<area shape="poly" title=" " alt="" coords="1637,30,1797,78,1791,78,1637,35"/>
+<area shape="rect" href="../../d8/d00/a00725.html" title="Contains the definitions for the emulated Typhoon Chipset devices." alt="" coords="754,229,878,256"/>
+<area shape="poly" title=" " alt="" coords="1523,31,1413,53,1286,83,1165,118,1046,158,862,226,860,221,1044,153,1163,113,1285,77,1412,48,1529,30"/>
+<area shape="rect" href="../../d3/d00/a00539.html" title=" " alt="" coords="2309,80,2395,107"/>
+<area shape="poly" title=" " alt="" coords="1661,21,1937,39,2113,56,2291,77,2297,80,2291,81,2290,83,2113,61,1936,45,1661,26"/>
+<area shape="rect" href="../../d7/d00/a00173.html" title=" " alt="" coords="1123,379,1232,405"/>
+<area shape="poly" title=" " alt="" coords="1284,330,1213,373,1212,368,1279,332"/>
+<area shape="rect" href="../../d8/d00/a00326.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="499,379,589,405"/>
+<area shape="poly" title=" " alt="" coords="1265,321,996,340,804,357,604,381,603,376,803,352,995,334,1270,320"/>
+<area shape="rect" title=" " alt="" coords="613,379,680,405"/>
+<area shape="poly" title=" " alt="" coords="1265,321,1031,339,867,356,696,381,695,376,866,351,1030,334,1270,320"/>
+<area shape="rect" href="../../d6/d00/a00047.html" title=" " alt="" coords="1718,379,1840,405"/>
+<area shape="poly" title=" " alt="" coords="1341,321,1705,378,1699,378,1340,327"/>
+<area shape="rect" href="../../dc/d00/a00053.html" title=" " alt="" coords="1280,453,1381,480"/>
+<area shape="poly" title=" " alt="" coords="1265,320,1194,326,1105,336,1024,354,994,366,974,380,969,392,974,404,994,418,1024,429,1103,441,1268,453,1263,453,1102,446,1022,434,992,423,970,407,964,392,970,377,991,361,1022,348,1104,331,1193,321,1270,319"/>
+<area shape="rect" href="../../de/d00/a00065.html" title=" " alt="" coords="704,379,808,405"/>
+<area shape="poly" title=" " alt="" coords="1265,324,824,384,823,379,1270,323"/>
+<area shape="rect" href="../../d9/d00/a00056.html" title=" " alt="" coords="834,453,921,480"/>
+<area shape="poly" title=" " alt="" coords="1265,318,1207,322,1128,331,1044,349,1002,363,963,381,925,410,895,443,893,439,921,406,960,376,1000,358,1042,344,1128,326,1206,317,1270,318"/>
+<area shape="rect" href="../../df/d00/a00062.html" title=" " alt="" coords="1563,379,1693,405"/>
+<area shape="poly" title=" " alt="" coords="1341,324,1560,375,1554,375,1340,329"/>
+<area shape="rect" href="../../d3/d00/a00059.html" title=" " alt="" coords="984,379,1098,405"/>
+<area shape="poly" title=" " alt="" coords="1270,328,1102,377,1101,372,1265,329"/>
+<area shape="rect" href="../../dd/d00/a00365.html" title="Contains macro&#39;s and prototypes for debugging." alt="" coords="1256,379,1358,405"/>
+<area shape="poly" title=" " alt="" coords="1306,329,1308,365,1304,361,1303,333"/>
+<area shape="rect" href="../../d8/d00/a00368.html" title="Contains byte&#45;order conversion helpers." alt="" coords="1382,379,1487,405"/>
+<area shape="poly" title=" " alt="" coords="1327,329,1401,371,1396,370,1326,334"/>
+<area shape="rect" title=" " alt="" coords="1837,453,1915,480"/>
+<area shape="poly" title=" " alt="" coords="1796,403,1850,445,1845,443,1795,408"/>
+<area shape="rect" title=" " alt="" coords="1939,453,1992,480"/>
+<area shape="poly" title=" " alt="" coords="1812,403,1927,450,1921,449,1811,409"/>
+<area shape="rect" title=" " alt="" coords="553,528,610,555"/>
+<area shape="poly" title=" " alt="" coords="1283,478,1268,483,1082,505,898,522,626,540,626,535,897,517,1081,500,1268,477,1277,478"/>
+<area shape="poly" title=" " alt="" coords="1382,473,1758,533,1752,533,1381,478"/>
+<area shape="rect" title=" " alt="" coords="1302,528,1359,555"/>
+<area shape="poly" title=" " alt="" coords="1333,479,1333,514,1329,511,1329,482"/>
+<area shape="rect" title=" " alt="" coords="1065,528,1122,555"/>
+<area shape="poly" title=" " alt="" coords="1292,480,1137,530,1136,524,1287,481"/>
+<area shape="rect" title=" " alt="" coords="1481,528,1559,555"/>
+<area shape="poly" title=" " alt="" coords="1364,478,1475,522,1470,522,1363,483"/>
+<area shape="poly" title=" " alt="" coords="809,394,972,403,1116,408,1239,409,1448,408,1549,409,1658,415,1780,429,1926,453,1920,453,1779,434,1657,421,1549,415,1448,413,1239,415,1116,413,972,408,809,399"/>
+<area shape="poly" title=" " alt="" coords="701,404,692,408,594,413,430,419,270,432,213,442,194,448,183,455,178,467,183,478,207,495,244,509,290,520,341,527,449,535,540,540,535,540,448,541,341,532,289,525,242,514,205,500,179,482,173,467,179,452,192,444,211,437,269,427,430,414,594,408,692,403,706,403"/>
+<area shape="poly" title=" " alt="" coords="809,394,1061,412,1227,429,1394,451,1596,489,1758,529,1752,528,1595,494,1393,456,1226,434,1061,417,809,399"/>
+<area shape="poly" title=" " alt="" coords="757,404,760,442,767,462,779,478,800,484,847,492,991,508,1289,537,1284,537,991,513,847,497,799,489,776,482,762,464,755,443,753,408"/>
+<area shape="poly" title=" " alt="" coords="701,404,692,408,565,415,393,422,314,429,254,441,234,448,223,457,220,466,227,478,262,488,342,499,583,516,1052,538,1047,539,583,521,341,504,261,494,224,482,215,467,218,454,232,444,253,435,314,424,393,417,565,410,692,403,706,403"/>
+<area shape="poly" title=" " alt="" coords="762,403,785,442,802,462,822,478,1468,535,1463,536,820,482,798,466,781,445,760,408"/>
+<area shape="rect" title=" " alt="" coords="944,453,1005,480"/>
+<area shape="poly" title=" " alt="" coords="794,403,932,451,927,450,794,409"/>
+<area shape="rect" title=" " alt="" coords="238,453,306,480"/>
+<area shape="poly" title=" " alt="" coords="701,404,692,408,590,422,508,430,426,439,322,456,321,451,426,434,508,425,589,417,692,403,706,403"/>
+<area shape="rect" title=" " alt="" coords="1131,453,1256,480"/>
+<area shape="poly" title=" " alt="" coords="809,399,1118,452,1113,453,809,405"/>
+<area shape="rect" title=" " alt="" coords="43,453,112,480"/>
+<area shape="poly" title=" " alt="" coords="701,404,692,408,535,424,411,430,288,437,131,456,128,456,125,452,130,451,288,432,411,425,534,419,692,403,706,403"/>
+<area shape="rect" title=" " alt="" coords="330,453,427,480"/>
+<area shape="poly" title=" " alt="" coords="701,404,443,455,442,450,706,403"/>
+<area shape="poly" title=" " alt="" coords="778,403,846,445,840,445,777,408"/>
+<area shape="rect" title=" " alt="" coords="450,453,526,480"/>
+<area shape="poly" title=" " alt="" coords="712,405,541,454,540,449,707,406"/>
+<area shape="rect" title=" " alt="" coords="550,453,618,480"/>
+<area shape="poly" title=" " alt="" coords="729,405,629,449,627,444,723,407"/>
+<area shape="rect" title=" " alt="" coords="642,453,708,480"/>
+<area shape="poly" title=" " alt="" coords="744,405,701,445,699,441,739,407"/>
+<area shape="poly" title=" " alt="" coords="1565,403,1544,408,1424,421,1331,428,1238,437,1119,456,1069,469,1018,483,908,502,798,518,626,538,625,533,798,513,907,497,1017,477,1067,464,1118,451,1237,432,1330,423,1424,415,1544,403,1560,403"/>
+<area shape="poly" title=" " alt="" coords="1684,403,1729,422,1751,435,1770,452,1789,481,1798,515,1794,512,1784,483,1766,455,1748,439,1727,427,1684,409"/>
+<area shape="poly" title=" " alt="" coords="1644,403,1660,419,1674,439,1681,460,1676,481,1655,503,1630,519,1602,530,1575,537,1574,531,1601,525,1627,514,1652,499,1671,479,1676,460,1669,441,1656,423,1642,408"/>
+<area shape="poly" title=" " alt="" coords="1565,404,1272,455,1271,450,1560,404"/>
+<area shape="rect" title=" " alt="" coords="2117,453,2182,480"/>
+<area shape="poly" title=" " alt="" coords="1694,401,1706,403,2105,459,2099,459,1705,408,1694,406"/>
+<area shape="poly" title=" " alt="" coords="1092,403,1268,449,1263,449,1091,409"/>
+<area shape="poly" title=" " alt="" coords="1099,401,1111,403,1197,410,1270,412,1397,407,1457,407,1521,412,1592,426,1674,451,1704,464,1732,481,1778,518,1773,517,1729,485,1701,469,1672,456,1591,431,1520,417,1457,412,1397,412,1270,417,1196,416,1110,408,1099,406"/>
+<area shape="poly" title=" " alt="" coords="1099,401,1111,403,1176,408,1260,412,1341,424,1373,435,1395,452,1402,470,1396,489,1382,506,1364,521,1362,516,1378,502,1391,486,1397,470,1391,455,1371,440,1340,429,1260,418,1175,413,1110,408,1099,406"/>
+<area shape="poly" title=" " alt="" coords="1047,404,1086,515,1082,512,1044,408"/>
+<area shape="poly" title=" " alt="" coords="1099,401,1111,403,1198,412,1267,414,1334,423,1372,434,1416,451,1463,481,1501,518,1496,516,1460,485,1413,456,1370,439,1333,428,1266,419,1197,417,1110,408,1099,406"/>
+<area shape="poly" title=" " alt="" coords="1032,405,998,444,995,440,1027,407"/>
+<area shape="rect" title=" " alt="" coords="1558,453,1661,480"/>
+<area shape="poly" title=" " alt="" coords="1099,401,1111,403,1231,418,1325,427,1419,436,1539,451,1545,454,1540,454,1538,456,1418,441,1324,432,1231,423,1110,408,1099,406"/>
+<area shape="poly" title=" " alt="" coords="1568,106,1526,130,1483,157,1438,192,1395,229,1327,295,1325,290,1391,225,1434,188,1480,152,1524,126,1563,108"/>
+<area shape="rect" href="../../d8/d00/a00344.html" title=" " alt="" coords="1594,229,1704,256"/>
+<area shape="poly" title=" " alt="" coords="1599,105,1642,216,1637,214,1597,109"/>
+<area shape="rect" href="../../dc/d00/a00332.html" title=" " alt="" coords="1493,155,1603,181"/>
+<area shape="poly" title=" " alt="" coords="1588,106,1566,143,1562,139,1583,109"/>
+<area shape="poly" title=" " alt="" coords="1623,102,1869,179,2065,231,2060,231,1867,184,1622,107"/>
+<area shape="poly" title=" " alt="" coords="1596,255,1356,308,1355,303,1591,256"/>
+<area shape="rect" title=" " alt="" coords="1966,379,2026,405"/>
+<area shape="poly" title=" " alt="" coords="1671,254,1734,289,1814,328,1886,355,1954,379,1949,378,1885,360,1812,333,1732,294,1669,259"/>
+<area shape="poly" title=" " alt="" coords="1591,244,1362,247,1035,254,865,261,707,272,570,287,469,307,443,318,419,333,319,376,317,371,416,328,441,313,467,301,570,282,706,267,865,256,1035,249,1362,242,1596,243"/>
+<area shape="rect" title=" " alt="" coords="2022,304,2079,331"/>
+<area shape="poly" title=" " alt="" coords="1705,251,2009,308,2004,308,1705,257"/>
+<area shape="rect" title=" " alt="" coords="1825,304,1890,331"/>
+<area shape="poly" title=" " alt="" coords="1686,254,1813,300,1808,300,1685,259"/>
+<area shape="poly" title=" " alt="" coords="1644,255,1624,293,1621,289,1640,258"/>
+<area shape="poly" title=" " alt="" coords="1490,170,1266,173,947,180,781,187,626,198,493,213,394,232,310,257,247,283,190,321,127,380,105,410,90,440,85,438,101,407,123,377,187,317,244,278,308,252,393,227,492,208,626,193,781,182,947,175,1266,168,1495,169"/>
+<area shape="poly" title=" " alt="" coords="1566,179,1622,220,1617,219,1565,184"/>
+<area shape="poly" title=" " alt="" coords="1551,179,1562,217,1572,237,1585,254,1617,276,1664,297,1753,328,1953,380,1948,380,1751,333,1662,302,1614,281,1581,258,1567,239,1557,219,1548,184"/>
+<area shape="poly" title=" " alt="" coords="1490,171,1213,184,821,207,627,225,458,247,389,260,332,274,291,289,267,306,261,318,259,333,265,365,260,363,253,333,256,317,263,302,289,285,331,269,388,255,458,242,627,219,821,202,1212,178,1495,170"/>
+<area shape="poly" title=" " alt="" coords="1531,181,1512,199,1495,217,1487,236,1487,245,1490,255,1502,270,1518,282,1555,303,1549,302,1515,287,1499,274,1486,257,1481,246,1481,235,1491,214,1508,195,1526,183"/>
+<area shape="poly" title=" " alt="" coords="2107,254,2107,292,2103,313,2094,332,2070,358,2041,376,2039,371,2067,353,2090,329,2098,311,2102,291,2104,258"/>
+<area shape="poly" title=" " alt="" coords="2097,255,2070,294,2067,289,2092,258"/>
+<area shape="poly" title=" " alt="" coords="1877,95,2022,114,2097,130,2126,141,2147,153,2185,188,2208,223,2219,264,2221,316,2221,393,2220,442,2212,462,2195,482,2169,498,2131,510,2035,528,1932,538,1845,542,1845,536,1931,532,2034,523,2130,505,2166,493,2192,478,2208,460,2215,441,2216,393,2216,316,2213,265,2203,225,2181,191,2144,157,2124,145,2095,135,2021,119,1877,100"/>
+<area shape="poly" title=" " alt="" coords="1838,106,1814,150,1775,210,1724,274,1695,305,1663,333,1634,351,1609,361,1583,369,1552,381,1527,396,1501,408,1430,426,1369,435,1313,439,1262,439,1154,439,1092,444,1020,455,1020,449,1092,438,1154,434,1262,434,1313,434,1368,430,1429,421,1499,403,1525,391,1549,376,1582,364,1607,356,1632,346,1660,329,1691,301,1720,271,1771,207,1810,147,1834,109"/>
+<area shape="poly" title=" " alt="" coords="1812,106,1768,129,1724,157,1693,187,1668,219,1665,214,1689,183,1721,153,1765,125,1806,108"/>
+<area shape="poly" title=" " alt="" coords="1806,104,1615,153,1614,148,1811,102"/>
+<area shape="rect" href="../../d4/d00/a00428.html" title=" " alt="" coords="1880,155,1949,181"/>
+<area shape="poly" title=" " alt="" coords="1856,105,1894,144,1889,143,1854,110"/>
+<area shape="rect" href="../../de/d00/a00440.html" title="Contains the definitions for the bx_gui_c base class used for interfacing with SDL and other device i..." alt="" coords="1933,229,2003,256"/>
+<area shape="poly" title=" " alt="" coords="1845,105,1853,142,1860,162,1870,180,1894,203,1924,223,1918,222,1891,207,1866,183,1855,164,1847,143,1842,109"/>
+<area shape="rect" href="../../dc/d00/a00338.html" title=" " alt="" coords="1798,229,1909,256"/>
+<area shape="poly" title=" " alt="" coords="1877,99,1924,118,1946,133,1964,153,1968,165,1968,176,1956,196,1935,212,1908,226,1907,221,1932,208,1952,193,1963,175,1963,166,1959,156,1943,137,1922,122,1877,104"/>
+<area shape="rect" href="../../df/d00/a00335.html" title="Support functions for working with attotime data." alt="" coords="2024,155,2133,181"/>
+<area shape="poly" title=" " alt="" coords="1877,102,2025,150,2020,150,1877,108"/>
+<area shape="poly" title=" " alt="" coords="1975,254,2013,329,2029,353,2041,378,2044,392,2041,406,2025,429,2004,447,2002,442,2021,426,2036,404,2039,392,2036,380,2024,355,2008,332,1972,259"/>
+<area shape="poly" title=" " alt="" coords="1951,256,1890,298,1888,293,1946,257"/>
+<area shape="poly" title=" " alt="" coords="1887,254,1925,273,1969,299,2009,334,2027,355,2041,378,2045,393,2044,410,2032,443,2016,469,2006,482,1981,492,1940,501,1822,517,1575,539,1575,534,1821,512,1939,495,1980,487,2002,478,2012,466,2027,440,2039,408,2040,393,2036,380,2023,358,2006,338,1965,303,1923,277,1886,259"/>
+<area shape="poly" title=" " alt="" coords="1856,254,1858,290,1854,287,1852,259"/>
+<area shape="poly" title=" " alt="" coords="1813,256,1664,302,1663,297,1808,257"/>
+<area shape="poly" title=" " alt="" coords="2021,176,1775,207,1583,232,1457,266,1352,301,1351,296,1456,261,1582,227,1774,201,2027,175"/>
+<area shape="poly" title=" " alt="" coords="2100,179,2125,200,2145,228,2162,284,2166,343,2164,396,2157,440,2153,436,2158,395,2161,343,2156,285,2140,231,2121,204,2098,184"/>
+<area shape="poly" title=" " alt="" coords="2078,180,2068,230,2057,290,2053,287,2063,229,2074,184"/>
+<area shape="poly" title=" " alt="" coords="2084,180,2097,216,2092,213,2082,184"/>
+<area shape="poly" title=" " alt="" coords="878,247,1089,269,1352,301,1511,328,1608,337,1685,339,1761,347,1804,358,1853,376,1904,406,1946,443,1940,442,1901,411,1851,381,1802,363,1760,352,1685,344,1608,342,1510,333,1352,307,1088,274,879,253"/>
+<area shape="poly" title=" " alt="" coords="751,246,626,254,470,264,320,281,259,293,214,307,151,333,104,360,85,377,67,397,33,454,28,467,33,478,58,491,107,502,250,519,410,530,540,538,535,539,410,535,250,524,106,507,56,496,29,482,23,467,28,452,62,394,81,373,101,356,149,329,212,301,258,288,319,276,469,259,626,248,756,245"/>
+<area shape="poly" title=" " alt="" coords="878,244,1130,261,1290,278,1451,301,1503,314,1555,328,1651,340,1727,343,1802,350,1845,360,1894,376,1955,408,1986,430,2006,452,2012,475,2005,494,1989,509,1965,520,1905,534,1846,541,1846,536,1904,529,1963,515,1986,504,2001,491,2007,475,2002,455,1983,434,1952,412,1892,381,1843,365,1801,355,1727,348,1650,346,1554,333,1502,320,1450,307,1289,283,1129,266,879,249"/>
+<area shape="poly" title=" " alt="" coords="840,254,872,275,902,302,926,336,945,373,969,439,965,437,940,375,921,339,898,306,869,279,840,259"/>
+<area shape="poly" title=" " alt="" coords="751,247,636,255,495,266,361,283,307,294,266,306,214,336,167,373,128,411,99,443,95,440,124,407,164,369,211,331,264,302,305,288,360,277,494,260,636,249,756,245"/>
+<area shape="poly" title=" " alt="" coords="751,247,629,256,481,268,353,285,309,295,286,306,278,318,273,332,272,364,267,362,268,332,273,316,282,302,307,290,352,280,481,263,628,251,756,246"/>
+<area shape="poly" title=" " alt="" coords="879,246,1811,311,1808,315,879,251"/>
+<area shape="poly" title=" " alt="" coords="878,244,1168,262,1357,279,1548,301,1555,305,1549,305,1548,307,1357,284,1168,267,879,249"/>
+<area shape="rect" href="../../d6/d00/a00356.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="744,304,888,331"/>
+<area shape="poly" title=" " alt="" coords="818,254,818,290,814,287,814,259"/>
+<area shape="rect" href="../../de/d00/a00323.html" title="Contains the definitions for the CPU tracing engine." alt="" coords="582,304,720,331"/>
+<area shape="poly" title=" " alt="" coords="790,256,695,300,693,295,785,258"/>
+<area shape="rect" href="../../dd/d00/a00719.html" title=" " alt="" coords="480,304,557,331"/>
+<area shape="poly" title=" " alt="" coords="761,258,574,305,572,300,766,256"/>
+<area shape="rect" title=" " alt="" coords="296,304,406,331"/>
+<area shape="poly" title=" " alt="" coords="751,255,424,307,422,307,420,302,424,301,755,252"/>
+<area shape="poly" title=" " alt="" coords="789,330,691,375,689,370,784,332"/>
+<area shape="poly" title=" " alt="" coords="635,330,576,372,574,367,630,332"/>
+<area shape="poly" title=" " alt="" coords="490,332,415,369,316,408,216,437,128,458,126,453,214,432,314,403,413,364,495,330"/>
+<area shape="poly" title=" " alt="" coords="558,326,570,328,764,351,928,363,1073,368,1209,368,1491,365,1657,367,1852,376,1953,386,1948,386,1852,381,1657,373,1491,370,1209,373,1073,373,928,368,763,356,569,333,558,331"/>
+<area shape="poly" title=" " alt="" coords="477,332,319,380,317,375,482,329"/>
 </map>
 </div>
 </div>
 <p><a href="../../d6/d00/a00371_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
-Data Structures</h2></td></tr>
-<tr class="memitem:bx_5Fvga_5Ftminfo_5Ft" id="r_bx_5Fvga_5Ftminfo_5Ft"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../db/d00/a01425.html">bx_vga_tminfo_t</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">VGA mode information for GUI.  <a href="../../db/d00/a01425.html#details">More...</a><br /></td></tr>
-<tr class="memitem:bx_5Fsvga_5Ftileinfo_5Ft" id="r_bx_5Fsvga_5Ftileinfo_5Ft"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d1/d00/a01429.html">bx_svga_tileinfo_t</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">VGA tile information for GUI.  <a href="../../d1/d00/a01429.html#details">More...</a><br /></td></tr>
-<tr class="memitem:bx_5Fgui_5Fc" id="r_bx_5Fgui_5Fc"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../d2/d00/a01433.html">bx_gui_c</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abstract base class for GUI implementations.  <a href="../../d2/d00/a01433.html#details">More...</a><br /></td></tr>
-<tr class="memitem:CDisplayOutput" id="r_CDisplayOutput"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../d9/d00/a01437.html">CDisplayOutput</a></td></tr>
-<tr class="memitem:CDisplayOutputProvider" id="r_CDisplayOutputProvider"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a01441.html">CDisplayOutputProvider</a></td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:ad6d77159677be550d33909310c0ae22b" id="r_ad6d77159677be550d33909310c0ae22b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad6d77159677be550d33909310c0ae22b">BX_DEBUG</a>(a)</td></tr>
-<tr class="memitem:a95a1feec75db0c8d042bdced727d07ce" id="r_a95a1feec75db0c8d042bdced727d07ce"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a95a1feec75db0c8d042bdced727d07ce">BX_INFO</a>(a)</td></tr>
-<tr class="memitem:af2547908e32be538a69d6f82363d4513" id="r_af2547908e32be538a69d6f82363d4513"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af2547908e32be538a69d6f82363d4513">BX_PANIC</a>(a)</td></tr>
-<tr class="memitem:a6a4f5db8f7b49047692c650d36bfad3e" id="r_a6a4f5db8f7b49047692c650d36bfad3e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6a4f5db8f7b49047692c650d36bfad3e">BX_ERROR</a>(a)</td></tr>
-<tr class="memitem:abf3b3a867b6448586fc87cb4ff5eb49c" id="r_abf3b3a867b6448586fc87cb4ff5eb49c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#abf3b3a867b6448586fc87cb4ff5eb49c">BX_KEY_PRESSED</a>&#160;&#160;&#160;0x00000000</td></tr>
-<tr class="memitem:ac39e97fa23388fa4338fed4029dbcce9" id="r_ac39e97fa23388fa4338fed4029dbcce9"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac39e97fa23388fa4338fed4029dbcce9">BX_KEY_RELEASED</a>&#160;&#160;&#160;0x80000000</td></tr>
-<tr class="memitem:a711cc83432a9b2c2e6eb36abb2d6ba8f" id="r_a711cc83432a9b2c2e6eb36abb2d6ba8f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a711cc83432a9b2c2e6eb36abb2d6ba8f">BX_KEY_UNHANDLED</a>&#160;&#160;&#160;0x10000000</td></tr>
-<tr class="memitem:abc6a144db2a7b65c37e44f0594044b7b" id="r_abc6a144db2a7b65c37e44f0594044b7b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#abc6a144db2a7b65c37e44f0594044b7b">BX_KEY_CTRL_L</a>&#160;&#160;&#160;0</td></tr>
-<tr class="memitem:afb1107f565aef08c464ff443b9676553" id="r_afb1107f565aef08c464ff443b9676553"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#afb1107f565aef08c464ff443b9676553">BX_KEY_SHIFT_L</a>&#160;&#160;&#160;1</td></tr>
-<tr class="memitem:aec4123e2640680355825d32b8b4f84b2" id="r_aec4123e2640680355825d32b8b4f84b2"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aec4123e2640680355825d32b8b4f84b2">BX_KEY_F1</a>&#160;&#160;&#160;2</td></tr>
-<tr class="memitem:afa7e96f8231f2a01a250f1d501731075" id="r_afa7e96f8231f2a01a250f1d501731075"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#afa7e96f8231f2a01a250f1d501731075">BX_KEY_F2</a>&#160;&#160;&#160;3</td></tr>
-<tr class="memitem:afe396b322fe80831e2b7d33335e8464f" id="r_afe396b322fe80831e2b7d33335e8464f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#afe396b322fe80831e2b7d33335e8464f">BX_KEY_F3</a>&#160;&#160;&#160;4</td></tr>
-<tr class="memitem:af539822896fae1600183579733a3f98c" id="r_af539822896fae1600183579733a3f98c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af539822896fae1600183579733a3f98c">BX_KEY_F4</a>&#160;&#160;&#160;5</td></tr>
-<tr class="memitem:aa72a30c78e2a8d1a70fc065d7e825f9e" id="r_aa72a30c78e2a8d1a70fc065d7e825f9e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aa72a30c78e2a8d1a70fc065d7e825f9e">BX_KEY_F5</a>&#160;&#160;&#160;6</td></tr>
-<tr class="memitem:a3eb3d755ed217b60efe0d74133608a3b" id="r_a3eb3d755ed217b60efe0d74133608a3b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a3eb3d755ed217b60efe0d74133608a3b">BX_KEY_F6</a>&#160;&#160;&#160;7</td></tr>
-<tr class="memitem:a95fb1e94e0b100d92e3f22408fd51f53" id="r_a95fb1e94e0b100d92e3f22408fd51f53"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a95fb1e94e0b100d92e3f22408fd51f53">BX_KEY_F7</a>&#160;&#160;&#160;8</td></tr>
-<tr class="memitem:a40a15a85d0cab9620f71de819c2f5f89" id="r_a40a15a85d0cab9620f71de819c2f5f89"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a40a15a85d0cab9620f71de819c2f5f89">BX_KEY_F8</a>&#160;&#160;&#160;9</td></tr>
-<tr class="memitem:a22be0bb28e2adaf20ed316ec3b38af35" id="r_a22be0bb28e2adaf20ed316ec3b38af35"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a22be0bb28e2adaf20ed316ec3b38af35">BX_KEY_F9</a>&#160;&#160;&#160;10</td></tr>
-<tr class="memitem:ae6eea31b2679eb230d431bf559955467" id="r_ae6eea31b2679eb230d431bf559955467"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae6eea31b2679eb230d431bf559955467">BX_KEY_F10</a>&#160;&#160;&#160;11</td></tr>
-<tr class="memitem:a551fb3174cc472b49da98fb9d1aedc72" id="r_a551fb3174cc472b49da98fb9d1aedc72"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a551fb3174cc472b49da98fb9d1aedc72">BX_KEY_F11</a>&#160;&#160;&#160;12</td></tr>
-<tr class="memitem:a2e3690dc8cee929cdc8b823b2873e72c" id="r_a2e3690dc8cee929cdc8b823b2873e72c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a2e3690dc8cee929cdc8b823b2873e72c">BX_KEY_F12</a>&#160;&#160;&#160;13</td></tr>
-<tr class="memitem:a15058ab614cba4888f5c03e18939550a" id="r_a15058ab614cba4888f5c03e18939550a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a15058ab614cba4888f5c03e18939550a">BX_KEY_CTRL_R</a>&#160;&#160;&#160;14</td></tr>
-<tr class="memitem:a5c9ca58e44e5d81b09dbf96094f597ac" id="r_a5c9ca58e44e5d81b09dbf96094f597ac"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5c9ca58e44e5d81b09dbf96094f597ac">BX_KEY_SHIFT_R</a>&#160;&#160;&#160;15</td></tr>
-<tr class="memitem:a8dfc696aba037380329979763594bc49" id="r_a8dfc696aba037380329979763594bc49"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a8dfc696aba037380329979763594bc49">BX_KEY_CAPS_LOCK</a>&#160;&#160;&#160;16</td></tr>
-<tr class="memitem:ab4daf739efdbb7d13ccc38404defdbf5" id="r_ab4daf739efdbb7d13ccc38404defdbf5"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab4daf739efdbb7d13ccc38404defdbf5">BX_KEY_NUM_LOCK</a>&#160;&#160;&#160;17</td></tr>
-<tr class="memitem:ac2a9b501b0a8c1e635e3115a2201c0a6" id="r_ac2a9b501b0a8c1e635e3115a2201c0a6"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac2a9b501b0a8c1e635e3115a2201c0a6">BX_KEY_ALT_L</a>&#160;&#160;&#160;18</td></tr>
-<tr class="memitem:a07e9ead921ca1687b75bed718fa664d1" id="r_a07e9ead921ca1687b75bed718fa664d1"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a07e9ead921ca1687b75bed718fa664d1">BX_KEY_ALT_R</a>&#160;&#160;&#160;19</td></tr>
-<tr class="memitem:a0ad140649519b17eed21fdb244f6c32a" id="r_a0ad140649519b17eed21fdb244f6c32a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0ad140649519b17eed21fdb244f6c32a">BX_KEY_A</a>&#160;&#160;&#160;20</td></tr>
-<tr class="memitem:a9b1ff73ec4fe402f3cb2369d13c0f42d" id="r_a9b1ff73ec4fe402f3cb2369d13c0f42d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9b1ff73ec4fe402f3cb2369d13c0f42d">BX_KEY_B</a>&#160;&#160;&#160;21</td></tr>
-<tr class="memitem:a40d9e7dddb148a18e157cd02e95fd384" id="r_a40d9e7dddb148a18e157cd02e95fd384"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a40d9e7dddb148a18e157cd02e95fd384">BX_KEY_C</a>&#160;&#160;&#160;22</td></tr>
-<tr class="memitem:aaaea2a55d3769c9886355fffda1f3537" id="r_aaaea2a55d3769c9886355fffda1f3537"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aaaea2a55d3769c9886355fffda1f3537">BX_KEY_D</a>&#160;&#160;&#160;23</td></tr>
-<tr class="memitem:a838382066c83dd0f64a12fcdab455858" id="r_a838382066c83dd0f64a12fcdab455858"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a838382066c83dd0f64a12fcdab455858">BX_KEY_E</a>&#160;&#160;&#160;24</td></tr>
-<tr class="memitem:abacd80f672146dd7d97a2908cdd28ec6" id="r_abacd80f672146dd7d97a2908cdd28ec6"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#abacd80f672146dd7d97a2908cdd28ec6">BX_KEY_F</a>&#160;&#160;&#160;25</td></tr>
-<tr class="memitem:a9cd77e6e771de7d706082d91c87fc60b" id="r_a9cd77e6e771de7d706082d91c87fc60b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9cd77e6e771de7d706082d91c87fc60b">BX_KEY_G</a>&#160;&#160;&#160;26</td></tr>
-<tr class="memitem:a997379d865f8db7f5b8d1e85f0b6b0c8" id="r_a997379d865f8db7f5b8d1e85f0b6b0c8"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a997379d865f8db7f5b8d1e85f0b6b0c8">BX_KEY_H</a>&#160;&#160;&#160;27</td></tr>
-<tr class="memitem:a9bb634c92c5329df61c411384c14ba91" id="r_a9bb634c92c5329df61c411384c14ba91"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9bb634c92c5329df61c411384c14ba91">BX_KEY_I</a>&#160;&#160;&#160;28</td></tr>
-<tr class="memitem:ab005e7392d952b5d19d78de3092a1cb5" id="r_ab005e7392d952b5d19d78de3092a1cb5"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab005e7392d952b5d19d78de3092a1cb5">BX_KEY_J</a>&#160;&#160;&#160;29</td></tr>
-<tr class="memitem:a70a0016b41e77d2d751572c2b9df3243" id="r_a70a0016b41e77d2d751572c2b9df3243"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a70a0016b41e77d2d751572c2b9df3243">BX_KEY_K</a>&#160;&#160;&#160;30</td></tr>
-<tr class="memitem:afde8474c5fb4f354d53016dc68ccb3bf" id="r_afde8474c5fb4f354d53016dc68ccb3bf"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#afde8474c5fb4f354d53016dc68ccb3bf">BX_KEY_L</a>&#160;&#160;&#160;31</td></tr>
-<tr class="memitem:a7238bc1338a4d18adf46ac7503c8982b" id="r_a7238bc1338a4d18adf46ac7503c8982b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a7238bc1338a4d18adf46ac7503c8982b">BX_KEY_M</a>&#160;&#160;&#160;32</td></tr>
-<tr class="memitem:a6d2b022ae2207aa8ee80c2f1c1f90bb3" id="r_a6d2b022ae2207aa8ee80c2f1c1f90bb3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6d2b022ae2207aa8ee80c2f1c1f90bb3">BX_KEY_N</a>&#160;&#160;&#160;33</td></tr>
-<tr class="memitem:ad5dd95b78693b58bca3ac1346d106dc5" id="r_ad5dd95b78693b58bca3ac1346d106dc5"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad5dd95b78693b58bca3ac1346d106dc5">BX_KEY_O</a>&#160;&#160;&#160;34</td></tr>
-<tr class="memitem:af61ea12f893e220090ac5b46d661f275" id="r_af61ea12f893e220090ac5b46d661f275"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af61ea12f893e220090ac5b46d661f275">BX_KEY_P</a>&#160;&#160;&#160;35</td></tr>
-<tr class="memitem:ab877b5686ffa97879db44f7fa288aa10" id="r_ab877b5686ffa97879db44f7fa288aa10"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab877b5686ffa97879db44f7fa288aa10">BX_KEY_Q</a>&#160;&#160;&#160;36</td></tr>
-<tr class="memitem:a6aca917b907f0895a94941353fccc85c" id="r_a6aca917b907f0895a94941353fccc85c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6aca917b907f0895a94941353fccc85c">BX_KEY_R</a>&#160;&#160;&#160;37</td></tr>
-<tr class="memitem:a28e31ac7ded364a30e8d1816f6c29b8b" id="r_a28e31ac7ded364a30e8d1816f6c29b8b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a28e31ac7ded364a30e8d1816f6c29b8b">BX_KEY_S</a>&#160;&#160;&#160;38</td></tr>
-<tr class="memitem:add1731e77f0215b7dff4442845b2a494" id="r_add1731e77f0215b7dff4442845b2a494"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#add1731e77f0215b7dff4442845b2a494">BX_KEY_T</a>&#160;&#160;&#160;39</td></tr>
-<tr class="memitem:a901677f0a8ae951c2206e89d225a26ba" id="r_a901677f0a8ae951c2206e89d225a26ba"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a901677f0a8ae951c2206e89d225a26ba">BX_KEY_U</a>&#160;&#160;&#160;40</td></tr>
-<tr class="memitem:a066fd5e65090fc19809b1059867ebe8f" id="r_a066fd5e65090fc19809b1059867ebe8f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a066fd5e65090fc19809b1059867ebe8f">BX_KEY_V</a>&#160;&#160;&#160;41</td></tr>
-<tr class="memitem:ad3a81c50d6a4c61544c1682e17844919" id="r_ad3a81c50d6a4c61544c1682e17844919"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad3a81c50d6a4c61544c1682e17844919">BX_KEY_W</a>&#160;&#160;&#160;42</td></tr>
-<tr class="memitem:a81dbfbfbfed0daeb82d415a786502190" id="r_a81dbfbfbfed0daeb82d415a786502190"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a81dbfbfbfed0daeb82d415a786502190">BX_KEY_X</a>&#160;&#160;&#160;43</td></tr>
-<tr class="memitem:a695ef4ac01ff434e5e8df9a4ad0f550e" id="r_a695ef4ac01ff434e5e8df9a4ad0f550e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a695ef4ac01ff434e5e8df9a4ad0f550e">BX_KEY_Y</a>&#160;&#160;&#160;44</td></tr>
-<tr class="memitem:a35490efc3892784f3ff1532e8036438b" id="r_a35490efc3892784f3ff1532e8036438b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a35490efc3892784f3ff1532e8036438b">BX_KEY_Z</a>&#160;&#160;&#160;45</td></tr>
-<tr class="memitem:ac5f80f201fce913ef7436caef79508f4" id="r_ac5f80f201fce913ef7436caef79508f4"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac5f80f201fce913ef7436caef79508f4">BX_KEY_0</a>&#160;&#160;&#160;46</td></tr>
-<tr class="memitem:a3b44914305e9e3c783010b0068ddd120" id="r_a3b44914305e9e3c783010b0068ddd120"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a3b44914305e9e3c783010b0068ddd120">BX_KEY_1</a>&#160;&#160;&#160;47</td></tr>
-<tr class="memitem:a0b328f36974392b63fca2860cadc4e65" id="r_a0b328f36974392b63fca2860cadc4e65"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0b328f36974392b63fca2860cadc4e65">BX_KEY_2</a>&#160;&#160;&#160;48</td></tr>
-<tr class="memitem:ac6ee73edf7cbb70a6db7f9252a7d8b39" id="r_ac6ee73edf7cbb70a6db7f9252a7d8b39"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac6ee73edf7cbb70a6db7f9252a7d8b39">BX_KEY_3</a>&#160;&#160;&#160;49</td></tr>
-<tr class="memitem:a832080666652e44e5ad442f03e36135d" id="r_a832080666652e44e5ad442f03e36135d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a832080666652e44e5ad442f03e36135d">BX_KEY_4</a>&#160;&#160;&#160;50</td></tr>
-<tr class="memitem:a7adcb9e6f47db452808a1cf8282b75f1" id="r_a7adcb9e6f47db452808a1cf8282b75f1"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a7adcb9e6f47db452808a1cf8282b75f1">BX_KEY_5</a>&#160;&#160;&#160;51</td></tr>
-<tr class="memitem:a07a445ddf2ba2d0f28071cee5e413058" id="r_a07a445ddf2ba2d0f28071cee5e413058"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a07a445ddf2ba2d0f28071cee5e413058">BX_KEY_6</a>&#160;&#160;&#160;52</td></tr>
-<tr class="memitem:a2aee1c29eac72c10daf5fcd38966aa91" id="r_a2aee1c29eac72c10daf5fcd38966aa91"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a2aee1c29eac72c10daf5fcd38966aa91">BX_KEY_7</a>&#160;&#160;&#160;53</td></tr>
-<tr class="memitem:aeaaff632698b810ef04eebd425014f63" id="r_aeaaff632698b810ef04eebd425014f63"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aeaaff632698b810ef04eebd425014f63">BX_KEY_8</a>&#160;&#160;&#160;54</td></tr>
-<tr class="memitem:ae59fc72a08dd4aeb54053af1669c93c8" id="r_ae59fc72a08dd4aeb54053af1669c93c8"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae59fc72a08dd4aeb54053af1669c93c8">BX_KEY_9</a>&#160;&#160;&#160;55</td></tr>
-<tr class="memitem:a01f1f29678369dc2b305b464afe21e60" id="r_a01f1f29678369dc2b305b464afe21e60"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a01f1f29678369dc2b305b464afe21e60">BX_KEY_ESC</a>&#160;&#160;&#160;56</td></tr>
-<tr class="memitem:a20a9b11bcd8c327f8336f6aa9dd54f20" id="r_a20a9b11bcd8c327f8336f6aa9dd54f20"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a20a9b11bcd8c327f8336f6aa9dd54f20">BX_KEY_SPACE</a>&#160;&#160;&#160;57</td></tr>
-<tr class="memitem:a2e3927825a7e19324d40b08aed7ba03c" id="r_a2e3927825a7e19324d40b08aed7ba03c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a2e3927825a7e19324d40b08aed7ba03c">BX_KEY_SINGLE_QUOTE</a>&#160;&#160;&#160;58</td></tr>
-<tr class="memitem:af07b5177988b91606a09d590868ffac2" id="r_af07b5177988b91606a09d590868ffac2"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af07b5177988b91606a09d590868ffac2">BX_KEY_COMMA</a>&#160;&#160;&#160;59</td></tr>
-<tr class="memitem:a9a0807a5119b265538713de76a70164a" id="r_a9a0807a5119b265538713de76a70164a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9a0807a5119b265538713de76a70164a">BX_KEY_PERIOD</a>&#160;&#160;&#160;60</td></tr>
-<tr class="memitem:a431af36fd0a231577189eae3eb0bd49d" id="r_a431af36fd0a231577189eae3eb0bd49d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a431af36fd0a231577189eae3eb0bd49d">BX_KEY_SLASH</a>&#160;&#160;&#160;61</td></tr>
-<tr class="memitem:acb09914a705c079387d9a030cc886b99" id="r_acb09914a705c079387d9a030cc886b99"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#acb09914a705c079387d9a030cc886b99">BX_KEY_SEMICOLON</a>&#160;&#160;&#160;62</td></tr>
-<tr class="memitem:ac429eeb31a9372cde83c15fc6694e12b" id="r_ac429eeb31a9372cde83c15fc6694e12b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac429eeb31a9372cde83c15fc6694e12b">BX_KEY_EQUALS</a>&#160;&#160;&#160;63</td></tr>
-<tr class="memitem:abb839312b9a9f3d9508086e7201c79f1" id="r_abb839312b9a9f3d9508086e7201c79f1"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#abb839312b9a9f3d9508086e7201c79f1">BX_KEY_LEFT_BRACKET</a>&#160;&#160;&#160;64</td></tr>
-<tr class="memitem:a1af9aea579c3b220dbf29e3e9e7abd67" id="r_a1af9aea579c3b220dbf29e3e9e7abd67"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a1af9aea579c3b220dbf29e3e9e7abd67">BX_KEY_BACKSLASH</a>&#160;&#160;&#160;65</td></tr>
-<tr class="memitem:a1152a302eae72c4d52f3be72dca14436" id="r_a1152a302eae72c4d52f3be72dca14436"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a1152a302eae72c4d52f3be72dca14436">BX_KEY_RIGHT_BRACKET</a>&#160;&#160;&#160;66</td></tr>
-<tr class="memitem:aedc81c4157220f517b0a03df48eb7e57" id="r_aedc81c4157220f517b0a03df48eb7e57"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aedc81c4157220f517b0a03df48eb7e57">BX_KEY_MINUS</a>&#160;&#160;&#160;67</td></tr>
-<tr class="memitem:ad0532407ac70871082c5d45d75e82d65" id="r_ad0532407ac70871082c5d45d75e82d65"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad0532407ac70871082c5d45d75e82d65">BX_KEY_GRAVE</a>&#160;&#160;&#160;68</td></tr>
-<tr class="memitem:a00623238917ad1066f99702cfff8424e" id="r_a00623238917ad1066f99702cfff8424e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a00623238917ad1066f99702cfff8424e">BX_KEY_BACKSPACE</a>&#160;&#160;&#160;69</td></tr>
-<tr class="memitem:accc559b33f139f6104e1b7baa840d98d" id="r_accc559b33f139f6104e1b7baa840d98d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#accc559b33f139f6104e1b7baa840d98d">BX_KEY_ENTER</a>&#160;&#160;&#160;70</td></tr>
-<tr class="memitem:a030f3408bf304c30884f67ef43349986" id="r_a030f3408bf304c30884f67ef43349986"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a030f3408bf304c30884f67ef43349986">BX_KEY_TAB</a>&#160;&#160;&#160;71</td></tr>
-<tr class="memitem:a8bd5de6aed44ce32a97e2cc5afc0c39b" id="r_a8bd5de6aed44ce32a97e2cc5afc0c39b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a8bd5de6aed44ce32a97e2cc5afc0c39b">BX_KEY_LEFT_BACKSLASH</a>&#160;&#160;&#160;72</td></tr>
-<tr class="memitem:afd0ab2a7b85b6aa1b7712f2b2a54ac5f" id="r_afd0ab2a7b85b6aa1b7712f2b2a54ac5f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#afd0ab2a7b85b6aa1b7712f2b2a54ac5f">BX_KEY_PRINT</a>&#160;&#160;&#160;73</td></tr>
-<tr class="memitem:aced47004964be823521d4de84ba3702a" id="r_aced47004964be823521d4de84ba3702a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aced47004964be823521d4de84ba3702a">BX_KEY_SCRL_LOCK</a>&#160;&#160;&#160;74</td></tr>
-<tr class="memitem:ab23444c2b052a380817480aa6c495014" id="r_ab23444c2b052a380817480aa6c495014"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab23444c2b052a380817480aa6c495014">BX_KEY_PAUSE</a>&#160;&#160;&#160;75</td></tr>
-<tr class="memitem:a60c331b76632fcafae3fdaa2732d3dc1" id="r_a60c331b76632fcafae3fdaa2732d3dc1"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a60c331b76632fcafae3fdaa2732d3dc1">BX_KEY_INSERT</a>&#160;&#160;&#160;76</td></tr>
-<tr class="memitem:a57b862c3903d0403ac8b514f998ab3c1" id="r_a57b862c3903d0403ac8b514f998ab3c1"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a57b862c3903d0403ac8b514f998ab3c1">BX_KEY_DELETE</a>&#160;&#160;&#160;77</td></tr>
-<tr class="memitem:a0dd1e9e2f140f08287bdbbb8a556ee0c" id="r_a0dd1e9e2f140f08287bdbbb8a556ee0c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0dd1e9e2f140f08287bdbbb8a556ee0c">BX_KEY_HOME</a>&#160;&#160;&#160;78</td></tr>
-<tr class="memitem:ae548ed17b0abf0d2aac6b99c7375fe1d" id="r_ae548ed17b0abf0d2aac6b99c7375fe1d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae548ed17b0abf0d2aac6b99c7375fe1d">BX_KEY_END</a>&#160;&#160;&#160;79</td></tr>
-<tr class="memitem:a81fae1d2da27f8a9bb3af4abf8a1dcd7" id="r_a81fae1d2da27f8a9bb3af4abf8a1dcd7"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a81fae1d2da27f8a9bb3af4abf8a1dcd7">BX_KEY_PAGE_UP</a>&#160;&#160;&#160;80</td></tr>
-<tr class="memitem:a63b69646a6b4faf80e2549df299f2282" id="r_a63b69646a6b4faf80e2549df299f2282"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a63b69646a6b4faf80e2549df299f2282">BX_KEY_PAGE_DOWN</a>&#160;&#160;&#160;81</td></tr>
-<tr class="memitem:af6f0b7e30623473aca6b1bbea6e114f0" id="r_af6f0b7e30623473aca6b1bbea6e114f0"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af6f0b7e30623473aca6b1bbea6e114f0">BX_KEY_KP_ADD</a>&#160;&#160;&#160;82</td></tr>
-<tr class="memitem:abde3ac27b9b7caeb6b6457d282356d1a" id="r_abde3ac27b9b7caeb6b6457d282356d1a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#abde3ac27b9b7caeb6b6457d282356d1a">BX_KEY_KP_SUBTRACT</a>&#160;&#160;&#160;83</td></tr>
-<tr class="memitem:a463c2c8aec24ca56a39fc2bc4ea6961e" id="r_a463c2c8aec24ca56a39fc2bc4ea6961e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a463c2c8aec24ca56a39fc2bc4ea6961e">BX_KEY_KP_END</a>&#160;&#160;&#160;84</td></tr>
-<tr class="memitem:a85c6b96cc7b7a74b1a59044fc2497677" id="r_a85c6b96cc7b7a74b1a59044fc2497677"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a85c6b96cc7b7a74b1a59044fc2497677">BX_KEY_KP_DOWN</a>&#160;&#160;&#160;85</td></tr>
-<tr class="memitem:a167af8d5d690dc11ea8e1a48497e8643" id="r_a167af8d5d690dc11ea8e1a48497e8643"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a167af8d5d690dc11ea8e1a48497e8643">BX_KEY_KP_PAGE_DOWN</a>&#160;&#160;&#160;86</td></tr>
-<tr class="memitem:ad7e2e50ce3064cc4659a925bb9408e52" id="r_ad7e2e50ce3064cc4659a925bb9408e52"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad7e2e50ce3064cc4659a925bb9408e52">BX_KEY_KP_LEFT</a>&#160;&#160;&#160;87</td></tr>
-<tr class="memitem:a92f8bc151b43b2ddc7dc79bbc76516ef" id="r_a92f8bc151b43b2ddc7dc79bbc76516ef"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a92f8bc151b43b2ddc7dc79bbc76516ef">BX_KEY_KP_RIGHT</a>&#160;&#160;&#160;88</td></tr>
-<tr class="memitem:ab45f582a107aafbf3c4702ffd2d0c47a" id="r_ab45f582a107aafbf3c4702ffd2d0c47a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab45f582a107aafbf3c4702ffd2d0c47a">BX_KEY_KP_HOME</a>&#160;&#160;&#160;89</td></tr>
-<tr class="memitem:ac10dbc79e6b5e3b0d87be15c0367085e" id="r_ac10dbc79e6b5e3b0d87be15c0367085e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ac10dbc79e6b5e3b0d87be15c0367085e">BX_KEY_KP_UP</a>&#160;&#160;&#160;90</td></tr>
-<tr class="memitem:a5eddf095ef09b7c52abf3fd901a838fd" id="r_a5eddf095ef09b7c52abf3fd901a838fd"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5eddf095ef09b7c52abf3fd901a838fd">BX_KEY_KP_PAGE_UP</a>&#160;&#160;&#160;91</td></tr>
-<tr class="memitem:a77d6282fb47ff1f4c75ace2c9ae70f0a" id="r_a77d6282fb47ff1f4c75ace2c9ae70f0a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a77d6282fb47ff1f4c75ace2c9ae70f0a">BX_KEY_KP_INSERT</a>&#160;&#160;&#160;92</td></tr>
-<tr class="memitem:a053897edc81781c0fb12a1e102683a64" id="r_a053897edc81781c0fb12a1e102683a64"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a053897edc81781c0fb12a1e102683a64">BX_KEY_KP_DELETE</a>&#160;&#160;&#160;93</td></tr>
-<tr class="memitem:ae3ed9bda2bc7a404540d1975ead2ecd5" id="r_ae3ed9bda2bc7a404540d1975ead2ecd5"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae3ed9bda2bc7a404540d1975ead2ecd5">BX_KEY_KP_5</a>&#160;&#160;&#160;94</td></tr>
-<tr class="memitem:a6a6c0bad13556570c68fda57b93d0190" id="r_a6a6c0bad13556570c68fda57b93d0190"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6a6c0bad13556570c68fda57b93d0190">BX_KEY_UP</a>&#160;&#160;&#160;95</td></tr>
-<tr class="memitem:abe5c3b00c7653987624da5eb44cab3d3" id="r_abe5c3b00c7653987624da5eb44cab3d3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#abe5c3b00c7653987624da5eb44cab3d3">BX_KEY_DOWN</a>&#160;&#160;&#160;96</td></tr>
-<tr class="memitem:a6b99abbdc5c95c9a57af75d503384528" id="r_a6b99abbdc5c95c9a57af75d503384528"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6b99abbdc5c95c9a57af75d503384528">BX_KEY_LEFT</a>&#160;&#160;&#160;97</td></tr>
-<tr class="memitem:af84186177088f5e74781cbc2b0249b1a" id="r_af84186177088f5e74781cbc2b0249b1a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af84186177088f5e74781cbc2b0249b1a">BX_KEY_RIGHT</a>&#160;&#160;&#160;98</td></tr>
-<tr class="memitem:a4b58a3c5f21309d77d1b118272a80be9" id="r_a4b58a3c5f21309d77d1b118272a80be9"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a4b58a3c5f21309d77d1b118272a80be9">BX_KEY_KP_ENTER</a>&#160;&#160;&#160;99</td></tr>
-<tr class="memitem:a4230d17df844668203f30992188ee406" id="r_a4230d17df844668203f30992188ee406"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a4230d17df844668203f30992188ee406">BX_KEY_KP_MULTIPLY</a>&#160;&#160;&#160;100</td></tr>
-<tr class="memitem:ab925c1f28e6d66fe2e8a60b2e23c8a48" id="r_ab925c1f28e6d66fe2e8a60b2e23c8a48"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab925c1f28e6d66fe2e8a60b2e23c8a48">BX_KEY_KP_DIVIDE</a>&#160;&#160;&#160;101</td></tr>
-<tr class="memitem:ad6d6df32501249b8125c6d810fd6fa0a" id="r_ad6d6df32501249b8125c6d810fd6fa0a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad6d6df32501249b8125c6d810fd6fa0a">BX_KEY_WIN_L</a>&#160;&#160;&#160;102</td></tr>
-<tr class="memitem:a1bdeaf8c8e74a72e2133953619e40006" id="r_a1bdeaf8c8e74a72e2133953619e40006"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a1bdeaf8c8e74a72e2133953619e40006">BX_KEY_WIN_R</a>&#160;&#160;&#160;103</td></tr>
-<tr class="memitem:a991e5f384b1d8b925d12f8816030e816" id="r_a991e5f384b1d8b925d12f8816030e816"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a991e5f384b1d8b925d12f8816030e816">BX_KEY_MENU</a>&#160;&#160;&#160;104</td></tr>
-<tr class="memitem:a759735f969b2f437bd41a6bffad3d90d" id="r_a759735f969b2f437bd41a6bffad3d90d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a759735f969b2f437bd41a6bffad3d90d">BX_KEY_ALT_SYSREQ</a>&#160;&#160;&#160;105</td></tr>
-<tr class="memitem:a5a8c37403fe910db9b0139632bb0e5d8" id="r_a5a8c37403fe910db9b0139632bb0e5d8"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5a8c37403fe910db9b0139632bb0e5d8">BX_KEY_CTRL_BREAK</a>&#160;&#160;&#160;106</td></tr>
-<tr class="memitem:a1ae2ec60a85e3e87c64f4026640792dc" id="r_a1ae2ec60a85e3e87c64f4026640792dc"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a1ae2ec60a85e3e87c64f4026640792dc">BX_KEY_INT_BACK</a>&#160;&#160;&#160;107</td></tr>
-<tr class="memitem:ae7ae94f73166529ee132e5273db6521f" id="r_ae7ae94f73166529ee132e5273db6521f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae7ae94f73166529ee132e5273db6521f">BX_KEY_INT_FORWARD</a>&#160;&#160;&#160;108</td></tr>
-<tr class="memitem:a70389acf0b3a3ce20773353fc23b7f23" id="r_a70389acf0b3a3ce20773353fc23b7f23"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a70389acf0b3a3ce20773353fc23b7f23">BX_KEY_INT_STOP</a>&#160;&#160;&#160;109</td></tr>
-<tr class="memitem:ab88992e393a9f880e7a5990292fe6b1d" id="r_ab88992e393a9f880e7a5990292fe6b1d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab88992e393a9f880e7a5990292fe6b1d">BX_KEY_INT_MAIL</a>&#160;&#160;&#160;110</td></tr>
-<tr class="memitem:a35b4b855a11f7cd9a69c3b667a2d76dc" id="r_a35b4b855a11f7cd9a69c3b667a2d76dc"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a35b4b855a11f7cd9a69c3b667a2d76dc">BX_KEY_INT_SEARCH</a>&#160;&#160;&#160;111</td></tr>
-<tr class="memitem:a5dee141927b7c8bf1c0c896b6efccc13" id="r_a5dee141927b7c8bf1c0c896b6efccc13"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5dee141927b7c8bf1c0c896b6efccc13">BX_KEY_INT_FAV</a>&#160;&#160;&#160;112</td></tr>
-<tr class="memitem:a995760715c24333d1676ba4f09126ef9" id="r_a995760715c24333d1676ba4f09126ef9"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a995760715c24333d1676ba4f09126ef9">BX_KEY_INT_HOME</a>&#160;&#160;&#160;113</td></tr>
-<tr class="memitem:acf61c359e5d72fe68bc0949379a493e0" id="r_acf61c359e5d72fe68bc0949379a493e0"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#acf61c359e5d72fe68bc0949379a493e0">BX_KEY_POWER_MYCOMP</a>&#160;&#160;&#160;114</td></tr>
-<tr class="memitem:ad10b1818e46601d3625ca4e6d55e60fb" id="r_ad10b1818e46601d3625ca4e6d55e60fb"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad10b1818e46601d3625ca4e6d55e60fb">BX_KEY_POWER_CALC</a>&#160;&#160;&#160;115</td></tr>
-<tr class="memitem:a397af584c37576107b14aac2b6ba4d92" id="r_a397af584c37576107b14aac2b6ba4d92"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a397af584c37576107b14aac2b6ba4d92">BX_KEY_POWER_SLEEP</a>&#160;&#160;&#160;116</td></tr>
-<tr class="memitem:ae6aeb8ce40cdcf5798a12b5fa0ad8555" id="r_ae6aeb8ce40cdcf5798a12b5fa0ad8555"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae6aeb8ce40cdcf5798a12b5fa0ad8555">BX_KEY_POWER_POWER</a>&#160;&#160;&#160;117</td></tr>
-<tr class="memitem:a0bb2209455f06a158b5dece33a474009" id="r_a0bb2209455f06a158b5dece33a474009"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0bb2209455f06a158b5dece33a474009">BX_KEY_POWER_WAKE</a>&#160;&#160;&#160;118</td></tr>
-<tr class="memitem:afd2e39e1ec046bf75b774a7f3fd8a7b8" id="r_afd2e39e1ec046bf75b774a7f3fd8a7b8"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#afd2e39e1ec046bf75b774a7f3fd8a7b8">BX_KEY_NBKEYS</a>&#160;&#160;&#160;119</td></tr>
-<tr class="memitem:a68601f1989a938cd9535a75e7ad24874" id="r_a68601f1989a938cd9535a75e7ad24874"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a68601f1989a938cd9535a75e7ad24874">IMPLEMENT_GUI_PLUGIN_CODE</a>(gui_name)</td></tr>
+<tr class="memitem:ab6f1afff1865d07e48e001f0d6de4a0e" id="r_ab6f1afff1865d07e48e001f0d6de4a0e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab6f1afff1865d07e48e001f0d6de4a0e">LOG_REGS</a>&#160;&#160;&#160;(1U &lt;&lt; 1)</td></tr>
+<tr class="memitem:a482347b889da621ee24ac3e37666ae38" id="r_a482347b889da621ee24ac3e37666ae38"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a482347b889da621ee24ac3e37666ae38">LOG_BLIT</a>&#160;&#160;&#160;(1U &lt;&lt; 2)</td></tr>
+<tr class="memitem:a5a33674fe6105cfd952915a42fa8dc1a" id="r_a5a33674fe6105cfd952915a42fa8dc1a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5a33674fe6105cfd952915a42fa8dc1a">LOG_HDAC</a>&#160;&#160;&#160;(1U &lt;&lt; 3)</td></tr>
+<tr class="memitem:aae585bf91fe9e3a84a5067d7fad33dd9" id="r_aae585bf91fe9e3a84a5067d7fad33dd9"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aae585bf91fe9e3a84a5067d7fad33dd9">LOG_BANK</a>&#160;&#160;&#160;(1U &lt;&lt; 4)</td></tr>
+<tr class="memitem:af28319df471aa57b18262a415976b1dd" id="r_af28319df471aa57b18262a415976b1dd"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af28319df471aa57b18262a415976b1dd">LOG_PLL</a>&#160;&#160;&#160;(1U &lt;&lt; 5)</td></tr>
+<tr class="memitem:a42f8c497a1968074f38bf5055c650dca" id="r_a42f8c497a1968074f38bf5055c650dca"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a42f8c497a1968074f38bf5055c650dca">VERBOSE</a>&#160;&#160;&#160;(<a class="el" href="../../d3/d00/a00419.html#af9a86285a265da1d934e6afeac099a5c">LOG_GENERAL</a> | <a class="el" href="#a5a33674fe6105cfd952915a42fa8dc1a">LOG_HDAC</a> | <a class="el" href="#ab6f1afff1865d07e48e001f0d6de4a0e">LOG_REGS</a> | <a class="el" href="#a482347b889da621ee24ac3e37666ae38">LOG_BLIT</a>)</td></tr>
+<tr class="memitem:a321ae946de24c36489276616d13c46cd" id="r_a321ae946de24c36489276616d13c46cd"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a321ae946de24c36489276616d13c46cd">LINES</a>&#160;&#160;&#160;((vga.crtc.vert_disp_end + 1) * (get_interlace_mode() + 1))</td></tr>
+<tr class="memitem:a0aae61f24e1156f489dfda729685fa9c" id="r_a0aae61f24e1156f489dfda729685fa9c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0aae61f24e1156f489dfda729685fa9c">GRAPHIC_MODE</a>&#160;&#160;&#160;(vga.gc.alpha_dis)</td></tr>
+<tr class="memitem:a0d6fca6b3c681e20c85e328a6d76a733" id="r_a0d6fca6b3c681e20c85e328a6d76a733"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0d6fca6b3c681e20c85e328a6d76a733">VGA_CH_WIDTH</a>&#160;&#160;&#160;((vga.sequencer.data[1]&amp;1)?8:9)</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:adc76cd0cd970965f86358db43bbcd7fc" id="r_adc76cd0cd970965f86358db43bbcd7fc"><td class="memItemLeft">class <a class="el" href="../../d2/d00/a01433.html">bx_gui_c</a> *&#160;</td><td class="memItemRight"><a class="el" href="#adc76cd0cd970965f86358db43bbcd7fc">bx_gui</a></td></tr>
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:afa104e830f0dd8d9a16c690bd79bbfaa" id="r_afa104e830f0dd8d9a16c690bd79bbfaa"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
+<tr class="memitem:afa104e830f0dd8d9a16c690bd79bbfaa template"><td class="memItemLeft">static bool&#160;</td><td class="memItemRight"><a class="el" href="#afa104e830f0dd8d9a16c690bd79bbfaa">cirrus_write_record</a> (FILE *f, const T &amp;value)</td></tr>
+<tr class="memitem:a27094f2e444cd46399cc1aec69d82758" id="r_a27094f2e444cd46399cc1aec69d82758"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
+<tr class="memitem:a27094f2e444cd46399cc1aec69d82758 template"><td class="memItemLeft">static bool&#160;</td><td class="memItemRight"><a class="el" href="#a27094f2e444cd46399cc1aec69d82758">cirrus_read_record</a> (FILE *f, T &amp;value)</td></tr>
 </table>
-<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Contains the definitions for the <a class="el" href="../../d2/d00/a01433.html" title="Abstract base class for GUI implementations.">bx_gui_c</a> base class used for interfacing with SDL and other device interfaces. </p>
-<p>$Id$</p>
-<p>X-1.8 Camiel Vanderhoeven 11-MAR-2008 Named, debuggable mutexes.</p>
-<p>X-1.7 Camiel Vanderhoeven 05-MAR-2008 Multi-threading version.</p>
-<p>X-1.6 David Leonard 20-FEB-2008 Avoid 'Xlib: unexpected async reply' errors on Linux/Unix/BSD's by adding some thread interlocking.</p>
-<p>X-1.5 Camiel Vanderhoeven 20-JAN-2008 Avoid compiler warnings.</p>
-<p>X-1.4 Camiel Vanderhoeven 02-JAN-2008 Comments.</p>
-<p>X-1.3 Camiel Vanderhoeven 10-DEC-2007 Use Configurator.</p>
-<p>X-1.2 Camiel Vanderhoeven 7-DEC-2007 Code cleanup.</p>
-<p>X-1.1 Camiel Vanderhoeven 6-DEC-2007 Initial version for ES40 emulator. </p>
+<a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
+<a id="a0aae61f24e1156f489dfda729685fa9c" name="a0aae61f24e1156f489dfda729685fa9c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0aae61f24e1156f489dfda729685fa9c">&#9670;&#160;</a></span>GRAPHIC_MODE</h2>
 
-<p class="definition">Definition in file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-</div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
-<a id="ad6d77159677be550d33909310c0ae22b" name="ad6d77159677be550d33909310c0ae22b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad6d77159677be550d33909310c0ae22b">&#9670;&#160;</a></span>BX_DEBUG</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_DEBUG</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>a</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">{                  \</div>
-<div class="line">  printf  a;       \</div>
-<div class="line">  printf(<span class="stringliteral">&quot;   \n&quot;</span>); \</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00072">72</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../df/d00/a00416_source.html#l00987">CKeyboard::controller_enQ()</a>, <a class="el" href="../../df/d00/a00416_source.html#l01215">CKeyboard::ctrl_to_kbd()</a>, <a class="el" href="../../df/d00/a00416_source.html#l01438">CKeyboard::ctrl_to_mouse()</a>, <a class="el" href="../../df/d00/a00416_source.html#l00417">CKeyboard::enQ()</a>, <a class="el" href="../../da/d00/a00383_source.html#l00391">bx_keymap_c::findAsciiChar()</a>, <a class="el" href="../../da/d00/a00383_source.html#l00368">bx_keymap_c::findHostKey()</a>, <a class="el" href="../../df/d00/a00416_source.html#l00239">CKeyboard::gen_scancode()</a>, <a class="el" href="../../da/d00/a00383_source.html#l00270">bx_keymap_c::loadKeymap()</a>, <a class="el" href="../../df/d00/a00416_source.html#l01743">CKeyboard::mouse_enQ()</a>, <a class="el" href="../../df/d00/a00416_source.html#l00452">CKeyboard::read_60()</a>, <a class="el" href="../../df/d00/a00416_source.html#l00549">CKeyboard::read_64()</a>, <a class="el" href="../../df/d00/a00416_source.html#l01186">CKeyboard::set_aux_clock_enable()</a>, <a class="el" href="../../df/d00/a00416_source.html#l00568">CKeyboard::write_60()</a>, and <a class="el" href="../../df/d00/a00416_source.html#l00726">CKeyboard::write_64()</a>.</p>
-
-</div>
-</div>
-<a id="a6a4f5db8f7b49047692c650d36bfad3e" name="a6a4f5db8f7b49047692c650d36bfad3e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6a4f5db8f7b49047692c650d36bfad3e">&#9670;&#160;</a></span>BX_ERROR</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_ERROR</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>a</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="#ad6d77159677be550d33909310c0ae22b">BX_DEBUG</a>(a)</div>
-<div class="ttc" id="aa00371_html_ad6d77159677be550d33909310c0ae22b"><div class="ttname"><a href="#ad6d77159677be550d33909310c0ae22b">BX_DEBUG</a></div><div class="ttdeci">#define BX_DEBUG(a)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00371_source.html#l00072">gui.h:72</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00079">79</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../df/d00/a00416_source.html#l00987">CKeyboard::controller_enQ()</a>, <a class="el" href="../../df/d00/a00416_source.html#l01215">CKeyboard::ctrl_to_kbd()</a>, <a class="el" href="../../df/d00/a00416_source.html#l01438">CKeyboard::ctrl_to_mouse()</a>, <a class="el" href="../../df/d00/a00416_source.html#l01126">CKeyboard::defer_keyboard_input()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01538">bx_sdl_gui_c::handle_keyboard_event_impl()</a>, <a class="el" href="../../df/d00/a00416_source.html#l01743">CKeyboard::mouse_enQ()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>, and <a class="el" href="../../df/d00/a00416_source.html#l00726">CKeyboard::write_64()</a>.</p>
-
-</div>
-</div>
-<a id="a95a1feec75db0c8d042bdced727d07ce" name="a95a1feec75db0c8d042bdced727d07ce"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a95a1feec75db0c8d042bdced727d07ce">&#9670;&#160;</a></span>BX_INFO</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_INFO</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>a</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="#ad6d77159677be550d33909310c0ae22b">BX_DEBUG</a>(a)</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00077">77</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d8/d00/a00368_source.html#l00250">bx_gui_c::beep_off()</a>, <a class="el" href="../../d8/d00/a00368_source.html#l00245">bx_gui_c::beep_on()</a>, <a class="el" href="../../df/d00/a00416_source.html#l01215">CKeyboard::ctrl_to_kbd()</a>, <a class="el" href="../../df/d00/a00416_source.html#l01438">CKeyboard::ctrl_to_mouse()</a>, <a class="el" href="../../da/d00/a00383_source.html#l00270">bx_keymap_c::loadKeymap()</a>, and <a class="el" href="../../df/d00/a00416_source.html#l00568">CKeyboard::write_60()</a>.</p>
-
-</div>
-</div>
-<a id="ac5f80f201fce913ef7436caef79508f4" name="ac5f80f201fce913ef7436caef79508f4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac5f80f201fce913ef7436caef79508f4">&#9670;&#160;</a></span>BX_KEY_0</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_0&#160;&#160;&#160;46</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00289">289</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a3b44914305e9e3c783010b0068ddd120" name="a3b44914305e9e3c783010b0068ddd120"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3b44914305e9e3c783010b0068ddd120">&#9670;&#160;</a></span>BX_KEY_1</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_1&#160;&#160;&#160;47</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00290">290</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a0b328f36974392b63fca2860cadc4e65" name="a0b328f36974392b63fca2860cadc4e65"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0b328f36974392b63fca2860cadc4e65">&#9670;&#160;</a></span>BX_KEY_2</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_2&#160;&#160;&#160;48</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00291">291</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="ac6ee73edf7cbb70a6db7f9252a7d8b39" name="ac6ee73edf7cbb70a6db7f9252a7d8b39"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac6ee73edf7cbb70a6db7f9252a7d8b39">&#9670;&#160;</a></span>BX_KEY_3</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_3&#160;&#160;&#160;49</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00292">292</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a832080666652e44e5ad442f03e36135d" name="a832080666652e44e5ad442f03e36135d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a832080666652e44e5ad442f03e36135d">&#9670;&#160;</a></span>BX_KEY_4</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_4&#160;&#160;&#160;50</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00293">293</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a7adcb9e6f47db452808a1cf8282b75f1" name="a7adcb9e6f47db452808a1cf8282b75f1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7adcb9e6f47db452808a1cf8282b75f1">&#9670;&#160;</a></span>BX_KEY_5</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_5&#160;&#160;&#160;51</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00294">294</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a07a445ddf2ba2d0f28071cee5e413058" name="a07a445ddf2ba2d0f28071cee5e413058"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a07a445ddf2ba2d0f28071cee5e413058">&#9670;&#160;</a></span>BX_KEY_6</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_6&#160;&#160;&#160;52</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00295">295</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a2aee1c29eac72c10daf5fcd38966aa91" name="a2aee1c29eac72c10daf5fcd38966aa91"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2aee1c29eac72c10daf5fcd38966aa91">&#9670;&#160;</a></span>BX_KEY_7</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_7&#160;&#160;&#160;53</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00296">296</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="aeaaff632698b810ef04eebd425014f63" name="aeaaff632698b810ef04eebd425014f63"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aeaaff632698b810ef04eebd425014f63">&#9670;&#160;</a></span>BX_KEY_8</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_8&#160;&#160;&#160;54</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00297">297</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="ae59fc72a08dd4aeb54053af1669c93c8" name="ae59fc72a08dd4aeb54053af1669c93c8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae59fc72a08dd4aeb54053af1669c93c8">&#9670;&#160;</a></span>BX_KEY_9</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_9&#160;&#160;&#160;55</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00298">298</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a0ad140649519b17eed21fdb244f6c32a" name="a0ad140649519b17eed21fdb244f6c32a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0ad140649519b17eed21fdb244f6c32a">&#9670;&#160;</a></span>BX_KEY_A</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_A&#160;&#160;&#160;20</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00262">262</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="ac2a9b501b0a8c1e635e3115a2201c0a6" name="ac2a9b501b0a8c1e635e3115a2201c0a6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac2a9b501b0a8c1e635e3115a2201c0a6">&#9670;&#160;</a></span>BX_KEY_ALT_L</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_ALT_L&#160;&#160;&#160;18</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00259">259</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l01233">sdl_event_dispatcher::send_guest_ctrl_alt_delete()</a>.</p>
-
-</div>
-</div>
-<a id="a07e9ead921ca1687b75bed718fa664d1" name="a07e9ead921ca1687b75bed718fa664d1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a07e9ead921ca1687b75bed718fa664d1">&#9670;&#160;</a></span>BX_KEY_ALT_R</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_ALT_R&#160;&#160;&#160;19</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00260">260</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a759735f969b2f437bd41a6bffad3d90d" name="a759735f969b2f437bd41a6bffad3d90d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a759735f969b2f437bd41a6bffad3d90d">&#9670;&#160;</a></span>BX_KEY_ALT_SYSREQ</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_ALT_SYSREQ&#160;&#160;&#160;105</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00360">360</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-</div>
-</div>
-<a id="a9b1ff73ec4fe402f3cb2369d13c0f42d" name="a9b1ff73ec4fe402f3cb2369d13c0f42d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9b1ff73ec4fe402f3cb2369d13c0f42d">&#9670;&#160;</a></span>BX_KEY_B</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_B&#160;&#160;&#160;21</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00263">263</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a1af9aea579c3b220dbf29e3e9e7abd67" name="a1af9aea579c3b220dbf29e3e9e7abd67"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1af9aea579c3b220dbf29e3e9e7abd67">&#9670;&#160;</a></span>BX_KEY_BACKSLASH</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_BACKSLASH&#160;&#160;&#160;65</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00312">312</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a00623238917ad1066f99702cfff8424e" name="a00623238917ad1066f99702cfff8424e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a00623238917ad1066f99702cfff8424e">&#9670;&#160;</a></span>BX_KEY_BACKSPACE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_BACKSPACE&#160;&#160;&#160;69</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00317">317</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a40d9e7dddb148a18e157cd02e95fd384" name="a40d9e7dddb148a18e157cd02e95fd384"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a40d9e7dddb148a18e157cd02e95fd384">&#9670;&#160;</a></span>BX_KEY_C</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_C&#160;&#160;&#160;22</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00264">264</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a8dfc696aba037380329979763594bc49" name="a8dfc696aba037380329979763594bc49"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8dfc696aba037380329979763594bc49">&#9670;&#160;</a></span>BX_KEY_CAPS_LOCK</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_CAPS_LOCK&#160;&#160;&#160;16</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00257">257</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01538">bx_sdl_gui_c::handle_keyboard_event_impl()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="af07b5177988b91606a09d590868ffac2" name="af07b5177988b91606a09d590868ffac2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af07b5177988b91606a09d590868ffac2">&#9670;&#160;</a></span>BX_KEY_COMMA</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_COMMA&#160;&#160;&#160;59</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00304">304</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a5a8c37403fe910db9b0139632bb0e5d8" name="a5a8c37403fe910db9b0139632bb0e5d8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5a8c37403fe910db9b0139632bb0e5d8">&#9670;&#160;</a></span>BX_KEY_CTRL_BREAK</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_CTRL_BREAK&#160;&#160;&#160;106</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00361">361</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-</div>
-</div>
-<a id="abc6a144db2a7b65c37e44f0594044b7b" name="abc6a144db2a7b65c37e44f0594044b7b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abc6a144db2a7b65c37e44f0594044b7b">&#9670;&#160;</a></span>BX_KEY_CTRL_L</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_CTRL_L&#160;&#160;&#160;0</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00239">239</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l01233">sdl_event_dispatcher::send_guest_ctrl_alt_delete()</a>.</p>
-
-</div>
-</div>
-<a id="a15058ab614cba4888f5c03e18939550a" name="a15058ab614cba4888f5c03e18939550a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a15058ab614cba4888f5c03e18939550a">&#9670;&#160;</a></span>BX_KEY_CTRL_R</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_CTRL_R&#160;&#160;&#160;14</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00255">255</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="aaaea2a55d3769c9886355fffda1f3537" name="aaaea2a55d3769c9886355fffda1f3537"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaaea2a55d3769c9886355fffda1f3537">&#9670;&#160;</a></span>BX_KEY_D</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_D&#160;&#160;&#160;23</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00265">265</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a57b862c3903d0403ac8b514f998ab3c1" name="a57b862c3903d0403ac8b514f998ab3c1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a57b862c3903d0403ac8b514f998ab3c1">&#9670;&#160;</a></span>BX_KEY_DELETE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_DELETE&#160;&#160;&#160;77</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00327">327</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l01233">sdl_event_dispatcher::send_guest_ctrl_alt_delete()</a>.</p>
-
-</div>
-</div>
-<a id="abe5c3b00c7653987624da5eb44cab3d3" name="abe5c3b00c7653987624da5eb44cab3d3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abe5c3b00c7653987624da5eb44cab3d3">&#9670;&#160;</a></span>BX_KEY_DOWN</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_DOWN&#160;&#160;&#160;96</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00348">348</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a838382066c83dd0f64a12fcdab455858" name="a838382066c83dd0f64a12fcdab455858"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a838382066c83dd0f64a12fcdab455858">&#9670;&#160;</a></span>BX_KEY_E</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_E&#160;&#160;&#160;24</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00266">266</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="ae548ed17b0abf0d2aac6b99c7375fe1d" name="ae548ed17b0abf0d2aac6b99c7375fe1d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae548ed17b0abf0d2aac6b99c7375fe1d">&#9670;&#160;</a></span>BX_KEY_END</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_END&#160;&#160;&#160;79</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00329">329</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="accc559b33f139f6104e1b7baa840d98d" name="accc559b33f139f6104e1b7baa840d98d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#accc559b33f139f6104e1b7baa840d98d">&#9670;&#160;</a></span>BX_KEY_ENTER</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_ENTER&#160;&#160;&#160;70</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00318">318</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="ac429eeb31a9372cde83c15fc6694e12b" name="ac429eeb31a9372cde83c15fc6694e12b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac429eeb31a9372cde83c15fc6694e12b">&#9670;&#160;</a></span>BX_KEY_EQUALS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_EQUALS&#160;&#160;&#160;63</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00309">309</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a01f1f29678369dc2b305b464afe21e60" name="a01f1f29678369dc2b305b464afe21e60"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a01f1f29678369dc2b305b464afe21e60">&#9670;&#160;</a></span>BX_KEY_ESC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_ESC&#160;&#160;&#160;56</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00300">300</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="abacd80f672146dd7d97a2908cdd28ec6" name="abacd80f672146dd7d97a2908cdd28ec6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abacd80f672146dd7d97a2908cdd28ec6">&#9670;&#160;</a></span>BX_KEY_F</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_F&#160;&#160;&#160;25</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00267">267</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="aec4123e2640680355825d32b8b4f84b2" name="aec4123e2640680355825d32b8b4f84b2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aec4123e2640680355825d32b8b4f84b2">&#9670;&#160;</a></span>BX_KEY_F1</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_F1&#160;&#160;&#160;2</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00242">242</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="ae6eea31b2679eb230d431bf559955467" name="ae6eea31b2679eb230d431bf559955467"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae6eea31b2679eb230d431bf559955467">&#9670;&#160;</a></span>BX_KEY_F10</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_F10&#160;&#160;&#160;11</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00251">251</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a551fb3174cc472b49da98fb9d1aedc72" name="a551fb3174cc472b49da98fb9d1aedc72"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a551fb3174cc472b49da98fb9d1aedc72">&#9670;&#160;</a></span>BX_KEY_F11</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_F11&#160;&#160;&#160;12</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00252">252</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a2e3690dc8cee929cdc8b823b2873e72c" name="a2e3690dc8cee929cdc8b823b2873e72c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2e3690dc8cee929cdc8b823b2873e72c">&#9670;&#160;</a></span>BX_KEY_F12</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_F12&#160;&#160;&#160;13</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00253">253</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="afa7e96f8231f2a01a250f1d501731075" name="afa7e96f8231f2a01a250f1d501731075"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afa7e96f8231f2a01a250f1d501731075">&#9670;&#160;</a></span>BX_KEY_F2</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_F2&#160;&#160;&#160;3</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00243">243</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="afe396b322fe80831e2b7d33335e8464f" name="afe396b322fe80831e2b7d33335e8464f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afe396b322fe80831e2b7d33335e8464f">&#9670;&#160;</a></span>BX_KEY_F3</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_F3&#160;&#160;&#160;4</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00244">244</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="af539822896fae1600183579733a3f98c" name="af539822896fae1600183579733a3f98c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af539822896fae1600183579733a3f98c">&#9670;&#160;</a></span>BX_KEY_F4</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_F4&#160;&#160;&#160;5</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00245">245</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="aa72a30c78e2a8d1a70fc065d7e825f9e" name="aa72a30c78e2a8d1a70fc065d7e825f9e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa72a30c78e2a8d1a70fc065d7e825f9e">&#9670;&#160;</a></span>BX_KEY_F5</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_F5&#160;&#160;&#160;6</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00246">246</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a3eb3d755ed217b60efe0d74133608a3b" name="a3eb3d755ed217b60efe0d74133608a3b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3eb3d755ed217b60efe0d74133608a3b">&#9670;&#160;</a></span>BX_KEY_F6</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_F6&#160;&#160;&#160;7</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00247">247</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a95fb1e94e0b100d92e3f22408fd51f53" name="a95fb1e94e0b100d92e3f22408fd51f53"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a95fb1e94e0b100d92e3f22408fd51f53">&#9670;&#160;</a></span>BX_KEY_F7</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_F7&#160;&#160;&#160;8</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00248">248</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a40a15a85d0cab9620f71de819c2f5f89" name="a40a15a85d0cab9620f71de819c2f5f89"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a40a15a85d0cab9620f71de819c2f5f89">&#9670;&#160;</a></span>BX_KEY_F8</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_F8&#160;&#160;&#160;9</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00249">249</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a22be0bb28e2adaf20ed316ec3b38af35" name="a22be0bb28e2adaf20ed316ec3b38af35"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a22be0bb28e2adaf20ed316ec3b38af35">&#9670;&#160;</a></span>BX_KEY_F9</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_F9&#160;&#160;&#160;10</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00250">250</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a9cd77e6e771de7d706082d91c87fc60b" name="a9cd77e6e771de7d706082d91c87fc60b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9cd77e6e771de7d706082d91c87fc60b">&#9670;&#160;</a></span>BX_KEY_G</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_G&#160;&#160;&#160;26</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00268">268</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="ad0532407ac70871082c5d45d75e82d65" name="ad0532407ac70871082c5d45d75e82d65"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad0532407ac70871082c5d45d75e82d65">&#9670;&#160;</a></span>BX_KEY_GRAVE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_GRAVE&#160;&#160;&#160;68</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00315">315</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a997379d865f8db7f5b8d1e85f0b6b0c8" name="a997379d865f8db7f5b8d1e85f0b6b0c8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a997379d865f8db7f5b8d1e85f0b6b0c8">&#9670;&#160;</a></span>BX_KEY_H</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_H&#160;&#160;&#160;27</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00269">269</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a0dd1e9e2f140f08287bdbbb8a556ee0c" name="a0dd1e9e2f140f08287bdbbb8a556ee0c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0dd1e9e2f140f08287bdbbb8a556ee0c">&#9670;&#160;</a></span>BX_KEY_HOME</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_HOME&#160;&#160;&#160;78</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00328">328</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a9bb634c92c5329df61c411384c14ba91" name="a9bb634c92c5329df61c411384c14ba91"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9bb634c92c5329df61c411384c14ba91">&#9670;&#160;</a></span>BX_KEY_I</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_I&#160;&#160;&#160;28</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00270">270</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a60c331b76632fcafae3fdaa2732d3dc1" name="a60c331b76632fcafae3fdaa2732d3dc1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a60c331b76632fcafae3fdaa2732d3dc1">&#9670;&#160;</a></span>BX_KEY_INSERT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_INSERT&#160;&#160;&#160;76</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00326">326</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a1ae2ec60a85e3e87c64f4026640792dc" name="a1ae2ec60a85e3e87c64f4026640792dc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1ae2ec60a85e3e87c64f4026640792dc">&#9670;&#160;</a></span>BX_KEY_INT_BACK</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_INT_BACK&#160;&#160;&#160;107</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00363">363</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-</div>
-</div>
-<a id="a5dee141927b7c8bf1c0c896b6efccc13" name="a5dee141927b7c8bf1c0c896b6efccc13"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5dee141927b7c8bf1c0c896b6efccc13">&#9670;&#160;</a></span>BX_KEY_INT_FAV</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_INT_FAV&#160;&#160;&#160;112</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00368">368</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-</div>
-</div>
-<a id="ae7ae94f73166529ee132e5273db6521f" name="ae7ae94f73166529ee132e5273db6521f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae7ae94f73166529ee132e5273db6521f">&#9670;&#160;</a></span>BX_KEY_INT_FORWARD</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_INT_FORWARD&#160;&#160;&#160;108</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00364">364</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-</div>
-</div>
-<a id="a995760715c24333d1676ba4f09126ef9" name="a995760715c24333d1676ba4f09126ef9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a995760715c24333d1676ba4f09126ef9">&#9670;&#160;</a></span>BX_KEY_INT_HOME</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_INT_HOME&#160;&#160;&#160;113</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00369">369</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-</div>
-</div>
-<a id="ab88992e393a9f880e7a5990292fe6b1d" name="ab88992e393a9f880e7a5990292fe6b1d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab88992e393a9f880e7a5990292fe6b1d">&#9670;&#160;</a></span>BX_KEY_INT_MAIL</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_INT_MAIL&#160;&#160;&#160;110</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00366">366</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-</div>
-</div>
-<a id="a35b4b855a11f7cd9a69c3b667a2d76dc" name="a35b4b855a11f7cd9a69c3b667a2d76dc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a35b4b855a11f7cd9a69c3b667a2d76dc">&#9670;&#160;</a></span>BX_KEY_INT_SEARCH</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_INT_SEARCH&#160;&#160;&#160;111</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00367">367</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-</div>
-</div>
-<a id="a70389acf0b3a3ce20773353fc23b7f23" name="a70389acf0b3a3ce20773353fc23b7f23"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a70389acf0b3a3ce20773353fc23b7f23">&#9670;&#160;</a></span>BX_KEY_INT_STOP</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_INT_STOP&#160;&#160;&#160;109</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00365">365</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-</div>
-</div>
-<a id="ab005e7392d952b5d19d78de3092a1cb5" name="ab005e7392d952b5d19d78de3092a1cb5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab005e7392d952b5d19d78de3092a1cb5">&#9670;&#160;</a></span>BX_KEY_J</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_J&#160;&#160;&#160;29</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00271">271</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a70a0016b41e77d2d751572c2b9df3243" name="a70a0016b41e77d2d751572c2b9df3243"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a70a0016b41e77d2d751572c2b9df3243">&#9670;&#160;</a></span>BX_KEY_K</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_K&#160;&#160;&#160;30</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00272">272</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="ae3ed9bda2bc7a404540d1975ead2ecd5" name="ae3ed9bda2bc7a404540d1975ead2ecd5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae3ed9bda2bc7a404540d1975ead2ecd5">&#9670;&#160;</a></span>BX_KEY_KP_5</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_KP_5&#160;&#160;&#160;94</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00345">345</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="af6f0b7e30623473aca6b1bbea6e114f0" name="af6f0b7e30623473aca6b1bbea6e114f0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af6f0b7e30623473aca6b1bbea6e114f0">&#9670;&#160;</a></span>BX_KEY_KP_ADD</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_KP_ADD&#160;&#160;&#160;82</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00333">333</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a053897edc81781c0fb12a1e102683a64" name="a053897edc81781c0fb12a1e102683a64"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a053897edc81781c0fb12a1e102683a64">&#9670;&#160;</a></span>BX_KEY_KP_DELETE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_KP_DELETE&#160;&#160;&#160;93</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00344">344</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="ab925c1f28e6d66fe2e8a60b2e23c8a48" name="ab925c1f28e6d66fe2e8a60b2e23c8a48"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab925c1f28e6d66fe2e8a60b2e23c8a48">&#9670;&#160;</a></span>BX_KEY_KP_DIVIDE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_KP_DIVIDE&#160;&#160;&#160;101</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00354">354</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a85c6b96cc7b7a74b1a59044fc2497677" name="a85c6b96cc7b7a74b1a59044fc2497677"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a85c6b96cc7b7a74b1a59044fc2497677">&#9670;&#160;</a></span>BX_KEY_KP_DOWN</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_KP_DOWN&#160;&#160;&#160;85</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00336">336</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a463c2c8aec24ca56a39fc2bc4ea6961e" name="a463c2c8aec24ca56a39fc2bc4ea6961e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a463c2c8aec24ca56a39fc2bc4ea6961e">&#9670;&#160;</a></span>BX_KEY_KP_END</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_KP_END&#160;&#160;&#160;84</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00335">335</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a4b58a3c5f21309d77d1b118272a80be9" name="a4b58a3c5f21309d77d1b118272a80be9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4b58a3c5f21309d77d1b118272a80be9">&#9670;&#160;</a></span>BX_KEY_KP_ENTER</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_KP_ENTER&#160;&#160;&#160;99</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00352">352</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="ab45f582a107aafbf3c4702ffd2d0c47a" name="ab45f582a107aafbf3c4702ffd2d0c47a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab45f582a107aafbf3c4702ffd2d0c47a">&#9670;&#160;</a></span>BX_KEY_KP_HOME</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_KP_HOME&#160;&#160;&#160;89</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00340">340</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a77d6282fb47ff1f4c75ace2c9ae70f0a" name="a77d6282fb47ff1f4c75ace2c9ae70f0a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a77d6282fb47ff1f4c75ace2c9ae70f0a">&#9670;&#160;</a></span>BX_KEY_KP_INSERT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_KP_INSERT&#160;&#160;&#160;92</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00343">343</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="ad7e2e50ce3064cc4659a925bb9408e52" name="ad7e2e50ce3064cc4659a925bb9408e52"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad7e2e50ce3064cc4659a925bb9408e52">&#9670;&#160;</a></span>BX_KEY_KP_LEFT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_KP_LEFT&#160;&#160;&#160;87</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00338">338</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a4230d17df844668203f30992188ee406" name="a4230d17df844668203f30992188ee406"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4230d17df844668203f30992188ee406">&#9670;&#160;</a></span>BX_KEY_KP_MULTIPLY</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_KP_MULTIPLY&#160;&#160;&#160;100</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00353">353</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a167af8d5d690dc11ea8e1a48497e8643" name="a167af8d5d690dc11ea8e1a48497e8643"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a167af8d5d690dc11ea8e1a48497e8643">&#9670;&#160;</a></span>BX_KEY_KP_PAGE_DOWN</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_KP_PAGE_DOWN&#160;&#160;&#160;86</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00337">337</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a5eddf095ef09b7c52abf3fd901a838fd" name="a5eddf095ef09b7c52abf3fd901a838fd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5eddf095ef09b7c52abf3fd901a838fd">&#9670;&#160;</a></span>BX_KEY_KP_PAGE_UP</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_KP_PAGE_UP&#160;&#160;&#160;91</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00342">342</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a92f8bc151b43b2ddc7dc79bbc76516ef" name="a92f8bc151b43b2ddc7dc79bbc76516ef"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a92f8bc151b43b2ddc7dc79bbc76516ef">&#9670;&#160;</a></span>BX_KEY_KP_RIGHT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_KP_RIGHT&#160;&#160;&#160;88</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00339">339</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="abde3ac27b9b7caeb6b6457d282356d1a" name="abde3ac27b9b7caeb6b6457d282356d1a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abde3ac27b9b7caeb6b6457d282356d1a">&#9670;&#160;</a></span>BX_KEY_KP_SUBTRACT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_KP_SUBTRACT&#160;&#160;&#160;83</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00334">334</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="ac10dbc79e6b5e3b0d87be15c0367085e" name="ac10dbc79e6b5e3b0d87be15c0367085e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac10dbc79e6b5e3b0d87be15c0367085e">&#9670;&#160;</a></span>BX_KEY_KP_UP</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_KP_UP&#160;&#160;&#160;90</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00341">341</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="afde8474c5fb4f354d53016dc68ccb3bf" name="afde8474c5fb4f354d53016dc68ccb3bf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afde8474c5fb4f354d53016dc68ccb3bf">&#9670;&#160;</a></span>BX_KEY_L</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_L&#160;&#160;&#160;31</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00273">273</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a6b99abbdc5c95c9a57af75d503384528" name="a6b99abbdc5c95c9a57af75d503384528"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6b99abbdc5c95c9a57af75d503384528">&#9670;&#160;</a></span>BX_KEY_LEFT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_LEFT&#160;&#160;&#160;97</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00349">349</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a8bd5de6aed44ce32a97e2cc5afc0c39b" name="a8bd5de6aed44ce32a97e2cc5afc0c39b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8bd5de6aed44ce32a97e2cc5afc0c39b">&#9670;&#160;</a></span>BX_KEY_LEFT_BACKSLASH</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_LEFT_BACKSLASH&#160;&#160;&#160;72</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00321">321</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-</div>
-</div>
-<a id="abb839312b9a9f3d9508086e7201c79f1" name="abb839312b9a9f3d9508086e7201c79f1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abb839312b9a9f3d9508086e7201c79f1">&#9670;&#160;</a></span>BX_KEY_LEFT_BRACKET</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_LEFT_BRACKET&#160;&#160;&#160;64</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00311">311</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a7238bc1338a4d18adf46ac7503c8982b" name="a7238bc1338a4d18adf46ac7503c8982b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7238bc1338a4d18adf46ac7503c8982b">&#9670;&#160;</a></span>BX_KEY_M</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_M&#160;&#160;&#160;32</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00274">274</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a991e5f384b1d8b925d12f8816030e816" name="a991e5f384b1d8b925d12f8816030e816"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a991e5f384b1d8b925d12f8816030e816">&#9670;&#160;</a></span>BX_KEY_MENU</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_MENU&#160;&#160;&#160;104</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00358">358</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="aedc81c4157220f517b0a03df48eb7e57" name="aedc81c4157220f517b0a03df48eb7e57"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aedc81c4157220f517b0a03df48eb7e57">&#9670;&#160;</a></span>BX_KEY_MINUS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_MINUS&#160;&#160;&#160;67</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00314">314</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a6d2b022ae2207aa8ee80c2f1c1f90bb3" name="a6d2b022ae2207aa8ee80c2f1c1f90bb3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6d2b022ae2207aa8ee80c2f1c1f90bb3">&#9670;&#160;</a></span>BX_KEY_N</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_N&#160;&#160;&#160;33</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00275">275</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="afd2e39e1ec046bf75b774a7f3fd8a7b8" name="afd2e39e1ec046bf75b774a7f3fd8a7b8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afd2e39e1ec046bf75b774a7f3fd8a7b8">&#9670;&#160;</a></span>BX_KEY_NBKEYS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_NBKEYS&#160;&#160;&#160;119</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00377">377</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../da/d00/a00383_source.html#l00348">bx_keymap_c::convertStringToBXKey()</a>.</p>
-
-</div>
-</div>
-<a id="ab4daf739efdbb7d13ccc38404defdbf5" name="ab4daf739efdbb7d13ccc38404defdbf5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab4daf739efdbb7d13ccc38404defdbf5">&#9670;&#160;</a></span>BX_KEY_NUM_LOCK</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_NUM_LOCK&#160;&#160;&#160;17</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00258">258</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01538">bx_sdl_gui_c::handle_keyboard_event_impl()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="ad5dd95b78693b58bca3ac1346d106dc5" name="ad5dd95b78693b58bca3ac1346d106dc5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad5dd95b78693b58bca3ac1346d106dc5">&#9670;&#160;</a></span>BX_KEY_O</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_O&#160;&#160;&#160;34</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00276">276</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="af61ea12f893e220090ac5b46d661f275" name="af61ea12f893e220090ac5b46d661f275"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af61ea12f893e220090ac5b46d661f275">&#9670;&#160;</a></span>BX_KEY_P</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_P&#160;&#160;&#160;35</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00277">277</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a63b69646a6b4faf80e2549df299f2282" name="a63b69646a6b4faf80e2549df299f2282"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a63b69646a6b4faf80e2549df299f2282">&#9670;&#160;</a></span>BX_KEY_PAGE_DOWN</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_PAGE_DOWN&#160;&#160;&#160;81</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00331">331</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a81fae1d2da27f8a9bb3af4abf8a1dcd7" name="a81fae1d2da27f8a9bb3af4abf8a1dcd7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a81fae1d2da27f8a9bb3af4abf8a1dcd7">&#9670;&#160;</a></span>BX_KEY_PAGE_UP</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_PAGE_UP&#160;&#160;&#160;80</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00330">330</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="ab23444c2b052a380817480aa6c495014" name="ab23444c2b052a380817480aa6c495014"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab23444c2b052a380817480aa6c495014">&#9670;&#160;</a></span>BX_KEY_PAUSE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_PAUSE&#160;&#160;&#160;75</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00324">324</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a9a0807a5119b265538713de76a70164a" name="a9a0807a5119b265538713de76a70164a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9a0807a5119b265538713de76a70164a">&#9670;&#160;</a></span>BX_KEY_PERIOD</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_PERIOD&#160;&#160;&#160;60</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00305">305</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="ad10b1818e46601d3625ca4e6d55e60fb" name="ad10b1818e46601d3625ca4e6d55e60fb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad10b1818e46601d3625ca4e6d55e60fb">&#9670;&#160;</a></span>BX_KEY_POWER_CALC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_POWER_CALC&#160;&#160;&#160;115</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00372">372</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-</div>
-</div>
-<a id="acf61c359e5d72fe68bc0949379a493e0" name="acf61c359e5d72fe68bc0949379a493e0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acf61c359e5d72fe68bc0949379a493e0">&#9670;&#160;</a></span>BX_KEY_POWER_MYCOMP</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_POWER_MYCOMP&#160;&#160;&#160;114</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00371">371</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-</div>
-</div>
-<a id="ae6aeb8ce40cdcf5798a12b5fa0ad8555" name="ae6aeb8ce40cdcf5798a12b5fa0ad8555"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae6aeb8ce40cdcf5798a12b5fa0ad8555">&#9670;&#160;</a></span>BX_KEY_POWER_POWER</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_POWER_POWER&#160;&#160;&#160;117</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00374">374</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-</div>
-</div>
-<a id="a397af584c37576107b14aac2b6ba4d92" name="a397af584c37576107b14aac2b6ba4d92"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a397af584c37576107b14aac2b6ba4d92">&#9670;&#160;</a></span>BX_KEY_POWER_SLEEP</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_POWER_SLEEP&#160;&#160;&#160;116</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00373">373</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-</div>
-</div>
-<a id="a0bb2209455f06a158b5dece33a474009" name="a0bb2209455f06a158b5dece33a474009"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0bb2209455f06a158b5dece33a474009">&#9670;&#160;</a></span>BX_KEY_POWER_WAKE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_POWER_WAKE&#160;&#160;&#160;118</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00375">375</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-</div>
-</div>
-<a id="abf3b3a867b6448586fc87cb4ff5eb49c" name="abf3b3a867b6448586fc87cb4ff5eb49c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abf3b3a867b6448586fc87cb4ff5eb49c">&#9670;&#160;</a></span>BX_KEY_PRESSED</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_PRESSED&#160;&#160;&#160;0x00000000</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00234">234</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-</div>
-</div>
-<a id="afd0ab2a7b85b6aa1b7712f2b2a54ac5f" name="afd0ab2a7b85b6aa1b7712f2b2a54ac5f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afd0ab2a7b85b6aa1b7712f2b2a54ac5f">&#9670;&#160;</a></span>BX_KEY_PRINT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_PRINT&#160;&#160;&#160;73</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00322">322</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="ab877b5686ffa97879db44f7fa288aa10" name="ab877b5686ffa97879db44f7fa288aa10"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab877b5686ffa97879db44f7fa288aa10">&#9670;&#160;</a></span>BX_KEY_Q</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_Q&#160;&#160;&#160;36</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00278">278</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a6aca917b907f0895a94941353fccc85c" name="a6aca917b907f0895a94941353fccc85c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6aca917b907f0895a94941353fccc85c">&#9670;&#160;</a></span>BX_KEY_R</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_R&#160;&#160;&#160;37</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00279">279</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="ac39e97fa23388fa4338fed4029dbcce9" name="ac39e97fa23388fa4338fed4029dbcce9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac39e97fa23388fa4338fed4029dbcce9">&#9670;&#160;</a></span>BX_KEY_RELEASED</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_RELEASED&#160;&#160;&#160;0x80000000</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00235">235</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../df/d00/a00416_source.html#l00239">CKeyboard::gen_scancode()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01538">bx_sdl_gui_c::handle_keyboard_event_impl()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l01160">sdl_event_dispatcher::release_guest_key()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l01233">sdl_event_dispatcher::send_guest_ctrl_alt_delete()</a>.</p>
-
-</div>
-</div>
-<a id="af84186177088f5e74781cbc2b0249b1a" name="af84186177088f5e74781cbc2b0249b1a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af84186177088f5e74781cbc2b0249b1a">&#9670;&#160;</a></span>BX_KEY_RIGHT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_RIGHT&#160;&#160;&#160;98</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00350">350</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a1152a302eae72c4d52f3be72dca14436" name="a1152a302eae72c4d52f3be72dca14436"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1152a302eae72c4d52f3be72dca14436">&#9670;&#160;</a></span>BX_KEY_RIGHT_BRACKET</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_RIGHT_BRACKET&#160;&#160;&#160;66</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00313">313</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a28e31ac7ded364a30e8d1816f6c29b8b" name="a28e31ac7ded364a30e8d1816f6c29b8b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a28e31ac7ded364a30e8d1816f6c29b8b">&#9670;&#160;</a></span>BX_KEY_S</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_S&#160;&#160;&#160;38</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00280">280</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="aced47004964be823521d4de84ba3702a" name="aced47004964be823521d4de84ba3702a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aced47004964be823521d4de84ba3702a">&#9670;&#160;</a></span>BX_KEY_SCRL_LOCK</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_SCRL_LOCK&#160;&#160;&#160;74</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00323">323</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="acb09914a705c079387d9a030cc886b99" name="acb09914a705c079387d9a030cc886b99"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acb09914a705c079387d9a030cc886b99">&#9670;&#160;</a></span>BX_KEY_SEMICOLON</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_SEMICOLON&#160;&#160;&#160;62</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00308">308</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="afb1107f565aef08c464ff443b9676553" name="afb1107f565aef08c464ff443b9676553"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afb1107f565aef08c464ff443b9676553">&#9670;&#160;</a></span>BX_KEY_SHIFT_L</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_SHIFT_L&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00240">240</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a5c9ca58e44e5d81b09dbf96094f597ac" name="a5c9ca58e44e5d81b09dbf96094f597ac"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5c9ca58e44e5d81b09dbf96094f597ac">&#9670;&#160;</a></span>BX_KEY_SHIFT_R</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_SHIFT_R&#160;&#160;&#160;15</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00256">256</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a2e3927825a7e19324d40b08aed7ba03c" name="a2e3927825a7e19324d40b08aed7ba03c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2e3927825a7e19324d40b08aed7ba03c">&#9670;&#160;</a></span>BX_KEY_SINGLE_QUOTE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_SINGLE_QUOTE&#160;&#160;&#160;58</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00303">303</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a431af36fd0a231577189eae3eb0bd49d" name="a431af36fd0a231577189eae3eb0bd49d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a431af36fd0a231577189eae3eb0bd49d">&#9670;&#160;</a></span>BX_KEY_SLASH</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_SLASH&#160;&#160;&#160;61</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00306">306</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a20a9b11bcd8c327f8336f6aa9dd54f20" name="a20a9b11bcd8c327f8336f6aa9dd54f20"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a20a9b11bcd8c327f8336f6aa9dd54f20">&#9670;&#160;</a></span>BX_KEY_SPACE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_SPACE&#160;&#160;&#160;57</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00302">302</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="add1731e77f0215b7dff4442845b2a494" name="add1731e77f0215b7dff4442845b2a494"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#add1731e77f0215b7dff4442845b2a494">&#9670;&#160;</a></span>BX_KEY_T</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_T&#160;&#160;&#160;39</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00281">281</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a030f3408bf304c30884f67ef43349986" name="a030f3408bf304c30884f67ef43349986"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a030f3408bf304c30884f67ef43349986">&#9670;&#160;</a></span>BX_KEY_TAB</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_TAB&#160;&#160;&#160;71</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00319">319</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a901677f0a8ae951c2206e89d225a26ba" name="a901677f0a8ae951c2206e89d225a26ba"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a901677f0a8ae951c2206e89d225a26ba">&#9670;&#160;</a></span>BX_KEY_U</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_U&#160;&#160;&#160;40</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00282">282</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a711cc83432a9b2c2e6eb36abb2d6ba8f" name="a711cc83432a9b2c2e6eb36abb2d6ba8f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a711cc83432a9b2c2e6eb36abb2d6ba8f">&#9670;&#160;</a></span>BX_KEY_UNHANDLED</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEY_UNHANDLED&#160;&#160;&#160;0x10000000</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00237">237</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01538">bx_sdl_gui_c::handle_keyboard_event_impl()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
-</div>
-</div>
-<a id="a6a6c0bad13556570c68fda57b93d0190" name="a6a6c0bad13556570c68fda57b93d0190"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6a6c0bad13556570c68fda57b93d0190">&#9670;&#160;</a></span>BX_KEY_UP</h2>
-
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define BX_KEY_UP&#160;&#160;&#160;95</td>
+          <td class="memname">#define GRAPHIC_MODE&#160;&#160;&#160;(vga.gc.alpha_dis)</td>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00347">347</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l02282">2282</a> of file <a class="el" href="../../d6/d00/a00371_source.html">Cirrus.cpp</a>.</p>
 
 </div>
 </div>
-<a id="a066fd5e65090fc19809b1059867ebe8f" name="a066fd5e65090fc19809b1059867ebe8f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a066fd5e65090fc19809b1059867ebe8f">&#9670;&#160;</a></span>BX_KEY_V</h2>
+<a id="a321ae946de24c36489276616d13c46cd" name="a321ae946de24c36489276616d13c46cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a321ae946de24c36489276616d13c46cd">&#9670;&#160;</a></span>LINES</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define BX_KEY_V&#160;&#160;&#160;41</td>
+          <td class="memname">#define LINES&#160;&#160;&#160;((vga.crtc.vert_disp_end + 1) * (get_interlace_mode() + 1))</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00283">283</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l02281">2281</a> of file <a class="el" href="../../d6/d00/a00371_source.html">Cirrus.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00425_source.html#l00082">svga_device::svga_vh_rgb8()</a>, and <a class="el" href="../../df/d00/a00431_source.html#l01433">vga_device::vga_vh_vga()</a>.</p>
 
 </div>
 </div>
-<a id="ad3a81c50d6a4c61544c1682e17844919" name="ad3a81c50d6a4c61544c1682e17844919"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad3a81c50d6a4c61544c1682e17844919">&#9670;&#160;</a></span>BX_KEY_W</h2>
+<a id="aae585bf91fe9e3a84a5067d7fad33dd9" name="aae585bf91fe9e3a84a5067d7fad33dd9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae585bf91fe9e3a84a5067d7fad33dd9">&#9670;&#160;</a></span>LOG_BANK</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define BX_KEY_W&#160;&#160;&#160;42</td>
+          <td class="memname">#define LOG_BANK&#160;&#160;&#160;(1U &lt;&lt; 4)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00284">284</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00065">65</a> of file <a class="el" href="../../d6/d00/a00371_source.html">Cirrus.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
 </div>
 </div>
-<a id="ad6d6df32501249b8125c6d810fd6fa0a" name="ad6d6df32501249b8125c6d810fd6fa0a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad6d6df32501249b8125c6d810fd6fa0a">&#9670;&#160;</a></span>BX_KEY_WIN_L</h2>
+<a id="a482347b889da621ee24ac3e37666ae38" name="a482347b889da621ee24ac3e37666ae38"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a482347b889da621ee24ac3e37666ae38">&#9670;&#160;</a></span>LOG_BLIT</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define BX_KEY_WIN_L&#160;&#160;&#160;102</td>
+          <td class="memname">#define LOG_BLIT&#160;&#160;&#160;(1U &lt;&lt; 2)</td>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00356">356</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00063">63</a> of file <a class="el" href="../../d6/d00/a00371_source.html">Cirrus.cpp</a>.</p>
 
 </div>
 </div>
-<a id="a1bdeaf8c8e74a72e2133953619e40006" name="a1bdeaf8c8e74a72e2133953619e40006"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1bdeaf8c8e74a72e2133953619e40006">&#9670;&#160;</a></span>BX_KEY_WIN_R</h2>
+<a id="a5a33674fe6105cfd952915a42fa8dc1a" name="a5a33674fe6105cfd952915a42fa8dc1a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5a33674fe6105cfd952915a42fa8dc1a">&#9670;&#160;</a></span>LOG_HDAC</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define BX_KEY_WIN_R&#160;&#160;&#160;103</td>
+          <td class="memname">#define LOG_HDAC&#160;&#160;&#160;(1U &lt;&lt; 3)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00357">357</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00064">64</a> of file <a class="el" href="../../d6/d00/a00371_source.html">Cirrus.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d00/a00371_source.html#l00185">cirrus_gd5428_vga_device::ramdac_hidden_mask_r()</a>, and <a class="el" href="../../d6/d00/a00371_source.html#l00203">cirrus_gd5428_vga_device::ramdac_hidden_mask_w()</a>.</p>
 
 </div>
 </div>
-<a id="a81dbfbfbfed0daeb82d415a786502190" name="a81dbfbfbfed0daeb82d415a786502190"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a81dbfbfbfed0daeb82d415a786502190">&#9670;&#160;</a></span>BX_KEY_X</h2>
+<a id="af28319df471aa57b18262a415976b1dd" name="af28319df471aa57b18262a415976b1dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af28319df471aa57b18262a415976b1dd">&#9670;&#160;</a></span>LOG_PLL</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define BX_KEY_X&#160;&#160;&#160;43</td>
+          <td class="memname">#define LOG_PLL&#160;&#160;&#160;(1U &lt;&lt; 5)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00285">285</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00066">66</a> of file <a class="el" href="../../d6/d00/a00371_source.html">Cirrus.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
-
 </div>
 </div>
-<a id="a695ef4ac01ff434e5e8df9a4ad0f550e" name="a695ef4ac01ff434e5e8df9a4ad0f550e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a695ef4ac01ff434e5e8df9a4ad0f550e">&#9670;&#160;</a></span>BX_KEY_Y</h2>
+<a id="ab6f1afff1865d07e48e001f0d6de4a0e" name="ab6f1afff1865d07e48e001f0d6de4a0e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6f1afff1865d07e48e001f0d6de4a0e">&#9670;&#160;</a></span>LOG_REGS</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define BX_KEY_Y&#160;&#160;&#160;44</td>
+          <td class="memname">#define LOG_REGS&#160;&#160;&#160;(1U &lt;&lt; 1)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00286">286</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00062">62</a> of file <a class="el" href="../../d6/d00/a00371_source.html">Cirrus.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d00/a00371_source.html#l00280">cirrus_gd5428_vga_device::crtc_map()</a>, and <a class="el" href="../../d6/d00/a00371_source.html#l01758">cirrus_gd5430_vga_device::mmio_r()</a>.</p>
 
 </div>
 </div>
-<a id="a35490efc3892784f3ff1532e8036438b" name="a35490efc3892784f3ff1532e8036438b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a35490efc3892784f3ff1532e8036438b">&#9670;&#160;</a></span>BX_KEY_Z</h2>
+<a id="a42f8c497a1968074f38bf5055c650dca" name="a42f8c497a1968074f38bf5055c650dca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42f8c497a1968074f38bf5055c650dca">&#9670;&#160;</a></span>VERBOSE</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define BX_KEY_Z&#160;&#160;&#160;45</td>
+          <td class="memname">#define VERBOSE&#160;&#160;&#160;(<a class="el" href="../../d3/d00/a00419.html#af9a86285a265da1d934e6afeac099a5c">LOG_GENERAL</a> | <a class="el" href="#a5a33674fe6105cfd952915a42fa8dc1a">LOG_HDAC</a> | <a class="el" href="#ab6f1afff1865d07e48e001f0d6de4a0e">LOG_REGS</a> | <a class="el" href="#a482347b889da621ee24ac3e37666ae38">LOG_BLIT</a>)</td>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00287">287</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d00/a00398_source.html#l01011">sdl_scan_to_bx_key()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00068">68</a> of file <a class="el" href="../../d6/d00/a00371_source.html">Cirrus.cpp</a>.</p>
 
 </div>
 </div>
-<a id="af2547908e32be538a69d6f82363d4513" name="af2547908e32be538a69d6f82363d4513"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af2547908e32be538a69d6f82363d4513">&#9670;&#160;</a></span>BX_PANIC</h2>
+<a id="a0d6fca6b3c681e20c85e328a6d76a733" name="a0d6fca6b3c681e20c85e328a6d76a733"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d6fca6b3c681e20c85e328a6d76a733">&#9670;&#160;</a></span>VGA_CH_WIDTH</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define BX_PANIC</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>a</em></span></td><td>)</td>
-          <td></td>
+          <td class="memname">#define VGA_CH_WIDTH&#160;&#160;&#160;((vga.sequencer.data[1]&amp;1)?8:9)</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="#ad6d77159677be550d33909310c0ae22b">BX_DEBUG</a>(a)</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00078">78</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../df/d00/a00416_source.html#l01438">CKeyboard::ctrl_to_mouse()</a>, <a class="el" href="../../da/d00/a00383_source.html#l00189">get_next_keymap_line()</a>, <a class="el" href="../../da/d00/a00383_source.html#l00270">bx_keymap_c::loadKeymap()</a>, and <a class="el" href="../../df/d00/a00416_source.html#l00726">CKeyboard::write_64()</a>.</p>
-
-</div>
-</div>
-<a id="a68601f1989a938cd9535a75e7ad24874" name="a68601f1989a938cd9535a75e7ad24874"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a68601f1989a938cd9535a75e7ad24874">&#9670;&#160;</a></span>IMPLEMENT_GUI_PLUGIN_CODE</h2>
 
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define IMPLEMENT_GUI_PLUGIN_CODE</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>gui_name</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordtype">int</span> lib##gui_name##_LTX_plugin_init(<a class="code hl_class" href="../../d3/d00/a00869.html">CConfigurator</a>*  cfg)                    \</div>
-<div class="line">{                                                                           \</div>
-<div class="line">  printf(<span class="stringliteral">&quot;%%GUI-I-INS: Installing %s module as the ES40 GUI\n&quot;</span>, #gui_name); \</div>
-<div class="line">  theGui = <span class="keyword">new</span> bx_##gui_name##_gui_c(cfg);                                  \</div>
-<div class="line">  <a class="code hl_variable" href="../../d8/d00/a00368.html#aadf5655663e70c8f409d89a43fc98598">bx_gui</a> = theGui;                                                          \</div>
-<div class="line">  return(0);                                                    \</div>
-<div class="line">}                                                                           \</div>
-<div class="line">                                                                           \</div>
-<div class="line"><span class="keywordtype">void</span> lib##gui_name##_LTX_plugin_fini(<span class="keywordtype">void</span>)                                  \</div>
-<div class="line">{ }</div>
-<div class="ttc" id="aa00368_html_aadf5655663e70c8f409d89a43fc98598"><div class="ttname"><a href="../../d8/d00/a00368.html#aadf5655663e70c8f409d89a43fc98598">bx_gui</a></div><div class="ttdeci">bx_gui_c * bx_gui</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00368_source.html#l00080">gui.cpp:80</a></div></div>
-<div class="ttc" id="aa00869_html"><div class="ttname"><a href="../../d3/d00/a00869.html">CConfigurator</a></div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00080_source.html#l00133">Configurator.h:134</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l00396">396</a> of file <a class="el" href="../../d6/d00/a00371_source.html">gui.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l02283">2283</a> of file <a class="el" href="../../d6/d00/a00371_source.html">Cirrus.cpp</a>.</p>
 
 </div>
 </div>
-<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
-<a id="adc76cd0cd970965f86358db43bbcd7fc" name="adc76cd0cd970965f86358db43bbcd7fc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adc76cd0cd970965f86358db43bbcd7fc">&#9670;&#160;</a></span>bx_gui</h2>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a27094f2e444cd46399cc1aec69d82758" name="a27094f2e444cd46399cc1aec69d82758"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27094f2e444cd46399cc1aec69d82758">&#9670;&#160;</a></span>cirrus_read_record()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename T&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">class <a class="el" href="../../d2/d00/a01433.html">bx_gui_c</a>* bx_gui</td>
+          <td class="memname">bool cirrus_read_record </td>
+          <td>(</td>
+          <td class="paramtype">FILE *</td>          <td class="paramname"><span class="paramname"><em>f</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">T &amp;</td>          <td class="paramname"><span class="paramname"><em>value</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/d00/a00368_source.html#l00080">80</a> of file <a class="el" href="../../d8/d00/a00368_source.html">gui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l02609">2609</a> of file <a class="el" href="../../d6/d00/a00371_source.html">Cirrus.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d7/d00/a00002_source.html#l00278">detach_gui_guest_input()</a>, <a class="el" href="../../d4/d00/a00617_source.html#l01720">CSystem::init()</a>, <a class="el" href="../../d8/d00/a00368_source.html#l00215">bx_gui_c::init_signal_handlers()</a>, <a class="el" href="../../d1/d00/a00077_source.html#l00816">CConfigurator::initialize()</a>, <a class="el" href="../../d9/d00/a00398_source.html#l00761">libsdl_LTX_plugin_init()</a>, <a class="el" href="../../d7/d00/a00002_source.html#l00305">main()</a>, <a class="el" href="../../d8/d00/a00368_source.html#l00204">bx_gui_c::mouse_enabled_changed()</a>, <a class="el" href="../../d5/d00/a00308_source.html#l00165">CCirrus::run()</a>, <a class="el" href="../../d7/d00/a00002_source.html#l00540">run_emulator()</a>, <a class="el" href="../../d5/d00/a00308_source.html#l01012">CCirrus::write_b_3c0()</a>, <a class="el" href="../../d5/d00/a00308_source.html#l01377">CCirrus::write_b_3c5()</a>, <a class="el" href="../../d5/d00/a00308_source.html#l01533">CCirrus::write_b_3c9()</a>, and <a class="el" href="../../d9/d00/a00398_source.html#l00647">sdl_application::~sdl_application()</a>.</p>
+<p class="reference">References <a class="el" href="../../db/d00/a02253_source.html#l00396">vga_device::m_ioas</a>.</p>
+
+</div>
+</div>
+<a id="afa104e830f0dd8d9a16c690bd79bbfaa" name="afa104e830f0dd8d9a16c690bd79bbfaa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afa104e830f0dd8d9a16c690bd79bbfaa">&#9670;&#160;</a></span>cirrus_write_record()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool cirrus_write_record </td>
+          <td>(</td>
+          <td class="paramtype">FILE *</td>          <td class="paramname"><span class="paramname"><em>f</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const T &amp;</td>          <td class="paramname"><span class="paramname"><em>value</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00371_source.html#l02599">2599</a> of file <a class="el" href="../../d6/d00/a00371_source.html">Cirrus.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d6/d00/a00371_source.html#l02305">CCirrus::advance_scan()</a>, <a class="el" href="../../d6/d00/a00356_source.html#l00169">CSystemComponent::cSystem</a>, <a class="el" href="../../db/d00/a00722_source.html#l00366">CSystem::device_access_time()</a>, <a class="el" href="../../db/d00/a02253_source.html#l00257">vga_device::vga_t::memory</a>, <a class="el" href="../../d1/d00/a00347_source.html#l00671">CPCIDevice::SaveState()</a>, <a class="el" href="../../d0/d00/a01641.html#a7e88ed0493a36c18b05a065fbdfda3d5">vga_device::vga_t::svga_intf</a>, and <a class="el" href="../../db/d00/a01637.html#a826baf65911a3540a5ae739e547d4571">vga_device::vga</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d6/d00/a00371_afa104e830f0dd8d9a16c690bd79bbfaa_cgraph.png" border="0" usemap="#ad6/d00/a00371_afa104e830f0dd8d9a16c690bd79bbfaa_cgraph" loading="lazy" alt=""/></div>
+<map name="ad6/d00/a00371_afa104e830f0dd8d9a16c690bd79bbfaa_cgraph" id="ad6/d00/a00371_afa104e830f0dd8d9a16c690bd79bbfaa_cgraph">
+<area shape="rect" title=" " alt="" coords="5,56,137,83"/>
+<area shape="rect" href="../../df/d00/a01385.html#abf629c7d43f548908b035455c7c463c4" title=" " alt="" coords="207,5,366,32"/>
+<area shape="poly" title=" " alt="" coords="130,53,214,35,210,38,132,58"/>
+<area shape="rect" href="../../d7/d00/a02109.html#a66112a639a400bb96cf335dd6f4f99de" title=" " alt="" coords="185,56,388,83"/>
+<area shape="poly" title=" " alt="" coords="137,67,171,69,166,70,138,72"/>
+<area shape="rect" href="../../d7/d00/a01365.html#a918dfd1dfb7a5bfaba599c86b783e168" title="Save state to a Virtual Machine State file." alt="" coords="204,107,368,133"/>
+<area shape="poly" title=" " alt="" coords="131,81,214,102,209,104,131,86"/>
+</map>
+</div>
 
 </div>
 </div>
@@ -2696,7 +554,7 @@ Variables</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_11bc0974ce736ce9a6fadebbeb7a8314.html">gui</a></li><li class="navelem"><a href="../../d6/d00/a00371.html">gui.h</a></li>
+    <li class="navelem"><a href="../../dir_e79632891301b850df87e9c0030293fa.html">graphics</a></li><li class="navelem"><a href="../../d6/d00/a00371.html">Cirrus.cpp</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

@@ -1,6 +1,6 @@
 var a00961 =
 [
-    [ "discard_safe", "da/d00/a00961.html#aa9bcd8c435567b2b66df62553b489ecc", null ],
-    [ "kind", "da/d00/a00961.html#a52e0bcf6da6a75b6d4810b13b4b11df3", null ],
-    [ "replay", "da/d00/a00961.html#a46f681b1e3eb9f23be97d7299b22aa09", null ]
+    [ "SDriveState", "d3/d00/a00965.html", "d3/d00/a00965" ],
+    [ "SControllerState", "dd/d00/a00981.html", "dd/d00/a00981" ],
+    [ "controller", "da/d00/a00961.html#af593b66c989b9159bda9728afe0a5e34", null ]
 ];

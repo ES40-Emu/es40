@@ -1,13 +1,9 @@
 var a01837 =
 [
-    [ "SSys_tig", "d2/d00/a01841.html", "d2/d00/a01841" ],
-    [ "SSys_cchip", "da/d00/a01845.html", "da/d00/a01845" ],
-    [ "SSys_dchip", "db/d00/a01849.html", "db/d00/a01849" ],
-    [ "SSys_pchip", "db/d00/a01853.html", "db/d00/a01853" ],
-    [ "cchip", "d7/d00/a01837.html#a587b90a26bc275d360136f34cc74f4a2", null ],
-    [ "cpu_lock_address", "d7/d00/a01837.html#a95248bf5ee6d3870783078bc24cf69e2", null ],
-    [ "cpu_lock_flags", "d7/d00/a01837.html#a1f81ca7875dd5ac7fe7ee64c83044951", null ],
-    [ "dchip", "d7/d00/a01837.html#af4671fa6950dfb06439c6c43124875c4", null ],
-    [ "pchip", "d7/d00/a01837.html#afd4f793c7492b56464273e10b91194aa", null ],
-    [ "tig", "d7/d00/a01837.html#a4f148568ae5d2554afabf2e6e5314bf3", null ]
+    [ "bit", "d7/d00/a01837.html#a76820090e846776e8a27eb80ebfab415", null ],
+    [ "opcode", "d7/d00/a01837.html#a34391838643a867bd89423285d878853", null ],
+    [ "phy_reg", "d7/d00/a01837.html#a26b36664f893d7df749c41e4a7051fcf", null ],
+    [ "phyaddr", "d7/d00/a01837.html#a45e6c98ce7657922114e5852831ac26c", null ],
+    [ "regaddr", "d7/d00/a01837.html#ac10d24925e2cec70c6617150cff37c7a", null ],
+    [ "state", "d7/d00/a01837.html#a675bf6283111861e8c210619a4cb7eff", null ]
 ];

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: network/Ethernet.cpp Source File</title>
+<title>ES40: gui/keymap.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,261 +109,109 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('dd/d00/a00455_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">Ethernet.cpp</div></div>
+  <div class="headertitle"><div class="title">keymap.h</div></div>
 </div><!--header-->
 <div class="contents">
 <a href="../../dd/d00/a00455.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator.</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2007-2008 by the ES40 Emulator Project</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright (C) 2026 by gdwnldsKSC</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * This program is free software; you can redistribute it and/or</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * modify it under the terms of the GNU General Public License</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * as published by the Free Software Foundation; either version 2</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * of the License, or (at your option) any later version.</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * This program is distributed in the hope that it will be useful,</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * GNU General Public License for more details.</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * You should have received a copy of the GNU General Public License</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * along with this program; if not, write to the Free Software</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> *  This file is based upon Bochs.</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *  Copyright (C) 2002  MandrakeSoft S.A.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> *    MandrakeSoft S.A.</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> *    43, rue d&#39;Aboukir</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> *    75002 Paris - France</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> *    http://www.linux-mandrake.com/</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> *    http://www.mandrakesoft.com/</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> *  This library is free software; you can redistribute it and/or</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> *  modify it under the terms of the GNU Lesser General Public</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> *  License as published by the Free Software Foundation; either</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> *  version 2 of the License, or (at your option) any later version.</span></div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * Although this is not required, the author would appreciate being notified of,</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * and receiving any modifications you may make to the source code that might serve</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> * the general public.</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> * Parts of this file based upon GXemul, which is Copyright (C) 2004-2007</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> * Anders Gavare.  All rights reserved.</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment"> * Redistribution and use in source and binary forms, with or without</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment"> * modification, are permitted provided that the following conditions are met:</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment"> * 1. Redistributions of source code must retain the above copyright</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment"> *    notice, this list of conditions and the following disclaimer.</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="comment"> * 2. Redistributions in binary form must reproduce the above copyright</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="comment"> *    notice, this list of conditions and the following disclaimer in the</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="comment"> *    documentation and/or other materials provided with the distribution.</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="comment"> * 3. The name of the author may not be used to endorse or promote products</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment"> *    derived from this software without specific prior written permission.</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS&#39;&#39; AND</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment"> * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment"> * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment"> * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment"> * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="comment"> * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="comment"> * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="comment"> * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment"> * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="comment"> * SUCH DAMAGE.</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d00/a00524.html">../StdAfx.h</a>&quot;</span></div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="preprocessor">#include &quot;<a class="code" href="../../da/d00/a00458.html">Ethernet.h</a>&quot;</span></div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#include &quot;<a class="code" href="../../dc/d00/a00515.html">telnet.h</a>&quot;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> *  This library is distributed in the hope that it will be useful,</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> *  but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> *  Lesser General Public License for more details.</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> *  You should have received a copy of the GNU Lesser General Public</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment"> *  License along with this library; if not, write to the Free Software</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment"> *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#include &quot;<a class="code" href="../../d4/d00/a00116.html">config/Configurator.h</a>&quot;</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>  <span class="comment">// In case of unknown symbol</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="../../dd/d00/a00455.html#af9df788a41e0e7b2555362f7d2c29e51">   60</a></span><span class="preprocessor">#define BX_KEYMAP_UNKNOWN 0xFFFFFFFF</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span></div>
+<div class="foldopen" id="foldopen00063" data-start="{" data-end="};">
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="../../d1/d00/a01709.html">   63</a></span><span class="keyword">typedef</span> <span class="keyword">struct</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>{</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="../../d1/d00/a01709.html#ab4ec2640a5adf80ee9799af608906612">   65</a></span>  <a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> <a class="code hl_variable" href="../../d1/d00/a01709.html#ab4ec2640a5adf80ee9799af608906612">baseKey</a>;  <span class="comment">// base key</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="../../d1/d00/a01709.html#ad3fea40a472a0c624b91689af21025c6">   66</a></span>  <a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> <a class="code hl_variable" href="../../d1/d00/a01709.html#ad3fea40a472a0c624b91689af21025c6">modKey</a>;   <span class="comment">// modifier key that must be held down</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="../../d1/d00/a01709.html#a69cbcfee0fb4bfacb23ceff7320a327d">   67</a></span>  <a class="code hl_typedef" href="../../d8/d00/a00326.html#ae5300ed9eabeae78ee9d0c704a9c412a">s32</a> <a class="code hl_variable" href="../../d1/d00/a01709.html#a69cbcfee0fb4bfacb23ceff7320a327d">ascii</a>;    <span class="comment">// ascii equivalent, if any</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="../../d1/d00/a01709.html#a06d132ce3a7636fd605b050fd3092752">   68</a></span>  <a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> <a class="code hl_variable" href="../../d1/d00/a01709.html#a06d132ce3a7636fd605b050fd3092752">hostKey</a>;  <span class="comment">// value that the host&#39;s OS or library recognizes</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>} <a class="code hl_struct" href="../../d1/d00/a01709.html">BXKeyEntry</a>;</div>
+</div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span></div>
-<div class="foldopen" id="foldopen00074" data-start="{" data-end="}">
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="../../d3/d00/a01577.html#a022801c8882c02d96e73a676bc0798ae">   74</a></span><a class="code hl_function" href="../../d3/d00/a01577.html#a022801c8882c02d96e73a676bc0798ae">CPacketQueue::CPacketQueue</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_variable" href="../../d3/d00/a01577.html#a796d4bcc5000da54f9983c9df3df20c5">name</a>, <span class="keywordtype">int</span> <a class="code hl_variable" href="../../d3/d00/a01577.html#a536e003ba8e752dff903c568a538156b">max</a>)</div>
+<div class="foldopen" id="foldopen00074" data-start="{" data-end="};">
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="../../d2/d00/a01713.html">   74</a></span><span class="keyword">class </span><a class="code hl_function" href="../../d2/d00/a01713.html#ae9d4ae6735f13dfc6247c825a6a52c8c">bx_keymap_c</a></div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>{</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        this-&gt;name = <a class="code hl_variable" href="../../d3/d00/a01577.html#a796d4bcc5000da54f9983c9df3df20c5">name</a>;</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        this-&gt;max = <a class="code hl_variable" href="../../d3/d00/a01577.html#a536e003ba8e752dff903c568a538156b">max</a>;</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        <a class="code hl_variable" href="../../d3/d00/a01577.html#a43bb7dc4b7b4db1438548701ee6a61db">head</a> = 0;</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        <a class="code hl_variable" href="../../d3/d00/a01577.html#a72033ebedeea8a07a7b6df61816bf6a6">tail</a> = -1;</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        <a class="code hl_variable" href="../../d3/d00/a01577.html#a60415ee70ba642ee4c1b13f9299ed444">cnt</a> = 0;</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        <a class="code hl_variable" href="../../d3/d00/a01577.html#ad45d625ce76da7e67232ae007f8bbde9">highwater</a> = 0;</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        <a class="code hl_variable" href="../../d3/d00/a01577.html#ac2b41fba93899b2d4109ef09395a1857">dropped</a> = 0;</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>        <a class="code hl_variable" href="../../d3/d00/a01577.html#a620de3a16e2aca75f5b05c3831a7ed0e">packets</a> = <span class="keyword">new</span> <a class="code hl_struct" href="../../d6/d00/a01573.html">eth_packet</a>[<a class="code hl_variable" href="../../d3/d00/a01577.html#a536e003ba8e752dff903c568a538156b">max</a>];</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>}</div>
-</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
-<div class="foldopen" id="foldopen00086" data-start="{" data-end="}">
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="../../d3/d00/a01577.html#acdf6cd78ea52162385429c23a23ee4aa">   86</a></span><a class="code hl_function" href="../../d3/d00/a01577.html#acdf6cd78ea52162385429c23a23ee4aa">CPacketQueue::~CPacketQueue</a>()</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>{</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        <span class="keyword">delete</span>[] <a class="code hl_variable" href="../../d3/d00/a01577.html#a620de3a16e2aca75f5b05c3831a7ed0e">packets</a>;</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        printf(<span class="stringliteral">&quot;CPacketQueue(%s): highwater=%d, lost=%d\n&quot;</span>, <a class="code hl_variable" href="../../d3/d00/a01577.html#a796d4bcc5000da54f9983c9df3df20c5">name</a>, <a class="code hl_variable" href="../../d3/d00/a01577.html#ad45d625ce76da7e67232ae007f8bbde9">highwater</a>, <a class="code hl_variable" href="../../d3/d00/a01577.html#ac2b41fba93899b2d4109ef09395a1857">dropped</a>);</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>}</div>
-</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>  <a class="code hl_function" href="../../d2/d00/a01713.html#ae9d4ae6735f13dfc6247c825a6a52c8c">bx_keymap_c</a>(<a class="code hl_class" href="../../d2/d00/a01085.html">CConfigurator</a>* cfg);</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>  <a class="code hl_function" href="../../d2/d00/a01713.html#ae9d4ae6735f13dfc6247c825a6a52c8c">~bx_keymap_c</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  <span class="keywordtype">void</span>          <a class="code hl_function" href="../../d2/d00/a01713.html#af8224621a0f4e615d6c6dbca9d16c162">loadKeymap</a>(<a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> stringToSymbol(<span class="keyword">const</span> <span class="keywordtype">char</span>*));</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  <span class="keywordtype">void</span>          <a class="code hl_function" href="../../d2/d00/a01713.html#af8224621a0f4e615d6c6dbca9d16c162">loadKeymap</a>(<a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> stringToSymbol(<span class="keyword">const</span> <span class="keywordtype">char</span>*),</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* filename);</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>  <span class="keywordtype">bool</span>          <a class="code hl_function" href="../../d2/d00/a01713.html#a9ba17e2a601febdf4ca20270c18c7321">isKeymapLoaded</a>();</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  <a class="code hl_struct" href="../../d1/d00/a01709.html">BXKeyEntry</a>* <a class="code hl_function" href="../../d2/d00/a01713.html#aab7364d8ec50be3ea8170f8836f1d9d1">findHostKey</a>(<a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> hostkeynum);</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  <a class="code hl_struct" href="../../d1/d00/a01709.html">BXKeyEntry</a>* <a class="code hl_function" href="../../d2/d00/a01713.html#a208c80ae898f3abadbb8cf2d712770ac">findAsciiChar</a>(<a class="code hl_typedef" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> ascii);</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="../../d2/d00/a01713.html#a11b6225705f56445a78ba2dee3af1c34">getBXKeyName</a>(<a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> key);</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  <a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>             <a class="code hl_function" href="../../d2/d00/a01713.html#a0ce7901c7c0a41402827c3ea4f462e44">convertStringToBXKey</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>*);</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="../../d2/d00/a01713.html#ab336b407e4d779f7d7acaed87b270e6d">   90</a></span>  <a class="code hl_class" href="../../d2/d00/a01085.html">CConfigurator</a>* <a class="code hl_variable" href="../../d2/d00/a01713.html#ab336b407e4d779f7d7acaed87b270e6d">myCfg</a>;</div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
-<div class="foldopen" id="foldopen00092" data-start="{" data-end="}">
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="../../d3/d00/a01577.html#a4ae6fce40f5b55c39203fe707508dab2">   92</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="../../d3/d00/a01577.html#a4ae6fce40f5b55c39203fe707508dab2">CPacketQueue::flush</a>()</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>{</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        <a class="code hl_variable" href="../../d3/d00/a01577.html#a60415ee70ba642ee4c1b13f9299ed444">cnt</a> = 0;</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        <a class="code hl_variable" href="../../d3/d00/a01577.html#a43bb7dc4b7b4db1438548701ee6a61db">head</a> = 0;</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        <a class="code hl_variable" href="../../d3/d00/a01577.html#a72033ebedeea8a07a7b6df61816bf6a6">tail</a> = -1;</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>}</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="../../d2/d00/a01713.html#a4681b86f1df1e35654e1f551b51b775f">   92</a></span>  <a class="code hl_struct" href="../../d1/d00/a01709.html">BXKeyEntry</a>* <a class="code hl_variable" href="../../d2/d00/a01713.html#a4681b86f1df1e35654e1f551b51b775f">keymapTable</a>;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="../../d2/d00/a01713.html#a38e2d3a0b4586a96c863010df7391451">   93</a></span>  <a class="code hl_typedef" href="../../d8/d00/a00326.html#a6dbf9516e516c901604625282c174aa4">u16</a>             <a class="code hl_variable" href="../../d2/d00/a01713.html#a38e2d3a0b4586a96c863010df7391451">keymapCount</a>;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>};</div>
 </div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
-<div class="foldopen" id="foldopen00099" data-start="{" data-end="};">
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno"><a class="line" href="../../dd/d00/a00455.html#a8cd963aa1510a06da50c808a7453f85f">   99</a></span><span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>  <a class="code hl_variable" href="../../dd/d00/a00455.html#a8cd963aa1510a06da50c808a7453f85f">crcTable</a>[256] = {</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>  0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F,</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>  0xE963A535, 0x9E6495A3, 0x0EDB8832, 0x79DCB8A4, 0xE0D5E91E, 0x97D2D988,</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>  0x09B64C2B, 0x7EB17CBD, 0xE7B82D07, 0x90BF1D91, 0x1DB71064, 0x6AB020F2,</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>  0xF3B97148, 0x84BE41DE, 0x1ADAD47D, 0x6DDDE4EB, 0xF4D4B551, 0x83D385C7,</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  0x136C9856, 0x646BA8C0, 0xFD62F97A, 0x8A65C9EC, 0x14015C4F, 0x63066CD9,</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>  0xFA0F3D63, 0x8D080DF5, 0x3B6E20C8, 0x4C69105E, 0xD56041E4, 0xA2677172,</div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  0x3C03E4D1, 0x4B04D447, 0xD20D85FD, 0xA50AB56B, 0x35B5A8FA, 0x42B2986C,</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>  0xDBBBC9D6, 0xACBCF940, 0x32D86CE3, 0x45DF5C75, 0xDCD60DCF, 0xABD13D59,</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  0x26D930AC, 0x51DE003A, 0xC8D75180, 0xBFD06116, 0x21B4F4B5, 0x56B3C423,</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  0xCFBA9599, 0xB8BDA50F, 0x2802B89E, 0x5F058808, 0xC60CD9B2, 0xB10BE924,</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>  0x2F6F7C87, 0x58684C11, 0xC1611DAB, 0xB6662D3D, 0x76DC4190, 0x01DB7106,</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>  0x98D220BC, 0xEFD5102A, 0x71B18589, 0x06B6B51F, 0x9FBFE4A5, 0xE8B8D433,</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>  0x7807C9A2, 0x0F00F934, 0x9609A88E, 0xE10E9818, 0x7F6A0DBB, 0x086D3D2D,</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  0x91646C97, 0xE6635C01, 0x6B6B51F4, 0x1C6C6162, 0x856530D8, 0xF262004E,</div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>  0x6C0695ED, 0x1B01A57B, 0x8208F4C1, 0xF50FC457, 0x65B0D9C6, 0x12B7E950,</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>  0x8BBEB8EA, 0xFCB9887C, 0x62DD1DDF, 0x15DA2D49, 0x8CD37CF3, 0xFBD44C65,</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>  0x4DB26158, 0x3AB551CE, 0xA3BC0074, 0xD4BB30E2, 0x4ADFA541, 0x3DD895D7,</div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>  0xA4D1C46D, 0xD3D6F4FB, 0x4369E96A, 0x346ED9FC, 0xAD678846, 0xDA60B8D0,</div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>  0x44042D73, 0x33031DE5, 0xAA0A4C5F, 0xDD0D7CC9, 0x5005713C, 0x270241AA,</div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>  0xBE0B1010, 0xC90C2086, 0x5768B525, 0x206F85B3, 0xB966D409, 0xCE61E49F,</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>  0x5EDEF90E, 0x29D9C998, 0xB0D09822, 0xC7D7A8B4, 0x59B33D17, 0x2EB40D81,</div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>  0xB7BD5C3B, 0xC0BA6CAD, 0xEDB88320, 0x9ABFB3B6, 0x03B6E20C, 0x74B1D29A,</div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>  0xEAD54739, 0x9DD277AF, 0x04DB2615, 0x73DC1683, 0xE3630B12, 0x94643B84,</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>  0x0D6D6A3E, 0x7A6A5AA8, 0xE40ECF0B, 0x9309FF9D, 0x0A00AE27, 0x7D079EB1,</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>  0xF00F9344, 0x8708A3D2, 0x1E01F268, 0x6906C2FE, 0xF762575D, 0x806567CB,</div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>  0x196C3671, 0x6E6B06E7, 0xFED41B76, 0x89D32BE0, 0x10DA7A5A, 0x67DD4ACC,</div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>  0xF9B9DF6F, 0x8EBEEFF9, 0x17B7BE43, 0x60B08ED5, 0xD6D6A3E8, 0xA1D1937E,</div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>  0x38D8C2C4, 0x4FDFF252, 0xD1BB67F1, 0xA6BC5767, 0x3FB506DD, 0x48B2364B,</div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>  0xD80D2BDA, 0xAF0A1B4C, 0x36034AF6, 0x41047A60, 0xDF60EFC3, 0xA867DF55,</div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>  0x316E8EEF, 0x4669BE79, 0xCB61B38C, 0xBC66831A, 0x256FD2A0, 0x5268E236,</div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>  0xCC0C7795, 0xBB0B4703, 0x220216B9, 0x5505262F, 0xC5BA3BBE, 0xB2BD0B28,</div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>  0x2BB45A92, 0x5CB36A04, 0xC2D7FFA7, 0xB5D0CF31, 0x2CD99E8B, 0x5BDEAE1D,</div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>  0x9B64C2B0, 0xEC63F226, 0x756AA39C, 0x026D930A, 0x9C0906A9, 0xEB0E363F,</div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>  0x72076785, 0x05005713, 0x95BF4A82, 0xE2B87A14, 0x7BB12BAE, 0x0CB61B38,</div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>  0x92D28E9B, 0xE5D5BE0D, 0x7CDCEFB7, 0x0BDBDF21, 0x86D3D2D4, 0xF1D4E242,</div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>  0x68DDB3F8, 0x1FDA836E, 0x81BE16CD, 0xF6B9265B, 0x6FB077E1, 0x18B74777,</div>
-<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>  0x88085AE6, 0xFF0F6A70, 0x66063BCA, 0x11010B5C, 0x8F659EFF, 0xF862AE69,</div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>  0x616BFFD3, 0x166CCF45, 0xA00AE278, 0xD70DD2EE, 0x4E048354, 0x3903B3C2,</div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>  0xA7672661, 0xD06016F7, 0x4969474D, 0x3E6E77DB, 0xAED16A4A, 0xD9D65ADC,</div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>  0x40DF0B66, 0x37D83BF0, 0xA9BCAE53, 0xDEBB9EC5, 0x47B2CF7F, 0x30B5FFE9,</div>
-<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>  0xBDBDF21C, 0xCABAC28A, 0x53B39330, 0x24B4A3A6, 0xBAD03605, 0xCDD70693,</div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>  0x54DE5729, 0x23D967BF, 0xB3667A2E, 0xC4614AB8, 0x5D681B02, 0x2A6F2B94,</div>
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>  0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D</div>
-<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>};</div>
-</div>
-<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span> </div>
-<div class="foldopen" id="foldopen00145" data-start="{" data-end="}">
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno"><a class="line" href="../../dd/d00/a00455.html#a3bfbc59c214962ad31300721fae81158">  145</a></span><span class="keyword">static</span> <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> <a class="code hl_function" href="../../dd/d00/a00455.html#a3bfbc59c214962ad31300721fae81158">eth_crc32</a>(<a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> crc, <span class="keyword">const</span> <span class="keywordtype">void</span>* vbuf, <span class="keywordtype">int</span> len)</div>
-<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>{</div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>        <span class="keyword">const</span> <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>             mask = 0xFFFFFFFF;</div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>        <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>* buf = (<span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>*)vbuf;</div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>        crc ^= mask;</div>
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>        <span class="keywordflow">while</span> (0 != len--)</div>
-<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>                crc = (crc &gt;&gt; 8) ^ <a class="code hl_variable" href="../../dd/d00/a00455.html#a8cd963aa1510a06da50c808a7453f85f">crcTable</a>[(crc ^ (*buf++)) &amp; 0xFF];</div>
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>        <span class="keywordflow">return</span>(crc ^ mask);</div>
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>}</div>
-</div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span> </div>
-<div class="foldopen" id="foldopen00156" data-start="{" data-end="}">
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno"><a class="line" href="../../d3/d00/a01577.html#a19c360b661f50a9d27f97db68f26a2f7">  156</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="../../d3/d00/a01577.html#a19c360b661f50a9d27f97db68f26a2f7">CPacketQueue::add_tail</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="../../df/d00/a00263.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a>* packet_data, <span class="keywordtype">int</span> packet_len,</div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>        <span class="keywordtype">bool</span> calc_crc, <span class="keywordtype">bool</span> need_crc)</div>
-<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>{</div>
-<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>        <span class="keywordflow">if</span> ((<a class="code hl_variable" href="../../d3/d00/a01577.html#a60415ee70ba642ee4c1b13f9299ed444">cnt</a> &gt;= <a class="code hl_variable" href="../../d3/d00/a01577.html#a536e003ba8e752dff903c568a538156b">max</a>) || (packet_len &lt; 1) || (packet_len &gt; <a class="code hl_define" href="../../da/d00/a00458.html#a0992880f77f5bfef1a2e2c3cbe9c8ff0">ETH_MAX_PACKET_RAW</a>))</div>
-<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>        {</div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>                <span class="keyword">const</span> <span class="keywordtype">char</span>* why = (<a class="code hl_variable" href="../../d3/d00/a01577.html#a60415ee70ba642ee4c1b13f9299ed444">cnt</a> &gt;= <a class="code hl_variable" href="../../d3/d00/a01577.html#a536e003ba8e752dff903c568a538156b">max</a>) ? <span class="stringliteral">&quot;queue full&quot;</span> : <span class="stringliteral">&quot;illegal size&quot;</span>;</div>
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>                <a class="code hl_variable" href="../../d3/d00/a01577.html#ac2b41fba93899b2d4109ef09395a1857">dropped</a> += 1;</div>
-<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>                printf(<span class="stringliteral">&quot;CPacketQueue(%s):add() packet lost (%s)! Size = %d, dropped = %d&quot;</span>,</div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>                        <a class="code hl_variable" href="../../d3/d00/a01577.html#a796d4bcc5000da54f9983c9df3df20c5">name</a>, why, packet_len, <a class="code hl_variable" href="../../d3/d00/a01577.html#ac2b41fba93899b2d4109ef09395a1857">dropped</a>);</div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>                <span class="keywordflow">if</span> (packet_len &gt;= 12)</div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>                {</div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>                        printf(<span class="stringliteral">&quot;.. dst: %02x-%02x-%02x-%02x-%02x-%02x &quot;</span>, packet_data[0],</div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>                                packet_data[1], packet_data[2], packet_data[3], packet_data[4],</div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>                                packet_data[5]);</div>
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>                        printf(<span class="stringliteral">&quot;.. src: %02x-%02x-%02x-%02x-%02x-%02x&quot;</span>, packet_data[6],</div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>                                packet_data[7], packet_data[8], packet_data[9], packet_data[10],</div>
-<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>                                packet_data[11]);</div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>                }</div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>                printf(<span class="stringliteral">&quot;\n&quot;</span>);</div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>        }</div>
-<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span> </div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>        <a class="code hl_variable" href="../../d3/d00/a01577.html#a72033ebedeea8a07a7b6df61816bf6a6">tail</a> += 1;</div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d3/d00/a01577.html#a72033ebedeea8a07a7b6df61816bf6a6">tail</a> &gt;= <a class="code hl_variable" href="../../d3/d00/a01577.html#a536e003ba8e752dff903c568a538156b">max</a>)</div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>        {</div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>                <a class="code hl_variable" href="../../d3/d00/a01577.html#a72033ebedeea8a07a7b6df61816bf6a6">tail</a> = 0;</div>
-<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>        }</div>
-<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span> </div>
-<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>        <a class="code hl_struct" href="../../d6/d00/a01573.html">eth_packet</a>* next = &amp;<a class="code hl_variable" href="../../d3/d00/a01577.html#a620de3a16e2aca75f5b05c3831a7ed0e">packets</a>[<a class="code hl_variable" href="../../d3/d00/a01577.html#a72033ebedeea8a07a7b6df61816bf6a6">tail</a>];</div>
-<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>        next-&gt;<a class="code hl_variable" href="../../d6/d00/a01573.html#a33ec45b25fb50653dbe5f6762a18eac0">len</a> = packet_len;</div>
-<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>        next-&gt;<a class="code hl_variable" href="../../d6/d00/a01573.html#aefd55e82314f51afa71adf465cd143d7">used</a> = 0;</div>
-<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>        memcpy(next-&gt;<a class="code hl_variable" href="../../d6/d00/a01573.html#ac971192f6b5c4f57aae33779052c074a">frame</a>, packet_data, packet_len); <span class="comment">// copy packet data</span></div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>        <span class="keywordflow">if</span> (need_crc)</div>
-<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>        { <span class="comment">// If packet needs CRC</span></div>
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>                <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> crc = calc_crc ? <a class="code hl_function" href="../../dd/d00/a00455.html#a3bfbc59c214962ad31300721fae81158">eth_crc32</a>(0, packet_data, packet_len) : 0; <span class="comment">// recalculate crc if needed</span></div>
-<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>                <a class="code hl_typedef" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> ncrc = htonl(crc);  <span class="comment">// put crc in network order</span></div>
-<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>                memcpy(&amp;next-&gt;<a class="code hl_variable" href="../../d6/d00/a01573.html#ac971192f6b5c4f57aae33779052c074a">frame</a>[packet_len], &amp;ncrc, 4); <span class="comment">// append CRC to packet</span></div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>                next-&gt;<a class="code hl_variable" href="../../d6/d00/a01573.html#a33ec45b25fb50653dbe5f6762a18eac0">len</a> += 4; <span class="comment">// increase packet length</span></div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>        }</div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span> </div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>        <a class="code hl_variable" href="../../d3/d00/a01577.html#a60415ee70ba642ee4c1b13f9299ed444">cnt</a> += 1;</div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d3/d00/a01577.html#a60415ee70ba642ee4c1b13f9299ed444">cnt</a> &gt; <a class="code hl_variable" href="../../d3/d00/a01577.html#ad45d625ce76da7e67232ae007f8bbde9">highwater</a>)</div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>        {</div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>                <a class="code hl_variable" href="../../d3/d00/a01577.html#ad45d625ce76da7e67232ae007f8bbde9">highwater</a> = <a class="code hl_variable" href="../../d3/d00/a01577.html#a60415ee70ba642ee4c1b13f9299ed444">cnt</a>;</div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>        }</div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span> </div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>}</div>
-</div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span> </div>
-<div class="foldopen" id="foldopen00205" data-start="{" data-end="}">
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno"><a class="line" href="../../d3/d00/a01577.html#acfa0fa660e3cb7d996f452daf6cab568">  205</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="../../d3/d00/a01577.html#acfa0fa660e3cb7d996f452daf6cab568">CPacketQueue::get_head</a>(<a class="code hl_struct" href="../../d6/d00/a01573.html">eth_packet</a>&amp; packet)</div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>{</div>
-<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d3/d00/a01577.html#a60415ee70ba642ee4c1b13f9299ed444">cnt</a> &lt;= 0)</div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>        {</div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>        }</div>
-<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span> </div>
-<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>        <a class="code hl_struct" href="../../d6/d00/a01573.html">eth_packet</a>* headp = &amp;<a class="code hl_variable" href="../../d3/d00/a01577.html#a620de3a16e2aca75f5b05c3831a7ed0e">packets</a>[<a class="code hl_variable" href="../../d3/d00/a01577.html#a43bb7dc4b7b4db1438548701ee6a61db">head</a>];</div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>        packet.<a class="code hl_variable" href="../../d6/d00/a01573.html#a33ec45b25fb50653dbe5f6762a18eac0">len</a> = headp-&gt;<a class="code hl_variable" href="../../d6/d00/a01573.html#a33ec45b25fb50653dbe5f6762a18eac0">len</a>;</div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>        packet.<a class="code hl_variable" href="../../d6/d00/a01573.html#aefd55e82314f51afa71adf465cd143d7">used</a> = headp-&gt;<a class="code hl_variable" href="../../d6/d00/a01573.html#aefd55e82314f51afa71adf465cd143d7">used</a>;</div>
-<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>        memcpy(packet.<a class="code hl_variable" href="../../d6/d00/a01573.html#ac971192f6b5c4f57aae33779052c074a">frame</a>, headp-&gt;<a class="code hl_variable" href="../../d6/d00/a01573.html#ac971192f6b5c4f57aae33779052c074a">frame</a>, <span class="keyword">sizeof</span>(packet.<a class="code hl_variable" href="../../d6/d00/a01573.html#ac971192f6b5c4f57aae33779052c074a">frame</a>));</div>
-<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>        <a class="code hl_variable" href="../../d3/d00/a01577.html#a43bb7dc4b7b4db1438548701ee6a61db">head</a> += 1;</div>
-<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d3/d00/a01577.html#a43bb7dc4b7b4db1438548701ee6a61db">head</a> &gt;= <a class="code hl_variable" href="../../d3/d00/a01577.html#a536e003ba8e752dff903c568a538156b">max</a>)</div>
-<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>        {</div>
-<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>                <a class="code hl_variable" href="../../d3/d00/a01577.html#a43bb7dc4b7b4db1438548701ee6a61db">head</a> = 0;</div>
-<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>        }</div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span> </div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>        <a class="code hl_variable" href="../../d3/d00/a01577.html#a60415ee70ba642ee4c1b13f9299ed444">cnt</a> -= 1;</div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>}</div>
-</div>
-<div class="ttc" id="aa00263_html_a70c1fcc1a4e96af8f6580f708657cd41"><div class="ttname"><a href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a></div><div class="ttdeci">uint32_t u32</div><div class="ttdef"><b>Definition</b> <a href="../../df/d00/a00263_source.html#l00125">datatypes.h:125</a></div></div>
-<div class="ttc" id="aa00263_html_a987e4d6cf789cb59dbb390728271e4d6"><div class="ttname"><a href="../../df/d00/a00263.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a></div><div class="ttdeci">uint8_t u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/d00/a00263_source.html#l00123">datatypes.h:123</a></div></div>
-<div class="ttc" id="aa00455_html_a3bfbc59c214962ad31300721fae81158"><div class="ttname"><a href="../../dd/d00/a00455.html#a3bfbc59c214962ad31300721fae81158">eth_crc32</a></div><div class="ttdeci">static u32 eth_crc32(u32 crc, const void *vbuf, int len)</div><div class="ttdef"><b>Definition</b> <a href="#l00145">Ethernet.cpp:145</a></div></div>
-<div class="ttc" id="aa00455_html_a8cd963aa1510a06da50c808a7453f85f"><div class="ttname"><a href="../../dd/d00/a00455.html#a8cd963aa1510a06da50c808a7453f85f">crcTable</a></div><div class="ttdeci">static const u32 crcTable[256]</div><div class="ttdef"><b>Definition</b> <a href="#l00099">Ethernet.cpp:99</a></div></div>
-<div class="ttc" id="aa00458_html"><div class="ttname"><a href="../../da/d00/a00458.html">Ethernet.h</a></div><div class="ttdoc">Contains the definitions for the packet queue and other NIC support routines.</div></div>
-<div class="ttc" id="aa00458_html_a0992880f77f5bfef1a2e2c3cbe9c8ff0"><div class="ttname"><a href="../../da/d00/a00458.html#a0992880f77f5bfef1a2e2c3cbe9c8ff0">ETH_MAX_PACKET_RAW</a></div><div class="ttdeci">#define ETH_MAX_PACKET_RAW</div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00458_source.html#l00069">Ethernet.h:69</a></div></div>
-<div class="ttc" id="aa00515_html"><div class="ttname"><a href="../../dc/d00/a00515.html">telnet.h</a></div><div class="ttdoc">Contains TCP/IP declarations used by the serial port emulator and lock-step code.</div></div>
-<div class="ttc" id="aa00524_html"><div class="ttname"><a href="../../d9/d00/a00524.html">StdAfx.h</a></div><div class="ttdoc">Standard includes.</div></div>
-<div class="ttc" id="aa01573_html"><div class="ttname"><a href="../../d6/d00/a01573.html">eth_packet</a></div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00458_source.html#l00081">Ethernet.h:82</a></div></div>
-<div class="ttc" id="aa01573_html_a33ec45b25fb50653dbe5f6762a18eac0"><div class="ttname"><a href="../../d6/d00/a01573.html#a33ec45b25fb50653dbe5f6762a18eac0">eth_packet::len</a></div><div class="ttdeci">int len</div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00458_source.html#l00083">Ethernet.h:83</a></div></div>
-<div class="ttc" id="aa01573_html_ac971192f6b5c4f57aae33779052c074a"><div class="ttname"><a href="../../d6/d00/a01573.html#ac971192f6b5c4f57aae33779052c074a">eth_packet::frame</a></div><div class="ttdeci">u8 frame[1518]</div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00458_source.html#l00085">Ethernet.h:85</a></div></div>
-<div class="ttc" id="aa01573_html_aefd55e82314f51afa71adf465cd143d7"><div class="ttname"><a href="../../d6/d00/a01573.html#aefd55e82314f51afa71adf465cd143d7">eth_packet::used</a></div><div class="ttdeci">int used</div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00458_source.html#l00084">Ethernet.h:84</a></div></div>
-<div class="ttc" id="aa01577_html_a022801c8882c02d96e73a676bc0798ae"><div class="ttname"><a href="../../d3/d00/a01577.html#a022801c8882c02d96e73a676bc0798ae">CPacketQueue::CPacketQueue</a></div><div class="ttdeci">CPacketQueue(const char *name, int max)</div><div class="ttdoc">Packet Queue for Ethernet packets.</div><div class="ttdef"><b>Definition</b> <a href="#l00074">Ethernet.cpp:74</a></div></div>
-<div class="ttc" id="aa01577_html_a19c360b661f50a9d27f97db68f26a2f7"><div class="ttname"><a href="../../d3/d00/a01577.html#a19c360b661f50a9d27f97db68f26a2f7">CPacketQueue::add_tail</a></div><div class="ttdeci">bool add_tail(const u8 *packet_data, int packet_len, bool calc_crc, bool need_crc)</div><div class="ttdef"><b>Definition</b> <a href="#l00156">Ethernet.cpp:156</a></div></div>
-<div class="ttc" id="aa01577_html_a43bb7dc4b7b4db1438548701ee6a61db"><div class="ttname"><a href="../../d3/d00/a01577.html#a43bb7dc4b7b4db1438548701ee6a61db">CPacketQueue::head</a></div><div class="ttdeci">int head</div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00458_source.html#l00098">Ethernet.h:98</a></div></div>
-<div class="ttc" id="aa01577_html_a4ae6fce40f5b55c39203fe707508dab2"><div class="ttname"><a href="../../d3/d00/a01577.html#a4ae6fce40f5b55c39203fe707508dab2">CPacketQueue::flush</a></div><div class="ttdeci">void flush()</div><div class="ttdef"><b>Definition</b> <a href="#l00092">Ethernet.cpp:92</a></div></div>
-<div class="ttc" id="aa01577_html_a536e003ba8e752dff903c568a538156b"><div class="ttname"><a href="../../d3/d00/a01577.html#a536e003ba8e752dff903c568a538156b">CPacketQueue::max</a></div><div class="ttdeci">int max</div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00458_source.html#l00097">Ethernet.h:97</a></div></div>
-<div class="ttc" id="aa01577_html_a60415ee70ba642ee4c1b13f9299ed444"><div class="ttname"><a href="../../d3/d00/a01577.html#a60415ee70ba642ee4c1b13f9299ed444">CPacketQueue::cnt</a></div><div class="ttdeci">int cnt</div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00458_source.html#l00100">Ethernet.h:100</a></div></div>
-<div class="ttc" id="aa01577_html_a620de3a16e2aca75f5b05c3831a7ed0e"><div class="ttname"><a href="../../d3/d00/a01577.html#a620de3a16e2aca75f5b05c3831a7ed0e">CPacketQueue::packets</a></div><div class="ttdeci">eth_packet * packets</div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00458_source.html#l00103">Ethernet.h:103</a></div></div>
-<div class="ttc" id="aa01577_html_a72033ebedeea8a07a7b6df61816bf6a6"><div class="ttname"><a href="../../d3/d00/a01577.html#a72033ebedeea8a07a7b6df61816bf6a6">CPacketQueue::tail</a></div><div class="ttdeci">int tail</div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00458_source.html#l00099">Ethernet.h:99</a></div></div>
-<div class="ttc" id="aa01577_html_a796d4bcc5000da54f9983c9df3df20c5"><div class="ttname"><a href="../../d3/d00/a01577.html#a796d4bcc5000da54f9983c9df3df20c5">CPacketQueue::name</a></div><div class="ttdeci">const char * name</div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00458_source.html#l00096">Ethernet.h:96</a></div></div>
-<div class="ttc" id="aa01577_html_ac2b41fba93899b2d4109ef09395a1857"><div class="ttname"><a href="../../d3/d00/a01577.html#ac2b41fba93899b2d4109ef09395a1857">CPacketQueue::dropped</a></div><div class="ttdeci">int dropped</div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00458_source.html#l00102">Ethernet.h:102</a></div></div>
-<div class="ttc" id="aa01577_html_acdf6cd78ea52162385429c23a23ee4aa"><div class="ttname"><a href="../../d3/d00/a01577.html#acdf6cd78ea52162385429c23a23ee4aa">CPacketQueue::~CPacketQueue</a></div><div class="ttdeci">~CPacketQueue()</div><div class="ttdef"><b>Definition</b> <a href="#l00086">Ethernet.cpp:86</a></div></div>
-<div class="ttc" id="aa01577_html_acfa0fa660e3cb7d996f452daf6cab568"><div class="ttname"><a href="../../d3/d00/a01577.html#acfa0fa660e3cb7d996f452daf6cab568">CPacketQueue::get_head</a></div><div class="ttdeci">bool get_head(eth_packet &amp;packet)</div><div class="ttdef"><b>Definition</b> <a href="#l00205">Ethernet.cpp:205</a></div></div>
-<div class="ttc" id="aa01577_html_ad45d625ce76da7e67232ae007f8bbde9"><div class="ttname"><a href="../../d3/d00/a01577.html#ad45d625ce76da7e67232ae007f8bbde9">CPacketQueue::highwater</a></div><div class="ttdeci">int highwater</div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00458_source.html#l00101">Ethernet.h:101</a></div></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="keyword">extern</span> <a class="code hl_class" href="../../d2/d00/a01713.html">bx_keymap_c</a>* <a class="code hl_variable" href="../../d1/d00/a00452.html#a22fa2cedc0d2a8c49e35953f581847ab">bx_keymap</a>;</div>
+<div class="ttc" id="aa00116_html"><div class="ttname"><a href="../../d4/d00/a00116.html">Configurator.h</a></div><div class="ttdoc">Contains the definitions for the configuration file interpreter.</div></div>
+<div class="ttc" id="aa00326_html_a6dbf9516e516c901604625282c174aa4"><div class="ttname"><a href="../../d8/d00/a00326.html#a6dbf9516e516c901604625282c174aa4">u16</a></div><div class="ttdeci">uint16_t u16</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00124">datatypes.h:124</a></div></div>
+<div class="ttc" id="aa00326_html_a70c1fcc1a4e96af8f6580f708657cd41"><div class="ttname"><a href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a></div><div class="ttdeci">uint32_t u32</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00125">datatypes.h:125</a></div></div>
+<div class="ttc" id="aa00326_html_a987e4d6cf789cb59dbb390728271e4d6"><div class="ttname"><a href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a></div><div class="ttdeci">uint8_t u8</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00123">datatypes.h:123</a></div></div>
+<div class="ttc" id="aa00326_html_ae5300ed9eabeae78ee9d0c704a9c412a"><div class="ttname"><a href="../../d8/d00/a00326.html#ae5300ed9eabeae78ee9d0c704a9c412a">s32</a></div><div class="ttdeci">int32_t s32</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00130">datatypes.h:130</a></div></div>
+<div class="ttc" id="aa00452_html_a22fa2cedc0d2a8c49e35953f581847ab"><div class="ttname"><a href="../../d1/d00/a00452.html#a22fa2cedc0d2a8c49e35953f581847ab">bx_keymap</a></div><div class="ttdeci">bx_keymap_c * bx_keymap</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d00/a00452_source.html#l00105">keymap.cpp:105</a></div></div>
+<div class="ttc" id="aa01085_html"><div class="ttname"><a href="../../d2/d00/a01085.html">CConfigurator</a></div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00116_source.html#l00135">Configurator.h:136</a></div></div>
+<div class="ttc" id="aa01709_html"><div class="ttname"><a href="../../d1/d00/a01709.html">BXKeyEntry</a></div><div class="ttdoc">Structure of an element of the keymap table.</div><div class="ttdef"><b>Definition</b> <a href="#l00063">keymap.h:64</a></div></div>
+<div class="ttc" id="aa01709_html_a06d132ce3a7636fd605b050fd3092752"><div class="ttname"><a href="../../d1/d00/a01709.html#a06d132ce3a7636fd605b050fd3092752">BXKeyEntry::hostKey</a></div><div class="ttdeci">u32 hostKey</div><div class="ttdef"><b>Definition</b> <a href="#l00068">keymap.h:68</a></div></div>
+<div class="ttc" id="aa01709_html_a69cbcfee0fb4bfacb23ceff7320a327d"><div class="ttname"><a href="../../d1/d00/a01709.html#a69cbcfee0fb4bfacb23ceff7320a327d">BXKeyEntry::ascii</a></div><div class="ttdeci">s32 ascii</div><div class="ttdef"><b>Definition</b> <a href="#l00067">keymap.h:67</a></div></div>
+<div class="ttc" id="aa01709_html_ab4ec2640a5adf80ee9799af608906612"><div class="ttname"><a href="../../d1/d00/a01709.html#ab4ec2640a5adf80ee9799af608906612">BXKeyEntry::baseKey</a></div><div class="ttdeci">u32 baseKey</div><div class="ttdef"><b>Definition</b> <a href="#l00065">keymap.h:65</a></div></div>
+<div class="ttc" id="aa01709_html_ad3fea40a472a0c624b91689af21025c6"><div class="ttname"><a href="../../d1/d00/a01709.html#ad3fea40a472a0c624b91689af21025c6">BXKeyEntry::modKey</a></div><div class="ttdeci">u32 modKey</div><div class="ttdef"><b>Definition</b> <a href="#l00066">keymap.h:66</a></div></div>
+<div class="ttc" id="aa01713_html"><div class="ttname"><a href="../../d2/d00/a01713.html">bx_keymap_c</a></div><div class="ttdoc">Keymap, used to map host keys to scancodes.</div><div class="ttdef"><b>Definition</b> <a href="#l00074">keymap.h:75</a></div></div>
+<div class="ttc" id="aa01713_html_a0ce7901c7c0a41402827c3ea4f462e44"><div class="ttname"><a href="../../d2/d00/a01713.html#a0ce7901c7c0a41402827c3ea4f462e44">bx_keymap_c::convertStringToBXKey</a></div><div class="ttdeci">u32 convertStringToBXKey(const char *)</div><div class="ttdoc">Convert a null-terminate string to a BX_KEY code.</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d00/a00452_source.html#l00348">keymap.cpp:348</a></div></div>
+<div class="ttc" id="aa01713_html_a11b6225705f56445a78ba2dee3af1c34"><div class="ttname"><a href="../../d2/d00/a01713.html#a11b6225705f56445a78ba2dee3af1c34">bx_keymap_c::getBXKeyName</a></div><div class="ttdeci">const char * getBXKeyName(u32 key)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d00/a00452_source.html#l00411">keymap.cpp:411</a></div></div>
+<div class="ttc" id="aa01713_html_a208c80ae898f3abadbb8cf2d712770ac"><div class="ttname"><a href="../../d2/d00/a01713.html#a208c80ae898f3abadbb8cf2d712770ac">bx_keymap_c::findAsciiChar</a></div><div class="ttdeci">BXKeyEntry * findAsciiChar(u8 ascii)</div><div class="ttdoc">Finds an entry whose ASCII character matches the target value, and returns a pointer to the correspon...</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d00/a00452_source.html#l00391">keymap.cpp:391</a></div></div>
+<div class="ttc" id="aa01713_html_a38e2d3a0b4586a96c863010df7391451"><div class="ttname"><a href="../../d2/d00/a01713.html#a38e2d3a0b4586a96c863010df7391451">bx_keymap_c::keymapCount</a></div><div class="ttdeci">u16 keymapCount</div><div class="ttdef"><b>Definition</b> <a href="#l00093">keymap.h:93</a></div></div>
+<div class="ttc" id="aa01713_html_a4681b86f1df1e35654e1f551b51b775f"><div class="ttname"><a href="../../d2/d00/a01713.html#a4681b86f1df1e35654e1f551b51b775f">bx_keymap_c::keymapTable</a></div><div class="ttdeci">BXKeyEntry * keymapTable</div><div class="ttdef"><b>Definition</b> <a href="#l00092">keymap.h:92</a></div></div>
+<div class="ttc" id="aa01713_html_a9ba17e2a601febdf4ca20270c18c7321"><div class="ttname"><a href="../../d2/d00/a01713.html#a9ba17e2a601febdf4ca20270c18c7321">bx_keymap_c::isKeymapLoaded</a></div><div class="ttdeci">bool isKeymapLoaded()</div><div class="ttdoc">Returns true if the keymap contains any valid key entries.</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d00/a00452_source.html#l00138">keymap.cpp:138</a></div></div>
+<div class="ttc" id="aa01713_html_aab7364d8ec50be3ea8170f8836f1d9d1"><div class="ttname"><a href="../../d2/d00/a01713.html#aab7364d8ec50be3ea8170f8836f1d9d1">bx_keymap_c::findHostKey</a></div><div class="ttdeci">BXKeyEntry * findHostKey(u32 hostkeynum)</div><div class="ttdoc">Finds an entry whose hostKey value matches the target value, and returns a pointer to the correspongi...</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d00/a00452_source.html#l00368">keymap.cpp:368</a></div></div>
+<div class="ttc" id="aa01713_html_ab336b407e4d779f7d7acaed87b270e6d"><div class="ttname"><a href="../../d2/d00/a01713.html#ab336b407e4d779f7d7acaed87b270e6d">bx_keymap_c::myCfg</a></div><div class="ttdeci">CConfigurator * myCfg</div><div class="ttdef"><b>Definition</b> <a href="#l00090">keymap.h:90</a></div></div>
+<div class="ttc" id="aa01713_html_ae9d4ae6735f13dfc6247c825a6a52c8c"><div class="ttname"><a href="../../d2/d00/a01713.html#ae9d4ae6735f13dfc6247c825a6a52c8c">bx_keymap_c::bx_keymap_c</a></div><div class="ttdeci">bx_keymap_c(CConfigurator *cfg)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d00/a00452_source.html#l00107">keymap.cpp:107</a></div></div>
+<div class="ttc" id="aa01713_html_af8224621a0f4e615d6c6dbca9d16c162"><div class="ttname"><a href="../../d2/d00/a01713.html#af8224621a0f4e615d6c6dbca9d16c162">bx_keymap_c::loadKeymap</a></div><div class="ttdeci">void loadKeymap(u32 stringToSymbol(const char *))</div><div class="ttdoc">Loads the configuration specified keymap file if keymapping is enabled using convertStringToSymbol to...</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d00/a00452_source.html#l00129">keymap.cpp:129</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_c901c14b65aa229498a52b725b3d4a2c.html">network</a></li><li class="navelem"><a href="../../dd/d00/a00455.html">Ethernet.cpp</a></li>
+    <li class="navelem"><a href="../../dir_11bc0974ce736ce9a6fadebbeb7a8314.html">gui</a></li><li class="navelem"><a href="../../dd/d00/a00455.html">keymap.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

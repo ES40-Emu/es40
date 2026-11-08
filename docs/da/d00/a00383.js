@@ -1,11 +1,9 @@
 var a00383 =
 [
-    [ "get_next_keymap_line", "da/d00/a00383.html#a74727fe29eb5775e126503c25257f0d5", null ],
-    [ "get_next_word", "da/d00/a00383.html#a8e3f3ed3640193ffe72f197d557c4866", null ],
-    [ "init_parse", "da/d00/a00383.html#a1290229bb991e9ed1a26a46030585e05", null ],
-    [ "init_parse_line", "da/d00/a00383.html#af8d6a35e21af2b5bdbb8789a222c9893", null ],
-    [ "bx_key_symbol", "da/d00/a00383.html#a0bd6c265b58e14450173f6d941d28f24", null ],
-    [ "bx_keymap", "da/d00/a00383.html#a22fa2cedc0d2a8c49e35953f581847ab", null ],
-    [ "lineCount", "da/d00/a00383.html#addc99401340ecb10778277e17c36c77d", null ],
-    [ "lineptr", "da/d00/a00383.html#a13fe685f1aff8f1cd7917076e8c09bb9", null ]
+    [ "IBM8514_LINE_LENGTH", "da/d00/a00383.html#abdf7cbc985e7785854cf598f27d58a3a", null ],
+    [ "coord12", "da/d00/a00383.html#a99d2abef5aad8074da1924c2621eb0f9", null ],
+    [ "pixtrans_lane_u32", "da/d00/a00383.html#a859d0d29271a523afc6ac7aba130ccfc", null ],
+    [ "pixtrans_set_endian", "da/d00/a00383.html#a01ab3a7344cea77f9fee8f40121a7f39", null ],
+    [ "wait_xfer_bytes", "da/d00/a00383.html#a537fc8af3f71eec680aac55443a4620c", null ],
+    [ "IBM8514A", "da/d00/a00383.html#a06c4da2d02c895d70726a95758a960b9", null ]
 ];

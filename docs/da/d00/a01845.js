@@ -1,7 +1,8 @@
 var a01845 =
 [
-    [ "csc", "da/d00/a01845.html#a57962ec17a3bd08f357361e710fdc9fb", null ],
-    [ "dim", "da/d00/a01845.html#abcfa9abe4d8a2d9f8e89a26c8823cf3b", null ],
-    [ "drir", "da/d00/a01845.html#a1c207faad3b280fbb06de4235a0e723a", null ],
-    [ "misc", "da/d00/a01845.html#a11df5cab645c47268eaafdb2bfc99917", null ]
+    [ "cur_addr", "da/d00/a01845.html#a89030c812a4f7fbc0a8f6cb1e49f8788", null ],
+    [ "cur_buf", "da/d00/a01845.html#a49ea83f1a7a3ebff25c2963ad302879d", null ],
+    [ "cur_buf_len", "da/d00/a01845.html#aa72dbd10e08cad8711a3c7eceb952ea2", null ],
+    [ "cur_offset", "da/d00/a01845.html#aa2049166aea5b064347e546050fefe6f", null ],
+    [ "current", "da/d00/a01845.html#a03f6b788766aaa64a91a2457f253a527", null ]
 ];

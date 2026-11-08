@@ -1,13 +1,13 @@
 var dir_88cc136c961c47108c264e4aa641465d =
 [
-    [ "AliM1543C.cpp", "d6/d00/a00047.html", "d6/d00/a00047" ],
-    [ "AliM1543C.h", "d5/d00/a00050.html", "d5/d00/a00050" ],
-    [ "AliM1543C_ide.cpp", "dc/d00/a00053.html", "dc/d00/a00053" ],
-    [ "AliM1543C_ide.h", "d9/d00/a00056.html", "d9/d00/a00056" ],
-    [ "AliM1543C_pmu.cpp", "d3/d00/a00059.html", "d3/d00/a00059" ],
-    [ "AliM1543C_pmu.h", "df/d00/a00062.html", "df/d00/a00062" ],
-    [ "AliM1543C_usb.cpp", "de/d00/a00065.html", "de/d00/a00065" ],
-    [ "AliM1543C_usb.h", "da/d00/a00068.html", "da/d00/a00068" ],
-    [ "DMA.cpp", "d0/d00/a00071.html", "d0/d00/a00071" ],
-    [ "DMA.h", "db/d00/a00074.html", "db/d00/a00074" ]
+    [ "AliM1543C.cpp", "d0/d00/a00071.html", "d0/d00/a00071" ],
+    [ "AliM1543C.h", "db/d00/a00074.html", "db/d00/a00074" ],
+    [ "AliM1543C_ide.cpp", "d1/d00/a00077.html", "d1/d00/a00077" ],
+    [ "AliM1543C_ide.h", "da/d00/a00080.html", "da/d00/a00080" ],
+    [ "AliM1543C_pmu.cpp", "d2/d00/a00083.html", "d2/d00/a00083" ],
+    [ "AliM1543C_pmu.h", "da/d00/a00086.html", "da/d00/a00086" ],
+    [ "AliM1543C_usb.cpp", "db/d00/a00089.html", "db/d00/a00089" ],
+    [ "AliM1543C_usb.h", "d1/d00/a00092.html", "d1/d00/a00092" ],
+    [ "DMA.cpp", "d9/d00/a00095.html", "d9/d00/a00095" ],
+    [ "DMA.h", "d1/d00/a00098.html", "d1/d00/a00098" ]
 ];

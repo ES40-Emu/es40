@@ -1,10 +1,9 @@
 var a00437 =
 [
-    [ "LOG", "d4/d00/a00437.html#a3577749fb48d57a158b8ac1a0b3ab57e", null ],
-    [ "LOG_GENERAL", "d4/d00/a00437.html#af9a86285a265da1d934e6afeac099a5c", null ],
-    [ "LOG_OUTPUT_FUNC", "d4/d00/a00437.html#a16460326664c5001ade062b6fffe6548", null ],
-    [ "LOGMASKED", "d4/d00/a00437.html#a0efe06239b8bb243a7b9ab48749c0ce9", null ],
-    [ "MAME_EMU_LOGMACRO_H", "d4/d00/a00437.html#ac4e6c90ce4e1866539d6359466521a19", null ],
-    [ "VERBOSE", "d4/d00/a00437.html#a42f8c497a1968074f38bf5055c650dca", null ],
-    [ "logerror", "d4/d00/a00437.html#a0548af6117bef6d5c78d45a36ab7013b", null ]
+    [ "user_key_t", "df/d00/a01681.html", "df/d00/a01681" ],
+    [ "BX_KEY_UNKNOWN", "d4/d00/a00437.html#a3691c2acc010e4b9a816f259cc3ce3b9", null ],
+    [ "N_USER_KEYS", "d4/d00/a00437.html#acdbdf08a20a86e1bdf0b996b4ce6ba77", null ],
+    [ "get_user_key", "d4/d00/a00437.html#a3e1e354e132b36ac8b8d9adef4aff053", null ],
+    [ "bx_gui", "d4/d00/a00437.html#aadf5655663e70c8f409d89a43fc98598", null ],
+    [ "user_keys", "d4/d00/a00437.html#a9e96aaa11838a5b3911fb9aa87c5548a", null ]
 ];

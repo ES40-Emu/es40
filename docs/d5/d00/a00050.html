@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: chipset/AliM1543C.h File Reference</title>
+<title>ES40: base/HostWakeEvent.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,68 +109,67 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d5/d00/a00050.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">AliM1543C.h File Reference</div></div>
+  <div class="headertitle"><div class="title">HostWakeEvent.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-
-<p>Contains the definitions for the ISA part of the emulated Ali M1543C chipset.  
-<a href="#details">More...</a></p>
-<div class="textblock"><code>#include &quot;<a class="el" href="../../d6/d00/a00287_source.html">emu/PCIDevice.h</a>&quot;</code><br />
-<code>#include &lt;chrono&gt;</code><br />
+<div class="textblock"><code>#include &lt;chrono&gt;</code><br />
+<code>#include &lt;condition_variable&gt;</code><br />
+<code>#include &lt;cstdint&gt;</code><br />
+<code>#include &lt;mutex&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
-Include dependency graph for AliM1543C.h:</div>
+Include dependency graph for HostWakeEvent.h:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../d2/d00/a00051.png" border="0" usemap="#achipset_2_ali_m1543_c_8h" loading="lazy" alt=""/></div>
-<map name="achipset_2_ali_m1543_c_8h" id="achipset_2_ali_m1543_c_8h">
-<area shape="rect" title="Contains the definitions for the ISA part of the emulated Ali M1543C chipset." alt="" coords="128,5,270,32"/>
-<area shape="rect" href="../../d6/d00/a00287.html" title="Contains the definitions for the PCI Device base class." alt="" coords="78,80,203,107"/>
-<area shape="poly" title=" " alt="" coords="187,35,162,69,158,66,190,30"/>
-<area shape="rect" title=" " alt="" coords="228,80,288,107"/>
-<area shape="poly" title=" " alt="" coords="210,30,241,68,235,68,209,35"/>
-<area shape="rect" href="../../d6/d00/a00293.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="68,155,213,181"/>
-<area shape="poly" title=" " alt="" coords="141,105,143,140,138,138,140,110"/>
-<area shape="rect" href="../../da/d00/a00080.html" title="Contains the definitions for the configuration file interpreter." alt="" coords="5,229,148,256"/>
-<area shape="poly" title=" " alt="" coords="128,184,100,219,96,216,131,180"/>
-<area shape="rect" title=" " alt="" coords="172,229,240,256"/>
-<area shape="poly" title=" " alt="" coords="153,179,187,218,182,218,151,184"/>
-<area shape="rect" title=" " alt="" coords="50,304,103,331"/>
-<area shape="poly" title=" " alt="" coords="78,255,79,289,74,288,75,259"/>
+<div class="center"><img src="../../d2/d00/a00051.png" border="0" usemap="#abase_2_host_wake_event_8h" loading="lazy" alt=""/></div>
+<map name="abase_2_host_wake_event_8h" id="abase_2_host_wake_event_8h">
+<area shape="rect" title=" " alt="" coords="132,5,291,32"/>
+<area shape="rect" title=" " alt="" coords="5,80,66,107"/>
+<area shape="poly" title=" " alt="" coords="182,35,81,76,79,71,180,30"/>
+<area shape="rect" title=" " alt="" coords="90,80,216,107"/>
+<area shape="poly" title=" " alt="" coords="204,31,174,70,171,66,199,34"/>
+<area shape="rect" title=" " alt="" coords="240,80,300,107"/>
+<area shape="poly" title=" " alt="" coords="223,30,253,68,248,67,221,35"/>
+<area shape="rect" title=" " alt="" coords="324,80,382,107"/>
+<area shape="poly" title=" " alt="" coords="237,30,317,72,312,73,235,35"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
 This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../d1/d00/a00052.png" border="0" usemap="#achipset_2_ali_m1543_c_8hdep" loading="lazy" alt=""/></div>
-<map name="achipset_2_ali_m1543_c_8hdep" id="achipset_2_ali_m1543_c_8hdep">
-<area shape="rect" title="Contains the definitions for the ISA part of the emulated Ali M1543C chipset." alt="" coords="1132,5,1274,32"/>
-<area shape="rect" href="../../d7/d00/a00002.html" title="Defines the entry point for the application." alt="" coords="5,80,108,107"/>
-<area shape="poly" title=" " alt="" coords="1114,21,935,28,688,37,405,55,119,83,109,84,108,79,119,77,405,49,687,32,935,22,1120,21"/>
-<area shape="rect" href="../../d5/d00/a00140.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="131,80,272,107"/>
-<area shape="poly" title=" " alt="" coords="1114,24,754,45,520,61,285,83,273,84,273,79,284,77,520,56,753,40,1119,23"/>
-<area shape="rect" href="../../d6/d00/a00047.html" title="Contains the code for the emulated Ali M1543C chipset devices." alt="" coords="297,80,453,107"/>
-<area shape="poly" title=" " alt="" coords="1119,25,827,49,465,83,454,84,453,79,464,77,827,44,1114,26"/>
-<area shape="rect" href="../../dc/d00/a00053.html" title="Contains the code for the emulated Ali M1543C IDE chipset part." alt="" coords="477,80,657,107"/>
-<area shape="poly" title=" " alt="" coords="1119,30,669,83,658,84,658,79,668,77,1114,30"/>
-<area shape="rect" href="../../d3/d00/a00059.html" title="Stub PMU/ACPI device at PCI 0:17:0 for the ALi M1543C bridge." alt="" coords="681,80,869,107"/>
-<area shape="poly" title=" " alt="" coords="1119,34,851,82,850,77,1114,35"/>
-<area shape="rect" href="../../d0/d00/a00071.html" title="Contains the code for the emulated DMA controller." alt="" coords="894,80,1016,107"/>
-<area shape="poly" title=" " alt="" coords="1148,36,999,82,998,77,1143,37"/>
-<area shape="rect" href="../../d1/d00/a00077.html" title="Contains the code for the configuration file interpreter." alt="" coords="1041,80,1197,107"/>
-<area shape="poly" title=" " alt="" coords="1179,42,1135,82,1133,77,1174,43"/>
-<area shape="rect" href="../../d5/d00/a00308.html" title="Contains the code for the emulated Cirrus CL GD&#45;5434 Video Card device." alt="" coords="1221,80,1356,107"/>
-<area shape="poly" title=" " alt="" coords="1230,40,1276,80,1271,79,1228,45"/>
-<area shape="rect" href="../../d6/d00/a00356.html" title=" " alt="" coords="1380,80,1531,107"/>
-<area shape="poly" title=" " alt="" coords="1262,34,1414,80,1408,79,1261,39"/>
-<area shape="rect" href="../../df/d00/a00416.html" title="Contains the code for the emulated Keyboard and mouse devices and controller." alt="" coords="1555,80,1670,107"/>
-<area shape="poly" title=" " alt="" coords="1290,33,1557,82,1552,82,1290,38"/>
-<area shape="rect" href="../../db/d00/a00422.html" title="Contains the code for the emulated Port 80 device." alt="" coords="1694,80,1792,107"/>
-<area shape="poly" title=" " alt="" coords="1290,26,1471,48,1682,77,1696,82,1691,82,1681,83,1470,53,1289,32"/>
-<area shape="rect" href="../../d4/d00/a00428.html" title="Contains the code for the emulated Serial Port devices." alt="" coords="1816,80,1910,107"/>
-<area shape="poly" title=" " alt="" coords="1290,23,1523,43,1664,58,1805,77,1819,82,1813,82,1804,83,1663,64,1523,48,1290,29"/>
-<area shape="rect" href="../../dc/d00/a00563.html" title="Contains the code for the emulated Floppy Controller devices." alt="" coords="1934,80,2123,107"/>
-<area shape="poly" title=" " alt="" coords="1290,24,1571,46,1922,77,1936,81,1931,81,1922,83,1571,51,1290,29"/>
-<area shape="rect" href="../../d4/d00/a00617.html" title="Contains the code for the emulated Typhoon Chipset devices." alt="" coords="2147,80,2286,107"/>
-<area shape="poly" title=" " alt="" coords="1290,21,1658,39,1896,56,2135,77,2150,81,2144,81,2135,83,1895,61,1658,44,1290,26"/>
+<div class="center"><img src="../../d1/d00/a00052.png" border="0" usemap="#abase_2_host_wake_event_8hdep" loading="lazy" alt=""/></div>
+<map name="abase_2_host_wake_event_8hdep" id="abase_2_host_wake_event_8hdep">
+<area shape="rect" title=" " alt="" coords="1366,5,1525,32"/>
+<area shape="rect" href="../../de/d00/a00185.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="1382,80,1509,107"/>
+<area shape="poly" title=" " alt="" coords="1447,46,1447,81,1443,78,1443,50"/>
+<area shape="rect" href="../../d7/d00/a00182.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="5,155,147,181"/>
+<area shape="poly" title=" " alt="" coords="1364,96,1157,103,858,113,511,130,159,157,148,159,147,153,158,152,511,125,858,107,1156,97,1369,96"/>
+<area shape="rect" href="../../d9/d00/a00191.html" title="Contains IEEE floating point code for the Alpha CPU." alt="" coords="171,155,368,181"/>
+<area shape="poly" title=" " alt="" coords="1363,98,944,120,664,137,380,157,368,158,368,153,380,152,664,131,944,115,1368,98"/>
+<area shape="rect" href="../../dc/d00/a00194.html" title="Contains VAX floating point code for the Alpha CPU." alt="" coords="392,155,586,181"/>
+<area shape="poly" title=" " alt="" coords="1368,99,1032,123,599,157,587,158,587,153,598,152,1031,118,1363,99"/>
+<area shape="rect" href="../../de/d00/a00197.html" title="Contains routines that replace parts of the VMS PALcode for the emulated DecChip 21264CB EV68 Alpha p..." alt="" coords="610,155,800,181"/>
+<area shape="poly" title=" " alt="" coords="1369,102,812,157,801,159,801,153,812,152,1363,102"/>
+<area shape="rect" href="../../d2/d00/a00281.html" title=" " alt="" coords="824,155,957,181"/>
+<area shape="poly" title=" " alt="" coords="1369,104,970,157,957,159,957,154,969,152,1364,104"/>
+<area shape="rect" href="../../d3/d00/a00275.html" title=" " alt="" coords="981,155,1184,181"/>
+<area shape="poly" title=" " alt="" coords="1369,110,1147,157,1146,151,1364,110"/>
+<area shape="rect" href="../../d6/d00/a00287.html" title=" " alt="" coords="1208,155,1349,181"/>
+<area shape="poly" title=" " alt="" coords="1405,113,1309,157,1307,151,1400,114"/>
+<area shape="rect" href="../../db/d00/a00296.html" title=" " alt="" coords="1373,155,1518,181"/>
+<area shape="poly" title=" " alt="" coords="1447,121,1447,156,1443,152,1443,124"/>
+<area shape="rect" href="../../dd/d00/a00320.html" title="Contains the code for the CPU tracing engine." alt="" coords="1541,155,1694,181"/>
+<area shape="poly" title=" " alt="" coords="1490,110,1590,154,1585,154,1489,116"/>
+<area shape="rect" href="../../d3/d00/a00113.html" title="Contains the code for the configuration file interpreter." alt="" coords="1718,155,1874,181"/>
+<area shape="poly" title=" " alt="" coords="1522,108,1737,154,1732,154,1521,113"/>
+<area shape="rect" href="../../d4/d00/a00704.html" title="Contains the code for the emulated Dual Port Ram and RMC devices." alt="" coords="1899,155,2021,181"/>
+<area shape="poly" title=" " alt="" coords="1524,102,1887,152,1901,157,1896,156,1886,157,1524,107"/>
+<area shape="rect" href="../../d4/d00/a00710.html" title="Contains the code for the emulated Flash ROM devices." alt="" coords="2045,155,2171,181"/>
+<area shape="poly" title=" " alt="" coords="1525,99,1754,120,2034,152,2048,156,2042,156,2033,157,1753,125,1525,104"/>
+<area shape="rect" href="../../db/d00/a00722.html" title="Contains the code for the emulated Typhoon Chipset devices." alt="" coords="2195,155,2333,181"/>
+<area shape="poly" title=" " alt="" coords="1525,97,1815,117,2183,152,2197,156,2192,156,2182,157,1814,123,1524,102"/>
+<area shape="rect" href="../../df/d00/a00728.html" title="ES40 (Clipper) board: TIGbus registers and DIMM topology." alt="" coords="2357,155,2531,181"/>
+<area shape="poly" title=" " alt="" coords="1524,96,1880,116,2346,152,2360,156,2354,156,2345,157,1880,122,1524,101"/>
+<area shape="rect" href="../../df/d00/a00731.html" title="Tsunami/Typhoon chipset (Cchip, Dchip, Pchip) CSRs, interrupt delivery and PCI window translation." alt="" coords="2555,155,2746,181"/>
+<area shape="poly" title=" " alt="" coords="1524,95,1958,114,2248,131,2543,152,2557,156,2552,156,2542,157,2248,136,1958,119,1524,100"/>
 </map>
 </div>
 </div>
@@ -178,124 +177,8 @@ This graph shows which files directly or indirectly include this file:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Data Structures</h2></td></tr>
-<tr class="memitem:CAliM1543C" id="r_CAliM1543C"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../d3/d00/a00785.html">CAliM1543C</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emulated ISA part of the ALi M1543C chipset.  <a href="../../d3/d00/a00785.html#details">More...</a><br /></td></tr>
-<tr class="memitem:CAliM1543C_3A_3ASAli_5Fstate" id="r_CAliM1543C_3A_3ASAli_5Fstate"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d8/d00/a00789.html">CAliM1543C::SAli_state</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The state structure contains all elements that need to be saved to the statefile.  <a href="../../d8/d00/a00789.html#details">More...</a><br /></td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:a279a6d24c5860895201f6637342c3e3f" id="r_a279a6d24c5860895201f6637342c3e3f"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a279a6d24c5860895201f6637342c3e3f">PIT_OFFSET_LATCH</a>&#160;&#160;&#160;3</td></tr>
-<tr class="memitem:a4ea8718d67855b09f375e756c8dfb311" id="r_a4ea8718d67855b09f375e756c8dfb311"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a4ea8718d67855b09f375e756c8dfb311">PIT_OFFSET_MAX</a>&#160;&#160;&#160;6</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:aa1aa93f7a5c8e1cab89524199501f9d8" id="r_aa1aa93f7a5c8e1cab89524199501f9d8"><td class="memItemLeft"><a class="el" href="../../d3/d00/a00785.html">CAliM1543C</a> *&#160;</td><td class="memItemRight"><a class="el" href="#aa1aa93f7a5c8e1cab89524199501f9d8">theAli</a></td></tr>
+<tr class="memitem:CHostWakeEvent" id="r_CHostWakeEvent"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../d9/d00/a00913.html">CHostWakeEvent</a></td></tr>
 </table>
-<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Contains the definitions for the ISA part of the emulated Ali M1543C chipset. </p>
-<p>$Id$</p>
-<p>X-1.34 Camiel Vanderhoeven 31-MAY-2008 Changes to include parts of Poco.</p>
-<p>X-1.33 Camiel Vanderhoeven 14-MAR-2008 Formatting.</p>
-<p>X-1.32 Camiel Vanderhoeven 13-MAR-2008 Create init(), start_threads() and stop_threads() functions.</p>
-<p>X-1.31 Camiel Vanderhoeven 11-MAR-2008 Named, debuggable mutexes.</p>
-<p>X-1.30 Camiel Vanderhoeven 05-MAR-2008 Multi-threading version.</p>
-<p>X-1.29 Camiel Vanderhoeven 26-FEB-2008 Moved DMA code into it's own class (<a class="el" href="../../d1/d00/a00837.html" title="Emulated DMA controller.">CDMA</a>)</p>
-<p>X-1.28 Camiel Vanderhoeven 12-FEB-2008 Moved keyboard code into it's own class (<a class="el" href="../../db/d00/a01501.html" title="Emulated keyboard controller, keyboard and mouse.">CKeyboard</a>)</p>
-<p>X-1.27 Camiel Vanderhoeven 07-FEB-2008 Comments.</p>
-<p>X-1.26 Brian Wheeler 02-FEB-2008 Completed LPT support so it works with FreeBSD as a guest OS.</p>
-<p>X-1.25 Camiel Vanderhoeven 08-JAN-2008 Comments.</p>
-<p>X-1.24 Camiel Vanderhoeven 02-JAN-2008 Comments; moved keyboard status register bits to "status" struct.</p>
-<p>X-1.23 Camiel Vanderhoeven 28-DEC-2007 Keep the compiler happy.</p>
-<p>X-1.22 Brian wheeler 17-DEC-2007 Better DMA support.</p>
-<p>X-1.21 Camiel Vanderhoeven 17-DEC-2007 SaveState file format 2.1</p>
-<p>X-1.20 Brian Wheeler 11-DEC-2007 Improved timer logic (again).</p>
-<p>X-1.19 Camiel Vanderhoeven 10-DEC-2007 Use configurator; move IDE and USB to their own classes.</p>
-<p>X-1.18 Camiel Vanderhoeven 7-DEC-2007 Add busmaster_status; add pic_edge_level.</p>
-<p>X-1.17 Camiel Vanderhoeven 7-DEC-2007 Generate keyboard interrupts when needed.</p>
-<p>X-1.16 Camiel Vanderhoeven 6-DEC-2007 Changed keyboard implementation (with thanks to the Bochs project!!)</p>
-<p>X-1.15 Brian Wheeler 1-DEC-2007 Added console support (using SDL library), corrected timer behavior for Linux/BSD as a guest OS.</p>
-<p>X-1.14 Camiel Vanderhoeven 16-APR-2007 Added ResetPCI()</p>
-<p>X-1.13 Camiel Vanderhoeven 11-APR-2007 Moved all data that should be saved to a state file to a structure "state".</p>
-<p>X-1.12 Camiel Vanderhoeven 31-MAR-2007 Added old changelog comments.</p>
-<p>X-1.11 Camiel Vanderhoeven 3-MAR-2007 Added inline function get_ide_disk, which returns a file handle.</p>
-<p>X-1.10 Camiel Vanderhoeven 20-FEB-2007 Added member variable to keep error status.</p>
-<p>X-1.9 Brian Wheeler 20-FEB-2007 Information about IDE disks is now kept in the ide_info structure.</p>
-<p>X-1.8 Camiel Vanderhoeven 16-FEB-2007 DoClock now returns int.</p>
-<p>X-1.7 Camiel Vanderhoeven 12-FEB-2007 Formatting.</p>
-<p>X-1.6 Camiel Vanderhoeven 12-FEB-2007 Added comments.</p>
-<p>X-1.5 Camiel Vanderhoeven 9-FEB-2007 Replaced f_ variables with ide_ members.</p>
-<p>X-1.4 Camiel Vanderhoeven 9-FEB-2007 Added comments.</p>
-<p>X-1.3 Brian Wheeler 3-FEB-2007 Formatting.</p>
-<p>X-1.2 Brian Wheeler 3-FEB-2007 Includes are now case-correct (necessary on Linux)</p>
-<p>X-1.1 Camiel Vanderhoeven 19-JAN-2007 Initial version in CVS.</p>
-<dl class="section author"><dt>Author</dt><dd>Camiel Vanderhoeven </dd></dl>
-
-<p class="definition">Definition in file <a class="el" href="../../d5/d00/a00050_source.html">AliM1543C.h</a>.</p>
-</div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
-<a id="a279a6d24c5860895201f6637342c3e3f" name="a279a6d24c5860895201f6637342c3e3f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a279a6d24c5860895201f6637342c3e3f">&#9670;&#160;</a></span>PIT_OFFSET_LATCH</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PIT_OFFSET_LATCH&#160;&#160;&#160;3</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d5/d00/a00050_source.html#l00308">308</a> of file <a class="el" href="../../d5/d00/a00050_source.html">AliM1543C.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d6/d00/a00047_source.html#l01690">CAliM1543C::pit_read()</a>, and <a class="el" href="../../d6/d00/a00047_source.html#l01729">CAliM1543C::pit_write()</a>.</p>
-
-</div>
-</div>
-<a id="a4ea8718d67855b09f375e756c8dfb311" name="a4ea8718d67855b09f375e756c8dfb311"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4ea8718d67855b09f375e756c8dfb311">&#9670;&#160;</a></span>PIT_OFFSET_MAX</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PIT_OFFSET_MAX&#160;&#160;&#160;6</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d5/d00/a00050_source.html#l00309">309</a> of file <a class="el" href="../../d5/d00/a00050_source.html">AliM1543C.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d6/d00/a00047_source.html#l01847">CAliM1543C::pit_clock()</a>, <a class="el" href="../../d6/d00/a00047_source.html#l01810">CAliM1543C::pit_out()</a>, <a class="el" href="../../d6/d00/a00047_source.html#l01729">CAliM1543C::pit_write()</a>, and <a class="el" href="../../d6/d00/a00047_source.html#l00905">CAliM1543C::reg_61_write()</a>.</p>
-
-</div>
-</div>
-<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
-<a id="aa1aa93f7a5c8e1cab89524199501f9d8" name="aa1aa93f7a5c8e1cab89524199501f9d8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa1aa93f7a5c8e1cab89524199501f9d8">&#9670;&#160;</a></span>theAli</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../d3/d00/a00785.html">CAliM1543C</a>* theAli</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00047_source.html#l02865">2865</a> of file <a class="el" href="../../d6/d00/a00047_source.html">AliM1543C.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d6/d00/a00047_source.html#l00363">CAliM1543C::CAliM1543C()</a>, <a class="el" href="../../dc/d00/a00563_source.html#l01377">CFloppyController::clear_interrupt()</a>, <a class="el" href="../../dc/d00/a00053_source.html#l01277">CAliM1543C_ide::deassert_interrupt()</a>, <a class="el" href="../../dc/d00/a00563_source.html#l01371">CFloppyController::do_interrupt()</a>, <a class="el" href="../../d4/d00/a00428_source.html#l00764">CSerial::eval_interrupts()</a>, <a class="el" href="../../dc/d00/a00563_source.html#l01361">CFloppyController::init()</a>, <a class="el" href="../../df/d00/a00416_source.html#l01918">CKeyboard::kbd_update_irq()</a>, <a class="el" href="../../dc/d00/a00053_source.html#l01251">CAliM1543C_ide::raise_interrupt()</a>, <a class="el" href="../../dc/d00/a00053_source.html#l02860">CAliM1543C_ide::run()</a>, <a class="el" href="../../d7/d00/a00002_source.html#l00540">run_emulator()</a>, <a class="el" href="../../d5/d00/a00140_source.html#l00504">CAlphaCPU::service_interval_timer()</a>, and <a class="el" href="../../dc/d00/a00563_source.html#l00539">CFloppyController::WriteMem()</a>.</p>
-
-</div>
-</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
@@ -309,7 +192,7 @@ Variables</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_88cc136c961c47108c264e4aa641465d.html">chipset</a></li><li class="navelem"><a href="../../d5/d00/a00050.html">AliM1543C.h</a></li>
+    <li class="navelem"><a href="../../dir_e914ee4d4a44400f1fdb170cb4ead18a.html">base</a></li><li class="navelem"><a href="../../d5/d00/a00050.html">HostWakeEvent.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

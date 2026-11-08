@@ -1,7 +1,28 @@
 var a01597 =
 [
-    [ "adapter", "d0/d00/a01597.html#a4337d36874a2644529bd15e87c9fcc30", null ],
-    [ "magic", "d0/d00/a01597.html#a1c806036b9cb9fa9680dac030daa28f6", null ],
-    [ "msg", "d0/d00/a01597.html#a7f2c7db3eb9072cc561a5246a87ebbf2", null ],
-    [ "version", "d0/d00/a01597.html#a6eb08fa0a454185ffa09f876bf6633c8", null ]
+    [ "active", "d0/d00/a01597.html#aa5ee713a92c9cc7513464ae217231317", null ],
+    [ "base", "d0/d00/a01597.html#aa5f960373ba3bdff0a8df79a6effe62f", null ],
+    [ "bg", "d0/d00/a01597.html#a96467c4c4d2b18a3ee993de75ef1e607", null ],
+    [ "bpp", "d0/d00/a01597.html#a2dfb6a4a9f9aab27f045f427f6a5cbe2", null ],
+    [ "compare", "d0/d00/a01597.html#a5298bf8b1f14c5c6d481692681d64ac4", null ],
+    [ "compare_color", "d0/d00/a01597.html#a2128abaa5fbef5599fc02ad76602ef22", null ],
+    [ "compare_mask", "d0/d00/a01597.html#a3590d2db42ce7945dbdebb413135cbf9", null ],
+    [ "dx", "d0/d00/a01597.html#a5b5759c602e6025745eafcf630e7c2ac", null ],
+    [ "dy", "d0/d00/a01597.html#a81d0d79abb0fea713481bdd30983ff16", null ],
+    [ "fg", "d0/d00/a01597.html#a8cd448965eeae7a2c96483aa149f5f1c", null ],
+    [ "height", "d0/d00/a01597.html#add6ff96ab0edfc5300151bd9baf113b6", null ],
+    [ "mask", "d0/d00/a01597.html#a6094f856493c35071b180efc19ca9681", null ],
+    [ "mono_lsb", "d0/d00/a01597.html#ab7b0cf5314d3a85b9933141fba18dcbb", null ],
+    [ "packed", "d0/d00/a01597.html#a7ef052cce49c3c7445fdb9a6a29d9b10", null ],
+    [ "pattern", "d0/d00/a01597.html#a3a680848c3872901c4c98b9c11d8bfab", null ],
+    [ "pitch", "d0/d00/a01597.html#a7940782cfd9e8be8bf345a4578888247", null ],
+    [ "rop", "d0/d00/a01597.html#a565209d06bd435e902c2e16c900527b0", null ],
+    [ "sc_br", "d0/d00/a01597.html#acbfc2b70317d997d87db0986368055e3", null ],
+    [ "sc_tl", "d0/d00/a01597.html#ab1dc6a844b9d8f71dfde839705da5203", null ],
+    [ "source_format", "d0/d00/a01597.html#a971bd4adbb8d2ad79d928b11bfe676f9", null ],
+    [ "width", "d0/d00/a01597.html#a92a3cf600a54d37522fbed69b24c94fe", null ],
+    [ "word", "d0/d00/a01597.html#a7397d30fb4085f82ff35b7079fbe53f5", null ],
+    [ "words_per_row", "d0/d00/a01597.html#a1856dc6eec30da1986f6355f186239e5", null ],
+    [ "x", "d0/d00/a01597.html#a526622910f8b8b5e220444ff0016b516", null ],
+    [ "y", "d0/d00/a01597.html#a32279634b94a6629e891ff8ad7dc4a8f", null ]
 ];

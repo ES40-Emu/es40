@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: graphics/S3Trio64.cpp File Reference</title>
+<title>ES40: emu/SystemComponent.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,1303 +109,233 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d6/d00/a00356.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">S3Trio64.cpp File Reference</div></div>
+  <div class="headertitle"><div class="title">SystemComponent.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../d9/d00/a00524_source.html">StdAfx.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d4/d00/a00359_source.html">S3Trio64.h</a>&quot;</code><br />
-<code>#include &lt;cmath&gt;</code><br />
-<code>#include &quot;<a class="el" href="../../dc/d00/a00620_source.html">system/System.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d5/d00/a00050_source.html">chipset/AliM1543C.h</a>&quot;</code><br />
-<code>#include &lt;algorithm&gt;</code><br />
-<code>#include &lt;chrono&gt;</code><br />
-<code>#include &lt;type_traits&gt;</code><br />
-<code>#include &lt;vector&gt;</code><br />
-<code>#include &quot;<a class="el" href="../../d6/d00/a00371_source.html">gui/gui.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../db/d00/a00296_source.html">emu/xtal.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dc/d00/a00278_source.html">emu.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d4/d00/a00437_source.html">logmacro.h</a>&quot;</code><br />
+
+<p>Contains definitions for the base class for devices that connect to the chipset.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d4/d00/a00116_source.html">config/Configurator.h</a>&quot;</code><br />
+<code>#include &lt;typeinfo&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
-Include dependency graph for S3Trio64.cpp:</div>
+Include dependency graph for SystemComponent.h:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../df/d00/a00357.png" border="0" usemap="#agraphics_2_s3_trio64_8cpp" loading="lazy" alt=""/></div>
-<map name="agraphics_2_s3_trio64_8cpp" id="agraphics_2_s3_trio64_8cpp">
-<area shape="rect" title=" " alt="" coords="1102,5,1253,32"/>
-<area shape="rect" href="../../d9/d00/a00524.html" title="Standard includes." alt="" coords="411,379,483,405"/>
-<area shape="poly" title=" " alt="" coords="1099,26,869,48,753,63,670,83,634,97,607,111,584,129,557,156,519,209,489,266,469,321,455,366,451,362,464,319,484,264,514,206,553,153,580,125,605,106,632,92,669,77,752,58,868,42,1104,24"/>
-<area shape="rect" title=" " alt="" coords="1057,603,1117,629"/>
-<area shape="poly" title=" " alt="" coords="1253,21,1486,36,1777,64,1913,83,2026,106,2070,119,2104,133,2125,149,2133,166,2133,468,2128,501,2113,523,2091,537,2062,544,1993,548,1956,551,1918,557,1847,570,1752,581,1525,598,1132,616,1132,611,1525,593,1752,575,1846,564,1917,552,1955,546,1993,543,2061,538,2089,532,2110,520,2123,499,2128,468,2128,167,2121,152,2101,138,2068,124,2025,111,1912,88,1776,69,1486,41,1254,26"/>
-<area shape="rect" href="../../d4/d00/a00359.html" title=" " alt="" coords="850,80,934,107"/>
-<area shape="poly" title=" " alt="" coords="1125,34,950,80,948,75,1130,31"/>
-<area shape="rect" title=" " alt="" coords="1598,379,1655,405"/>
-<area shape="poly" title=" " alt="" coords="1253,22,1463,40,1720,70,1839,89,1938,111,1977,123,2006,136,2025,151,2032,166,2032,244,2029,259,2020,273,1989,298,1944,320,1890,339,1771,369,1671,387,1670,382,1770,363,1888,334,1942,315,1987,293,2016,269,2024,257,2027,244,2027,167,2021,154,2003,141,1975,128,1937,116,1838,94,1719,75,1462,45,1254,28"/>
-<area shape="rect" title=" " alt="" coords="538,379,612,405"/>
-<area shape="poly" title=" " alt="" coords="1099,20,993,28,929,36,861,48,791,65,721,89,655,119,594,157,557,188,536,219,522,256,512,305,509,318,512,330,525,350,544,370,539,369,521,354,507,332,504,318,507,303,517,255,531,217,553,185,590,153,652,114,719,84,789,60,859,43,928,31,993,23,1104,18"/>
-<area shape="rect" title=" " alt="" coords="158,379,215,405"/>
-<area shape="poly" title=" " alt="" coords="1099,23,828,35,653,45,474,59,307,78,168,102,115,116,74,132,48,149,42,158,40,167,40,244,43,265,50,285,76,320,110,348,146,370,142,372,107,352,72,323,46,287,38,266,35,244,35,166,37,156,45,145,71,127,113,111,167,97,306,73,473,54,652,40,827,30,1104,21"/>
-<area shape="rect" title=" " alt="" coords="1000,304,1083,331"/>
-<area shape="poly" title=" " alt="" coords="1219,30,1263,47,1312,73,1358,108,1377,130,1393,153,1407,181,1413,207,1409,232,1393,258,1371,274,1340,285,1261,296,1173,301,1098,307,1097,301,1173,296,1260,291,1339,280,1369,269,1389,254,1404,230,1407,207,1402,183,1388,156,1373,133,1354,112,1309,78,1261,52,1219,35"/>
-<area shape="rect" href="../../d6/d00/a00371.html" title="Contains the definitions for the bx_gui_c base class used for interfacing with SDL and other device i..." alt="" coords="1142,155,1213,181"/>
-<area shape="poly" title=" " alt="" coords="1179,30,1180,140,1175,138,1176,35"/>
-<area shape="rect" href="../../db/d00/a00296.html" title=" " alt="" coords="217,304,271,331"/>
-<area shape="poly" title=" " alt="" coords="1099,23,912,31,678,43,468,60,393,70,351,82,325,100,304,124,287,151,273,181,256,240,249,290,244,288,251,239,268,179,282,149,299,121,321,96,348,78,392,65,467,55,678,38,912,26,1104,21"/>
-<area shape="rect" href="../../dc/d00/a00620.html" title="Contains the definitions for the emulated Typhoon Chipset devices." alt="" coords="1505,229,1629,256"/>
-<area shape="poly" title=" " alt="" coords="1253,22,1297,29,1344,39,1392,55,1436,78,1475,109,1509,146,1556,217,1551,215,1505,149,1472,113,1433,82,1390,60,1343,44,1296,34,1254,27"/>
-<area shape="rect" href="../../d5/d00/a00050.html" title="Contains the definitions for the ISA part of the emulated Ali M1543C chipset." alt="" coords="1237,155,1379,181"/>
-<area shape="poly" title=" " alt="" coords="1189,30,1290,143,1284,143,1188,35"/>
-<area shape="rect" href="../../dc/d00/a00278.html" title=" " alt="" coords="302,155,359,181"/>
-<area shape="poly" title=" " alt="" coords="1099,23,918,30,692,41,491,58,420,69,380,82,366,94,355,109,340,141,336,138,351,106,363,90,377,78,419,64,490,53,692,35,918,25,1104,21"/>
-<area shape="rect" href="../../d4/d00/a00437.html" title=" " alt="" coords="2168,80,2253,107"/>
-<area shape="poly" title=" " alt="" coords="1253,19,1416,23,1639,33,1893,51,2150,77,2155,80,2150,81,2149,83,1892,56,1638,39,1416,29,1254,24"/>
-<area shape="rect" href="../../d7/d00/a00131.html" title=" " alt="" coords="23,453,132,480"/>
-<area shape="poly" title=" " alt="" coords="409,403,148,454,147,449,411,398"/>
-<area shape="rect" href="../../df/d00/a00263.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="1067,453,1157,480"/>
-<area shape="poly" title=" " alt="" coords="483,397,526,403,672,417,787,424,904,433,1055,453,1050,453,903,438,787,430,672,422,525,408,484,402"/>
-<area shape="rect" title=" " alt="" coords="976,453,1043,480"/>
-<area shape="poly" title=" " alt="" coords="483,397,526,403,647,416,742,424,837,433,958,451,963,454,958,454,957,456,836,438,742,429,647,422,525,408,484,402"/>
-<area shape="rect" href="../../d3/d00/a00023.html" title=" " alt="" coords="651,453,773,480"/>
-<area shape="poly" title=" " alt="" coords="483,401,653,448,648,449,483,406"/>
-<area shape="rect" href="../../d5/d00/a00029.html" title=" " alt="" coords="226,528,326,555"/>
-<area shape="poly" title=" " alt="" coords="415,407,380,428,342,455,314,485,292,517,289,513,310,482,338,451,377,424,419,405"/>
-<area shape="rect" href="../../dd/d00/a00041.html" title=" " alt="" coords="797,453,902,480"/>
-<area shape="poly" title=" " alt="" coords="483,397,784,452,779,454,483,402"/>
-<area shape="rect" href="../../dc/d00/a00032.html" title=" " alt="" coords="1124,528,1212,555"/>
-<area shape="poly" title=" " alt="" coords="483,397,526,403,636,413,722,416,807,425,857,435,914,451,940,464,965,478,1040,504,1112,526,1107,526,1038,509,963,482,938,468,912,456,856,440,807,430,722,421,635,418,525,408,484,402"/>
-<area shape="rect" href="../../d8/d00/a00038.html" title=" " alt="" coords="554,528,684,555"/>
-<area shape="poly" title=" " alt="" coords="429,404,408,423,390,441,381,460,382,469,386,478,409,494,446,508,541,530,536,530,445,513,406,499,382,482,377,471,376,459,386,438,405,419,424,407"/>
-<area shape="rect" href="../../d4/d00/a00035.html" title=" " alt="" coords="156,453,271,480"/>
-<area shape="poly" title=" " alt="" coords="408,406,269,451,268,446,413,403"/>
-<area shape="rect" href="../../d0/d00/a00302.html" title="Contains macro&#39;s and prototypes for debugging." alt="" coords="396,453,498,480"/>
-<area shape="poly" title=" " alt="" coords="448,404,449,439,444,436,445,408"/>
-<area shape="rect" href="../../d3/d00/a00305.html" title="Contains byte&#45;order conversion helpers." alt="" coords="522,453,627,480"/>
-<area shape="poly" title=" " alt="" coords="469,403,542,445,537,445,469,409"/>
-<area shape="rect" title=" " alt="" coords="351,528,428,555"/>
-<area shape="poly" title=" " alt="" coords="653,481,444,531,443,525,658,480"/>
-<area shape="rect" title=" " alt="" coords="1320,528,1373,555"/>
-<area shape="poly" title=" " alt="" coords="774,476,786,477,930,491,1045,496,1159,503,1307,528,1302,528,1159,508,1044,501,930,496,785,483,774,481"/>
-<area shape="rect" title=" " alt="" coords="841,603,898,629"/>
-<area shape="poly" title=" " alt="" coords="327,550,339,552,826,607,824,612,338,557,327,555"/>
-<area shape="poly" title=" " alt="" coords="327,550,339,552,659,580,1044,611,1038,612,659,585,338,557,327,556"/>
-<area shape="rect" title=" " alt="" coords="159,603,217,629"/>
-<area shape="poly" title=" " alt="" coords="263,554,216,595,214,590,258,556"/>
-<area shape="rect" title=" " alt="" coords="244,603,300,629"/>
-<area shape="poly" title=" " alt="" coords="277,553,276,589,271,585,273,557"/>
-<area shape="rect" title=" " alt="" coords="325,603,403,629"/>
-<area shape="poly" title=" " alt="" coords="292,553,340,593,335,592,291,558"/>
-<area shape="poly" title=" " alt="" coords="902,471,1104,495,1307,528,1302,528,1104,500,902,476"/>
-<area shape="poly" title=" " alt="" coords="902,478,968,499,996,512,1013,526,1019,542,1017,557,1008,569,993,580,955,597,913,609,913,604,953,592,990,576,1004,566,1012,555,1014,543,1009,530,993,517,966,504,902,483"/>
-<area shape="poly" title=" " alt="" coords="901,478,977,500,1010,513,1034,526,1060,555,1078,590,1074,587,1056,558,1030,530,1008,518,975,505,900,483"/>
-<area shape="poly" title=" " alt="" coords="794,479,786,483,729,486,657,486,489,483,405,485,327,491,262,506,236,517,215,530,205,542,198,557,190,589,186,586,192,555,200,539,212,526,233,512,260,501,326,486,404,479,489,477,657,481,729,481,785,477,799,478"/>
-<area shape="poly" title=" " alt="" coords="794,478,786,483,700,493,633,498,567,507,485,530,463,543,441,557,376,584,316,605,314,599,374,579,439,552,460,538,483,526,566,501,632,493,700,488,785,477,799,478"/>
-<area shape="poly" title=" " alt="" coords="799,477,542,531,403,598,401,593,541,525,794,478"/>
-<area shape="rect" title=" " alt="" coords="1235,528,1296,555"/>
-<area shape="poly" title=" " alt="" coords="902,472,1043,492,1223,527,1218,527,1042,497,902,477"/>
-<area shape="rect" title=" " alt="" coords="810,528,878,555"/>
-<area shape="poly" title=" " alt="" coords="850,479,848,514,844,511,847,482"/>
-<area shape="rect" title=" " alt="" coords="623,603,748,629"/>
-<area shape="poly" title=" " alt="" coords="838,480,712,595,709,590,833,481"/>
-<area shape="rect" title=" " alt="" coords="1462,528,1530,555"/>
-<area shape="poly" title=" " alt="" coords="902,471,1449,534,1444,535,902,476"/>
-<area shape="rect" title=" " alt="" coords="903,528,999,555"/>
-<area shape="poly" title=" " alt="" coords="868,478,923,519,918,518,866,483"/>
-<area shape="poly" title=" " alt="" coords="902,477,1112,527,1107,527,902,483"/>
-<area shape="poly" title=" " alt="" coords="663,553,829,602,823,602,662,558"/>
-<area shape="poly" title=" " alt="" coords="685,550,1044,607,1039,608,684,555"/>
-<area shape="poly" title=" " alt="" coords="577,555,419,602,418,597,572,556"/>
-<area shape="poly" title=" " alt="" coords="631,553,666,592,661,590,629,558"/>
-<area shape="poly" title=" " alt="" coords="225,478,258,516,253,516,224,483"/>
-<area shape="poly" title=" " alt="" coords="271,470,461,490,579,505,697,525,748,538,798,552,1044,606,1039,606,797,557,746,543,696,531,578,511,460,495,271,475"/>
-<area shape="poly" title=" " alt="" coords="166,483,109,505,85,517,70,530,65,541,67,552,73,562,83,571,112,588,147,603,142,603,110,593,80,576,68,565,61,553,60,540,66,526,82,513,107,500,170,479"/>
-<area shape="poly" title=" " alt="" coords="179,482,155,496,130,514,117,533,116,543,121,553,134,562,161,573,232,600,227,601,159,578,131,566,117,556,111,544,112,531,127,510,152,492,183,479"/>
-<area shape="poly" title=" " alt="" coords="211,478,206,516,208,536,216,553,229,565,253,577,313,600,307,600,251,582,226,569,211,556,203,537,201,516,208,483"/>
-<area shape="poly" title=" " alt="" coords="271,470,384,477,618,486,803,487,987,495,1094,506,1223,528,1217,528,1093,512,986,500,802,492,618,491,384,483,271,475"/>
-<area shape="poly" title=" " alt="" coords="927,105,1265,228,1265,405,1267,514,1263,511,1260,405,1261,231,926,110"/>
-<area shape="rect" href="../../dc/d00/a01929.html" title=" " alt="" coords="862,155,922,181"/>
-<area shape="poly" title=" " alt="" coords="893,105,894,140,890,138,891,109"/>
-<area shape="rect" href="../../d2/d00/a00281.html" title=" " alt="" coords="521,304,660,331"/>
-<area shape="poly" title=" " alt="" coords="847,98,781,108,697,130,655,147,616,169,581,197,553,231,548,245,551,261,570,293,565,292,546,263,543,245,548,228,578,193,613,164,653,142,696,125,780,103,852,96"/>
-<area shape="rect" href="../../d5/d00/a00269.html" title=" " alt="" coords="725,229,864,256"/>
-<area shape="poly" title=" " alt="" coords="885,105,852,156,812,218,808,214,847,153,881,109"/>
-<area shape="rect" href="../../d3/d00/a00275.html" title=" " alt="" coords="939,229,1050,256"/>
-<area shape="poly" title=" " alt="" coords="902,104,937,153,980,217,975,216,933,156,900,110"/>
-<area shape="rect" href="../../de/d00/a00323.html" title=" " alt="" coords="563,229,651,256"/>
-<area shape="poly" title=" " alt="" coords="865,109,646,224,643,220,870,106"/>
-<area shape="poly" title=" " alt="" coords="935,103,1129,153,1124,154,935,108"/>
-<area shape="rect" href="../../d9/d00/a00272.html" title="Support functions for working with attotime data." alt="" coords="75,229,184,256"/>
-<area shape="poly" title=" " alt="" coords="847,98,565,119,405,135,339,146,290,157,254,171,219,188,161,222,158,218,217,183,252,166,289,152,338,141,404,130,564,113,852,95"/>
-<area shape="poly" title=" " alt="" coords="890,179,886,211,882,249,887,291,893,311,902,329,930,363,958,386,987,400,1018,409,1088,423,1128,434,1170,451,1311,521,1305,520,1168,456,1126,439,1087,428,1017,414,985,405,955,390,926,367,898,332,888,313,881,292,877,249,880,210,887,184"/>
-<area shape="rect" href="../../d6/d00/a00287.html" title="Contains the definitions for the PCI Device base class." alt="" coords="1125,229,1251,256"/>
-<area shape="poly" title=" " alt="" coords="923,174,1124,225,1119,226,923,179"/>
-<area shape="poly" title=" " alt="" coords="859,178,793,200,715,232,662,263,619,296,616,292,659,259,712,227,791,195,864,176"/>
-<area shape="poly" title=" " alt="" coords="877,180,825,222,822,218,873,183"/>
-<area shape="poly" title=" " alt="" coords="910,179,967,220,961,220,910,185"/>
-<area shape="poly" title=" " alt="" coords="859,178,667,229,665,224,864,176"/>
-<area shape="rect" href="../../d6/d00/a00293.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="1107,304,1251,331"/>
-<area shape="poly" title=" " alt="" coords="1188,255,1184,290,1180,287,1185,259"/>
-<area shape="poly" title=" " alt="" coords="1167,330,1037,445,1034,441,1162,332"/>
-<area shape="poly" title=" " alt="" coords="563,332,487,374,484,369,568,330"/>
-<area shape="rect" title=" " alt="" coords="655,379,716,405"/>
-<area shape="poly" title=" " alt="" coords="608,329,660,369,654,369,607,334"/>
-<area shape="poly" title=" " alt="" coords="661,321,1584,385,1581,390,661,326"/>
-<area shape="poly" title=" " alt="" coords="590,329,583,365,579,362,586,333"/>
-<area shape="poly" title=" " alt="" coords="519,333,232,385,230,380,522,329"/>
-<area shape="poly" title=" " alt="" coords="807,254,848,291,901,328,960,357,1012,376,1104,397,1199,415,1253,429,1316,451,1394,485,1463,521,1457,520,1392,490,1314,456,1252,435,1198,420,1103,403,1010,381,958,361,899,333,844,295,806,259"/>
-<area shape="poly" title=" " alt="" coords="757,258,642,301,640,296,762,255"/>
-<area shape="poly" title=" " alt="" coords="788,255,705,368,702,364,783,258"/>
-<area shape="poly" title=" " alt="" coords="865,248,927,253,1280,260,1395,264,1497,272,1576,284,1602,292,1619,302,1629,316,1634,332,1634,365,1630,362,1629,332,1624,318,1616,306,1600,297,1574,289,1497,278,1395,270,1280,265,927,259,865,253"/>
-<area shape="poly" title=" " alt="" coords="950,257,828,295,673,333,339,391,117,431,42,447,12,455,9,464,9,472,26,492,59,513,104,533,212,571,312,601,307,602,210,576,102,538,57,517,23,496,5,474,3,463,9,451,41,442,116,426,339,385,672,328,827,289,955,256"/>
-<area shape="rect" title=" " alt="" coords="912,304,976,331"/>
-<area shape="poly" title=" " alt="" coords="988,255,963,294,960,289,984,258"/>
-<area shape="poly" title=" " alt="" coords="1004,254,1028,292,1023,290,1002,259"/>
-<area shape="poly" title=" " alt="" coords="606,254,599,290,595,287,602,259"/>
-<area shape="poly" title=" " alt="" coords="1213,176,1324,206,1393,227,1398,242,1393,257,1381,280,1366,297,1332,320,1299,342,1285,358,1273,380,1270,391,1271,400,1282,415,1299,431,1317,452,1332,483,1342,515,1337,512,1327,485,1313,455,1295,435,1278,419,1266,402,1265,391,1268,378,1281,354,1296,338,1329,315,1362,293,1376,277,1388,255,1392,242,1389,231,1323,211,1213,181"/>
-<area shape="poly" title=" " alt="" coords="1165,180,1121,219,1064,258,987,300,985,295,1061,254,1117,214,1160,183"/>
-<area shape="rect" href="../../d8/d00/a01932.html" title="Definitions for VGA cards." alt="" coords="1325,229,1379,256"/>
-<area shape="poly" title=" " alt="" coords="1208,179,1313,224,1308,224,1208,185"/>
-<area shape="poly" title=" " alt="" coords="137,253,166,292,185,312,207,328,254,351,304,367,398,386,393,388,303,373,252,356,204,333,181,316,162,295,137,259"/>
-<area shape="poly" title=" " alt="" coords="134,254,164,330,178,365,173,365,159,332,133,259"/>
-<area shape="poly" title=" " alt="" coords="149,254,214,294,209,296,150,259"/>
-<area shape="poly" title=" " alt="" coords="271,320,625,376,643,381,637,382,624,381,271,325"/>
-<area shape="poly" title=" " alt="" coords="232,333,208,368,204,365,236,329"/>
-<area shape="poly" title=" " alt="" coords="1556,255,1537,279,1518,305,1506,333,1500,356,1493,379,1480,407,1455,440,1428,471,1375,520,1373,515,1424,467,1451,437,1475,404,1488,377,1495,354,1501,331,1514,303,1533,276,1552,258"/>
-<area shape="poly" title=" " alt="" coords="1590,254,1623,276,1657,306,1685,345,1693,367,1696,390,1696,468,1692,494,1682,513,1667,526,1647,534,1598,545,1543,557,1452,569,1271,585,914,614,913,609,1271,580,1452,563,1542,552,1597,540,1645,529,1664,521,1678,509,1687,492,1691,468,1691,391,1688,368,1680,348,1653,310,1619,280,1589,259"/>
-<area shape="poly" title=" " alt="" coords="1629,241,1689,245,1758,255,1830,273,1899,302,1931,318,1957,335,1975,357,1981,390,1981,469,1973,486,1951,501,1917,515,1873,528,1760,551,1624,571,1342,600,1133,615,1132,609,1342,594,1624,566,1759,546,1872,523,1915,510,1949,496,1969,482,1976,467,1976,391,1970,360,1954,339,1928,323,1896,306,1829,278,1757,260,1688,250,1629,247"/>
-<area shape="poly" title=" " alt="" coords="1553,255,1527,279,1501,306,1481,333,1469,356,1456,380,1435,407,1401,441,1365,473,1298,522,1296,517,1361,468,1398,437,1431,404,1452,377,1464,354,1477,330,1497,302,1523,276,1548,257"/>
-<area shape="poly" title=" " alt="" coords="1629,244,1698,250,1772,261,1837,278,1861,289,1878,302,1884,317,1878,332,1847,375,1808,413,1764,444,1717,471,1624,510,1546,532,1545,527,1622,505,1714,466,1761,440,1804,409,1843,372,1874,329,1878,317,1874,306,1859,293,1835,283,1771,266,1698,256,1630,250"/>
-<area shape="poly" title=" " alt="" coords="1501,256,1262,303,1261,298,1507,255"/>
-<area shape="poly" title=" " alt="" coords="1629,246,1692,252,1759,263,1817,279,1839,290,1854,302,1865,325,1859,345,1839,359,1811,371,1740,385,1671,392,1671,386,1740,380,1810,366,1837,355,1854,341,1859,326,1850,306,1836,294,1815,284,1758,268,1692,257,1629,251"/>
-<area shape="rect" href="../../dd/d00/a00260.html" title="Contains the definitions for the CPU tracing engine." alt="" coords="1283,379,1421,405"/>
-<area shape="poly" title=" " alt="" coords="1523,256,1472,278,1423,306,1392,336,1368,368,1365,364,1388,332,1420,302,1469,273,1518,257"/>
-<area shape="rect" href="../../d7/d00/a00614.html" title=" " alt="" coords="1528,304,1605,331"/>
-<area shape="poly" title=" " alt="" coords="1568,254,1569,290,1565,287,1565,259"/>
-<area shape="rect" title=" " alt="" coords="1730,304,1841,331"/>
-<area shape="poly" title=" " alt="" coords="1605,254,1735,299,1730,299,1605,259"/>
-<area shape="poly" title=" " alt="" coords="1313,405,1169,451,1168,446,1308,406"/>
-<area shape="poly" title=" " alt="" coords="1567,329,1555,396,1531,481,1513,517,1510,512,1526,479,1550,395,1563,333"/>
-<area shape="poly" title=" " alt="" coords="1526,324,731,390,731,384,1529,320"/>
-<area shape="poly" title=" " alt="" coords="1578,329,1609,368,1604,366,1576,334"/>
-<area shape="poly" title=" " alt="" coords="1379,172,1570,192,1686,209,1802,232,1910,260,1999,296,2033,316,2060,339,2077,363,2083,390,2083,469,2074,487,2049,504,2010,519,1960,533,1832,557,1680,576,1363,603,1133,615,1133,610,1363,598,1679,571,1831,552,1959,528,2009,514,2046,499,2070,484,2077,467,2077,391,2072,366,2056,342,2030,320,1996,300,1908,265,1801,237,1685,214,1570,197,1380,177"/>
-<area shape="poly" title=" " alt="" coords="1290,181,1223,223,1221,219,1285,183"/>
-<area shape="poly" title=" " alt="" coords="330,179,331,211,332,249,340,290,357,329,377,352,404,371,399,371,374,356,353,332,335,292,327,249,325,210,328,184"/>
-<area shape="poly" title=" " alt="" coords="353,179,558,295,553,297,353,184"/>
-<area shape="poly" title=" " alt="" coords="360,171,712,226,708,230,360,176"/>
-<area shape="poly" title=" " alt="" coords="325,180,261,292,257,289,322,184"/>
+<div class="center"><img src="../../df/d00/a00357.png" border="0" usemap="#aemu_2_system_component_8h" loading="lazy" alt=""/></div>
+<map name="aemu_2_system_component_8h" id="aemu_2_system_component_8h">
+<area shape="rect" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="54,5,227,32"/>
+<area shape="rect" href="../../d4/d00/a00116.html" title="Contains the definitions for the configuration file interpreter." alt="" coords="5,80,148,107"/>
+<area shape="poly" title=" " alt="" coords="128,35,100,70,96,66,131,30"/>
+<area shape="rect" title=" " alt="" coords="172,80,240,107"/>
+<area shape="poly" title=" " alt="" coords="153,30,187,68,182,69,151,35"/>
+<area shape="rect" title=" " alt="" coords="10,155,63,181"/>
+<area shape="poly" title=" " alt="" coords="72,106,53,142,49,139,67,109"/>
+<area shape="rect" title=" " alt="" coords="88,155,145,181"/>
+<area shape="poly" title=" " alt="" coords="85,105,105,141,100,141,82,110"/>
+</map>
+</div>
+</div><div class="textblock"><div class="dynheader">
+This graph shows which files directly or indirectly include this file:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../df/d00/a00358.png" border="0" usemap="#aemu_2_system_component_8hdep" loading="lazy" alt=""/></div>
+<map name="aemu_2_system_component_8hdep" id="aemu_2_system_component_8hdep">
+<area shape="rect" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="2461,5,2634,32"/>
+<area shape="rect" href="../../de/d00/a00185.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="3811,155,3938,181"/>
+<area shape="poly" title=" " alt="" coords="2650,20,2995,37,3210,54,3427,77,3646,114,3823,154,3818,154,3645,119,3426,83,3210,59,2994,43,2650,26"/>
+<area shape="rect" href="../../d4/d00/a00008.html" title=" " alt="" coords="506,155,619,181"/>
+<area shape="poly" title=" " alt="" coords="2443,26,1543,84,1016,121,631,157,620,159,619,154,630,152,1016,116,1542,78,2448,25"/>
+<area shape="rect" href="../../d2/d00/a00014.html" title=" " alt="" coords="368,155,482,181"/>
+<area shape="poly" title=" " alt="" coords="2443,22,1903,42,1543,59,1177,83,834,113,493,157,483,159,482,154,493,152,834,107,1177,77,1543,54,1903,37,2448,22"/>
+<area shape="rect" href="../../d1/d00/a00098.html" title="Contains the definitions for the emulated DMA controller." alt="" coords="79,80,187,107"/>
+<area shape="poly" title=" " alt="" coords="2443,22,1574,42,958,59,326,83,188,91,187,86,326,77,958,54,1574,36,2449,21"/>
+<area shape="rect" href="../../d8/d00/a00671.html" title="Contains the definitions for the emulated Floppy Controller devices." alt="" coords="170,155,344,181"/>
+<area shape="poly" title=" " alt="" coords="2443,20,2172,25,1780,33,1326,51,1093,65,864,83,714,99,565,119,328,157,327,151,565,114,713,93,863,77,1092,60,1326,46,1780,27,2172,19,2448,20"/>
+<area shape="rect" href="../../db/d00/a00350.html" title="Contains the definitions for the PCI Device base class." alt="" coords="1714,80,1840,107"/>
+<area shape="poly" title=" " alt="" coords="2448,29,1840,89,1840,83,2443,30"/>
+<area shape="rect" href="../../db/d00/a00353.html" title="Contains code for the base class for devices that connect to the chipset." alt="" coords="2323,155,2511,181"/>
+<area shape="poly" title=" " alt="" coords="2529,43,2429,157,2427,152,2524,45"/>
+<area shape="rect" href="../../d7/d00/a00521.html" title="Contains the definitions for the emulated Keyboard and mouse devices and controller." alt="" coords="2686,155,2788,181"/>
+<area shape="poly" title=" " alt="" coords="2600,35,2638,54,2675,78,2710,117,2733,156,2728,153,2706,120,2671,82,2636,58,2599,41"/>
+<area shape="rect" href="../../d9/d00/a00527.html" title="Contains the definitions for the emulated Port 80 device." alt="" coords="1635,155,1719,181"/>
+<area shape="poly" title=" " alt="" coords="2455,35,2135,89,1739,157,1720,161,1719,156,1738,152,2134,84,2449,35"/>
+<area shape="rect" href="../../db/d00/a00533.html" title="Contains the definitions for the emulated Serial Port devices." alt="" coords="3524,155,3603,181"/>
+<area shape="poly" title=" " alt="" coords="2650,20,2775,25,2929,35,3097,52,3264,77,3339,94,3413,114,3531,154,3526,154,3411,119,3338,99,3263,83,3096,57,2928,41,2774,30,2650,25"/>
+<area shape="rect" href="../../db/d00/a00683.html" title="Contains definitions for the SCSI bus class." alt="" coords="3118,80,3252,107"/>
+<area shape="poly" title=" " alt="" coords="2650,29,3120,84,3115,84,2650,34"/>
+<area shape="rect" href="../../d1/d00/a00707.html" title="Contains the definitions for the emulated Dual Port Ram and RMC devices." alt="" coords="3679,155,3787,181"/>
+<area shape="poly" title=" " alt="" coords="2650,21,2958,38,3148,54,3337,77,3435,94,3532,114,3689,154,3683,154,3531,119,3434,99,3337,83,3147,59,2958,43,2650,26"/>
+<area shape="rect" href="../../d1/d00/a00713.html" title="Contains the definitions for the emulated Flash ROM devices." alt="" coords="4609,155,4721,181"/>
+<area shape="poly" title=" " alt="" coords="2650,23,3525,77,4161,124,4611,162,4606,162,4161,129,3525,83,2650,28"/>
+<area shape="rect" href="../../d8/d00/a00725.html" title="Contains the definitions for the emulated Typhoon Chipset devices." alt="" coords="2536,80,2661,107"/>
+<area shape="poly" title=" " alt="" coords="2566,42,2592,81,2587,78,2564,47"/>
+<area shape="rect" href="../../d7/d00/a00182.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="2617,229,2758,256"/>
+<area shape="poly" title=" " alt="" coords="3797,182,3639,198,3507,205,3282,209,3057,213,2925,219,2771,232,2759,233,2759,228,2770,227,2925,214,3057,207,3282,204,3507,200,3639,192,3792,182"/>
+<area shape="rect" href="../../d9/d00/a00191.html" title="Contains IEEE floating point code for the Alpha CPU." alt="" coords="3964,229,4161,256"/>
+<area shape="poly" title=" " alt="" coords="3922,185,4032,229,4027,228,3921,190"/>
+<area shape="rect" href="../../dc/d00/a00194.html" title="Contains VAX floating point code for the Alpha CPU." alt="" coords="4185,229,4380,256"/>
+<area shape="poly" title=" " alt="" coords="3954,181,4213,229,4208,228,3953,186"/>
+<area shape="rect" href="../../de/d00/a00197.html" title="Contains routines that replace parts of the VMS PALcode for the emulated DecChip 21264CB EV68 Alpha p..." alt="" coords="3270,229,3460,256"/>
+<area shape="poly" title=" " alt="" coords="3798,182,3461,231,3460,226,3793,182"/>
+<area shape="rect" href="../../d2/d00/a00281.html" title=" " alt="" coords="4404,229,4537,256"/>
+<area shape="poly" title=" " alt="" coords="3954,175,4392,227,4407,231,4401,231,4391,232,3953,180"/>
+<area shape="rect" href="../../d3/d00/a00275.html" title=" " alt="" coords="4561,229,4764,256"/>
+<area shape="poly" title=" " alt="" coords="3954,173,4549,227,4563,231,4558,230,4549,232,3954,179"/>
+<area shape="rect" href="../../d6/d00/a00287.html" title=" " alt="" coords="3630,229,3772,256"/>
+<area shape="poly" title=" " alt="" coords="3833,187,3732,231,3731,226,3828,188"/>
+<area shape="rect" href="../../db/d00/a00296.html" title=" " alt="" coords="3796,229,3940,256"/>
+<area shape="poly" title=" " alt="" coords="3874,195,3871,231,3867,227,3870,199"/>
+<area shape="rect" href="../../dd/d00/a00320.html" title="Contains the code for the CPU tracing engine." alt="" coords="4788,229,4940,256"/>
+<area shape="poly" title=" " alt="" coords="3953,170,4310,190,4542,206,4776,227,4790,231,4784,230,4775,232,4541,211,4310,195,3953,175"/>
+<area shape="rect" href="../../d3/d00/a00113.html" title="Contains the code for the configuration file interpreter." alt="" coords="1599,229,1755,256"/>
+<area shape="poly" title=" " alt="" coords="3798,181,3493,207,3236,218,3010,221,2799,219,2362,214,2106,218,1804,232,1756,236,1756,230,1804,227,2106,213,2362,208,2799,213,3010,215,3236,213,3492,202,3792,182"/>
+<area shape="rect" href="../../d4/d00/a00704.html" title="Contains the code for the emulated Dual Port Ram and RMC devices." alt="" coords="3484,229,3606,256"/>
+<area shape="poly" title=" " alt="" coords="3805,185,3603,231,3602,226,3799,185"/>
+<area shape="rect" href="../../d4/d00/a00710.html" title="Contains the code for the emulated Flash ROM devices." alt="" coords="4964,229,5089,256"/>
+<area shape="poly" title=" " alt="" coords="3953,168,4380,184,4664,201,4952,227,4966,231,4961,231,4951,232,4663,207,4380,189,3953,174"/>
+<area shape="rect" href="../../db/d00/a00722.html" title="Contains the code for the emulated Typhoon Chipset devices." alt="" coords="2892,229,3030,256"/>
+<area shape="poly" title=" " alt="" coords="3798,182,3584,202,3418,209,3253,215,3043,232,3031,233,3030,228,3042,227,3252,210,3418,203,3583,197,3792,182"/>
+<area shape="rect" href="../../df/d00/a00728.html" title="ES40 (Clipper) board: TIGbus registers and DIMM topology." alt="" coords="5113,229,5286,256"/>
+<area shape="poly" title=" " alt="" coords="3953,169,4438,186,4767,203,5101,227,5115,231,5110,230,5101,232,4767,208,4438,191,3953,174"/>
+<area shape="rect" href="../../df/d00/a00731.html" title="Tsunami/Typhoon chipset (Cchip, Dchip, Pchip) CSRs, interrupt delivery and PCI window translation." alt="" coords="3055,229,3246,256"/>
+<area shape="poly" title=" " alt="" coords="3798,182,3644,201,3526,210,3259,232,3246,233,3246,228,3258,227,3526,205,3644,196,3792,182"/>
+<area shape="poly" title=" " alt="" coords="634,179,886,202,1082,210,1279,214,1529,227,1601,235,1596,234,1529,232,1279,220,1082,215,886,207,634,184"/>
+<area shape="rect" href="../../dd/d00/a00005.html" title=" " alt="" coords="580,229,707,256"/>
+<area shape="poly" title=" " alt="" coords="589,189,632,230,627,228,587,194"/>
+<area shape="poly" title=" " alt="" coords="497,179,654,194,787,203,1014,211,1240,214,1529,227,1601,235,1596,234,1529,232,1240,219,1014,216,787,209,654,199,497,184"/>
+<area shape="rect" href="../../da/d00/a00011.html" title=" " alt="" coords="281,229,409,256"/>
+<area shape="poly" title=" " alt="" coords="403,191,360,231,358,227,398,193"/>
+<area shape="poly" title=" " alt="" coords="134,120,142,153,149,168,160,179,183,187,232,194,387,205,838,219,1529,227,1601,234,1596,234,1529,232,838,224,387,211,231,199,182,192,157,184,145,171,137,155,132,124"/>
+<area shape="rect" href="../../d9/d00/a00095.html" title="Contains the code for the emulated DMA controller." alt="" coords="433,229,556,256"/>
+<area shape="poly" title=" " alt="" coords="73,114,45,128,20,144,9,161,9,170,15,180,28,191,45,200,90,213,145,220,206,223,328,223,421,227,435,231,430,231,421,232,328,229,206,229,145,226,89,218,43,205,25,195,11,183,4,172,3,160,17,140,43,123,76,110"/>
+<area shape="rect" href="../../d0/d00/a00668.html" title="Contains the code for the emulated Floppy Controller devices." alt="" coords="1328,229,1517,256"/>
+<area shape="poly" title=" " alt="" coords="118,118,109,152,109,167,116,179,132,187,167,194,280,206,627,224,1020,234,1330,241,1325,241,1020,239,626,229,280,211,166,199,131,192,113,183,104,168,103,152,115,122"/>
+<area shape="poly" title=" " alt="" coords="168,112,238,153,233,155,167,117"/>
+<area shape="poly" title=" " alt="" coords="360,179,689,199,945,207,1202,212,1529,227,1601,234,1596,234,1529,232,1201,217,945,212,689,205,360,184"/>
+<area shape="poly" title=" " alt="" coords="360,179,640,200,912,217,1330,238,1325,238,912,222,639,206,360,184"/>
+<area shape="poly" title=" " alt="" coords="1855,93,2137,98,2506,108,2832,126,2940,138,2974,145,2991,153,2999,172,2996,194,2986,214,2973,231,2970,227,2981,211,2991,192,2994,173,2987,157,2972,150,2939,143,2832,131,2506,114,2137,103,1855,98"/>
+<area shape="poly" title=" " alt="" coords="1856,94,2488,112,2821,129,2941,140,3012,152,3050,168,3085,188,3139,230,3134,228,3082,192,3048,173,3011,157,2941,145,2820,134,2488,117,1856,99"/>
+<area shape="poly" title=" " alt="" coords="1696,99,1091,132,631,157,620,159,619,153,630,152,1091,126,1702,98"/>
+<area shape="poly" title=" " alt="" coords="1696,95,1490,100,1192,109,845,127,667,140,493,157,483,159,482,153,493,152,667,135,845,121,1191,104,1490,95,1702,95"/>
+<area shape="poly" title=" " alt="" coords="1696,95,1332,99,830,106,586,114,377,124,227,139,182,147,160,157,155,168,160,179,434,228,432,233,157,183,150,168,156,153,180,142,227,133,377,119,586,108,830,101,1332,93,1701,94"/>
+<area shape="rect" href="../../db/d00/a00074.html" title="Contains the definitions for the ISA part of the emulated Ali M1543C chipset." alt="" coords="1794,155,1936,181"/>
+<area shape="poly" title=" " alt="" coords="1805,114,1852,155,1847,153,1803,119"/>
+<area shape="rect" href="../../da/d00/a00080.html" title="Contains the definitions for the emulated Ali M1543C IDE chipset part." alt="" coords="3102,155,3268,181"/>
+<area shape="poly" title=" " alt="" coords="1855,94,2371,110,2724,127,3084,152,3104,156,3099,156,3083,157,2724,133,2371,116,1855,99"/>
+<area shape="rect" href="../../da/d00/a00086.html" title="Stub Power Management Unit (M7101) on the ALi M1543C bridge." alt="" coords="1961,155,2135,181"/>
+<area shape="poly" title=" " alt="" coords="1839,108,2003,154,1998,154,1838,114"/>
+<area shape="rect" href="../../d1/d00/a00092.html" title="Contains the definitions for the emulated Ali M1543C USB chipset part." alt="" coords="643,155,813,181"/>
+<area shape="poly" title=" " alt="" coords="1696,98,1323,120,1076,137,825,157,813,158,813,153,825,152,1075,131,1322,115,1702,98"/>
+<area shape="rect" href="../../d1/d00/a00347.html" title="Contains the code for the PCI device class." alt="" coords="2159,155,2299,181"/>
+<area shape="poly" title=" " alt="" coords="1855,104,2161,156,2156,155,1855,110"/>
+<area shape="rect" href="../../db/d00/a02253.html" title=" " alt="" coords="2863,155,2976,181"/>
+<area shape="poly" title=" " alt="" coords="1855,95,2260,116,2800,152,2865,161,2860,160,2799,157,2260,122,1855,101"/>
+<area shape="rect" href="../../d8/d00/a00545.html" title="Contains the definitions for the emulated DEC 21143 NIC device." alt="" coords="836,155,982,181"/>
+<area shape="poly" title=" " alt="" coords="1696,100,1393,123,1001,157,983,159,982,154,1001,152,1393,118,1702,99"/>
+<area shape="rect" href="../../dc/d00/a00677.html" title="Contains the definitions for the emulated LSI Logic 53C1020 controller." alt="" coords="1057,155,1209,181"/>
+<area shape="poly" title=" " alt="" coords="1701,102,1221,157,1210,159,1209,153,1221,152,1696,103"/>
+<area shape="rect" href="../../d5/d00/a00695.html" title="Contains the definitions for the emulated Symbios SCSI controller." alt="" coords="1233,155,1385,181"/>
+<area shape="poly" title=" " alt="" coords="1701,106,1385,158,1385,152,1696,107"/>
+<area shape="rect" href="../../dd/d00/a00701.html" title="Contains the definitions for the emulated Symbios SCSI controller." alt="" coords="1460,155,1611,181"/>
+<area shape="poly" title=" " alt="" coords="1723,111,1579,157,1578,151,1718,112"/>
+<area shape="poly" title=" " alt="" coords="1951,179,2136,195,2280,203,2423,210,2605,227,2619,231,2614,231,2605,232,2423,216,2280,208,2136,200,1951,184"/>
+<area shape="poly" title=" " alt="" coords="1821,187,1711,231,1709,226,1816,188"/>
+<area shape="poly" title=" " alt="" coords="1951,179,2213,197,2418,202,2621,208,2880,227,2894,231,2889,230,2879,232,2621,213,2417,208,2213,202,1951,184"/>
+<area shape="poly" title=" " alt="" coords="1781,178,1732,184,1555,194,1404,198,1149,201,894,207,745,216,568,232,556,233,556,228,567,227,744,211,894,202,1149,196,1404,193,1554,188,1732,179,1776,178"/>
+<area shape="poly" title=" " alt="" coords="1781,183,1500,231,1500,226,1776,184"/>
+<area shape="rect" href="../../d5/d00/a00518.html" title="Contains the code for the emulated Keyboard and mouse devices and controller." alt="" coords="2251,229,2367,256"/>
+<area shape="poly" title=" " alt="" coords="1952,181,2253,232,2248,232,1951,186"/>
+<area shape="rect" href="../../d9/d00/a00524.html" title="Contains the code for the emulated Port 80 device." alt="" coords="1816,229,1914,256"/>
+<area shape="poly" title=" " alt="" coords="1867,195,1867,231,1863,227,1863,199"/>
+<area shape="rect" href="../../da/d00/a00530.html" title="Contains the code for the emulated Serial Port devices." alt="" coords="2390,229,2484,256"/>
+<area shape="poly" title=" " alt="" coords="1952,179,2167,201,2261,210,2379,227,2392,231,2387,231,2378,232,2260,216,2167,206,1952,184"/>
+<area shape="poly" title=" " alt="" coords="3231,185,3336,229,3331,228,3230,190"/>
+<area shape="poly" title=" " alt="" coords="3089,176,2989,184,2656,198,2396,205,2137,213,1804,232,1756,236,1756,231,1804,227,2137,208,2396,199,2656,192,2989,179,3084,176"/>
+<area shape="poly" title=" " alt="" coords="1971,185,1742,231,1742,226,1965,185"/>
+<area shape="poly" title=" " alt="" coords="2151,179,2357,194,2517,201,2677,209,2880,227,2894,231,2889,231,2879,232,2676,214,2517,206,2356,199,2151,184"/>
+<area shape="poly" title=" " alt="" coords="828,179,1026,196,1180,205,1529,227,1601,235,1596,235,1529,232,1180,211,1026,201,828,184"/>
+<area shape="poly" title=" " alt="" coords="2936,193,2956,230,2952,228,2933,197"/>
+<area shape="rect" href="../../d7/d00/a00467.html" title="Contains the code for the bx_sdl_gui_c class used for interfacing with SDL." alt="" coords="2783,229,2867,256"/>
+<area shape="poly" title=" " alt="" coords="2894,190,2842,231,2840,226,2889,192"/>
+<area shape="poly" title=" " alt="" coords="997,175,1601,234,1596,234,997,180"/>
+<area shape="poly" title=" " alt="" coords="1224,179,1601,231,1596,231,1224,184"/>
+<area shape="poly" title=" " alt="" coords="1389,182,1615,229,1610,229,1388,187"/>
+<area shape="poly" title=" " alt="" coords="1574,186,1655,229,1650,228,1573,191"/>
+<area shape="poly" title=" " alt="" coords="2674,173,1804,232,1756,236,1756,231,1803,227,2668,173"/>
+<area shape="poly" title=" " alt="" coords="2674,180,2379,232,2368,234,2367,229,2378,227,2668,180"/>
+<area shape="poly" title=" " alt="" coords="2765,189,2812,230,2807,228,2763,194"/>
+<area shape="rect" href="../../d4/d00/a00437.html" title="Contains code for the bx_gui_c base class used for interfacing with SDL and other device interfaces." alt="" coords="2508,229,2593,256"/>
+<area shape="poly" title=" " alt="" coords="2693,187,2584,231,2583,226,2688,188"/>
+<area shape="poly" title=" " alt="" coords="1679,195,1679,231,1675,227,1675,199"/>
+<area shape="poly" title=" " alt="" coords="1724,185,1835,229,1829,228,1723,190"/>
+<area shape="poly" title=" " alt="" coords="3518,186,3400,231,3399,226,3512,187"/>
+<area shape="poly" title=" " alt="" coords="3511,181,3250,212,3031,225,2837,229,2656,226,2282,218,2062,221,1804,232,1756,236,1756,230,1804,227,2062,215,2282,213,2656,221,2837,224,3030,220,3250,206,3506,182"/>
+<area shape="poly" title=" " alt="" coords="3559,195,3550,231,3547,227,3555,198"/>
+<area shape="poly" title=" " alt="" coords="3511,181,3355,201,3224,209,3109,211,3001,210,2778,210,2648,216,2496,232,2485,234,2484,228,2495,227,2648,211,2778,204,3001,204,3109,206,3224,204,3355,196,3506,182"/>
+<area shape="poly" title=" " alt="" coords="3187,121,3187,156,3183,152,3183,124"/>
+<area shape="rect" href="../../d4/d00/a00632.html" title="Contains definitions for the disk base class." alt="" coords="3393,155,3500,181"/>
+<area shape="poly" title=" " alt="" coords="3246,109,3403,154,3398,154,3245,114"/>
+<area shape="poly" title=" " alt="" coords="3423,191,3380,231,3378,226,3418,193"/>
+<area shape="poly" title=" " alt="" coords="3380,175,3280,184,2804,202,2433,208,2062,214,1586,232,1517,236,1517,231,1586,227,2062,208,2433,203,2804,197,3280,179,3375,175"/>
+<area shape="poly" title=" " alt="" coords="3803,179,3951,193,4076,201,4290,206,4504,209,4629,215,4776,227,4790,231,4784,230,4775,232,4628,221,4503,215,4290,212,4076,207,3950,199,3803,184"/>
+<area shape="poly" title=" " alt="" coords="3667,177,3616,184,3340,199,3107,206,2710,209,2313,211,2080,218,1804,232,1756,236,1756,230,1804,227,2079,213,2313,206,2710,204,3106,201,3340,194,3616,179,3661,177"/>
+<area shape="poly" title=" " alt="" coords="3689,187,3579,231,3578,226,3684,188"/>
+<area shape="poly" title=" " alt="" coords="3667,176,3616,184,3329,206,3204,215,3043,232,3031,233,3030,228,3042,227,3203,210,3329,201,3615,179,3661,177"/>
+<area shape="poly" title=" " alt="" coords="4714,184,4831,229,4826,228,4713,190"/>
+<area shape="poly" title=" " alt="" coords="4591,171,3150,199,2302,217,1804,232,1756,236,1756,230,1804,227,2302,211,3150,194,4596,170"/>
+<area shape="poly" title=" " alt="" coords="4736,181,4966,229,4961,229,4736,186"/>
+<area shape="poly" title=" " alt="" coords="4596,171,3832,195,3377,212,3043,232,3031,233,3030,228,3042,227,3376,206,3832,189,4591,171"/>
+<area shape="poly" title=" " alt="" coords="4736,176,5115,230,5110,229,4736,182"/>
+<area shape="poly" title=" " alt="" coords="2676,93,2873,97,3151,107,3473,124,3800,152,3813,156,3807,156,3799,157,3473,130,3151,112,2873,102,2676,98"/>
+<area shape="poly" title=" " alt="" coords="2676,94,3209,113,3576,130,3951,152,4364,183,4776,227,4790,231,4784,231,4775,232,4363,188,3950,157,3576,135,3209,118,2676,100"/>
+<area shape="poly" title=" " alt="" coords="2519,98,2106,122,1900,138,1826,147,1783,157,1754,173,1728,193,1688,232,1686,227,1724,189,1751,168,1781,152,1825,142,1899,133,2106,116,2524,98"/>
+<area shape="poly" title=" " alt="" coords="2676,94,2917,100,3221,112,3488,129,3576,140,3603,146,3617,153,3624,164,3625,175,3613,196,3592,216,3569,231,3567,226,3589,211,3609,193,3620,174,3619,165,3614,157,3602,151,3575,145,3488,135,3221,117,2916,106,2676,99"/>
+<area shape="poly" title=" " alt="" coords="2676,94,3827,123,4443,141,4733,152,4808,167,4881,187,4997,229,4991,228,4879,193,4807,173,4733,157,4443,146,3827,129,2676,99"/>
+<area shape="poly" title=" " alt="" coords="2676,93,2837,97,3027,107,3193,125,3250,137,3269,144,3282,153,3288,168,3281,183,3251,194,3187,207,3031,233,3030,228,3186,201,3250,188,3278,179,3283,168,3278,156,3267,149,3248,142,3192,130,3026,113,2836,103,2676,98"/>
+<area shape="poly" title=" " alt="" coords="2676,94,3867,124,4809,152,4908,167,5004,188,5159,229,5154,229,5003,193,4907,173,4809,157,3867,129,2676,99"/>
+<area shape="poly" title=" " alt="" coords="2676,93,2841,97,3038,106,3211,124,3270,137,3290,144,3303,153,3311,167,3311,180,3304,192,3291,202,3255,219,3213,231,3212,226,3253,214,3288,198,3300,188,3306,179,3306,168,3299,157,3288,149,3269,142,3210,129,3038,112,2841,102,2676,98"/>
+<area shape="poly" title=" " alt="" coords="2518,97,1519,124,958,141,631,157,620,159,619,153,630,152,958,136,1519,118,2523,96"/>
+<area shape="poly" title=" " alt="" coords="2518,97,1450,123,846,140,624,149,493,157,483,159,482,153,493,152,624,144,846,135,1450,118,2523,96"/>
+<area shape="poly" title=" " alt="" coords="2518,96,2186,104,1726,115,1295,133,1138,144,1046,157,1021,170,995,184,932,201,878,211,784,219,689,221,568,232,556,234,556,228,567,227,688,216,783,214,877,206,931,196,993,179,1018,165,1044,152,1137,139,1294,127,1726,110,2186,99,2523,96"/>
+<area shape="poly" title=" " alt="" coords="2518,96,2253,106,1906,118,1598,135,1496,145,1465,151,1449,157,1436,172,1429,192,1424,231,1420,227,1424,191,1432,170,1446,152,1463,146,1495,140,1598,130,1906,112,2253,100,2523,96"/>
+<area shape="poly" title=" " alt="" coords="2597,120,2588,154,2580,170,2568,183,2540,195,2489,209,2368,233,2367,228,2487,203,2538,190,2565,179,2575,167,2583,152,2593,123"/>
+<area shape="poly" title=" " alt="" coords="2586,118,2560,155,2543,171,2523,184,2487,194,2425,203,2253,220,1915,242,1915,236,2252,215,2425,198,2486,189,2521,179,2540,167,2556,151,2582,121"/>
+<area shape="poly" title=" " alt="" coords="2615,118,2626,151,2626,167,2619,183,2601,194,2567,207,2484,231,2483,226,2566,201,2599,189,2615,180,2621,166,2621,152,2612,123"/>
+<area shape="poly" title=" " alt="" coords="2524,109,2294,157,2294,151,2518,110"/>
+<area shape="poly" title=" " alt="" coords="2676,97,2709,104,2742,115,2774,131,2802,153,2814,171,2822,192,2827,231,2823,227,2817,193,2810,173,2798,157,2771,136,2740,120,2708,109,2676,103"/>
+<area shape="poly" title=" " alt="" coords="2555,112,2449,157,2448,151,2550,113"/>
 </map>
 </div>
 </div>
 <p><a href="../../d6/d00/a00356_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:af9a86285a265da1d934e6afeac099a5c" id="r_af9a86285a265da1d934e6afeac099a5c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af9a86285a265da1d934e6afeac099a5c">LOG_GENERAL</a>&#160;&#160;&#160;(1U &lt;&lt; 0)</td></tr>
-<tr class="memitem:ab6f1afff1865d07e48e001f0d6de4a0e" id="r_ab6f1afff1865d07e48e001f0d6de4a0e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab6f1afff1865d07e48e001f0d6de4a0e">LOG_REGS</a>&#160;&#160;&#160;(1U &lt;&lt; 2)</td></tr>
-<tr class="memitem:aaa1560fa6fd9d19d13d9adf8330b465a" id="r_aaa1560fa6fd9d19d13d9adf8330b465a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aaa1560fa6fd9d19d13d9adf8330b465a">LOG_CRTC</a>&#160;&#160;&#160;(1U &lt;&lt; 4)</td></tr>
-<tr class="memitem:a42f8c497a1968074f38bf5055c650dca" id="r_a42f8c497a1968074f38bf5055c650dca"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a42f8c497a1968074f38bf5055c650dca">VERBOSE</a>&#160;&#160;&#160;<a class="el" href="#a3e64ffed225005d919c10c922913d22a">s3_log_mask</a></td></tr>
-<tr class="memitem:a16b9885a0a5187eb71f85897e74f6ac6" id="r_a16b9885a0a5187eb71f85897e74f6ac6"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a16b9885a0a5187eb71f85897e74f6ac6">LOGREGS</a>(...)</td></tr>
-<tr class="memitem:a1625be1043ade36861fc5bcd79dc670d" id="r_a1625be1043ade36861fc5bcd79dc670d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a1625be1043ade36861fc5bcd79dc670d">LOGCRTC</a>(...)</td></tr>
-<tr class="memitem:a321ae946de24c36489276616d13c46cd" id="r_a321ae946de24c36489276616d13c46cd"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a321ae946de24c36489276616d13c46cd">LINES</a>&#160;&#160;&#160;((vga.crtc.vert_disp_end + 1) * (get_interlace_mode() + 1))</td></tr>
-<tr class="memitem:a0b8e9731968755880282d036c2d59b12" id="r_a0b8e9731968755880282d036c2d59b12"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0b8e9731968755880282d036c2d59b12">TEXT_LINES</a>&#160;&#160;&#160;(vga.crtc.vert_disp_end+1)</td></tr>
-<tr class="memitem:a0aae61f24e1156f489dfda729685fa9c" id="r_a0aae61f24e1156f489dfda729685fa9c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0aae61f24e1156f489dfda729685fa9c">GRAPHIC_MODE</a>&#160;&#160;&#160;(vga.gc.alpha_dis)</td></tr>
-<tr class="memitem:af97f5affaca35539b4d6e1b3896d9801" id="r_af97f5affaca35539b4d6e1b3896d9801"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af97f5affaca35539b4d6e1b3896d9801">EGA_COLUMNS</a>&#160;&#160;&#160;(vga.crtc.horz_disp_end+1)</td></tr>
-<tr class="memitem:a1b90c6f521e77559a3471714cc30d77c" id="r_a1b90c6f521e77559a3471714cc30d77c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a1b90c6f521e77559a3471714cc30d77c">EGA_LINE_LENGTH</a>&#160;&#160;&#160;(vga.crtc.offset&lt;&lt;1)</td></tr>
-<tr class="memitem:a0a39c24751de84b35e375fd01773d436" id="r_a0a39c24751de84b35e375fd01773d436"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0a39c24751de84b35e375fd01773d436">VGA_COLUMNS</a>&#160;&#160;&#160;(vga.crtc.horz_disp_end+1)</td></tr>
-<tr class="memitem:aa6468abab2759c8f6b90fc582359adf7" id="r_aa6468abab2759c8f6b90fc582359adf7"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aa6468abab2759c8f6b90fc582359adf7">VGA_LINE_LENGTH</a>&#160;&#160;&#160;(vga.crtc.offset&lt;&lt;3)</td></tr>
-<tr class="memitem:a0d6fca6b3c681e20c85e328a6d76a733" id="r_a0d6fca6b3c681e20c85e328a6d76a733"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a0d6fca6b3c681e20c85e328a6d76a733">VGA_CH_WIDTH</a>&#160;&#160;&#160;((vga.sequencer.data[1]&amp;1)?8:9)</td></tr>
-<tr class="memitem:a5598f87d384b0fcd91bd70097d7830b0" id="r_a5598f87d384b0fcd91bd70097d7830b0"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5598f87d384b0fcd91bd70097d7830b0">TEXT_COLUMNS</a>&#160;&#160;&#160;(vga.crtc.horz_disp_end+1)</td></tr>
-<tr class="memitem:a907ff234a7987d6a70df5e349bedc518" id="r_a907ff234a7987d6a70df5e349bedc518"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a907ff234a7987d6a70df5e349bedc518">TEXT_START_ADDRESS</a>&#160;&#160;&#160;(vga.crtc.start_addr&lt;&lt;3)</td></tr>
-<tr class="memitem:a314aeff9e61992d209decb586c27a6f7" id="r_a314aeff9e61992d209decb586c27a6f7"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a314aeff9e61992d209decb586c27a6f7">TEXT_LINE_LENGTH</a>&#160;&#160;&#160;(vga.crtc.offset&lt;&lt;1)</td></tr>
-<tr class="memitem:a6f5306a88f272a1d7074289a18399eba" id="r_a6f5306a88f272a1d7074289a18399eba"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a6f5306a88f272a1d7074289a18399eba">TEXT_COPY_9COLUMN</a>(ch)</td></tr>
-<tr class="memitem:a934b1dbfe4a7c3e76399af5b0008d527" id="r_a934b1dbfe4a7c3e76399af5b0008d527"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a934b1dbfe4a7c3e76399af5b0008d527">TLINES</a>&#160;&#160;&#160;(<a class="el" href="#a321ae946de24c36489276616d13c46cd">LINES</a>)</td></tr>
-<tr class="memitem:ab4217ea8dc2df79f5c7ca87c9c5f1ee8" id="r_ab4217ea8dc2df79f5c7ca87c9c5f1ee8"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab4217ea8dc2df79f5c7ca87c9c5f1ee8">TGA_COLUMNS</a>&#160;&#160;&#160;(<a class="el" href="#af97f5affaca35539b4d6e1b3896d9801">EGA_COLUMNS</a>)</td></tr>
-<tr class="memitem:ab604e48d94552560b7d4efa2d7cbf3ef" id="r_ab604e48d94552560b7d4efa2d7cbf3ef"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab604e48d94552560b7d4efa2d7cbf3ef">TGA_LINE_LENGTH</a>&#160;&#160;&#160;(vga.crtc.offset&lt;&lt;3)</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
-Enumerations</h2></td></tr>
-<tr class="memitem:a4a42d741fdbd982c088814833e3af2af" id="r_a4a42d741fdbd982c088814833e3af2af"><td class="memItemLeft"><a class="el" href="#a4a42d741fdbd982c088814833e3af2af">enum </a>&#160;</td><td class="memItemRight">{ <br />
-&#160;&#160;<a class="el" href="#a4a42d741fdbd982c088814833e3af2afac504fe4c87ca4bc80a99467549859f26">IBM8514_IDLE</a> = 0
-, <a class="el" href="#a4a42d741fdbd982c088814833e3af2afa153b6ad90bf6150aa4128b1bec3070bc">IBM8514_DRAWING_RECT</a>
-, <a class="el" href="#a4a42d741fdbd982c088814833e3af2afa8bb2988ec548fea343dd0f2720b30649">IBM8514_DRAWING_LINE</a>
-, <a class="el" href="#a4a42d741fdbd982c088814833e3af2afa815baadb03782d3b41acb4a0510887ff">IBM8514_DRAWING_BITBLT</a>
-, <br />
-&#160;&#160;<a class="el" href="#a4a42d741fdbd982c088814833e3af2afa7ccb6ab137ac0343c9510d3b54493f90">IBM8514_DRAWING_PATTERN</a>
-, <a class="el" href="#a4a42d741fdbd982c088814833e3af2afaea68262dd1a07646ad2a95be4be42704">IBM8514_DRAWING_SSV_1</a>
-, <a class="el" href="#a4a42d741fdbd982c088814833e3af2afa3547e09e8323f35e0e5d7ce3ff3d65d4">IBM8514_DRAWING_SSV_2</a>
-, <a class="el" href="#a4a42d741fdbd982c088814833e3af2afa7645daa586a81c7bb5bd51ee9fc60d62">MACH8_DRAWING_SCAN</a>
-<br />
- }</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:a8d9b7d63ff20f2093f8afdf4a0299f4b" id="r_a8d9b7d63ff20f2093f8afdf4a0299f4b"><td class="memItemLeft">static <a class="el" href="../../df/d00/a00263.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a>&#160;</td><td class="memItemRight"><a class="el" href="#a8d9b7d63ff20f2093f8afdf4a0299f4b">s3_cursor_ab</a> (const <a class="el" href="../../df/d00/a00263.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> *vram, <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> vram_mask, <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> src_base, unsigned sx, unsigned sy, bool is16bpp, bool right_storage)</td></tr>
-<tr class="memitem:af8c7197ef7c75157f3f81ddd16a725f6" id="r_af8c7197ef7c75157f3f81ddd16a725f6"><td class="memItemLeft">static <a class="el" href="../../de/d00/a00134.html#a9a941819355e6f658991890ff66b4b0e">uint8_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#af8c7197ef7c75157f3f81ddd16a725f6">s3_cr36_from_memsize</a> (<a class="el" href="../../de/d00/a00134.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a> bytes, bool use_edo)</td></tr>
-<tr class="memitem:abd73e1e83f0cb9c29359766d49c3ff2c" id="r_abd73e1e83f0cb9c29359766d49c3ff2c"><td class="memItemLeft">static bool&#160;</td><td class="memItemRight"><a class="el" href="#abd73e1e83f0cb9c29359766d49c3ff2c">s3_cr32_is_unlock</a> (<a class="el" href="../../de/d00/a00134.html#a9a941819355e6f658991890ff66b4b0e">uint8_t</a> v)</td></tr>
-<tr class="memitem:a25f628d58e2a3c852c6071aedcb0322d" id="r_a25f628d58e2a3c852c6071aedcb0322d"><td class="memItemLeft">static <a class="el" href="../../de/d00/a00134.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#a25f628d58e2a3c852c6071aedcb0322d">s3_lfb_size_from_cr58</a> (<a class="el" href="../../de/d00/a00134.html#a9a941819355e6f658991890ff66b4b0e">uint8_t</a> cr58)</td></tr>
-<tr class="memitem:a2214b671fbe73a8b69cb14ca04c74b9a" id="r_a2214b671fbe73a8b69cb14ca04c74b9a"><td class="memItemLeft">static bool&#160;</td><td class="memItemRight"><a class="el" href="#a2214b671fbe73a8b69cb14ca04c74b9a">s3_lfb_enabled</a> (<a class="el" href="../../de/d00/a00134.html#a9a941819355e6f658991890ff66b4b0e">uint8_t</a> cr58, <a class="el" href="../../de/d00/a00134.html#a30af71eaf40c925c9832eb289a48da35">uint16_t</a> advfunc)</td></tr>
-<tr class="memitem:ade9631a225f009cdbf6a2991d7ca63b9" id="r_ade9631a225f009cdbf6a2991d7ca63b9"><td class="memItemLeft">static <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#ade9631a225f009cdbf6a2991d7ca63b9">clamp_vram_addr</a> (<a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> a, <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> vram_size)</td></tr>
-<tr class="memitem:a1b9471dd256eec64dbe884c031650cdb" id="r_a1b9471dd256eec64dbe884c031650cdb"><td class="memItemLeft">static void&#160;</td><td class="memItemRight"><a class="el" href="#a1b9471dd256eec64dbe884c031650cdb">write16_low_high</a> (<a class="el" href="../../df/d00/a00263.html#a6dbf9516e516c901604625282c174aa4">u16</a> &amp;reg, <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> port, <a class="el" href="../../df/d00/a00263.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> data)</td></tr>
-<tr class="memitem:aadf5ec0ae6ed488052d5c3a0efb8558a" id="r_aadf5ec0ae6ed488052d5c3a0efb8558a"><td class="memItemLeft">static <a class="el" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a>&#160;</td><td class="memItemRight"><a class="el" href="#aadf5ec0ae6ed488052d5c3a0efb8558a">alpha_pio_phys_from_linear_base</a> (<a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> base)</td></tr>
-<tr class="memitem:aaa036002df67987b3ff59fa07a1cb502" id="r_aaa036002df67987b3ff59fa07a1cb502"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:aaa036002df67987b3ff59fa07a1cb502 template"><td class="memItemLeft">static bool&#160;</td><td class="memItemRight"><a class="el" href="#aaa036002df67987b3ff59fa07a1cb502">s3_write_record</a> (FILE *f, const T &amp;value)</td></tr>
-<tr class="memitem:a8b58578d2d3279cd8ee8f85e26e9139f" id="r_a8b58578d2d3279cd8ee8f85e26e9139f"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:a8b58578d2d3279cd8ee8f85e26e9139f template"><td class="memItemLeft">static bool&#160;</td><td class="memItemRight"><a class="el" href="#a8b58578d2d3279cd8ee8f85e26e9139f">s3_read_record</a> (FILE *f, T &amp;value)</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:a3e64ffed225005d919c10c922913d22a" id="r_a3e64ffed225005d919c10c922913d22a"><td class="memItemLeft">static constexpr unsigned&#160;</td><td class="memItemRight"><a class="el" href="#a3e64ffed225005d919c10c922913d22a">s3_log_mask</a> = 0</td></tr>
-<tr class="memitem:a25fa42db3669cc291391c6d0ada8ce2b" id="r_a25fa42db3669cc291391c6d0ada8ce2b"><td class="memItemLeft">static <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a25fa42db3669cc291391c6d0ada8ce2b">s3_cfg_data</a> [64]</td></tr>
-<tr class="memdesc:a25fa42db3669cc291391c6d0ada8ce2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">PCI Configuration Space data block.  <br /></td></tr>
-<tr class="memitem:a2169c45606261197a35fce2dc912ca53" id="r_a2169c45606261197a35fce2dc912ca53"><td class="memItemLeft">static <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a2169c45606261197a35fce2dc912ca53">s3_cfg_mask</a> [64]</td></tr>
-<tr class="memdesc:a2169c45606261197a35fce2dc912ca53"><td class="mdescLeft">&#160;</td><td class="mdescRight">PCI Configuration Space mask block.  <br /></td></tr>
-<tr class="memitem:a6823567ac6de30aaa61b6748f7ff4301" id="r_a6823567ac6de30aaa61b6748f7ff4301"><td class="memItemLeft">static <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a6823567ac6de30aaa61b6748f7ff4301">s3_magic1</a> = 0x53338811</td></tr>
-<tr class="memitem:a64bfc789e18b86fd39024cb31e98eb69" id="r_a64bfc789e18b86fd39024cb31e98eb69"><td class="memItemLeft">static <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a64bfc789e18b86fd39024cb31e98eb69">s3_magic2</a> = 0x88115333</td></tr>
-<tr class="memitem:a2a82822bdd7a7e90beab3b1fea589dfd" id="r_a2a82822bdd7a7e90beab3b1fea589dfd"><td class="memItemLeft">static const <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a2a82822bdd7a7e90beab3b1fea589dfd">s3_video_magic</a> = 0x53335632</td></tr>
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Data Structures</h2></td></tr>
+<tr class="memitem:CSystemComponent" id="r_CSystemComponent"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../d7/d00/a01373.html">CSystemComponent</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abstract base class for devices that connect to the Typhoon chipset.  <a href="../../d7/d00/a01373.html#details">More...</a><br /></td></tr>
+<tr class="memitem:CSystemComponent_3A_3APciIoWrite" id="r_CSystemComponent_3A_3APciIoWrite"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d3/d00/a01377.html">CSystemComponent::PciIoWrite</a></td></tr>
 </table>
-<a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
-<a id="af97f5affaca35539b4d6e1b3896d9801" name="af97f5affaca35539b4d6e1b3896d9801"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af97f5affaca35539b4d6e1b3896d9801">&#9670;&#160;</a></span>EGA_COLUMNS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define EGA_COLUMNS&#160;&#160;&#160;(vga.crtc.horz_disp_end+1)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00103">103</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../de/d00/a00362_source.html#l00442">CVGA::vga_vh_ega()</a>.</p>
-
-</div>
-</div>
-<a id="a1b90c6f521e77559a3471714cc30d77c" name="a1b90c6f521e77559a3471714cc30d77c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1b90c6f521e77559a3471714cc30d77c">&#9670;&#160;</a></span>EGA_LINE_LENGTH</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define EGA_LINE_LENGTH&#160;&#160;&#160;(vga.crtc.offset&lt;&lt;1)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00104">104</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a0aae61f24e1156f489dfda729685fa9c" name="a0aae61f24e1156f489dfda729685fa9c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0aae61f24e1156f489dfda729685fa9c">&#9670;&#160;</a></span>GRAPHIC_MODE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define GRAPHIC_MODE&#160;&#160;&#160;(vga.gc.alpha_dis)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00101">101</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a321ae946de24c36489276616d13c46cd" name="a321ae946de24c36489276616d13c46cd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a321ae946de24c36489276616d13c46cd">&#9670;&#160;</a></span>LINES</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define LINES&#160;&#160;&#160;((vga.crtc.vert_disp_end + 1) * (get_interlace_mode() + 1))</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00098">98</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../de/d00/a00362_source.html#l00654">CVGA::svga_vh_rgb8()</a>, <a class="el" href="../../de/d00/a00362_source.html#l00560">CVGA::vga_vh_cga()</a>, <a class="el" href="../../de/d00/a00362_source.html#l00442">CVGA::vga_vh_ega()</a>, <a class="el" href="../../de/d00/a00362_source.html#l00591">CVGA::vga_vh_mono()</a>, and <a class="el" href="../../de/d00/a00362_source.html#l00489">CVGA::vga_vh_vga()</a>.</p>
-
-</div>
-</div>
-<a id="aaa1560fa6fd9d19d13d9adf8330b465a" name="aaa1560fa6fd9d19d13d9adf8330b465a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaa1560fa6fd9d19d13d9adf8330b465a">&#9670;&#160;</a></span>LOG_CRTC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define LOG_CRTC&#160;&#160;&#160;(1U &lt;&lt; 4)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00057">57</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-<a id="af9a86285a265da1d934e6afeac099a5c" name="af9a86285a265da1d934e6afeac099a5c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af9a86285a265da1d934e6afeac099a5c">&#9670;&#160;</a></span>LOG_GENERAL</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define LOG_GENERAL&#160;&#160;&#160;(1U &lt;&lt; 0)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00055">55</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-<a id="ab6f1afff1865d07e48e001f0d6de4a0e" name="ab6f1afff1865d07e48e001f0d6de4a0e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab6f1afff1865d07e48e001f0d6de4a0e">&#9670;&#160;</a></span>LOG_REGS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define LOG_REGS&#160;&#160;&#160;(1U &lt;&lt; 2)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00056">56</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a1625be1043ade36861fc5bcd79dc670d" name="a1625be1043ade36861fc5bcd79dc670d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1625be1043ade36861fc5bcd79dc670d">&#9670;&#160;</a></span>LOGCRTC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define LOGCRTC</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em></em></span>...</td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d4/d00/a00437.html#a0efe06239b8bb243a7b9ab48749c0ce9">LOGMASKED</a>(<a class="code hl_define" href="#aaa1560fa6fd9d19d13d9adf8330b465a">LOG_CRTC</a>, __VA_ARGS__)</div>
-<div class="ttc" id="aa00356_html_aaa1560fa6fd9d19d13d9adf8330b465a"><div class="ttname"><a href="#aaa1560fa6fd9d19d13d9adf8330b465a">LOG_CRTC</a></div><div class="ttdeci">#define LOG_CRTC</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00356_source.html#l00057">S3Trio64.cpp:57</a></div></div>
-<div class="ttc" id="aa00437_html_a0efe06239b8bb243a7b9ab48749c0ce9"><div class="ttname"><a href="../../d4/d00/a00437.html#a0efe06239b8bb243a7b9ab48749c0ce9">LOGMASKED</a></div><div class="ttdeci">#define LOGMASKED(mask,...)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00437_source.html#l00071">logmacro.h:71</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00088">88</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d6/d00/a00356_source.html#l00233">CS3Trio64::crtc_map()</a>, and <a class="el" href="../../d6/d00/a00356_source.html#l00161">CS3Trio64::s3_define_video_mode()</a>.</p>
-
-</div>
-</div>
-<a id="a16b9885a0a5187eb71f85897e74f6ac6" name="a16b9885a0a5187eb71f85897e74f6ac6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a16b9885a0a5187eb71f85897e74f6ac6">&#9670;&#160;</a></span>LOGREGS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define LOGREGS</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em></em></span>...</td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_define" href="../../d4/d00/a00437.html#a0efe06239b8bb243a7b9ab48749c0ce9">LOGMASKED</a>(<a class="code hl_define" href="#ab6f1afff1865d07e48e001f0d6de4a0e">LOG_REGS</a>, __VA_ARGS__)</div>
-<div class="ttc" id="aa00356_html_ab6f1afff1865d07e48e001f0d6de4a0e"><div class="ttname"><a href="#ab6f1afff1865d07e48e001f0d6de4a0e">LOG_REGS</a></div><div class="ttdeci">#define LOG_REGS</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00356_source.html#l00056">S3Trio64.cpp:56</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00087">87</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a5598f87d384b0fcd91bd70097d7830b0" name="a5598f87d384b0fcd91bd70097d7830b0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5598f87d384b0fcd91bd70097d7830b0">&#9670;&#160;</a></span>TEXT_COLUMNS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TEXT_COLUMNS&#160;&#160;&#160;(vga.crtc.horz_disp_end+1)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00111">111</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a6f5306a88f272a1d7074289a18399eba" name="a6f5306a88f272a1d7074289a18399eba"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6f5306a88f272a1d7074289a18399eba">&#9670;&#160;</a></span>TEXT_COPY_9COLUMN</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TEXT_COPY_9COLUMN</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>ch</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">(((ch &amp; 0xe0) == 0xc0)&amp;&amp;(vga.attribute.data[0x10]&amp;4))</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00115">115</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../de/d00/a00362_source.html#l00354">CVGA::vga_vh_text()</a>.</p>
-
-</div>
-</div>
-<a id="a314aeff9e61992d209decb586c27a6f7" name="a314aeff9e61992d209decb586c27a6f7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a314aeff9e61992d209decb586c27a6f7">&#9670;&#160;</a></span>TEXT_LINE_LENGTH</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TEXT_LINE_LENGTH&#160;&#160;&#160;(vga.crtc.offset&lt;&lt;1)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00113">113</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a0b8e9731968755880282d036c2d59b12" name="a0b8e9731968755880282d036c2d59b12"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0b8e9731968755880282d036c2d59b12">&#9670;&#160;</a></span>TEXT_LINES</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TEXT_LINES&#160;&#160;&#160;(vga.crtc.vert_disp_end+1)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00099">99</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../de/d00/a00362_source.html#l00354">CVGA::vga_vh_text()</a>.</p>
-
-</div>
-</div>
-<a id="a907ff234a7987d6a70df5e349bedc518" name="a907ff234a7987d6a70df5e349bedc518"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a907ff234a7987d6a70df5e349bedc518">&#9670;&#160;</a></span>TEXT_START_ADDRESS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TEXT_START_ADDRESS&#160;&#160;&#160;(vga.crtc.start_addr&lt;&lt;3)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00112">112</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-<a id="ab4217ea8dc2df79f5c7ca87c9c5f1ee8" name="ab4217ea8dc2df79f5c7ca87c9c5f1ee8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab4217ea8dc2df79f5c7ca87c9c5f1ee8">&#9670;&#160;</a></span>TGA_COLUMNS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TGA_COLUMNS&#160;&#160;&#160;(<a class="el" href="#af97f5affaca35539b4d6e1b3896d9801">EGA_COLUMNS</a>)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00119">119</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../de/d00/a00362_source.html#l00700">CVGA::svga_vh_rgb15()</a>, <a class="el" href="../../de/d00/a00362_source.html#l00740">CVGA::svga_vh_rgb16()</a>, <a class="el" href="../../de/d00/a00362_source.html#l00780">CVGA::svga_vh_rgb24()</a>, and <a class="el" href="../../de/d00/a00362_source.html#l00818">CVGA::svga_vh_rgb32()</a>.</p>
-
-</div>
-</div>
-<a id="ab604e48d94552560b7d4efa2d7cbf3ef" name="ab604e48d94552560b7d4efa2d7cbf3ef"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab604e48d94552560b7d4efa2d7cbf3ef">&#9670;&#160;</a></span>TGA_LINE_LENGTH</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TGA_LINE_LENGTH&#160;&#160;&#160;(vga.crtc.offset&lt;&lt;3)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00120">120</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a934b1dbfe4a7c3e76399af5b0008d527" name="a934b1dbfe4a7c3e76399af5b0008d527"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a934b1dbfe4a7c3e76399af5b0008d527">&#9670;&#160;</a></span>TLINES</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TLINES&#160;&#160;&#160;(<a class="el" href="#a321ae946de24c36489276616d13c46cd">LINES</a>)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00118">118</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../de/d00/a00362_source.html#l00700">CVGA::svga_vh_rgb15()</a>, <a class="el" href="../../de/d00/a00362_source.html#l00740">CVGA::svga_vh_rgb16()</a>, <a class="el" href="../../de/d00/a00362_source.html#l00780">CVGA::svga_vh_rgb24()</a>, and <a class="el" href="../../de/d00/a00362_source.html#l00818">CVGA::svga_vh_rgb32()</a>.</p>
-
-</div>
-</div>
-<a id="a42f8c497a1968074f38bf5055c650dca" name="a42f8c497a1968074f38bf5055c650dca"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a42f8c497a1968074f38bf5055c650dca">&#9670;&#160;</a></span>VERBOSE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define VERBOSE&#160;&#160;&#160;<a class="el" href="#a3e64ffed225005d919c10c922913d22a">s3_log_mask</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00071">71</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a0d6fca6b3c681e20c85e328a6d76a733" name="a0d6fca6b3c681e20c85e328a6d76a733"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0d6fca6b3c681e20c85e328a6d76a733">&#9670;&#160;</a></span>VGA_CH_WIDTH</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define VGA_CH_WIDTH&#160;&#160;&#160;((vga.sequencer.data[1]&amp;1)?8:9)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00109">109</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a0a39c24751de84b35e375fd01773d436" name="a0a39c24751de84b35e375fd01773d436"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0a39c24751de84b35e375fd01773d436">&#9670;&#160;</a></span>VGA_COLUMNS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define VGA_COLUMNS&#160;&#160;&#160;(vga.crtc.horz_disp_end+1)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00106">106</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../de/d00/a00362_source.html#l00654">CVGA::svga_vh_rgb8()</a>, and <a class="el" href="../../de/d00/a00362_source.html#l00489">CVGA::vga_vh_vga()</a>.</p>
-
-</div>
-</div>
-<a id="aa6468abab2759c8f6b90fc582359adf7" name="aa6468abab2759c8f6b90fc582359adf7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa6468abab2759c8f6b90fc582359adf7">&#9670;&#160;</a></span>VGA_LINE_LENGTH</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define VGA_LINE_LENGTH&#160;&#160;&#160;(vga.crtc.offset&lt;&lt;3)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00107">107</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-<a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
-<a id="a4a42d741fdbd982c088814833e3af2af" name="a4a42d741fdbd982c088814833e3af2af"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4a42d741fdbd982c088814833e3af2af">&#9670;&#160;</a></span>anonymous enum</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">anonymous enum</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a4a42d741fdbd982c088814833e3af2afac504fe4c87ca4bc80a99467549859f26" name="a4a42d741fdbd982c088814833e3af2afac504fe4c87ca4bc80a99467549859f26"></a>IBM8514_IDLE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4a42d741fdbd982c088814833e3af2afa153b6ad90bf6150aa4128b1bec3070bc" name="a4a42d741fdbd982c088814833e3af2afa153b6ad90bf6150aa4128b1bec3070bc"></a>IBM8514_DRAWING_RECT&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4a42d741fdbd982c088814833e3af2afa8bb2988ec548fea343dd0f2720b30649" name="a4a42d741fdbd982c088814833e3af2afa8bb2988ec548fea343dd0f2720b30649"></a>IBM8514_DRAWING_LINE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4a42d741fdbd982c088814833e3af2afa815baadb03782d3b41acb4a0510887ff" name="a4a42d741fdbd982c088814833e3af2afa815baadb03782d3b41acb4a0510887ff"></a>IBM8514_DRAWING_BITBLT&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4a42d741fdbd982c088814833e3af2afa7ccb6ab137ac0343c9510d3b54493f90" name="a4a42d741fdbd982c088814833e3af2afa7ccb6ab137ac0343c9510d3b54493f90"></a>IBM8514_DRAWING_PATTERN&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4a42d741fdbd982c088814833e3af2afaea68262dd1a07646ad2a95be4be42704" name="a4a42d741fdbd982c088814833e3af2afaea68262dd1a07646ad2a95be4be42704"></a>IBM8514_DRAWING_SSV_1&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4a42d741fdbd982c088814833e3af2afa3547e09e8323f35e0e5d7ce3ff3d65d4" name="a4a42d741fdbd982c088814833e3af2afa3547e09e8323f35e0e5d7ce3ff3d65d4"></a>IBM8514_DRAWING_SSV_2&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4a42d741fdbd982c088814833e3af2afa7645daa586a81c7bb5bd51ee9fc60d62" name="a4a42d741fdbd982c088814833e3af2afa7645daa586a81c7bb5bd51ee9fc60d62"></a>MACH8_DRAWING_SCAN&#160;</td><td class="fielddoc"></td></tr>
-</table>
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00075">75</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
-<a id="aadf5ec0ae6ed488052d5c3a0efb8558a" name="aadf5ec0ae6ed488052d5c3a0efb8558a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aadf5ec0ae6ed488052d5c3a0efb8558a">&#9670;&#160;</a></span>alpha_pio_phys_from_linear_base()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../df/d00/a00263.html#a1af9f95651e921615e75917a6dd1b574">u64</a> alpha_pio_phys_from_linear_base </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a></td>          <td class="paramname"><span class="paramname"><em>base</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l04081">4081</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d6/d00/a00356_source.html#l02320">s3_lfb_enabled()</a>, and <a class="el" href="../../d6/d00/a00356_source.html#l02311">s3_lfb_size_from_cr58()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d6/d00/a00356_aadf5ec0ae6ed488052d5c3a0efb8558a_cgraph.png" border="0" usemap="#ad6/d00/a00356_aadf5ec0ae6ed488052d5c3a0efb8558a_cgraph" loading="lazy" alt=""/></div>
-<map name="ad6/d00/a00356_aadf5ec0ae6ed488052d5c3a0efb8558a_cgraph" id="ad6/d00/a00356_aadf5ec0ae6ed488052d5c3a0efb8558a_cgraph">
-<area shape="rect" title=" " alt="" coords="5,47,150,89"/>
-<area shape="rect" href="../../d6/d00/a00356.html#a2214b671fbe73a8b69cb14ca04c74b9a" title=" " alt="" coords="198,29,306,56"/>
-<area shape="poly" title=" " alt="" coords="150,55,185,52,180,53,151,60"/>
-<area shape="rect" href="../../d6/d00/a00356.html#a25f628d58e2a3c852c6071aedcb0322d" title=" " alt="" coords="354,55,506,81"/>
-<area shape="poly" title=" " alt="" coords="150,65,339,65,338,71,150,71"/>
-<area shape="poly" title=" " alt="" coords="222,28,217,21,220,11,232,5,252,3,273,5,285,14,280,14,271,10,252,8,234,10,224,15,222,20,227,30"/>
-<area shape="poly" title=" " alt="" coords="306,48,341,55,336,55,306,53"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="ade9631a225f009cdbf6a2991d7ca63b9" name="ade9631a225f009cdbf6a2991d7ca63b9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ade9631a225f009cdbf6a2991d7ca63b9">&#9670;&#160;</a></span>clamp_vram_addr()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> clamp_vram_addr </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a></td>          <td class="paramname"><span class="paramname"><em>a</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a></td>          <td class="paramname"><span class="paramname"><em>vram_size</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l03515">3515</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d0/d00/a00302_source.html#l00099">FAILURE</a>.</p>
-
-</div>
-</div>
-<a id="abd73e1e83f0cb9c29359766d49c3ff2c" name="abd73e1e83f0cb9c29359766d49c3ff2c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abd73e1e83f0cb9c29359766d49c3ff2c">&#9670;&#160;</a></span>s3_cr32_is_unlock()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool s3_cr32_is_unlock </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="../../de/d00/a00134.html#a9a941819355e6f658991890ff66b4b0e">uint8_t</a></td>          <td class="paramname"><span class="paramname"><em>v</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l02278">2278</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-<a id="af8c7197ef7c75157f3f81ddd16a725f6" name="af8c7197ef7c75157f3f81ddd16a725f6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af8c7197ef7c75157f3f81ddd16a725f6">&#9670;&#160;</a></span>s3_cr36_from_memsize()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../de/d00/a00134.html#a9a941819355e6f658991890ff66b4b0e">uint8_t</a> s3_cr36_from_memsize </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="../../de/d00/a00134.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a></td>          <td class="paramname"><span class="paramname"><em>bytes</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>use_edo</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l02265">2265</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d6/d00/a00356_source.html#l02311">s3_lfb_size_from_cr58()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d6/d00/a00356_af8c7197ef7c75157f3f81ddd16a725f6_cgraph.png" border="0" usemap="#ad6/d00/a00356_af8c7197ef7c75157f3f81ddd16a725f6_cgraph" loading="lazy" alt=""/></div>
-<map name="ad6/d00/a00356_af8c7197ef7c75157f3f81ddd16a725f6_cgraph" id="ad6/d00/a00356_af8c7197ef7c75157f3f81ddd16a725f6_cgraph">
-<area shape="rect" title=" " alt="" coords="5,5,166,32"/>
-<area shape="rect" href="../../d6/d00/a00356.html#a25f628d58e2a3c852c6071aedcb0322d" title=" " alt="" coords="214,5,366,32"/>
-<area shape="poly" title=" " alt="" coords="166,16,201,19,196,19,166,21"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a8d9b7d63ff20f2093f8afdf4a0299f4b" name="a8d9b7d63ff20f2093f8afdf4a0299f4b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8d9b7d63ff20f2093f8afdf4a0299f4b">&#9670;&#160;</a></span>s3_cursor_ab()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../df/d00/a00263.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> s3_cursor_ab </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="../../df/d00/a00263.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> *</td>          <td class="paramname"><span class="paramname"><em>vram</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a></td>          <td class="paramname"><span class="paramname"><em>vram_mask</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a></td>          <td class="paramname"><span class="paramname"><em>src_base</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">unsigned</td>          <td class="paramname"><span class="paramname"><em>sx</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">unsigned</td>          <td class="paramname"><span class="paramname"><em>sy</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>is16bpp</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>right_storage</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l02079">2079</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a2214b671fbe73a8b69cb14ca04c74b9a" name="a2214b671fbe73a8b69cb14ca04c74b9a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2214b671fbe73a8b69cb14ca04c74b9a">&#9670;&#160;</a></span>s3_lfb_enabled()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool s3_lfb_enabled </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="../../de/d00/a00134.html#a9a941819355e6f658991890ff66b4b0e">uint8_t</a></td>          <td class="paramname"><span class="paramname"><em>cr58</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="../../de/d00/a00134.html#a30af71eaf40c925c9832eb289a48da35">uint16_t</a></td>          <td class="paramname"><span class="paramname"><em>advfunc</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l02320">2320</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d6/d00/a00356_source.html#l02320">s3_lfb_enabled()</a>, and <a class="el" href="../../d6/d00/a00356_source.html#l02311">s3_lfb_size_from_cr58()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d6/d00/a00356_source.html#l04081">alpha_pio_phys_from_linear_base()</a>, <a class="el" href="../../d6/d00/a00356_source.html#l03198">CS3Trio64::decodes_memory_access()</a>, <a class="el" href="../../d6/d00/a00356_source.html#l02320">s3_lfb_enabled()</a>, and <a class="el" href="../../d6/d00/a00356_source.html#l02296">CS3Trio64::s3_mmio_base_off()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d6/d00/a00356_a2214b671fbe73a8b69cb14ca04c74b9a_cgraph.png" border="0" usemap="#ad6/d00/a00356_a2214b671fbe73a8b69cb14ca04c74b9a_cgraph" loading="lazy" alt=""/></div>
-<map name="ad6/d00/a00356_a2214b671fbe73a8b69cb14ca04c74b9a_cgraph" id="ad6/d00/a00356_a2214b671fbe73a8b69cb14ca04c74b9a_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,114,56"/>
-<area shape="poly" title=" " alt="" coords="29,29,23,21,27,11,40,5,60,3,81,5,94,14,88,14,79,10,59,8,41,10,31,15,29,20,34,29"/>
-<area shape="rect" href="../../d6/d00/a00356.html#a25f628d58e2a3c852c6071aedcb0322d" title=" " alt="" coords="162,29,314,56"/>
-<area shape="poly" title=" " alt="" coords="114,40,149,42,144,43,114,45"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d6/d00/a00356_a2214b671fbe73a8b69cb14ca04c74b9a_icgraph.png" border="0" usemap="#ad6/d00/a00356_a2214b671fbe73a8b69cb14ca04c74b9a_icgraph" loading="lazy" alt=""/></div>
-<map name="ad6/d00/a00356_a2214b671fbe73a8b69cb14ca04c74b9a_icgraph" id="ad6/d00/a00356_a2214b671fbe73a8b69cb14ca04c74b9a_icgraph">
-<area shape="rect" title=" " alt="" coords="1044,80,1152,107"/>
-<area shape="poly" title=" " alt="" coords="1126,64,1117,61,1098,59,1080,61,1070,65,1068,71,1073,81,1068,78,1063,71,1067,62,1079,56,1098,53,1119,56,1132,65"/>
-<area shape="rect" href="../../d6/d00/a00356.html#aadf5ec0ae6ed488052d5c3a0efb8558a" title=" " alt="" coords="852,5,996,48"/>
-<area shape="poly" title=" " alt="" coords="1044,74,981,51,982,46,1049,74"/>
-<area shape="rect" href="../../de/d00/a01349.html#ac225158489fc81036fe66a3fb3873c95" title=" " alt="" coords="854,72,994,115"/>
-<area shape="poly" title=" " alt="" coords="1026,93,994,96,994,91,1031,93"/>
-<area shape="rect" href="../../de/d00/a01349.html#a2d8107923d86c30e0852f62c39b00993" title=" " alt="" coords="852,139,996,181"/>
-<area shape="poly" title=" " alt="" coords="1049,112,982,141,981,135,1044,113"/>
-<area shape="rect" href="../../de/d00/a01349.html#a64ddfd2d00193080de28baf2e3e6ace0" title="Read from linear VRAM using a framebuffer&#45;relative byte offset." alt="" coords="651,147,804,173"/>
-<area shape="poly" title=" " alt="" coords="834,160,804,163,804,157,839,160"/>
-<area shape="rect" href="../../de/d00/a01349.html#a9cb05c12dfef1782ace4611e58dd4223" title=" " alt="" coords="444,147,603,173"/>
-<area shape="poly" title=" " alt="" coords="633,160,604,163,604,157,638,160"/>
-<area shape="rect" href="../../de/d00/a01349.html#ab767233743ea4e3160a0bc6bf85efcd6" title="Write to Legacy VGA Memory." alt="" coords="232,121,396,148"/>
-<area shape="poly" title=" " alt="" coords="426,149,397,147,397,142,431,148"/>
-<area shape="rect" href="../../de/d00/a01349.html#a4cb4a34d55a6b7d52ac4c1458ab89a32" title="Write to linear VRAM using a framebuffer&#45;relative byte offset." alt="" coords="236,172,392,199"/>
-<area shape="poly" title=" " alt="" coords="431,171,392,179,392,173,426,172"/>
-<area shape="rect" href="../../de/d00/a01349.html#ad079cffdb25599a8392e169bc882ef7b" title="Read from one of the PCI BAR (configurable address) memory ranges." alt="" coords="5,172,184,199"/>
-<area shape="poly" title=" " alt="" coords="218,185,184,188,184,183,223,185"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a25f628d58e2a3c852c6071aedcb0322d" name="a25f628d58e2a3c852c6071aedcb0322d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a25f628d58e2a3c852c6071aedcb0322d">&#9670;&#160;</a></span>s3_lfb_size_from_cr58()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../de/d00/a00134.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a> s3_lfb_size_from_cr58 </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="../../de/d00/a00134.html#a9a941819355e6f658991890ff66b4b0e">uint8_t</a></td>          <td class="paramname"><span class="paramname"><em>cr58</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l02311">2311</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d6/d00/a00356_source.html#l04081">alpha_pio_phys_from_linear_base()</a>, <a class="el" href="../../d6/d00/a00356_source.html#l02265">s3_cr36_from_memsize()</a>, <a class="el" href="../../d6/d00/a00356_source.html#l02320">s3_lfb_enabled()</a>, and <a class="el" href="../../d6/d00/a00356_source.html#l02296">CS3Trio64::s3_mmio_base_off()</a>.</p>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d6/d00/a00356_a25f628d58e2a3c852c6071aedcb0322d_icgraph.png" border="0" usemap="#ad6/d00/a00356_a25f628d58e2a3c852c6071aedcb0322d_icgraph" loading="lazy" alt=""/></div>
-<map name="ad6/d00/a00356_a25f628d58e2a3c852c6071aedcb0322d_icgraph" id="ad6/d00/a00356_a25f628d58e2a3c852c6071aedcb0322d_icgraph">
-<area shape="rect" title=" " alt="" coords="1252,80,1405,107"/>
-<area shape="rect" href="../../d6/d00/a00356.html#aadf5ec0ae6ed488052d5c3a0efb8558a" title=" " alt="" coords="852,5,996,48"/>
-<area shape="poly" title=" " alt="" coords="1292,71,1251,51,1204,33,1150,24,1096,19,997,22,996,16,1096,14,1151,18,1205,28,1254,46,1297,72"/>
-<area shape="rect" href="../../d6/d00/a00356.html#af8c7197ef7c75157f3f81ddd16a725f6" title=" " alt="" coords="1044,43,1204,69"/>
-<area shape="poly" title=" " alt="" coords="1234,77,1201,73,1201,67,1240,77"/>
-<area shape="rect" href="../../d6/d00/a00356.html#a2214b671fbe73a8b69cb14ca04c74b9a" title=" " alt="" coords="1070,117,1178,144"/>
-<area shape="poly" title=" " alt="" coords="1240,110,1179,123,1178,118,1234,110"/>
-<area shape="rect" href="../../de/d00/a01349.html#a2d8107923d86c30e0852f62c39b00993" title=" " alt="" coords="852,160,996,203"/>
-<area shape="poly" title=" " alt="" coords="1296,114,1253,140,1205,159,1151,171,1096,179,997,185,996,180,1096,174,1150,166,1204,153,1251,135,1291,116"/>
-<area shape="poly" title=" " alt="" coords="1080,109,966,51,967,46,1086,110"/>
-<area shape="poly" title=" " alt="" coords="1157,102,1147,98,1124,96,1103,98,1092,103,1089,108,1095,118,1090,116,1084,109,1088,99,1102,93,1124,91,1148,93,1162,103"/>
-<area shape="rect" href="../../de/d00/a01349.html#ac225158489fc81036fe66a3fb3873c95" title=" " alt="" coords="854,93,994,136"/>
-<area shape="poly" title=" " alt="" coords="1052,125,994,123,994,118,1057,125"/>
-<area shape="poly" title=" " alt="" coords="1057,148,997,166,996,160,1052,149"/>
-<area shape="rect" href="../../de/d00/a01349.html#a64ddfd2d00193080de28baf2e3e6ace0" title="Read from linear VRAM using a framebuffer&#45;relative byte offset." alt="" coords="651,168,804,195"/>
-<area shape="poly" title=" " alt="" coords="834,181,804,184,804,179,839,181"/>
-<area shape="rect" href="../../de/d00/a01349.html#a9cb05c12dfef1782ace4611e58dd4223" title=" " alt="" coords="444,168,603,195"/>
-<area shape="poly" title=" " alt="" coords="633,181,604,184,604,179,638,181"/>
-<area shape="rect" href="../../de/d00/a01349.html#ab767233743ea4e3160a0bc6bf85efcd6" title="Write to Legacy VGA Memory." alt="" coords="232,143,396,169"/>
-<area shape="poly" title=" " alt="" coords="426,170,397,169,397,163,431,170"/>
-<area shape="rect" href="../../de/d00/a01349.html#a4cb4a34d55a6b7d52ac4c1458ab89a32" title="Write to linear VRAM using a framebuffer&#45;relative byte offset." alt="" coords="236,193,392,220"/>
-<area shape="poly" title=" " alt="" coords="431,193,392,200,392,195,426,193"/>
-<area shape="rect" href="../../de/d00/a01349.html#ad079cffdb25599a8392e169bc882ef7b" title="Read from one of the PCI BAR (configurable address) memory ranges." alt="" coords="5,193,184,220"/>
-<area shape="poly" title=" " alt="" coords="218,207,184,209,184,204,223,207"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a8b58578d2d3279cd8ee8f85e26e9139f" name="a8b58578d2d3279cd8ee8f85e26e9139f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8b58578d2d3279cd8ee8f85e26e9139f">&#9670;&#160;</a></span>s3_read_record()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool s3_read_record </td>
-          <td>(</td>
-          <td class="paramtype">FILE *</td>          <td class="paramname"><span class="paramname"><em>f</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">T &amp;</td>          <td class="paramname"><span class="paramname"><em>value</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l04214">4214</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-<a id="aaa036002df67987b3ff59fa07a1cb502" name="aaa036002df67987b3ff59fa07a1cb502"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaa036002df67987b3ff59fa07a1cb502">&#9670;&#160;</a></span>s3_write_record()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool s3_write_record </td>
-          <td>(</td>
-          <td class="paramtype">FILE *</td>          <td class="paramname"><span class="paramname"><em>f</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const T &amp;</td>          <td class="paramname"><span class="paramname"><em>value</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l04204">4204</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../dc/d00/a01929_source.html#l00233">CVGA::vga_t::memory</a>, <a class="el" href="../../d3/d00/a01377.html#a63e6ea0120ef4f35c2f3e22ae1e9ed3d">CVGA::vga_t::svga_intf</a>, and <a class="el" href="../../d7/d00/a01373.html#add78940fd92c0f721f70236ce7a9446e">CVGA::vga</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d6/d00/a00356_source.html#l04141">CS3Trio64::trace_lfb_if_changed()</a>.</p>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d6/d00/a00356_aaa036002df67987b3ff59fa07a1cb502_icgraph.png" border="0" usemap="#ad6/d00/a00356_aaa036002df67987b3ff59fa07a1cb502_icgraph" loading="lazy" alt=""/></div>
-<map name="ad6/d00/a00356_aaa036002df67987b3ff59fa07a1cb502_icgraph" id="ad6/d00/a00356_aaa036002df67987b3ff59fa07a1cb502_icgraph">
-<area shape="rect" title=" " alt="" coords="411,13,524,40"/>
-<area shape="rect" href="../../de/d00/a01349.html#aed47a01aafed9794299022be6f6aa4c8" title=" " alt="" coords="222,5,363,48"/>
-<area shape="poly" title=" " alt="" coords="393,27,363,29,363,24,398,27"/>
-<area shape="rect" href="../../de/d00/a01349.html#a6a65066d6464225c5adec32822f99db5" title=" " alt="" coords="5,5,174,48"/>
-<area shape="poly" title=" " alt="" coords="204,27,174,29,174,24,209,26"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a1b9471dd256eec64dbe884c031650cdb" name="a1b9471dd256eec64dbe884c031650cdb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1b9471dd256eec64dbe884c031650cdb">&#9670;&#160;</a></span>write16_low_high()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void write16_low_high </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="../../df/d00/a00263.html#a6dbf9516e516c901604625282c174aa4">u16</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>reg</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a></td>          <td class="paramname"><span class="paramname"><em>port</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="../../df/d00/a00263.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a></td>          <td class="paramname"><span class="paramname"><em>data</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l03594">3594</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
-<a id="a25fa42db3669cc291391c6d0ada8ce2b" name="a25fa42db3669cc291391c6d0ada8ce2b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a25fa42db3669cc291391c6d0ada8ce2b">&#9670;&#160;</a></span>s3_cfg_data</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> s3_cfg_data[64]</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">                                       = {</div>
-<div class="line">         0x88115333,            </div>
-<div class="line">         0x02000000,            </div>
-<div class="line">         0x03000002,            </div>
-<div class="line">         0x00000000,            </div>
-<div class="line">         0x00000000,            </div>
-<div class="line">         0x00000000,            </div>
-<div class="line">         0x00000000,            </div>
-<div class="line">         0x00000000,            </div>
-<div class="line">         0x00000000,            </div>
-<div class="line">         0x00000000,            </div>
-<div class="line">         0x00000000,            </div>
-<div class="line">         0x00000000,            </div>
-<div class="line">         0x000c0000,            </div>
-<div class="line">         0x00000000,            </div>
-<div class="line">         0x00000000,</div>
-<div class="line">         0x281401ff,            </div>
-<div class="line">        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,</div>
-<div class="line">        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,</div>
-<div class="line">        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p>PCI Configuration Space data block. </p>
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l02197">2197</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d6/d00/a00356_source.html#l02414">CS3Trio64::init()</a>.</p>
-
-</div>
-</div>
-<a id="a2169c45606261197a35fce2dc912ca53" name="a2169c45606261197a35fce2dc912ca53"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2169c45606261197a35fce2dc912ca53">&#9670;&#160;</a></span>s3_cfg_mask</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> s3_cfg_mask[64]</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">                                       = {</div>
-<div class="line">         0x00000000,            </div>
-<div class="line">         0x00000023,            </div>
-<div class="line">         0x00000000,            </div>
-<div class="line">         0x0000ffff,            </div>
-<div class="line">         0xff800000,            </div>
-<div class="line">         0x00000000,            </div>
-<div class="line">         0x00000000,            </div>
-<div class="line">         0x00000000,            </div>
-<div class="line">         0x00000000,            </div>
-<div class="line">         0x00000000,            </div>
-<div class="line">         0x00000000,            </div>
-<div class="line">         0x00000000,            </div>
-<div class="line">         0xffff0001,            </div>
-<div class="line">         0x00000000,            </div>
-<div class="line">         0x00000000,</div>
-<div class="line">         0x000000ff,            </div>
-<div class="line">        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,</div>
-<div class="line">        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,</div>
-<div class="line">        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p>PCI Configuration Space mask block. </p>
-<p>Restore retains the saved mask; initialization and PCI reset use these hardware defaults. </p>
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l02221">2221</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d6/d00/a00356_source.html#l02414">CS3Trio64::init()</a>.</p>
-
-</div>
-</div>
-<a id="a3e64ffed225005d919c10c922913d22a" name="a3e64ffed225005d919c10c922913d22a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3e64ffed225005d919c10c922913d22a">&#9670;&#160;</a></span>s3_log_mask</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">unsigned s3_log_mask = 0</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l00060">60</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a6823567ac6de30aaa61b6748f7ff4301" name="a6823567ac6de30aaa61b6748f7ff4301"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6823567ac6de30aaa61b6748f7ff4301">&#9670;&#160;</a></span>s3_magic1</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> s3_magic1 = 0x53338811</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l04197">4197</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a64bfc789e18b86fd39024cb31e98eb69" name="a64bfc789e18b86fd39024cb31e98eb69"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a64bfc789e18b86fd39024cb31e98eb69">&#9670;&#160;</a></span>s3_magic2</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> s3_magic2 = 0x88115333</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l04198">4198</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d6/d00/a00356_source.html#l04191">CS3Trio64::check_state()</a>.</p>
-
-</div>
-</div>
-<a id="a2a82822bdd7a7e90beab3b1fea589dfd" name="a2a82822bdd7a7e90beab3b1fea589dfd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2a82822bdd7a7e90beab3b1fea589dfd">&#9670;&#160;</a></span>s3_video_magic</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const <a class="el" href="../../df/d00/a00263.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> s3_video_magic = 0x53335632</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d6/d00/a00356_source.html#l04199">4199</a> of file <a class="el" href="../../d6/d00/a00356_source.html">S3Trio64.cpp</a>.</p>
-
-</div>
-</div>
-</div><!-- contents -->
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Contains definitions for the base class for devices that connect to the chipset. </p>
+<p>$Id$</p>
+<p>X-1.16 Camiel Vanderhoeven 13-MAR-2008 Create init(), start_threads() and stop_threads() functions.</p>
+<p>X-1.15 Camiel Vanderhoeven 05-MAR-2008 Multi-threading version.</p>
+<p>X-1.14 Camiel Vanderhoeven 08-FEB-2008 Show originating device name on memory errors.</p>
+<p>X-1.13 Camiel Vanderhoeven 19-JAN-2008 Run CPU in a separate thread if CPU_THREADS is defined. NOTA BENE: This is very experimental, and has several problems.</p>
+<p>X-1.12 Camiel Vanderhoeven 02-JAN-2008 Comments.</p>
+<p>X-1.11 Camiel Vanderhoeven 17-DEC-2007 SaveState file format 2.1</p>
+<p>X-1.10 Camiel Vanderhoeven 10-DEC-2007 Use configurator.</p>
+<p>X-1.9 Camiel Vanderhoeven 16-APR-2007 Added ResetPCI()</p>
+<p>X-1.8 Camiel Vanderhoeven 30-MAR-2007 Added old changelog comments.</p>
+<p>X-1.7 Camiel Vanderhoeven 16-FEB-2007 DoClock returns 0.</p>
+<p>X-1.6 Brian Wheeler 13-FEB-2007 Formatting.</p>
+<p>X-1.5 Camiel Vanderhoeven 12-FEB-2007 Member cSystem is protected now.</p>
+<p>X-1.4 Camiel Vanderhoeven 12-FEB-2007 Added comments.</p>
+<p>X-1.3 Camiel Vanderhoeven 9-FEB-2007 Added comments.</p>
+<p>X-1.2 Brian Wheeler 3-FEB-2007 Formatting.</p>
+<p>X-1.1 Camiel Vanderhoeven 19-JAN-2007 Initial version in CVS.</p>
+<dl class="section author"><dt>Author</dt><dd>Camiel Vanderhoeven </dd></dl>
+
+<p class="definition">Definition in file <a class="el" href="../../d6/d00/a00356_source.html">SystemComponent.h</a>.</p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
 <div id="page-nav-resize-handle"></div>
@@ -1418,7 +348,7 @@ Here is the caller graph for this function:</div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_e79632891301b850df87e9c0030293fa.html">graphics</a></li><li class="navelem"><a href="../../d6/d00/a00356.html">S3Trio64.cpp</a></li>
+    <li class="navelem"><a href="../../dir_450cafc1c0b54ccdbdec0997809be7cf.html">emu</a></li><li class="navelem"><a href="../../d6/d00/a00356.html">SystemComponent.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

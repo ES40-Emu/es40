@@ -1,14 +1,18 @@
 var a00158 =
 [
-    [ "AlphaHWLoadDescriptor", "d1/d00/a00945.html", "d1/d00/a00945" ],
-    [ "AlphaHWLoadPolicy", "df/d00/a00949.html", "df/d00/a00949" ],
-    [ "AlphaHWLoadAddress", "d6/d00/a00158.html#aa3ad26f561afb9009c452480177375e7", [
-      [ "Invalid", "d6/d00/a00158.html#aa3ad26f561afb9009c452480177375e7a4bbb8f967da6d1a610596d7257179c2b", null ],
-      [ "Physical", "d6/d00/a00158.html#aa3ad26f561afb9009c452480177375e7ace898d62ed9ca7653a01fe0c781e97e9", null ],
-      [ "Virtual", "d6/d00/a00158.html#aa3ad26f561afb9009c452480177375e7a615e6f9baca5553d44683a098d342b70", null ]
-    ] ],
-    [ "alpha_decode_hw_load", "d6/d00/a00158.html#a39e6fb8b9481dd0277a58ffa8fddcbd9", null ],
-    [ "alpha_hw_load_compilable", "d6/d00/a00158.html#a7187fb36cd6b9bab1a96611f696057a2", null ],
-    [ "alpha_hw_load_helper_descriptor", "d6/d00/a00158.html#a49822d70c34b3143f691d658e1d66c28", null ],
-    [ "alpha_hw_load_valid", "d6/d00/a00158.html#a443860ab83551bf77dad9bf4efcaa6b7", null ]
+    [ "regex_t", "d9/d00/a01129.html", "d9/d00/a01129" ],
+    [ "regmatch_t", "db/d00/a01133.html", "db/d00/a01133" ],
+    [ "REG_BADPAT", "d6/d00/a00158.html#ad7e13616a54be821d6b686d8b2587401", null ],
+    [ "REG_ESPACE", "d6/d00/a00158.html#ae0ee85477e8756f1cf2d7fab21e56235", null ],
+    [ "REG_EXTENDED", "d6/d00/a00158.html#a5fc31e6da9b77e09ea62b4544ac4767f", null ],
+    [ "REG_ICASE", "d6/d00/a00158.html#a0c3e7b1d5bc9c2d278a544fe9b61b67a", null ],
+    [ "REG_NEWLINE", "d6/d00/a00158.html#ab678ef3b27bf7de2fb82c79cb2cd9d8a", null ],
+    [ "REG_NOMATCH", "d6/d00/a00158.html#a183aab34192b1bdc18a56e84759aa210", null ],
+    [ "REG_NOSUB", "d6/d00/a00158.html#abb835c7fe6f1673fc0efeff0064510ab", null ],
+    [ "REG_NOTBOL", "d6/d00/a00158.html#aa0ca15a79530976f6d4ef90326c46858", null ],
+    [ "REG_NOTEOL", "d6/d00/a00158.html#a9d97d85ef86123060a845723d28a92cb", null ],
+    [ "regoff_t", "d6/d00/a00158.html#a4abd4d1fef6d236c8e12d2afce56c212", null ],
+    [ "regcomp", "d6/d00/a00158.html#a38bbfba560a12468196f72aa88486406", null ],
+    [ "regexec", "d6/d00/a00158.html#a5fda573156393bb7d89b4291ded6e26b", null ],
+    [ "regfree", "d6/d00/a00158.html#ad94d0de532eaa4fd959b8adde4d64898", null ]
 ];

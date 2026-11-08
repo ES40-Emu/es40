@@ -1,9 +1,6 @@
 var a01461 =
 [
-    [ "matches", "dc/d00/a01461.html#aff545396c571c29a9498d1e43df237d7", null ],
-    [ "config_name", "dc/d00/a01461.html#ab5ae216cf7e52876d8865706f1ee5269", null ],
-    [ "display", "dc/d00/a01461.html#a9943260d1c12c51b5c8f75c752e136f6", null ],
-    [ "enabled", "dc/d00/a01461.html#a0ec78f676c57b1a3258d86b109d6f4f1", null ],
-    [ "key", "dc/d00/a01461.html#a815a673c66d688f333b08b2b3f9bb134", null ],
-    [ "modifiers", "dc/d00/a01461.html#a88465ed0be53033dabc37e129542bb39", null ]
+    [ "argb", "dc/d00/a01461.html#a1c254eed483df2e2e8ffa52628c6a45e", null ],
+    [ "height", "dc/d00/a01461.html#a818ebc754ba138b01d8d2d630c8970ef", null ],
+    [ "width", "dc/d00/a01461.html#a3dabee14681d568931dba7e317290dc8", null ]
 ];

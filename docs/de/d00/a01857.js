@@ -1,8 +1,6 @@
 var a01857 =
 [
-    [ "address", "de/d00/a01857.html#a580eb1f54f33ce83c097fe8352eefffe", null ],
-    [ "claims", "de/d00/a01857.html#a3b6447c9141e5f1bedea253d45edb0f2", null ],
-    [ "data", "de/d00/a01857.html#adda76b4917005bcb1cbdca33275292fb", null ],
-    [ "dsize", "de/d00/a01857.html#a0782c86a1ef8586f842a38b36ebc931b", null ],
-    [ "write", "de/d00/a01857.html#a33297a4caa13a65009b1a45804703325", null ]
+    [ "frame", "de/d00/a01857.html#ac971192f6b5c4f57aae33779052c074a", null ],
+    [ "len", "de/d00/a01857.html#a33ec45b25fb50653dbe5f6762a18eac0", null ],
+    [ "used", "de/d00/a01857.html#aefd55e82314f51afa71adf465cd143d7", null ]
 ];

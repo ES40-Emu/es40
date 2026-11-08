@@ -1,16 +1,11 @@
 var a00777 =
 [
-    [ "CSemaphore", "d2/d00/a00777.html#a910fe4de7c75a7ad60bd9a43fad016da", null ],
-    [ "CSemaphore", "d2/d00/a00777.html#a93de78b6680bd3df74685b89ff99a5d1", null ],
-    [ "~CSemaphore", "d2/d00/a00777.html#ac9ca04f6c08e0f995968d6e392d0e0f5", null ],
-    [ "CSemaphore", "d2/d00/a00777.html#abf9e09282e0484f7168e75a362dc1b9c", null ],
-    [ "operator=", "d2/d00/a00777.html#ac5baaa056b5b4cbe38c1b80c4b612dde", null ],
-    [ "set", "d2/d00/a00777.html#a1f27417ae7edfd3a568b06efd2e2672b", null ],
-    [ "tryWait", "d2/d00/a00777.html#a9705e17b65c13d0cc6179f4777a005c0", null ],
-    [ "wait", "d2/d00/a00777.html#a1c108bd981fe68527ec8ef5e7b0d116c", null ],
-    [ "wait", "d2/d00/a00777.html#ae5333faa4d3476ad589f58b0adf988e0", null ],
-    [ "_cond", "d2/d00/a00777.html#ad0f5877f89fab5dd94a517d5d05313a2", null ],
-    [ "_max", "d2/d00/a00777.html#abf4fed5d1708116f2398fa23b0e9236b", null ],
-    [ "_mutex", "d2/d00/a00777.html#a6d86eb813080d55e96d84f09df4d0db6", null ],
-    [ "_n", "d2/d00/a00777.html#a7d7fabdf521bc80e2bba3aa538591fef", null ]
+    [ "calc_freq", "d2/d00/a00777.html#a54f6a7ea655c51c736ddcad95a2b0ea6", null ],
+    [ "ctl_en", "d2/d00/a00777.html#a004fe44624e56b7765f4557929fe24a0", null ],
+    [ "sctl_fmt", "d2/d00/a00777.html#a61e5f1facd9ebbe3982f125f37f743b2", null ],
+    [ "sctl_inten", "d2/d00/a00777.html#a755bdbbbebaffb6624b4dbffeffc072d", null ],
+    [ "sctl_loopsel", "d2/d00/a00777.html#afe18f48a9571446b529a1bf0c3782b50", null ],
+    [ "sctl_pause", "d2/d00/a00777.html#a9d7a94fd6430aebb18025f073a0a4277", null ],
+    [ "sctl_sh_fmt", "d2/d00/a00777.html#ac4ab44daf28162d5ce0550aaeb173adf", null ],
+    [ "stat_int", "d2/d00/a00777.html#a83a48e43f945860f1dbc8dfb91651937", null ]
 ];

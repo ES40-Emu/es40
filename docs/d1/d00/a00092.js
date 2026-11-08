@@ -1,6 +1,5 @@
 var a00092 =
 [
-    [ "Answer", "dc/d00/a00893.html", "dc/d00/a00893" ],
-    [ "MultipleChoiceQuestion", "de/d00/a00897.html", "de/d00/a00897" ],
-    [ "AnswerSet", "d1/d00/a00092.html#a0cc53f976e4582ed2e041b536c8b0dd9", null ]
+    [ "CAliM1543C_usb", "da/d00/a00993.html", "da/d00/a00993" ],
+    [ "CAliM1543C_usb::SUSB_state", "d0/d00/a00997.html", "d0/d00/a00997" ]
 ];

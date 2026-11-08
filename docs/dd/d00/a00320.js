@@ -1,9 +1,11 @@
 var a00320 =
 [
-    [ "IBM8514_LINE_LENGTH", "dd/d00/a00320.html#abdf7cbc985e7785854cf598f27d58a3a", null ],
-    [ "coord12", "dd/d00/a00320.html#a99d2abef5aad8074da1924c2621eb0f9", null ],
-    [ "pixtrans_lane_u32", "dd/d00/a00320.html#a859d0d29271a523afc6ac7aba130ccfc", null ],
-    [ "pixtrans_set_endian", "dd/d00/a00320.html#a01ab3a7344cea77f9fee8f40121a7f39", null ],
-    [ "wait_xfer_bytes", "dd/d00/a00320.html#a537fc8af3f71eec680aac55443a4620c", null ],
-    [ "IBM8514A", "dd/d00/a00320.html#a06c4da2d02c895d70726a95758a960b9", null ]
+    [ "sRegion", "de/d00/a01273.html", "de/d00/a01273" ],
+    [ "real_address", "dd/d00/a00320.html#a2f1580ff30219765551c6378caad2968", null ],
+    [ "write_printable_s", "dd/d00/a00320.html#a01e8d42103a7091a2c083051a7aa2467", null ],
+    [ "bDisassemble", "dd/d00/a00320.html#a9c3cfa2b0c665b04458d1d148bc10e17", null ],
+    [ "bHashing", "dd/d00/a00320.html#aab8239a91148ca640a60179bce466daf", null ],
+    [ "bListing", "dd/d00/a00320.html#a5783a67942e298401dd23cddf8f3448a", null ],
+    [ "bTrace", "dd/d00/a00320.html#aec440ea495e89a5b3c1c6020761c31d7", null ],
+    [ "trc", "dd/d00/a00320.html#a68bf49d9a6ffe37d4e0ebb6a7d175d5c", null ]
 ];

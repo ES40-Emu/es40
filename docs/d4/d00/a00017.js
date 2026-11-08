@@ -1,7 +1,26 @@
 var a00017 =
 [
-    [ "BANNER_INNER_WIDTH", "d4/d00/a00017.html#a7ba9bfbbb535509caaf649dba6ee1843", null ],
-    [ "banner_border", "d4/d00/a00017.html#ac3bda3905cbb6198e0e14eb41a08d04f", null ],
-    [ "banner_line", "d4/d00/a00017.html#a57a646d26d7d1d147e9235c02a51df8a", null ],
-    [ "print_es40_banner", "d4/d00/a00017.html#aebf927e73582be38c8b1aa3e0eb64072", null ]
+    [ "host_audio::available", "d1/d00/a00738.html#ae60503ec33830f96030faf66cd7ccfd9", null ],
+    [ "host_audio::backend_for_gui", "d1/d00/a00738.html#a93e9192fe46b535140a502b0c09515e6", null ],
+    [ "host_audio::bind_stream", "d1/d00/a00738.html#a40249397a8164381e22505c288b3ae84", null ],
+    [ "host_audio::clear_stream", "d1/d00/a00738.html#ad7f0cb857285f358a47d9712195dd499", null ],
+    [ "host_audio::close_device", "d1/d00/a00738.html#a990648322a1add323059d298095ddc62", null ],
+    [ "host_audio::create_stream", "d1/d00/a00738.html#a045e7a48558c2e104db7ecd357b21b37", null ],
+    [ "host_audio::destroy_stream", "d1/d00/a00738.html#ac2a60024d7f5c7531c146944ef0ee513", null ],
+    [ "host_audio::error", "d1/d00/a00738.html#a96f7e878aac6d449eac8abe83ca0647a", null ],
+    [ "host_audio::fail", "d1/d00/a00738.html#a11630b4d1b0916d57cc68f4adab674f5", null ],
+    [ "host_audio::initialize", "d1/d00/a00738.html#a827e367190171cbe95d128cea42a109c", null ],
+    [ "host_audio::lock_stream", "d1/d00/a00738.html#a4117bd3f6857b9e025fc86f3553b70cb", null ],
+    [ "host_audio::open_input_device", "d1/d00/a00738.html#a29adbb39808cac5019b4a002545b341c", null ],
+    [ "host_audio::open_output_device", "d1/d00/a00738.html#a874602540caeaf31d3fdabc6fde4ed4f", null ],
+    [ "host_audio::output_device_format", "d1/d00/a00738.html#aa0c40f691c135158af079d0f558a5244", null ],
+    [ "host_audio::queued", "d1/d00/a00738.html#a93759bfdcad86eba330f63e96f904b68", null ],
+    [ "host_audio::read", "d1/d00/a00738.html#a09be41bd3782f2cc65355993cad3cebd", null ],
+    [ "host_audio::set_format", "d1/d00/a00738.html#aaa2facd8158cffc1bcef4756ee227fdf", null ],
+    [ "host_audio::set_input_callback", "d1/d00/a00738.html#a798c66cab92a545b0d10c268949fcc0a", null ],
+    [ "host_audio::set_output_callback", "d1/d00/a00738.html#a127070b0aba0867ffabbbe6d90736f8c", null ],
+    [ "host_audio::set_sample_frames_hint", "d1/d00/a00738.html#a04b2ced850e4e6774aaa4c442bdc672f", null ],
+    [ "host_audio::unbind_stream", "d1/d00/a00738.html#a885bf75f4de2fa9561fbdbd4704c687d", null ],
+    [ "host_audio::unlock_stream", "d1/d00/a00738.html#a1d40626a510464e1ad251e5c4e7aa376", null ],
+    [ "host_audio::write", "d1/d00/a00738.html#ae25f98df986d5b8c730574fa88fdfc6c", null ]
 ];

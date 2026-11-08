@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: CPU/idle_detect.h Source File</title>
+<title>ES40: CPU/cpu_fp_branch.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,111 +109,86 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d0/d00/a00239_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">idle_detect.h</div></div>
+  <div class="headertitle"><div class="title">cpu_fp_branch.h</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../d0/d00/a00239.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator -- host-side idle detection methods</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * SPDX-License-Identifier: BSD-1-Clause</span></div>
+<a href="../../d0/d00/a00239.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 Emulator.</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2007-2008 by the ES40 Emulator Project</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright (C) 2025 by gdwnldsKSC</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * Optional JIT heuristics for guests that spin instead of issuing WTINT,</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * such as HP OpenVMS Alpha 8.4. Disabled by default; repeated PCs alone do</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * not establish that the guest is idle.</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * The configured OS name selects a heuristic, not an OS identity check.</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * Selecting the wrong name can still trigger sleeps during useful work.</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * With idle_detect=&quot;off&quot; and idle_nap=false (both defaults), the shared</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * idle wait returns without sleeping. Other timer pacing is independent.</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * Prior art: SIMH &quot;SET CPU IDLE=VMS&quot; (MIT, Copyright (c) Robert M Supnik).</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * No code copied -- only the approach of testing processor state instead of</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * looking for a particular address.</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#if !defined(INCLUDED_IDLE_DETECT_H)</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#define INCLUDED_IDLE_DETECT_H</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;cstring&gt;</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">/* Internal rules. Several guest OSes can share one, and the user never names</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> * a rule -- only an OS label, so a rule can be improved without anyone&#39;s</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> * config changing. Same split as SIMH&#39;s os_tab[].</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> */</span></div>
-<div class="foldopen" id="foldopen00027" data-start="{" data-end="};">
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="../../d0/d00/a00239.html#ae1cb99b7c446a716f09351f157acec25">   27</a></span><span class="keyword">enum</span> <a class="code hl_enumeration" href="../../d0/d00/a00239.html#ae1cb99b7c446a716f09351f157acec25">EIdleRule</a></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>{</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="../../d0/d00/a00239.html#ae1cb99b7c446a716f09351f157acec25a592187f3a6746679fc32286eefb524dc">   29</a></span>  <a class="code hl_enumvalue" href="../../d0/d00/a00239.html#ae1cb99b7c446a716f09351f157acec25a592187f3a6746679fc32286eefb524dc">RULE_NONE</a>      = 0,</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="../../d0/d00/a00239.html#ae1cb99b7c446a716f09351f157acec25a4eea9d49dcf47b30f12a0029f534f5c4">   30</a></span>  <a class="code hl_enumvalue" href="../../d0/d00/a00239.html#ae1cb99b7c446a716f09351f157acec25a4eea9d49dcf47b30f12a0029f534f5c4">RULE_SPIN</a>      = 1,   <span class="comment">// spinning within a small set of PCs</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="../../d0/d00/a00239.html#ae1cb99b7c446a716f09351f157acec25ad67b92be79262bd9f85e921c9a6f99af">   31</a></span>  <a class="code hl_enumvalue" href="../../d0/d00/a00239.html#ae1cb99b7c446a716f09351f157acec25ad67b92be79262bd9f85e921c9a6f99af">RULE_SPIN_IPL3</a> = 2    <span class="comment">// ...and VMS PAL PS reports IPL 3 at each qualifying sample</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>};</div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * This program is free software; you can redistribute it and/or</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * modify it under the terms of the GNU General Public License</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * as published by the Free Software Foundation; either version 2</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * of the License, or (at your option) any later version.</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * This program is distributed in the hope that it will be useful,</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * GNU General Public License for more details.</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * You should have received a copy of the GNU General Public License</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * along with this program; if not, write to the Free Software</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * Although this is not required, the author would appreciate being notified of,</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * and receiving any modifications you may make to the source code that might serve</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> * the general public.</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="../../d0/d00/a00239.html#a35cbff736c397d624b27c6ba10d4b26e">   74</a></span><span class="preprocessor">#define FP_IS_ZERO(val) (((val) &amp; ~FPR_SIGN) == 0)</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="../../d0/d00/a00239.html#a6f52790b6d3c56191d155e4a701ffd39">   75</a></span><span class="preprocessor">#define FP_IS_NEGATIVE(val) (((val) &amp; FPR_SIGN) != 0)</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="comment">// Branch if equal to zero (+0 or -0)</span></div>
+<div class="foldopen" id="foldopen00078" data-start="" data-end="">
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="../../d0/d00/a00239.html#a9c8f6b0d938a7405cd833d7245454d03">   78</a></span><span class="preprocessor">#define DO_FBEQ FPSTART; \</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="preprocessor">  if(FP_IS_ZERO(state.f[FREG_1])) \</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="preprocessor">    add_pc(DISP_21 * 4);</span></div>
 </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
-<div class="foldopen" id="foldopen00034" data-start="{" data-end="};">
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="../../d5/d00/a01021.html">   34</a></span><span class="keyword">struct </span><a class="code hl_struct" href="../../d5/d00/a01021.html">SIdleMethod</a></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>{</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="../../d5/d00/a01021.html#adfcfb51f973f20cc4c2c02277bfeb2cd">   36</a></span>  <span class="keyword">const</span> <span class="keywordtype">char</span>*  <a class="code hl_variable" href="../../d5/d00/a01021.html#adfcfb51f973f20cc4c2c02277bfeb2cd">name</a>;</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="../../d5/d00/a01021.html#aad90e5b01d265dc4902c971d282b49ff">   37</a></span>  <span class="keywordtype">int</span>          <a class="code hl_variable" href="../../d5/d00/a01021.html#aad90e5b01d265dc4902c971d282b49ff">rule</a>;</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="../../d5/d00/a01021.html#a120603e5b11c87516e598dd018ed5f46">   38</a></span>  <span class="keyword">const</span> <span class="keywordtype">char</span>*  <a class="code hl_variable" href="../../d5/d00/a01021.html#a120603e5b11c87516e598dd018ed5f46">about</a>;</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>};</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="comment">// Branch if &gt;= 0 (positive or zero, including -0)</span></div>
+<div class="foldopen" id="foldopen00083" data-start="" data-end="">
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="../../d0/d00/a00239.html#a9e049daec1f76e1586c02baaa3094f9f">   83</a></span><span class="preprocessor">#define DO_FBGE FPSTART; \</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="preprocessor">  if(!FP_IS_NEGATIVE(state.f[FREG_1]) || FP_IS_ZERO(state.f[FREG_1])) \</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="preprocessor">    add_pc(DISP_21 * 4);</span></div>
 </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment">/* One row per guest OS, the way SIMH&#39;s os_tab[] works. Historical idle host</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment"> * CPU measurements before interruptible waits, single CPU with the JIT on:</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment"> *   HP OpenVMS Alpha 8.4            101.2% -&gt; 7.5%   vms</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="comment"> *   Tru64 UNIX 5.1B-4               100.8% -&gt; 9.4%   tru64</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="comment"> *   NetBSD 10.1/alpha stock GENERIC 100.8% -&gt; 20.7%  netbsd</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment"> * RULE_SPIN cannot distinguish idle loops from repetitive computation and</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="comment"> * can repeatedly sleep during useful work. tru64 and netbsd both select it:</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="comment"> * reduced host CPU use trades off against guest throughput and latency.</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="comment"> * RULE_SPIN_IPL3 additionally samples the VMS PAL PS layout in p22; it does</span></div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="comment"> * not prove that an entire dispatch stayed at IPL 3 or did no useful work.</span></div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="comment"> * Other CPU/PAL combinations need an appropriate state decoder and explicit</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="comment"> * eligibility before relying on this qualifier. These historical figures</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="comment"> * do not establish guest clock accuracy or active-workload performance.</span></div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="comment"> */</span></div>
-<div class="foldopen" id="foldopen00057" data-start="{" data-end="};">
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="../../d0/d00/a00239.html#aa859dbb982061717cc9142be2fdcbc87">   57</a></span><span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_struct" href="../../d5/d00/a01021.html">SIdleMethod</a> <a class="code hl_variable" href="../../d0/d00/a00239.html#aa859dbb982061717cc9142be2fdcbc87">idle_methods</a>[] =</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>{</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>  { <span class="stringliteral">&quot;off&quot;</span>,    <a class="code hl_enumvalue" href="../../d0/d00/a00239.html#ae1cb99b7c446a716f09351f157acec25a592187f3a6746679fc32286eefb524dc">RULE_NONE</a>,      <span class="stringliteral">&quot;no host-side idle detection (default)&quot;</span> },</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  { <span class="stringliteral">&quot;vms&quot;</span>,    <a class="code hl_enumvalue" href="../../d0/d00/a00239.html#ae1cb99b7c446a716f09351f157acec25ad67b92be79262bd9f85e921c9a6f99af">RULE_SPIN_IPL3</a>, <span class="stringliteral">&quot;OpenVMS&quot;</span> },</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  { <span class="stringliteral">&quot;tru64&quot;</span>,  <a class="code hl_enumvalue" href="../../d0/d00/a00239.html#ae1cb99b7c446a716f09351f157acec25a4eea9d49dcf47b30f12a0029f534f5c4">RULE_SPIN</a>,      <span class="stringliteral">&quot;Tru64 UNIX&quot;</span> },</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>  { <span class="stringliteral">&quot;netbsd&quot;</span>, <a class="code hl_enumvalue" href="../../d0/d00/a00239.html#ae1cb99b7c446a716f09351f157acec25a4eea9d49dcf47b30f12a0029f534f5c4">RULE_SPIN</a>,      <span class="stringliteral">&quot;NetBSD/alpha&quot;</span> },</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>  { 0, 0, 0 }</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>};</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="comment">// Branch if &gt; 0 (positive and non-zero)</span></div>
+<div class="foldopen" id="foldopen00088" data-start="" data-end="">
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="../../d0/d00/a00239.html#abd2eeb8d077703b57095d1b1033d41b0">   88</a></span><span class="preprocessor">#define DO_FBGT FPSTART; \</span></div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="preprocessor">  if(!FP_IS_NEGATIVE(state.f[FREG_1]) &amp;&amp; !FP_IS_ZERO(state.f[FREG_1])) \</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="preprocessor">    add_pc(DISP_21 * 4);</span></div>
 </div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
-<div class="foldopen" id="foldopen00066" data-start="{" data-end="}">
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="../../d0/d00/a00239.html#a737b2141c4f39691fac007695b10419c">   66</a></span><span class="keyword">inline</span> <span class="keywordtype">int</span> <a class="code hl_function" href="../../d0/d00/a00239.html#a737b2141c4f39691fac007695b10419c">idle_method_by_name</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* n)</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>{</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>  <span class="keywordflow">if</span> (!n)</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="keywordflow">return</span> <a class="code hl_enumvalue" href="../../d0/d00/a00239.html#ae1cb99b7c446a716f09351f157acec25a592187f3a6746679fc32286eefb524dc">RULE_NONE</a>;</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; <a class="code hl_variable" href="../../d0/d00/a00239.html#aa859dbb982061717cc9142be2fdcbc87">idle_methods</a>[i].<a class="code hl_variable" href="../../d5/d00/a01021.html#adfcfb51f973f20cc4c2c02277bfeb2cd">name</a>; i++)</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keywordflow">if</span> (!<a class="code hl_define" href="../../df/d00/a00107.html#ac99ec3f1036620727a68aa8c25a8963c">strcasecmp</a>(n, <a class="code hl_variable" href="../../d0/d00/a00239.html#aa859dbb982061717cc9142be2fdcbc87">idle_methods</a>[i].name))</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>      <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d0/d00/a00239.html#aa859dbb982061717cc9142be2fdcbc87">idle_methods</a>[i].<a class="code hl_variable" href="../../d5/d00/a01021.html#aad90e5b01d265dc4902c971d282b49ff">rule</a>;</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>  <span class="keywordflow">return</span> -1;   <span class="comment">// caller reports the bad name rather than silently idling wrong</span></div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>}</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="comment">// Branch if &lt;= 0 (negative or zero)</span></div>
+<div class="foldopen" id="foldopen00093" data-start="" data-end="">
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="../../d0/d00/a00239.html#a626450b6b526a8befc122d7a50ea98cc">   93</a></span><span class="preprocessor">#define DO_FBLE FPSTART; \</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="preprocessor">  if(FP_IS_NEGATIVE(state.f[FREG_1]) || FP_IS_ZERO(state.f[FREG_1])) \</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="preprocessor">    add_pc(DISP_21 * 4);</span></div>
 </div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="aa00107_html_ac99ec3f1036620727a68aa8c25a8963c"><div class="ttname"><a href="../../df/d00/a00107.html#ac99ec3f1036620727a68aa8c25a8963c">strcasecmp</a></div><div class="ttdeci">#define strcasecmp</div><div class="ttdef"><b>Definition</b> <a href="../../df/d00/a00107_source.html#l00043">bsd_compat.h:43</a></div></div>
-<div class="ttc" id="aa00239_html_a737b2141c4f39691fac007695b10419c"><div class="ttname"><a href="../../d0/d00/a00239.html#a737b2141c4f39691fac007695b10419c">idle_method_by_name</a></div><div class="ttdeci">int idle_method_by_name(const char *n)</div><div class="ttdef"><b>Definition</b> <a href="#l00066">idle_detect.h:66</a></div></div>
-<div class="ttc" id="aa00239_html_aa859dbb982061717cc9142be2fdcbc87"><div class="ttname"><a href="../../d0/d00/a00239.html#aa859dbb982061717cc9142be2fdcbc87">idle_methods</a></div><div class="ttdeci">static const SIdleMethod idle_methods[]</div><div class="ttdef"><b>Definition</b> <a href="#l00057">idle_detect.h:57</a></div></div>
-<div class="ttc" id="aa00239_html_ae1cb99b7c446a716f09351f157acec25"><div class="ttname"><a href="../../d0/d00/a00239.html#ae1cb99b7c446a716f09351f157acec25">EIdleRule</a></div><div class="ttdeci">EIdleRule</div><div class="ttdef"><b>Definition</b> <a href="#l00027">idle_detect.h:28</a></div></div>
-<div class="ttc" id="aa00239_html_ae1cb99b7c446a716f09351f157acec25a4eea9d49dcf47b30f12a0029f534f5c4"><div class="ttname"><a href="../../d0/d00/a00239.html#ae1cb99b7c446a716f09351f157acec25a4eea9d49dcf47b30f12a0029f534f5c4">RULE_SPIN</a></div><div class="ttdeci">@ RULE_SPIN</div><div class="ttdef"><b>Definition</b> <a href="#l00030">idle_detect.h:30</a></div></div>
-<div class="ttc" id="aa00239_html_ae1cb99b7c446a716f09351f157acec25a592187f3a6746679fc32286eefb524dc"><div class="ttname"><a href="../../d0/d00/a00239.html#ae1cb99b7c446a716f09351f157acec25a592187f3a6746679fc32286eefb524dc">RULE_NONE</a></div><div class="ttdeci">@ RULE_NONE</div><div class="ttdef"><b>Definition</b> <a href="#l00029">idle_detect.h:29</a></div></div>
-<div class="ttc" id="aa00239_html_ae1cb99b7c446a716f09351f157acec25ad67b92be79262bd9f85e921c9a6f99af"><div class="ttname"><a href="../../d0/d00/a00239.html#ae1cb99b7c446a716f09351f157acec25ad67b92be79262bd9f85e921c9a6f99af">RULE_SPIN_IPL3</a></div><div class="ttdeci">@ RULE_SPIN_IPL3</div><div class="ttdef"><b>Definition</b> <a href="#l00031">idle_detect.h:31</a></div></div>
-<div class="ttc" id="aa01021_html"><div class="ttname"><a href="../../d5/d00/a01021.html">SIdleMethod</a></div><div class="ttdef"><b>Definition</b> <a href="#l00034">idle_detect.h:35</a></div></div>
-<div class="ttc" id="aa01021_html_a120603e5b11c87516e598dd018ed5f46"><div class="ttname"><a href="../../d5/d00/a01021.html#a120603e5b11c87516e598dd018ed5f46">SIdleMethod::about</a></div><div class="ttdeci">const char * about</div><div class="ttdef"><b>Definition</b> <a href="#l00038">idle_detect.h:38</a></div></div>
-<div class="ttc" id="aa01021_html_aad90e5b01d265dc4902c971d282b49ff"><div class="ttname"><a href="../../d5/d00/a01021.html#aad90e5b01d265dc4902c971d282b49ff">SIdleMethod::rule</a></div><div class="ttdeci">int rule</div><div class="ttdef"><b>Definition</b> <a href="#l00037">idle_detect.h:37</a></div></div>
-<div class="ttc" id="aa01021_html_adfcfb51f973f20cc4c2c02277bfeb2cd"><div class="ttname"><a href="../../d5/d00/a01021.html#adfcfb51f973f20cc4c2c02277bfeb2cd">SIdleMethod::name</a></div><div class="ttdeci">const char * name</div><div class="ttdef"><b>Definition</b> <a href="#l00036">idle_detect.h:36</a></div></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="comment">// Branch if &lt; 0 (negative and non-zero)</span></div>
+<div class="foldopen" id="foldopen00098" data-start="" data-end="">
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="../../d0/d00/a00239.html#ac7d7895e1e0e49d90b6e8b269e48c093">   98</a></span><span class="preprocessor">#define DO_FBLT FPSTART; \</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="preprocessor">  if(FP_IS_NEGATIVE(state.f[FREG_1]) &amp;&amp; !FP_IS_ZERO(state.f[FREG_1])) \</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span><span class="preprocessor">    add_pc(DISP_21 * 4);</span></div>
+</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="comment">// Branch if not equal to zero</span></div>
+<div class="foldopen" id="foldopen00103" data-start="" data-end="">
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="../../d0/d00/a00239.html#a13bddfdb496f68a5429ae23fd465237a">  103</a></span><span class="preprocessor">#define DO_FBNE FPSTART; \</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="preprocessor">  if(!FP_IS_ZERO(state.f[FREG_1])) \</span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="preprocessor">    add_pc(DISP_21 * 4);</span></div>
+</div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d0/d00/a00239.html">idle_detect.h</a></li>
+    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d0/d00/a00239.html">cpu_fp_branch.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: CPU/AlphaCPUProfile.h Source File</title>
+<title>ES40: config/tui_win32/bsd_compat.c Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.92.2</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
    </div>
   </td>
  </tr>
@@ -109,10 +109,10 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d9/d00/a00146_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">AlphaCPUProfile.h</div></div>
+  <div class="headertitle"><div class="title">bsd_compat.c</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../d9/d00/a00146.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator -- Alpha CPU identity profiles</span></div>
+<a href="../../d9/d00/a00146.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator.</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2026 by gdwnldsKSC</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * All rights reserved.</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
@@ -138,79 +138,78 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d9/d00/a00146_
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span></div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> * POSSIBILITY OF SUCH DAMAGE.</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#if !defined(INCLUDED_ALPHACPUPROFILE_H)</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#define INCLUDED_ALPHACPUPROFILE_H</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;cstdint&gt;</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d00/a00236.html">Ev68PAL.h</a>&quot;</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d00/a00227.html">Ev68IPR.h</a>&quot;</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &quot;<a class="code" href="../../d6/d00/a00233.html">Ev68MMU.h</a>&quot;</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &quot;<a class="code" href="../../dc/d00/a00218.html">Ev68HWLoad.h</a>&quot;</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &quot;<a class="code" href="../../dd/d00/a00221.html">Ev68HWStore.h</a>&quot;</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment">// Immutable model identity, feature probes, and PAL entry rules chosen by configuration.</span></div>
-<div class="foldopen" id="foldopen00038" data-start="{" data-end="};">
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="../../d6/d00/a00941.html">   38</a></span><span class="keyword">struct </span><a class="code hl_struct" href="../../d6/d00/a00941.html">AlphaCPUProfile</a></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>{</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="../../d6/d00/a00941.html#a74097b8e195271d3406fc8a8c847332f">   40</a></span>  std::uint64_t <a class="code hl_variable" href="../../d6/d00/a00941.html#a74097b8e195271d3406fc8a8c847332f">amask</a>;       <span class="comment">// Implemented extensions; AMASK returns input &amp; ~amask.</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="../../d6/d00/a00941.html#acac881b224550b602574b93493d93a4c">   41</a></span>  std::uint32_t <a class="code hl_variable" href="../../d6/d00/a00941.html#acac881b224550b602574b93493d93a4c">implver</a>;     <span class="comment">// Architectural implementation version.</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="../../d6/d00/a00941.html#a61e4b59e73095ee8bd9c6df2a0b62494">   42</a></span>  std::uint32_t <a class="code hl_variable" href="../../d6/d00/a00941.html#a61e4b59e73095ee8bd9c6df2a0b62494">chip_id</a>;     <span class="comment">// Implementation-specific chip revision identifier.</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="../../d6/d00/a00941.html#aa9ae9cb957761dd793c5e54834e07f9d">   43</a></span>  std::uint32_t <a class="code hl_variable" href="../../d6/d00/a00941.html#aa9ae9cb957761dd793c5e54834e07f9d">type_major</a>;  <span class="comment">// System-reference processor type.</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="../../d6/d00/a00941.html#a36cfe1cf0fdf434d8f324d6862b9e864">   44</a></span>  std::uint32_t <a class="code hl_variable" href="../../d6/d00/a00941.html#a36cfe1cf0fdf434d8f324d6862b9e864">type_minor</a>;  <span class="comment">// System-reference processor revision.</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="../../d6/d00/a00941.html#a3334f53fb5326aa873b46512c95df4e3">   45</a></span>  <a class="code hl_struct" href="../../d7/d00/a01005.html">AlphaPALPolicy</a> <a class="code hl_variable" href="../../d6/d00/a00941.html#a3334f53fb5326aa873b46512c95df4e3">pal</a> = <a class="code hl_variable" href="../../d7/d00/a00236.html#a6bfbebb20857436daaae9f227ff5a041">kEv68PALPolicy</a>;  <span class="comment">// Immutable family entry rules.</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="../../d6/d00/a00941.html#acd33c29c96427cf5fab28b6737410c4a">   46</a></span>  <a class="code hl_struct" href="../../d3/d00/a00965.html">AlphaIPRReadPolicy</a> <a class="code hl_variable" href="../../d6/d00/a00941.html#acd33c29c96427cf5fab28b6737410c4a">ipr_read</a> = <a class="code hl_variable" href="../../d9/d00/a00227.html#ac72e7b81fb425e5ebbce074acda1caf7">kEv68IPRReadPolicy</a>; <span class="comment">// Immutable family IPR reads.</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="../../d6/d00/a00941.html#aae3a0175b2bbb39f9c1781393bf640e8">   47</a></span>  <a class="code hl_struct" href="../../d7/d00/a00969.html">AlphaIPRWritePolicy</a> <a class="code hl_variable" href="../../d6/d00/a00941.html#aae3a0175b2bbb39f9c1781393bf640e8">ipr_write</a> = <a class="code hl_variable" href="../../d9/d00/a00227.html#ac5a652b053679c56a4f876bb9f861408">kEv68IPRWritePolicy</a>; <span class="comment">// Immutable family IPR writes.</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="../../d6/d00/a00941.html#a571d1e5d66e62d3c34b9fd3ac213eb31">   48</a></span>  <a class="code hl_struct" href="../../d5/d00/a00977.html">AlphaTBFillPolicy</a> <a class="code hl_variable" href="../../d6/d00/a00941.html#a571d1e5d66e62d3c34b9fd3ac213eb31">tb_fill</a> = <a class="code hl_variable" href="../../d6/d00/a00233.html#a46c3fb375cb12b1b0d03cf0995bb21ca">kEv68TBFillPolicy</a>; <span class="comment">// Immutable family PTE decoding.</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="../../d6/d00/a00941.html#a55781580b5b173191a9acea8afabba20">   49</a></span>  <a class="code hl_struct" href="../../d4/d00/a00989.html">AlphaMMUAddressPolicy</a> <a class="code hl_variable" href="../../d6/d00/a00941.html#a55781580b5b173191a9acea8afabba20">mmu_address</a> = <a class="code hl_variable" href="../../d6/d00/a00233.html#af72d7608012fab6bf3716a3d9092570a">kEv68MMUAddressPolicy</a>; <span class="comment">// Immutable address rules.</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="../../d6/d00/a00941.html#a3433074097fe349ccc9222f5fe927fd1">   50</a></span>  <a class="code hl_struct" href="../../df/d00/a00949.html">AlphaHWLoadPolicy</a> <a class="code hl_variable" href="../../d6/d00/a00941.html#a3433074097fe349ccc9222f5fe927fd1">hw_load</a> = <a class="code hl_variable" href="../../dc/d00/a00218.html#a11d8be60c2a5212bfd83994d91e248bd">kEv68HWLoadPolicy</a>; <span class="comment">// Immutable hardware-load forms.</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="../../d6/d00/a00941.html#a398e14d8dc58877b3b703d6100e6aae8">   51</a></span>  <a class="code hl_struct" href="../../d1/d00/a00957.html">AlphaHWStorePolicy</a> <a class="code hl_variable" href="../../d6/d00/a00941.html#a398e14d8dc58877b3b703d6100e6aae8">hw_store</a> = <a class="code hl_variable" href="../../dd/d00/a00221.html#a0d8be7fe2edf0a9abd0e211520fced2f">kEv68HWStorePolicy</a>; <span class="comment">// Immutable hardware-store forms.</span></div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>};</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">/* asprintf/vasprintf/strsep for NetBSD libform on MSVC. */</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;stdio.h&gt;</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;stdlib.h&gt;</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;string.h&gt;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &quot;<a class="code" href="../../da/d00/a00149.html">include/bsd_compat.h</a>&quot;</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="foldopen" id="foldopen00035" data-start="{" data-end="}">
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="../../d9/d00/a00146.html#a5ec7fd90ebe6015636bce974c192c86a">   35</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="../../d9/d00/a00146.html#a5ec7fd90ebe6015636bce974c192c86a">vasprintf</a>(<span class="keywordtype">char</span> **strp, <span class="keyword">const</span> <span class="keywordtype">char</span> *fmt, va_list ap)</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>{</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    va_list aq;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keywordtype">int</span> len;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    *strp = NULL;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    va_copy(aq, ap);</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    len = _vscprintf(fmt, aq);</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    va_end(aq);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keywordflow">if</span> (len &lt; 0)</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        <span class="keywordflow">return</span> -1;</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    *strp = malloc((<span class="keywordtype">size_t</span>)len + 1);</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keywordflow">if</span> (*strp == NULL)</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <span class="keywordflow">return</span> -1;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="keywordflow">return</span> vsnprintf(*strp, (<span class="keywordtype">size_t</span>)len + 1, fmt, ap);</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>}</div>
 </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="comment">// EV68CB pass 4: BWX | FIX | CIX | MVI | precise traps | prefetch modify.</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="../../d9/d00/a00146.html#a36f273265088a857127352fc2d18616f">   55</a></span><span class="keyword">inline</span> <span class="keyword">constexpr</span> <a class="code hl_struct" href="../../d6/d00/a00941.html">AlphaCPUProfile</a> <a class="code hl_variable" href="../../d9/d00/a00146.html#a36f273265088a857127352fc2d18616f">kEv68CBProfile</a>{0x1307, 2, 0x21, 12, 6};</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="aa00146_html_a36f273265088a857127352fc2d18616f"><div class="ttname"><a href="../../d9/d00/a00146.html#a36f273265088a857127352fc2d18616f">kEv68CBProfile</a></div><div class="ttdeci">constexpr AlphaCPUProfile kEv68CBProfile</div><div class="ttdef"><b>Definition</b> <a href="#l00055">AlphaCPUProfile.h:55</a></div></div>
-<div class="ttc" id="aa00218_html"><div class="ttname"><a href="../../dc/d00/a00218.html">Ev68HWLoad.h</a></div></div>
-<div class="ttc" id="aa00218_html_a11d8be60c2a5212bfd83994d91e248bd"><div class="ttname"><a href="../../dc/d00/a00218.html#a11d8be60c2a5212bfd83994d91e248bd">kEv68HWLoadPolicy</a></div><div class="ttdeci">constexpr AlphaHWLoadPolicy kEv68HWLoadPolicy</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00218_source.html#l00061">Ev68HWLoad.h:61</a></div></div>
-<div class="ttc" id="aa00221_html"><div class="ttname"><a href="../../dd/d00/a00221.html">Ev68HWStore.h</a></div></div>
-<div class="ttc" id="aa00221_html_a0d8be7fe2edf0a9abd0e211520fced2f"><div class="ttname"><a href="../../dd/d00/a00221.html#a0d8be7fe2edf0a9abd0e211520fced2f">kEv68HWStorePolicy</a></div><div class="ttdeci">constexpr AlphaHWStorePolicy kEv68HWStorePolicy</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d00/a00221_source.html#l00059">Ev68HWStore.h:59</a></div></div>
-<div class="ttc" id="aa00227_html"><div class="ttname"><a href="../../d9/d00/a00227.html">Ev68IPR.h</a></div></div>
-<div class="ttc" id="aa00227_html_ac5a652b053679c56a4f876bb9f861408"><div class="ttname"><a href="../../d9/d00/a00227.html#ac5a652b053679c56a4f876bb9f861408">kEv68IPRWritePolicy</a></div><div class="ttdeci">constexpr AlphaIPRWritePolicy kEv68IPRWritePolicy</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d00/a00227_source.html#l00100">Ev68IPR.h:100</a></div></div>
-<div class="ttc" id="aa00227_html_ac72e7b81fb425e5ebbce074acda1caf7"><div class="ttname"><a href="../../d9/d00/a00227.html#ac72e7b81fb425e5ebbce074acda1caf7">kEv68IPRReadPolicy</a></div><div class="ttdeci">constexpr AlphaIPRReadPolicy kEv68IPRReadPolicy</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d00/a00227_source.html#l00096">Ev68IPR.h:96</a></div></div>
-<div class="ttc" id="aa00233_html"><div class="ttname"><a href="../../d6/d00/a00233.html">Ev68MMU.h</a></div></div>
-<div class="ttc" id="aa00233_html_a46c3fb375cb12b1b0d03cf0995bb21ca"><div class="ttname"><a href="../../d6/d00/a00233.html#a46c3fb375cb12b1b0d03cf0995bb21ca">kEv68TBFillPolicy</a></div><div class="ttdeci">constexpr AlphaTBFillPolicy kEv68TBFillPolicy</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00233_source.html#l00043">Ev68MMU.h:43</a></div></div>
-<div class="ttc" id="aa00233_html_af72d7608012fab6bf3716a3d9092570a"><div class="ttname"><a href="../../d6/d00/a00233.html#af72d7608012fab6bf3716a3d9092570a">kEv68MMUAddressPolicy</a></div><div class="ttdeci">constexpr AlphaMMUAddressPolicy kEv68MMUAddressPolicy</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00233_source.html#l00044">Ev68MMU.h:44</a></div></div>
-<div class="ttc" id="aa00236_html"><div class="ttname"><a href="../../d7/d00/a00236.html">Ev68PAL.h</a></div></div>
-<div class="ttc" id="aa00236_html_a6bfbebb20857436daaae9f227ff5a041"><div class="ttname"><a href="../../d7/d00/a00236.html#a6bfbebb20857436daaae9f227ff5a041">kEv68PALPolicy</a></div><div class="ttdeci">constexpr AlphaPALPolicy kEv68PALPolicy</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00236_source.html#l00099">Ev68PAL.h:99</a></div></div>
-<div class="ttc" id="aa00941_html"><div class="ttname"><a href="../../d6/d00/a00941.html">AlphaCPUProfile</a></div><div class="ttdef"><b>Definition</b> <a href="#l00038">AlphaCPUProfile.h:39</a></div></div>
-<div class="ttc" id="aa00941_html_a3334f53fb5326aa873b46512c95df4e3"><div class="ttname"><a href="../../d6/d00/a00941.html#a3334f53fb5326aa873b46512c95df4e3">AlphaCPUProfile::pal</a></div><div class="ttdeci">AlphaPALPolicy pal</div><div class="ttdef"><b>Definition</b> <a href="#l00045">AlphaCPUProfile.h:45</a></div></div>
-<div class="ttc" id="aa00941_html_a3433074097fe349ccc9222f5fe927fd1"><div class="ttname"><a href="../../d6/d00/a00941.html#a3433074097fe349ccc9222f5fe927fd1">AlphaCPUProfile::hw_load</a></div><div class="ttdeci">AlphaHWLoadPolicy hw_load</div><div class="ttdef"><b>Definition</b> <a href="#l00050">AlphaCPUProfile.h:50</a></div></div>
-<div class="ttc" id="aa00941_html_a36cfe1cf0fdf434d8f324d6862b9e864"><div class="ttname"><a href="../../d6/d00/a00941.html#a36cfe1cf0fdf434d8f324d6862b9e864">AlphaCPUProfile::type_minor</a></div><div class="ttdeci">std::uint32_t type_minor</div><div class="ttdef"><b>Definition</b> <a href="#l00044">AlphaCPUProfile.h:44</a></div></div>
-<div class="ttc" id="aa00941_html_a398e14d8dc58877b3b703d6100e6aae8"><div class="ttname"><a href="../../d6/d00/a00941.html#a398e14d8dc58877b3b703d6100e6aae8">AlphaCPUProfile::hw_store</a></div><div class="ttdeci">AlphaHWStorePolicy hw_store</div><div class="ttdef"><b>Definition</b> <a href="#l00051">AlphaCPUProfile.h:51</a></div></div>
-<div class="ttc" id="aa00941_html_a55781580b5b173191a9acea8afabba20"><div class="ttname"><a href="../../d6/d00/a00941.html#a55781580b5b173191a9acea8afabba20">AlphaCPUProfile::mmu_address</a></div><div class="ttdeci">AlphaMMUAddressPolicy mmu_address</div><div class="ttdef"><b>Definition</b> <a href="#l00049">AlphaCPUProfile.h:49</a></div></div>
-<div class="ttc" id="aa00941_html_a571d1e5d66e62d3c34b9fd3ac213eb31"><div class="ttname"><a href="../../d6/d00/a00941.html#a571d1e5d66e62d3c34b9fd3ac213eb31">AlphaCPUProfile::tb_fill</a></div><div class="ttdeci">AlphaTBFillPolicy tb_fill</div><div class="ttdef"><b>Definition</b> <a href="#l00048">AlphaCPUProfile.h:48</a></div></div>
-<div class="ttc" id="aa00941_html_a61e4b59e73095ee8bd9c6df2a0b62494"><div class="ttname"><a href="../../d6/d00/a00941.html#a61e4b59e73095ee8bd9c6df2a0b62494">AlphaCPUProfile::chip_id</a></div><div class="ttdeci">std::uint32_t chip_id</div><div class="ttdef"><b>Definition</b> <a href="#l00042">AlphaCPUProfile.h:42</a></div></div>
-<div class="ttc" id="aa00941_html_a74097b8e195271d3406fc8a8c847332f"><div class="ttname"><a href="../../d6/d00/a00941.html#a74097b8e195271d3406fc8a8c847332f">AlphaCPUProfile::amask</a></div><div class="ttdeci">std::uint64_t amask</div><div class="ttdef"><b>Definition</b> <a href="#l00040">AlphaCPUProfile.h:40</a></div></div>
-<div class="ttc" id="aa00941_html_aa9ae9cb957761dd793c5e54834e07f9d"><div class="ttname"><a href="../../d6/d00/a00941.html#aa9ae9cb957761dd793c5e54834e07f9d">AlphaCPUProfile::type_major</a></div><div class="ttdeci">std::uint32_t type_major</div><div class="ttdef"><b>Definition</b> <a href="#l00043">AlphaCPUProfile.h:43</a></div></div>
-<div class="ttc" id="aa00941_html_aae3a0175b2bbb39f9c1781393bf640e8"><div class="ttname"><a href="../../d6/d00/a00941.html#aae3a0175b2bbb39f9c1781393bf640e8">AlphaCPUProfile::ipr_write</a></div><div class="ttdeci">AlphaIPRWritePolicy ipr_write</div><div class="ttdef"><b>Definition</b> <a href="#l00047">AlphaCPUProfile.h:47</a></div></div>
-<div class="ttc" id="aa00941_html_acac881b224550b602574b93493d93a4c"><div class="ttname"><a href="../../d6/d00/a00941.html#acac881b224550b602574b93493d93a4c">AlphaCPUProfile::implver</a></div><div class="ttdeci">std::uint32_t implver</div><div class="ttdef"><b>Definition</b> <a href="#l00041">AlphaCPUProfile.h:41</a></div></div>
-<div class="ttc" id="aa00941_html_acd33c29c96427cf5fab28b6737410c4a"><div class="ttname"><a href="../../d6/d00/a00941.html#acd33c29c96427cf5fab28b6737410c4a">AlphaCPUProfile::ipr_read</a></div><div class="ttdeci">AlphaIPRReadPolicy ipr_read</div><div class="ttdef"><b>Definition</b> <a href="#l00046">AlphaCPUProfile.h:46</a></div></div>
-<div class="ttc" id="aa00949_html"><div class="ttname"><a href="../../df/d00/a00949.html">AlphaHWLoadPolicy</a></div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00158_source.html#l00073">AlphaHWLoad.h:74</a></div></div>
-<div class="ttc" id="aa00957_html"><div class="ttname"><a href="../../d1/d00/a00957.html">AlphaHWStorePolicy</a></div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00161_source.html#l00065">AlphaHWStore.h:66</a></div></div>
-<div class="ttc" id="aa00965_html"><div class="ttname"><a href="../../d3/d00/a00965.html">AlphaIPRReadPolicy</a></div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00055">AlphaIPR.h:56</a></div></div>
-<div class="ttc" id="aa00969_html"><div class="ttname"><a href="../../d7/d00/a00969.html">AlphaIPRWritePolicy</a></div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00079">AlphaIPR.h:80</a></div></div>
-<div class="ttc" id="aa00977_html"><div class="ttname"><a href="../../d5/d00/a00977.html">AlphaTBFillPolicy</a></div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00167_source.html#l00048">AlphaMMU.h:49</a></div></div>
-<div class="ttc" id="aa00989_html"><div class="ttname"><a href="../../d4/d00/a00989.html">AlphaMMUAddressPolicy</a></div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00167_source.html#l00078">AlphaMMU.h:79</a></div></div>
-<div class="ttc" id="aa01005_html"><div class="ttname"><a href="../../d7/d00/a01005.html">AlphaPALPolicy</a></div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00170_source.html#l00120">AlphaPAL.h:121</a></div></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
+<div class="foldopen" id="foldopen00053" data-start="{" data-end="}">
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="../../d9/d00/a00146.html#a1af9acc6b6efdca3576cb8223d95f401">   53</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="../../d9/d00/a00146.html#a1af9acc6b6efdca3576cb8223d95f401">asprintf</a>(<span class="keywordtype">char</span> **strp, <span class="keyword">const</span> <span class="keywordtype">char</span> *fmt, ...)</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>{</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    va_list ap;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordtype">int</span> len;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    va_start(ap, fmt);</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    len = <a class="code hl_function" href="../../d9/d00/a00146.html#a5ec7fd90ebe6015636bce974c192c86a">vasprintf</a>(strp, fmt, ap);</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    va_end(ap);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="keywordflow">return</span> len;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>}</div>
+</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="foldopen" id="foldopen00064" data-start="{" data-end="}">
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="../../d9/d00/a00146.html#a098b232e1cfa2b0ce1d94b7ad0440cbb">   64</a></span><span class="keywordtype">char</span> *<a class="code hl_function" href="../../d9/d00/a00146.html#a098b232e1cfa2b0ce1d94b7ad0440cbb">strsep</a>(<span class="keywordtype">char</span> **stringp, <span class="keyword">const</span> <span class="keywordtype">char</span> *delim)</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>{</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keywordtype">char</span> *start = *stringp;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <span class="keywordtype">char</span> *end;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="keywordflow">if</span> (start == NULL)</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <span class="keywordflow">return</span> NULL;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    end = start + strcspn(start, delim);</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="keywordflow">if</span> (*end != <span class="charliteral">&#39;\0&#39;</span>)</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    {</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        *end = <span class="charliteral">&#39;\0&#39;</span>;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        *stringp = end + 1;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    }</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        *stringp = NULL;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="keywordflow">return</span> start;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>}</div>
+</div>
+<div class="ttc" id="aa00146_html_a098b232e1cfa2b0ce1d94b7ad0440cbb"><div class="ttname"><a href="../../d9/d00/a00146.html#a098b232e1cfa2b0ce1d94b7ad0440cbb">strsep</a></div><div class="ttdeci">char * strsep(char **stringp, const char *delim)</div><div class="ttdef"><b>Definition</b> <a href="#l00064">bsd_compat.c:64</a></div></div>
+<div class="ttc" id="aa00146_html_a1af9acc6b6efdca3576cb8223d95f401"><div class="ttname"><a href="../../d9/d00/a00146.html#a1af9acc6b6efdca3576cb8223d95f401">asprintf</a></div><div class="ttdeci">int asprintf(char **strp, const char *fmt,...)</div><div class="ttdef"><b>Definition</b> <a href="#l00053">bsd_compat.c:53</a></div></div>
+<div class="ttc" id="aa00146_html_a5ec7fd90ebe6015636bce974c192c86a"><div class="ttname"><a href="../../d9/d00/a00146.html#a5ec7fd90ebe6015636bce974c192c86a">vasprintf</a></div><div class="ttdeci">int vasprintf(char **strp, const char *fmt, va_list ap)</div><div class="ttdef"><b>Definition</b> <a href="#l00035">bsd_compat.c:35</a></div></div>
+<div class="ttc" id="aa00149_html"><div class="ttname"><a href="../../da/d00/a00149.html">bsd_compat.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d9/d00/a00146.html">AlphaCPUProfile.h</a></li>
+    <li class="navelem"><a href="../../dir_9f351d46ce3cc29445a41dc3a31e6919.html">config</a></li><li class="navelem"><a href="../../dir_6b7d1cab4fc1513651fc64c4a9a49cf4.html">tui_win32</a></li><li class="navelem"><a href="../../d9/d00/a00146.html">bsd_compat.c</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

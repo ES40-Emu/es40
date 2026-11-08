@@ -83,22 +83,6 @@
  *
  */
 
-/**
- * Constructor.
- *
- * Bind the card's sole display output; device initialization is done by init().
- **/
-CCirrus::CCirrus(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
-	bx_gui_c& display, Model model)
-	: svga_device(cfg, c, pcibus, pcidev), m_model(model), m_output(0, display)
-{
-	memset(&vga, 0, sizeof(vga));
-	memset(&svga, 0, sizeof(svga));
-	memset(&pci_state, 0, sizeof(pci_state));
-	memset(std_config_data, 0, sizeof(std_config_data));
-	memset(std_config_mask, 0, sizeof(std_config_mask));
-}
-
 //cirrus_gd5401_vga_device::cirrus_gd5401_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
 //	: vga_device(mconfig, CIRRUS_GD5401_VGA, tag, owner, clock)
 cirrus_gd5401_vga_device::cirrus_gd5401_vga_device(CConfigurator* cfg, CSystem* c,
@@ -828,7 +812,7 @@ void cirrus_gd5428_vga_device::device_reset()
 	cirrus.m_hidden_dac_mode = 0;
 }
 
-uint32_t CCirrus::screen_update(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
+uint32_t cirrus_gd5428_vga_device::screen_update(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect)
 {
 	uint32_t ptr = (vga.svga_intf.vram_size - 0x4000);  // cursor patterns are stored in the last 16kB of VRAM
 	svga_device::screen_update(screen, bitmap, cliprect);
@@ -985,7 +969,7 @@ void cirrus_gd5428_vga_device::recompute_params()
 	recompute_params_clock(divisor, (int)clock);
 }
 
-uint16_t CCirrus::offset()
+uint16_t cirrus_gd5428_vga_device::offset()
 {
 	// TODO: check true enable condition
 	if (svga.rgb8_en || svga.rgb15_en || svga.rgb16_en || svga.rgb24_en || svga.rgb32_en)
@@ -993,7 +977,7 @@ uint16_t CCirrus::offset()
 	return svga_device::offset();
 }
 
-uint32_t CCirrus::latch_start_addr()
+uint32_t cirrus_gd5428_vga_device::latch_start_addr()
 {
 	if (svga.rgb24_en || svga.rgb32_en)
 		return vga.crtc.start_addr_latch >> 1;
@@ -1304,7 +1288,7 @@ void cirrus_gd5428_vga_device::copy_pixel(uint8_t src, uint8_t dst, bool foregro
 	vga.memory[cirrus.m_blt_dest_current % vga.svga_intf.vram_size] = res;
 }
 
-uint8_t CCirrus::vga_latch_write(int offs, uint8_t data)
+uint8_t cirrus_gd5428_vga_device::vga_latch_write(int offs, uint8_t data)
 {
 	uint8_t res = 0;
 	uint8_t mode_mask = (cirrus.gc_mode_ext & 0x04) ? 0x07 : 0x03;
@@ -1806,6 +1790,24 @@ void cirrus_gd5446_vga_device::gc_map(address_map &map)
 void cirrus_gd5446_vga_device::sequencer_map(address_map &map)
 {
 	cirrus_gd5430_vga_device::sequencer_map(map);
+}
+
+// ES40 adapter.
+
+/**
+ * Constructor.
+ *
+ * Bind the card's sole display output; device initialization is done by init().
+ **/
+CCirrus::CCirrus(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
+	bx_gui_c& display, Model model)
+	: svga_device(cfg, c, pcibus, pcidev), m_model(model), m_output(0, display)
+{
+	memset(&vga, 0, sizeof(vga));
+	memset(&svga, 0, sizeof(svga));
+	memset(&pci_state, 0, sizeof(pci_state));
+	memset(std_config_data, 0, sizeof(std_config_data));
+	memset(std_config_mask, 0, sizeof(std_config_mask));
 }
 
 /**

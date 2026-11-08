@@ -102,16 +102,6 @@ protected:
 
   void recompute_params_clock(int divisor, int xtal);
 
-public:
-
-	virtual uint32_t screen_update(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect) override;
-
-protected:
-
-	// device-level overrides
-	virtual uint16_t offset() override;
-	virtual uint32_t latch_start_addr() override;
-
   struct {
     u8 m_hidden_dac_mode = 0;
     u8 m_hidden_dac_phase = 0;
@@ -167,10 +157,6 @@ protected:
     uint8_t m_cr1d = 0;
     uint8_t m_sr17 = 1;
   } cirrus{};
-
-	virtual uint8_t vga_latch_write(int offs, uint8_t data) override;
-
-	virtual bool get_interlace_mode() override { return BIT(cirrus.m_cr1a, 0); }
 
 private:
   Model m_model;
@@ -243,7 +229,7 @@ private:
 
 // Upstream model declarations retain pc_vga_cirrus.h order and layout.
 // Members still provided by the ES40 adapter remain commented in place.
-// GD5401/AVGA1 retain the existing SVGA-backed compatibility behavior.
+// GD5401/AVGA1 use the shared VGA/SVGA implementation.
 class cirrus_gd5401_vga_device : public CCirrus
 {
 public:
@@ -269,7 +255,7 @@ public:
 	virtual uint8_t mem_r(offs_t offset) override;
 	virtual void mem_w(offs_t offset, uint8_t data) override;
 
-//	virtual uint32_t screen_update(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect) override;
+	virtual uint32_t screen_update(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect) override;
 
 protected:
 //	cirrus_gd5428_vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock);
@@ -279,8 +265,8 @@ protected:
 	// device-level overrides
 	virtual void device_start() override ATTR_COLD;
 	virtual void device_reset() override ATTR_COLD;
-//	virtual uint16_t offset() override;
-//	virtual uint32_t latch_start_addr() override;
+	virtual uint16_t offset() override;
+	virtual uint32_t latch_start_addr() override;
 
 	virtual void io_3cx_map(address_map &map) override ATTR_COLD;
 
@@ -339,13 +325,13 @@ protected:
 //	uint8_t m_vclk_num[4]{};
 //	uint8_t m_vclk_denom[4]{};
 
-//	virtual uint8_t vga_latch_write(int offs, uint8_t data) override;
+	virtual uint8_t vga_latch_write(int offs, uint8_t data) override;
 
 	virtual void crtc_map(address_map &map) override ATTR_COLD;
 	virtual void gc_map(address_map &map) override ATTR_COLD;
 	virtual void sequencer_map(address_map &map) override ATTR_COLD;
 
-//	virtual bool get_interlace_mode() override { return BIT(m_cr1a, 0); }
+	virtual bool get_interlace_mode() override { return BIT(cirrus.m_cr1a, 0); }
 
 	uint8_t offset_select(offs_t offset);
 	virtual void recompute_params() override;

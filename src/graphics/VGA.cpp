@@ -68,6 +68,12 @@ static constexpr unsigned vga_log_mask = 0
 // device type definition
 // DEFINE_DEVICE_TYPE(VGA, vga_device, "vga", "VGA")
 
+// ES40 construction and display ownership.
+  /**
+   * Constructor.
+   *
+   * Multiple VGA cards require explicit configuration permission.
+   **/
 // vga_device::vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock)
 // 	: device_t(mconfig, type, tag, owner, clock)
 // 	, device_video_interface(mconfig, *this)
@@ -76,25 +82,6 @@ static constexpr unsigned vga_log_mask = 0
 // 	, vga(*this)
 // 	, m_input_sense(*this, "VGA_SENSE")
 // 	, m_vsync_cb(*this)
-// {
-// 	m_main_if_space_config = address_space_config("io_regs", ENDIANNESS_LITTLE, 8, 4, 0, address_map_constructor(FUNC(vga_device::io_3bx_3dx_map), this));
-// 	m_crtc_space_config = address_space_config("crtc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(vga_device::crtc_map), this));
-// 	m_gc_space_config = address_space_config("gc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(vga_device::gc_map), this));
-// 	m_seq_space_config = address_space_config("sequencer_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(vga_device::sequencer_map), this));
-// 	m_atc_space_config = address_space_config("attribute_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(vga_device::attribute_map), this));
-// }
-
-// vga_device::vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
-// 	: vga_device(mconfig, VGA, tag, owner, clock)
-// {
-// }
-
-// ES40 construction and display ownership.
-  /**
-   * Constructor.
-   *
-   * Multiple VGA cards require explicit configuration permission.
-   **/
 CVGA::CVGA(class CConfigurator* cfg, class CSystem* c, int pcibus, int pcidev) : CPCIDevice(cfg, c, pcibus, pcidev)
 {
 	const bool another_vga = c->has_vga_device(this);
@@ -111,6 +98,11 @@ CVGA::CVGA(class CConfigurator* cfg, class CSystem* c, int pcibus, int pcidev) :
 	// a firmware console when multiple cards are present.
 	theVGA = another_vga ? nullptr : this;
 }
+
+// vga_device::vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
+// 	: vga_device(mconfig, VGA, tag, owner, clock)
+// {
+// }
 
 /**
  * Destructor.

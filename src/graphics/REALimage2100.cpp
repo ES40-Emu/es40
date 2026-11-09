@@ -2201,7 +2201,7 @@ bool CRealImage2100::triangle_profile() const
 CRealImage2100::TrianglePreparation CRealImage2100::prepare_triangle(
 	uint32_t address, uint32_t value, TriangleOperation& operation) const
 {
-	// These commands retain the slot without launching a primitive
+	// These commands retain the slot without launching a primitive.
 	if (!value || value == 0x10)
 		return TrianglePreparation::NoOp;
 	const uint32_t pipeline = peek(PipelineControl0), texture_mode = pipeline & 0x00038000u,
@@ -2218,7 +2218,7 @@ CRealImage2100::TrianglePreparation CRealImage2100::prepare_triangle(
 		use_alpha = blend && (!additive || source_blend != 1) &&
 			!(textured && texture_alpha && texture_mode == 0x18000),
 		use_w = textured && !affine;
-	// Untextured perspective draws retain the existing linear depth approx.
+	// Untextured perspective draws retain the existing linear depth approximation.
 	if (value != 0x13 || !triangle_profile())
 	{
 		return TrianglePreparation::Rejected;
@@ -2248,14 +2248,14 @@ CRealImage2100::TrianglePreparation CRealImage2100::prepare_triangle(
 			{
 				return TrianglePreparation::Rejected;
 			}
-			// Lighting can emit overrange RGB, so clamp before interpolation
+			// Lighting can emit overrange RGB; clamp before interpolation.
 			component[i] = i > 0 && i < 4 ? std::clamp(double(input), 0.0, 256.0) : input;
 		}
 		vertex[slot] = {component[0], component[1], component[2], component[3],
 			component[4], component[5], component[6], 0, 0};
 		if (textured)
 		{
-			// Optimized driver packets leave the leading texture word unwritten
+			// Optimized driver packets leave the leading texture word unwritten.
 			float coordinates[4];
 			for (unsigned i = 1; i < 4; ++i)
 			{
@@ -2278,7 +2278,7 @@ CRealImage2100::TrianglePreparation CRealImage2100::prepare_triangle(
 			vertex[slot].t = coordinates[2];
 		}
 	}
-	// The shared projection scale can be negative. Reject a horizon crossing
+	// The shared projection scale can be negative; reject a horizon crossing.
 	if (use_w && ((vertex[0].z < 0) != (vertex[1].z < 0) ||
 		(vertex[0].z < 0) != (vertex[2].z < 0)))
 	{
@@ -2287,7 +2287,7 @@ CRealImage2100::TrianglePreparation CRealImage2100::prepare_triangle(
 	double flat_color[4]{};
 	if (flat && (use_color || use_alpha))
 	{
-		// The launching slot supplies flat color, regardless of winding
+		// The launching slot supplies flat color, regardless of winding.
 		const uint32_t slot = (address - FlatVertexBase) / VertexStride;
 		for (unsigned i = 0; i < 4; ++i)
 		{

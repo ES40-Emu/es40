@@ -205,8 +205,24 @@ struct mame_machine_provider
   const mame_machine_stub& machine() const { return m_machine_stub_; }
 };
 
-class machine_config {};
-using device_type = int;  // opaque handle, not used meaningfully in ES40
+class machine_config
+{
+public:
+  machine_config() = default;
+  machine_config(class CConfigurator* cfg, class CSystem* system, int pcibus, int pcidev,
+    class bx_gui_c& display, uint32_t snapshot_id)
+    : cfg(cfg), system(system), pcibus(pcibus), pcidev(pcidev),
+      display(&display), snapshot_id(snapshot_id) { }
+
+  CConfigurator* cfg = nullptr;
+  CSystem* system = nullptr;
+  int pcibus = 0;
+  int pcidev = 0;
+  bx_gui_c* display = nullptr;
+  uint32_t snapshot_id = 0;
+};
+
+using device_type = const void*;
 
 struct finder_base {
   static constexpr const char* DUMMY_TAG = "";
@@ -269,10 +285,11 @@ private:
 };
 
 #define DEFINE_DEVICE_TYPE(Type, Class, ShortName, FullName) \
-  const int Type = 0;
+  static char Type##_token; \
+  device_type const Type = &Type##_token;
 
 #define DECLARE_DEVICE_TYPE(Type, Class) \
-  extern const int Type;
+  extern device_type const Type;
 
 enum endianness_t { ENDIANNESS_LITTLE, ENDIANNESS_BIG };
 

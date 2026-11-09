@@ -1154,16 +1154,22 @@ void CConfigurator::initialize()
 		CSystem* const system = (CSystem*)pParent->get_device();
 		bx_gui_c& display = bx_gui->display_for_output(get_device_path(), 0);
 		const char* model = get_text_value("model", "GD5430");
+		const std::string tag = get_device_path();
 		if (!strcasecmp(model, "GD5401"))
-			myDevice = new cirrus_gd5401_vga_device(this, system, pcibus, pcidev, display);
+			myDevice = new cirrus_gd5401_vga_device(
+				machine_config(this, system, pcibus, pcidev, display, 0), tag.c_str(), nullptr);
 		else if (!strcasecmp(model, "GD5428"))
-			myDevice = new cirrus_gd5428_vga_device(this, system, pcibus, pcidev, display);
+			myDevice = new cirrus_gd5428_vga_device(
+				machine_config(this, system, pcibus, pcidev, display, 1), tag.c_str(), nullptr);
 		else if (!strcasecmp(model, "GD5430"))
-			myDevice = new cirrus_gd5430_vga_device(this, system, pcibus, pcidev, display);
+			myDevice = new cirrus_gd5430_vga_device(
+				machine_config(this, system, pcibus, pcidev, display, 2), tag.c_str(), nullptr);
 		else if (!strcasecmp(model, "GD5446"))
-			myDevice = new cirrus_gd5446_vga_device(this, system, pcibus, pcidev, display);
+			myDevice = new cirrus_gd5446_vga_device(
+				machine_config(this, system, pcibus, pcidev, display, 3), tag.c_str(), nullptr);
 		else if (!strcasecmp(model, "AVGA1"))
-			myDevice = new cirrus_gd5401_vga_device(this, system, pcibus, pcidev, display, true);
+			myDevice = new cirrus_gd5401_vga_device(
+				machine_config(this, system, pcibus, pcidev, display, 4), tag.c_str(), nullptr);
 		else FAILURE_1(Configuration,
 			"cirrus model must be GD5401, GD5428, GD5430, GD5446 or AVGA1 (got %s)", model);
 		break;

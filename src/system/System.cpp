@@ -2078,7 +2078,9 @@ static const u32 system_state_magic = 0xa1fae540;
 // 2.10 persists injected disk offline conditions.
 // 2.11 uses registered Cirrus chipset state.
 // 2.12 registers Cirrus VGA register arrays.
-static const u32 system_state_version = 0x0002000c;
+// 2.13 uses registered Cirrus SVGA state.
+// 2.14 uses registered Cirrus video memory.
+static const u32 system_state_version = 0x0002000e;
 static const u32 snapshot_identity_limit = 65536;
 
 void CSystem::flush_storage()
@@ -2191,7 +2193,7 @@ bool CSystem::RestoreState(const char* fn)
 	if (version != system_state_version)
 	{
 		printf("%%SYS-I-VERSION: State file %s is incompatible; "
-			"version 2.12 is required.\n", fn);
+			"version 2.14 is required.\n", fn);
 		return false;
 	}
 	if (fread(&memory_size, sizeof(memory_size), 1, f) != 1 ||

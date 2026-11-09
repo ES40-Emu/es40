@@ -56,7 +56,6 @@
 #include "emu/xtal.h"
 #include <chrono>
 #include <type_traits>
-#include <vector>
 
 
 #define LOG_REGS (1U << 1)
@@ -70,10 +69,10 @@
 #include "logmacro.h"
 
 // NOTE: use gd54xx shortname here, clgd54xx for ISA16 cards to avoid validation clashing
-//DEFINE_DEVICE_TYPE(CIRRUS_GD5401_VGA, cirrus_gd5401_vga_device, "gd5401", "Cirrus Logic GD5401 / Acumos AVGA1 i/f")
-//DEFINE_DEVICE_TYPE(CIRRUS_GD5428_VGA, cirrus_gd5428_vga_device, "gd5428", "Cirrus Logic GD5428 VGA i/f")
-//DEFINE_DEVICE_TYPE(CIRRUS_GD5430_VGA, cirrus_gd5430_vga_device, "gd5430", "Cirrus Logic GD5430 VGA i/f")
-//DEFINE_DEVICE_TYPE(CIRRUS_GD5446_VGA, cirrus_gd5446_vga_device, "gd5446", "Cirrus Logic GD5446 VGA i/f")
+DEFINE_DEVICE_TYPE(CIRRUS_GD5401_VGA, cirrus_gd5401_vga_device, "gd5401", "Cirrus Logic GD5401 / Acumos AVGA1 i/f")
+DEFINE_DEVICE_TYPE(CIRRUS_GD5428_VGA, cirrus_gd5428_vga_device, "gd5428", "Cirrus Logic GD5428 VGA i/f")
+DEFINE_DEVICE_TYPE(CIRRUS_GD5430_VGA, cirrus_gd5430_vga_device, "gd5430", "Cirrus Logic GD5430 VGA i/f")
+DEFINE_DEVICE_TYPE(CIRRUS_GD5446_VGA, cirrus_gd5446_vga_device, "gd5446", "Cirrus Logic GD5446 VGA i/f")
 
 /*
  * Acumos AVGA1
@@ -83,11 +82,9 @@
  *
  */
 
-//cirrus_gd5401_vga_device::cirrus_gd5401_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
+cirrus_gd5401_vga_device::cirrus_gd5401_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
 //	: vga_device(mconfig, CIRRUS_GD5401_VGA, tag, owner, clock)
-cirrus_gd5401_vga_device::cirrus_gd5401_vga_device(CConfigurator* cfg, CSystem* c,
-	int pcibus, int pcidev, bx_gui_c& display, bool avga1)
-	: CCirrus(cfg, c, pcibus, pcidev, display, avga1 ? Model::AVGA1 : Model::GD5401)
+	: CCirrus(mconfig, CIRRUS_GD5401_VGA, tag, owner, clock)
 {
 }
 
@@ -110,52 +107,38 @@ void cirrus_gd5401_vga_device::recompute_params()
 }
 
 
-//cirrus_gd5428_vga_device::cirrus_gd5428_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
-//	: cirrus_gd5428_vga_device(mconfig, CIRRUS_GD5428_VGA, tag, owner, clock)
-cirrus_gd5428_vga_device::cirrus_gd5428_vga_device(CConfigurator* cfg, CSystem* c,
-	int pcibus, int pcidev, bx_gui_c& display)
-	: cirrus_gd5428_vga_device(cfg, c, pcibus, pcidev, display, Model::GD5428)
+cirrus_gd5428_vga_device::cirrus_gd5428_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
+	: cirrus_gd5428_vga_device(mconfig, CIRRUS_GD5428_VGA, tag, owner, clock)
 {
 	m_crtc_space_config = address_space_config("crtc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5428_vga_device::crtc_map), this));
 	m_gc_space_config = address_space_config("gc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5428_vga_device::gc_map), this));
 	m_seq_space_config = address_space_config("sequencer_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5428_vga_device::sequencer_map), this));
 }
 
-//cirrus_gd5428_vga_device::cirrus_gd5428_vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock)
+cirrus_gd5428_vga_device::cirrus_gd5428_vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock)
 //	: svga_device(mconfig, type, tag, owner, clock)
-cirrus_gd5428_vga_device::cirrus_gd5428_vga_device(CConfigurator* cfg, CSystem* c,
-	int pcibus, int pcidev, bx_gui_c& display, Model model)
-	: CCirrus(cfg, c, pcibus, pcidev, display, model)
+	: CCirrus(mconfig, type, tag, owner, clock)
 {
 	// Preserve ES40 constructor clearing for members without initializers.
 	m_chip_id = 0;
 	memset(m_ext_palette, 0, sizeof(m_ext_palette));
 }
 
-//cirrus_gd5430_vga_device::cirrus_gd5430_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
-//	: cirrus_gd5430_vga_device(mconfig, CIRRUS_GD5430_VGA, tag, owner, clock)
-cirrus_gd5430_vga_device::cirrus_gd5430_vga_device(CConfigurator* cfg, CSystem* c,
-	int pcibus, int pcidev, bx_gui_c& display)
-	: cirrus_gd5430_vga_device(cfg, c, pcibus, pcidev, display, Model::GD5430)
+cirrus_gd5430_vga_device::cirrus_gd5430_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
+	: cirrus_gd5430_vga_device(mconfig, CIRRUS_GD5430_VGA, tag, owner, clock)
 {
 	m_crtc_space_config = address_space_config("crtc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5430_vga_device::crtc_map), this));
 	m_gc_space_config = address_space_config("gc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5430_vga_device::gc_map), this));
 	m_seq_space_config = address_space_config("sequencer_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5430_vga_device::sequencer_map), this));
 }
 
-//cirrus_gd5430_vga_device::cirrus_gd5430_vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock)
-//	: cirrus_gd5428_vga_device(mconfig, type, tag, owner, clock)
-cirrus_gd5430_vga_device::cirrus_gd5430_vga_device(CConfigurator* cfg, CSystem* c,
-	int pcibus, int pcidev, bx_gui_c& display, Model model)
-	: cirrus_gd5428_vga_device(cfg, c, pcibus, pcidev, display, model)
+cirrus_gd5430_vga_device::cirrus_gd5430_vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock)
+	: cirrus_gd5428_vga_device(mconfig, type, tag, owner, clock)
 {
 }
 
-//cirrus_gd5446_vga_device::cirrus_gd5446_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
-//	: cirrus_gd5430_vga_device(mconfig, CIRRUS_GD5446_VGA, tag, owner, clock)
-cirrus_gd5446_vga_device::cirrus_gd5446_vga_device(CConfigurator* cfg, CSystem* c,
-	int pcibus, int pcidev, bx_gui_c& display)
-	: cirrus_gd5430_vga_device(cfg, c, pcibus, pcidev, display, Model::GD5446)
+cirrus_gd5446_vga_device::cirrus_gd5446_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
+	: cirrus_gd5430_vga_device(mconfig, CIRRUS_GD5446_VGA, tag, owner, clock)
 {
 	m_crtc_space_config = address_space_config("crtc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5446_vga_device::crtc_map), this));
 	m_gc_space_config = address_space_config("gc_regs", ENDIANNESS_LITTLE, 8, 8, 0, address_map_constructor(FUNC(cirrus_gd5446_vga_device::gc_map), this));
@@ -1794,14 +1777,32 @@ void cirrus_gd5446_vga_device::sequencer_map(address_map &map)
 
 // ES40 adapter.
 
+CConfigurator* CCirrus::config_for(const machine_config& mconfig)
+{
+	if (!mconfig.cfg || !mconfig.system || !mconfig.display)
+		FAILURE(Configuration, "Cirrus requires an ES40 construction context");
+	return mconfig.cfg;
+}
+
+bool CCirrus::is_avga() const noexcept
+{
+	return m_type == CIRRUS_GD5401_VGA;
+}
+
+bool CCirrus::is_pci() const noexcept
+{
+	return m_type == CIRRUS_GD5430_VGA || m_type == CIRRUS_GD5446_VGA;
+}
+
 /**
  * Constructor.
  *
  * Bind the card's sole display output; device initialization is done by init().
  **/
-CCirrus::CCirrus(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
-	bx_gui_c& display, Model model)
-	: svga_device(cfg, c, pcibus, pcidev), m_model(model), m_output(0, display)
+CCirrus::CCirrus(const machine_config& mconfig, device_type type, const char* /*tag*/,
+	device_t* /*owner*/, uint32_t /*clock*/)
+	: svga_device(config_for(mconfig), mconfig.system, mconfig.pcibus, mconfig.pcidev),
+	  m_type(type), m_snapshot_id(mconfig.snapshot_id), m_output(0, *mconfig.display)
 {
 	memset(&vga, 0, sizeof(vga));
 	memset(&svga, 0, sizeof(svga));
@@ -1829,7 +1830,7 @@ void CCirrus::init()
 	const char* model = myCfg->get_text_value("model", "GD5430");
 
 	const u32 vram_size = is_avga() ? 256u * 1024u :
-		m_model == Model::GD5446 ? 4u * 1024u * 1024u : 2u * 1024u * 1024u;
+		m_type == CIRRUS_GD5446_VGA ? 4u * 1024u * 1024u : 2u * 1024u * 1024u;
 	vga.svga_intf.vram_size = vram_size;
 	init_maps();
 	// ES40 retains the existing Oak register readback and storage.
@@ -1868,16 +1869,16 @@ void CCirrus::init()
 	{
 		u32 data[64]{};
 		u32 mask[64]{};
-		data[0x00 / 4] = m_model == Model::GD5446 ? 0x00b81013 : 0x00a01013;
-		data[0x04 / 4] = m_model == Model::GD5446 ? 0x02000000 : 0;
+		data[0x00 / 4] = m_type == CIRRUS_GD5446_VGA ? 0x00b81013 : 0x00a01013;
+		data[0x04 / 4] = m_type == CIRRUS_GD5446_VGA ? 0x02000000 : 0;
 		data[0x08 / 4] = 0x03000000;
-		data[0x2c / 4] = m_model == Model::GD5446 ? 0x00001013 : 0;
+		data[0x2c / 4] = m_type == CIRRUS_GD5446_VGA ? 0x00001013 : 0;
 		data[0x30 / 4] = 0x000c0000;
 		data[0x3c / 4] = 0x000001ff;
 		mask[0x04 / 4] = 0x00000023;
 		mask[0x0c / 4] = 0x0000ffff;
-		mask[0x10 / 4] = m_model == Model::GD5446 ? 0xfe000000 : 0xffc00000;
-		if (m_model == Model::GD5446)
+		mask[0x10 / 4] = m_type == CIRRUS_GD5446_VGA ? 0xfe000000 : 0xffc00000;
+		if (m_type == CIRRUS_GD5446_VGA)
 		{
 			mask[0x14 / 4] = 0xfffffe00;
 			mask[0x18 / 4] = 0xfffffe00;
@@ -2583,6 +2584,7 @@ void CCirrus::check_state()
 // Fields not registered by upstream device_start().
 void CCirrus::register_chipset_state()
 {
+	save_item(NAME(svga.ignore_chain4));
 	if (auto* gd5428 = dynamic_cast<cirrus_gd5428_vga_device*>(this))
 	{
 		save_item(gd5428->gc_mode_ext, "gc_mode_ext");
@@ -2668,22 +2670,18 @@ int CCirrus::SaveState(FILE* f)
 	auto saved_vga = vga;
 	saved_vga.memory = nullptr;
 	const u8 io_state[] = { (u8)m_ioas };
-	const u32 vram_size = (u32)vga.svga_intf.vram_size;
-	const u32 model = static_cast<u32>(m_model);
 
 	if (fwrite(&cirrus_video_magic, sizeof(cirrus_video_magic), 1, f) != 1 ||
-		!cirrus_write_record(f, model) || !cirrus_write_record(f, saved_vga) ||
-		!save_registered_state(f) || !cirrus_write_record(f, svga) ||
+		!cirrus_write_record(f, m_snapshot_id) || !cirrus_write_record(f, saved_vga) ||
+		!save_registered_state(f) ||
 		!cirrus_write_record(f, io_state) ||
-		!cirrus_write_record(f, m_scan) ||
-		fwrite(&vram_size, sizeof(vram_size), 1, f) != 1 ||
-		fwrite(vga.memory, vram_size, 1, f) != 1)
+		!cirrus_write_record(f, m_scan))
 	{
 		printf("%s: Could not save graphics state.\n", devid_string);
 		return -1;
 	}
 	printf("%s: Graphics registers and %u bytes of VRAM saved.\n",
-		devid_string, vram_size);
+		devid_string, (u32)vga.svga_intf.vram_size);
 	return 0;
 }
 
@@ -2702,19 +2700,15 @@ int CCirrus::RestoreState(FILE* f)
 	// Stage the complete graphics section so a short read or layout mismatch can't corrupt state.
 	decltype(vga) saved_vga{};
 	RegisteredState saved_cirrus;
-	decltype(svga) saved_svga{};
 	u8 io_state[1]{};
 	ScanPosition saved_scan{};
-	u32 magic = 0, model = 0, vram_size = 0;
+	u32 magic = 0, model = 0;
 	if (fread(&magic, sizeof(magic), 1, f) != 1 || magic != cirrus_video_magic ||
-		!cirrus_read_record(f, model) || model != static_cast<u32>(m_model) ||
+		!cirrus_read_record(f, model) || model != m_snapshot_id ||
 		!cirrus_read_record(f, saved_vga) ||
 		!read_registered_state(f, saved_cirrus) ||
-		!cirrus_read_record(f, saved_svga) ||
 		!cirrus_read_record(f, io_state) ||
 		!cirrus_read_record(f, saved_scan) ||
-		fread(&vram_size, sizeof(vram_size), 1, f) != 1 ||
-		vram_size != vga.svga_intf.vram_size ||
 		saved_vga.svga_intf.vram_size != vga.svga_intf.vram_size ||
 		io_state[0] > 1 ||
 		!std::isfinite(saved_scan.character) || saved_scan.character < 0.0 ||
@@ -2722,13 +2716,6 @@ int CCirrus::RestoreState(FILE* f)
 		saved_scan.field > 1)
 	{
 		printf("%s: Invalid or incompatible graphics state.\n", devid_string);
-		return -1;
-	}
-
-	std::vector<u8> saved_vram(vram_size);
-	if (fread(saved_vram.data(), vram_size, 1, f) != 1)
-	{
-		printf("%s: Incomplete graphics state.\n", devid_string);
 		return -1;
 	}
 
@@ -2745,14 +2732,12 @@ int CCirrus::RestoreState(FILE* f)
 	}
 	saved_vga.memory = vga.memory;
 	vga = saved_vga;
-	svga = saved_svga;
 	m_ioas = io_state[0] != 0;
 	m_scan = saved_scan;
 	m_scan_time = cSystem->device_access_time();
 	m_scan_initialized = true;
 	// Preserve whether the caller stopped the VM. Normal System restore
 	// resumes through start_threads; direct device restores remain runnable.
-	memcpy(vga.memory, saved_vram.data(), vram_size);
 
 	// Rebuild host rendering caches from the restored registers.
 	recompute_params();
@@ -2761,6 +2746,6 @@ int CCirrus::RestoreState(FILE* f)
 	old_iWidth = old_iHeight = 0;
 	m_last_refresh_time = std::chrono::steady_clock::time_point{};
 	printf("%s: Graphics registers and %u bytes of VRAM restored.\n",
-		devid_string, vram_size);
+		devid_string, (u32)vga.svga_intf.vram_size);
 	return 0;
 }

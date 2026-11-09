@@ -254,8 +254,10 @@ private:
       throw std::invalid_argument("Saved array is too large");
     const u32 type = boolean ? 1 : std::is_enum_v<atom_type> ? 5 :
       std::is_floating_point_v<atom_type> ? 4 : std::is_signed_v<atom_type> ? 2 : 3;
+    const bool contiguous = !boolean && blocks && stride == sizeof(ItemType);
     add_state_field({ name ? name : "", s32(index), type, element_size,
-      u32(blocks * elements), sizeof(ItemType), stride, u32(blocks), std::move(address) });
+      u32(blocks * elements), contiguous ? blocks * sizeof(ItemType) : sizeof(ItemType),
+      stride, contiguous ? 1u : u32(blocks), std::move(address) });
   }
 
   void add_state_field(StateField field);

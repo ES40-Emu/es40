@@ -146,7 +146,7 @@ void vga_device::device_start()
 	// copy over interfaces
 // 	vga.memory = std::make_unique<uint8_t []>(vga.svga_intf.vram_size);
 // 	memset(&vga.memory[0], 0, vga.svga_intf.vram_size);
-// 	save_pointer(NAME(vga.memory), vga.svga_intf.vram_size);
+	save_pointer(NAME(vga.memory), vga.svga_intf.vram_size);
 // 	save_item(NAME(vga.pens));
 // 	save_item(NAME(m_ioas));
 //

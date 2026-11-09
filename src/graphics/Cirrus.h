@@ -96,18 +96,19 @@ public:
   virtual void  stop_threads() override;
 
 protected:
-  enum class Model : u32 { GD5401, GD5428, GD5430, GD5446, AVGA1 };
-  CCirrus(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
-    bx_gui_c& display, Model model);
+  CCirrus(const machine_config& mconfig, device_type type, const char* tag,
+    device_t* owner, uint32_t clock);
 
   void recompute_params_clock(int divisor, int xtal);
 
 private:
+  static CConfigurator* config_for(const machine_config& mconfig);
   void register_chipset_state();
 
-  Model m_model;
-  bool is_avga() const noexcept { return m_model == Model::GD5401 || m_model == Model::AVGA1; }
-  bool is_pci() const noexcept { return m_model == Model::GD5430 || m_model == Model::GD5446; }
+  device_type m_type;
+  u32 m_snapshot_id;
+  bool is_avga() const noexcept;
+  bool is_pci() const noexcept;
   // Cirrus has one modeled output.
   CDisplayOutput m_output;
   // ATC index 0x00..0x0F: Palette registers
@@ -179,9 +180,7 @@ private:
 class cirrus_gd5401_vga_device : public CCirrus
 {
 public:
-//	cirrus_gd5401_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock = 0);
-	cirrus_gd5401_vga_device(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
-		bx_gui_c& display, bool avga1 = false);
+	cirrus_gd5401_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock = 0);
 
 protected:
 	virtual void recompute_params() override;
@@ -194,9 +193,7 @@ public:
 //	static constexpr feature_type imperfect_features() { return feature::GRAPHICS; }
 
 	// construction/destruction
-//	cirrus_gd5428_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock = 0);
-	cirrus_gd5428_vga_device(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
-		bx_gui_c& display);
+	cirrus_gd5428_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock = 0);
 
 	virtual uint8_t mem_r(offs_t offset) override;
 	virtual void mem_w(offs_t offset, uint8_t data) override;
@@ -204,9 +201,7 @@ public:
 	virtual uint32_t screen_update(screen_device &screen, bitmap_rgb32 &bitmap, const rectangle &cliprect) override;
 
 protected:
-//	cirrus_gd5428_vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock);
-	cirrus_gd5428_vga_device(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
-		bx_gui_c& display, Model model);
+	cirrus_gd5428_vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock);
 
 	// device-level overrides
 	virtual void device_start() override ATTR_COLD;
@@ -298,17 +293,13 @@ private:
 class cirrus_gd5430_vga_device :  public cirrus_gd5428_vga_device
 {
 public:
-//	cirrus_gd5430_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock = 0);
-	cirrus_gd5430_vga_device(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
-		bx_gui_c& display);
+	cirrus_gd5430_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock = 0);
 
 	virtual uint8_t mem_r(offs_t offset) override;
 	virtual void mem_w(offs_t offset, uint8_t data) override;
 
 protected:
-//	cirrus_gd5430_vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock);
-	cirrus_gd5430_vga_device(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
-		bx_gui_c& display, Model model);
+	cirrus_gd5430_vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock);
 
 	virtual void device_start() override ATTR_COLD;
 	virtual void device_reset() override ATTR_COLD;
@@ -331,9 +322,7 @@ private:
 class cirrus_gd5446_vga_device :  public cirrus_gd5430_vga_device
 {
 public:
-//	cirrus_gd5446_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock = 0);
-	cirrus_gd5446_vga_device(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
-		bx_gui_c& display);
+	cirrus_gd5446_vga_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock = 0);
 
 protected:
 	virtual void device_start() override ATTR_COLD;
@@ -345,10 +334,10 @@ protected:
 
 
 // device type definition
-//DECLARE_DEVICE_TYPE(CIRRUS_GD5401_VGA, cirrus_gd5401_vga_device)
-//DECLARE_DEVICE_TYPE(CIRRUS_GD5428_VGA, cirrus_gd5428_vga_device)
-//DECLARE_DEVICE_TYPE(CIRRUS_GD5430_VGA, cirrus_gd5430_vga_device)
-//DECLARE_DEVICE_TYPE(CIRRUS_GD5446_VGA, cirrus_gd5446_vga_device)
+DECLARE_DEVICE_TYPE(CIRRUS_GD5401_VGA, cirrus_gd5401_vga_device)
+DECLARE_DEVICE_TYPE(CIRRUS_GD5428_VGA, cirrus_gd5428_vga_device)
+DECLARE_DEVICE_TYPE(CIRRUS_GD5430_VGA, cirrus_gd5430_vga_device)
+DECLARE_DEVICE_TYPE(CIRRUS_GD5446_VGA, cirrus_gd5446_vga_device)
 
 
 #endif // INCLUDED_Cirrus_H_

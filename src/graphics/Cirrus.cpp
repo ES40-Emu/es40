@@ -2584,6 +2584,9 @@ void CCirrus::check_state()
 // Fields not registered by upstream device_start().
 void CCirrus::register_chipset_state()
 {
+	save_item(NAME(vga.crtc.horz_blank_end));
+	save_item(NAME(vga.cursor.visible));
+	save_item(NAME(vga.oak.reg));
 	save_item(NAME(svga.ignore_chain4));
 	if (auto* gd5428 = dynamic_cast<cirrus_gd5428_vga_device*>(this))
 	{
@@ -2666,15 +2669,9 @@ int CCirrus::SaveState(FILE* f)
 	if (res)
 		return res;
 
-	// Only serialize guest state. The VRAM allocation belongs to this process.
-	auto saved_vga = vga;
-	saved_vga.memory = nullptr;
-	const u8 io_state[] = { (u8)m_ioas };
-
 	if (fwrite(&cirrus_video_magic, sizeof(cirrus_video_magic), 1, f) != 1 ||
-		!cirrus_write_record(f, m_snapshot_id) || !cirrus_write_record(f, saved_vga) ||
+		!cirrus_write_record(f, m_snapshot_id) ||
 		!save_registered_state(f) ||
-		!cirrus_write_record(f, io_state) ||
 		!cirrus_write_record(f, m_scan))
 	{
 		printf("%s: Could not save graphics state.\n", devid_string);
@@ -2698,19 +2695,13 @@ int CCirrus::RestoreState(FILE* f)
 		return res;
 
 	// Stage the complete graphics section so a short read or layout mismatch can't corrupt state.
-	decltype(vga) saved_vga{};
 	RegisteredState saved_cirrus;
-	u8 io_state[1]{};
 	ScanPosition saved_scan{};
 	u32 magic = 0, model = 0;
 	if (fread(&magic, sizeof(magic), 1, f) != 1 || magic != cirrus_video_magic ||
 		!cirrus_read_record(f, model) || model != m_snapshot_id ||
-		!cirrus_read_record(f, saved_vga) ||
 		!read_registered_state(f, saved_cirrus) ||
-		!cirrus_read_record(f, io_state) ||
 		!cirrus_read_record(f, saved_scan) ||
-		saved_vga.svga_intf.vram_size != vga.svga_intf.vram_size ||
-		io_state[0] > 1 ||
 		!std::isfinite(saved_scan.character) || saved_scan.character < 0.0 ||
 		saved_scan.character >= 65541.0 || saved_scan.line >= 131076 ||
 		saved_scan.field > 1)
@@ -2724,15 +2715,6 @@ int CCirrus::RestoreState(FILE* f)
 		printf("%s: Could not restore registered chipset state.\n", devid_string);
 		return -1;
 	}
-	if (!is_avga())
-	{
-		memcpy(saved_vga.crtc.data, vga.crtc.data, sizeof(saved_vga.crtc.data));
-		memcpy(saved_vga.sequencer.data, vga.sequencer.data, sizeof(saved_vga.sequencer.data));
-		memcpy(saved_vga.attribute.data, vga.attribute.data, sizeof(saved_vga.attribute.data));
-	}
-	saved_vga.memory = vga.memory;
-	vga = saved_vga;
-	m_ioas = io_state[0] != 0;
 	m_scan = saved_scan;
 	m_scan_time = cSystem->device_access_time();
 	m_scan_initialized = true;

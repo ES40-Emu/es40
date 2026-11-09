@@ -382,11 +382,7 @@ void CGloriaSynergy::run()
 {
 	try
 	{
-		if (!m_gui_initialized)
-		{
-			m_output.display().init(X_TILESIZE, Y_TILESIZE);
-			m_gui_initialized = true;
-		}
+		m_output.initialize(X_TILESIZE, Y_TILESIZE);
 		while (!m_stop.load())
 		{
 			{

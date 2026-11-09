@@ -1729,14 +1729,7 @@ void CS3Trio64::run()
 {
 	try
 	{
-		// The GUI outlives this worker. Serial-menu save/restore stops and joins the worker. 
-		// Next run must retain the existing window.
-		if (!m_gui_initialized)
-		{
-			// initialize the GUI (and let it know our tilesize)
-			m_output.display().init(state.x_tilesize, state.y_tilesize);
-			m_gui_initialized = true;
-		}
+		m_output.initialize(state.x_tilesize, state.y_tilesize);
 		bool was_paused = false;
 		PauseAck.store(false, std::memory_order_release);
 		for (;;)
@@ -3788,7 +3781,7 @@ int CS3Trio64::RestoreState(FILE* f)
 	s3_define_video_mode();
 	recompute_params();
 	vga.dac.dirty = 1;
-	if (m_gui_initialized)
+	if (m_output.initialized())
 		palette_update();
 	else
 		vga_device::palette_update();

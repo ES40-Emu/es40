@@ -386,6 +386,15 @@ void bx_gui_c::graphics_tile_update_in_place(unsigned x0, unsigned y0,
 	}
 }
 
+void CDisplayOutput::initialize(unsigned tile_width, unsigned tile_height)
+{
+	if (!m_initialized)
+	{
+		m_display.init(tile_width, tile_height);
+		m_initialized = true;
+	}
+}
+
 void CDisplayOutput::resize_argb32(unsigned width, unsigned height, bool force)
 {
 	if (force || width != m_width || height != m_height)

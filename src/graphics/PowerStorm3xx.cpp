@@ -338,11 +338,7 @@ void CPowerStorm3xx::run()
 {
 	try
 	{
-		if (!m_gui_initialized)
-		{
-			m_output.display().init(X_TILESIZE, Y_TILESIZE);
-			m_gui_initialized = true;
-		}
+		m_output.initialize(X_TILESIZE, Y_TILESIZE);
 		// Only this display thread owns the reusable frame.
 		CRealImage2100::Frame frame;
 		while (!m_stop.load())

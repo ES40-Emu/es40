@@ -151,7 +151,6 @@ private:
   //  - PauseAck is raised by the Cirrus thread once it is safely paused
   std::atomic<bool> PauseThread{ false };
   std::atomic<bool> PauseAck{ false };
-  bool m_gui_initialized = false;
   // computed video timing, MAME screen().configure() parameters
   struct {
     int      pixel_clock_hz = 0;    // computed pixel clock in Hz

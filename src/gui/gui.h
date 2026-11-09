@@ -215,8 +215,10 @@ public:
 
   unsigned id() const { return m_id; }
   bx_gui_c& display() const { return m_display; }
+  bool initialized() const { return m_initialized; }
 
   // Callers retain GUI locking and flushing.
+  void initialize(unsigned tile_width, unsigned tile_height);
   void resize_argb32(unsigned width, unsigned height, bool force = false);
   void present_argb32(const u32* pixels, unsigned width, unsigned height);
   void invalidate_dimensions() { m_width = m_height = 0; }
@@ -224,6 +226,7 @@ public:
 private:
   const unsigned m_id;
   bx_gui_c& m_display;
+  bool m_initialized = false;
   unsigned m_width = 0, m_height = 0;
 };
 

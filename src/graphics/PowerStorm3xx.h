@@ -166,7 +166,6 @@ private:
   CThread* m_thread = nullptr;
   std::atomic<bool> m_stop{false}, m_pause{false}, m_pause_ack{false},
     m_worker_failed{false};
-  bool m_gui_initialized = false;
 };
 
 #endif // INCLUDED_PowerStorm3xx_H_

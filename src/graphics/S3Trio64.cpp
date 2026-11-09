@@ -4422,13 +4422,13 @@ void CS3Trio64::update(void)
 	// MAME always produces ARGB32 — tell SDL we're in 32bpp mode.
 	if (state.last_bpp != 32 || iWidth != old_iWidth || iHeight != old_iHeight)
 	{
-		m_output.display().dimension_update(iWidth, iHeight, 0, 0, 32);
+		m_output.resize_argb32(iWidth, iHeight, true);
 		old_iWidth = iWidth;
 		old_iHeight = iHeight;
 		state.last_bpp = 32;
 	}
 
-	m_output.display().graphics_frame_update(m_render_bitmap.raw(), iWidth, iHeight);
+	m_output.present_argb32(m_render_bitmap.raw(), iWidth, iHeight);
 
 	state.vga_mem_updated = 0;
 }

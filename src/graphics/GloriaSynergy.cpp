@@ -368,15 +368,7 @@ void CGloriaSynergy::update()
 		CGloriaDisplayLock guard(m_output.display());
 		if (!frame.argb.empty())
 		{
-			if (frame.width != m_host_width || frame.height != m_host_height)
-			{
-				m_output.display().dimension_update(
-					frame.width, frame.height, 0, 0, 32);
-				m_host_width = frame.width;
-				m_host_height = frame.height;
-			}
-			m_output.display().graphics_frame_update(
-				frame.argb.data(), frame.width, frame.height);
+			m_output.present_argb32(frame.argb.data(), frame.width, frame.height);
 		}
 		else
 		{

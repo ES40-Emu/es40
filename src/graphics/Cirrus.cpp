@@ -2405,15 +2405,7 @@ void CCirrus::update(void)
 	// Tick the frame counter (for cursor blink)
 	screen().tick_frame();
 
-	// MAME always produces ARGB32 — tell SDL we're in 32bpp mode.
-	if (iWidth != old_iWidth || iHeight != old_iHeight)
-	{
-		m_output.display().dimension_update(iWidth, iHeight, 0, 0, 32);
-		old_iWidth = iWidth;
-		old_iHeight = iHeight;
-	}
-
-	m_output.display().graphics_frame_update(m_render_bitmap.raw(), iWidth, iHeight);
+	m_output.present_argb32(m_render_bitmap.raw(), iWidth, iHeight);
 }
 
 void CCirrus::get_display_size(unsigned& width, unsigned& height)
@@ -2507,7 +2499,7 @@ void CCirrus::start_threads()
 		m_scan_paused = false;
 	}
 	// Repaint and resize through the normal GUI path after any resume.
-	old_iWidth = old_iHeight = 0;
+	m_output.invalidate_dimensions();
 	// Resume after reset if the thread already exists
 	PauseThread.store(false, std::memory_order_release);
 
@@ -2715,7 +2707,7 @@ int CCirrus::RestoreState(FILE* f)
 	recompute_params();
 	vga.dac.dirty = 1;
 	vga_device::palette_update();
-	old_iWidth = old_iHeight = 0;
+	m_output.invalidate_dimensions();
 	m_last_refresh_time = std::chrono::steady_clock::time_point{};
 	printf("%s: Graphics registers and %u bytes of VRAM restored.\n",
 		devid_string, (u32)vga.svga_intf.vram_size);

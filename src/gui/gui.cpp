@@ -386,6 +386,23 @@ void bx_gui_c::graphics_tile_update_in_place(unsigned x0, unsigned y0,
 	}
 }
 
+void CDisplayOutput::resize_argb32(unsigned width, unsigned height, bool force)
+{
+	if (force || width != m_width || height != m_height)
+	{
+		m_display.dimension_update(width, height, 0, 0, 32);
+		m_width = width;
+		m_height = height;
+	}
+}
+
+void CDisplayOutput::present_argb32(const u32* pixels,
+	unsigned width, unsigned height)
+{
+	resize_argb32(width, height);
+	m_display.graphics_frame_update(pixels, width, height);
+}
+
 void bx_gui_c::graphics_frame_update(const u32* pixels,
 	unsigned width, unsigned height)
 {

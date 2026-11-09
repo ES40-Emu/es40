@@ -160,7 +160,6 @@ private:
   std::atomic<bool> m_stop{false}, m_pause{false}, m_pause_ack{false},
     m_worker_failed{false};
   bool m_gui_initialized = false;
-  unsigned m_host_width = 0, m_host_height = 0;
 };
 
 #endif // INCLUDED_Radeon7500_H_

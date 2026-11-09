@@ -152,9 +152,6 @@ private:
   std::atomic<bool> PauseThread{ false };
   std::atomic<bool> PauseAck{ false };
   bool m_gui_initialized = false;
-  // Host dimension cache for this card's single scanout; not snapshot data.
-  unsigned old_iHeight = 0;
-  unsigned old_iWidth = 0;
   // computed video timing, MAME screen().configure() parameters
   struct {
     int      pixel_clock_hz = 0;    // computed pixel clock in Hz

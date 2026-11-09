@@ -216,9 +216,15 @@ public:
   unsigned id() const { return m_id; }
   bx_gui_c& display() const { return m_display; }
 
+  // Callers retain GUI locking and flushing.
+  void resize_argb32(unsigned width, unsigned height, bool force = false);
+  void present_argb32(const u32* pixels, unsigned width, unsigned height);
+  void invalidate_dimensions() { m_width = m_height = 0; }
+
 private:
   const unsigned m_id;
   bx_gui_c& m_display;
+  unsigned m_width = 0, m_height = 0;
 };
 
 // Enumeration of outputs. IDs are unique within a provider.

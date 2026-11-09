@@ -209,6 +209,8 @@ class machine_config
 {
 public:
   machine_config() = default;
+  machine_config(class CConfigurator* cfg, class CSystem* system, int pcibus, int pcidev)
+    : cfg(cfg), system(system), pcibus(pcibus), pcidev(pcidev) { }
   machine_config(class CConfigurator* cfg, class CSystem* system, int pcibus, int pcidev,
     class bx_gui_c& display, uint32_t snapshot_id)
     : cfg(cfg), system(system), pcibus(pcibus), pcidev(pcidev),

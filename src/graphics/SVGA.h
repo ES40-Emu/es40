@@ -52,7 +52,7 @@ public:
 
 protected:
   // construction/destruction
-  //svga_device(const machine_config& mconfig, device_type type, const char* tag, device_t* owner, uint32_t clock);
+  svga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock);
   svga_device(class CConfigurator* cfg, class CSystem* c, int pcibus, int pcidev);
 
   void svga_vh_rgb8(bitmap_rgb32& bitmap, const rectangle& cliprect);

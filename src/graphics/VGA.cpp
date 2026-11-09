@@ -74,7 +74,7 @@ static constexpr unsigned vga_log_mask = 0
    *
    * Multiple VGA cards require explicit configuration permission.
    **/
-// vga_device::vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock)
+vga_device::vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock)
 // 	: device_t(mconfig, type, tag, owner, clock)
 // 	, device_video_interface(mconfig, *this)
 // 	, device_palette_interface(mconfig, *this)
@@ -82,6 +82,10 @@ static constexpr unsigned vga_log_mask = 0
 // 	, vga(*this)
 // 	, m_input_sense(*this, "VGA_SENSE")
 // 	, m_vsync_cb(*this)
+	: vga_device(mconfig.cfg, mconfig.system, mconfig.pcibus, mconfig.pcidev)
+{
+}
+
 vga_device::vga_device(class CConfigurator* cfg, class CSystem* c, int pcibus, int pcidev) : CPCIDevice(cfg, c, pcibus, pcidev)
 {
 	const bool another_vga = c->has_vga_device(this);

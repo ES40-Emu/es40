@@ -1777,11 +1777,11 @@ void cirrus_gd5446_vga_device::sequencer_map(address_map &map)
 
 // ES40 adapter.
 
-CConfigurator* CCirrus::config_for(const machine_config& mconfig)
+const machine_config& CCirrus::config_for(const machine_config& mconfig)
 {
 	if (!mconfig.cfg || !mconfig.system || !mconfig.display)
 		FAILURE(Configuration, "Cirrus requires an ES40 construction context");
-	return mconfig.cfg;
+	return mconfig;
 }
 
 bool CCirrus::is_avga() const noexcept
@@ -1799,9 +1799,9 @@ bool CCirrus::is_pci() const noexcept
  *
  * Bind the card's sole display output; device initialization is done by init().
  **/
-CCirrus::CCirrus(const machine_config& mconfig, device_type type, const char* /*tag*/,
-	device_t* /*owner*/, uint32_t /*clock*/)
-	: svga_device(config_for(mconfig), mconfig.system, mconfig.pcibus, mconfig.pcidev),
+CCirrus::CCirrus(const machine_config& mconfig, device_type type, const char* tag,
+	device_t* owner, uint32_t clock)
+	: svga_device(config_for(mconfig), type, tag, owner, clock),
 	  m_type(type), m_snapshot_id(mconfig.snapshot_id), m_output(0, *mconfig.display)
 {
 	memset(&vga, 0, sizeof(vga));

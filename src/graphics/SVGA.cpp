@@ -46,10 +46,13 @@
  *
  *************************************/
 
-// svga_device::svga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock)
-// 	: vga_device(mconfig, type, tag, owner, clock)
+svga_device::svga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock)
+	: vga_device(mconfig, type, tag, owner, clock)
+{
+}
+
 svga_device::svga_device(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev)
-	: vga_device(cfg, c, pcibus, pcidev)
+	: svga_device(machine_config(cfg, c, pcibus, pcidev), nullptr, nullptr, nullptr, 0)
 {
 }
 

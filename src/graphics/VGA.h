@@ -145,7 +145,7 @@ protected:
     RGB32_MODE
   };
 
-  //vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock);
+  vga_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock);
 
   //TIMER_CALLBACK_MEMBER(vblank_timer_cb);
 

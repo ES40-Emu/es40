@@ -102,7 +102,7 @@ protected:
   void recompute_params_clock(int divisor, int xtal);
 
 private:
-  static CConfigurator* config_for(const machine_config& mconfig);
+  static const machine_config& config_for(const machine_config& mconfig);
   void register_chipset_state();
 
   device_type m_type;

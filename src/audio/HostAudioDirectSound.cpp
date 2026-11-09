@@ -309,7 +309,11 @@ struct NativeStream
         last_service = now;
         const std::uint64_t safe_position = play_position + (safe + ring_bytes - play) % ring_bytes;
         producer = (std::max)(producer, safe_position);
-        const std::uint64_t end = (std::min)(safe_position + period_frames * frame,
+        // The safe cursor can advance by 20 ms between worker runs even though
+        // we request a 2 ms wait. Keep three periods beyond it so that scheduler
+        // jitter cannot overtake a single 10.7 ms period and insert silence while
+        // source samples remain queued.
+        const std::uint64_t end = (std::min)(safe_position + 3 * period_frames * frame,
             play_position + ring_bytes - frame);
         if (producer < end) {
             const size_t bytes = static_cast<size_t>(end - producer);

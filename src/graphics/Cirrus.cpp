@@ -1810,6 +1810,9 @@ CCirrus::CCirrus(const machine_config& mconfig, device_type type, const char* ta
 	memset(&pci_state, 0, sizeof(pci_state));
 	memset(std_config_data, 0, sizeof(std_config_data));
 	memset(std_config_mask, 0, sizeof(std_config_mask));
+	screen().set_before_clock_change([this] {
+		advance_scan(cSystem->device_access_time());
+	});
 }
 
 /**
@@ -1906,9 +1909,9 @@ void CCirrus::init()
 	memset(vga.memory, 0, vga.svga_intf.vram_size);
 
 	// lets make it decent - redraw time
-	timing.vrefresh_hz = 60.0;
-	timing.refresh_interval_ms = 16;   // ~60Hz
-	timing.xtal_hz = timing.pixel_clock_hz = 25'174'800;
+	screen().vrefresh_hz = 60.0;
+	screen().refresh_interval_ms = 16;   // ~60Hz
+	screen().xtal_hz = screen().pixel_clock_hz = 25'174'800;
 	m_last_refresh_time = std::chrono::steady_clock::now();
 
 	printf("%s: Cirrus %s, %u KiB video RAM\n", devid_string, model, vram_size / 1024);
@@ -2285,7 +2288,7 @@ CCirrus::ScanTiming CCirrus::scan_timing() const
 	}
 	t.sync_enabled = vga.crtc.sync_en != 0;
 	const double dots_per_character = BIT(vga.sequencer.data[1], 0) ? 8.0 : 9.0;
-	t.characters_per_second = (double)timing.pixel_clock_hz * timing.divisor / dots_per_character;
+	t.characters_per_second = (double)screen().pixel_clock_hz * screen().divisor / dots_per_character;
 	return t;
 }
 
@@ -2357,22 +2360,6 @@ u8 CCirrus::scan_status(std::chrono::steady_clock::time_point now)
 	return 0x04 | ((horizontal || vertical) ? 0x01 : 0) | (vertical ? 0x08 : 0);
 }
 
-void CCirrus::recompute_params_clock(int divisor, int xtal)
-{
-	advance_scan(cSystem->device_access_time());
-	// Store timing parameters for renderer/debug use -- ES40 specific
-	timing.xtal_hz = xtal;
-	timing.divisor = divisor;
-	// es40 specific end
-
-	// ES40 specific here - MAME: pixel_clock = xtal / (((vga.sequencer.data[1]&8) >> 3) + 1);
-	const int seq_div = ((vga.sequencer.data[1] & 0x08) >> 3) + 1;
-	timing.pixel_clock_hz = (seq_div > 0) ? (xtal / seq_div) : xtal;
-
-	vga_device::recompute_params_clock(divisor, xtal,
-		timing.vrefresh_hz, timing.refresh_interval_ms);
-}
-
 void CCirrus::update(void)
 {
 	unsigned iWidth = 0, iHeight = 0;
@@ -2381,7 +2368,7 @@ void CCirrus::update(void)
 	auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
 		now - m_last_refresh_time).count();
 
-	if (elapsed_ms < (long long)timing.refresh_interval_ms)
+	if (elapsed_ms < (long long)screen().refresh_interval_ms)
 		return;
 	m_last_refresh_time = now;
 
@@ -2416,7 +2403,7 @@ void CCirrus::get_display_size(unsigned& width, unsigned& height)
 		return;
 
 	const unsigned char_clocks = GRAPHIC_MODE ? 8 : VGA_CH_WIDTH;
-	const unsigned divisor = timing.divisor > 0 ? (unsigned)timing.divisor : 1;
+	const unsigned divisor = screen().divisor > 0 ? (unsigned)screen().divisor : 1;
 	width = (vga.crtc.horz_disp_end + 1u) * char_clocks / divisor;
 	height = LINES;
 }

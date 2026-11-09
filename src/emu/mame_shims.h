@@ -157,6 +157,24 @@ private:
 class screen_device
 {
 public:
+  // ES40 clock and redraw timing.
+  int pixel_clock_hz = 0;
+  int xtal_hz = 0;
+  int divisor = 1;
+  double vrefresh_hz = 0.0;
+  uint64_t refresh_interval_ms = 0;
+
+  void set_before_clock_change(std::function<void()> callback)
+  {
+    m_before_clock_change = std::move(callback);
+  }
+
+  void before_clock_change()
+  {
+    if (m_before_clock_change)
+      m_before_clock_change();
+  }
+
   // Set the logical visible area after mode change
   void set_visible_area(int w, int h)
   {
@@ -186,6 +204,7 @@ public:
   struct dummy_time { void adjust(...) {} };
 
 private:
+  std::function<void()> m_before_clock_change;
   rectangle  m_visarea;
   uint64_t   m_frame_number = 0;
   int        m_vpos = 0;

@@ -101,6 +101,7 @@ protected:
 
   screen_device m_screen_shim;
   screen_device& screen() { return m_screen_shim; }
+  const screen_device& screen() const { return m_screen_shim; }
   bitmap_rgb32 m_render_bitmap;
 
   // Reports an unimplemented register or port once per card: printed (up to
@@ -159,7 +160,8 @@ protected:
   void vga_vh_cga(bitmap_rgb32& bitmap, const rectangle& cliprect);
   void vga_vh_mono(bitmap_rgb32& bitmap, const rectangle& cliprect);
   virtual uint8_t pc_vga_choosevideomode();
-  // ES40 keeps timing storage in each card; false means incomplete CRTC geometry.
+  void recompute_params_clock(int divisor, int xtal);
+  // ES40 compatibility for card-owned timing; false means incomplete CRTC geometry.
   bool recompute_params_clock(int divisor, int xtal,
     double& vrefresh_hz, uint64_t& refresh_interval_ms);
   virtual void recompute_params();

@@ -89,8 +89,6 @@ protected:
   CCirrus(const machine_config& mconfig, device_type type, const char* tag,
     device_t* owner, uint32_t clock);
 
-  void recompute_params_clock(int divisor, int xtal);
-
 private:
   static const machine_config& config_for(const machine_config& mconfig);
   void register_chipset_state();
@@ -143,14 +141,6 @@ private:
   //  - PauseAck is raised by the Cirrus thread once it is safely paused
   std::atomic<bool> PauseThread{ false };
   std::atomic<bool> PauseAck{ false };
-  // computed video timing, MAME screen().configure() parameters
-  struct {
-    int      pixel_clock_hz = 0;    // computed pixel clock in Hz
-    int      xtal_hz = 0;    // base or PLL-derived crystal frequency
-    int      divisor = 1;    // VCLK divisor from color mode
-    double   vrefresh_hz;          // vertical refresh rate derived from CRTC
-    uint64_t refresh_interval_ms;  // milliseconds between redraws
-  } timing{};
   // screen refresh stuff
   std::chrono::steady_clock::time_point m_last_refresh_time{};
 

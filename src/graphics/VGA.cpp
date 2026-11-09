@@ -1660,7 +1660,16 @@ uint32_t vga_device::screen_update(screen_device &screen, bitmap_rgb32 &bitmap, 
  *
  *************************************/
 
-// void vga_device::recompute_params_clock(int divisor, int xtal)
+void vga_device::recompute_params_clock(int divisor, int xtal)
+{
+	screen().before_clock_change();
+	screen().xtal_hz = xtal;
+	screen().divisor = divisor;
+	screen().pixel_clock_hz = xtal / (((vga.sequencer.data[1]&8) >> 3) + 1);
+	recompute_params_clock(divisor, xtal,
+		screen().vrefresh_hz, screen().refresh_interval_ms);
+}
+
 bool vga_device::recompute_params_clock(int divisor, int xtal,
 	double& vrefresh_hz, uint64_t& refresh_interval_ms)
 {

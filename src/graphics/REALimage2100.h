@@ -338,6 +338,23 @@ private:
     TriangleOperation& operation) const;
   void execute_triangle(const TriangleOperation& operation);
   void triangle_command(uint32_t address, uint32_t value);
+
+  enum class LinePreparation { Rejected, NoOp, Ready };
+  struct LineOperation
+  {
+    struct Point { int64_t x = 0, y = 0; }; // fixed-point, pixel * 16
+    Point a{}, b{};
+    ColorWriteContext rgb{};
+    uint32_t color = 0, banks = 0, auxiliary = 0, compare_mask = 0;
+    uint32_t masks[3]{};
+    uint32_t stipple = 0, command = 0;
+    bool inclusive = false, patterned = false, apply_rgb_rop = false;
+    bool auxiliary_compare = false, color_write = false;
+  };
+  LinePreparation prepare_line(uint32_t address, uint32_t value,
+    LineOperation& operation) const;
+  void execute_line(const LineOperation& operation);
+
   void raster_vertex_command(uint32_t address, uint32_t value);
   uint32_t texture_color(double s, double t, uint32_t base,
     uint32_t width, uint32_t height, unsigned row_shift) const;

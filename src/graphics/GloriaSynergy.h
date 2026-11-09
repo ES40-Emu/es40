@@ -100,13 +100,6 @@ public:
   void finalize_restore() noexcept override;
   std::string snapshot_identity() const override;
 
-  std::size_t output_count() const override { return 1; }
-
-  const CDisplayOutput* output_at(std::size_t ordinal) const override
-  {
-    return ordinal == 0 ? &m_output : nullptr;
-  }
-
   u8 mem_r(offs_t offset) override;
   void mem_w(offs_t offset, u8 data) override;
 
@@ -137,7 +130,6 @@ private:
   void publish_frame();
   void trace_unimplemented(const std::string& text) override;
 
-  CDisplayOutput m_output;
   CPermedia2 m_permedia2;
   // Host scanout storage is shared only by the display and frame-file paths.
   // Acquire this mutex before the device bus; native conversion releases the bus.

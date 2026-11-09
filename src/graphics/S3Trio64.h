@@ -104,12 +104,6 @@ public:
     bx_gui_c& display);
   virtual       ~CS3Trio64();
 
-  std::size_t output_count() const override { return 1; }
-  const CDisplayOutput* output_at(std::size_t ordinal) const override
-  {
-    return ordinal == 0 ? &m_output : nullptr;
-  }
-
   void          update(void);
   virtual void  run(void) override;
 
@@ -252,9 +246,6 @@ protected:
 
 
 private:
-  // Trio64 has one modeled output.
-  CDisplayOutput m_output;
-
   // MAME CODE HERE
   ibm8514a_device m_8514;
   void refresh_pitch_offset();

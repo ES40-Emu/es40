@@ -234,10 +234,19 @@ private:
 class CDisplayOutputProvider
 {
 public:
+  CDisplayOutputProvider(unsigned id, bx_gui_c& display)
+    : m_output(id, display) {}
+
   virtual ~CDisplayOutputProvider() = default;
-  virtual std::size_t output_count() const = 0;
+  virtual std::size_t output_count() const { return 1; }
   // Returns a borrowed binding, or nullptr when out of range.
-  virtual const CDisplayOutput* output_at(std::size_t ordinal) const = 0;
+  virtual const CDisplayOutput* output_at(std::size_t ordinal) const
+  {
+    return ordinal == 0 ? &m_output : nullptr;
+  }
+
+protected:
+  CDisplayOutput m_output;
 };
 
 #define BX_KEY_PRESSED        0x00000000

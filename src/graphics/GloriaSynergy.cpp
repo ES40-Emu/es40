@@ -514,7 +514,7 @@ CGloriaSynergy::OptionROM CGloriaSynergy::OptionROM::parse(
 CGloriaSynergy::CGloriaSynergy(
 	CConfigurator* cfg, CSystem* sys, int bus, int dev, bx_gui_c& display)
 try
-	: svga_device(cfg, sys, bus, dev), m_output(0, display),
+	: svga_device(cfg, sys, bus, dev), CDisplayOutputProvider(0, display),
 	  m_permedia2(gloria_options(cfg)), m_rom(65536, 0xff)
 {
 	reset_vga();

@@ -474,7 +474,7 @@ CPowerStorm3xx::OptionROM CPowerStorm3xx::OptionROM::parse(
 
 CPowerStorm3xx::CPowerStorm3xx(
 	CConfigurator* cfg, CSystem* sys, int bus, int dev, bx_gui_c& display)
-try : svga_device(cfg, sys, bus, dev), m_output(0, display)
+try : svga_device(cfg, sys, bus, dev), CDisplayOutputProvider(0, display)
 {
 	reset_vga();
 	m_crtc_space_config = address_space_config("crtc_regs", ENDIANNESS_LITTLE, 8, 8, 0,

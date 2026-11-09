@@ -78,12 +78,6 @@ public:
 
   virtual       ~CCirrus();
 
-  std::size_t output_count() const override { return 1; }
-  const CDisplayOutput* output_at(std::size_t ordinal) const override
-  {
-    return ordinal == 0 ? &m_output : nullptr;
-  }
-
   void          update(void);
   virtual void  run(void) override;
 
@@ -105,8 +99,6 @@ private:
   u32 m_snapshot_id;
   bool is_avga() const noexcept;
   bool is_pci() const noexcept;
-  // Cirrus has one modeled output.
-  CDisplayOutput m_output;
 
   void  get_display_size(unsigned& width, unsigned& height);
   u32   io_read(u32 address, int dsize);

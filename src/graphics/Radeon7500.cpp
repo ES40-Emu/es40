@@ -469,7 +469,7 @@ CRadeon7500::OptionROM CRadeon7500::OptionROM::parse(
 CRadeon7500::CRadeon7500(
 	CConfigurator* cfg, CSystem* sys, int bus, int dev, bx_gui_c& display)
 try
-	: svga_device(cfg, sys, bus, dev), m_output(0, display),
+	: svga_device(cfg, sys, bus, dev), CDisplayOutputProvider(0, display),
 	  m_rv200(radeon_options(cfg))
 {
 	reset_vga();

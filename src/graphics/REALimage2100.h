@@ -66,7 +66,7 @@ public:
   static constexpr uint32_t UnitReset = 0x0080041c;
   // Read-only busy bits 0/3/25-31; timing roles for bits 23/24 are inferred.
   static constexpr uint32_t Status = 0x00800420, StatusVBlank = 1u << 23,
-                            StatusVRetrace = 1u << 24;
+                            StatusVRetrace = 1u << 24,
                             StatusUpperWritable = 0xff800000u;
   // Status reads per virtual frame; the timing flags need no host clock.
   static constexpr uint32_t StatusFrameReads = 64;

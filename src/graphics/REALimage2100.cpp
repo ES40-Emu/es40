@@ -2201,7 +2201,7 @@ bool CRealImage2100::triangle_profile() const
 CRealImage2100::TrianglePreparation CRealImage2100::prepare_triangle(
 	uint32_t address, uint32_t value, TriangleOperation& operation) const
 {
-	// These commands retain the slot without launching a primitive.
+	// These commands retain the slot without launching a primitive
 	if (!value || value == 0x10)
 		return TrianglePreparation::NoOp;
 	const uint32_t pipeline = peek(PipelineControl0), texture_mode = pipeline & 0x00038000u,
@@ -2218,7 +2218,7 @@ CRealImage2100::TrianglePreparation CRealImage2100::prepare_triangle(
 		use_alpha = blend && (!additive || source_blend != 1) &&
 			!(textured && texture_alpha && texture_mode == 0x18000),
 		use_w = textured && !affine;
-	// Untextured perspective draws retain the existing linear depth approximation.
+	// Untextured perspective draws retain the existing linear depth approx.
 	if (value != 0x13 || !triangle_profile())
 	{
 		return TrianglePreparation::Rejected;
@@ -2248,14 +2248,14 @@ CRealImage2100::TrianglePreparation CRealImage2100::prepare_triangle(
 			{
 				return TrianglePreparation::Rejected;
 			}
-			// Lighting can emit overrange RGB; clamp before interpolation.
+			// Lighting can emit overrange RGB, so clamp before interpolation
 			component[i] = i > 0 && i < 4 ? std::clamp(double(input), 0.0, 256.0) : input;
 		}
 		vertex[slot] = {component[0], component[1], component[2], component[3],
 			component[4], component[5], component[6], 0, 0};
 		if (textured)
 		{
-			// Optimized driver packets leave the leading texture word unwritten.
+			// Optimized driver packets leave the leading texture word unwritten
 			float coordinates[4];
 			for (unsigned i = 1; i < 4; ++i)
 			{
@@ -2278,7 +2278,7 @@ CRealImage2100::TrianglePreparation CRealImage2100::prepare_triangle(
 			vertex[slot].t = coordinates[2];
 		}
 	}
-	// The shared projection scale can be negative; reject a horizon crossing.
+	// The shared projection scale can be negative. Reject a horizon crossing
 	if (use_w && ((vertex[0].z < 0) != (vertex[1].z < 0) ||
 		(vertex[0].z < 0) != (vertex[2].z < 0)))
 	{
@@ -2287,7 +2287,7 @@ CRealImage2100::TrianglePreparation CRealImage2100::prepare_triangle(
 	double flat_color[4]{};
 	if (flat && (use_color || use_alpha))
 	{
-		// The launching slot supplies flat color, regardless of winding.
+		// The launching slot supplies flat color, regardless of winding
 		const uint32_t slot = (address - FlatVertexBase) / VertexStride;
 		for (unsigned i = 0; i < 4; ++i)
 		{
@@ -2376,45 +2376,347 @@ CRealImage2100::TrianglePreparation CRealImage2100::prepare_triangle(
 	return TrianglePreparation::Ready;
 }
 
+void CRealImage2100::execute_line(const LineOperation& operation)
+{
+	LineOperation::Point a = operation.a, b = operation.b;
+	const int ax = int(a.x / 16), ay = int(a.y / 16);
+	const int bx = int(b.x / 16), by = int(b.y / 16);
+	const int dx = bx - ax, dy = by - ay;
+	const int adx = std::abs(dx), ady = std::abs(dy);
+	const int sx = dx < 0 ? -1 : 1, sy = dy < 0 ? -1 : 1;
+	const bool x_major = adx >= ady;
+	const int major = x_major ? adx : ady;
+	const int minor = x_major ? ady : adx;
+
+	// Exclusive lines omit the final endpoint. A zero-length exclusive
+	// segment draws nothing, while inclusive still plots the single pixel
+	if (!operation.inclusive && major == 0 && minor == 0)
+		return;
+	const int steps = major + int(operation.inclusive);
+
+	// Stipple phase is anchored on the major axis in pixel space, matching
+	// the axial path the drivers already exercise. Diagonal walks advance
+	// one major step per iteration, so the same phase formula applies
+	const int64_t major_start = x_major ? a.x / 16 : a.y / 16;
+	const int64_t major_end = x_major ? b.x / 16 : b.y / 16;
+	const unsigned phase = unsigned(major_end < major_start ?
+		int64_t(operation.command >> 20) - major_start :
+		major_start - int64_t(operation.command >> 20)) & 0xfff;
+	const unsigned stipple_scale = (operation.stipple >> 27) & 7;
+	auto stipple_visible = [&](unsigned step) {
+		if (!operation.patterned)
+			return true;
+		return ((operation.stipple >>
+			(((phase + step) >> stipple_scale) & 15)) & 1) != 0;
+	};
+
+	const int left = std::max(0, int(peek(ClipXMin) >> 4));
+	const int top = std::max(0, int(peek(ClipYMin) >> 4));
+	const int right = std::min(int(m_color_width) - 1, int(peek(ClipXMax) >> 4));
+	const int bottom = std::min(int(m_color_height) - 1, int(peek(ClipYMax) >> 4));
+	if (left > right || top > bottom)
+		return;
+
+	auto invalidate = [&]() {
+		for (unsigned bank = 0; bank < 3; ++bank)
+			if ((operation.banks & (1u << bank)) &&
+				(bank < 2 || !operation.auxiliary_compare))
+				m_clear_cache[bank] = {};
+	};
+
+	auto write_pixel = [&](int x, int y) {
+		const size_t offset = size_t(y) * m_color_width + unsigned(x);
+		if (operation.auxiliary_compare &&
+			((m_auxiliary[offset] ^ operation.auxiliary) & operation.compare_mask))
+			return;
+		if (operation.apply_rgb_rop)
+			color_write(operation.rgb, unsigned(x), unsigned(y),
+				operation.color, operation.banks);
+		else if (operation.color_write)
+			for (unsigned bank = 0; bank < 2; ++bank)
+				if (operation.banks & (1u << bank))
+				{
+					uint32_t& pixel =
+						m_color[size_t(bank) * m_color_pixels + offset];
+					pixel = (pixel & ~operation.masks[bank]) |
+						(operation.color & operation.masks[bank]);
+				}
+		if (operation.banks & 4)
+			m_auxiliary[offset] =
+				(m_auxiliary[offset] & ~operation.masks[2]) |
+				(operation.auxiliary & operation.masks[2]);
+	};
+
+	int x = ax, y = ay;
+	int error = 2 * minor - major;
+	bool drawn = false;
+	for (int i = 0; i < steps; ++i)
+	{
+		if (stipple_visible(unsigned(i)) &&
+			x >= left && x <= right && y >= top && y <= bottom)
+		{
+			if (!drawn)
+				invalidate();
+			drawn = true;
+			write_pixel(x, y);
+		}
+		// Midpoint ties keep the axial step
+		if (error > 0)
+		{
+			if (x_major)
+				y += sy;
+			else
+				x += sx;
+			error -= 2 * major;
+		}
+		error += 2 * minor;
+		if (x_major)
+			x += sx;
+		else
+			y += sy;
+	}
+}
+
+CRealImage2100::LinePreparation CRealImage2100::prepare_line(
+	uint32_t address, uint32_t value, LineOperation& operation) const
+{
+	operation = {};
+	const bool floating = flat_vertex_register(address);
+	// Rotating slot encodings share the same primitive family:
+	// 0x22/0x26/0x2a and 0x62/0x66/0x6a (bits 2..3 select the vertex pair)
+	const uint32_t primitive = floating ? (value & ~0xcu) : (value & 0x000fffffu & ~0xcu);
+	const bool inclusive = primitive == 0x62;
+	const bool line = primitive == 0x22 || inclusive;
+	if (!line)
+		return LinePreparation::Rejected;
+
+	const unsigned first_vertex = (value >> 2) & 3;
+	const uint32_t stipple = peek(PipelineControl3);
+	const bool patterned = !floating && (stipple & 0x80000000u);
+
+	const uint32_t control = peek(DrawControl), banks = (control >> 12) & 15,
+		width = block_width(), columns = ((peek(MemoryControl) >> 24) & 63) + 1,
+		global = peek(GlobalControl0);
+	const bool direct_rgb = (control & ~0xff01u) == 0x21000002u &&
+		(banks == 1 || banks == 2);
+	const bool native_line_rgb = !floating &&
+		(control & ~0x00ffff01u) == 0xa1000002u && (banks == 1 || banks == 2);
+	const bool auxiliary_compare = (control & ~0x00ffff01u) == 0xa1000002u &&
+		(banks == 5 || banks == 6) && plane_value(2, 0, 0xffffffff) == 0;
+	const bool auxiliary_write =
+		(control & ~0x00ef0f01u) == 0xa1004002u &&
+		!(plane_value(2, 0, 0xffffffff) & ~0xe000f000u);
+	const bool color_write = direct_rgb || native_line_rgb || auxiliary_compare ||
+		((control & ~0xff01u) == 0xa1000002u && !(banks & ~3u));
+
+	// Command shape
+	if (first_vertex >= 3)
+		return LinePreparation::Rejected;
+	if (address != (floating ? VertexBase + 0x100 : IntegerVertexColorBase) +
+		((first_vertex + 1) % 3) * VertexStride + 0x1c)
+		return LinePreparation::Rejected;
+	// Non-stippled integer lines shall not carry a phase field in the high bits
+	if (!patterned && !floating && (value & 0xfff00000u))
+		return LinePreparation::Rejected;
+	// Stipple control: enable bit set, scale/pattern in the documented field
+	if (patterned && ((stipple & 0x47ff0000u) || !color_write))
+		return LinePreparation::Rejected;
+	if (inclusive && !floating &&
+		!auxiliary_compare && !direct_rgb && !native_line_rgb)
+		return LinePreparation::Rejected;
+	if (!inclusive && !auxiliary_write && !color_write)
+		return LinePreparation::Rejected;
+	if (!banks || (banks & ~7u))
+		return LinePreparation::Rejected;
+	if (!width || !native_pixel_profile() ||
+		((control >> 8) & 15) != (columns + 1) / 2 ||
+		columns > (m_color_width + 10 * width - 1) / (10 * width))
+		return LinePreparation::Rejected;
+	if (m_pending.width || m_readback.width)
+		return LinePreparation::Rejected;
+
+	// Pipeline profile retained by the NT / OpenVMS drivers for 2D lines
+	const std::pair<uint32_t, uint32_t> profile[] = {
+		{GlobalControl0, inclusive && global == 3 ? 3u : 1u},
+		{GlobalControl1, 0x20810}, {GlobalControl2, 0x33},
+		{PipelineControl0, 0}, {PipelineControl1, 0},
+		{PipelineControl2, 0x10000000},
+		{PipelineControl3, patterned ? stipple : 0u},
+		{PipelineControl4, 0}, {PipelineControl5, 0},
+		{0x008005cc, 0}, {0x008005d4, 0}, {0x008005dc, 0}};
+	for (const auto& reg : profile)
+		if (peek(reg.first) != reg.second)
+			return LinePreparation::Rejected;
+
+	if ((peek(ClipXMin) | peek(ClipYMin) | peek(ClipXMax) | peek(ClipYMax)) & 0xffff000fu)
+		return LinePreparation::Rejected;
+
+	// Plane / ROP validation
+	bool uses_color = !floating;
+	if (floating)
+		for (unsigned bank = 0; bank < 2; ++bank)
+			if (banks & (1u << bank))
+				for (unsigned shift = 0; shift < 24; shift += 8)
+				{
+					const unsigned rop = (plane_value(bank, 4, 0) >> shift) & 15;
+					if ((plane_value(bank, 0, 0xffffffff) & (0xffu << shift)) &&
+						((rop ^ (rop >> 2)) & 3))
+						uses_color = true;
+				}
+
+	uint32_t color = 0;
+	if (uses_color && !auxiliary_write)
+		for (uint32_t i = 0; i < 4; ++i)
+		{
+			const uint32_t component = peek(IntegerVertexColorBase + i * 4);
+			if (m_shadow.find(IntegerVertexColorBase + i * 4) == m_shadow.end() ||
+				(color_write ? (component & ~0x3fcu) != 0 : component != 0))
+				return LinePreparation::Rejected;
+			if (i)
+				color |= (component >> 2) << ((3 - i) * 8);
+		}
+
+	for (unsigned bank = 0; bank < 3; ++bank)
+	{
+		if (!(banks & (1u << bank)))
+			continue;
+		const uint32_t rops = plane_value(bank, 4, 0),
+			mask = plane_value(bank, 0, 0xffffffff);
+		bool valid_rop = rops == 0x03030303u;
+		if (color_write && bank < 2)
+			valid_rop = !(mask & 0xff000000u) || (rops >> 24) == 5;
+		if (m_planes[bank].unknown_masks || !valid_rop ||
+			(bank < 2 && !plane_profile(bank)))
+			return LinePreparation::Rejected;
+		if (bank == 2)
+		{
+			const uint32_t expected[] = {
+				0, auxiliary_compare ? 0x8000u : 0u,
+				0x0fff0fff, 0x03030303,
+				auxiliary_compare ? 0x0a000200u : 0x0a000000u,
+				0, 0, 0, 0, 0x00ff0000, 0x33300000, 0x100, 0, 0x100, 0};
+			for (unsigned i = 0; i < std::size(expected); ++i)
+				if (plane_value(bank, i + 1, expected[i]) != expected[i])
+					return LinePreparation::Rejected;
+		}
+	}
+
+	// Vertex fetch, both domains normalize to pixel*16 fixed point
+	LineOperation::Point vertex[2]{};
+	for (unsigned slot = 0; slot < 2; ++slot)
+	{
+		const unsigned index = (first_vertex + slot) % 3;
+		const uint32_t base = (floating ? VertexBase : IntegerVertexColorBase) +
+			index * VertexStride + 0x10;
+		for (unsigned i = 0; i < 3; ++i)
+			if (m_shadow.find(base + i * 4) == m_shadow.end())
+				return LinePreparation::Rejected;
+		if (floating)
+		{
+			float component[3];
+			for (unsigned i = 0; i < 3; ++i)
+			{
+				const uint32_t word = peek(base + i * 4);
+				std::memcpy(&component[i], &word, sizeof(word));
+			}
+			if (!std::isfinite(component[0]) || !std::isfinite(component[1]) ||
+				component[0] < -32768 || component[0] >= 32768 ||
+				component[1] < -32768 || component[1] >= 32768 ||
+				component[0] != std::trunc(component[0]) ||
+				component[1] != std::trunc(component[1]) || component[2] != 0)
+				return LinePreparation::Rejected;
+			vertex[slot] = {int64_t(component[0]) * 16, int64_t(component[1]) * 16};
+		}
+		else
+		{
+			vertex[slot] = {int32_t(peek(base)), int32_t(peek(base + 4))};
+			if (vertex[slot].x < -524288 || vertex[slot].x >= 524288 ||
+				vertex[slot].y < -524288 || vertex[slot].y >= 524288 ||
+				peek(base + 8))
+				return LinePreparation::Rejected;
+		}
+	}
+
+	// Hardware walks pixel centers, sub-pixel sources are not in the
+	// decoded 2D driver profiles
+	if ((vertex[0].x | vertex[0].y | vertex[1].x | vertex[1].y) & 15)
+		return LinePreparation::Rejected;
+
+	const ColorWriteContext rgb = prepare_color_write();
+	operation.a = vertex[0];
+	operation.b = vertex[1];
+	operation.rgb = rgb;
+	operation.color = color;
+	operation.banks = banks;
+	operation.masks[0] = rgb.masks[0] & 0xffffff;
+	operation.masks[1] = rgb.masks[1] & 0xffffff;
+	operation.masks[2] = plane_value(2, 0, 0xffffffff);
+	operation.auxiliary = (auxiliary_write || auxiliary_compare) ?
+		((control & 0x00f00000u) << 8) | ((control & 0x000f0000u) >> 4) : 0;
+	operation.compare_mask = 0x8000u;
+	operation.stipple = stipple;
+	operation.command = value;
+	operation.inclusive = inclusive;
+	operation.patterned = patterned;
+	operation.apply_rgb_rop = color_write &&
+		(((banks & 1) && (rgb.rops[0] & 0xffffff) != 0x030303) ||
+		 ((banks & 2) && (rgb.rops[1] & 0xffffff) != 0x030303));
+	operation.auxiliary_compare = auxiliary_compare;
+	operation.color_write = color_write;
+	return LinePreparation::Ready;
+}
+
 void CRealImage2100::raster_vertex_command(uint32_t address, uint32_t value)
 {
 	if (!value)
 		return;
+
 	const bool floating = flat_vertex_register(address);
-	const uint32_t primitive = floating ? value : value & 0x000fffffu;
-	const bool inclusive = (primitive & ~0xcu) == 0x62,
-		line = (primitive & ~0xcu) == 0x22 || inclusive;
-	const unsigned first_vertex = (value >> 2) & 3;
-	const uint32_t stipple = peek(PipelineControl3);
-	const bool patterned = !floating && line && (stipple & 0x80000000u);
+	// Rotating slot encodings (0x26/0x2a, 0x66/0x6a) share the same primitive
+	// family as 0x22 / 0x62. Bits 2..3 only select the vertex pair
+	const uint32_t primitive = floating ? (value & ~0xcu) : (value & 0x000fffffu & ~0xcu);
+	const bool inclusive = primitive == 0x62;
+	const bool line = primitive == 0x22 || inclusive;
+
+	if (line)
+	{
+		LineOperation operation;
+		const LinePreparation result = prepare_line(address, value, operation);
+		if (result == LinePreparation::Rejected)
+			unimplemented_once(
+				floating ? "REALimage floating line command/profile (command rejected)" :
+					"REALimage integer line command/profile (command rejected)",
+				address, value, true);
+		else if (result == LinePreparation::Ready)
+			execute_line(operation);
+		return;
+	}
+
+	// Integer triangle path continues below (value == 3)
 	auto reject = [&]() {
-		unimplemented_once(floating ? "REALimage floating line command/profile (command rejected)" :
-			line ? "REALimage integer line command/profile (command rejected)" :
-			"REALimage integer triangle command/profile (command rejected)", address, value, true);
+		unimplemented_once(
+			"REALimage integer triangle command/profile (command rejected)",
+			address, value, true);
 	};
+	if (value != 3)
+	{
+		reject();
+		return;
+	}
+
+	const unsigned first_vertex = (value >> 2) & 3;
 	const uint32_t control = peek(DrawControl), banks = (control >> 12) & 15,
 		width = block_width(), columns = ((peek(MemoryControl) >> 24) & 63) + 1,
 		global = peek(GlobalControl0);
 	const bool direct_rgb = (control & ~0xff01u) == 0x21000002u &&
 		(banks == 1 || banks == 2),
-		native_line_rgb = !floating && line && (control & ~0x00ffff01u) == 0xa1000002u &&
-		(banks == 1 || banks == 2),
 		auxiliary_compare = (control & ~0x00ffff01u) == 0xa1000002u &&
 		(banks == 5 || banks == 6) && plane_value(2, 0, 0xffffffff) == 0,
-		auxiliary_write = (control & ~(line ? 0x00ef0f01u : 0x00ff0f01u)) == 0xa1004002u &&
-		!(plane_value(2, 0, 0xffffffff) & ~(line ? 0xe000f000u : 0xf000f000u)),
-		color_write = direct_rgb || native_line_rgb || auxiliary_compare ||
+		auxiliary_write = (control & ~0x00ff0f01u) == 0xa1004002u &&
+		!(plane_value(2, 0, 0xffffffff) & ~0xf000f000u),
+		color_write = direct_rgb || auxiliary_compare ||
 		((control & ~0xff01u) == 0xa1000002u && !(banks & ~3u));
-	if ((floating && ((value != 0x22 && value != 0x62) || !color_write)) ||
-		(!line && value != 3) ||
-		(!patterned && line && (value & 0xfff00000u)) ||
-		(patterned && ((stipple & 0x47ff0000u) || !color_write)) ||
-		(line && (first_vertex >= 3 ||
-			address != (floating ? VertexBase + 0x100 : IntegerVertexColorBase) +
-				((first_vertex + 1) % 3) * VertexStride + 0x1c ||
-			(inclusive && !floating ? (!auxiliary_compare && !direct_rgb && !native_line_rgb) :
-				(!auxiliary_write && !color_write)))) ||
-		(!auxiliary_write && !color_write &&
+	if ((!auxiliary_write && !color_write &&
 		(control & ~0xff01u) != 0x21000002u) ||
 		!banks || (banks & ~7u) ||
 		!width || !native_pixel_profile() || ((control >> 8) & 15) != (columns + 1) / 2 ||

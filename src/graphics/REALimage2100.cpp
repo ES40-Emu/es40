@@ -2673,10 +2673,9 @@ void CRealImage2100::raster_vertex_command(uint32_t address, uint32_t value)
 
 	const bool floating = flat_vertex_register(address);
 	// Rotating slot encodings (0x26/0x2a, 0x66/0x6a) share the same primitive
-	// family as 0x22 / 0x62. Bits 2..3 only select the vertex pair
+	// family as 0x22 / 0x62; bits 2..3 only select the vertex pair.
 	const uint32_t primitive = floating ? (value & ~0xcu) : (value & 0x000fffffu & ~0xcu);
-	const bool inclusive = primitive == 0x62;
-	const bool line = primitive == 0x22 || inclusive;
+	const bool line = primitive == 0x22 || primitive == 0x62;
 
 	if (line)
 	{
@@ -2692,7 +2691,7 @@ void CRealImage2100::raster_vertex_command(uint32_t address, uint32_t value)
 		return;
 	}
 
-	// Integer triangle path continues below (value == 3)
+	// Integer triangle path (value == 3).
 	auto reject = [&]() {
 		unimplemented_once(
 			"REALimage integer triangle command/profile (command rejected)",
@@ -2704,7 +2703,6 @@ void CRealImage2100::raster_vertex_command(uint32_t address, uint32_t value)
 		return;
 	}
 
-	const unsigned first_vertex = (value >> 2) & 3;
 	const uint32_t control = peek(DrawControl), banks = (control >> 12) & 15,
 		width = block_width(), columns = ((peek(MemoryControl) >> 24) & 63) + 1,
 		global = peek(GlobalControl0);
@@ -2726,13 +2724,14 @@ void CRealImage2100::raster_vertex_command(uint32_t address, uint32_t value)
 		reject();
 		return;
 	}
-	const bool direct_polygon = !line && direct_rgb && global == 1;
+
+	const bool direct_polygon = direct_rgb && global == 1;
 	// Connected terminal commands can retain mode 1 until the next state flush.
 	const std::pair<uint32_t, uint32_t> profile[] = {
-		{GlobalControl0, line ? (inclusive && global == 3 ? 3u : 1u) : direct_polygon ? 1u : 0u},
+		{GlobalControl0, direct_polygon ? 1u : 0u},
 		{GlobalControl1, 0x20810}, {GlobalControl2, 0x33},
 		{PipelineControl0, 0}, {PipelineControl1, 0}, {PipelineControl2, 0x10000000},
-		{PipelineControl3, patterned ? stipple : 0u}, {PipelineControl4, 0}, {PipelineControl5, 0},
+		{PipelineControl3, 0}, {PipelineControl4, 0}, {PipelineControl5, 0},
 		{0x008005cc, 0}, {0x008005d4, 0}, {0x008005dc, 0}};
 	for (const auto& reg : profile)
 		if (peek(reg.first) != reg.second)
@@ -2740,20 +2739,9 @@ void CRealImage2100::raster_vertex_command(uint32_t address, uint32_t value)
 			reject();
 			return;
 		}
-	bool uses_color = !floating;
-	if (floating)
-		for (unsigned bank = 0; bank < 2; ++bank)
-			if (banks & (1u << bank))
-				for (unsigned shift = 0; shift < 24; shift += 8)
-				{
-					const unsigned rop = (plane_value(bank, 4, 0) >> shift) & 15;
-					if ((plane_value(bank, 0, 0xffffffff) & (0xffu << shift)) &&
-						((rop ^ (rop >> 2)) & 3))
-						uses_color = true;
-				}
+
 	uint32_t color = 0;
-	// Floating 2D lines share integer ARGB; source-independent ROPs need no color.
-	if (uses_color && !auxiliary_write)
+	if (!auxiliary_write)
 		for (uint32_t i = 0; i < 4; ++i)
 		{
 			const uint32_t component = peek(IntegerVertexColorBase + i * 4);
@@ -2778,7 +2766,7 @@ void CRealImage2100::raster_vertex_command(uint32_t address, uint32_t value)
 		const uint32_t rops = plane_value(bank, 4, 0), mask = plane_value(bank, 0, 0xffffffff);
 		bool valid_rop = rops == 0x03030303u;
 		// Preserve the existing all-zero initialization triangle profile.
-		const bool zero_clear = !line && direct_rgb && !color && !peek(IntegerVertexColorBase) && valid_rop;
+		const bool zero_clear = direct_rgb && !color && !peek(IntegerVertexColorBase) && valid_rop;
 		if (color_write && bank < 2 && !zero_clear)
 			valid_rop = !(mask & 0xff000000u) || (rops >> 24) == 5;
 		if (m_planes[bank].unknown_masks || !valid_rop ||
@@ -2789,7 +2777,7 @@ void CRealImage2100::raster_vertex_command(uint32_t address, uint32_t value)
 		}
 		if (bank == 2)
 		{
-			const uint32_t expected[] = {0, auxiliary_compare ? (line ? 0x8000u : 0x10000000u) : 0u,
+			const uint32_t expected[] = {0, auxiliary_compare ? 0x10000000u : 0u,
 				0x0fff0fff, 0x03030303, auxiliary_compare ? 0x0a000200u : 0x0a000000u,
 				0, 0, 0, 0, 0x00ff0000, 0x33300000, 0x100, 0, 0x100, 0};
 			for (unsigned i = 0; i < std::size(expected); ++i)
@@ -2800,57 +2788,35 @@ void CRealImage2100::raster_vertex_command(uint32_t address, uint32_t value)
 				}
 		}
 	}
+
 	struct Point { int64_t x, y; } vertex[3];
-	for (unsigned slot = 0; slot < (line ? 2u : 3u); ++slot)
+	for (unsigned slot = 0; slot < 3; ++slot)
 	{
-		const unsigned index = line ? (first_vertex + slot) % 3 : slot;
-		const uint32_t base = (floating ? VertexBase : IntegerVertexColorBase) +
-			index * VertexStride + 0x10;
+		const uint32_t base = IntegerVertexColorBase + slot * VertexStride + 0x10;
 		for (unsigned i = 0; i < 3; ++i)
 			if (m_shadow.find(base + i * 4) == m_shadow.end())
 			{
 				reject();
 				return;
 			}
-		if (floating)
+		vertex[slot] = {int32_t(peek(base)), int32_t(peek(base + 4))};
+		if (vertex[slot].x < -524288 || vertex[slot].x >= 524288 ||
+			vertex[slot].y < -524288 || vertex[slot].y >= 524288 || peek(base + 8))
 		{
-			float component[3];
-			for (unsigned i = 0; i < 3; ++i)
-			{
-				const uint32_t word = peek(base + i * 4);
-				std::memcpy(&component[i], &word, sizeof(word));
-			}
-			if (!std::isfinite(component[0]) || !std::isfinite(component[1]) ||
-				component[0] < -32768 || component[0] >= 32768 ||
-				component[1] < -32768 || component[1] >= 32768 ||
-				component[0] != std::trunc(component[0]) ||
-				component[1] != std::trunc(component[1]) || component[2] != 0)
-			{
-				reject();
-				return;
-			}
-			vertex[slot] = {int64_t(component[0]) * 16, int64_t(component[1]) * 16};
-		}
-		else
-		{
-			vertex[slot] = {int32_t(peek(base)), int32_t(peek(base + 4))};
-			if (vertex[slot].x < -524288 || vertex[slot].x >= 524288 ||
-				vertex[slot].y < -524288 || vertex[slot].y >= 524288 || peek(base + 8))
-			{
-				reject();
-				return;
-			}
+			reject();
+			return;
 		}
 	}
+
 	const ColorWriteContext rgb = prepare_color_write();
-	const bool apply_rgb_rop = color_write && (line ||
-		((banks & 1) && (rgb.rops[0] & 0xffffff) != 0x030303) ||
-		((banks & 2) && (rgb.rops[1] & 0xffffff) != 0x030303));
+	const bool apply_rgb_rop = color_write &&
+		(((banks & 1) && (rgb.rops[0] & 0xffffff) != 0x030303) ||
+		 ((banks & 2) && (rgb.rops[1] & 0xffffff) != 0x030303));
 	const uint32_t masks[] = {rgb.masks[0] & 0xffffff,
 		rgb.masks[1] & 0xffffff, plane_value(2, 0, 0xffffffff)};
 	const uint32_t auxiliary = (auxiliary_write || auxiliary_compare) ?
 		((control & 0x00f00000u) << 8) | ((control & 0x000f0000u) >> 4) : 0,
-		compare_mask = line ? 0x8000u : 0x10000000u;
+		compare_mask = 0x10000000u;
 	auto invalidate = [&]() {
 		for (unsigned bank = 0; bank < 3; ++bank)
 			if ((banks & (1u << bank)) && (bank < 2 || !auxiliary_compare))
@@ -2872,89 +2838,7 @@ void CRealImage2100::raster_vertex_command(uint32_t address, uint32_t value)
 		if (banks & 4)
 			m_auxiliary[offset] = (m_auxiliary[offset] & ~masks[2]) | (auxiliary & masks[2]);
 	};
-	if (line)
-	{
-		const Point& a = vertex[0];
-		Point b = vertex[1];
-		if (((a.x | a.y | b.x | b.y) & 15) ||
-			((floating || patterned) && a.x != b.x && a.y != b.y))
-		{
-			reject();
-			return;
-		}
-		const bool stipple_x_major = std::abs(b.x - a.x) >= std::abs(b.y - a.y);
-		const int64_t major_start = (stipple_x_major ? a.x : a.y) / 16,
-			major_end = (stipple_x_major ? b.x : b.y) / 16;
-		// The 12-bit anchor preserves the repeated, LSB-first pattern in either direction.
-		const unsigned phase = unsigned(major_end < major_start ?
-			int64_t(value >> 20) - major_start : major_start - int64_t(value >> 20)) & 0xfff;
-		auto stipple_visible = [&](unsigned step) {
-			return !patterned || ((stipple >> (((phase + step) >> ((stipple >> 27) & 7)) & 15)) & 1);
-		};
-		if (a.x != b.x && a.y != b.y)
-		{
-			int x = int(a.x / 16), y = int(a.y / 16);
-			const int dx = int((b.x - a.x) / 16), dy = int((b.y - a.y) / 16),
-				adx = std::abs(dx), ady = std::abs(dy), sx = dx < 0 ? -1 : 1, sy = dy < 0 ? -1 : 1;
-			const bool x_major = adx >= ady;
-			const int major = x_major ? adx : ady, minor = x_major ? ady : adx,
-				left = std::max(0, int(peek(ClipXMin) >> 4)),
-				top = std::max(0, int(peek(ClipYMin) >> 4)),
-				right = std::min(int(m_color_width) - 1, int(peek(ClipXMax) >> 4)),
-				bottom = std::min(int(m_color_height) - 1, int(peek(ClipYMax) >> 4));
-			if (left > right || top > bottom)
-				return;
-			int error = 2 * minor - major;
-			bool drawn = false;
-			for (int i = 0; i < major + int(inclusive); ++i)
-			{
-				if (x >= left && x <= right && y >= top && y <= bottom)
-				{
-					if (!drawn)
-						invalidate();
-					drawn = true;
-					write_pixel(x, y);
-				}
-				// Midpoint ties keep the axial step, matching RV200's convention.
-				if (error > 0)
-				{
-					if (x_major) y += sy;
-					else x += sx;
-					error -= 2 * major;
-				}
-				error += 2 * minor;
-				if (x_major) x += sx;
-				else y += sy;
-			}
-			return;
-		}
-		// Bit 6 includes the final endpoint for any rotating line slot.
-		if (!inclusive)
-		{
-			if (a.x == b.x && a.y == b.y)
-				return;
-			b.x += a.x > b.x ? 16 : a.x < b.x ? -16 : 0;
-			b.y += a.y > b.y ? 16 : a.y < b.y ? -16 : 0;
-		}
-		const int left = std::max({0, int(peek(ClipXMin) >> 4), int(std::min(a.x, b.x) / 16)}),
-			top = std::max({0, int(peek(ClipYMin) >> 4), int(std::min(a.y, b.y) / 16)}),
-			right = std::min({int(m_color_width) - 1, int(peek(ClipXMax) >> 4), int(std::max(a.x, b.x) / 16)}),
-			bottom = std::min({int(m_color_height) - 1, int(peek(ClipYMax) >> 4), int(std::max(a.y, b.y) / 16)});
-		if (left > right || top > bottom)
-			return;
-		bool drawn = false;
-		for (int y = top; y <= bottom; ++y)
-			for (int x = left; x <= right; ++x)
-			{
-				if (!stipple_visible(unsigned(std::abs(int64_t(stipple_x_major ? x : y) - major_start))))
-					continue;
-				if (!drawn)
-					invalidate();
-				drawn = true;
-				write_pixel(x, y);
-			}
-		return;
-	}
+
 	auto edge = [](const Point& p, const Point& q, const Point& at) {
 		return (q.x - p.x) * (at.y - p.y) - (q.y - p.y) * (at.x - p.x);
 	};

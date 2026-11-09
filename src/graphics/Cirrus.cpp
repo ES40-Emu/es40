@@ -2372,16 +2372,6 @@ void CCirrus::recompute_params_clock(int divisor, int xtal)
 		timing.vrefresh_hz, timing.refresh_interval_ms);
 }
 
-u8 CCirrus::get_actl_palette_idx(u8 index)
-{
-	return atc_palette(index);
-}
-
-void CCirrus::redraw_area(unsigned, unsigned, unsigned, unsigned)
-{
-	// Each refresh renders the entire frame.
-}
-
 void CCirrus::update(void)
 {
 	unsigned iWidth = 0, iHeight = 0;

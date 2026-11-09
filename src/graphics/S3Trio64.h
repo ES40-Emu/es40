@@ -113,9 +113,8 @@ public:
   void          update(void);
   virtual void  run(void) override;
 
-  virtual u8    get_actl_palette_idx(u8 index) override;
   virtual void  redraw_area(unsigned x0, unsigned y0, unsigned width,
-    unsigned height) override;
+    unsigned height);
 
   virtual void  init() override;
   virtual void  start_threads() override;
@@ -435,9 +434,6 @@ private:
   inline u8  seq_mclkn() const { return s3.sr10 & 0x1f; }
   inline u8  seq_mclkr() const { return s3.sr10 >> 5; }
   inline u8  seq_mclkm() const { return s3.sr11; }
-
-  // ATC index 0x00..0x0F: Palette registers
-  inline u8  atc_palette(u8 idx) const { return vga.attribute.data[idx & 0x0f]; }
 
   // ATC index 0x10: Mode Control (decomposed bit accessors)
   inline bool atc_graphics_alpha()       const { return BIT(vga.attribute.data[0x10], 0); }

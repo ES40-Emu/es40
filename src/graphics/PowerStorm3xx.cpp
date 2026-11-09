@@ -259,18 +259,6 @@ void CPowerStorm3xx::mem_w(offs_t address, u8 data)
 				vga_latch_write(plane, data);
 }
 
-u8 CPowerStorm3xx::get_actl_palette_idx(u8 index)
-{
-	std::lock_guard<std::recursive_mutex> guard(
-		cSystem->get_device_bus_mutex());
-	return m_atc_map.read_byte(index & 0x1f);
-}
-
-void CPowerStorm3xx::redraw_area(unsigned, unsigned, unsigned, unsigned)
-{
-	// Complete frames are submitted through the same output API as S3Trio64.
-}
-
 void CPowerStorm3xx::palette_update()
 {
 	for (unsigned i = 0; i < 256; ++i)

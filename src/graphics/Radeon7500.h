@@ -105,9 +105,6 @@ public:
     return ordinal == 0 ? &m_output : nullptr;
   }
 
-  u8 get_actl_palette_idx(u8 index) override;
-  void redraw_area(
-    unsigned x0, unsigned y0, unsigned width, unsigned height) override;
   u8 mem_r(offs_t offset) override;
   void mem_w(offs_t offset, u8 data) override;
 

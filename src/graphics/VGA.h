@@ -59,10 +59,6 @@ public:
   vga_device(class CConfigurator* cfg, class CSystem* c, int pcibus, int pcidev);
   ~vga_device(void);
 
-  virtual u8    get_actl_palette_idx(u8 index) = 0;
-  virtual void  redraw_area(unsigned x0, unsigned y0, unsigned width,
-    unsigned height) = 0;
-
   // construction/destruction
   //vga_device(const machine_config& mconfig, const char* tag, device_t* owner, uint32_t clock);
 

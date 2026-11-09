@@ -303,18 +303,6 @@ void CGloriaSynergy::mem_w(offs_t address, u8 data)
 			vga.memory[offset + plane * 0x10000] = vga_latch_write(plane, data);
 }
 
-u8 CGloriaSynergy::get_actl_palette_idx(u8 index)
-{
-	std::lock_guard<std::recursive_mutex> guard(
-		cSystem->get_device_bus_mutex());
-	return m_atc_map.read_byte(index & 0x1f);
-}
-
-void CGloriaSynergy::redraw_area(unsigned, unsigned, unsigned, unsigned)
-{
-	// Complete frames are submitted through the same output API as S3Trio64.
-}
-
 void CGloriaSynergy::palette_update()
 {
 	for (unsigned i = 0; i < 256; ++i)

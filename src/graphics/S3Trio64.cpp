@@ -4339,11 +4339,6 @@ u8 CS3Trio64::read_b_3ca()
 	return 0;
 }
 
-u8 CS3Trio64::get_actl_palette_idx(u8 index)
-{
-	return atc_palette(index);
-}
-
 void CS3Trio64::redraw_area(unsigned x0, unsigned y0, unsigned width,
 	unsigned height)
 {

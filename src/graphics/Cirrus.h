@@ -87,10 +87,6 @@ public:
   void          update(void);
   virtual void  run(void) override;
 
-  virtual u8    get_actl_palette_idx(u8 index) override;
-  virtual void  redraw_area(unsigned x0, unsigned y0, unsigned width,
-    unsigned height) override;
-
   virtual void  init() override;
   virtual void  start_threads() override;
   virtual void  stop_threads() override;
@@ -111,8 +107,6 @@ private:
   bool is_pci() const noexcept;
   // Cirrus has one modeled output.
   CDisplayOutput m_output;
-  // ATC index 0x00..0x0F: Palette registers
-  inline u8  atc_palette(u8 idx) const { return vga.attribute.data[idx & 0x0f]; }
 
   void  get_display_size(unsigned& width, unsigned& height);
   u32   io_read(u32 address, int dsize);

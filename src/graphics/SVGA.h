@@ -41,7 +41,7 @@
 #include "VGA.h"
 
 /**
- * \brief Abstract base class for PCI SVGA cards.
+ * \brief Base class for PCI SVGA cards.
  **/
 class svga_device : public vga_device
 {

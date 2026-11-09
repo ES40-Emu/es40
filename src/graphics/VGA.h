@@ -50,7 +50,7 @@
 using offs_t = uint32_t;
 
 /**
- * \brief Abstract base class for PCI VGA cards.
+ * \brief Base class for PCI VGA cards.
  **/
 class vga_device : public CPCIDevice, public mame_machine_provider
 {

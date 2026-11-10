@@ -648,7 +648,8 @@ void CJitEngine::patch_edge(void* tagged, uint64_t tag, uint64_t vgen_bits, void
     // Native branches leave CM and the instruction mapping unchanged.
     // Same-page targets can reuse the source's access check. Compare the full
     // VA here; all other targets use the guarded entry.
-    void* const direct_body = same_page_body && !((s->source_tag | tag) & 1)
+    void* const direct_body = m_profile.instruction_fetch.jit_same_page_access
+        && same_page_body && !((s->source_tag | tag) & 1)
         && ((s->source_tag ^ tag) & ~UINT64_C(0x1fff)) == 0 ? same_page_body : body;
     if (!write_site(s, (const uint8_t*) direct_body)) {
 #ifdef JIT_STATS

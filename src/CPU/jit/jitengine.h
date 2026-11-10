@@ -235,7 +235,7 @@ public:
   struct JitBlock
   {
     uint64_t tag;         // start VIRTUAL PC (validity tag / key)
-    uint64_t phys;        // start physical PC (source bytes for compilation)
+    uint64_t phys;        // family source identity (EV68: start physical PC)
     uint32_t asn;         // address space number (key; ignored when asm_global)
     bool     asm_global;  // global (ASM) page: matches any ASN, like the icache
     bool     pal_shadow;  // PALmode variant: true maps R4-7/R20-23 to the shadow bank
@@ -280,7 +280,7 @@ public:
   // these on an epoch change, mirroring revalidate_flushed, and also stores what to re-form.
   struct SourceSeg {
     uint64_t guest_pc;    // segment start virtual PC
-    uint64_t phys_pc;     // segment start physical PC (source bytes)
+    uint64_t phys_pc;     // segment source identity (EV68: start physical PC)
     uint32_t n_instr;     // instructions in the segment (hash length)
     bool     asm_global;  // global (ASM) segment
     uint32_t asn;         // ASN (ignored when asm_global)
@@ -510,7 +510,8 @@ public:
 #endif
   // Tagged request pointer: bit 1 = PatchSite (else LinkSlot[]), bit 0 = non-global source.
   // target_global: a global-source edge is ASN-sensitive only when its target is not global.
-  // same_page_body is used only by a static native edge within one full-VA 8 KiB page.
+  // same_page_body needs a static native edge within one full-VA 8 KiB page and
+  // the source policy's uniform-permission capability.
   void patch_edge(void* tagged, uint64_t tag, uint64_t vgen_bits, void* body,
                   bool target_global = false, void* same_page_body = nullptr);
   void invalidate_links(int cause = kBumpFlush);          // every patched edge (epoch change)

@@ -979,7 +979,7 @@ void CAlphaCPU::init()
 
 #ifdef ES40_JIT
 	if (m_profile.jit_supported
-		&& Ev68InstructionFetch::supports_legacy_jit(m_profile.instruction_fetch))
+		&& m_profile.instruction_fetch.supports_jit())
 	{
 		if (!m_jit) m_jit = new CJitEngine(m_profile, (int)state.iProcNum);
 		m_jit->set_exit_slot(&m_jit_exit);
@@ -1552,21 +1552,29 @@ void CAlphaCPU::jit_run(int budget)
 		if (idle_rule != RULE_NONE)
 			idle_detect_sample(start_virt, sources);
 
-		// Observe the family's mapping without fetching or faulting. The legacy JIT
-		// still uses the physical identity to validate its DRAM-backed compiled blocks.
+		// Observe the family's executable source identity without fetching or faulting.
 		const auto source = probe_instruction_source(start_virt);
 		const u64 start_phys = source.physical;
 		const bool start_asm = source.asm_global;
 		const bool have_phys = source.valid;
 
-		// Trace segments are native addresses. Preserve their existing alignment
-		// while using the same family probe as the dispatcher.
-		auto live_exec_phys = [&](u64 v, u64* op) -> bool {
-			const auto mapping = probe_instruction_source(v & ~U64(3));
-			if (!mapping.valid) return false;
-			*op = mapping.physical;
+#if defined(JIT_TRACES) || defined(JIT_VERIFY)
+		auto live_exec_matches = [&](u64 pc, u64 identity, bool global) -> bool {
+			const auto mapping = probe_instruction_source(pc);
+			return mapping.valid && mapping.physical == identity && mapping.asm_global == global;
+		};
+		auto trace_segs_live = [&](const CJitEngine::TraceFragment* tf) -> bool {
+			for (uint32_t s = 0; s < tf->n_segs; ++s) {
+				const auto& seg = tf->segs[s];
+				if (!instruction_source_can_chain(seg.guest_pc)
+					|| !live_exec_matches(seg.guest_pc, seg.phys_pc, seg.asm_global)) {
+					m_jit->note_trace_stale();
+					return false;
+				}
+			}
 			return true;
 		};
+#endif
 
 		// Trace tier: gated lookup BEFORE the block cache. In non-debug release a hot trace runs
 		// straight through and side-exits back here with state.pc set, then `continue`; the block
@@ -1578,12 +1586,6 @@ void CAlphaCPU::jit_run(int budget)
 		// poll, so DON'T enter it while an interrupt/timer is pending (the interpreter must service it,
 		// or the CPU livelocks -> OS sanity-timer bugcheck), nor a PALmode trace without SDE, nor one
 		// that would overrun the budget. JIT_TRACES-off builds compile the whole hook away.
-		auto trace_segs_live = [&](CJitEngine::TraceFragment* tf) -> bool {
-			// The head's live phys is checked by trace_ok; re-resolve each INTERIOR segment too. An interior
-			// page remapped to a different physical with IDENTICAL bytes is invisible to the source hash.
-			for (uint32_t s = 1; s < tf->n_segs; ++s) { u64 sp; if (!live_exec_phys(tf->segs[s].guest_pc, &sp) || sp != tf->segs[s].phys_pc) { m_jit->note_trace_stale(); return false; } }
-			return true;
-		};
 		if (have_phys && !(start_virt & 1) && m_jit->traces_enabled()
 			&& !state.check_int && !state.check_timers)
 		{
@@ -1595,8 +1597,9 @@ void CAlphaCPU::jit_run(int budget)
 				// chain-in: a predecessor's exit missed here and the trace is validated (vgen just
 				// re-stamped) -- patch its slots with the trace's chained entry so the edge lands
 				// in-frame next time. Hook-before-block ordering makes traces win the patch.
-				if (m_link_from && t->chain_entry) { m_jit->note_link_bail();
-					m_jit->patch_edge(m_link_from, t->head_tag, t->vgen, t->chain_entry, t->asm_global);
+				if (m_link_from) { m_jit->note_link_bail();
+					if (t->chain_entry && instruction_source_can_chain(t->head_tag))
+						m_jit->patch_edge(m_link_from, t->head_tag, t->vgen, t->chain_entry, t->asm_global);
 					m_link_from = nullptr; }
 				m_jit_budget = budget;   // ceiling for the trace (its loads/bails honor it like a block)
 #ifdef JIT_STATS
@@ -1643,7 +1646,8 @@ void CAlphaCPU::jit_run(int budget)
 		// Run the compiled safe prefix natively when available. A pending interrupt
 		// is deliverable only outside PALmode (execute() applies the same rule), while
 		// delayed timers still require the interpreter's per-instruction poll.
-		if (b && b->code && b->phys == start_phys && (int)b->prefix_len <= budget
+		if (b && b->code && b->phys == start_phys && b->asm_global == start_asm
+			&& (int)b->prefix_len <= budget
 			&& (!state.check_int || (b->tag & 1)) && !state.check_timers
 			&& (!(b->tag & 1) || b->pal_shadow == (bool)state.sde))
 		{
@@ -1654,7 +1658,7 @@ void CAlphaCPU::jit_run(int budget)
 			// future trace head). Dispatch-counted for now -- it undercounts chained loops, but they
 			// still surface here when a chain breaks
 			if (!(b->tag & 1) && m_jit->traces_enabled() && ++b->hot == 8
-				&& !m_jit->trace_lookup(start_virt, start_asn))
+				&& instruction_source_can_chain(b->tag) && !m_jit->trace_lookup(start_virt, start_asn))
 			{
 				const CJitEngine::HelperSet hs = {
 					(void*)&CAlphaCPU::jit_read,        (void*)&CAlphaCPU::jit_write,
@@ -1711,10 +1715,11 @@ void CAlphaCPU::jit_run(int budget)
 				      if (cur->link[li].body) { spc = cur->link[li].tag; break; }
 				    if (!spc || (spc & 1) != (cur->tag & 1)) break;   // no observed successor / mode change
 				  } else break;                                       // breaker terminator: don't cross
+				  if (!instruction_source_can_chain(spc)) break;
 				  if (spc == b->tag) { closes = true; break; }   // back-edge to the head -> compile_trace closes the loop
 				  CJitEngine::JitBlock* succ = m_jit->lookup(spc, start_asn, false);
 				  if (!succ || succ == b || !succ->code || succ->prefix_len == 0) break;
-				  u64 sp; if (!live_exec_phys(spc, &sp) || sp != succ->phys) break;   // successor remapped since compile -> stale, don't fuse
+				  if (!live_exec_matches(spc, succ->phys, succ->asm_global)) break;   // successor changed since compile -> don't fuse
 				  bool dup = false; for (u32 j = 0; j < nb; ++j) if (blist[j] == succ) { dup = true; break; }
 				  if (dup) break;
 				  blist[nb++] = succ; cur = succ;
@@ -1814,7 +1819,7 @@ void CAlphaCPU::jit_run(int budget)
 				u32 n_interp = 0;              // ops the interp ran over the trace's fused span (vs t->code's done)
 			bool clean = true;
 			CJitEngine::TraceFragment* vtr = m_jit->traces_enabled() ? m_jit->trace_lookup(start_virt, start_asn) : nullptr;
-				if (vtr && !m_jit->trace_ok(vtr, start_phys, sources)) vtr = nullptr;   // stale -> verify as a plain block
+				if (vtr && (!m_jit->trace_ok(vtr, start_phys, sources) || !trace_segs_live(vtr))) vtr = nullptr;   // stale -> verify as a plain block
 				const u32 nseg = vtr ? vtr->n_segs : 1;   // interp the trace's full fused span; else just block b
 				for (u32 seg = 0; seg < nseg && clean; ++seg) {
 				if (vtr) { cur_len = vtr->segs[seg].n_instr; cur_tag = vtr->segs[seg].guest_pc;
@@ -2065,7 +2070,7 @@ void CAlphaCPU::jit_run(int budget)
 				if (m_jit->traces_enabled()) {
 					CJitEngine::TraceFragment* tr = m_jit->trace_lookup(start_virt, start_asn);
 					if (tr && m_jit->trace_ok(tr, start_phys, sources)
-							&& [&]{ for (uint32_t s = 1; s < tr->n_segs; ++s) { u64 sp; if (!live_exec_phys(tr->segs[s].guest_pc, &sp) || sp != tr->segs[s].phys_pc) return false; } return true; }()) {   // verify now mirrors the production hook's interior live-phys check
+							&& trace_segs_live(tr)) {
 						memcpy(state.f, f_pre, sizeof(f_pre));
 						state.sde = ictl_sde_pre; state.hwe = ictl_hwe_pre;
 						state.i_ctl_spe = ictl_spe_pre; state.i_ctl_va_mode = ictl_vam_pre;
@@ -2187,9 +2192,10 @@ void CAlphaCPU::jit_run(int budget)
 			// 
 			// Tag-keyed: an existing entry for this target MUST be refreshed in place.
 			if (m_link_from) { m_jit->note_link_bail();
-				m_jit->patch_edge(m_link_from, b->tag,
-					b->vgen | (b->pal_shadow ? (U64(1) << 63) : 0), b->jit_body, b->asm_global,
-					b->jit_body_same_page);
+				if (instruction_source_can_chain(b->tag))
+					m_jit->patch_edge(m_link_from, b->tag,
+						b->vgen | (b->pal_shadow ? (U64(1) << 63) : 0), b->jit_body, b->asm_global,
+						b->jit_body_same_page);
 				m_link_from = nullptr; }
 			m_jit_budget = budget;   // ceiling for compiled chains (epilogue stops at it)
 #ifdef JIT_STATS
@@ -3090,17 +3096,12 @@ void* CAlphaCPU::jit_indirect_impl(CAlphaCPU* cpu, u64 target, void* link_cache)
 		cpu->m_jit->note_jmp_hit();
 		return body;
 	};
-	if (target & 1)
-	{
-		// PALmode target: the I-stream is physically addressed (not paged), so no remap / no stale
-		// risk. lookup selected the body whose register-bank mapping matches the live SDE state.
-		return hit(b->jit_body);
-	}
-	// Recheck the native mapping here; the dispatcher handles faults.
+	// Every family validates the full target, including PAL cache sources.
+	// The dispatcher handles faults; this resolver only observes executable sources.
 	const u64 gen = cpu->m_jit->vgen();
-	const auto mapping = cpu->probe_instruction_source(target & ~U64(3));
+	const auto mapping = cpu->probe_instruction_source(target);
 	if (!mapping.valid) return nullptr;   // let the dispatcher fault it in
-	if (mapping.physical != b->phys)
+	if (mapping.physical != b->phys || mapping.asm_global != b->asm_global)
 	{
 		// Caught a stale block: the page was remapped without flushing the JIT cache. Bail so the
 		// dispatcher re-records/recompiles. Rate-limited log -- this firing confirms the stale chain.

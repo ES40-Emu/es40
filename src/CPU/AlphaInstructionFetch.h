@@ -33,7 +33,8 @@
 class CAlphaCPU;
 
 // Observed instruction mapping; a failed probe has valid == false.
-// Physical addresses currently identify sources for the legacy DRAM-backed JIT.
+// physical is the source identity matched against AlphaInstructionSourceView;
+// EV68 uses a physical PC, while cache-backed policies may use a different key.
 struct AlphaInstructionMapping
 {
   std::uint64_t physical = 0;
@@ -61,20 +62,41 @@ struct AlphaInstructionFetchPolicy
   AlphaInstructionMapping (*probe)(CAlphaCPU& cpu, std::uint64_t pc) = nullptr;
 
   // Peek the current instruction's cached word without consuming its cursor.
-  // False means no cached override: leave the caller's legacy source word intact.
+  // False means no cached override: leave the caller's source word intact.
   bool (*peek_cached)(const CAlphaCPU& cpu, std::uint32_t* instruction) = nullptr;
 
-  // Can the legacy JIT record this interpreted span from its backing source?
+  // Can the JIT record this interpreted span from its backing source?
   // Detect cached instructions that differ from the current backing bytes.
   bool (*matches_interpreted)(const CAlphaCPU& cpu, std::uint64_t start_pc,
                               std::uint32_t count) = nullptr;
 
-  // Reject targets that need dispatcher preparation before entering compiled code.
-  // Called before lookup; a PAL target need not subsequently probe a translation.
+  // May another compiled block enter this target without dispatcher preparation?
+  // An admitted block must also be safe to iterate within a stable source epoch.
   bool (*can_chain)(const CAlphaCPU& cpu, std::uint64_t target) = nullptr;
 
-  // Bounded backing words for JIT snapshots and revalidation. 
+  // Observational backing words for JIT snapshots and revalidation. Views are
+  // borrowed until the next callback; their identity/global status match probe.
   AlphaInstructionSourceView (*source)(CAlphaCPU& cpu, std::uint64_t pc) = nullptr;
+
+  // Explicit source-coherence promise, separate from the model's execution support.
+  // probe validates current CM/ASN execute access, including PAL targets. Cache
+  // word/span/availability changes require source invalidation (jit_flush_blocks);
+  // an ITB/link epoch bump alone cannot reject changed words at the same identity.
+  // Mapping/global/permission/chain-eligibility changes must retire incoming links
+  // and access proofs, with fresh probes rejecting obsolete mappings or access.
+  // Private-only source changes may use the non-global flush when every global
+  // source remains unchanged. Mutating instructions redispatch; invalidation runs
+  // on the owning CPU, never by concurrently patching its running code.
+  bool jit_coherent = false;
+
+  // Static native edges may share an access check within an aligned 8 KiB VA
+  // page only when the family guarantees uniform execute permissions there.
+  bool jit_same_page_access = false;
+
+  constexpr bool supports_jit() const
+  {
+    return jit_coherent && fetch && probe && matches_interpreted && can_chain && source;
+  }
 };
 
 #endif

@@ -41,16 +41,6 @@ public:
   static bool can_chain(const CAlphaCPU& cpu, std::uint64_t target);
   static AlphaInstructionSourceView source(CAlphaCPU& cpu, std::uint64_t pc);
 
-  // Keep admission exact until cache-backed dispatch and JIT invalidation have
-  // been qualified together for a different family's source policy.
-  static constexpr bool supports_legacy_jit(const AlphaInstructionFetchPolicy& policy)
-  {
-    return policy.fetch == &fetch && policy.prepare_dispatch == &prepare_dispatch
-      && policy.probe == &probe && policy.peek_cached == &peek_cached
-      && policy.matches_interpreted == &matches_interpreted && policy.can_chain == &can_chain
-      && policy.source == &source;
-  }
-
 private:
   static int read_cache(CAlphaCPU& cpu, std::uint64_t address, std::uint32_t* data);
 };
@@ -59,7 +49,9 @@ inline constexpr AlphaInstructionFetchPolicy kEv68InstructionFetchPolicy{
   &Ev68InstructionFetch::fetch, &Ev68InstructionFetch::prepare_dispatch,
   &Ev68InstructionFetch::probe, &Ev68InstructionFetch::peek_cached,
   &Ev68InstructionFetch::matches_interpreted, &Ev68InstructionFetch::can_chain,
-  &Ev68InstructionFetch::source
+  &Ev68InstructionFetch::source,
+  true, // Coherent EV68 RAM/cache sources participate in JIT invalidation.
+  true  // Execute permissions are uniform within an 8 KiB translation.
 };
 
 #endif

@@ -2206,7 +2206,8 @@ CRealImage2100::TrianglePreparation CRealImage2100::prepare_triangle(
 	uint32_t address, uint32_t value, TriangleOperation& operation) const
 {
 	// These commands retain the slot without launching a primitive.
-	if (!value || value == 0x10)
+	const uint32_t command = value & 0xffu;
+	if (!value || command == 0x10)
 		return TrianglePreparation::NoOp;
 	const uint32_t pipeline = peek(PipelineControl0), texture_mode = pipeline & 0x00038000u,
 		bank = ((peek(DrawControl) >> 12) & 3) == 2 ? 1 : 0,
@@ -2222,10 +2223,10 @@ CRealImage2100::TrianglePreparation CRealImage2100::prepare_triangle(
 		use_alpha = blend && (!additive || source_blend != 1) &&
 			!(textured && texture_alpha && texture_mode == 0x18000),
 		use_w = textured && !affine;
-	// 0x13 launches an independent or strip triangle. Bits 2..3 rotate which
-	// of the three vertex slots is first (0x13 / 0x17 / 0x1b).
-	const unsigned first_vertex = (value >> 2) & 3;
-	if ((value & ~0xcu) != 0x13 || first_vertex >= 3 || !triangle_profile())
+	// 0x13 launches; bits 2..3 of the low byte rotate the vertex ring
+	// (0x13 / 0x17 / 0x1b). Same convention as line commands.
+	const unsigned first_vertex = (command >> 2) & 3;
+	if ((command & ~0xcu) != 0x13 || first_vertex >= 3 || !triangle_profile())
 	{
 		return TrianglePreparation::Rejected;
 	}

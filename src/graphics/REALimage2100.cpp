@@ -881,7 +881,11 @@ void CRealImage2100::WriteMem(uint32_t a, int bits, uint32_t v)
 			unimplemented_once("REALimage vertex width (command rejected)", a, v, true);
 		else if ((key - VertexBase) % VertexStride == 0x1c)
 		{
-			if (flat_vertex_register(original_address) && (it->second == 0x22 || it->second == 0x62))
+			// Line and triangle families both use bits 2..3 as the rotating
+			// vertex index. Mask them out before classifying the command.
+			const uint32_t family = it->second & ~0xcu;
+			if (flat_vertex_register(original_address) &&
+				(family == 0x22 || family == 0x62))
 				raster_vertex_command(original_address, it->second);
 			else
 				triangle_command(original_address, it->second);
@@ -2218,8 +2222,10 @@ CRealImage2100::TrianglePreparation CRealImage2100::prepare_triangle(
 		use_alpha = blend && (!additive || source_blend != 1) &&
 			!(textured && texture_alpha && texture_mode == 0x18000),
 		use_w = textured && !affine;
-	// Untextured perspective draws retain the existing linear depth approximation.
-	if (value != 0x13 || !triangle_profile())
+	// 0x13 launches an independent or strip triangle. Bits 2..3 rotate which
+	// of the three vertex slots is first (0x13 / 0x17 / 0x1b).
+	const unsigned first_vertex = (value >> 2) & 3;
+	if ((value & ~0xcu) != 0x13 || first_vertex >= 3 || !triangle_profile())
 	{
 		return TrianglePreparation::Rejected;
 	}
@@ -2227,13 +2233,14 @@ CRealImage2100::TrianglePreparation CRealImage2100::prepare_triangle(
 	Vertex vertex[3]{};
 	for (unsigned slot = 0; slot < 3; ++slot)
 	{
+		const unsigned index = (first_vertex + slot) % 3;
 		double component[7]{};
 		for (unsigned i = 0; i < 7; ++i)
 		{
 			if ((i == 0 && (flat || !use_alpha)) ||
 				(i > 0 && i < 4 && (flat || !use_color)) || (i == 6 && no_depth && !use_w))
 				continue;
-			const auto reg = m_shadow.find(VertexBase + slot * VertexStride + i * 4);
+			const auto reg = m_shadow.find(VertexBase + index * VertexStride + i * 4);
 			if (reg == m_shadow.end())
 			{
 				return TrianglePreparation::Rejected;
@@ -2259,7 +2266,7 @@ CRealImage2100::TrianglePreparation CRealImage2100::prepare_triangle(
 			float coordinates[4];
 			for (unsigned i = 1; i < 4; ++i)
 			{
-				const auto reg = m_shadow.find(VertexTextureBase + slot * VertexStride + i * 4);
+				const auto reg = m_shadow.find(VertexTextureBase + index * VertexStride + i * 4);
 				if (reg == m_shadow.end())
 				{
 					return TrianglePreparation::Rejected;

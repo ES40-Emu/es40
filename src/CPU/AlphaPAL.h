@@ -73,7 +73,7 @@ enum class AlphaPALReturnSource
 };
 
 // Decoded PAL return rules, outside saved CPU state. Read the selected source
-// at execution time; EXC_ADDR returns and forms with side effects stay interpreted.
+// at execution time; forms with side effects stay interpreted.
 struct AlphaPALReturnDescriptor
 {
   bool valid = false;
@@ -101,8 +101,7 @@ constexpr std::uint64_t alpha_pal_return_target(
 
 constexpr bool alpha_pal_return_compilable(const AlphaPALReturnDescriptor& entry)
 {
-  return alpha_pal_return_valid(entry) && entry.compilable && !entry.clear_lock
-    && entry.source == AlphaPALReturnSource::RegisterB;
+  return alpha_pal_return_valid(entry) && entry.compilable && !entry.clear_lock;
 }
 
 // Family access rules for the PAL-reserved hardware instructions.

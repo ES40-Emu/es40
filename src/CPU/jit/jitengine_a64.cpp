@@ -3659,25 +3659,32 @@ static A64OpEmitReceipt emit_a64_jmp_indirect(A64EmitContext& context,
   a64::Assembler& a = context.assembler;
   Error err = Error::kOk;
 
-  const A64GprRoute rb =
-      a64_guest_gpr_read_route(context.regs, op.rb, context.pal_shadow);
+  const bool hw_return = op.opcode == 0x1e;
+  const auto descriptor = hw_return
+      ? alpha_pal_return_descriptor(context.profile.pal, op.ins) : AlphaPALReturnDescriptor{};
+  if (hw_return && !alpha_pal_return_compilable(descriptor))
+    return {Error::kInvalidArgument, op.kind};
   a64::Gp src = RA::kScratch0;
-  switch (rb.kind) {
-    case A64GprRouteKind::kZero:   src = a64::xzr; break;
-    case A64GprRouteKind::kPinned: src = a64::x(static_cast<uint32_t>(rb.host)); break;
-    case A64GprRouteKind::kMemory:
-      if (context.prev_fwd == static_cast<int>(op.rb)) { src = RA::kScratch2; break; }
-      err = a.ldr(RA::kScratch0, a64::ptr(RA::kRegs,
-                  static_cast<int32_t>(rb.slot * sizeof(uint64_t))));
-      break;
-    default:
-      return {Error::kInvalidArgument, op.kind};
+  if (hw_return && descriptor.source == AlphaPALReturnSource::ExceptionAddress) {
+    err = emit_a64_load_cpu_u64(a, RA::kScratch0, context.offsets.exc_addr);
+  } else {
+    const A64GprRoute rb =
+        a64_guest_gpr_read_route(context.regs, op.rb, context.pal_shadow);
+    switch (rb.kind) {
+      case A64GprRouteKind::kZero:   src = a64::xzr; break;
+      case A64GprRouteKind::kPinned: src = a64::x(static_cast<uint32_t>(rb.host)); break;
+      case A64GprRouteKind::kMemory:
+        if (context.prev_fwd == static_cast<int>(op.rb)) { src = RA::kScratch2; break; }
+        err = a.ldr(RA::kScratch0, a64::ptr(RA::kRegs,
+                    static_cast<int32_t>(rb.slot * sizeof(uint64_t))));
+        break;
+      default:
+        return {Error::kInvalidArgument, op.kind};
+    }
   }
   if (err != Error::kOk) return a64_completed_op_receipt(op, err);
 
-  if (op.opcode == 0x1e) {   // HW_RET: the family selects the final target, including its mode bit.
-    const auto descriptor = alpha_pal_return_descriptor(context.profile.pal, op.ins);
-    if (!alpha_pal_return_compilable(descriptor)) return {Error::kInvalidArgument, op.kind};
+  if (hw_return) {   // The family selects the final target, including its mode bit.
     if (src.id() == a64::xzr.id() || descriptor.target_mask == 0
         || descriptor.target_bits == ~uint64_t(0)) {
       err = emit_a64_mov_u64(a, RA::kNextPc, descriptor.target_bits);

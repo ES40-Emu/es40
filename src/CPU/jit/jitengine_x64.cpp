@@ -2222,15 +2222,19 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             continue;
         }
 
-        // HW_RET (HWREI, 0x1e): transform Rb with the family mask/bits, without a link write.
+        // HW_RET (HWREI, 0x1e): transform the selected live source without a link write.
         // Like OP_JMP, leave R10 = target for the epilogue's in-frame chain.
         if (op == OP_HW_RET) {
             const auto descriptor = alpha_pal_return_descriptor(m_profile.pal, ins);
-            if (rb == 31 || descriptor.target_mask == 0
+            if ((descriptor.source == AlphaPALReturnSource::RegisterB && rb == 31)
+                || descriptor.target_mask == 0
                 || descriptor.target_bits == ~uint64_t(0)) {
                 a.mov(x86::r10, imm(descriptor.target_bits));
             } else {
-                mov_from_reg(x86::r10, rb);
+                if (descriptor.source == AlphaPALReturnSource::ExceptionAddress)
+                    a.mov(x86::r10, x86::qword_ptr(x86::rbp, m_off.exc_addr));
+                else
+                    mov_from_reg(x86::r10, rb);
                 // 64-bit AND/OR immediates sign-extend an encoded 32-bit value.
                 auto immediate_fits = [](uint64_t value) {
                     return value <= 0x7fffffffu || value >= 0xffffffff80000000ull;

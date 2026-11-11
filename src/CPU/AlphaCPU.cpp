@@ -1695,6 +1695,8 @@ void CAlphaCPU::jit_run(int budget)
 				  u32 lop;
 				  if (!cur->prefix_len || !sources.read_word(cur->tag, cur->phys,
 				      cur->asm_global, cur->prefix_len - 1, lop)) break;
+				  // Retired branches have no trace edge.
+				  if (m_profile.retires_instruction_at_decode(lop)) break;
 				  const u32 lopc = lop >> 26;
 				  u64 spc = 0;
 				  if (lopc >= 0x38 && lopc <= 0x3f) {
@@ -1850,9 +1852,11 @@ void CAlphaCPU::jit_run(int budget)
 				peek_cached_instruction(&ins);
 				if (n_interp + k < 16) verify_words[n_interp + k] = ins;
 				const u32 opc = ins >> 26;
+				// Compare retired state without replay effects.
+				const bool executes = !m_profile.retires_instruction_at_decode(ins);
 				const int lra = (ins >> 21) & 0x1F;
 				// Replay the family-selected compiled loads using their original address.
-				const auto hw_load = (opc == 0x1b)
+				const auto hw_load = (executes && opc == 0x1b)
 					? alpha_decode_hw_load(m_profile.hw_load, ins) : AlphaHWLoadDescriptor{};
 				const bool is_hwld = (opc == 0x1b) && alpha_hw_load_compilable(hw_load);
 				// RPCC/RC/RS (MISC 0x18) and family-marked IPRs read CPU state the verify can't
@@ -1862,16 +1866,16 @@ void CAlphaCPU::jit_run(int budget)
 				// Compiled misc reads: RC/RS (0xE000/0xF000) for all Ra incl. 31 (the flag-only side-effect
 				// forms compile too); RPCC (0xC000) only when it has a GPR dest (Ra!=31).
 				const bool is_miscrd = (opc == 0x18) && (miscfn == 0xE000 || miscfn == 0xF000 || (miscfn == 0xC000 && lra != 31));
-				const auto ipr_read = (opc == 0x19)
+				const auto ipr_read = (executes && opc == 0x19)
 					? m_profile.ipr_read.describe(ins) : AlphaIPRReadDescriptor{};
 				const bool is_ipr_replay = (opc == 0x19) && ipr_read.replay
 					&& (lra != 31 || !ipr_read.discard_safe);
 				const bool is_fpld = (opc == 0x22 || opc == 0x23 || opc == 0x20 || opc == 0x21);   // LDS/LDT/LDF/LDG: dest is f[lra]
 				// Ordinary loads log only with a destination. Stateful misc/IPR reads log
 				// even to R31 when the compiled helper must consume a replay slot.
-				const bool isld = ((opc == 0x28 || opc == 0x29 || opc == 0x0a || opc == 0x0c
+				const bool isld = executes && (((opc == 0x28 || opc == 0x29 || opc == 0x0a || opc == 0x0c
 					|| opc == 0x2a || opc == 0x2b || opc == 0x0b || is_hwld || is_fpld) && lra != 31)
-					|| is_miscrd || is_ipr_replay;  // +LDBU/LDWU +LDx_L +LDQ_U +RPCC/RC/RS +ISUM +LDS/LDT
+					|| is_miscrd || is_ipr_replay);  // +LDBU/LDWU +LDx_L +LDQ_U +RPCC/RC/RS +ISUM +LDS/LDT
 				u64 eva = 0;
 				if (isld && !is_miscrd && !is_ipr_replay)   // misc/ISUM reads have no effective address -- only a logged value
 				{
@@ -1885,11 +1889,11 @@ void CAlphaCPU::jit_run(int budget)
 				// compare. Ra (lra) is the value source; Rb is the base. Hardware stores
 				// use the family-selected compiled forms and original physical address.
 				const bool is_sc = (opc == 0x2e || opc == 0x2f);   // STL_C/STQ_C: store-conditional (success in Ra)
-				const auto hw_store = (opc == 0x1f)
+				const auto hw_store = (executes && opc == 0x1f)
 					? alpha_decode_hw_store(m_profile.hw_store, ins) : AlphaHWStoreDescriptor{};
 				const bool is_hwst = (opc == 0x1f) && alpha_hw_store_compilable(hw_store);
 				const bool is_fpst = (opc == 0x26 || opc == 0x27 || opc == 0x24 || opc == 0x25);   // STS/STT/STF/STG: value source is f[lra]
-				const bool isst = (opc == 0x2c || opc == 0x2d || opc == 0x0d || opc == 0x0e || opc == 0x0f || is_sc || is_hwst || is_fpst);  // +STx_C +STQ_U +STS/STT
+				const bool isst = executes && (opc == 0x2c || opc == 0x2d || opc == 0x0d || opc == 0x0e || opc == 0x0f || is_sc || is_hwst || is_fpst);  // +STx_C +STQ_U +STS/STT
 				u64 sva = 0, sval = 0;
 				if (isst)
 				{
@@ -1905,7 +1909,7 @@ void CAlphaCPU::jit_run(int budget)
 				// Capture the computed target before execute() can change its source state.
 				u64 jtgt = 0;
 				bool jtgt_valid = false;
-				if (opc == 0x1a || opc == 0x1e)
+				if (executes && (opc == 0x1a || opc == 0x1e))
 				{
 					const int jrb = (ins >> 16) & 0x1F;
 					const u64 source = jrb == 31 ? (u64)0 : state.r[RREG(jrb)];
@@ -1934,18 +1938,18 @@ void CAlphaCPU::jit_run(int budget)
 					// the dispatcher's !check_int guard handles that) legitimately differs, so
 					// skip the compare instead of flagging a false mismatch.
 					bool ok_branch = false;
-					if (k == cur_len - 1 &&
+					if (executes && k == cur_len - 1 &&
 						(opc == 0x30 || opc == 0x34 || (opc >= 0x38 && opc <= 0x3f)))
 					{
 						const int64_t bdisp = (int64_t)((uint64_t)(ins & 0x1FFFFF) << 43) >> 43;
 						const u64 tgt = vpc + (u64)(bdisp * 4);   // vpc == branch_pc + 4 (fall-through)
 						ok_branch = (state.pc == tgt);
 					}
-					else if (k == cur_len - 1 && (opc == 0x1a || opc == 0x1e))
+					else if (executes && k == cur_len - 1 && (opc == 0x1a || opc == 0x1e))
 					{
 						ok_branch = jtgt_valid && (state.pc == jtgt); // selected computed return/jump target
 					}
-					else if (k == cur_len - 1 && opc == 0x00)
+					else if (executes && k == cur_len - 1 && opc == 0x00)
 					{
 						// CALL_PAL vectored to its PALcode entry (pal_base | offset); the kernel-mode
 						// path never traps, but accept the OPCDEC vector too.
@@ -3567,8 +3571,7 @@ _next_instruction:
 #endif
 	opcode = ins >> 26;
 
-	// An absent extension traps before operand access or EV6's F31 suppression.
-	// Debugger listings still decode the mnemonic without executing the instruction.
+	// Check extensions before retirement; allow debugger listings.
 	if (!m_profile.supports_instruction(ins)
 #if defined(IDB)
 		&& !bListing
@@ -3578,11 +3581,8 @@ _next_instruction:
 		ES40_EXECUTE_END();
 	}
 
-	// EV6 retires FP operates (ITFP/FLTV/FLTI/FLTL) into F31 at decode: no FEN
-	// or arith trap (21264 HRM 2.5, Table 2-6). MT_FPCR (no dest) and MF_FPCR
-	// (dest is Fa) are excluded.
-	if (opcode >= 0x14 && opcode <= 0x17 && (ins & 0x1f) == 31
-		&& !(opcode == 0x17 && (((ins >> 5) & 0x7fe) == 0x024))
+	// Retire before operand checks and exceptions.
+	if (m_profile.retires_instruction_at_decode(ins)
 #if defined(IDB)
 		&& !bListing
 #endif

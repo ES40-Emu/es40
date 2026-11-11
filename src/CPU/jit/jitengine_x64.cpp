@@ -95,6 +95,7 @@ enum SafeOp {
   OP_MULL, OP_UMULH,             // INTM (0x13): MULL = sext32(Ra*op2); UMULH = hi64 of unsigned Ra*op2
   OP_EXTL, OP_EXTH, OP_INSL, OP_INSH, OP_MSKL, OP_MSKH, OP_ZAP,   // INTS (0x12) byte-manip (Rb&7 keyed)
   OP_NOP, OP_MFENCE,             // MISC (0x18): prefetch/cache hints (no-op), barriers (mfence)
+  OP_DECODE_RETIRE,             // Retire at decode; clear F31.
   OP_RPCC, OP_RC, OP_RS,         // MISC (0x18) state reads (Ra dest): cycle counter / read-and-clear,set intr flag
   OP_LDQ, OP_LDL,                // memory-format loads: Ra = MEM[Rb + disp16]
   OP_LDBU, OP_LDWU,              // BWX byte/word loads (0x0a/0x0c): Ra = zero-extend MEM[Rb+disp16].{b,w}
@@ -144,9 +145,10 @@ static bool host_has_bmi2() {
 SafeOp classify(uint32_t ins, bool pal_block, const AlphaIPRReadPolicy& ipr_read,
     const AlphaIPRWritePolicy& ipr_write, const AlphaPALPolicy& pal,
     const AlphaHWLoadPolicy& hw_load, const AlphaHWStorePolicy& hw_store,
-    uint64_t amask)
+    uint64_t amask, const AlphaInstructionDecodePolicy& decode)
 {
   if (!alpha_instruction_supported(amask, ins)) return OP_NONE;
+  if (alpha_instruction_retires_at_decode(decode, ins)) return OP_DECODE_RETIRE;
   uint32_t opcode = ins >> 26;
   uint32_t func = (ins >> 5) & 0x7F;
   switch (opcode) {
@@ -197,8 +199,7 @@ SafeOp classify(uint32_t ins, bool pal_block, const AlphaIPRReadPolicy& ipr_read
       if (func == 0x00) return OP_MULL;    // 32-bit multiply, low 32 sign-extended
       if (func == 0x30) return OP_UMULH;   // high 64 bits of the unsigned 128-bit product
       break;
-    case 0x14: {  // ITFP: compile the int->FP register moves + IEEE SQRT*. Fc==31 is interpreted
-      // (the interp zeroes f[31] per instruction -- a compiled write would desync).
+    case 0x14: {  // ITFP: int->FP moves and IEEE SQRT; other F31 forms interpret.
       const uint32_t f14 = (ins >> 5) & 0x7ff;
       if ((ins & 0x1f) == 31) return OP_NONE;             // Fc==31 -> interp
       const uint32_t sb = f14 & 0x3f;                     // IEEE sqrt (source Fb): SQRTS 0x0b / SQRTT 0x2b
@@ -850,7 +851,8 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
     bool islit = ((ins >> 12) & 1) != 0;
     uint32_t lit = (ins >> 13) & 0xFF;
     SafeOp op = classify(ins, pal_block, m_profile.ipr_read, m_profile.ipr_write,
-        m_profile.pal, m_profile.hw_load, m_profile.hw_store, m_profile.amask);
+        m_profile.pal, m_profile.hw_load, m_profile.hw_store, m_profile.amask,
+        m_profile.instruction_decode);
 
     const bool prev_fp_t_guarded = regalloc.fp_t_guarded;
     const bool prev_fp_t_exc_zero = regalloc.fp_t_exc_zero;
@@ -865,7 +867,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
     // 
     // Branches also reset the facts before trace/chain boundary bookkeeping.
     switch (op) {
-    case OP_NOP: case OP_MFENCE: case OP_LDA: case OP_LDAH:
+    case OP_NOP: case OP_DECODE_RETIRE: case OP_MFENCE: case OP_LDA: case OP_LDAH:
     case OP_ADDL: case OP_SUBL: case OP_ADDQ: case OP_SUBQ:
     case OP_S4ADDL: case OP_S8ADDL: case OP_S4SUBL: case OP_S8SUBL:
     case OP_S4ADDQ: case OP_S8ADDQ: case OP_S4SUBQ: case OP_S8SUBQ:
@@ -919,6 +921,11 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
     do {
         // MB: a locked RMW on our frame is a full barrier, cheaper than mfence.
         if (op == OP_NOP)    { preserve_dpc(); continue; }
+        if (op == OP_DECODE_RETIRE) {
+            // Clear stale F31 as execute() does before decode.
+            a.mov(x86::qword_ptr(x86::rbp, m_off.f_base + 31 * 8), imm(0));
+            preserve_dpc(); continue;
+        }
         if (op == OP_MFENCE) {
 #ifdef JIT_STATS
             a.mov(x86::rax, imm((uint64_t) &m_mb_exec)); a.inc(x86::qword_ptr(x86::rax));
@@ -2841,7 +2848,8 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
   while (plen < scan_len)
   {
     SafeOp sop = classify(words[plen], pal_block, m_profile.ipr_read, m_profile.ipr_write,
-        m_profile.pal, m_profile.hw_load, m_profile.hw_store, m_profile.amask);
+        m_profile.pal, m_profile.hw_load, m_profile.hw_store, m_profile.amask,
+        m_profile.instruction_decode);
     if (sop == OP_NONE) {               // uncompilable op ends the straight-line prefix
 #ifdef JIT_STATS
       const uint32_t bop = words[plen] >> 26;
@@ -2893,11 +2901,11 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
   bool byte_scan_fused = false;
   bool tail_scan_fused = false;
 #if defined(_WIN32) && !defined(JIT_VERIFY)
-  // Fusions consume instructions beyond the classified prefix. Every consumed
-  // word must satisfy the same extension policy (notably the counted scan's LDBU).
+  // Check all fusion words, including lookahead.
   const auto span_supported = [&](uint32_t count) {
     for (uint32_t i = 0; i < count; ++i)
-      if (!m_profile.supports_instruction(words[i])) return false;
+      if (!m_profile.supports_instruction(words[i])
+          || m_profile.retires_instruction_at_decode(words[i])) return false;
     return true;
   };
   if (!pal_block && plen == 6 && snapshot_len >= 39) {
@@ -3800,6 +3808,8 @@ void CJitEngine::compile_trace(TraceFragment* t, JitBlock** blocks, uint32_t n_b
       return;
     for (uint32_t word : source_words[bi])
       if (!m_profile.supports_instruction(word)) return;
+    // Trace tails must set R10; retired tails stay in the block JIT.
+    if (m_profile.retires_instruction_at_decode(source_words[bi].back())) return;
   }
 
   // Regalloc: pick the trace's hottest guest GPRs for its callee-saved pins. A fresh

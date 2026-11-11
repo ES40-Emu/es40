@@ -29,6 +29,7 @@
 
 #include <cstdint>
 #include "AlphaInstructionSet.h"
+#include "Ev68InstructionSet.h"
 #include "Ev68PAL.h"
 #include "Ev68IPR.h"
 #include "Ev68MMU.h"
@@ -55,10 +56,16 @@ struct AlphaCPUProfile
   bool jit_supported = true; // Disable only while the JIT lacks support for this family's fetch or execution rules.
   AlphaResetPolicy reset = kEv68ResetPolicy; // Family state for init and system reset.
   AlphaInstructionFetchPolicy instruction_fetch = kEv68InstructionFetchPolicy;
+  AlphaInstructionDecodePolicy instruction_decode = kEv68InstructionDecodePolicy;
 
   constexpr bool supports_instruction(std::uint32_t ins) const
   {
     return alpha_instruction_supported(amask, ins);
+  }
+
+  constexpr bool retires_instruction_at_decode(std::uint32_t ins) const
+  {
+    return alpha_instruction_retires_at_decode(instruction_decode, ins);
   }
 };
 

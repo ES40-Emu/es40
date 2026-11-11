@@ -215,6 +215,7 @@ enum A64GprOperandMask : uint8_t {
 enum class A64OpKind : uint8_t {
   kUnsupported,
   kValidationProbe,
+  kDecodeRetire,  // Retire at decode; clear F31.
   kIntlLogical,   // INTL (0x11) AND/BIS/XOR/BIC/ORNOT/EQV: 1:1 A64 register ops
   kBranchInt,     // BR/BSR + conditional integer branches (0x30/0x34/0x38-0x3f)
   kHwMfpr,        // HW_MFPR (0x19), PALmode: plain IPR fields inline, others via helper
@@ -959,6 +960,7 @@ static constexpr bool a64_supported_op_kind(A64OpKind kind) noexcept
     case A64OpKind::kUnsupported:
     case A64OpKind::kValidationProbe:
       return false;
+    case A64OpKind::kDecodeRetire:
     case A64OpKind::kIntlLogical:
     case A64OpKind::kBranchInt:
     case A64OpKind::kHwMfpr:
@@ -1212,9 +1214,12 @@ static constexpr A64OpClass classify_a64_op(uint32_t ins, bool pal_block,
     const AlphaPALPolicy& pal = kEv68PALPolicy,
     const AlphaHWLoadPolicy& hw_load = kEv68HWLoadPolicy,
     const AlphaHWStorePolicy& hw_store = kEv68HWStorePolicy,
-    uint64_t amask = kEv68CBProfile.amask) noexcept
+    uint64_t amask = kEv68CBProfile.amask,
+    const AlphaInstructionDecodePolicy& decode = kEv68InstructionDecodePolicy) noexcept
 {
   if (!alpha_instruction_supported(amask, ins)) return {};
+  if (alpha_instruction_retires_at_decode(decode, ins))
+    return {A64OpKind::kDecodeRetire, A64TerminatorKind::kNone, 0, 0};
   const uint32_t opcode = ins >> 26;
   const uint32_t func = (ins >> 5) & 0x7fu;
   const bool is_literal = ((ins >> 12) & 1u) != 0;
@@ -1484,10 +1489,11 @@ static constexpr A64DecodedOp decode_a64_op(uint32_t ins, bool pal_block,
     const AlphaPALPolicy& pal = kEv68PALPolicy,
     const AlphaHWLoadPolicy& hw_load = kEv68HWLoadPolicy,
     const AlphaHWStorePolicy& hw_store = kEv68HWStorePolicy,
-    uint64_t amask = kEv68CBProfile.amask) noexcept
+    uint64_t amask = kEv68CBProfile.amask,
+    const AlphaInstructionDecodePolicy& decode = kEv68InstructionDecodePolicy) noexcept
 {
   const A64OpClass classification = classify_a64_op(
-      ins, pal_block, ipr_read, ipr_write, pal, hw_load, hw_store, amask);
+      ins, pal_block, ipr_read, ipr_write, pal, hw_load, hw_store, amask, decode);
   A64DecodedOp decoded{};
   decoded.ins = ins;
   decoded.kind = classification.kind;
@@ -1522,7 +1528,7 @@ static A64BlockPlan plan_a64_block(const CJitEngine::JitBlock& block,
     const AlphaInstructionSourceView& source, const AlphaIPRReadPolicy& ipr_read,
     const AlphaIPRWritePolicy& ipr_write, const AlphaPALPolicy& pal,
     const AlphaHWLoadPolicy& hw_load, const AlphaHWStorePolicy& hw_store,
-    uint64_t amask) noexcept
+    uint64_t amask, const AlphaInstructionDecodePolicy& decode) noexcept
 {
   A64BlockPlan plan{};
   if (block.n_instr == 0) {
@@ -1541,7 +1547,7 @@ static A64BlockPlan plan_a64_block(const CJitEngine::JitBlock& block,
   for (uint32_t i = 0; i < limit.count; ++i) {
     const uint32_t word = source_words[i];
     const A64DecodedOp decoded = decode_a64_op(
-        word, pal_block, ipr_read, ipr_write, pal, hw_load, hw_store, amask);
+        word, pal_block, ipr_read, ipr_write, pal, hw_load, hw_store, amask, decode);
     if (decoded.kind == A64OpKind::kUnsupported) {
       plan.breaker_word = word;
       plan.stop = A64PlanStop::kUnsupported;
@@ -1850,7 +1856,7 @@ static_assert(classify_a64_op((0x13u << 26) | (0x20u << 5), false).kind
 static_assert(classify_a64_op((0x17u << 26) | (0x020u << 5) | 5u, false).kind
                   == A64OpKind::kFltl          // CPYS to f5
               && classify_a64_op((0x17u << 26) | (0x020u << 5) | 31u, false).kind
-                  == A64OpKind::kUnsupported   // Fc==31 -> interp (f31 zeroing)
+                  == A64OpKind::kDecodeRetire  // EV68 F31 retirement
               && classify_a64_op((0x15u << 26) | (0x020u << 5) | 4u, false).kind
                   == A64OpKind::kFltv          // ADDG
               && classify_a64_op((0x15u << 26) | (0x220u << 5) | 4u, false).kind
@@ -5595,6 +5601,14 @@ static A64OpEmitReceipt emit_a64_dispatch_op(A64EmitContext& context,
     case A64OpKind::kUnsupported:
     case A64OpKind::kValidationProbe:
       return {};
+    case A64OpKind::kDecodeRetire: {
+      // CPU-based F31 clear, no FPSTART; verify GPRs are scratch.
+      auto err = context.assembler.mov(CJitEngine::RegAlloc::kScratch0, asmjit::imm(0));
+      if (err == asmjit::Error::kOk)
+        err = emit_a64_store_cpu_u64(context.assembler, CJitEngine::RegAlloc::kScratch0,
+            context.offsets.f_base + 31 * 8);
+      return a64_completed_op_receipt(op, err);
+    }
     case A64OpKind::kIntlLogical:
       return emit_a64_intl_logical(context, op);
     case A64OpKind::kBranchInt:
@@ -6656,7 +6670,7 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
   }
   const A64BlockPlan plan = plan_a64_block(
       *b, source, m_profile.ipr_read, m_profile.ipr_write, m_profile.pal,
-      m_profile.hw_load, m_profile.hw_store, m_profile.amask);
+      m_profile.hw_load, m_profile.hw_store, m_profile.amask, m_profile.instruction_decode);
 #ifdef JIT_STATS
   if (plan.stop == A64PlanStop::kUnsupported) {
     const uint32_t bop = plan.breaker_word >> 26;

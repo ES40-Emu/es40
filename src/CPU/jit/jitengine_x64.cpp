@@ -143,8 +143,10 @@ static bool host_has_bmi2() {
 // compile them when the block is PALmode (the dispatcher keys blocks by PC bit 0).
 SafeOp classify(uint32_t ins, bool pal_block, const AlphaIPRReadPolicy& ipr_read,
     const AlphaIPRWritePolicy& ipr_write, const AlphaPALPolicy& pal,
-    const AlphaHWLoadPolicy& hw_load, const AlphaHWStorePolicy& hw_store)
+    const AlphaHWLoadPolicy& hw_load, const AlphaHWStorePolicy& hw_store,
+    uint64_t amask)
 {
+  if (!alpha_instruction_supported(amask, ins)) return OP_NONE;
   uint32_t opcode = ins >> 26;
   uint32_t func = (ins >> 5) & 0x7F;
   switch (opcode) {
@@ -848,7 +850,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
     bool islit = ((ins >> 12) & 1) != 0;
     uint32_t lit = (ins >> 13) & 0xFF;
     SafeOp op = classify(ins, pal_block, m_profile.ipr_read, m_profile.ipr_write,
-        m_profile.pal, m_profile.hw_load, m_profile.hw_store);
+        m_profile.pal, m_profile.hw_load, m_profile.hw_store, m_profile.amask);
 
     const bool prev_fp_t_guarded = regalloc.fp_t_guarded;
     const bool prev_fp_t_exc_zero = regalloc.fp_t_exc_zero;
@@ -2839,7 +2841,7 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
   while (plen < scan_len)
   {
     SafeOp sop = classify(words[plen], pal_block, m_profile.ipr_read, m_profile.ipr_write,
-        m_profile.pal, m_profile.hw_load, m_profile.hw_store);
+        m_profile.pal, m_profile.hw_load, m_profile.hw_store, m_profile.amask);
     if (sop == OP_NONE) {               // uncompilable op ends the straight-line prefix
 #ifdef JIT_STATS
       const uint32_t bop = words[plen] >> 26;
@@ -2891,6 +2893,13 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
   bool byte_scan_fused = false;
   bool tail_scan_fused = false;
 #if defined(_WIN32) && !defined(JIT_VERIFY)
+  // Fusions consume instructions beyond the classified prefix. Every consumed
+  // word must satisfy the same extension policy (notably the counted scan's LDBU).
+  const auto span_supported = [&](uint32_t count) {
+    for (uint32_t i = 0; i < count; ++i)
+      if (!m_profile.supports_instruction(words[i])) return false;
+    return true;
+  };
   if (!pal_block && plen == 6 && snapshot_len >= 39) {
     static const uint32_t head[15] = {
       0x40020536, 0x47e0341c, 0x400203b7, 0x46df04dc, 0x4797041c, 0xe3800022,
@@ -2902,14 +2911,16 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
       0x47e60402, 0x47e70403, 0xc3ffffd9
     };
     counted_scan_fused = memcmp(words, head, sizeof(head)) == 0
-                      && memcmp(words + 32, mismatch, sizeof(mismatch)) == 0;
+                      && memcmp(words + 32, mismatch, sizeof(mismatch)) == 0
+                      && span_supported(39);
   }
   if (!pal_block && plen == 5 && snapshot_len >= 10) {
     static const uint32_t word_scan[10] = {
       0xa6e10000, 0x42fc01f6, 0x439701f8, 0x46d80016, 0xf6c00028,
       0x40011120, 0x40211401, 0xf81ffff8, 0x40011400, 0xe4000007
     };
-    word_scan_fused = memcmp(words, word_scan, sizeof(word_scan)) == 0;
+    word_scan_fused = memcmp(words, word_scan, sizeof(word_scan)) == 0
+                   && span_supported(10);
   }
   // Inner byte-search loop.
   // R23 contains the aligned source word
@@ -2920,7 +2931,8 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
       0x40003520, 0x40203401, 0xe400001b,
       0x4420f016, 0xf6dffff8
     };
-    byte_scan_fused = memcmp(words, byte_scan, sizeof(byte_scan)) == 0;
+    byte_scan_fused = memcmp(words, byte_scan, sizeof(byte_scan)) == 0
+                   && span_supported(8);
   }
   // End of the inner loop search.
   // R23 remains the loaded word and R0 is the remaining byte count.
@@ -2930,7 +2942,8 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
       0x4ae100d8, 0x431b0538, 0xe7000003,
       0x40003120, 0x40203401, 0xf41ffffa
     };
-    tail_scan_fused = memcmp(words, tail_scan, sizeof(tail_scan)) == 0;
+    tail_scan_fused = memcmp(words, tail_scan, sizeof(tail_scan)) == 0
+                   && span_supported(6);
   }
 #endif
   const uint32_t hash_len = counted_scan_fused ? 39u : byte_scan_fused ? 8u
@@ -3785,6 +3798,8 @@ void CJitEngine::compile_trace(TraceFragment* t, JitBlock** blocks, uint32_t n_b
     source_words[bi].resize(source_desc[bi].n_instr);
     if (!source.copy_words(source_words[bi].data(), source_desc[bi].n_instr))
       return;
+    for (uint32_t word : source_words[bi])
+      if (!m_profile.supports_instruction(word)) return;
   }
 
   // Regalloc: pick the trace's hottest guest GPRs for its callee-saved pins. A fresh

@@ -1211,8 +1211,10 @@ static constexpr A64OpClass classify_a64_op(uint32_t ins, bool pal_block,
     const AlphaIPRWritePolicy& ipr_write = kEv68IPRWritePolicy,
     const AlphaPALPolicy& pal = kEv68PALPolicy,
     const AlphaHWLoadPolicy& hw_load = kEv68HWLoadPolicy,
-    const AlphaHWStorePolicy& hw_store = kEv68HWStorePolicy) noexcept
+    const AlphaHWStorePolicy& hw_store = kEv68HWStorePolicy,
+    uint64_t amask = kEv68CBProfile.amask) noexcept
 {
+  if (!alpha_instruction_supported(amask, ins)) return {};
   const uint32_t opcode = ins >> 26;
   const uint32_t func = (ins >> 5) & 0x7fu;
   const bool is_literal = ((ins >> 12) & 1u) != 0;
@@ -1481,10 +1483,11 @@ static constexpr A64DecodedOp decode_a64_op(uint32_t ins, bool pal_block,
     const AlphaIPRWritePolicy& ipr_write = kEv68IPRWritePolicy,
     const AlphaPALPolicy& pal = kEv68PALPolicy,
     const AlphaHWLoadPolicy& hw_load = kEv68HWLoadPolicy,
-    const AlphaHWStorePolicy& hw_store = kEv68HWStorePolicy) noexcept
+    const AlphaHWStorePolicy& hw_store = kEv68HWStorePolicy,
+    uint64_t amask = kEv68CBProfile.amask) noexcept
 {
   const A64OpClass classification = classify_a64_op(
-      ins, pal_block, ipr_read, ipr_write, pal, hw_load, hw_store);
+      ins, pal_block, ipr_read, ipr_write, pal, hw_load, hw_store, amask);
   A64DecodedOp decoded{};
   decoded.ins = ins;
   decoded.kind = classification.kind;
@@ -1518,7 +1521,8 @@ static constexpr A64ScanLimit a64_scan_limit(uint32_t n_instr, uint32_t source_w
 static A64BlockPlan plan_a64_block(const CJitEngine::JitBlock& block,
     const AlphaInstructionSourceView& source, const AlphaIPRReadPolicy& ipr_read,
     const AlphaIPRWritePolicy& ipr_write, const AlphaPALPolicy& pal,
-    const AlphaHWLoadPolicy& hw_load, const AlphaHWStorePolicy& hw_store) noexcept
+    const AlphaHWLoadPolicy& hw_load, const AlphaHWStorePolicy& hw_store,
+    uint64_t amask) noexcept
 {
   A64BlockPlan plan{};
   if (block.n_instr == 0) {
@@ -1537,7 +1541,7 @@ static A64BlockPlan plan_a64_block(const CJitEngine::JitBlock& block,
   for (uint32_t i = 0; i < limit.count; ++i) {
     const uint32_t word = source_words[i];
     const A64DecodedOp decoded = decode_a64_op(
-        word, pal_block, ipr_read, ipr_write, pal, hw_load, hw_store);
+        word, pal_block, ipr_read, ipr_write, pal, hw_load, hw_store, amask);
     if (decoded.kind == A64OpKind::kUnsupported) {
       plan.breaker_word = word;
       plan.stop = A64PlanStop::kUnsupported;
@@ -6652,7 +6656,7 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
   }
   const A64BlockPlan plan = plan_a64_block(
       *b, source, m_profile.ipr_read, m_profile.ipr_write, m_profile.pal,
-      m_profile.hw_load, m_profile.hw_store);
+      m_profile.hw_load, m_profile.hw_store, m_profile.amask);
 #ifdef JIT_STATS
   if (plan.stop == A64PlanStop::kUnsupported) {
     const uint32_t bop = plan.breaker_word >> 26;

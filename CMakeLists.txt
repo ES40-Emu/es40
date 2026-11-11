@@ -422,6 +422,7 @@ list(APPEND ES40_SOURCES
     src/CPU/Ev68Reset.cpp
     src/CPU/AlphaInstructionFetch.h
     src/CPU/AlphaInstructionSource.h
+    src/CPU/AlphaInstructionSet.h
     src/CPU/Ev68InstructionFetch.h
     src/CPU/Ev68InstructionFetch.cpp
     src/CPU/AlphaMMU.h

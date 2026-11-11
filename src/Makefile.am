@@ -87,6 +87,7 @@ noinst_HEADERS = config/ConfigEditor.h config/ConfigDocument.h \
        CPU/Ev68Reset.h \
        CPU/AlphaInstructionFetch.h \
        CPU/AlphaInstructionSource.h \
+       CPU/AlphaInstructionSet.h \
        CPU/Ev68InstructionFetch.h \
        CPU/idle_detect.h \
        CPU/AlphaPAL.h \

@@ -3567,6 +3567,17 @@ _next_instruction:
 #endif
 	opcode = ins >> 26;
 
+	// An absent extension traps before operand access or EV6's F31 suppression.
+	// Debugger listings still decode the mnemonic without executing the instruction.
+	if (!m_profile.supports_instruction(ins)
+#if defined(IDB)
+		&& !bListing
+#endif
+		) {
+		GO_PAL(AlphaPALException::OpcodeDecode);
+		ES40_EXECUTE_END();
+	}
+
 	// EV6 retires FP operates (ITFP/FLTV/FLTI/FLTL) into F31 at decode: no FEN
 	// or arith trap (21264 HRM 2.5, Table 2-6). MT_FPCR (no dest) and MF_FPCR
 	// (dest is Fa) are excluded.

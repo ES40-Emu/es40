@@ -28,6 +28,7 @@
 #define INCLUDED_ALPHACPUPROFILE_H
 
 #include <cstdint>
+#include "AlphaInstructionSet.h"
 #include "Ev68PAL.h"
 #include "Ev68IPR.h"
 #include "Ev68MMU.h"
@@ -39,7 +40,7 @@
 // Immutable model identity, execution capabilities, and family rules chosen by configuration.
 struct AlphaCPUProfile
 {
-  std::uint64_t amask;       // Implemented extensions; AMASK returns input & ~amask.
+  std::uint64_t amask;       // Execution capabilities; AMASK returns input & ~amask.
   std::uint32_t implver;     // Architectural implementation version.
   std::uint32_t chip_id;     // Implementation-specific chip revision identifier.
   std::uint32_t type_major;  // System-reference processor type.
@@ -54,6 +55,11 @@ struct AlphaCPUProfile
   bool jit_supported = true; // Disable only while the JIT lacks support for this family's fetch or execution rules.
   AlphaResetPolicy reset = kEv68ResetPolicy; // Family state for init and system reset.
   AlphaInstructionFetchPolicy instruction_fetch = kEv68InstructionFetchPolicy;
+
+  constexpr bool supports_instruction(std::uint32_t ins) const
+  {
+    return alpha_instruction_supported(amask, ins);
+  }
 };
 
 // EV68CB pass 4: BWX | FIX | CIX | MVI | precise traps | prefetch modify.

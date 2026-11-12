@@ -4625,50 +4625,9 @@ int CAlphaCPU::virt2phys(u64 virt, u64* phys, int flags, bool* asm_bit, u32 ins)
 			{
 
 				// handle D-stream access fault
-				state.exc_addr = state.current_pc;
-				state.fault_va = virt;
-				/* HRM 5.1.5/D.24: VA_FORM is derived from VA, which is written
-				   on every D-stream fault (including FOR/FOW DFAULT), not just TB
-				   miss. Keep the VA_FORM snapshot current so the OS fault
-				   handler computes the right PTE address. */
-				state.va_form_va = virt;
-				state.exc_sum = ((u64)REG_1 & 0x1f) << 8;  /* HRM 5.2.13: EXC_SUM REG[12:8] is 5 bits */
-
-				/* HRM 5.3.8 MM_STAT: FOR [bit 2] is set when a fault-on-read
-				 * error occurs during a read transaction with PTE[FOR] set.
-				 * FOW [bit 3] is set when a fault-on-write error occurs.
-				 * For HW_LD WrChk variants the chip is performing both a
-				 * read AND a write-protection check, so PTE[FOW] (if set)
-				 * is reportable too
-				 */
-				u32 opcode = I_GETOP(ins);
-				int for_bit =
-					((flags & ACCESS_WRITE) == 0)
-					&& state.tb[t][i].fault[0] ? 4 : 0;
-				int fow_bit =
-					(((flags & ACCESS_WRITE) || (flags & WRCHK))
-						&& state.tb[t][i].fault[1]) ? 8 : 0;
-				state.mm_stat =
-					(
-						(opcode == 0x1b || opcode == 0x1f) ? opcode -
-						0x18 : opcode
-						) <<
-					4 |
-					(flags & ACCESS_WRITE) |
-					for_bit | fow_bit;
-				if (state.pal_vms)
-				{
-					if ((res = vmspal_ent_dfault(flags)))
-						return res;
-				}
-				else
-				{
-#ifdef JIT_STATS
-					m_stat_tb[3]++;
-#endif
-					set_pc(state.pal_base + pal_exception_offset(AlphaPALException::DataFault) + 1);
-					return -1;
-				}
+				res = m_profile.data_fault.access_fault(*this, virt, flags, ins,
+					state.tb[t][i].fault[0] != 0, state.tb[t][i].fault[1] != 0);
+				if (res) return res;
 			}
 		}
 	}

@@ -44,6 +44,9 @@ public:
   static int access_violation(CAlphaCPU& cpu, std::uint64_t virt,
                                int access_flags, std::uint32_t instruction,
                                AlphaDataFaultSource source);
+  static int access_fault(CAlphaCPU& cpu, std::uint64_t virt,
+                           int access_flags, std::uint32_t instruction,
+                           bool fault_on_read, bool fault_on_write);
   static void unaligned(CAlphaCPU& cpu, std::uint64_t virt,
                          int access_flags, std::uint32_t instruction, int alignment_mask);
 };
@@ -54,7 +57,7 @@ inline constexpr AlphaMMUAddressPolicy kEv68MMUAddressPolicy{
   &Ev68MMU::access, &Ev68MMU::map_address
 };
 inline constexpr AlphaDataFaultPolicy kEv68DataFaultPolicy{
-  &Ev68MMU::access_violation, &Ev68MMU::unaligned
+  &Ev68MMU::access_violation, &Ev68MMU::unaligned, &Ev68MMU::access_fault
 };
 
 #endif

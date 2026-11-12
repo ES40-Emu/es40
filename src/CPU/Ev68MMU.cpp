@@ -235,6 +235,41 @@ int Ev68MMU::access_violation(CAlphaCPU& cpu, std::uint64_t virt, int flags,
   return -1;
 }
 
+int Ev68MMU::access_fault(CAlphaCPU& cpu, std::uint64_t virt, int flags,
+                           std::uint32_t ins, bool fault_on_read, bool fault_on_write)
+{
+  auto& state = cpu.state;
+  state.exc_addr = state.current_pc;
+  state.fault_va = virt;
+  /* HRM 5.1.5/D.24: VA_FORM is derived from VA, which is written
+     on every D-stream fault (including FOR/FOW DFAULT), not just TB
+     miss. Keep the VA_FORM snapshot current so the OS fault
+     handler computes the right PTE address. */
+  state.va_form_va = virt;
+  state.exc_sum = (u64)I_GETRA(ins) << 8;  /* HRM 5.2.13: EXC_SUM REG[12:8] is 5 bits */
+
+  /* HRM 5.3.8 MM_STAT: FOR [bit 2] is set when a fault-on-read
+   * error occurs during a read transaction with PTE[FOR] set.
+   * FOW [bit 3] is set when a fault-on-write error occurs.
+   * For HW_LD WrChk variants the chip is performing both a
+   * read AND a write-protection check, so PTE[FOW] (if set)
+   * is reportable too
+   */
+  const u32 opcode = I_GETOP(ins);
+  const int for_bit = !(flags & ACCESS_WRITE) && fault_on_read ? 4 : 0;
+  const int fow_bit = ((flags & ACCESS_WRITE) || (flags & WRCHK)) && fault_on_write ? 8 : 0;
+  state.mm_stat = ((opcode == 0x1b || opcode == 0x1f) ? opcode - 0x18 : opcode) << 4
+    | (flags & ACCESS_WRITE) | for_bit | fow_bit;
+  if (state.pal_vms)
+    return cpu.vmspal_ent_dfault(flags);
+
+#ifdef JIT_STATS
+  cpu.m_stat_tb[3]++;
+#endif
+  cpu.set_pc(state.pal_base + cpu.pal_exception_offset(AlphaPALException::DataFault) + 1);
+  return -1;
+}
+
 #if defined(DEBUG_UNALIGN)
 // pc/opcode identify the guest instruction; n counts alignment faults.
 #define TRACE_UNALIGN(flags, align)                                              \

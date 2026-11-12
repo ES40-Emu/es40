@@ -46,6 +46,12 @@ struct AlphaDataFaultPolicy
   // Always ends the instruction, before translation or memory side effects.
   void (*unaligned)(CAlphaCPU& cpu, std::uint64_t address,
                     int access_flags, std::uint32_t instruction, int alignment_mask);
+
+  // Selected TB fault bits, before access-direction or WRCHK filtering.
+  // Zero continues with the selected entry; nonzero ends translation.
+  int (*access_fault)(CAlphaCPU& cpu, std::uint64_t address,
+                       int access_flags, std::uint32_t instruction,
+                       bool fault_on_read, bool fault_on_write);
 };
 
 #endif

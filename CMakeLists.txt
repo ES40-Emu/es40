@@ -423,6 +423,9 @@ list(APPEND ES40_SOURCES
     src/CPU/AlphaInterrupt.h
     src/CPU/Ev68Interrupt.h
     src/CPU/Ev68Interrupt.cpp
+    src/CPU/AlphaFPCR.h
+    src/CPU/Ev68FPCR.h
+    src/CPU/Ev68FPCR.cpp
     src/CPU/AlphaInstructionFetch.h
     src/CPU/AlphaInstructionSource.h
     src/CPU/AlphaInstructionSet.h

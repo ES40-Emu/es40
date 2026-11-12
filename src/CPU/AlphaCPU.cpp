@@ -1203,56 +1203,12 @@ void CAlphaCPU::stop_threads()
 	mySemaphore.tryWait(1);
 }
 
-// ============================================================================
-//
-// Alpha FPCR layout (all meaningful bits are in the upper 32 bits):
-//
-//   63    SUM      - Summary Bit (SUM).
-//   62    INED     - Inexact Disable (INED). 
-//   61    UNFD     - Underflow Disable (UNFD)
-//   60    UNDZ     - Underflow to Zero (UNDZ)
-//   59:58 DYN      -  Dynamic Rounding Mode (DYN)
-//   57    IOV      - Integer Overflow (IOV)
-//   56    INE      - Inexact Result (INE)
-//   55    UNF      - Underflow (UNF).
-//   54    OVF      - Overflow (OVF)
-//   53    DZE      - Division by Zero (DZE)
-//   52    INV      - Invalid Operation (INV)
-//   51    OVFD     - Overflow Disable (OVFD)
-//   50    DZED     - Division by Zero Disable (DZED)
-//   49    INVD     - Invalid Operation Disable (INVD)
-//   48    DNZ      - Denormal Operands to Zero (DNZ)
-//   47    DNOD     - Denormal Operand Exception Disable (DNOD)
-//   46:0  Reserved, must be read as zero
-//
-//   Alpha Architecture Reference Manual, 4th ed. [ARM]:
-//     Section 4.7.8   - Floating-Point Control Register (FPCR)
-//     Section 4.7.8.1 - Accessing the FPCR
-//     Section 4.7.8.2 - Default Values of the FPCR
-//     Section 4.10.4  - Move from/to Floating-Point Control Register
-//   at least according to this one https://download.majix.org/dec/alpha_arch_ref.pdf
-// ============================================================================
-
 u64 CAlphaCPU::read_fpcr_arch() const {
-	u64 val = state.fpcr & ~(FPCR_RAZ | U64(0x00000000FFFFFFFF));
-
-	if (val & FPCR_ERR)
-		val |= FPCR_SUM;
-	else
-		val &= ~FPCR_SUM;
-
-	return val;
+	return m_profile.fpcr.read(state.fpcr);
 }
 
 void CAlphaCPU::write_fpcr_arch(u64 arch_val) {
-	u64 val = arch_val & ~(FPCR_RAZ | U64(0x00000000FFFFFFFF));
-
-	if (val & FPCR_ERR)
-		val |= FPCR_SUM;
-	else
-		val &= ~FPCR_SUM;
-
-	state.fpcr = val;
+	state.fpcr = m_profile.fpcr.write(arch_val);
 }
 
 /**
@@ -1765,9 +1721,9 @@ void CAlphaCPU::jit_run(int budget)
 				if (ii == 13) { x &= ~U64(0x1f00); y &= ~U64(0x1f00); }
 				return x != y;
 			};
-			const u64  exc_sum_pre = state.exc_sum, fpcr_pre = state.fpcr; // restored before the TRACE pass:
-			                                                               // boundary compares need the pre-span
-			                                                               // value, not the interp's inherited final
+			const u64  exc_sum_pre = state.exc_sum, fpcr_pre = state.fpcr; // FPCR is restored before both replays;
+			                                                               // trace boundary compares also need
+			                                                               // EXC_SUM from before the span.
 			// HW_MTPR verify: a compiled block writes IPR fields directly in LIVE state (its GPR
 			// writes go to jr scratch). cap_iprs snapshots the writable IPR set (the per-boundary
 			// snapshots below and the post-pass compares both use it); put_iprs restores it. Mostly
@@ -2013,6 +1969,7 @@ void CAlphaCPU::jit_run(int budget)
 				state.aster = aster_pre; state.astrr = astrr_pre;            // ...and the PCTX read-backs (a
 				state.fpen = fpen_pre; state.ppcen = ppcen_pre;              // HW_MFPR PCTX reads these live)
 				state.exc_addr = exc_addr_pre;
+				state.fpcr = fpcr_pre;
 				const u64 interp_pc = state.pc;   // interpreter is authoritative for the PC
 					const u32 n_stores_interp = sn;   // interp's RECORDED store count (sn), NOT the replay cursor m_jit_slog_i; a compiled pass must consume exactly this many (catches a missing/extra store)
 				m_jit_vreplay = true;

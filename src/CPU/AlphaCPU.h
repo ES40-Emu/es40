@@ -1073,17 +1073,8 @@ inline int CAlphaCPU::get_cpuid()
 // CPU-local mode.
 inline void CAlphaCPU::kick_int_if_pending()
 {
-  if ((state.eien & state.eir) || (state.sien & state.sir)
-      || (state.asten
-          && (state.aster & state.astrr & ((1 << (state.cm + 1)) - 1))))
-  {
-#ifdef JIT_STATS
-    if (state.eien & state.eir) m_stat_kick[0]++;
-    else if (state.sien & state.sir) m_stat_kick[1]++;
-    else m_stat_kick[2]++;
-#endif
+  if (m_profile.interrupt.pending(*this))
     state.check_int = true;
-  }
 }
 
 /**

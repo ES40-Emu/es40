@@ -25,10 +25,27 @@
  *
  */
 
-// EV68 interrupt eligibility and routing extracted from AlphaCPU.cpp.
+// EV68 interrupt eligibility and routing extracted from AlphaCPU.cpp/AlphaCPU.h.
 #include "StdAfx.h"
 #include "AlphaCPU.h"
 #include "Ev68Interrupt.h"
+
+bool Ev68Interrupt::pending(CAlphaCPU& cpu)
+{
+  const auto& state = cpu.state;
+  if ((state.eien & state.eir) || (state.sien & state.sir)
+      || (state.asten
+          && (state.aster & state.astrr & ((1 << (state.cm + 1)) - 1))))
+  {
+#ifdef JIT_STATS
+    if (state.eien & state.eir) cpu.m_stat_kick[0]++;
+    else if (state.sien & state.sir) cpu.m_stat_kick[1]++;
+    else cpu.m_stat_kick[2]++;
+#endif
+    return true;
+  }
+  return false;
+}
 
 AlphaInterruptResult Ev68Interrupt::service(CAlphaCPU& cpu)
 {
@@ -64,8 +81,8 @@ AlphaInterruptResult Ev68Interrupt::service(CAlphaCPU& cpu)
   else
   {
 
-    // PALcode base is set to an unsupported value. We have no choice but to transfer control
-    // to PALmode at the PALcode interrupt entry point.
+    // VMS PALcode replacement is inactive, either because the PALcode base is unsupported
+    // or native PALcode is selected. Transfer control to the PALcode interrupt entry point.
     //        if (state.eir & 8)
     //        {
     //          printf("%s: IP interrupt received%s...\n",devid_string, (state.eien&8)?"(enabled)":"(masked)");

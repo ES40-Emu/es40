@@ -32,9 +32,12 @@
 class Ev68Interrupt
 {
 public:
+  static bool pending(CAlphaCPU& cpu);
   static AlphaInterruptResult service(CAlphaCPU& cpu);
 };
 
-inline constexpr AlphaInterruptPolicy kEv68InterruptPolicy{&Ev68Interrupt::service};
+inline constexpr AlphaInterruptPolicy kEv68InterruptPolicy{
+  &Ev68Interrupt::service, &Ev68Interrupt::pending
+};
 
 #endif

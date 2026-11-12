@@ -36,10 +36,13 @@ enum class AlphaInterruptResult
   Return    // End this execute call after family delivery.
 };
 
-// Called outside PALmode after the shared poll clears its pending flag.
 struct AlphaInterruptPolicy
 {
+  // Called outside PALmode after the shared poll clears its pending flag.
   AlphaInterruptResult (*service)(CAlphaCPU& cpu);
+
+  // CPU-local qualification in any mode; true requests an interrupt poll.
+  bool (*pending)(CAlphaCPU& cpu);
 };
 
 #endif

@@ -39,6 +39,7 @@
 #include "Ev68HWStore.h"
 #include "Ev68Reset.h"
 #include "Ev68InstructionFetch.h"
+#include "Ev68Interrupt.h"
 
 // Immutable model identity, execution capabilities, and family rules chosen by configuration.
 struct AlphaCPUProfile
@@ -63,6 +64,7 @@ struct AlphaCPUProfile
   AlphaDataFaultPolicy data_fault = kEv68DataFaultPolicy;
   AlphaTBMissPolicy tb_miss = kEv68TBMissPolicy;
   AlphaInstructionFaultPolicy instruction_fault = kEv68InstructionFaultPolicy;
+  AlphaInterruptPolicy interrupt = kEv68InterruptPolicy;
 
   constexpr bool supports_instruction(std::uint32_t ins) const
   {

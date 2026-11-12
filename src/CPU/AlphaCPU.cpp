@@ -3459,69 +3459,20 @@ _next_instruction:
 			// service, but we might have. This needs to be checked.
 
 
-			if (state.pal_vms) {
-				// PALcode base is set to 0x8000; meaning OpenVMS PALcode is currently active. In this
-				// case, our VMS PALcode replacement routines are valid, and should be used as it is
-				// faster than using the original PALcode.
-
-				// Native PAL handles chipset errors on irq<0> (Tsunami HRM 6.3.1)
-				// and halt / MP work requests on irq<4>, before lower-priority interpreter work.
-				if (state.eir & state.eien & 0x11)
-				{
-					GO_PAL(AlphaPALException::Interrupt);
-					seq_remaining = 0;
-#ifndef ES40_JIT
-					goto _next_instruction;
-#else
-					return;
-#endif
-				}
-
-				// irq<1>=device, irq<2>=timer, irq<3>=IPI. (Was 0x6 = device+timer only,
-				// which stranded incoming IPIs under VMS PALcode -> CPUSPINWAIT.)
-				if (state.eir & state.eien & 0xe)
-					if (vmspal_ent_ext_int(state.eir & state.eien & 0xe))
-						return;
-
-				if (state.sir & state.sien & 0xfffc)
-					if (vmspal_ent_sw_int(state.sir & state.sien))
-						return;
-
-				if (state.asten && (state.aster & state.astrr & ((1 << (state.cm + 1)) - 1)))
-					if (vmspal_ent_ast_int(state.aster & state.astrr & ((1 << (state.cm + 1)) - 1)))
-						return;
-
-				if (state.sir & state.sien)
-					if (vmspal_ent_sw_int(state.sir & state.sien))
-						return;
-			}
-			else
-
+			switch (m_profile.interrupt.service(*this))
 			{
-
-				// PALcode base is set to an unsupported value. We have no choice but to transfer control
-				// to PALmode at the PALcode interrupt entry point.
-				//        if (state.eir & 8)
-				//        {
-				//          printf("%s: IP interrupt received%s...\n",devid_string, (state.eien&8)?"(enabled)":"(masked)");
-				//        }
-				if ((state.eien & state.eir) || (state.sien & state.sir) || (state.asten
-					&& (state.aster & state.astrr & ((1 << (state.cm + 1)) - 1))))
-				{
-#ifdef JIT_STATS
-					m_stat_kick[5]++;
-#endif
-					GO_PAL(AlphaPALException::Interrupt);
-					seq_remaining = 0;
+			case AlphaInterruptResult::EnterPAL:
+				GO_PAL(AlphaPALException::Interrupt);
+				seq_remaining = 0;
 #ifndef ES40_JIT
-					goto _next_instruction;
+				goto _next_instruction;
 #else
-					return;
+				return;
 #endif
-				}
-#ifdef JIT_STATS
-				else m_stat_kick[6]++;   // flag was set but nothing deliverable at the poll
-#endif
+			case AlphaInterruptResult::Return:
+				return;
+			case AlphaInterruptResult::Continue:
+				break;
 			}
 
 		}

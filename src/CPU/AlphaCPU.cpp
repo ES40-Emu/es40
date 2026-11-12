@@ -4388,16 +4388,9 @@ int CAlphaCPU::initiate_acv_fault(u64 virt, int flags, u32 ins)
 
 	if (flags & ACCESS_EXEC)
 	{
-		state.exc_addr = state.current_pc;
-		state.exc_sum = 0;
-		if (state.pal_vms)
-		{
-			res = vmspal_ent_iacv(flags);
-			return res ? res : -1;
-		}
-
-		set_pc(state.pal_base + pal_exception_offset(AlphaPALException::InstructionAccessViolation) + 1);
-		return -1;
+		res = m_profile.instruction_fault.handle(*this, virt, flags, ins,
+			AlphaInstructionFaultSource::AddressCheck);
+		return res ? res : -1;
 	}
 
 	res = m_profile.data_fault.access_violation(*this, virt, flags, ins,
@@ -4566,18 +4559,9 @@ int CAlphaCPU::virt2phys(u64 virt, u64* phys, int flags, bool* asm_bit, u32 ins)
 			{
 
 				// handle I-stream access violation
-				state.exc_addr = state.current_pc;
-				state.exc_sum = 0;
-				if (state.pal_vms)
-				{
-					if ((res = vmspal_ent_iacv(flags)))
-						return res;
-				}
-				else
-				{
-					set_pc(state.pal_base + pal_exception_offset(AlphaPALException::InstructionAccessViolation) + 1);
-					return -1;
-				}
+				res = m_profile.instruction_fault.handle(*this, virt, flags, ins,
+					AlphaInstructionFaultSource::TranslationPermission);
+				if (res) return res;
 			}
 			else
 			{
@@ -4608,18 +4592,9 @@ int CAlphaCPU::virt2phys(u64 virt, u64* phys, int flags, bool* asm_bit, u32 ins)
 			{
 
 				// handle I-stream access fault
-				state.exc_addr = state.current_pc;
-				state.exc_sum = 0;
-				if (state.pal_vms)
-				{
-					if ((res = vmspal_ent_iacv(flags)))
-						return res;
-				}
-				else
-				{
-					set_pc(state.pal_base + pal_exception_offset(AlphaPALException::InstructionAccessViolation) + 1);
-					return -1;
-				}
+				res = m_profile.instruction_fault.handle(*this, virt, flags, ins,
+					AlphaInstructionFaultSource::TranslationFault);
+				if (res) return res;
 			}
 			else
 			{

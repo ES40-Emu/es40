@@ -62,6 +62,7 @@ struct AlphaCPUProfile
   AlphaRegisterBankPolicy register_bank = kEv68RegisterBankPolicy;
   AlphaDataFaultPolicy data_fault = kEv68DataFaultPolicy;
   AlphaTBMissPolicy tb_miss = kEv68TBMissPolicy;
+  AlphaInstructionFaultPolicy instruction_fault = kEv68InstructionFaultPolicy;
 
   constexpr bool supports_instruction(std::uint32_t ins) const
   {

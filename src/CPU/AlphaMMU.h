@@ -61,6 +61,21 @@ struct AlphaTBMissPolicy
                  std::uint32_t instruction);
 };
 
+enum class AlphaInstructionFaultSource
+{
+  AddressCheck,
+  TranslationPermission,
+  TranslationFault
+};
+
+// Family fault state and PAL/HLE delivery, called only for real I-stream faults.
+struct AlphaInstructionFaultPolicy
+{
+  // Zero continues with the selected TB entry; address checks still return failure.
+  int (*handle)(CAlphaCPU& cpu, std::uint64_t virt, int access_flags,
+                 std::uint32_t instruction, AlphaInstructionFaultSource source);
+};
+
 // Effective permissions and address space for a translation-buffer lookup.
 struct AlphaMMUAccess
 {

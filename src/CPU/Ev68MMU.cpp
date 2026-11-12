@@ -208,6 +208,19 @@ int Ev68MMU::tb_miss(CAlphaCPU& cpu, std::uint64_t virt, int flags, std::uint32_
   }
 }
 
+int Ev68MMU::instruction_fault(CAlphaCPU& cpu, std::uint64_t, int flags,
+                                std::uint32_t, AlphaInstructionFaultSource)
+{
+  auto& state = cpu.state;
+  state.exc_addr = state.current_pc;
+  state.exc_sum = 0;
+  if (state.pal_vms)
+    return cpu.vmspal_ent_iacv(flags);
+
+  cpu.set_pc(state.pal_base + cpu.pal_exception_offset(AlphaPALException::InstructionAccessViolation) + 1);
+  return -1;
+}
+
 int Ev68MMU::access_violation(CAlphaCPU& cpu, std::uint64_t virt, int flags,
                               std::uint32_t ins, [[maybe_unused]] AlphaDataFaultSource source)
 {

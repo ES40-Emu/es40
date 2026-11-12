@@ -41,6 +41,9 @@ public:
                                  int access_flags);
   static int tb_miss(CAlphaCPU& cpu, std::uint64_t virt, int access_flags,
                       std::uint32_t instruction);
+  static int instruction_fault(CAlphaCPU& cpu, std::uint64_t virt,
+                                int access_flags, std::uint32_t instruction,
+                                AlphaInstructionFaultSource source);
   static int access_violation(CAlphaCPU& cpu, std::uint64_t virt,
                                int access_flags, std::uint32_t instruction,
                                AlphaDataFaultSource source);
@@ -53,6 +56,9 @@ public:
 
 inline constexpr AlphaTBFillPolicy kEv68TBFillPolicy{&Ev68MMU::decode_fill};
 inline constexpr AlphaTBMissPolicy kEv68TBMissPolicy{&Ev68MMU::tb_miss};
+inline constexpr AlphaInstructionFaultPolicy kEv68InstructionFaultPolicy{
+  &Ev68MMU::instruction_fault
+};
 inline constexpr AlphaMMUAddressPolicy kEv68MMUAddressPolicy{
   &Ev68MMU::access, &Ev68MMU::map_address
 };

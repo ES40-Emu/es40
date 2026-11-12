@@ -625,33 +625,13 @@ inline u64 fsqrt64(u64 asig, s32 exp)
 #define TB_INDEX_DATA                 0
 #define TB_INDEX_ITB                  1
 
-#if defined(DEBUG_UNALIGN)
-// pc/opcode identify the guest instruction; n counts alignment faults.
-#define TRACE_UNALIGN(flags, align)                                              \
-  do { static u64 _ua_n = 0;                                                     \
-    printf("unaligned access %d, %d -> trap! exc_sum=0x%04" PRIx64               \
-      ", fault_va=0x%016" PRIx64 ", mm_stat=0x%03" PRIx64                        \
-      ", pc=0x%016" PRIx64 ", op=0x%02x, n=%" PRIu64 "\n",                       \
-      (flags), (align), state.exc_sum, state.fault_va, state.mm_stat,            \
-      state.current_pc, (unsigned) I_GETOP(ins), ++_ua_n);                        \
-  } while (0)
-#else
-#define TRACE_UNALIGN(flags, align)
-#endif
-
 #define UNALIGN_CHECK(addr, flags, align)                                        \
   if((addr) & (align))                                                           \
   {                                                                             \
     /* HRM 6.8.2: UNALIGN is a fault regardless of translation page size.       \
      * Enter PAL before translation or any memory/device side effect.          \
      * HW_LD/HW_ST use DATA_PHYS_NT; LDQ_U/STQ_U already align their address. */ \
-    state.fault_va = (addr);                                                    \
-    state.va_form_va = (addr);                                                  \
-    state.exc_sum = ((REG_1 & 0x1f) << 8);                                      \
-    /* HRM 5.3.8: pure misalignment is not an access violation (ACV). */        \
-    state.mm_stat = (I_GETOP(ins) << 4) | ((flags & ACCESS_WRITE) ? 1 : 0);      \
-    TRACE_UNALIGN(flags, align);                                                \
-    GO_PAL(AlphaPALException::Unaligned);                                     \
+    m_profile.data_fault.unaligned(*this, (addr), (flags), ins, (align));        \
     ES40_EXECUTE_END();                                                         \
   }
 

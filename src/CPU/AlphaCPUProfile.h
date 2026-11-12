@@ -28,6 +28,7 @@
 #define INCLUDED_ALPHACPUPROFILE_H
 
 #include <cstdint>
+#include "AlphaDataFault.h"
 #include "AlphaInstructionSet.h"
 #include "AlphaRegisterBank.h"
 #include "Ev68InstructionSet.h"
@@ -59,6 +60,7 @@ struct AlphaCPUProfile
   AlphaInstructionFetchPolicy instruction_fetch = kEv68InstructionFetchPolicy;
   AlphaInstructionDecodePolicy instruction_decode = kEv68InstructionDecodePolicy;
   AlphaRegisterBankPolicy register_bank = kEv68RegisterBankPolicy;
+  AlphaDataFaultPolicy data_fault = kEv68DataFaultPolicy;
 
   constexpr bool supports_instruction(std::uint32_t ins) const
   {

@@ -28,6 +28,7 @@
 #define INCLUDED_EV68MMU_H
 
 #include "AlphaMMU.h"
+#include "AlphaDataFault.h"
 
 class Ev68MMU
 {
@@ -38,11 +39,19 @@ public:
   static AlphaTBFill decode_fill(const CAlphaCPU& cpu, std::uint64_t virt,
                                  std::uint64_t pte_phys, std::uint64_t pte_flags,
                                  int access_flags);
+  static int access_violation(CAlphaCPU& cpu, std::uint64_t virt,
+                               int access_flags, std::uint32_t instruction,
+                               AlphaDataFaultSource source);
+  static void unaligned(CAlphaCPU& cpu, std::uint64_t virt,
+                         int access_flags, std::uint32_t instruction, int alignment_mask);
 };
 
 inline constexpr AlphaTBFillPolicy kEv68TBFillPolicy{&Ev68MMU::decode_fill};
 inline constexpr AlphaMMUAddressPolicy kEv68MMUAddressPolicy{
   &Ev68MMU::access, &Ev68MMU::map_address
+};
+inline constexpr AlphaDataFaultPolicy kEv68DataFaultPolicy{
+  &Ev68MMU::access_violation, &Ev68MMU::unaligned
 };
 
 #endif

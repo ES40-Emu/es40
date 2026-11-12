@@ -921,6 +921,11 @@ void CAlphaCPU::enter_pal_exception(const AlphaPALExceptionEntry& entry)
 		cSystem->cpu_clear_lock(state.iProcNum);
 }
 
+void CAlphaCPU::enter_unaligned_exception()
+{
+	GO_PAL(AlphaPALException::Unaligned);
+}
+
 void CAlphaCPU::enter_native_call_pal(u32 function)
 {
 	const auto entry = m_profile.pal.call_pal_entry(function, state.current_pc, state.pc);
@@ -2338,12 +2343,7 @@ bool CAlphaCPU::jit_verify_store_slot(u32& slot)
 int CAlphaCPU::jit_unalign(u64 va, u32 ins, int flags, int align)
 {
 	if (!ins || m_jit_vreplay) return 1;
-	state.fault_va = va;
-	state.va_form_va = va;
-	state.exc_sum = (u64)I_GETRA(ins) << 8;
-	state.mm_stat = (I_GETOP(ins) << 4) | ((flags & ACCESS_WRITE) ? 1 : 0);
-	TRACE_UNALIGN(flags, align);
-	GO_PAL(AlphaPALException::Unaligned);
+	m_profile.data_fault.unaligned(*this, va, flags, ins, align);
 	return 2;
 }
 
@@ -4386,10 +4386,9 @@ int CAlphaCPU::initiate_acv_fault(u64 virt, int flags, u32 ins)
 {
 	int res;
 
-	state.exc_addr = state.current_pc;
-
 	if (flags & ACCESS_EXEC)
 	{
+		state.exc_addr = state.current_pc;
 		state.exc_sum = 0;
 		if (state.pal_vms)
 		{
@@ -4401,27 +4400,9 @@ int CAlphaCPU::initiate_acv_fault(u64 virt, int flags, u32 ins)
 		return -1;
 	}
 
-	state.fault_va = virt;
-	state.va_form_va = virt;
-	state.exc_sum = ((u64)REG_1 & 0x1f) << 8;  /* HRM 5.2.13: EXC_SUM REG[12:8] is 5 bits */
-
-	u32 opcode = I_GETOP(ins);
-	state.mm_stat =
-		(
-			(opcode == 0x1b || opcode == 0x1f) ? opcode -
-			0x18 : opcode
-			) <<
-		4 |
-		(flags & ACCESS_WRITE) |
-		2;
-	if (state.pal_vms)
-	{
-		res = vmspal_ent_dfault(flags);
-		return res ? res : -1;
-	}
-
-	set_pc(state.pal_base + pal_exception_offset(AlphaPALException::DataFault) + 1);
-	return -1;
+	res = m_profile.data_fault.access_violation(*this, virt, flags, ins,
+		AlphaDataFaultSource::AddressCheck);
+	return res ? res : -1;
 }
 
 /**
@@ -4709,37 +4690,9 @@ int CAlphaCPU::virt2phys(u64 virt, u64* phys, int flags, bool* asm_bit, u32 ins)
 			{
 
 				// Handle D-stream access violation
-				state.exc_addr = state.current_pc;
-				state.fault_va = virt;
-				/* HRM 5.1.5/D.24: VA_FORM is derived from VA, which is written
-				   on every D-stream fault (incl. DFAULT), not just TB miss.
-				   Keep the VA_FORM snapshot current so the OS fault handler
-				   computes the right PTE. */
-				state.va_form_va = virt;
-				state.exc_sum = ((u64)REG_1 & 0x1f) << 8;  /* HRM 5.2.13: EXC_SUM REG[12:8] is 5 bits */
-
-				u32 opcode = I_GETOP(ins);
-				state.mm_stat =
-					(
-						(opcode == 0x1b || opcode == 0x1f) ? opcode -
-						0x18 : opcode
-						) <<
-					4 |
-					(flags & ACCESS_WRITE) |
-					2;
-				if (state.pal_vms)
-				{
-					if ((res = vmspal_ent_dfault(flags)))
-						return res;
-				}
-				else
-				{
-#ifdef JIT_STATS
-					m_stat_tb[3]++;
-#endif
-					set_pc(state.pal_base + pal_exception_offset(AlphaPALException::DataFault) + 1);
-					return -1;
-				}
+				res = m_profile.data_fault.access_violation(*this, virt, flags, ins,
+					AlphaDataFaultSource::TranslationBuffer);
+				if (res) return res;
 			}
 		}
 

@@ -424,6 +424,7 @@ list(APPEND ES40_SOURCES
     src/CPU/AlphaInstructionSource.h
     src/CPU/AlphaInstructionSet.h
     src/CPU/AlphaRegisterBank.h
+    src/CPU/AlphaDataFault.h
     src/CPU/Ev68InstructionSet.h
     src/CPU/Ev68InstructionFetch.h
     src/CPU/Ev68InstructionFetch.cpp

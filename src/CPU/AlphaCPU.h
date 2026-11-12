@@ -344,6 +344,7 @@ private:
   AlphaPALExceptionEntry pal_exception_entry(AlphaPALException reason, u64 pc) const;
   u64 pal_exception_offset(AlphaPALException reason) const;
   void enter_pal_exception(const AlphaPALExceptionEntry& entry);
+  void enter_unaligned_exception();
   void enter_native_call_pal(u32 function);
 
   // Immutable for the CPU lifetime; deliberately outside the saved state.

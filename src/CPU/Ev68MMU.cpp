@@ -24,7 +24,7 @@
  *
  */
 
-// EV68 address and translation-fill rules extracted from AlphaCPU.cpp.
+// EV68 address, translation-fill and data-fault rules extracted from AlphaCPU.cpp/cpu_defs.h.
 #include "StdAfx.h"
 #include "AlphaCPU.h"
 #include "Ev68MMU.h"
@@ -111,3 +111,59 @@ AlphaTBFill Ev68MMU::decode_fill(const CAlphaCPU&, std::uint64_t virt,
   fill.asm_bit = (int)pte_flags & 0x10;
   return fill;
 }
+
+int Ev68MMU::access_violation(CAlphaCPU& cpu, std::uint64_t virt, int flags,
+                              std::uint32_t ins, [[maybe_unused]] AlphaDataFaultSource source)
+{
+  auto& state = cpu.state;
+  state.exc_addr = state.current_pc;
+  state.fault_va = virt;
+  /* HRM 5.1.5/D.24: VA_FORM is derived from VA, which is written
+     on every D-stream fault (incl. DFAULT), not just TB miss.
+     Keep the VA_FORM snapshot current so the OS fault handler
+     computes the right PTE. */
+  state.va_form_va = virt;
+  state.exc_sum = (u64)I_GETRA(ins) << 8;  /* HRM 5.2.13: EXC_SUM REG[12:8] is 5 bits */
+
+  const u32 opcode = I_GETOP(ins);
+  state.mm_stat = ((opcode == 0x1b || opcode == 0x1f) ? opcode - 0x18 : opcode) << 4
+    | (flags & ACCESS_WRITE) | 2;
+  if (state.pal_vms)
+    return cpu.vmspal_ent_dfault(flags);
+
+#ifdef JIT_STATS
+  if (source == AlphaDataFaultSource::TranslationBuffer)
+    cpu.m_stat_tb[3]++;
+#endif
+  cpu.set_pc(state.pal_base + cpu.pal_exception_offset(AlphaPALException::DataFault) + 1);
+  return -1;
+}
+
+#if defined(DEBUG_UNALIGN)
+// pc/opcode identify the guest instruction; n counts alignment faults.
+#define TRACE_UNALIGN(flags, align)                                              \
+  do { static u64 _ua_n = 0;                                                     \
+    printf("unaligned access %d, %d -> trap! exc_sum=0x%04" PRIx64               \
+      ", fault_va=0x%016" PRIx64 ", mm_stat=0x%03" PRIx64                        \
+      ", pc=0x%016" PRIx64 ", op=0x%02x, n=%" PRIu64 "\n",                       \
+      (flags), (align), state.exc_sum, state.fault_va, state.mm_stat,            \
+      state.current_pc, (unsigned) I_GETOP(ins), ++_ua_n);                        \
+  } while (0)
+#else
+#define TRACE_UNALIGN(flags, align)
+#endif
+
+void Ev68MMU::unaligned(CAlphaCPU& cpu, std::uint64_t virt, int flags,
+                        std::uint32_t ins, [[maybe_unused]] int align)
+{
+  auto& state = cpu.state;
+  state.fault_va = virt;
+  state.va_form_va = virt;
+  state.exc_sum = (u64)I_GETRA(ins) << 8;
+  /* HRM 5.3.8: pure misalignment is not an access violation (ACV). */
+  state.mm_stat = (I_GETOP(ins) << 4) | ((flags & ACCESS_WRITE) ? 1 : 0);
+  TRACE_UNALIGN(flags, align);
+  cpu.enter_unaligned_exception();
+}
+
+#undef TRACE_UNALIGN

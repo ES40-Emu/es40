@@ -841,7 +841,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         a.mov(x86::qword_ptr(x86::rbp, m_off.state_pc), x86::r10);
         };
     auto pin_id = [&](int r) -> int {        // r -> its bound host reg id, or -1 = the state.r[] memory slot
-        if (b->pal_shadow && ((r & 0xc) == 0x4)) return -1;
+        if (b->pal_shadow && m_profile.register_bank.shadowable(r)) return -1;
         return regalloc.host_of(r);
         };
 
@@ -963,14 +963,14 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         regalloc.rax_holds = -1;
 
         auto reg = [&](int r) {
-            // PALshadow (RREG, AlphaCPU.h): in a PALmode block with SDE set, R4-7 and R20-23 map to
-            // the shadow bank r[r+32]. 
-            int idx = (b->pal_shadow && ((r & 0xc) == 0x4)) ? r + 32 : r;
+            // PALshadow (RREG, AlphaCPU.h): in a PALmode block with SDE set, registers selected by
+            // the profile map to the shadow bank r[r+32].
+            const auto idx = m_profile.register_bank.slot(r, b->pal_shadow);
             return x86::qword_ptr(x86::rbx, idx * 8);
             };
         // 32-bit (low-dword) view with the SAME shadow remap, for the 32-bit ALU ops (ADDL/SUBL).
         auto reg32 = [&](int r) {
-            int idx = (b->pal_shadow && ((r & 0xc) == 0x4)) ? r + 32 : r;
+            const auto idx = m_profile.register_bank.slot(r, b->pal_shadow);
             return x86::dword_ptr(x86::rbx, idx * 8);
             };
         // Pin-aware reg access: route through the pinned x86 reg when r is pinned, else the regs[]
@@ -1260,7 +1260,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                 s.size_bits = size_bits;
                 s.ins = ins;
                 s.ra = ra;  s.pin = pin_id(ra);
-                s.slot = (b->pal_shadow && ((ra & 0xc) == 0x4)) ? ra + 32 : ra;   // PALshadow remap (see reg())
+                s.slot = m_profile.register_bank.slot(ra, b->pal_shadow);   // PALshadow remap (see reg())
                 s.i = i;    s.fault_pc = b->tag + 4 * (uint64_t) i;
                 s.vol_bind = regalloc.vol_bind; s.vol_host = (s.vol_bind >= 0) ? regalloc.host[s.vol_bind] : -1;
                 s.vol_bind2 = regalloc.vol_bind2; s.vol_host2 = (s.vol_bind2 >= 0) ? regalloc.host[s.vol_bind2] : -1;
@@ -1343,7 +1343,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                 m_off.dpc_write_row + m_off.dpc_host_bias));
             a.bind(dpc_ready);
             const int sp = (ra == 31) ? -1 : pin_id(ra);
-            const int slot = (b->pal_shadow && ((ra & 0xc) == 0x4)) ? ra + 32 : ra;
+            const auto slot = m_profile.register_bank.slot(ra, b->pal_shadow);
             // Plain tags need no LL/SC lock. The cold path also lands here for
             // unwatched lines on watched pages. First LL updates all page aliases
             // after draining active CPUs.
@@ -2301,7 +2301,10 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             if (entry.write_link) {
                 a.movzx(x86::eax, x86::byte_ptr(x86::rbp, m_off.sde));      // SDE (0/1)
                 a.mov(x86::rcx, imm(entry.return_pc));
-                if (const int link_pin = pin_id(entry.link_register); link_pin >= 0) {
+                // Link descriptors name physical slots.
+                const int link_pin = entry.link_register < 32
+                    ? regalloc.host_of(entry.link_register) : -1;
+                if (link_pin >= 0) {
                     if (entry.link_register == entry.shadow_link_register)
                         a.mov(x86::gpq((uint32_t)link_pin), x86::rcx);
                     else {
@@ -2311,7 +2314,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                 }
                 if (entry.shadow_link_register < 32
                     && entry.shadow_link_register != entry.link_register) {
-                    if (const int shadow_pin = pin_id(entry.shadow_link_register); shadow_pin >= 0) {
+                    if (const int shadow_pin = regalloc.host_of(entry.shadow_link_register); shadow_pin >= 0) {
                         a.test(x86::eax, x86::eax);
                         a.cmovnz(x86::gpq((uint32_t)shadow_pin), x86::rcx);
                     }
@@ -3829,7 +3832,7 @@ void CJitEngine::compile_trace(TraceFragment* t, JitBlock** blocks, uint32_t n_b
     for (uint32_t bi = 0; bi < n_blocks; ++bi)
       count_gpr_access(source_words[bi].data(), source_desc[bi].n_instr, acc);
     acc[31] = 0;
-    for (int r = 0; r < 32; ++r) if ((r & 0xc) == 0x4) acc[r] = 0;   // r4-7, r20-23: PALshadow-remappable
+    for (int r = 0; r < 32; ++r) if (m_profile.register_bank.shadowable(r)) acc[r] = 0;   // PALshadow-remappable
     for (int k = 0; k < n_pin_hosts; ++k) {
       int best = -1; uint32_t bestc = 2;              // strictly > 2 accesses to justify load+sync
       for (int r = 0; r < 32; ++r) if (acc[r] > bestc) { bestc = acc[r]; best = r; }
@@ -3846,16 +3849,16 @@ void CJitEngine::compile_trace(TraceFragment* t, JitBlock** blocks, uint32_t n_b
 #endif
   }
 
-  // RLE: keep the region's hottest unpinned guest GPR live in R8 (caller-saved) 
-  // deletes one regs[] load per use. convention is unchanged: one store when leaving. 
-  // Excludes pinned regs and r4-7/r20-23 (pin routing skips PALshadow).
+  // RLE: keep the region's hottest unpinned guest GPR live in R8 (caller-saved)
+  // deletes one regs[] load per use. convention is unchanged: one store when leaving.
+  // Excludes pinned regs and the profile's shadow registers (pin routing skips PALshadow).
   int vol_reg = -1;
   if (RegionCacheReg) {
     uint32_t acc2[32] = {};
     for (uint32_t bi = 0; bi < n_blocks; ++bi)
       count_gpr_access(source_words[bi].data(), source_desc[bi].n_instr, acc2);
     acc2[31] = 0;
-    for (int r = 0; r < 32; ++r) if ((r & 0xc) == 0x4) acc2[r] = 0;
+    for (int r = 0; r < 32; ++r) if (m_profile.register_bank.shadowable(r)) acc2[r] = 0;
     for (int k = 0; k < n_pins; ++k) acc2[pin_guest[k]] = 0;
     uint32_t bestc = 3;                                  // > 3 uses to pay its load + exit store
     for (int r = 0; r < 32; ++r) if (acc2[r] > bestc) { bestc = acc2[r]; vol_reg = r; }

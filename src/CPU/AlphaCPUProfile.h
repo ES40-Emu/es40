@@ -29,6 +29,7 @@
 
 #include <cstdint>
 #include "AlphaInstructionSet.h"
+#include "AlphaRegisterBank.h"
 #include "Ev68InstructionSet.h"
 #include "Ev68PAL.h"
 #include "Ev68IPR.h"
@@ -57,6 +58,7 @@ struct AlphaCPUProfile
   AlphaResetPolicy reset = kEv68ResetPolicy; // Family state for init and system reset.
   AlphaInstructionFetchPolicy instruction_fetch = kEv68InstructionFetchPolicy;
   AlphaInstructionDecodePolicy instruction_decode = kEv68InstructionDecodePolicy;
+  AlphaRegisterBankPolicy register_bank = kEv68RegisterBankPolicy;
 
   constexpr bool supports_instruction(std::uint32_t ins) const
   {

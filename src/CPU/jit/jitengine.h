@@ -238,7 +238,7 @@ public:
     uint64_t phys;        // family source identity (EV68: start physical PC)
     uint32_t asn;         // address space number (key; ignored when asm_global)
     bool     asm_global;  // global (ASM) page: matches any ASN, like the icache
-    bool     pal_shadow;  // PALmode variant: true maps R4-7/R20-23 to the shadow bank
+    bool     pal_shadow;  // PALmode variant: true maps the profile's selected registers to the shadow bank
     uint32_t n_instr;     // instructions in the straight-line block
     bool     valid;
     uint64_t flush_gen;   // global or process-specific flush generation at last source validation

@@ -1106,8 +1106,8 @@ uint64_t CJitEngine::note_exec(uint32_t native_instr, uint32_t interp_instr, uin
 
 #ifdef JIT_REGPROF
 // Pin-selection report: attribute each live block's executions (rp_hits) to every GPR it touches
-// (rp_mask), then print the heaviest. A trailing '*' marks regs that CANNOT be pinned -- R4-7/R20-23,
-// the PALshadow remap targets (which also covers R23's CALL_PAL save). R31 is excluded by the mask.
+// (rp_mask), then print the heaviest. A trailing '*' marks the profile's PALshadow remap
+// targets, which are excluded from dynamic pins. R31 is excluded by the mask.
 void CJitEngine::regprof_report()
 {
   uint64_t hist[32] = { 0 };
@@ -1131,7 +1131,7 @@ void CJitEngine::regprof_report()
     int best = -1; uint64_t bestv = 0;
     for (int r = 0; r < 31; ++r) if (hist[r] > bestv) { bestv = hist[r]; best = r; }
     if (best < 0) break;
-    const bool pinnable = (best & 0xc) != 0x4;   // exclude R4-7 / R20-23 (shadow remap; covers R23)
+    const bool pinnable = !m_profile.register_bank.shadowable(best);   // exclude the profile's PALshadow remap targets
     len += snprintf(buf + len, sizeof(buf) - len, " R%d=%llu%s", best, (unsigned long long) bestv, pinnable ? "" : "*");
     hist[best] = 0;
   }

@@ -28,6 +28,7 @@
 #define INCLUDED_EV68PAL_H
 
 #include "AlphaPAL.h"
+#include "AlphaRegisterBank.h"
 
 namespace Ev68PAL
 {
@@ -96,6 +97,8 @@ constexpr AlphaPALInstructionAccess hardware_instruction_access(std::uint32_t in
   }
 }
 }
+
+inline constexpr AlphaRegisterBankPolicy kEv68RegisterBankPolicy{0x00f000f0}; // R4-7, R20-23.
 
 inline constexpr AlphaPALPolicy kEv68PALPolicy{
   &Ev68PAL::exception_entry, &Ev68PAL::call_pal_valid, &Ev68PAL::call_pal_entry,

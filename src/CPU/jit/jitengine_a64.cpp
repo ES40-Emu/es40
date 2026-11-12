@@ -72,6 +72,7 @@ struct CJitEngine::RegAlloc {
   A64DpcState dpc{};
   int8_t fwd_reg = -1;   // guest GPR whose value kScratch2 still mirrors (x64 rax_holds)
   A64FpTState fp_t{};
+  AlphaRegisterBankPolicy register_bank = kEv68RegisterBankPolicy;
 
   static constexpr asmjit::a64::Gp kArgCpu = asmjit::a64::x0;
   static constexpr asmjit::a64::Gp kArgRegs = asmjit::a64::x1;
@@ -107,13 +108,13 @@ struct CJitEngine::RegAlloc {
   std::array<uint8_t, kGuestPinCount> guest_by_pin{};
   uint8_t pin_count = 0;
 
-  static constexpr bool guest_is_shadowable(uint32_t raw_guest) noexcept {
-    return raw_guest < 32 && (raw_guest & 0x0cu) == 0x04u;
+  constexpr bool guest_is_shadowable(uint32_t raw_guest) const noexcept {
+    return register_bank.shadowable(raw_guest);
   }
 
   // Dynamic bindings exclude variant-dependent slots. Fixed block bindings may use
   // bind_main_guest() for an explicitly main-bank value that PAL-shadow routing bypasses.
-  static constexpr bool guest_pin_candidate(uint32_t raw_guest) noexcept {
+  constexpr bool guest_pin_candidate(uint32_t raw_guest) const noexcept {
     return raw_guest < 31 && !guest_is_shadowable(raw_guest);
   }
 
@@ -193,14 +194,16 @@ static constexpr bool kA64ForwardValues = true;   // reuse x11's guest-register 
 static constexpr bool kA64DirectPatch = true;     // non-PAL branch/fall-through exits as patched `b`
 
 // Every block body shares this exact mapping so a chained entry can inherit the
-// live pin bank without an adapter. R22/R23 name the main-bank slots; PAL-shadow
-// accesses to those architectural registers continue to route through memory.
+// live pin bank without an adapter. These pins name main-bank slots; PAL-shadow
+// accesses selected by the profile continue to route through memory.
 static constexpr std::array<uint8_t, CJitEngine::RegAlloc::kGuestPinCount>
     kA64BlockGuestPins{{1, 16, 30, 22, 23, 27}};
 
-static constexpr CJitEngine::RegAlloc make_a64_block_regalloc() noexcept
+static constexpr CJitEngine::RegAlloc make_a64_block_regalloc(
+    const AlphaRegisterBankPolicy& bank = kEv68RegisterBankPolicy) noexcept
 {
   CJitEngine::RegAlloc regs{};
+  regs.register_bank = bank;
   for (const uint8_t guest : kA64BlockGuestPins)
     if (!regs.bind_main_guest(guest)) return {};
   return regs;
@@ -2132,10 +2135,10 @@ static constexpr bool a64_gpr_usage_probe() noexcept
 static_assert(a64_gpr_usage_probe(),
               "A64 GPR analysis must follow semantic roles and exclude architectural R31");
 
-static constexpr uint32_t a64_guest_gpr_slot(uint32_t raw_reg, bool pal_shadow) noexcept
+static constexpr uint32_t a64_guest_gpr_slot(uint32_t raw_reg, bool pal_shadow,
+    const AlphaRegisterBankPolicy& bank = kEv68RegisterBankPolicy) noexcept
 {
-  const uint32_t reg = raw_reg & 31u;
-  return reg + ((pal_shadow && CJitEngine::RegAlloc::guest_is_shadowable(reg)) ? 32u : 0u);
+  return bank.slot(raw_reg, pal_shadow);
 }
 
 enum class A64GprRouteKind : uint8_t {
@@ -2161,7 +2164,7 @@ static constexpr A64GprRoute a64_guest_gpr_read_route(
   if (raw_reg >= 32) return {A64GprRouteKind::kInvalid, 0, -1};
   const uint32_t reg = raw_reg;
   if (reg == 31) return {A64GprRouteKind::kZero, 31, -1};
-  const uint8_t slot = static_cast<uint8_t>(a64_guest_gpr_slot(reg, pal_shadow));
+  const uint8_t slot = static_cast<uint8_t>(a64_guest_gpr_slot(reg, pal_shadow, regs.register_bank));
   const int host = regs.host_of(reg, pal_shadow);
   return host < 0 ? A64GprRoute{A64GprRouteKind::kMemory, slot, -1}
                   : A64GprRoute{A64GprRouteKind::kPinned, slot,
@@ -2174,7 +2177,7 @@ static constexpr A64GprRoute a64_guest_gpr_write_route(
   if (raw_reg >= 32) return {A64GprRouteKind::kInvalid, 0, -1};
   const uint32_t reg = raw_reg;
   if (reg == 31) return {A64GprRouteKind::kDiscard, 31, -1};
-  const uint8_t slot = static_cast<uint8_t>(a64_guest_gpr_slot(reg, pal_shadow));
+  const uint8_t slot = static_cast<uint8_t>(a64_guest_gpr_slot(reg, pal_shadow, regs.register_bank));
   const int host = regs.host_of(reg, pal_shadow);
   return host < 0 ? A64GprRoute{A64GprRouteKind::kMemory, slot, -1}
                   : A64GprRoute{A64GprRouteKind::kPinned, slot,
@@ -2213,21 +2216,21 @@ static constexpr bool a64_gpr_route_probe() noexcept
       && r31.kind == A64GprRouteKind::kZero
       && w31.kind == A64GprRouteKind::kDiscard
       && bad.kind == A64GprRouteKind::kInvalid
-      && CJitEngine::RegAlloc::guest_pin_candidate(3)
-      && !CJitEngine::RegAlloc::guest_pin_candidate(4)
-      && !CJitEngine::RegAlloc::guest_pin_candidate(20)
-      && CJitEngine::RegAlloc::guest_pin_candidate(24)
-      && !CJitEngine::RegAlloc::guest_pin_candidate(31);
+      && regs.guest_pin_candidate(3)
+      && !regs.guest_pin_candidate(4)
+      && !regs.guest_pin_candidate(20)
+      && regs.guest_pin_candidate(24)
+      && !regs.guest_pin_candidate(31);
 }
 
 static_assert(a64_gpr_route_probe(),
               "A64 GPR routing must preserve pin, PAL-shadow, and R31 semantics");
 
 static constexpr asmjit::a64::Mem a64_guest_gpr_mem(uint32_t raw_reg,
-                                                     bool pal_shadow) noexcept
+    bool pal_shadow, const AlphaRegisterBankPolicy& bank = kEv68RegisterBankPolicy) noexcept
 {
   return asmjit::a64::ptr(CJitEngine::RegAlloc::kRegs,
-      static_cast<int32_t>(a64_guest_gpr_slot(raw_reg, pal_shadow) * sizeof(uint64_t)));
+      static_cast<int32_t>(a64_guest_gpr_slot(raw_reg, pal_shadow, bank) * sizeof(uint64_t)));
 }
 
 static_assert(a64_guest_gpr_slot(3, true) == 3
@@ -2253,8 +2256,8 @@ static constexpr bool a64_block_pin_contract_probe() noexcept
       && regs.host_of(22, true) == -1 && regs.host_of(23, true) == -1
       && a64_guest_gpr_slot(22, true) == 54
       && a64_guest_gpr_slot(23, true) == 55
-      && !CJitEngine::RegAlloc::guest_pin_candidate(22)
-      && !CJitEngine::RegAlloc::guest_pin_candidate(23);
+      && !regs.guest_pin_candidate(22)
+      && !regs.guest_pin_candidate(23);
 }
 
 static_assert(a64_block_pin_contract_probe(),
@@ -2268,7 +2271,7 @@ static asmjit::Error emit_a64_load_guest_pins(asmjit::a64::Assembler& a,
     const int guest = regs.guest_of_pin(i);
     if (guest < 0) return Error::kInvalidArgument;
     const Error err = a.ldr(a64::x(CJitEngine::RegAlloc::kGuestPin0.id() + i),
-                            a64_guest_gpr_mem(static_cast<uint32_t>(guest), false));
+                            a64_guest_gpr_mem(static_cast<uint32_t>(guest), false, regs.register_bank));
     if (err != Error::kOk) return err;
   }
   return Error::kOk;
@@ -2282,7 +2285,7 @@ static asmjit::Error emit_a64_sync_guest_pins(asmjit::a64::Assembler& a,
     const int guest = regs.guest_of_pin(i);
     if (guest < 0) return Error::kInvalidArgument;
     const Error err = a.str(a64::x(CJitEngine::RegAlloc::kGuestPin0.id() + i),
-                            a64_guest_gpr_mem(static_cast<uint32_t>(guest), false));
+                            a64_guest_gpr_mem(static_cast<uint32_t>(guest), false, regs.register_bank));
     if (err != Error::kOk) return err;
   }
   return Error::kOk;
@@ -6738,7 +6741,7 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
 #endif
   assert(a.is_initialized());
 
-  RegAlloc regalloc = make_a64_block_regalloc();
+  RegAlloc regalloc = make_a64_block_regalloc(m_profile.register_bank);
   [[maybe_unused]] const HelperSet helpers = {
       read_helper, write_helper, opcdec_helper, hw_mfpr_helper, hw_ld_helper,
       hw_mtpr_helper, hw_st_helper, indirect_helper, read_locked_helper, stc_helper,
@@ -6861,7 +6864,7 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
     if (s.restore_fwd >= 0) {   // the helper clobbered the forwarded mirror
       if (a.ldr(RegAlloc::kScratch2, asmjit::a64::ptr(RegAlloc::kRegs,
               static_cast<int32_t>(a64_guest_gpr_slot(
-                  static_cast<uint32_t>(s.restore_fwd), b->pal_shadow) * 8)))
+                  static_cast<uint32_t>(s.restore_fwd), b->pal_shadow, regalloc.register_bank) * 8)))
           != asmjit::Error::kOk)
         return;
     }

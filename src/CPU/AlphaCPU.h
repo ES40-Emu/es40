@@ -897,11 +897,7 @@ private:
 /** Translate raw register (0..31) number to a number that takes PALshadow
     registers into consideration (0..63). Considers the program counter
     (to determine if we're in PALmode), and the SDE (Shadow Enable) bit. */
-#define RREG(a)                                                          \
-    (                                                                    \
-      ((a) & 0x1f) +                                                     \
-        (((state.pc & 1) && (((a) & 0xc) == 0x4) && state.sde) ? 32 : 0) \
-    )
+#define RREG(a) m_profile.register_bank.slot((a), (state.pc & 1) && state.sde)
 
     /**
      * Empty the instruction cache.

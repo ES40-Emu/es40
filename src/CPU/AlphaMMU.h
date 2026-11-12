@@ -1,4 +1,4 @@
-/* ES40 emulator -- Alpha translation-fill policy
+/* ES40 emulator -- Alpha translation policies
  * Copyright (C) 2026 by gdwnldsKSC
  * All rights reserved.
  *
@@ -50,6 +50,15 @@ struct AlphaTBFillPolicy
   AlphaTBFill (*decode)(const CAlphaCPU& cpu, std::uint64_t virt,
                         std::uint64_t pte_phys, std::uint64_t pte_flags,
                         int access_flags);
+};
+
+// Family fault state and PAL/HLE delivery, called only for real TB misses.
+struct AlphaTBMissPolicy
+{
+  // Zero retries translation with RECUR; any nonzero result ends this lookup.
+  // The handler must stop an unresolved RECUR miss.
+  int (*handle)(CAlphaCPU& cpu, std::uint64_t virt, int access_flags,
+                 std::uint32_t instruction);
 };
 
 // Effective permissions and address space for a translation-buffer lookup.

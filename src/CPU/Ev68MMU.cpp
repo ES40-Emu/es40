@@ -24,7 +24,7 @@
  *
  */
 
-// EV68 address, translation-fill and data-fault rules extracted from AlphaCPU.cpp/cpu_defs.h.
+// EV68 address, translation-fill and fault rules extracted from AlphaCPU.cpp/cpu_defs.h.
 #include "StdAfx.h"
 #include "AlphaCPU.h"
 #include "Ev68MMU.h"
@@ -110,6 +110,102 @@ AlphaTBFill Ev68MMU::decode_fill(const CAlphaCPU&, std::uint64_t virt,
   fill.access[1][3] = (int)pte_flags & 0x8000;
   fill.asm_bit = (int)pte_flags & 0x10;
   return fill;
+}
+
+int Ev68MMU::tb_miss(CAlphaCPU& cpu, std::uint64_t virt, int flags, std::uint32_t ins)
+{
+  auto& state = cpu.state;
+  if (!state.pal_vms)  // unknown PALcode
+  {
+
+    // transfer execution to PALcode
+    state.exc_addr = state.current_pc;
+    if (flags & VPTE)
+    {
+      // HRM 5.1.3: VA is NOT written for LD_VPTE misses
+      state.va_form_va = virt;
+      state.exc_sum = (u64)I_GETRA(ins) << 8;  /* HRM 5.2.13: EXC_SUM REG[12:8] is 5 bits */
+      /*
+       * I_CTL[VA_48] selects the DTB double-miss PAL entry.
+       * state.i_ctl_va_mode packs bits [16:15] of I_CTL, so bit 0
+       * here is the architectural VA_48 bit.
+       */
+#ifdef JIT_STATS
+      cpu.m_stat_tb[1]++;
+#endif
+      const auto reason = (state.i_ctl_va_mode & 1)
+        ? AlphaPALException::DataTlbDoubleMiss48 : AlphaPALException::DataTlbDoubleMiss43;
+      cpu.set_pc(state.pal_base + cpu.pal_exception_offset(reason) + 1);
+    }
+    else if (flags & ACCESS_EXEC)
+    {
+#ifdef JIT_STATS
+      cpu.m_stat_tb[2]++;
+#endif
+      cpu.set_pc(state.pal_base + cpu.pal_exception_offset(AlphaPALException::InstructionTlbMiss) + 1);
+    }
+    else
+    {
+      state.fault_va = virt;
+      state.va_form_va = virt;
+      state.exc_sum = (u64)I_GETRA(ins) << 8;  /* HRM 5.2.13: EXC_SUM REG[12:8] is 5 bits */
+
+      const u32 opcode = I_GETOP(ins);
+      state.mm_stat = ((opcode == 0x1b || opcode == 0x1f) ? opcode - 0x18 : opcode) << 4
+        | (flags & ACCESS_WRITE);
+#ifdef JIT_STATS
+      cpu.m_stat_tb[0]++;
+      {
+        const int t = TB_INDEX_DATA;
+        const int h = (int)cpu.m_tb_idx[t][cpu.tb_idx_slot(virt)] - 1;
+        if (h >= 0) cpu.m_stat_tb[state.tb[t][h].valid ? 9 : 8]++;
+        const u64 pg = virt >> 13; const u32 sl = (u32)(pg * 0x9E3779B1u) >> 25;
+        if (cpu.m_stat_va[sl][0] != pg) { cpu.m_stat_va[sl][0] = pg; cpu.m_stat_va[sl][1] = 0; }
+        cpu.m_stat_va[sl][1]++;
+      }
+#endif
+      cpu.set_pc(state.pal_base + cpu.pal_exception_offset(AlphaPALException::DataTlbMiss) + 1);
+    }
+
+    return -1;
+  }
+  else  // VMS PALcode
+  {
+    if (flags & RECUR) // we already tried this
+    {
+      printf("Translationbuffer RECUR lookup failed!\n");
+      return -1;
+    }
+
+    state.exc_addr = state.current_pc;
+    if (flags & VPTE)
+    {
+
+      // try to handle the double miss. If this needs to transfer control
+      // to the OS, it will return non-zero value.
+      return cpu.vmspal_ent_dtbm_double_3(flags);
+    }
+    else if (flags & ACCESS_EXEC)
+    {
+
+      // try to handle the ITB miss. If this needs to transfer control
+      // to the OS, it will return non-zero value.
+      return cpu.vmspal_ent_itbm(flags);
+    }
+    else
+    {
+      state.fault_va = virt;
+      state.exc_sum = (u64)I_GETRA(ins) << 8;  /* HRM 5.2.13: EXC_SUM REG[12:8] is 5 bits */
+
+      const u32 opcode = I_GETOP(ins);
+      state.mm_stat = ((opcode == 0x1b || opcode == 0x1f) ? opcode - 0x18 : opcode) << 4
+        | (flags & ACCESS_WRITE);
+
+      // try to handle the single miss. If this needs to transfer control
+      // to the OS, it will return non-zero value.
+      return cpu.vmspal_ent_dtbm_single(flags);
+    }
+  }
 }
 
 int Ev68MMU::access_violation(CAlphaCPU& cpu, std::uint64_t virt, int flags,

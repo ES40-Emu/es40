@@ -842,19 +842,18 @@ inline u64 fsqrt64(u64 asig, s32 exp)
 #define TRAP_INE  U64(0x20) /* inexact */
 #define TRAP_IOV  U64(0x40) /* integer overflow */
 
-#define TRAP_INT  U64(0x80) /* exception register is integer reg */
-
-#define ARITH_TRAP(flags, reg)                                     \
-  {                                                                \
-    state.exc_sum |= flags; /* cause of trap */                    \
-    state.exc_sum |= (reg & 0x1f) << 8; /* destination register */ \
-    GO_PAL(AlphaPALException::Arithmetic);  /* trap */                        \
+#define ARITH_TRAP(flags, reg)                                              \
+  {                                                                       \
+    m_profile.arithmetic_trap.report(*this, (flags), (reg),                  \
+                                    AlphaArithmeticTrapKind::FloatingPoint); \
+    GO_PAL(AlphaPALException::Arithmetic);  /* trap */                      \
   }
 
-#define ARITH_TRAP_I(flags, reg)      \
-  {                                   \
-    state.exc_sum = 0;                \
-    ARITH_TRAP(TRAP_INT | flags, reg) \
+#define ARITH_TRAP_I(flags, reg)                                            \
+  {                                                                       \
+    m_profile.arithmetic_trap.report(*this, (flags), (reg),                  \
+                                    AlphaArithmeticTrapKind::Integer);     \
+    GO_PAL(AlphaPALException::Arithmetic);  /* trap */                      \
   }
 
 #endif

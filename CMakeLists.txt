@@ -428,6 +428,9 @@ list(APPEND ES40_SOURCES
     src/CPU/Ev68FPCR.cpp
     src/CPU/AlphaFPStart.h
     src/CPU/Ev68FPStart.h
+    src/CPU/AlphaArithmeticTrap.h
+    src/CPU/Ev68ArithmeticTrap.h
+    src/CPU/Ev68ArithmeticTrap.cpp
     src/CPU/AlphaInstructionFetch.h
     src/CPU/AlphaInstructionSource.h
     src/CPU/AlphaInstructionSet.h

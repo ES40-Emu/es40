@@ -162,7 +162,8 @@ if (ES40_HAVE_SLIRP)
     if (WIN32)
         # Native artifacts the Rust static library needs (see
         # `cargo rustc -- --print native-static-libs`).
-        list(APPEND ES40_SLIRP_LINK_LIBRARIES ws2_32 dbghelp iphlpapi userenv ntdll)
+        # synchronization provides Rust std's WaitOnAddress/WakeByAddress* imports.
+        list(APPEND ES40_SLIRP_LINK_LIBRARIES ws2_32 dbghelp iphlpapi userenv ntdll synchronization)
     else()
         find_package(Threads REQUIRED)
         list(APPEND ES40_SLIRP_LINK_LIBRARIES Threads::Threads ${CMAKE_DL_LIBS})

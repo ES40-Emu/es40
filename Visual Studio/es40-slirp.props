@@ -16,7 +16,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Es40HasSlirp)'=='true' And '$(MSBuildProjectName)'=='es40'">
     <Link>
-      <AdditionalDependencies>$(Es40SlirpLibrary);ws2_32.lib;dbghelp.lib;iphlpapi.lib;userenv.lib;ntdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <!-- Rust's standard library uses WaitOnAddress/WakeByAddress*, provided by synchronization.lib. -->
+      <AdditionalDependencies>$(Es40SlirpLibrary);ws2_32.lib;dbghelp.lib;iphlpapi.lib;userenv.lib;ntdll.lib;synchronization.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Target Name="ValidateEs40SlirpLibrary" BeforeTargets="PrepareForBuild"

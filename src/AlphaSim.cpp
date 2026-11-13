@@ -208,6 +208,9 @@
 #if defined(_WIN32)
 #include "gui/win32_manager.h"
 #endif
+#if defined(ES40_MCP)
+#include "mcp/McpServer.h"
+#endif
 
 #include <thread>
 
@@ -537,6 +540,9 @@ int main(int argc, char* argv[])
 #endif
 		if (bx_gui && bx_gui->requires_main_thread())
 			bx_gui->main_thread_init();
+#if defined(ES40_MCP)
+		es40_mcp_start(argv[0], filename);
+#endif
 	}
 	catch (CException& e)
 	{
@@ -663,6 +669,10 @@ static int run_emulator(int argc, char* argv[])
 	if (theSystem)
 	{
 		theSystem->stop_threads();
+#if defined(ES40_MCP)
+		// The MCP calls use the keyboard and the displays: end them first
+		es40_mcp_stop();
+#endif
 		if (detach_gui_guest_input())
 			delete theSystem;
 		else

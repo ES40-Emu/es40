@@ -166,6 +166,48 @@ rejects a process with pcap file capabilities, that error can still occur when
 Zenity is unavailable.
 
 ------------------------------------------------------------------------  
+
+# MCP server for AI agents
+
+es40 can let an AI agent such as Claude Code run the emulated machine: it
+takes screenshots, waits for the screen to change or settle, types, presses
+keys, moves and clicks the mouse, resets and quits. Turn it on in the system
+section of the configuration:
+
+```
+sys0 = tsunami
+{
+  mcp = true;
+  ...
+}
+```
+
+or start es40 with `ES40_MCP=1`. es40 then listens on a Unix socket in
+`/tmp/es40-<uid>`, a folder only you can open, and writes `<pid>.json` next to
+it, which says what the VM is and where its socket is.
+
+The agent starts `es40-mcp`, which is built next to `es40`. It finds every
+es40 that runs with MCP on, lists them (`vm-list`), waits for one to start or
+end (`vm-wait`), and passes the other tool calls to the VM that their `vm`
+argument names. Add it to Claude Code once:
+
+```
+claude mcp add es40 -- /path/to/build/es40-mcp
+```
+
+Then start es40, from the agent's shell or your own, and the agent finds it.
+es40 serves one MCP client at a time. es40-mcp lets go of a VM a few seconds
+after its last call, so several agent sessions can take turns.
+
+To reach one VM without es40-mcp, give its socket a fixed path with
+`mcp.socket` and connect any MCP client with `nc -U`, for example
+`claude mcp add es40 -- nc -U /tmp/es40-501/es40.sock`. That client has to
+start after es40, and loses the VM when es40 quits.
+
+It needs zlib, for the PNG screenshots, and Unix sockets, so it is not on
+Windows yet. Build with `-DES40_DISABLE_MCP=ON` to leave it out.
+
+------------------------------------------------------------------------  
   
 ## Status  
 

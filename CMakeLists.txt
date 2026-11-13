@@ -10,6 +10,7 @@ endif()
 
 option(ES40_DISABLE_SDL "Disable SDL support" OFF)
 option(ES40_DISABLE_X11 "Disable the native X11 GUI" OFF)
+option(ES40_DISABLE_MCP "Disable the MCP server for AI agents" OFF)
 option(ES40_DISABLE_NETWORKING "Disable PCap/networking for networkless builds" OFF)
 option(ES40_DISABLE_TAP "Disable TAP networking even on platforms that support it (Linux/FreeBSD/NetBSD)" OFF)
 option(ES40_DISABLE_VMNET "Disable vmnet networking on macOS" OFF)
@@ -568,6 +569,32 @@ if (NOT WIN32)
     list(APPEND ES40_LIBRARIES Threads::Threads)
 endif()
 
+# The MCP server lets an AI agent see the screen and use the keyboard and
+# mouse (src/mcp/McpServer.h). It needs Unix sockets and zlib for its PNGs.
+set(ES40_HAVE_MCP FALSE)
+if (NOT WIN32 AND NOT ES40_DISABLE_MCP)
+    find_package(ZLIB)
+    if (ZLIB_FOUND)
+        set(ES40_HAVE_MCP TRUE)
+        list(APPEND ES40_DEFINITIONS ES40_MCP)
+        list(APPEND ES40_SOURCES
+            src/mcp/McpImage.cpp
+            src/mcp/McpImage.h
+            src/mcp/McpInternal.h
+            src/mcp/McpJson.cpp
+            src/mcp/McpJson.h
+            src/mcp/McpSchemas.cpp
+            src/mcp/McpSchemas.h
+            src/mcp/McpServer.cpp
+            src/mcp/McpServer.h
+            src/mcp/McpTools.cpp
+            )
+        list(APPEND ES40_LIBRARIES ZLIB::ZLIB)
+    else()
+        message(STATUS "zlib not found: es40 is built without the MCP server")
+    endif()
+endif()
+
 list(APPEND ES40_INCLUDES
     ${CMAKE_CURRENT_BINARY_DIR}/src
     src/
@@ -654,6 +681,21 @@ if (ES40_HAVE_VMNET)
         $<LINK_LIBRARY:FRAMEWORK,vmnet>)
     set_property(TARGET es40_vmnet_helper PROPERTY CXX_STANDARD 17)
     add_dependencies(es40 es40_vmnet_helper)
+endif()
+
+if (ES40_HAVE_MCP)
+    # es40-mcp is the MCP server an agent starts. It finds every running es40
+    # whose MCP server is on and passes the agent's tool calls on to it
+    # (src/mcp/McpRelay.cpp). It needs none of es40's other dependencies.
+    add_executable(es40-mcp
+        src/mcp/McpJson.cpp
+        src/mcp/McpJson.h
+        src/mcp/McpRelay.cpp
+        src/mcp/McpSchemas.cpp
+        src/mcp/McpSchemas.h)
+    target_compile_definitions(es40-mcp PRIVATE PACKAGE_VERSION="${PROJECT_VERSION}")
+    set_property(TARGET es40-mcp PROPERTY CXX_STANDARD 17)
+    add_dependencies(es40 es40-mcp)
 endif()
 
 target_compile_definitions(es40 PUBLIC ${ES40_DEFINITIONS})

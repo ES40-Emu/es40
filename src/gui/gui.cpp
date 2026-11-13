@@ -76,6 +76,9 @@
 #include "gui.h"
 
 #include "io/Keyboard.h"
+#if defined(ES40_MCP)
+#include "mcp/McpServer.h"
+#endif
 
 bx_gui_c* bx_gui = NULL;
 
@@ -408,6 +411,11 @@ void CDisplayOutput::resize_argb32(unsigned width, unsigned height, bool force)
 void CDisplayOutput::present_argb32(const u32* pixels,
 	unsigned width, unsigned height)
 {
+#if defined(ES40_MCP)
+	// The MCP server keeps a copy of the newest frame for screenshots and waits
+	if (es40_mcp_tap.load(std::memory_order_relaxed))
+		es40_mcp_frame(this, pixels, width, height);
+#endif
 	resize_argb32(width, height);
 	m_display.graphics_frame_update(pixels, width, height);
 }

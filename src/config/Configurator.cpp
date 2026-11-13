@@ -164,6 +164,9 @@
 #include "audio/ES1370.h"
 #include "audio/ES1371.h"
 #include "audio/MPU401.h"
+#if defined(ES40_MCP)
+#include "mcp/McpServer.h"
+#endif
 
 #endif // !CONFIGURATION_ONLY
 
@@ -745,7 +748,8 @@ static const char* const kv_none[] = { 0 };
 static const char* const kv_tsunami[] = {
   "memory.bits", "rom.srm", "rom.flash", "rom.dpr", "rom.toy", "time",
   "arc_year_compat", "exit_on_pal_halt", "graphics.multihead", "debug.stop_on_decode_conflict",
-  "debug.shared_read_policy", "debug.shared_read_claimant", 0 };
+  "debug.shared_read_policy", "debug.shared_read_claimant", "mcp", "mcp.name", "mcp.registry",
+  "mcp.socket", 0 };
 static const char* const kv_ev68cb[] = {
   "speed", "palcode.vms.nohle", "idle_nap", "idle_detect",
   "idle_spin_count", "idle_nap_poll_us", "idle_pc_lo", "idle_pc_hi",
@@ -1080,6 +1084,9 @@ void CConfigurator::initialize()
 		myDevice = new CSystem(this);
 		new CDPR(this, (CSystem*)myDevice);
 		new CFlash(this, (CSystem*)myDevice);
+#if defined(ES40_MCP)
+		es40_mcp_configure(this);
+#endif
 		break;
 
 	case c_ev68cb:

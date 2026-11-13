@@ -160,6 +160,9 @@ void Json::erase(const std::string& key)
 
 bool Json::operator==(const Json& o) const
 {
+  // two whole numbers compare exactly: a double cannot tell big ids apart
+  if (m_type == Type::Int && o.m_type == Type::Int)
+    return m_int == o.m_int;
   if (is_number() && o.is_number())
     return as_double() == o.as_double();
   if (m_type != o.m_type)

@@ -650,6 +650,8 @@ struct WaitSpec
 };
 
 const int kTile = 32;
+// A cursor that blinks goes back to how it looked within this many seconds
+const double kBlinkSecs = 0.7;
 
 class Waiter
 {
@@ -686,6 +688,7 @@ public:
     bool changed = until == "stable";
     double changed_at = 0;
     double last_change = 0;
+    double small_since = -1;  // since when only a cursor-sized area has changed
 
     for (;;)
     {
@@ -704,14 +707,21 @@ public:
       else if (!changed)
       {
         Diff d = diff(base, prev, false);
-        if (d.count >= m_spec.min_pixels)
+        // A cursor that blinks is known as one only once it blinks back, so
+        // a cursor-sized change counts only after it stayed that long
+        const bool small = m_spec.ignore_blink && d.count >= m_spec.min_pixels && blink_sized(d);
+        if (!small)
+          small_since = -1;
+        else if (small_since < 0)
+          small_since = t;
+        if (d.count >= m_spec.min_pixels && (!small || t - small_since >= kBlinkSecs))
         {
           changed = true;
-          changed_at = t;
-          last_change = t;
+          changed_at = small ? small_since : t;
+          last_change = std::max(last_change, changed_at);
           if (until == "change")
           {
-            summary = "The screen changed after " + fmt_secs(t) + " (" + describe(d) + ").";
+            summary = "The screen changed after " + fmt_secs(changed_at) + " (" + describe(d) + ").";
             return true;
           }
         }
@@ -772,11 +782,18 @@ private:
     std::vector<unsigned> tiles;
   };
 
+  // A tile's changes, each within 2.5 s of the one before
+  struct Run
+  {
+    double first = 0, last = 0;
+    int count = 0;
+  };
+
   const WaitSpec& m_spec;
   Call& m_call;
   unsigned m_w = 0, m_h = 0, m_tiles_x = 0;
   std::vector<uint8_t> m_animated;
-  std::vector<std::vector<double>> m_tile_times;
+  std::vector<Run> m_runs;
   std::vector<Rect> m_blinks;
 
   bool close_to(uint32_t p) const
@@ -795,7 +812,7 @@ private:
     m_h = h;
     m_tiles_x = (w + kTile - 1) / kTile;
     m_animated.assign((size_t)m_tiles_x * ((h + kTile - 1) / kTile), 0);
-    m_tile_times.assign(m_animated.size(), std::vector<double>());
+    m_runs.assign(m_animated.size(), Run());
     m_blinks.clear();
   }
 
@@ -870,12 +887,18 @@ private:
       std::to_string(d.y1 - d.y0 + 1);
   }
 
+  /// A change no bigger than a cursor
+  static bool blink_sized(const Diff& d)
+  {
+    return d.x1 - d.x0 + 1 <= 24 && d.y1 - d.y0 + 1 <= 32;
+  }
+
   /// A small area that went back to how it looked two frames ago: a blinking cursor
   bool is_blink(const Diff& d, const Image& before, const Image& now)
   {
     const int w = d.x1 - d.x0 + 1, h = d.y1 - d.y0 + 1;
 
-    if (w > 24 || h > 32 || before.w != now.w || before.h != now.h)
+    if (!blink_sized(d) || before.w != now.w || before.h != now.h)
       return false;
     for (int y = d.y0; y <= d.y1; y++)
     {
@@ -900,13 +923,15 @@ private:
   {
     for (unsigned i : d.tiles)
     {
-      auto& times = m_tile_times[i];
-      if (!times.empty() && t - times.back() > 2.5)
-        times.clear();
-      times.push_back(t);
-      if (times.size() > 3)
-        times.erase(times.begin());
-      if (times.size() >= 3 && times.back() - times.front() >= 0.6)
+      Run& run = m_runs[i];
+      if (!run.count || t - run.last > 2.5)
+      {
+        run.first = t;
+        run.count = 0;
+      }
+      run.last = t;
+      run.count++;
+      if (run.count >= 3 && run.last - run.first >= 0.6)
         m_animated[i] = 1;
     }
   }

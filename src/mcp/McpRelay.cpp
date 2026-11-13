@@ -416,7 +416,7 @@ struct Conn
   std::vector<Json> queue;  // calls held back until es40 answers initialize
   std::map<int64_t, Pending> pending;  // by the id es40-mcp gave the call
   int64_t next_id = 1;
-  int held = 0;  // buttons pressed with mouse-button down and not released yet
+  bool held = false;  // es40 said a mouse button is down (mouse-button down)
 };
 
 std::map<int, std::unique_ptr<Conn>> g_conns;  // by pid
@@ -536,30 +536,6 @@ Conn* open_conn(const Vm& v, std::string& err)
   return raw;
 }
 
-/// How many mouse buttons a call presses (down) less those it releases (up)
-int button_change(const std::string& tool, const Json& args)
-{
-  auto one = [](const Json& a) {
-    const std::string& action = a.find("action") ? a.find("action")->as_string() : std::string();
-    return action == "down" ? 1 : action == "up" ? -1 : 0;
-  };
-  int n = 0;
-
-  if (tool == "mouse-button")
-    return one(args);
-  if (tool == "steps" && args.find("steps"))
-  {
-    for (const auto& s : args.find("steps")->items())
-    {
-      const Json* t = s.find("tool");
-      const Json* a = s.find("args");
-      if (t && t->as_string() == "mouse-button" && a)
-        n += one(*a);
-    }
-  }
-  return n;
-}
-
 void forward(Conn* c, const Json& agent_id, const std::string& tool, Json params)
 {
   const int64_t id = c->next_id++;
@@ -616,6 +592,14 @@ void from_vm(Conn* c, const std::string& line)
     c->queue.clear();
     return;
   }
+
+  // es40 says which mouse buttons are down once a call is done, whether it
+  // worked or not
+  const Json* result = msg.find("result");
+  const Json* meta = result ? result->find("_meta") : nullptr;
+  const Json* buttons = meta ? meta->find("es40/buttons") : nullptr;
+  if (buttons)
+    c->held = buttons->as_int() != 0;
 
   auto it = c->pending.find(id->as_int());
   if (it == c->pending.end())
@@ -679,7 +663,7 @@ void check_conns()
       c->busy = true;
       kill_conn(c, "no answer to initialize");
     }
-    else if (c->ready && c->pending.empty() && c->held <= 0 &&
+    else if (c->ready && c->pending.empty() && !c->held &&
       now - c->last > std::chrono::milliseconds(kIdleMs))
     {
       kill_conn(c, "idle");
@@ -1143,7 +1127,6 @@ void call(const Json& id, const Json* params)
   Json fargs = args;
   fargs.erase("vm");
   fwd.set("arguments", std::move(fargs));
-  c->held = std::max(0, c->held + button_change(tool, args));
   forward(c, id, tool, std::move(fwd));
 }
 

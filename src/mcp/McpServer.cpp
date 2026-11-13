@@ -453,7 +453,15 @@ void run_call(std::shared_ptr<Connection> conn, Json id, std::string key, std::s
     r.text = tool + " failed inside es40";
   }
   if (!flag->load())  // a cancelled call gets no answer
-    conn->send(response(id, r.to_json()));
+  {
+    // the buttons still down, for es40-mcp: it keeps the connection while
+    // one is, because es40 lets go of them when the client leaves
+    Json result = r.to_json();
+    Json meta = Json::object();
+    meta.set("es40/buttons", es40mcp::held_buttons());
+    result.set("_meta", std::move(meta));
+    conn->send(response(id, std::move(result)));
+  }
   conn->remove_call(key);
   count_call(-1);
 }

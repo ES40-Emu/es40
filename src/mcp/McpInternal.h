@@ -86,7 +86,8 @@ struct ToolResult
 
 // McpTools.cpp
 ToolResult call_tool(Call& call, const std::string& name, const Json& args);
-void release_input();  // lets go of every key and button an agent still holds
+void release_input();     // lets go of every key and button an agent still holds
+unsigned held_buttons();  // the mouse buttons an agent holds down (1 left, 2 right, 4 middle)
 
 // McpServer.cpp: the frames the displays show
 struct Frame

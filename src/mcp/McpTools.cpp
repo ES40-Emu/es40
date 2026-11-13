@@ -1763,4 +1763,10 @@ void release_input()
   }
 }
 
+unsigned held_buttons()
+{
+  std::lock_guard<std::mutex> lock(g_input_mutex);
+  return g_buttons;
+}
+
 } // namespace es40mcp

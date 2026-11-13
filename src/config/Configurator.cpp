@@ -828,6 +828,7 @@ classinfo classes[] = {
   {"file", c_file, IS_DISK, kv_disk_file},
   {"device", c_device, IS_DISK, kv_disk_device},
   {"ramdisk", c_ramdisk, IS_DISK, kv_disk_ram},
+  {"null", c_gui_null, N_P | IS_GUI, kv_none},
   {"sdl", c_sdl, N_P | IS_GUI, kv_gui_sdl},
   {"win32", c_win32, N_P | IS_GUI, kv_gui_win32},
   {"X11", c_x11, N_P | IS_GUI, kv_gui_x11},
@@ -872,7 +873,8 @@ void CConfigurator::initialize()
 			for (int i = 0; i < iNumChildren; ++i)
 			{
 				const char* value = pChildren[i]->get_myValue();
-				if (!strcasecmp(value, "sdl") || !strcasecmp(value, "win32") || !strcasecmp(value, "X11"))
+				if (!strcasecmp(value, "null") || !strcasecmp(value, "sdl") ||
+					!strcasecmp(value, "win32") || !strcasecmp(value, "X11"))
 					has_gui = true;
 			}
 			if (!has_gui)
@@ -1245,6 +1247,10 @@ void CConfigurator::initialize()
 		}
 
 		myDevice = new CSerial(this, (CSystem*)pParent->get_device(), number);
+		break;
+
+	case c_gui_null:
+		PLUG_load_plugin(this, null);
 		break;
 
 	case c_sdl:

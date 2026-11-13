@@ -74,6 +74,7 @@ void SetupGuard::complete()
 
 Backend backend_for_gui(const char* gui)
 {
+    if (gui && std::strcmp(gui, "null") == 0) return Backend::null;
     if (gui && std::strcmp(gui, "win32") == 0) return Backend::dsound;
     if (gui && std::strcmp(gui, "sdl") == 0) return Backend::sdl;
 #ifdef HAVE_SDL

@@ -329,7 +329,7 @@ void CPowerStorm3xx::update(CRealImage2100::Frame& frame)
 	}
 	else
 	{
-		m_output.display().clear_screen();
+		m_output.clear_screen();
 	}
 	m_output.display().flush();
 }

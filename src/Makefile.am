@@ -80,6 +80,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src/emu
 
 # CPU headers are distributed with the emulator sources.
 noinst_HEADERS = config/ConfigEditor.h config/ConfigDocument.h \
+       gui/ShmFramebuffer.h \
        CPU/AlphaCPU.h \
        base/HostWakeEvent.h \
        CPU/AlphaCPUProfile.h \
@@ -302,6 +303,8 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        system/i2c_spd.cpp \
 	base/ThreadTLS.cpp \
        gui/gui.cpp \
+       gui/gui_null.cpp \
+       gui/ShmFramebuffer.cpp \
        gui/gui_x11.cpp \
        gui/x11_dispatch.h \
        gui/x11_hotkey.h \

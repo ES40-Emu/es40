@@ -549,10 +549,10 @@ int main(int argc, char* argv[])
 
 	MultipleChoiceQuestion gui_q;
 
-	gui_q.setQuestion("Do you want to have a GUI?");
-	gui_q.setExplanation("You need a GUI if you want to use an emulated graphics card. You don't need this for most OS'es. If you don't need this, we recomment that you answer 'none' to this question.");
-	gui_q.setDefault("none");
-	gui_q.addAnswer("none", "", "No GUI. Graphics cards are not supported.");
+	gui_q.setQuestion("Which display backend do you want to use?");
+	gui_q.setExplanation("Choose 'null' to run graphics without a window. ES40_SHM_PATH enables framebuffer export.");
+	gui_q.setDefault("null");
+	gui_q.addAnswer("null", "null", "Headless graphics output without a GUI.");
 
 #if defined(HAVE_SDL)
 	gui_q.addAnswer("SDL", "sdl", "Simple Directmedia Layer. Preferred GUI mechanism.");
@@ -566,10 +566,9 @@ int main(int argc, char* argv[])
 
 	if (gui_q.countAnswers() == 1)
 	{
-		/* The only valid answer is "none".
-		 */
-		cout << "\nNo graphical output backend is available in this build.\n";
-		gui_q.setAnswer("");
+		// Only the null backend is available.
+		cout << "\nUsing the headless display backend.\n";
+		gui_q.setAnswer("null");
 	}
 	else
 	{
@@ -578,7 +577,11 @@ int main(int argc, char* argv[])
 		gui_q.ask();
 	}
 
-	if (gui_q.getAnswer() != "")
+	if (gui_q.getAnswer() == "null")
+	{
+		os << "gui = null\n{\n}\n\n";
+	}
+	else if (gui_q.getAnswer() != "")
 	{
 		const bool win32_gui = gui_q.getAnswer() == "win32";
 		const bool x11_gui = gui_q.getAnswer() == "X11";

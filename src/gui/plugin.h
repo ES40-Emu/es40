@@ -74,6 +74,7 @@
   int  lib##mod##_LTX_plugin_init(CConfigurator*  cfg); \
   void                                                lib##mod##_LTX_plugin_fini(void);
 
+DECLARE_PLUGIN_INIT_FINI_FOR_MODULE(null)
 #if defined(HAVE_SDL)
 DECLARE_PLUGIN_INIT_FINI_FOR_MODULE(sdl)
 #endif

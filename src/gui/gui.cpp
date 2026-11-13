@@ -71,9 +71,11 @@
 
 #include "../StdAfx.h"
 
+#include <cstdlib>
 #include <signal.h>
 
 #include "gui.h"
+#include "ShmFramebuffer.h"
 
 #include "io/Keyboard.h"
 
@@ -386,6 +388,34 @@ void bx_gui_c::graphics_tile_update_in_place(unsigned x0, unsigned y0,
 	}
 }
 
+// Export ownership changes only on the configuration thread.
+static CDisplayOutput* exported_output = nullptr;
+
+CDisplayOutput::CDisplayOutput(unsigned id, bx_gui_c& display)
+	: m_id(id), m_display(display)
+{
+	const char* path = std::getenv("ES40_SHM_PATH");
+	if (path && *path && !exported_output)
+	{
+		try
+		{
+			m_export.reset(new CShmFramebuffer(path));
+		}
+		catch (const std::exception& e)
+		{
+			FAILURE(Configuration, e.what());
+		}
+		exported_output = this;
+		printf("%%GUI-I-IFB1: Exporting first configured display to %s\n", path);
+	}
+}
+
+CDisplayOutput::~CDisplayOutput()
+{
+	if (exported_output == this)
+		exported_output = nullptr;
+}
+
 void CDisplayOutput::initialize(unsigned tile_width, unsigned tile_height)
 {
 	if (!m_initialized)
@@ -397,11 +427,12 @@ void CDisplayOutput::initialize(unsigned tile_width, unsigned tile_height)
 
 void CDisplayOutput::resize_argb32(unsigned width, unsigned height, bool force)
 {
-	if (force || width != m_width || height != m_height)
+	if (force || !m_dimensions_valid || width != m_width || height != m_height)
 	{
 		m_display.dimension_update(width, height, 0, 0, 32);
 		m_width = width;
 		m_height = height;
+		m_dimensions_valid = true;
 	}
 }
 
@@ -409,7 +440,29 @@ void CDisplayOutput::present_argb32(const u32* pixels,
 	unsigned width, unsigned height)
 {
 	resize_argb32(width, height);
+	export_frame(pixels, width, height);
 	m_display.graphics_frame_update(pixels, width, height);
+}
+
+void CDisplayOutput::clear_screen()
+{
+	if (m_width && m_height)
+		export_frame(nullptr, m_width, m_height);
+	m_display.clear_screen();
+}
+
+void CDisplayOutput::export_frame(const u32* pixels, unsigned width, unsigned height)
+{
+	if (!m_export)
+		return;
+	try
+	{
+		m_export->publish(pixels, width, height);
+	}
+	catch (const std::exception& e)
+	{
+		FAILURE(Runtime, e.what());
+	}
 }
 
 void bx_gui_c::graphics_frame_update(const u32* pixels,

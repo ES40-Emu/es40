@@ -2443,7 +2443,7 @@ void CCirrus::run()
 				if (!was_paused)
 				{
 					m_output.display().lock();
-					m_output.display().clear_screen();   // optional; comment out if you want last frame to remain
+					m_output.clear_screen();   // optional; comment out if you want last frame to remain
 					m_output.display().unlock();
 					was_paused = true;
 				}

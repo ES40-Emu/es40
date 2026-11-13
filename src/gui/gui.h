@@ -67,6 +67,7 @@
 #define __GUI_H__
 
 #include <cstddef>
+#include <memory>
 #include <string>
 
 #define BX_DEBUG(a)  \
@@ -207,11 +208,12 @@ private:
 };
 
 // Host presentation binding for one modeled output.
+class CShmFramebuffer;
 class CDisplayOutput
 {
 public:
-  CDisplayOutput(unsigned id, bx_gui_c& display)
-    : m_id(id), m_display(display) {}
+  CDisplayOutput(unsigned id, bx_gui_c& display);
+  ~CDisplayOutput();
 
   unsigned id() const { return m_id; }
   bx_gui_c& display() const { return m_display; }
@@ -221,12 +223,16 @@ public:
   void initialize(unsigned tile_width, unsigned tile_height);
   void resize_argb32(unsigned width, unsigned height, bool force = false);
   void present_argb32(const u32* pixels, unsigned width, unsigned height);
-  void invalidate_dimensions() { m_width = m_height = 0; }
+  void clear_screen();
+  void invalidate_dimensions() { m_dimensions_valid = false; }
 
 private:
+  void export_frame(const u32* pixels, unsigned width, unsigned height);
   const unsigned m_id;
   bx_gui_c& m_display;
+  std::unique_ptr<CShmFramebuffer> m_export;
   bool m_initialized = false;
+  bool m_dimensions_valid = false;
   unsigned m_width = 0, m_height = 0;
 };
 

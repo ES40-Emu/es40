@@ -127,6 +127,7 @@ typedef enum
   c_ramdisk,
 
   // gui's
+  c_gui_null,
   c_sdl,
   c_win32,
   c_x11

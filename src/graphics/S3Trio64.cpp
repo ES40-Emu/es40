@@ -1750,7 +1750,7 @@ void CS3Trio64::run()
 				if (!was_paused)
 				{
 					m_output.display().lock();
-					m_output.display().clear_screen();   // optional; comment out if you want last frame to remain
+					m_output.clear_screen();   // optional; comment out if you want last frame to remain
 					m_output.display().unlock();
 					was_paused = true;
 				}
@@ -4169,7 +4169,7 @@ void CS3Trio64::io_write_b(u32 address, u8 data)
 			bool new_ve = atc_video_enabled();
 			if (!new_ve && prev_ve) {
 				m_output.display().lock();
-				m_output.display().clear_screen();
+				m_output.clear_screen();
 				m_output.display().unlock();
 			}
 			else if (new_ve && !prev_ve) {

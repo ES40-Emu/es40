@@ -1131,7 +1131,7 @@ void edit_gui_x11(const char *title) { edit_gui_settings(title, "X11"); }
 void edit_gui(const char *title)
 {
     MenuEntry_t entry[] = {
-        {"none", "No GUI. Graphics cards will not be supported.", NULL}
+        {"null", "Headless graphics output without a GUI.", NULL}
 #if defined(HAVE_SDL)
         ,
         {"sdl", "Simple Directmedia Layer. Preferred GUI mechanism.", edit_gui_sdl}
@@ -1147,19 +1147,11 @@ void edit_gui(const char *title)
     };
     int num_entries = ARRAY_SIZE(entry);
 
-    if (num_entries == 1)
-    {
-        show_text(title, "No graphical output backend is available in this build.");
-        return;
-    }
-
     int sel = show_menu(title, entry, num_entries, MENU_2ND_LEVEL);
 
     if (sel == 0)
     {
-        CConfigurator *c = theConfig->find_child("gui");
-        if (c != nullptr)
-            theConfig->remove_child(c->get_myName());
+        edit_node(theConfig, theConfig->find_child("gui"), "gui", "null");
     }
 }
 
@@ -2802,9 +2794,7 @@ bool main_menu(void)
 {
     MenuEntry_t entry[] = {
         {"Edit GUI settings",
-         "You need a GUI if you want to use an emulated graphics card.\n"
-         "You don't need this for most OS'es. If you don't need this,\n"
-         "we recommend that you select 'none'.",
+         "Select 'null' for headless graphics without a window.",
          edit_gui},
         {"Edit System settings", "", edit_tsunami},
         {"Edit CPU settings", "", edit_ev68cb},

@@ -425,6 +425,9 @@ list(APPEND ES40_SOURCES
     src/base/Exception.cpp
     src/base/ThreadTLS.cpp
 	src/gui/gui.cpp
+    src/gui/gui_null.cpp
+    src/gui/ShmFramebuffer.cpp
+    src/gui/ShmFramebuffer.h
     src/gui/keymap.cpp
     src/gui/scancodes.cpp
     src/chipset/AliM1543C_ide.cpp

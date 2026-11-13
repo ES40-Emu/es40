@@ -323,7 +323,7 @@ void CRadeon7500::update()
 	}
 	else
 	{
-		m_output.display().clear_screen();
+		m_output.clear_screen();
 	}
 	m_output.display().flush();
 }

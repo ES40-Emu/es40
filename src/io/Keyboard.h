@@ -97,8 +97,9 @@ public:
   void          gen_scancode(u32 key);
   void          mouse_motion(int delta_x, int delta_y, int delta_z, unsigned button_state);
   // Motion and buttons from an agent (the MCP server): like mouse_motion(),
-  // but it does not need the host window to have captured the mouse.
-  void          agent_mouse_motion(int delta_x, int delta_y, int delta_z, unsigned button_state);
+  // but it does not need the host window to have captured the mouse. false
+  // if the guest has the mouse off, so nothing was queued.
+  bool          agent_mouse_motion(int delta_x, int delta_y, int delta_z, unsigned button_state);
   // For an agent's pacing: the bytes the keyboard buffer still takes, and
   // whether motion or buttons have not gone out in a mouse packet yet.
   int           agent_kbd_room();
@@ -128,7 +129,7 @@ private:
   bool      controller_deQ();
   bool      input_transaction_active() const;
   void      discard_mouse_stream();
-  void      queue_mouse_motion(int delta_x, int delta_y, int delta_z, unsigned button_state);
+  bool      queue_mouse_motion(int delta_x, int delta_y, int delta_z, unsigned button_state);
   void      defer_keyboard_input();
   void      prepare_command_response();
   void      set_kbd_clock_enable(u8 value);

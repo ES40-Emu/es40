@@ -46,6 +46,7 @@
 #include <cstring>
 #include <mutex>
 #include <set>
+#include <thread>
 #include <vector>
 
 #if !defined(PACKAGE_VERSION)
@@ -61,11 +62,28 @@ namespace
 // ---------------------------------------------------------------- input
 
 std::mutex g_input_mutex;
-std::multiset<u32> g_held_keys;
+std::multiset<u32> g_held_keys;  // pressed, and not let go of yet
 unsigned g_buttons = 0;
 bool g_ptr_known = false;
 int g_ptr_x = 0;
 int g_ptr_y = 0;
+
+// Calls run at once, each on a thread of its own. One at a time uses the
+// keyboard and the mouse, from its first key or move to its last release, so
+// the keys, moves and clicks of two calls never mix.
+std::timed_mutex g_input_turn;
+
+/// Waits for the keyboard and the mouse; false if the call was cancelled first
+bool take_input(Call& call, std::unique_lock<std::timed_mutex>& turn)
+{
+  turn = std::unique_lock<std::timed_mutex>(g_input_turn, std::defer_lock);
+  while (!turn.try_lock_for(std::chrono::milliseconds(20)))
+  {
+    if (call.cancelled())
+      return false;
+  }
+  return true;
+}
 
 bool have_keyboard(std::string& err)
 {
@@ -78,8 +96,10 @@ bool have_keyboard(std::string& err)
 }
 
 // The keyboard buffer holds 16 bytes and drops what does not fit. One key
-// makes at most 6 (Pause), so a key goes in only while 8 are free.
+// makes at most 8 bytes (Pause) and lets go with at most 6 (Print Screen), so
+// a key goes in only while 8 are free, and a release while 6 are.
 const int kKeyBytes = 8;
+const int kReleaseBytes = 6;
 // How long a key or a mouse packet waits for the guest to read the last ones,
 // and how long once the guest has been seen not to read them
 const int kInputWaitMs = 3000;
@@ -87,23 +107,24 @@ const int kStalledWaitMs = 40;
 std::atomic<bool> g_kbd_stalled{ false };
 std::atomic<bool> g_mouse_stalled{ false };
 
-/// Waits while busy() is true; false if the call was cancelled or the guest
-/// did not catch up in time. After one such timeout the next waits are short,
-/// until the guest reads again.
+/// Waits while busy() is true; false if the guest did not catch up in time, or
+/// if the call was cancelled and cancellable is set. After one timeout the
+/// next waits are short, until the guest reads again.
 template <typename Busy>
-bool wait_guest(Call& call, std::atomic<bool>& stalled, Busy busy)
+bool wait_guest(Call& call, bool cancellable, std::atomic<bool>& stalled, Busy busy)
 {
   const int limit = stalled.load() ? kStalledWaitMs : kInputWaitMs;
 
   for (int waited = 0; busy(); waited += 2)
   {
-    if (!call.sleep(2))
+    if (cancellable && call.cancelled())
       return false;
     if (waited >= limit)
     {
       stalled = true;
       return false;
     }
+    std::this_thread::sleep_for(std::chrono::milliseconds(2));
   }
   stalled = false;
   return true;
@@ -112,21 +133,39 @@ bool wait_guest(Call& call, std::atomic<bool>& stalled, Busy busy)
 /// Waits until the keyboard buffer has room for one more key
 bool keyboard_ready(Call& call)
 {
-  return wait_guest(call, g_kbd_stalled, [] { return theKeyboard->agent_kbd_room() < kKeyBytes; });
+  return wait_guest(call, true, g_kbd_stalled, [] { return theKeyboard->agent_kbd_room() < kKeyBytes; });
 }
 
-/// Waits until the last motion or buttons went out in a packet of their own,
-/// so a new button state or step does not merge with them
-bool mouse_sent(Call& call)
+/// Lets go of a key, after a cancel too. A release that does not fit in the
+/// buffer is not sent in part: the key stays in g_held_keys, and the next
+/// call that types, or the end of the connection, lets go of it.
+void release_key(Call& call, u32 key)
 {
-  return wait_guest(call, g_mouse_stalled, [] { return theKeyboard->agent_mouse_busy(); });
+  if (!wait_guest(call, false, g_kbd_stalled, [] { return theKeyboard->agent_kbd_room() < kReleaseBytes; }))
+    return;
+  std::lock_guard<std::mutex> lock(g_input_mutex);
+  theKeyboard->gen_scancode(key | BX_KEY_RELEASED);
+  auto held = g_held_keys.find(key);
+  if (held != g_held_keys.end())
+    g_held_keys.erase(held);
 }
 
-/// The keys one call pressed; it lets go of the rest when the call ends
+/// The keys one call pressed; it lets go of the rest when the call ends. It
+/// is made only while the call has the input (take_input).
 class KeyPresser
 {
 public:
-  explicit KeyPresser(Call& call) : m_call(call) {}
+  explicit KeyPresser(Call& call) : m_call(call)
+  {
+    // the keys earlier calls could not let go of, as the guest did not read them
+    std::vector<u32> left;
+    {
+      std::lock_guard<std::mutex> lock(g_input_mutex);
+      left.assign(g_held_keys.rbegin(), g_held_keys.rend());
+    }
+    for (u32 key : left)
+      release_key(m_call, key);
+  }
 
   ~KeyPresser()
   {
@@ -146,18 +185,12 @@ public:
     return true;
   }
 
-  /// A key goes up even when the buffer stays full or the call was cancelled
   void up(u32 key)
   {
-    keyboard_ready(m_call);
-    std::lock_guard<std::mutex> lock(g_input_mutex);
-    theKeyboard->gen_scancode(key | BX_KEY_RELEASED);
-    auto held = g_held_keys.find(key);
-    if (held != g_held_keys.end())
-      g_held_keys.erase(held);
     auto mine = std::find(m_down.rbegin(), m_down.rend(), key);
     if (mine != m_down.rend())
       m_down.erase(std::next(mine).base());
+    release_key(m_call, key);
   }
 
 private:
@@ -165,29 +198,66 @@ private:
   std::vector<u32> m_down;
 };
 
-/// Moves the mouse by dx, dy screen pixels (down is positive); false if the
-/// call was cancelled
-bool mouse_send(Call& call, int dx, int dy, int dz)
+void forget_pointer()
 {
-  {
-    std::lock_guard<std::mutex> lock(g_input_mutex);
-    theKeyboard->agent_mouse_motion(dx, -dy, dz, g_buttons);  // PS/2 Y is positive up
-  }
-  return mouse_sent(call) || !call.cancelled();
+  std::lock_guard<std::mutex> lock(g_input_mutex);
+  g_ptr_known = false;
 }
 
-/// Presses or lets go of a button; false if the call was cancelled
-bool set_button(Call& call, unsigned bit, bool down)
+void set_pointer(int x, int y)
 {
+  std::lock_guard<std::mutex> lock(g_input_mutex);
+  g_ptr_x = x;
+  g_ptr_y = y;
+  g_ptr_known = true;
+}
+
+/// After motion or buttons were queued (queued false: the guest has the mouse
+/// off), waits until they went out in a packet of their own, so a new button
+/// state or step does not merge with them. false, and err says why, if the
+/// guest has the mouse off or does not read it, or the call was cancelled.
+bool mouse_sent(Call& call, bool queued, std::string& err)
+{
+  if (!queued)
+  {
+    // the guest resets the pointer when it turns the mouse on again
+    forget_pointer();
+    err = "The guest has the PS/2 mouse turned off (its mouse driver does not run yet), so it took"
+      " no mouse input.";
+    return false;
+  }
+  if (wait_guest(call, true, g_mouse_stalled, [] { return theKeyboard->agent_mouse_busy(); }))
+    return true;
+  err = call.cancelled() ? "Cancelled." : "The guest is not reading the mouse, so the rest did not go out.";
+  return false;
+}
+
+/// Moves the mouse by dx, dy screen pixels (down is positive); false, and
+/// err says why, if it did not go out
+bool mouse_send(Call& call, int dx, int dy, int dz, std::string& err)
+{
+  bool queued;
   {
     std::lock_guard<std::mutex> lock(g_input_mutex);
-    if (down)
-      g_buttons |= bit;
-    else
-      g_buttons &= ~bit;
-    theKeyboard->agent_mouse_motion(0, 0, 0, g_buttons);
+    queued = theKeyboard->agent_mouse_motion(dx, -dy, dz, g_buttons);  // PS/2 Y is positive up
   }
-  return mouse_sent(call) || !call.cancelled();
+  return mouse_sent(call, queued, err);
+}
+
+/// Presses or lets go of a button; false, and err says why, if it did not go
+/// out. A release the guest did not read yet goes out with the next packet.
+bool set_button(Call& call, unsigned bit, bool down, std::string& err)
+{
+  bool queued;
+  {
+    std::lock_guard<std::mutex> lock(g_input_mutex);
+    const unsigned buttons = down ? g_buttons | bit : g_buttons & ~bit;
+    queued = theKeyboard->agent_mouse_motion(0, 0, 0, buttons);
+    // a press the guest did not take is not held; a release always counts
+    if (queued || !down)
+      g_buttons = buttons;
+  }
+  return mouse_sent(call, queued, err);
 }
 
 struct NamedKey
@@ -1120,7 +1190,7 @@ bool screen_size(unsigned& w, unsigned& h)
   return true;
 }
 
-bool move_steps(Call& call, int dx, int dy, int step, int delay_ms)
+bool move_steps(Call& call, int dx, int dy, int step, int delay_ms, std::string& err)
 {
   while (dx || dy)
   {
@@ -1130,35 +1200,39 @@ bool move_steps(Call& call, int dx, int dy, int step, int delay_ms)
 
     // each step goes out in a packet of its own: two in one packet could
     // cross the guest's acceleration threshold
-    if (!mouse_send(call, sx, sy, 0))
+    if (!mouse_send(call, sx, sy, 0, err))
       return false;
     dx -= sx;
     dy -= sy;
     const int left = delay_ms - (int)((call.elapsed() - start) * 1000.0);
     if (left > 0 && !call.sleep(left))
+    {
+      err = "Cancelled.";
       return false;
+    }
   }
   return true;
 }
 
 /// Pushes the pointer far into the top-left corner, where the guest stops it
-bool home_pointer(Call& call)
+bool home_pointer(Call& call, std::string& err)
 {
   unsigned w, h;
 
   screen_size(w, h);
   const int steps = (int)(std::max(w, h) / 40) * 2 + 10;
+  forget_pointer();  // until it is in the corner
   for (int i = 0; i < steps; i++)
   {
-    if (!mouse_send(call, -40, -40, 0))
+    if (!mouse_send(call, -40, -40, 0, err))
       return false;
   }
   if (!call.sleep(100))
+  {
+    err = "Cancelled.";
     return false;
-  std::lock_guard<std::mutex> lock(g_input_mutex);
-  g_ptr_x = 0;
-  g_ptr_y = 0;
-  g_ptr_known = true;
+  }
+  set_pointer(0, 0);
   return true;
 }
 
@@ -1201,7 +1275,9 @@ bool parse_move(const Json& args, MoveSpec& m, bool need_target, std::string& er
   return true;
 }
 
-/// Moves the pointer; adds what it did to text
+/// Moves the pointer; adds what it did to text. The caller has the input
+/// (take_input). The position is not known while the pointer moves, so a
+/// move that does not finish leaves it unknown.
 bool do_move(Call& call, const MoveSpec& m, std::string& text, std::string& err)
 {
   unsigned w, h;
@@ -1209,57 +1285,47 @@ bool do_move(Call& call, const MoveSpec& m, std::string& text, std::string& err)
   int px, py;
 
   screen_size(w, h);
+  {
+    std::lock_guard<std::mutex> lock(g_input_mutex);
+    known = g_ptr_known;
+    px = g_ptr_x;
+    py = g_ptr_y;
+  }
   if (m.has_xy)
   {
-    {
-      std::lock_guard<std::mutex> lock(g_input_mutex);
-      known = g_ptr_known;
-    }
     if (m.home == "always" || (m.home == "auto" && !known))
     {
-      if (!home_pointer(call))
-      {
-        err = "cancelled";
+      if (!home_pointer(call, err))
         return false;
-      }
       text += "Homed the pointer to 0,0. ";
+      px = 0;
+      py = 0;
     }
     else if (!known)
     {
       err = "the pointer position is not known; let es40 home it (home auto)";
       return false;
     }
-    {
-      std::lock_guard<std::mutex> lock(g_input_mutex);
-      px = g_ptr_x;
-      py = g_ptr_y;
-    }
     int tx = std::max(0, std::min(m.x, (int)w - 1));
     int ty = std::max(0, std::min(m.y, (int)h - 1));
-    if (!move_steps(call, tx - px, ty - py, m.step, m.step_delay))
-    {
-      err = "cancelled";
+    forget_pointer();
+    if (!move_steps(call, tx - px, ty - py, m.step, m.step_delay, err))
       return false;
-    }
-    std::lock_guard<std::mutex> lock(g_input_mutex);
-    g_ptr_x = tx;
-    g_ptr_y = ty;
+    set_pointer(tx, ty);
     text += "Moved the pointer to " + std::to_string(tx) + "," + std::to_string(ty) + ".";
   }
   else if (m.has_dxy)
   {
-    if (!move_steps(call, m.dx, m.dy, m.step, m.step_delay))
-    {
-      err = "cancelled";
+    forget_pointer();
+    if (!move_steps(call, m.dx, m.dy, m.step, m.step_delay, err))
       return false;
-    }
-    std::lock_guard<std::mutex> lock(g_input_mutex);
-    if (g_ptr_known)
+    if (known)
     {
-      g_ptr_x = std::max(0, std::min(g_ptr_x + m.dx, (int)w - 1));
-      g_ptr_y = std::max(0, std::min(g_ptr_y + m.dy, (int)h - 1));
+      px = std::max(0, std::min(px + m.dx, (int)w - 1));
+      py = std::max(0, std::min(py + m.dy, (int)h - 1));
+      set_pointer(px, py);
       text += "Moved the pointer by " + std::to_string(m.dx) + "," + std::to_string(m.dy) +
-        " to about " + std::to_string(g_ptr_x) + "," + std::to_string(g_ptr_y) + ".";
+        " to about " + std::to_string(px) + "," + std::to_string(py) + ".";
     }
     else
     {
@@ -1430,30 +1496,36 @@ ToolResult tool_key(Call& call, const Json& args)
     combos.push_back(c);
   }
 
-  const Image before = screen_before(then);
-  KeyPresser keyboard(call);
+  Image before;
   std::string pressed;
-  for (const auto& c : combos)
   {
-    for (int n = 0; n < c.repeat; n++)
+    std::unique_lock<std::timed_mutex> turn;
+    if (!take_input(call, turn))
+      return fail("Cancelled.");
+    before = screen_before(then);
+    KeyPresser keyboard(call);
+    for (const auto& c : combos)
     {
-      for (size_t i = 0; i + 1 < c.keys.size(); i++)
+      for (int n = 0; n < c.repeat; n++)
       {
-        if (!keyboard.down(c.keys[i]))
+        for (size_t i = 0; i + 1 < c.keys.size(); i++)
+        {
+          if (!keyboard.down(c.keys[i]))
+            return not_typed(call, pressed);
+          if (!call.sleep(lead))
+            return fail("Cancelled.");
+        }
+        if (!keyboard.down(c.keys.back()))
           return not_typed(call, pressed);
-        if (!call.sleep(lead))
+        if (!call.sleep(hold))
+          return fail("Cancelled.");
+        for (size_t i = c.keys.size(); i-- > 0;)
+          keyboard.up(c.keys[i]);
+        if (!call.sleep(delay))
           return fail("Cancelled.");
       }
-      if (!keyboard.down(c.keys.back()))
-        return not_typed(call, pressed);
-      if (!call.sleep(hold))
-        return fail("Cancelled.");
-      for (size_t i = c.keys.size(); i-- > 0;)
-        keyboard.up(c.keys[i]);
-      if (!call.sleep(delay))
-        return fail("Cancelled.");
+      pressed += (pressed.empty() ? "" : ", ") + c.text;
     }
-    pressed += (pressed.empty() ? "" : ", ") + c.text;
   }
   r.text = "Pressed " + pressed + ".";
   finish_then(call, then, before, r);
@@ -1498,28 +1570,34 @@ ToolResult tool_type_text(Call& call, const Json& args)
     strokes.emplace_back(key, shift);
   }
 
-  const Image before = screen_before(then);
-  KeyPresser keyboard(call);
-  size_t typed = 0;
-  for (const auto& s : strokes)
+  Image before;
   {
-    if (s.second)
+    std::unique_lock<std::timed_mutex> turn;
+    if (!take_input(call, turn))
+      return fail("Cancelled.");
+    before = screen_before(then);
+    KeyPresser keyboard(call);
+    size_t typed = 0;
+    for (const auto& s : strokes)
     {
-      if (!keyboard.down(BX_KEY_SHIFT_L))
+      if (s.second)
+      {
+        if (!keyboard.down(BX_KEY_SHIFT_L))
+          return not_typed(call, std::to_string(typed) + " characters");
+        if (!call.sleep(lead))
+          return fail("Cancelled.");
+      }
+      if (!keyboard.down(s.first))
         return not_typed(call, std::to_string(typed) + " characters");
-      if (!call.sleep(lead))
+      typed++;
+      if (!call.sleep(hold))
+        return fail("Cancelled.");
+      keyboard.up(s.first);
+      if (s.second)
+        keyboard.up(BX_KEY_SHIFT_L);
+      if (!call.sleep(char_delay))
         return fail("Cancelled.");
     }
-    if (!keyboard.down(s.first))
-      return not_typed(call, std::to_string(typed) + " characters");
-    typed++;
-    if (!call.sleep(hold))
-      return fail("Cancelled.");
-    keyboard.up(s.first);
-    if (s.second)
-      keyboard.up(BX_KEY_SHIFT_L);
-    if (!call.sleep(char_delay))
-      return fail("Cancelled.");
   }
   r.text = "Typed " + std::to_string(strokes.size()) + " characters.";
   finish_then(call, then, before, r);
@@ -1535,9 +1613,15 @@ ToolResult tool_mouse_move(Call& call, const Json& args)
 
   if (!have_keyboard(err) || !parse_move(args, m, true, err) || !parse_then(args, then, err))
     return fail(err);
-  const Image before = screen_before(then);
-  if (!do_move(call, m, r.text, err))
-    return fail(err);
+  Image before;
+  {
+    std::unique_lock<std::timed_mutex> turn;
+    if (!take_input(call, turn))
+      return fail("Cancelled.");
+    before = screen_before(then);
+    if (!do_move(call, m, r.text, err))
+      return fail(err);
+  }
   finish_then(call, then, before, r);
   return r;
 }
@@ -1559,24 +1643,41 @@ ToolResult tool_mouse_click(Call& call, const Json& args)
   if (m.has_dxy)
     return fail("mouse-click moves to x, y; use mouse-move for dx, dy");
 
-  if (m.has_xy && !do_move(call, m, r.text, err))
-    return fail(err);
-  // after the move: a "change" wait must see the click, not the pointer moving
-  const Image before = m.has_xy ? screen_after_move(call, then) : screen_before(then);
-  for (int i = 0; i < count; i++)
+  Image before;
   {
-    if (i && !call.sleep(interval))
+    std::unique_lock<std::timed_mutex> turn;
+    if (!take_input(call, turn))
       return fail("Cancelled.");
-    if (wheel)
+    if (m.has_xy && !do_move(call, m, r.text, err))
+      return fail(err);
+    // after the move: a "change" wait must see the click, not the pointer moving
+    before = m.has_xy ? screen_after_move(call, then) : screen_before(then);
+    for (int i = 0; i < count; i++)
     {
-      if (!mouse_send(call, 0, 0, wheel))
+      if (i && !call.sleep(interval))
         return fail("Cancelled.");
-      continue;
+      if (wheel)
+      {
+        if (!mouse_send(call, 0, 0, wheel, err))
+          return fail(err);
+        continue;
+      }
+      std::string up_err;
+      bool ok = set_button(call, bit, true, err);
+      if (ok && !call.sleep(hold))
+      {
+        ok = false;
+        err = "Cancelled.";
+      }
+      // it goes up after a cancel or a press that did not go out too
+      if (!set_button(call, bit, false, up_err) && ok)
+      {
+        ok = false;
+        err = up_err;
+      }
+      if (!ok)
+        return fail(err);
     }
-    bool ok = set_button(call, bit, true) && call.sleep(hold);
-    set_button(call, bit, false);  // it goes up after a cancel too
-    if (!ok)
-      return fail("Cancelled.");
   }
   r.text += (r.text.empty() ? "" : " ") + std::string(count == 1 ? "Clicked " : count == 2 ? "Double-clicked " : "Triple-clicked ") + name + ".";
   finish_then(call, then, before, r);
@@ -1599,8 +1700,15 @@ ToolResult tool_mouse_button(Call& call, const Json& args)
   if (wheel)
     return fail("a wheel has no down and up; use mouse-click with wheel-up or wheel-down");
 
-  const Image before = screen_before(then);
-  set_button(call, bit, action == "down");
+  Image before;
+  {
+    std::unique_lock<std::timed_mutex> turn;
+    if (!take_input(call, turn))
+      return fail("Cancelled.");
+    before = screen_before(then);
+    if (!set_button(call, bit, action == "down", err))
+      return fail(err);
+  }
   r.text = (action == "down" ? "Pressed " : "Released ") + name + ".";
   finish_then(call, then, before, r);
   return r;
@@ -1753,9 +1861,13 @@ void release_input()
 
   if (!theKeyboard)
     return;
-  for (auto it = g_held_keys.rbegin(); it != g_held_keys.rend(); ++it)
-    theKeyboard->gen_scancode(*it | BX_KEY_RELEASED);
-  g_held_keys.clear();
+  // a release that does not fit stays held, for the next call that types
+  while (!g_held_keys.empty() && theKeyboard->agent_kbd_room() >= kReleaseBytes)
+  {
+    auto last = std::prev(g_held_keys.end());
+    theKeyboard->gen_scancode(*last | BX_KEY_RELEASED);
+    g_held_keys.erase(last);
+  }
   if (g_buttons)
   {
     g_buttons = 0;

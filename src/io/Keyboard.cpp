@@ -1782,11 +1782,11 @@ void CKeyboard::mouse_motion(int delta_x, int delta_y, int delta_z, unsigned but
 		queue_mouse_motion(delta_x, delta_y, delta_z, button_state);
 }
 
-void CKeyboard::agent_mouse_motion(int delta_x, int delta_y, int delta_z, unsigned button_state)
+bool CKeyboard::agent_mouse_motion(int delta_x, int delta_y, int delta_z, unsigned button_state)
 {
 	CFastMutex::ScopedLock guard(kbdLock);
 
-	queue_mouse_motion(delta_x, delta_y, delta_z, button_state);
+	return queue_mouse_motion(delta_x, delta_y, delta_z, button_state);
 }
 
 /**
@@ -1812,16 +1812,17 @@ bool CKeyboard::agent_mouse_busy()
 }
 
 /**
- * Add motion and buttons to the next mouse packet. The caller holds kbdLock.
+ * Add motion and buttons to the next mouse packet; false if the guest has the
+ * mouse off, so nothing was queued. The caller holds kbdLock.
  **/
-void CKeyboard::queue_mouse_motion(int delta_x, int delta_y, int delta_z, unsigned button_state)
+bool CKeyboard::queue_mouse_motion(int delta_x, int delta_y, int delta_z, unsigned button_state)
 {
 	// Host motion produces unsolicited packets only while stream reporting is
 	// active and the controller can clock the AUX device.
 	if (!state.mouse.enable
 		|| state.mouse.mode != MOUSE_MODE_STREAM
 		|| !state.aux_clock_enabled)
-		return;
+		return false;
 
 	state.mouse.delayed_dx += delta_x;
 	state.mouse.delayed_dy += delta_y;
@@ -1834,6 +1835,7 @@ void CKeyboard::queue_mouse_motion(int delta_x, int delta_y, int delta_z, unsign
 		if (!state.timer_pending)
 			state.timer_pending = 1;
 	}
+	return true;
 }
 
 /**

@@ -466,6 +466,18 @@ void run_call(std::shared_ptr<Connection> conn, Json id, std::string key, std::s
   count_call(-1);
 }
 
+/// Waits until every call has ended; cancelled ones end within moments
+void wait_calls()
+{
+  std::unique_lock<std::mutex> lock(g_calls_mutex);
+
+  if (!g_calls_cv.wait_for(lock, std::chrono::seconds(5), [] { return g_calls == 0; }))
+  {
+    printf("%%MCP-I-WAIT: waiting for %d agent calls to end\n", g_calls);
+    g_calls_cv.wait(lock, [] { return g_calls == 0; });
+  }
+}
+
 void start_call(const std::shared_ptr<Connection>& conn, const Json& id, const Json* params)
 {
   const Json* name = params ? params->find("name") : nullptr;
@@ -599,6 +611,9 @@ void serve(const std::shared_ptr<Connection>& conn)
   }
   conn->cancel_all();
   conn->close();
+  // no call of this client may press or let go of anything once the next
+  // client has the VM, or after the release below
+  wait_calls();
   es40mcp::release_input();
 }
 
@@ -960,16 +975,9 @@ void es40_mcp_stop()
   }
   if (g_server.joinable())
     g_server.join();
-  {
-    // The calls use the keyboard and the displays, which go away after this.
-    // Their client is gone, so they are cancelled and end within moments.
-    std::unique_lock<std::mutex> lock(g_calls_mutex);
-    if (!g_calls_cv.wait_for(lock, std::chrono::seconds(5), [] { return g_calls == 0; }))
-    {
-      printf("%%MCP-I-WAIT: waiting for %d agent calls to end\n", g_calls);
-      g_calls_cv.wait(lock, [] { return g_calls == 0; });
-    }
-  }
+  // The calls use the keyboard and the displays, which go away after this.
+  // Their client is gone, so they are cancelled and end within moments.
+  wait_calls();
   es40mcp::release_input();
   close(g_listen);
   g_listen = -1;

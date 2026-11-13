@@ -1778,12 +1778,51 @@ void CKeyboard::mouse_motion(int delta_x, int delta_y, int delta_z, unsigned but
 {
 	CFastMutex::ScopedLock guard(kbdLock);
 
+	if (state.mouse.captured)
+		queue_mouse_motion(delta_x, delta_y, delta_z, button_state);
+}
+
+bool CKeyboard::agent_mouse_motion(int delta_x, int delta_y, int delta_z, unsigned button_state)
+{
+	CFastMutex::ScopedLock guard(kbdLock);
+
+	return queue_mouse_motion(delta_x, delta_y, delta_z, button_state);
+}
+
+/**
+ * The scancode bytes the keyboard buffer takes before enQ() drops them.
+ **/
+int CKeyboard::agent_kbd_room()
+{
+	CFastMutex::ScopedLock guard(kbdLock);
+
+	return BX_KBD_ELEMENTS - state.kbd_internal_buffer.num_elements;
+}
+
+/**
+ * True while queued motion or buttons have not gone out in a packet yet, or
+ * a packet still waits in the mouse buffer. A packet takes the newest button
+ * state only, so an agent waits for this before it changes the buttons again.
+ **/
+bool CKeyboard::agent_mouse_busy()
+{
+	CFastMutex::ScopedLock guard(kbdLock);
+
+	return state.mouse.data_pending || state.mouse_internal_buffer.num_elements > 0;
+}
+
+/**
+ * Add motion and buttons to the next mouse packet; false if the guest has the
+ * mouse off, so nothing was queued. The caller holds kbdLock.
+ **/
+bool CKeyboard::queue_mouse_motion(int delta_x, int delta_y, int delta_z, unsigned button_state)
+{
 	// Host motion produces unsolicited packets only while stream reporting is
 	// active and the controller can clock the AUX device.
-	if (!state.mouse.captured || !state.mouse.enable
+	if (!state.mouse.enable
 		|| state.mouse.mode != MOUSE_MODE_STREAM
 		|| !state.aux_clock_enabled)
-		return;
+		return false;
 
 	state.mouse.delayed_dx += delta_x;
 	state.mouse.delayed_dy += delta_y;
@@ -1796,6 +1835,7 @@ void CKeyboard::mouse_motion(int delta_x, int delta_y, int delta_z, unsigned but
 		if (!state.timer_pending)
 			state.timer_pending = 1;
 	}
+	return true;
 }
 
 /**

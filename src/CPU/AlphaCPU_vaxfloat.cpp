@@ -462,6 +462,9 @@ u64 CAlphaCPU::vax_sqrt(u64 op, u32 ins, u32 dp)
   **/
 void CAlphaCPU::vax_trap(u64 mask, u32 ins)
 {
+#ifdef ES40_JIT
+	m_jit_fltv_trapped = true;
+#endif
 	ARITH_TRAP(mask | ((ins & I_FTRP_S) ? TRAP_SWC : 0), I_GETRC(ins));
 }
 

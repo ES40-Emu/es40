@@ -827,12 +827,11 @@ inline u64 fsqrt64(u64 asig, s32 exp)
 #define VPTE_IFETCH   1024   /* interpreter VPTE data read on behalf of an instruction fetch */
 #define PAL_KSTACK    2048   /* interpreter kernel-stack access: memory faults must halt */
 
-#define FPSTART       if(state.fpen == 0) /* flt point disabled? */ \
+#define FPSTART       if(!fp_start()) /* flt point disabled? */ \
   {                                                                 \
     GO_PAL(AlphaPALException::FloatingPointDisabled);            /* set trap */ \
     break;                  /* and stop current instruction */      \
-  }                                                                 \
-  state.exc_sum = 0;
+  }
 
     /* Traps - corresponds to arithmetic trap summary register */
 #define TRAP_SWC  U64(0x01) /* software completion */

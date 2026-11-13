@@ -479,6 +479,7 @@ private:
   int             vmspal_int_kernel_stack_not_valid();
 
   // New FP helpers.....
+  bool fp_start();
   void write_fpcr_arch(u64 arch_val);
   u64  read_fpcr_arch() const;
 
@@ -750,8 +751,9 @@ private:
   static int jit_ftoi(CAlphaCPU* cpu, u32 fa, u32 fmt, u64* out);
   // FLTL (0x17) non-arithmetic: FPCR moves, CPYSx, FCMOVx, CVTLQ/QL. Return 1 = FEN-trap bail.
   static int jit_fltl(CAlphaCPU* cpu, u32 ins);
-  // FLTV (0x15) VAX arith/convert/compare. Return 0 ok / 1 FEN-trap bail / 2 arith trap (exc_sum set).
+  // FLTV (0x15) VAX arith/convert/compare. Return 0 ok / 1 FEN-trap bail / 2 arith trap taken.
   static int jit_fltv(CAlphaCPU* cpu, u32 ins);
+  bool m_jit_fltv_trapped = false; // Per-helper trap signal, independent of accumulated EXC_SUM.
   // Verify support: the interpreter pass records each value it loads, and the
   // compiled pass replays them instead of re-reading memory - false mismatch fix
   // must cover a full trace formation, not just a 64-instruction block.
@@ -983,6 +985,13 @@ inline void CAlphaCPU::set_PAL_BASE(u64 pb)
     printf("%%CPU-W-NOP21: PAL switched but p21=0! Scratch area not available.\n");
   }
 #endif
+}
+
+inline bool CAlphaCPU::fp_start()
+{
+  if (!state.fpen) return false;
+  if (m_profile.fp_start.clear_exception_summary) state.exc_sum = 0;
+  return true;
 }
 
 // EV68 cache predicates used by the family fetch and source-observation policy.

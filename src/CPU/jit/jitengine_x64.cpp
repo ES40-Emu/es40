@@ -834,6 +834,11 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
     void* fp_read_helper = hs.fp_read_helper;         void* fp_write_helper = hs.fp_write_helper;
     void* fltv_helper = hs.fltv_helper;
 
+    auto emit_fp_start_summary = [&]() {
+        if (m_profile.fp_start.clear_exception_summary)
+            a.mov(x86::qword_ptr(x86::rbp, m_off.exc_sum), imm(0));
+        };
+
     auto aq = [&](int k) { return x86::gpq(gpa[k]); };
     auto ad = [&](int k) { return x86::gpd(gpa[k]); };
     auto set_pc = [&](uint64_t pc_val) {
@@ -890,7 +895,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         // LDT's destination. Retain existing proofs only. 
         // 
         // A successful VMS DTB refill can still write EXC_SUM after FPSTART,  Thereby 
-        // the next T operation must clear it at that operation's original position, 
+        // the next T operation must apply its summary rule at that operation's original position,
         // not in this helper.
         regalloc.fp_t_guarded = prev_fp_t_guarded;
         regalloc.fp_t_nearest = prev_fp_t_nearest;
@@ -1388,8 +1393,6 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             const int  disp = (int)(int16_t)(ins & 0xFFFF);
             const uint32_t descr = (fmt << 16) | (uint32_t)size_bits;   // fmt<<16 | size
 
-            if (isload && fa == 31) continue;   // LDT/LDS f31: interp skips the read (NOP)
-
             emit_address(disp);                                              // va -> RDX (preserved for helper)
 #ifdef JIT_STATS
             emit_licm_probe();
@@ -1430,16 +1433,17 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
 #ifdef JIT_VERIFY
             emit_helper();
 #else
-            if (!israw) { emit_helper(); continue; }
+            // F31 loads still run FPSTART; the helper discards them before any memory access.
+            if (!israw || (isload && fa == 31)) { emit_helper(); continue; }
 
-            // Inline fast path for LDT/STT: FPSTART (fpen gate + exc_sum=0), then the data-cache hit.
+            // Inline fast path for LDT/STT: FPSTART (FEN gate and family summary rule), then the data-cache hit.
             // misalign / cache miss / MMIO / fpen==0 fall to the helper. R11 = slot byte offset; RAX/R10/R9 scratch.
             Label slow = a.new_label();
             Label fdone = a.new_label();
             const Label watched_page = a.new_label();
             const Label raw_store = a.new_label();
             a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0));                          a.je(slow);   // fpen==0 -> FEN trap
-            a.mov(x86::qword_ptr(x86::rbp, m_off.exc_sum), imm(0));                                    // exc_sum = 0
+            emit_fp_start_summary();
             emit_dpc_offset();
             const int dpc_row = isload ? 0 : (int)m_off.dpc_write_row;
             a.mov(x86::r10, x86::rdx);
@@ -1730,7 +1734,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             continue;
         }
 
-        // ITOFx (0x14): f[Fc] = fmt(Ra). jit_itof mirrors FPSTART (fpen -> FEN trap = bail, exc_sum=0);
+        // ITOFx (0x14): f[Fc] = fmt(Ra). jit_itof mirrors FPSTART (FEN bail and family summary rule);
         // the verify compares the FP file via its snapshot.
         if (op == OP_ITOFS || op == OP_ITOFF || op == OP_ITOFT) {
             emit_call(itof_helper, { {JA_CPU, 0}, {JA_I32, (uint64_t)rc}, {JA_GPZ, (uint64_t)ra},
@@ -1765,14 +1769,14 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
 
         // CVTQT/CVTQS (0x16): f[Fc] = (double|single)(s64) f[Fb] via SSE. Inline the steady-state
         // common case; bail to the interpreter (it owns rounding/traps/FPCR) on any edge that would
-        // trap or need non-nearest rounding. The verify carries fpcr/exc_sum across its two passes, so
-        // the inline path leaves them untouched -- correctness rests on the bails, not on FPCR upkeep.
+        // trap or need non-nearest rounding. The inline path leaves FPCR unchanged;
+        // the family startup rule governs EXC_SUM.
         if (op == OP_CVTQT || op == OP_CVTQS) {
             const bool dyn = (((ins >> 11) & 3) == 3);      // /D: rounding is FPCR<59:58>, checked at runtime
             Label bail = a.new_label(), fdone = a.new_label(), cont = a.new_label();
             a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0));   // FPSTART: FP disabled -> FEN trap (interp)
             a.je(bail);
-            a.mov(x86::qword_ptr(x86::rbp, m_off.exc_sum), imm(0));
+            emit_fp_start_summary();
             if (dyn) {                                      // dynamic rounding: only nearest is SSE's default
                 a.mov(x86::rax, x86::qword_ptr(x86::rbp, m_off.fpcr));
                 a.shr(x86::rax, imm(58)); a.and_(x86::eax, imm(3));
@@ -1818,7 +1822,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                 a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0)); a.je(bail);      // FPSTART: FP disabled -> FEN trap
             }
             if (!prev_fp_t_exc_zero)
-                a.mov(x86::qword_ptr(x86::rbp, m_off.exc_sum), imm(0));
+                emit_fp_start_summary();
             if (!prev_fp_t_guarded) {
                 a.bt(x86::qword_ptr(x86::rbp, m_off.fpcr), imm(56)); a.jnc(bail);    // INE clear -> first inexact traps
             }
@@ -1876,7 +1880,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             // Only successful execution reaches the following instruction. Result
             // and complete-underflow checks above remain mandatory for every op.
             regalloc.fp_t_guarded = true;
-            regalloc.fp_t_exc_zero = true;
+            regalloc.fp_t_exc_zero = m_profile.fp_start.clear_exception_summary;
             regalloc.fp_t_nearest = prev_fp_t_nearest || dyn;
             regalloc.fp_t_non_denormal = prev_fp_t_non_denormal | (uint32_t{1} << rc);
             continue;
@@ -1900,7 +1904,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                 a.bind(ok);                                                     // mantissa == 0 -> zero or Inf -> compare inline
                 };
             a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0)); a.je(bail);   // FPSTART
-            a.mov(x86::qword_ptr(x86::rbp, m_off.exc_sum), imm(0));
+            emit_fp_start_summary();
             a.movq(x86::xmm0, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)ra));   // f[Fa]
             a.movq(x86::xmm1, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rb));   // f[Fb]
             cmp_bail(x86::xmm0); cmp_bail(x86::xmm1);
@@ -1955,7 +1959,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         if (op == OP_CVTST) {
             Label bail = a.new_label(), cont = a.new_label();
             a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0)); a.je(bail);          // FPSTART
-            a.mov(x86::qword_ptr(x86::rbp, m_off.exc_sum), imm(0));
+            emit_fp_start_summary();
             a.movq(x86::xmm0, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rb));   // f[Fb]
             dbl_bail(x86::xmm0, true, bail);                                        // denormal/Inf/NaN -> interp
             a.movq(x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rc), x86::xmm0);   // S bits are valid T
@@ -1974,7 +1978,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             const bool dyn = (((ins >> 11) & 3) == 3);
             Label bail = a.new_label(), cont = a.new_label();
             a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0)); a.je(bail);          // FPSTART
-            a.mov(x86::qword_ptr(x86::rbp, m_off.exc_sum), imm(0));
+            emit_fp_start_summary();
             a.bt(x86::qword_ptr(x86::rbp, m_off.fpcr), imm(56)); a.jnc(bail);        // INE clear -> first inexact traps
             if (dyn) fp_dyn_bail(bail);
             a.movq(x86::xmm0, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rb));   // f[Fb] (double)
@@ -2010,7 +2014,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             const bool dyn = (((ins >> 11) & 3) == 3);
             Label bail = a.new_label(), cont = a.new_label(), exact = a.new_label();
             a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0)); a.je(bail);          // FPSTART
-            a.mov(x86::qword_ptr(x86::rbp, m_off.exc_sum), imm(0));
+            emit_fp_start_summary();
             if (dyn) fp_dyn_bail(bail);
             a.movq(x86::xmm0, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rb));   // f[Fb] (double)
             dbl_bail(x86::xmm0, false, bail);                                       // denormal operand -> interp
@@ -2036,7 +2040,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             const bool dyn = (((ins >> 11) & 3) == 3);
             Label bail = a.new_label(), cont = a.new_label();
             a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0)); a.je(bail);          // FPSTART
-            a.mov(x86::qword_ptr(x86::rbp, m_off.exc_sum), imm(0));
+            emit_fp_start_summary();
             a.bt(x86::qword_ptr(x86::rbp, m_off.fpcr), imm(56)); a.jnc(bail);        // INE clear -> first inexact traps
             if (dyn) fp_dyn_bail(bail);
             a.movq(x86::xmm0, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rb));   // f[Fb]
@@ -2067,7 +2071,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             const bool dyn = (((ins >> 11) & 3) == 3);
             Label bail = a.new_label(), cont = a.new_label();
             a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0)); a.je(bail);          // FPSTART
-            a.mov(x86::qword_ptr(x86::rbp, m_off.exc_sum), imm(0));
+            emit_fp_start_summary();
             a.bt(x86::qword_ptr(x86::rbp, m_off.fpcr), imm(56)); a.jnc(bail);        // INE clear -> first inexact traps
             if (dyn) fp_dyn_bail(bail);
             a.movq(x86::xmm0, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)ra));   // f[Fa]
@@ -2131,7 +2135,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             Label bail = a.new_label(), cont = a.new_label();
             a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0));
             a.je(bail);
-            a.mov(x86::qword_ptr(x86::rbp, m_off.exc_sum), imm(0));
+            emit_fp_start_summary();
             a.mov(x86::rax, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)ra));
             if (fltl_func <= 0x022) {
                 // Identical sources are a raw move (or a sign flip for CPYSN).
@@ -2344,7 +2348,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             Label bail = a.new_label(), cont = a.new_label();
             a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0));   // FPSTART: FP disabled -> FEN trap (interp)
             a.je(bail);
-            a.mov(x86::qword_ptr(x86::rbp, m_off.exc_sum), imm(0));
+            emit_fp_start_summary();
             if (ra == 31) a.xor_(x86::eax, x86::eax);             // f[31] = 0 -> s = 0
             else {
                 a.mov(x86::rax, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * ra));

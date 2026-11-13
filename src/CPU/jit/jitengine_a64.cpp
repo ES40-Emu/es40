@@ -4821,6 +4821,7 @@ static asmjit::Error emit_a64_load_f_bits(A64EmitContext& c,
 static asmjit::Error emit_a64_store_f_bits(A64EmitContext& c,
                                            const asmjit::a64::Gp& x, uint32_t freg);
 static asmjit::Error emit_a64_fp_start(A64EmitContext& c, const asmjit::Label& bail);
+static asmjit::Error emit_a64_fp_start_summary(A64EmitContext& c);
 
 // FP-memory helper sequence. Production carries the instruction in descr[63:32]
 // so a fault can enter PAL without retrying the instruction in the interpreter.
@@ -4867,15 +4868,15 @@ static A64OpEmitReceipt emit_a64_fp_mem(A64EmitContext& context,
   using namespace asmjit;
   [[maybe_unused]] a64::Assembler& a = context.assembler;
 
-  const bool isload = op.opcode == 0x23 || op.opcode == 0x22
-                   || op.opcode == 0x20 || op.opcode == 0x21;
-  if (isload && op.ra == 31) return a64_completed_op_receipt(op);
+  [[maybe_unused]] const bool isload = op.opcode == 0x23 || op.opcode == 0x22
+                                   || op.opcode == 0x20 || op.opcode == 0x21;
   [[maybe_unused]] const bool israw = op.opcode == 0x23 || op.opcode == 0x27;   // LDT / STT
 
   Error err = emit_a64_mem_va(context, op, false);
   if (err != Error::kOk) return a64_completed_op_receipt(op, err);
 #ifndef JIT_VERIFY
-  if (israw) {
+  // F31 loads still run FPSTART; the helper discards them before any memory access.
+  if (israw && !(isload && op.ra == 31)) {
     if (context.cold == nullptr) return {Error::kInvalidState, op.kind};
     A64ColdStub stub{};
     stub.slow = a.new_label();
@@ -4887,9 +4888,7 @@ static A64OpEmitReceipt emit_a64_fp_mem(A64EmitContext& context,
 
     err = emit_a64_load_cpu_u8(a, RA::kScratch3.w(), context.offsets.fpen, false);
     if (err == Error::kOk) err = a.cbz(RA::kScratch3.w(), stub.slow);
-    if (err == Error::kOk) err = emit_a64_mov_u64(a, RA::kScratch0, 0);
-    if (err == Error::kOk)
-      err = emit_a64_store_cpu_u64(a, RA::kScratch0, context.offsets.exc_sum);
+    if (err == Error::kOk) err = emit_a64_fp_start_summary(context);
     if (err == Error::kOk)
       err = emit_a64_dpc_probe(context, 64, false, !isload, stub.slow,
           !isload && context.smp_memory ? &watched : nullptr);
@@ -5074,9 +5073,7 @@ static A64OpEmitReceipt emit_a64_branch_fp(A64EmitContext& context,
   if (err == Error::kOk) err = a.cbnz(RA::kScratch3.w(), fen_ok);
   if (err == Error::kOk) err = emit_a64_retry_bail(context, index);
   if (err == Error::kOk) err = a.bind(fen_ok);
-  if (err == Error::kOk) err = emit_a64_mov_u64(a, RA::kScratch0, 0);
-  if (err == Error::kOk)
-    err = emit_a64_store_cpu_u64(a, RA::kScratch0, context.offsets.exc_sum);
+  if (err == Error::kOk) err = emit_a64_fp_start_summary(context);
   if (err != Error::kOk) return a64_completed_op_receipt(op, err);
 
   if (op.ra == 31) {   // f[31] = 0 -> s = 0: the condition folds
@@ -5168,16 +5165,24 @@ static asmjit::Error emit_a64_store_f_bits(A64EmitContext& c,
       : c.assembler.str(x, mem);
 }
 
-// FPSTART: fpen==0 -> FEN bail; exc_sum = 0.
+static asmjit::Error emit_a64_fp_start_summary(A64EmitContext& c)
+{
+  if (!c.profile.fp_start.clear_exception_summary) return asmjit::Error::kOk;
+  using RA = CJitEngine::RegAlloc;
+  asmjit::Error err = emit_a64_mov_u64(c.assembler, RA::kScratch0, 0);
+  if (err == asmjit::Error::kOk)
+    err = emit_a64_store_cpu_u64(c.assembler, RA::kScratch0, c.offsets.exc_sum);
+  return err;
+}
+
+// FPSTART: fpen==0 -> FEN bail, then the family summary rule.
 static asmjit::Error emit_a64_fp_start(A64EmitContext& c, const asmjit::Label& bail)
 {
   using RA = CJitEngine::RegAlloc;
   asmjit::a64::Assembler& a = c.assembler;
   asmjit::Error err = emit_a64_load_cpu_u8(a, RA::kScratch3.w(), c.offsets.fpen, false);
   if (err == asmjit::Error::kOk) err = a.cbz(RA::kScratch3.w(), bail);
-  if (err == asmjit::Error::kOk) err = emit_a64_mov_u64(a, RA::kScratch0, 0);
-  if (err == asmjit::Error::kOk)
-    err = emit_a64_store_cpu_u64(a, RA::kScratch0, c.offsets.exc_sum);
+  if (err == asmjit::Error::kOk) err = emit_a64_fp_start_summary(c);
   return err;
 }
 // FPCR.INE (bit 56) clear -> the first inexact would trap -> bail.
@@ -5267,11 +5272,7 @@ static A64OpEmitReceipt emit_a64_flti_arith(A64EmitContext& context,
     err = emit_a64_load_cpu_u8(a, RA::kScratch3.w(), context.offsets.fpen, false);
     if (err == Error::kOk) err = a.cbz(RA::kScratch3.w(), bail);
   }
-  if (err == Error::kOk && !prev.exc_zero) {
-    err = emit_a64_mov_u64(a, RA::kScratch0, 0);
-    if (err == Error::kOk)
-      err = emit_a64_store_cpu_u64(a, RA::kScratch0, context.offsets.exc_sum);
-  }
+  if (err == Error::kOk && !prev.exc_zero) err = emit_a64_fp_start_summary(context);
   if (err == Error::kOk && !prev.guarded) err = emit_a64_fp_ine_gate(context, bail);
   if (err == Error::kOk && dyn && !prev.nearest) err = emit_a64_fp_dyn_gate(context, bail);
   if (err == Error::kOk) err = emit_a64_load_f(context, a64::d16, op.ra);
@@ -5337,7 +5338,7 @@ static A64OpEmitReceipt emit_a64_flti_arith(A64EmitContext& context,
   if (err == Error::kOk) err = a.bind(cont);
   if (err == Error::kOk && !sgl) {
     context.regs.fp_t.guarded = true;
-    context.regs.fp_t.exc_zero = true;
+    context.regs.fp_t.exc_zero = context.profile.fp_start.clear_exception_summary;
     context.regs.fp_t.nearest = prev.nearest || dyn;
     context.regs.fp_t.non_denormal = prev.non_denormal | (uint32_t{1} << op.rc);
   }
@@ -5710,7 +5711,7 @@ static A64OpEmitReceipt emit_a64_planned_op(A64EmitContext& context,
         // Successful raw LDT/STT helpers preserve FPEN/FPCR and other FPRs, but
         // a successful VMS DTB refill can write EXC_SUM after FPSTART. 
         // 
-        // Retain existing proofs only; clear EXC_SUM at the next T op's original site.
+        // Retain existing proofs only; apply the summary rule at the next T op's original site.
         context.regs.fp_t = context.prev_fp_t;
         context.regs.fp_t.exc_zero = false;
         if (op.opcode == 0x23)
@@ -5798,11 +5799,6 @@ static A64OpEmitReceipt emit_a64_planned_op(A64EmitContext& context,
     }
     case A64OpKind::kMemLoad:   // the R31 NOP skip emits nothing (real loads set their own)
       preserves = op.ra == 31; break;
-    case A64OpKind::kFpMem: {   // likewise the f31 load NOP
-      const bool isload = op.opcode == 0x23 || op.opcode == 0x22
-                       || op.opcode == 0x20 || op.opcode == 0x21;
-      preserves = isload && op.ra == 31; break;
-    }
     default: break;
   }
   if (preserves && dest != context.prev_dpc.base)

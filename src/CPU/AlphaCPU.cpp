@@ -1721,9 +1721,9 @@ void CAlphaCPU::jit_run(int budget)
 				if (ii == 13) { x &= ~U64(0x1f00); y &= ~U64(0x1f00); }
 				return x != y;
 			};
-			const u64  exc_sum_pre = state.exc_sum, fpcr_pre = state.fpcr; // FPCR is restored before both replays;
-			                                                               // trace boundary compares also need
-			                                                               // EXC_SUM from before the span.
+			const u64  exc_sum_pre = state.exc_sum, fpcr_pre = state.fpcr; // Restore both before replay so reads
+			                                                               // see pre-span state, not the
+			                                                               // interpreter's final values.
 			// HW_MTPR verify: a compiled block writes IPR fields directly in LIVE state (its GPR
 			// writes go to jr scratch). cap_iprs snapshots the writable IPR set (the per-boundary
 			// snapshots below and the post-pass compares both use it); put_iprs restores it. Mostly
@@ -1736,7 +1736,7 @@ void CAlphaCPU::jit_run(int budget)
 				// IER enables; check_int not snapshotted (rolling it back could suppress a poll)
 				d[7] = (u64)(u32)state.asten; d[8] = (u64)(u32)state.sien; d[9] = (u64)(u32)state.pcen;
 				d[10] = (u64)(u32)state.cren; d[11] = (u64)(u32)state.slen; d[12] = (u64)(u32)state.eien;
-				d[13] = state.exc_sum;   // FPSTART clears it (compiled ITOFx/FTOIx/FLTL)
+				d[13] = state.exc_sum;   // FPSTART may clear it (compiled ITOFx/FTOIx/FLTL)
 				d[14] = state.fpcr;      // MT_FPCR (compiled FLTL) writes it
 				d[15] = (u64)state.sde; d[16] = (u64)state.hwe;            // I_CTL (compiled as terminator)
 				d[17] = (u64)(u32)state.i_ctl_spe; d[18] = (u64)(u32)state.i_ctl_va_mode;
@@ -1969,6 +1969,7 @@ void CAlphaCPU::jit_run(int budget)
 				state.aster = aster_pre; state.astrr = astrr_pre;            // ...and the PCTX read-backs (a
 				state.fpen = fpen_pre; state.ppcen = ppcen_pre;              // HW_MFPR PCTX reads these live)
 				state.exc_addr = exc_addr_pre;
+				state.exc_sum = exc_sum_pre;
 				state.fpcr = fpcr_pre;
 				const u64 interp_pc = state.pc;   // interpreter is authoritative for the PC
 					const u32 n_stores_interp = sn;   // interp's RECORDED store count (sn), NOT the replay cursor m_jit_slog_i; a compiled pass must consume exactly this many (catches a missing/extra store)
@@ -2429,13 +2430,12 @@ int CAlphaCPU::jit_read(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 }
 
 // JIT FP load helper (static). descr packs size[7:0], format[17:16], instruction[63:32].
-// FPSTART (fpen -> FEN bail; exc_sum=0) precedes the discarded-f31 and alignment checks.
+// FPSTART (fpen -> FEN bail; family summary rule) precedes the discarded-f31 and alignment checks.
 // Production reuses jit_read's cache read/direct PAL faults; verify replays the interp's CONVERTED
 // f-value (FP loads join the load log), so it consumes m_jit_vlog like an integer load.
 int CAlphaCPU::jit_fp_read(CAlphaCPU* cpu, u64 va, u32 fa, u64 descr)
 {
-	if (cpu->state.fpen == 0) return 1;       // FEN trap (FPSTART)
-	cpu->state.exc_sum = 0;
+	if (!cpu->fp_start()) return 1;          // FEN trap (FPSTART)
 	if (fa == 31) return 0;                    // f31 dest: interp skips the read
 	const u64 amask = ((descr & 0xff) / 8) - 1;
 	if ((va & amask) && !cpu->m_unaligned_fixup)   // fixup: jit_read below splits the access
@@ -2472,8 +2472,7 @@ int CAlphaCPU::jit_fp_read(CAlphaCPU* cpu, u64 va, u32 fa, u64 descr)
 // jit_write so verify compares vs the store log (FP stores join it) and production writes.
 int CAlphaCPU::jit_fp_write(CAlphaCPU* cpu, u64 va, u32 fa, u64 descr)
 {
-	if (cpu->state.fpen == 0) return 1;       // FEN trap (FPSTART)
-	cpu->state.exc_sum = 0;
+	if (!cpu->fp_start()) return 1;          // FEN trap (FPSTART)
 	u64 value;
 	switch ((descr >> 16) & 3)   // fmt: 0=T raw, 1=S ieee, 2=F vax, 3=G vax
 	{
@@ -2517,11 +2516,10 @@ u64 CAlphaCPU::jit_misc(CAlphaCPU* cpu, u32 sel)
 }
 
 // JIT int->FP move helper (static). ITOFx: f[fc] = fmt(value). Mirrors DO_ITOFx incl. FPSTART
-// (fpen==0 -> return 1, the FEN-trap bail; exc_sum cleared). fmt: 0=T raw, 1=S, 2=F.
+// (fpen==0 -> return 1, the FEN-trap bail; family summary rule). fmt: 0=T raw, 1=S, 2=F.
 int CAlphaCPU::jit_itof(CAlphaCPU* cpu, u32 fc, u64 value, u32 fmt)
 {
-	if (cpu->state.fpen == 0) return 1;       // FEN trap: the interpreter vectors it
-	cpu->state.exc_sum = 0;                   // FPSTART
+	if (!cpu->fp_start()) return 1;          // FEN trap: the interpreter vectors it
 	if (fmt == 1)      cpu->state.f[fc] = cpu->ieee_lds((u32)value);
 	else if (fmt == 2) cpu->state.f[fc] = cpu->vax_ldf(SWAP_VAXF((u32)value));
 	else               cpu->state.f[fc] = value;
@@ -2531,8 +2529,7 @@ int CAlphaCPU::jit_itof(CAlphaCPU* cpu, u32 fc, u64 value, u32 fmt)
 // JIT FP->int move helper (static). FTOIx: *out = fmt(f[fa]). Same FPSTART bail. fmt: 0=T, 1=S.
 int CAlphaCPU::jit_ftoi(CAlphaCPU* cpu, u32 fa, u32 fmt, u64* out)
 {
-	if (cpu->state.fpen == 0) return 1;       // FEN trap: the interpreter vectors it
-	cpu->state.exc_sum = 0;                   // FPSTART
+	if (!cpu->fp_start()) return 1;          // FEN trap: the interpreter vectors it
 	*out = (fmt == 1) ? sext_u64_32(cpu->ieee_sts(cpu->state.f[fa])) : cpu->state.f[fa];
 	return 0;
 }
@@ -2542,8 +2539,7 @@ int CAlphaCPU::jit_ftoi(CAlphaCPU* cpu, u32 fa, u32 fmt, u64* out)
 // these funcs here (no FP math, no /V trap forms). Returns 1 = FEN-trap bail.
 int CAlphaCPU::jit_fltl(CAlphaCPU* cpu, u32 ins)
 {
-	if (cpu->state.fpen == 0) return 1;       // FEN trap: the interpreter vectors it
-	cpu->state.exc_sum = 0;                   // FPSTART
+	if (!cpu->fp_start()) return 1;          // FEN trap: the interpreter vectors it
 	u64* f = cpu->state.f;
 	const u32 fa = (ins >> 21) & 0x1f, fb = (ins >> 16) & 0x1f, fc = ins & 0x1f;
 	switch ((ins >> 5) & 0x7ff)
@@ -2578,12 +2574,12 @@ int CAlphaCPU::jit_fltl(CAlphaCPU* cpu, u32 ins)
 
 // JIT VAX-FP arithmetic helper (static). FLTV (0x15): mirrors the interpreter's vax_* dispatch into
 // f[fc]. FPSTART bail (return 1) if FP disabled. Returns 2 when the op delivered an arith trap: vax_trap
-// GO_PALs (sets state.pc + exc_sum), so exc_sum != 0 detects it and the caller honors state.pc -- the op
+// GO_PALs (sets state.pc + exc_sum) and marks the helper's trap flag; the caller honors state.pc -- the op
 // runs exactly once (no re-execute). Returns 0 on the common no-trap path. Fc==31 is gated out in classify.
 int CAlphaCPU::jit_fltv(CAlphaCPU* cpu, u32 ins)
 {
-	if (cpu->state.fpen == 0) return 1;       // FEN trap (FPSTART): op not run
-	cpu->state.exc_sum = 0;
+	if (!cpu->fp_start()) return 1;          // FEN trap (FPSTART): op not run
+	cpu->m_jit_fltv_trapped = false;
 	u64* f = cpu->state.f;
 	const u32 fa = (ins >> 21) & 0x1f, fb = (ins >> 16) & 0x1f, fc = ins & 0x1f;
 	const u32 fn = (ins >> 5) & 0x7ff;
@@ -2612,7 +2608,7 @@ int CAlphaCPU::jit_fltv(CAlphaCPU* cpu, u32 ins)
 		case 0x02f: f[fc] = cpu->vax_cvtfi(f[fb], ins); break;   // CVTGQ
 		}
 	}
-	return cpu->state.exc_sum ? 2 : 0;   // exc_sum != 0 => vax_trap GO_PAL'd -> caller honors state.pc
+	return cpu->m_jit_fltv_trapped ? 2 : 0;   // vax_trap GO_PAL'd -> caller honors state.pc
 }
 
 // JIT load-locked helper (static). LDx_L: the verify-checked load PLUS cpu_lock -- the LL/SC

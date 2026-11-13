@@ -89,6 +89,8 @@ noinst_HEADERS = config/ConfigEditor.h config/ConfigDocument.h \
        CPU/Ev68Interrupt.h \
        CPU/AlphaFPCR.h \
        CPU/Ev68FPCR.h \
+       CPU/AlphaFPStart.h \
+       CPU/Ev68FPStart.h \
        CPU/AlphaInstructionFetch.h \
        CPU/AlphaInstructionSource.h \
        CPU/AlphaInstructionSet.h \

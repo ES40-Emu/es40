@@ -453,6 +453,9 @@ list(APPEND ES40_SOURCES
     src/CPU/AlphaArithmeticTrap.h
     src/CPU/Ev68ArithmeticTrap.h
     src/CPU/Ev68ArithmeticTrap.cpp
+    src/CPU/AlphaIEEETrap.h
+    src/CPU/Ev68IEEETrap.h
+    src/CPU/Ev68IEEETrap.cpp
     src/CPU/AlphaInstructionFetch.h
     src/CPU/AlphaInstructionSource.h
     src/CPU/AlphaInstructionSet.h

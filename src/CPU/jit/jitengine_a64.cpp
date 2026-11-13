@@ -57,7 +57,8 @@ struct A64DpcState {
 // 
 // Every block starts with no facts, including when entered through a chain.
 struct A64FpTState {
-  bool guarded = false;       // FP enabled and FPCR.INE set
+  bool guarded = false;       // FP enabled and the inexact rule proved
+  AlphaIEEEInexactRule inexact{};
   bool exc_zero = false;      // EXC_SUM is zero at this point
   bool nearest = false;       // dynamic rounding was checked as round-to-nearest
   uint32_t non_denormal = 0;  // FPRs holding checked T arithmetic results
@@ -5185,13 +5186,16 @@ static asmjit::Error emit_a64_fp_start(A64EmitContext& c, const asmjit::Label& b
   if (err == asmjit::Error::kOk) err = emit_a64_fp_start_summary(c);
   return err;
 }
-// FPCR.INE (bit 56) clear -> the first inexact would trap -> bail.
-static asmjit::Error emit_a64_fp_ine_gate(A64EmitContext& c, const asmjit::Label& bail)
+// Elide an INE event only when the family's rule proves it has no effects.
+static asmjit::Error emit_a64_fp_ine_gate(A64EmitContext& c, const asmjit::Label& bail,
+                                         const AlphaIEEEInexactRule& rule)
 {
   using RA = CJitEngine::RegAlloc;
+  if (rule.kind == AlphaIEEEInexactKind::Noop) return asmjit::Error::kOk;
+  if (rule.kind != AlphaIEEEInexactKind::FpcrBitSet) return c.assembler.b(bail);
   asmjit::Error err = emit_a64_load_cpu_u64(c.assembler, RA::kScratch3, c.offsets.fpcr);
   return err != asmjit::Error::kOk ? err
-      : c.assembler.tbz(RA::kScratch3, asmjit::imm(56), bail);
+      : c.assembler.tbz(RA::kScratch3, asmjit::imm(rule.fpcr_bit), bail);
 }
 // /D dynamic rounding: bail unless FPCR<59:58> is round-to-nearest (2).
 static asmjit::Error emit_a64_fp_dyn_gate(A64EmitContext& c, const asmjit::Label& bail)
@@ -5267,13 +5271,15 @@ static A64OpEmitReceipt emit_a64_flti_arith(A64EmitContext& context,
 
   const Label bail = a.new_label(), cont = a.new_label();
   const A64FpTState prev = sgl ? A64FpTState{} : context.prev_fp_t;
+  const auto inexact_rule = alpha_ieee_inexact_rule(context.profile.ieee_trap, op.ins);
   Error err = Error::kOk;
   if (!prev.guarded) {
     err = emit_a64_load_cpu_u8(a, RA::kScratch3.w(), context.offsets.fpen, false);
     if (err == Error::kOk) err = a.cbz(RA::kScratch3.w(), bail);
   }
   if (err == Error::kOk && !prev.exc_zero) err = emit_a64_fp_start_summary(context);
-  if (err == Error::kOk && !prev.guarded) err = emit_a64_fp_ine_gate(context, bail);
+  if (err == Error::kOk && (!prev.guarded || !(prev.inexact == inexact_rule)))
+    err = emit_a64_fp_ine_gate(context, bail, inexact_rule);
   if (err == Error::kOk && dyn && !prev.nearest) err = emit_a64_fp_dyn_gate(context, bail);
   if (err == Error::kOk) err = emit_a64_load_f(context, a64::d16, op.ra);
   if (err == Error::kOk) err = emit_a64_load_f(context, a64::d17, op.rb);
@@ -5337,7 +5343,8 @@ static A64OpEmitReceipt emit_a64_flti_arith(A64EmitContext& context,
   if (err == Error::kOk) err = emit_a64_retry_bail(context, index);
   if (err == Error::kOk) err = a.bind(cont);
   if (err == Error::kOk && !sgl) {
-    context.regs.fp_t.guarded = true;
+    context.regs.fp_t.guarded = inexact_rule.kind != AlphaIEEEInexactKind::Interpreter;
+    context.regs.fp_t.inexact = inexact_rule;
     context.regs.fp_t.exc_zero = context.profile.fp_start.clear_exception_summary;
     context.regs.fp_t.nearest = prev.nearest || dyn;
     context.regs.fp_t.non_denormal = prev.non_denormal | (uint32_t{1} << op.rc);
@@ -5400,7 +5407,7 @@ static A64OpEmitReceipt emit_a64_flti_cmp(A64EmitContext& context,
 
 // FLTI converts. CVTST: valid-T copy (denorm/Inf/NaN bail). 
 // CVTTS: narrow+rewiden with result-class and underflow guards. 
-// CVTQT/CVTQS: int->FP, exactness via a chop round-trip, else INE-gated. 
+// CVTQT/CVTQS: int->FP, exactness via a chop round-trip, else the family inexact gate.
 // CVTTQ: FP->int; unlike x86's indefinite, 
 // A64 saturates and converts NaN to 0 -- so Inf/NaN bail up front and both sat values bail 
 static A64OpEmitReceipt emit_a64_flti_cvt(A64EmitContext& context,
@@ -5442,13 +5449,16 @@ static A64OpEmitReceipt emit_a64_flti_cvt(A64EmitContext& context,
       err = a.scvtf(a64::d17, RA::kScratch1);
       if (err == Error::kOk) err = a.fcmp(a64::d17, a64::d16);
       if (err == Error::kOk) err = a.b_eq(exact);
-      if (err == Error::kOk) err = emit_a64_fp_ine_gate(context, bail);
+      if (err == Error::kOk)
+        err = emit_a64_fp_ine_gate(context, bail,
+            alpha_ieee_inexact_rule(context.profile.ieee_trap, op.ins));
       if (err == Error::kOk) err = a.bind(exact);
     }
     if (err == Error::kOk)
       err = emit_a64_store_f_bits(context, RA::kScratch1, op.rc);
   } else if ((f & 0x3fu) == 0x2c) {                       // CVTTS
-    err = emit_a64_fp_ine_gate(context, bail);
+    err = emit_a64_fp_ine_gate(context, bail,
+        alpha_ieee_inexact_rule(context.profile.ieee_trap, op.ins));
     if (err == Error::kOk && dyn) err = emit_a64_fp_dyn_gate(context, bail);
     if (err == Error::kOk) err = emit_a64_load_f(context, a64::d16, op.rb);
     if (err == Error::kOk) err = emit_a64_dbl_class_bail(context, a64::d16, false, bail);
@@ -5494,7 +5504,9 @@ static A64OpEmitReceipt emit_a64_flti_cvt(A64EmitContext& context,
       if (err == Error::kOk) err = a.eor(RA::kScratch5, RA::kScratch1, Imm(0x7fffffffffffffffull));
       if (err == Error::kOk) err = a.cbnz(RA::kScratch5, fdone);
       if (err == Error::kOk) err = a.bind(fgate);
-      if (err == Error::kOk) err = emit_a64_fp_ine_gate(context, bail);
+      if (err == Error::kOk)
+        err = emit_a64_fp_ine_gate(context, bail,
+            alpha_ieee_inexact_rule(context.profile.ieee_trap, op.ins));
       if (err == Error::kOk) err = a.bind(fdone);
     }
     if (err == Error::kOk && to_single) err = a.fcvt(a64::d16, a64::s16);
@@ -5519,7 +5531,9 @@ static A64OpEmitReceipt emit_a64_fsqrt(A64EmitContext& context,
 
   const Label bail = a.new_label(), cont = a.new_label();
   Error err = emit_a64_fp_start(context, bail);
-  if (err == Error::kOk) err = emit_a64_fp_ine_gate(context, bail);
+  if (err == Error::kOk)
+    err = emit_a64_fp_ine_gate(context, bail,
+        alpha_ieee_inexact_rule(context.profile.ieee_trap, op.ins));
   if (err == Error::kOk && dyn) err = emit_a64_fp_dyn_gate(context, bail);
   if (err == Error::kOk) err = emit_a64_load_f(context, a64::d16, op.rb);
   if (err == Error::kOk) err = emit_a64_dbl_class_bail(context, a64::d16, false, bail);

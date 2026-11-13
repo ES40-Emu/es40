@@ -418,7 +418,8 @@ struct CJitEngine::RegAlloc {
   int dpc_base, dpc_disp;
   bool dpc_write, dpc_force_align;
   // Facts proved by an earlier successful inline T operation in this straight-line span.
-  bool fp_t_guarded = false;                     // FP enabled and FPCR.INE set
+  bool fp_t_guarded = false;                     // FP enabled and the inexact rule proved
+  AlphaIEEEInexactRule fp_t_inexact{};
   bool fp_t_exc_zero = false;                    // FPSTART's exception-summary clear is still live
   bool fp_t_nearest = false;                     // dynamic FPCR rounding was checked as nearest
   uint32_t fp_t_non_denormal = 0;                // FP registers holding checked arithmetic results
@@ -838,6 +839,19 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         if (m_profile.fp_start.clear_exception_summary)
             a.mov(x86::qword_ptr(x86::rbp, m_off.exc_sum), imm(0));
         };
+    auto emit_inexact_gate = [&](const Label& bail, const AlphaIEEEInexactRule& rule) {
+        switch (rule.kind) {
+        case AlphaIEEEInexactKind::Noop:
+            break;
+        case AlphaIEEEInexactKind::FpcrBitSet:
+            a.bt(x86::qword_ptr(x86::rbp, m_off.fpcr), imm(rule.fpcr_bit));
+            a.jnc(bail);
+            break;
+        default:
+            a.jmp(bail);
+            break;
+        }
+        };
 
     auto aq = [&](int k) { return x86::gpq(gpa[k]); };
     auto ad = [&](int k) { return x86::gpd(gpa[k]); };
@@ -860,6 +874,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         m_profile.instruction_decode);
 
     const bool prev_fp_t_guarded = regalloc.fp_t_guarded;
+    const auto prev_fp_t_inexact = regalloc.fp_t_inexact;
     const bool prev_fp_t_exc_zero = regalloc.fp_t_exc_zero;
     const bool prev_fp_t_nearest = regalloc.fp_t_nearest;
     const uint32_t prev_fp_t_non_denormal = regalloc.fp_t_non_denormal;
@@ -886,6 +901,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
     case OP_EXTL: case OP_EXTH: case OP_INSL: case OP_INSH:
     case OP_MSKL: case OP_MSKH: case OP_ZAP:
         regalloc.fp_t_guarded = prev_fp_t_guarded;
+        regalloc.fp_t_inexact = prev_fp_t_inexact;
         regalloc.fp_t_exc_zero = prev_fp_t_exc_zero;
         regalloc.fp_t_nearest = prev_fp_t_nearest;
         regalloc.fp_t_non_denormal = prev_fp_t_non_denormal;
@@ -898,6 +914,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         // the next T operation must apply its summary rule at that operation's original position,
         // not in this helper.
         regalloc.fp_t_guarded = prev_fp_t_guarded;
+        regalloc.fp_t_inexact = prev_fp_t_inexact;
         regalloc.fp_t_nearest = prev_fp_t_nearest;
         regalloc.fp_t_non_denormal = op == OP_LDT
             ? prev_fp_t_non_denormal & ~(uint32_t{1} << ra) : prev_fp_t_non_denormal;
@@ -1788,8 +1805,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             else { a.cvtsi2ss(x86::xmm0, x86::rax); a.cvttss2si(x86::rcx, x86::xmm0); }
             a.cmp(x86::rcx, x86::rax);                       // round-trip equal -> exact (no inexact, no trap)
             a.je(fdone);
-            a.bt(x86::qword_ptr(x86::rbp, m_off.fpcr), imm(56));   // inexact: FPCR.INE clear -> first one traps
-            a.jnc(bail);
+            emit_inexact_gate(bail, alpha_ieee_inexact_rule(m_profile.ieee_trap, ins));
             a.bind(fdone);
             if (op == OP_CVTQS) a.cvtss2sd(x86::xmm0, x86::xmm0);  // widen single -> register (T-format) bits
             a.movq(x86::qword_ptr(x86::rbp, m_off.f_base + 8u * rc), x86::xmm0);
@@ -1802,11 +1818,12 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         }
 
         // IEEE T-float arithmetic (0x16 ADDT/SUBT/MULT/DIVT): inline SSE on the double f-registers. 
-        // FPCR.INE already sticky-set (so an inexact result won't trap). Every edge bails to the interpreter:
-        // FP-off, /D-not-nearest, denormal operand, INE-clear (a first inexact would trap), or an Inf/NaN/
+        // Inexact results require a family rule with no exception side effects. Every edge bails:
+        // FP-off, /D-not-nearest, denormal operand, an unsatisfied inexact rule, or an Inf/NaN/
         // denormal result (overflow/invalid/div-zero/underflow). 
         if (op == OP_ADDT || op == OP_SUBT || op == OP_MULT || op == OP_DIVT) {
             const bool dyn = (((ins >> 11) & 3) == 3);      // /D: rounding is FPCR<59:58>, checked at runtime
+            const auto inexact_rule = alpha_ieee_inexact_rule(m_profile.ieee_trap, ins);
             Label bail = a.new_label(), cont = a.new_label();
             auto class_bail = [&](const x86::Vec& x, bool chk_inf_nan) {   // bail if denormal (always) / Inf|NaN (if asked)
                 Label ok = a.new_label();
@@ -1823,9 +1840,8 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             }
             if (!prev_fp_t_exc_zero)
                 emit_fp_start_summary();
-            if (!prev_fp_t_guarded) {
-                a.bt(x86::qword_ptr(x86::rbp, m_off.fpcr), imm(56)); a.jnc(bail);    // INE clear -> first inexact traps
-            }
+            if (!prev_fp_t_guarded || !(prev_fp_t_inexact == inexact_rule))
+                emit_inexact_gate(bail, inexact_rule);
             if (dyn && !prev_fp_t_nearest) {                                         // dynamic rounding: SSE gives nearest
                 a.mov(x86::rax, x86::qword_ptr(x86::rbp, m_off.fpcr));
                 a.shr(x86::rax, imm(58)); a.and_(x86::eax, imm(3));
@@ -1879,7 +1895,8 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             a.bind(cont);
             // Only successful execution reaches the following instruction. Result
             // and complete-underflow checks above remain mandatory for every op.
-            regalloc.fp_t_guarded = true;
+            regalloc.fp_t_guarded = inexact_rule.kind != AlphaIEEEInexactKind::Interpreter;
+            regalloc.fp_t_inexact = inexact_rule;
             regalloc.fp_t_exc_zero = m_profile.fp_start.clear_exception_summary;
             regalloc.fp_t_nearest = prev_fp_t_nearest || dyn;
             regalloc.fp_t_non_denormal = prev_fp_t_non_denormal | (uint32_t{1} << rc);
@@ -1972,14 +1989,14 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         }
 
         // CVTTS (T->S narrow): round the double to single, re-widen for the S register format. Denormal
-        // operand, an Inf/NaN/denormal single result (overflow/invalid/underflow), or a first inexact
-        // (INE clear) bail.
+        // operand, an Inf/NaN/denormal single result (overflow/invalid/underflow), or an unsatisfied
+        // family inexact rule bail.
         if (op == OP_CVTTS) {
             const bool dyn = (((ins >> 11) & 3) == 3);
             Label bail = a.new_label(), cont = a.new_label();
             a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0)); a.je(bail);          // FPSTART
             emit_fp_start_summary();
-            a.bt(x86::qword_ptr(x86::rbp, m_off.fpcr), imm(56)); a.jnc(bail);        // INE clear -> first inexact traps
+            emit_inexact_gate(bail, alpha_ieee_inexact_rule(m_profile.ieee_trap, ins));
             if (dyn) fp_dyn_bail(bail);
             a.movq(x86::xmm0, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rb));   // f[Fb] (double)
             dbl_bail(x86::xmm0, false, bail);                                       // denormal operand -> interp
@@ -2008,7 +2025,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
 
         // CVTTQ (T->Q): double -> signed 64-bit integer (raw bits into f[Fc]). /C chops (cvttsd2si), else
         // round-to-nearest (cvtsd2si). Overflow / Inf / NaN -> the integer indefinite -> interp (covers
-        // IOV). A non-integer source (inexact) with INE clear traps -> interp; exact converts run inline.
+        // IOV). A non-integer source must pass the family inexact rule; exact converts run inline.
         if (op == OP_CVTTQ) {
             const bool chop = (((ins >> 11) & 3) == 0);
             const bool dyn = (((ins >> 11) & 3) == 3);
@@ -2023,7 +2040,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             a.cmp(x86::rax, x86::rcx); a.je(bail);                                  // overflow / Inf / NaN -> interp
             a.cvtsi2sd(x86::xmm1, x86::rax);                                        // round-trip to test exactness
             a.ucomisd(x86::xmm1, x86::xmm0); a.je(exact);                           // round-trip == source -> exact
-            a.bt(x86::qword_ptr(x86::rbp, m_off.fpcr), imm(56)); a.jnc(bail);       // inexact + INE clear -> trap
+            emit_inexact_gate(bail, alpha_ieee_inexact_rule(m_profile.ieee_trap, ins));
             a.bind(exact);
             a.mov(x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rc), x86::rax);     // store s64 bits
             a.jmp(cont);
@@ -2035,13 +2052,13 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         }
 
         // IEEE SQRT (T/S): sqrtsd / sqrtss. Denormal operand, an Inf/NaN/denormal result (a negative
-        // operand yields NaN), or a first inexact (INE clear) bail to the interpreter.
+        // operand yields NaN), or an unsatisfied family inexact rule bail to the interpreter.
         if (op == OP_SQRTT || op == OP_SQRTS) {
             const bool dyn = (((ins >> 11) & 3) == 3);
             Label bail = a.new_label(), cont = a.new_label();
             a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0)); a.je(bail);          // FPSTART
             emit_fp_start_summary();
-            a.bt(x86::qword_ptr(x86::rbp, m_off.fpcr), imm(56)); a.jnc(bail);        // INE clear -> first inexact traps
+            emit_inexact_gate(bail, alpha_ieee_inexact_rule(m_profile.ieee_trap, ins));
             if (dyn) fp_dyn_bail(bail);
             a.movq(x86::xmm0, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rb));   // f[Fb]
             dbl_bail(x86::xmm0, false, bail);                                       // denormal operand -> interp
@@ -2066,13 +2083,13 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
 
         // IEEE S-float arith (ADDS/SUBS/MULS/DIVS): compute in single precision (narrow the operands,
         // op, re-widen). Same bail policy as the T-float arith -- FP-off, /D-not-nearest, denormal
-        // operand, INE clear, or an Inf/NaN/denormal single result.
+        // operand, an unsatisfied inexact rule, or an Inf/NaN/denormal single result.
         if (op == OP_ADDS || op == OP_SUBS || op == OP_MULS || op == OP_DIVS) {
             const bool dyn = (((ins >> 11) & 3) == 3);
             Label bail = a.new_label(), cont = a.new_label();
             a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0)); a.je(bail);          // FPSTART
             emit_fp_start_summary();
-            a.bt(x86::qword_ptr(x86::rbp, m_off.fpcr), imm(56)); a.jnc(bail);        // INE clear -> first inexact traps
+            emit_inexact_gate(bail, alpha_ieee_inexact_rule(m_profile.ieee_trap, ins));
             if (dyn) fp_dyn_bail(bail);
             a.movq(x86::xmm0, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)ra));   // f[Fa]
             a.movq(x86::xmm1, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rb));   // f[Fb]

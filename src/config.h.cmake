@@ -108,6 +108,9 @@
 /* Use the native X11 GUI */
 #cmakedefine HAVE_X11 1
 
+/* Use X11 screen saver suspension */
+#cmakedefine HAVE_X11_XSS 1
+
 /* Define to 1 if you have the `select' function. */
 #cmakedefine HAVE_SELECT 1
 

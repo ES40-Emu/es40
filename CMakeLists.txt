@@ -52,10 +52,28 @@ endif()
 # X11 is an optional native frontend, independent of SDL. Require both its
 # headers and library before exposing the backend to any configuration tool.
 set(HAVE_X11 FALSE)
+set(HAVE_X11_XSS FALSE)
 if (NOT WIN32 AND NOT ES40_DISABLE_X11)
     find_package(X11 QUIET)
     if (X11_FOUND)
         set(HAVE_X11 TRUE)
+        if (TARGET X11::Xss AND TARGET X11::Xext)
+            include(CheckCXXSourceCompiles)
+            include(CMakePushCheckState)
+            cmake_push_check_state(RESET)
+            set(CMAKE_REQUIRED_LIBRARIES X11::Xss)
+            check_cxx_source_compiles("#include <X11/Xlib.h>
+#include <X11/extensions/scrnsaver.h>
+int main() {
+    Display *display = 0;
+    int event, error, major, minor;
+    XScreenSaverQueryExtension(display, &event, &error);
+    XScreenSaverQueryVersion(display, &major, &minor);
+    XScreenSaverSuspend(display, True);
+}" ES40_X11_XSS_USABLE)
+            cmake_pop_check_state()
+            set(HAVE_X11_XSS ${ES40_X11_XSS_USABLE})
+        endif()
     endif()
 endif()
 
@@ -526,6 +544,10 @@ endif()
 if (HAVE_X11)
     list(APPEND ES40_DEFINITIONS HAVE_X11)
     list(APPEND ES40_SOURCES src/gui/gui_x11.cpp src/gui/x11_dispatch.h src/gui/x11_hotkey.h src/gui/x11_scale.h)
+    if (HAVE_X11_XSS)
+        list(APPEND ES40_DEFINITIONS HAVE_X11_XSS)
+        list(APPEND ES40_LIBRARIES X11::Xss)
+    endif()
     list(APPEND ES40_LIBRARIES X11::X11)
 endif()
 

@@ -60,6 +60,30 @@ AC_DEFUN([AM_PATH_X11], [
     ], [have_x11=yes], [have_x11=no])
     AC_MSG_RESULT([$have_x11])
 
+    AS_IF([test "x$have_x11" = "xyes"], [
+      LIBS="$X_LIBS -lXss -lXext $X_PRE_LIBS -lX11 $X_EXTRA_LIBS $es40_x11_save_LIBS"
+      AC_MSG_CHECKING([whether X11 screen saver suspension is usable])
+      AC_LANG_PUSH([C++])
+      AC_LINK_IFELSE([
+        AC_LANG_PROGRAM([[
+          #include <X11/Xlib.h>
+          #include <X11/extensions/scrnsaver.h>
+        ]], [[
+          Display *display = 0;
+          int event, error, major, minor;
+          XScreenSaverQueryExtension(display, &event, &error);
+          XScreenSaverQueryVersion(display, &major, &minor);
+          XScreenSaverSuspend(display, True);
+        ]])
+      ], [have_x11_xss=yes], [have_x11_xss=no])
+      AC_LANG_POP([C++])
+      AC_MSG_RESULT([$have_x11_xss])
+      AS_IF([test "x$have_x11_xss" = "xyes"], [
+        AC_DEFINE([HAVE_X11_XSS], [1], [Use X11 screen saver suspension])
+        X11_LIBS="$X_LIBS -lXss -lXext $X_PRE_LIBS -lX11 $X_EXTRA_LIBS"
+      ])
+    ])
+
     CPPFLAGS="$es40_x11_save_CPPFLAGS"
     LIBS="$es40_x11_save_LIBS"
   ])

@@ -82,6 +82,9 @@ extern "C"
 #include <X11/Xos.h>
 #include <X11/Xatom.h>
 #include <X11/keysym.h>
+#ifdef HAVE_X11_XSS
+#include <X11/extensions/scrnsaver.h>
+#endif
 }
 
 class bx_x11_gui_c : public bx_gui_c
@@ -138,6 +141,11 @@ class bx_x11_gui_c : public bx_gui_c
     bool scale_change_enable = false;
     bool video_linear = true;
     bool frame_active = false;
+    bool display_inhibition_active = false, screen_saver_suspended = false;
+    std::chrono::steady_clock::time_point screen_saver_deadline = {};
+    void start_display_inhibition();
+    void keep_display_awake();
+    void stop_display_inhibition();
     Atom wm_state_atom = None, net_wm_state_atom = None;
     Atom net_wm_max_horz = None, net_wm_max_vert = None;
     Atom net_wm_fullscreen = None, net_wm_hidden = None;
@@ -258,12 +266,24 @@ static Atom           wm_delete_window = None, wm_protocols = None;
 static XErrorHandler  previous_x_error_handler = nullptr;
 static Display*       error_display = nullptr;
 static int            x_error = 0;
+#ifdef HAVE_X11_XSS
+static bool           screen_saver_request_pending = false;
+static unsigned long  screen_saver_request_serial = 0;
+static int            screen_saver_request_error = 0;
+#endif
 
 // Report Xlib errors on the caller; never throw from this callback.
 static int record_x11_error(Display* display, XErrorEvent* event)
 {
   if(display == error_display)
   {
+#ifdef HAVE_X11_XSS
+    if(screen_saver_request_pending && event->serial == screen_saver_request_serial)
+    {
+      screen_saver_request_error = event->error_code;
+      return 0;
+    }
+#endif
     if(!x_error) x_error = event->error_code;
     return 0;
   }
@@ -277,6 +297,11 @@ static void restore_x11_error_handler()
   error_display = nullptr;
   previous_x_error_handler = nullptr;
   x_error = 0;
+#ifdef HAVE_X11_XSS
+  screen_saver_request_pending = false;
+  screen_saver_request_serial = 0;
+  screen_saver_request_error = 0;
+#endif
 }
 
 static void check_x11_error()
@@ -600,6 +625,64 @@ void bx_x11_gui_c::load_video_settings()
   scale_change_enable = myCfg->get_bool_value("video.scale_change_enable", false);
 }
 
+void bx_x11_gui_c::start_display_inhibition()
+{
+  if(display_inhibition_active || !bx_x_display) return;
+  XSync(bx_x_display, False);
+  check_x11_error();
+#ifdef HAVE_X11_XSS
+  int event_base = 0, error_base = 0, major = 0, minor = 0;
+  const bool supported = XScreenSaverQueryExtension(bx_x_display, &event_base, &error_base) &&
+      XScreenSaverQueryVersion(bx_x_display, &major, &minor) &&
+      (major > 1 || (major == 1 && minor >= 1));
+  check_x11_error();
+  if(supported)
+  {
+    screen_saver_request_serial = XNextRequest(bx_x_display);
+    screen_saver_request_error = 0;
+    screen_saver_request_pending = true;
+    XScreenSaverSuspend(bx_x_display, True);
+  }
+#endif
+  display_inhibition_active = true;
+  keep_display_awake();
+  XSync(bx_x_display, False);
+#ifdef HAVE_X11_XSS
+  if(screen_saver_request_pending)
+  {
+    screen_saver_request_pending = false;
+    screen_saver_suspended = !screen_saver_request_error;
+    if(!screen_saver_suspended)
+      printf("%%X11-W-DISPLAYPOWER: Unable to suspend display blanking (X error %d); "
+             "using periodic activity.\n", screen_saver_request_error);
+  }
+#endif
+  check_x11_error();
+}
+
+void bx_x11_gui_c::keep_display_awake()
+{
+  if(!display_inhibition_active || !bx_x_display) return;
+  const auto now = std::chrono::steady_clock::now();
+  if(now < screen_saver_deadline) return;
+  XResetScreenSaver(bx_x_display);
+  screen_saver_deadline = now + std::chrono::seconds(30);
+}
+
+void bx_x11_gui_c::stop_display_inhibition()
+{
+  display_inhibition_active = false;
+  screen_saver_deadline = {};
+#ifdef HAVE_X11_XSS
+  if(screen_saver_suspended && bx_x_display)
+  {
+    XScreenSaverSuspend(bx_x_display, False);
+    XFlush(bx_x_display);
+  }
+#endif
+  screen_saver_suspended = false;
+}
+
 void bx_x11_gui_c::load_mouse_settings()
 {
   const char* speed = myCfg->get_text_value("mouse.speed", "1.0");
@@ -741,8 +824,7 @@ try
   load_keyboard_mapping();
 
   XMapWindow(bx_x_display, win);
-  XSync(bx_x_display, False);
-  check_x11_error();
+  start_display_inhibition();
   new_gfx_api = 1;
   x_init_done = true;
 }
@@ -1022,6 +1104,7 @@ void bx_x11_gui_c::poll_events(bool process_input)
 {
   if(!bx_x_display) return;
   check_x11_error();
+  keep_display_awake();
   check_mouse_capture();
   if(process_input) sync_mouse_capture();
   XEvent                report;
@@ -2398,6 +2481,7 @@ void bx_x11_gui_c::dimension_update_impl(unsigned x, unsigned y)
 
 void bx_x11_gui_c::exit_impl(void)
 {
+  stop_display_inhibition();
   mouse_enabled_changed_impl(false);
   guest_mouse_captured = false;
   mouse_sync_pending = true;

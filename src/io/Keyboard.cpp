@@ -70,7 +70,6 @@
 #include "StdAfx.h"
 #include "system/System.h"
 #include "Keyboard.h"
-#include "QmpInput.h"
 #include "chipset/AliM1543C.h"
 #include <math.h>
 
@@ -116,8 +115,9 @@ bool CKeyboard::uses_subtractive_decode(int index, u64 address, int dsize,
  **/
 void CKeyboard::init()
 {
+	CFastMutex::ScopedLock guard(kbdLock);
 	int i;
-	discard_input();
+	discard_input_locked();
 	local_keys.fill(false);
 	external_keys.fill(false);
 	local_buttons = external_buttons = 0;
@@ -183,8 +183,6 @@ void CKeyboard::init()
 	state.kbd_controller_Qsource = 0;
 
 	myThread = 0;
-	qmp_input = std::make_unique<QmpInput>(*this,
-		myCfg->get_myParent()->get_text_value("qmp.port", "0"));
 
 	printf("kbc: $Id$\n");
 }
@@ -193,8 +191,6 @@ void CKeyboard::start_threads()
 {
 	if (!myThread)
 	{
-		if (qmp_input)
-			qmp_input->start();
 		myThread = new CThread("kbd");
 		printf(" %s", myThread->getName().c_str());
 		StopThread = false;
@@ -212,8 +208,6 @@ void CKeyboard::stop_threads()
 		delete myThread;
 		myThread = 0;
 	}
-	if (qmp_input)
-		qmp_input->stop();
 	release_input();
 }
 
@@ -223,7 +217,6 @@ void CKeyboard::stop_threads()
 CKeyboard::~CKeyboard()
 {
 	stop_threads();
-	qmp_input.reset();
 	if (theKeyboard == this)
 		theKeyboard = nullptr;
 }
@@ -2352,8 +2345,6 @@ void CKeyboard::run()
 		{
 			if (StopThread)
 				return;
-			if (qmp_input)
-				qmp_input->poll();
 
 			{
 				CFastMutex::ScopedLock guard(kbdLock);
@@ -2391,9 +2382,8 @@ int CKeyboard::SaveState(FILE* f)
  **/
 int CKeyboard::RestoreState(FILE* f)
 {
-	if (qmp_input)
-		qmp_input->stop();
-	discard_input();
+	CFastMutex::ScopedLock guard(kbdLock);
+	discard_input_locked();
 	local_keys.fill(false);
 	external_keys.fill(false);
 	local_buttons = external_buttons = 0;

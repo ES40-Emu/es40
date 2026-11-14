@@ -328,6 +328,8 @@
 #include "Flash.h"
 #include "SnapshotFile.h"
 #include "gui/gui.h"
+#include "io/Keyboard.h"
+#include "io/QmpInput.h"
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -481,6 +483,7 @@ CSystem::CSystem(CConfigurator* cfg)
  **/
 CSystem::~CSystem()
 {
+	qmp_input.reset();
 	int i;
 
 	printf("Freeing memory in use by system...\n");
@@ -883,6 +886,8 @@ void CSystem::Run()
 
 		CThread::sleep(100); // 100ms sleep
 		CheckForShutdown();
+		if (qmp_input)
+			qmp_input->check_state();
 		UpdateX86BIOSClock();
 		for (i = 0; i < iNumComponents; i++)
 			acComponents[i]->check_state();
@@ -1041,6 +1046,8 @@ int CSystem::SingleStep()
 	//       printf("%d | %016" PRIx64 "\r",iSSCycles,acCPUs[0]->get_pc());
 	//#endif
 	//  }
+	if (qmp_input)
+		qmp_input->check_state();
 	for (i = 0; i < iNumComponents; i++)
 		acComponents[i]->check_state();
 
@@ -2025,6 +2032,10 @@ void CSystem::init()
 			FAILURE_2(Configuration, "Display output %s/%u does not match its GUI binding",
 				binding.component->devid_string, binding.output->id());
 	}
+	for (auto* component : acComponents)
+		if (auto* keyboard = dynamic_cast<CKeyboard*>(component))
+			qmp_input = std::make_unique<QmpInput>(*keyboard,
+				myCfg->get_text_value("qmp.port", "0"));
 }
 
 void CSystem::start_threads()
@@ -2032,6 +2043,8 @@ void CSystem::start_threads()
 	SDeviceAccessScope time_scope(this);
 	int i;
 
+	if (qmp_input)
+		qmp_input->start();
 	printf("Start threads:");
 	for (i = 0; i < iNumComponents; i++) { // includes fix for IDB graphical window from axpbox commit 9ef3473
 		if (!acComponents[i])

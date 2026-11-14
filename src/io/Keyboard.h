@@ -61,10 +61,8 @@
 #include "gui/gui.h"
 #include <array>
 #include <atomic>
-#include <memory>
 
 class CAliM1543C;
-class QmpInput;
 
 #define BX_KBD_ELEMENTS     16
 #define BX_MOUSE_BUFF_SIZE  48
@@ -141,7 +139,6 @@ private:
 
   CThread* myThread = nullptr;
   std::atomic<bool> StopThread{true};
-  std::unique_ptr<QmpInput> qmp_input;
 
   CFastMutex kbdLock{ "kbd" };
 

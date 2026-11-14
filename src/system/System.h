@@ -161,6 +161,7 @@
 #define INCLUDED_SYSTEM_H
 
 class CDisplayOutput;
+class QmpInput;
 class vga_device;
 
 #if defined(PROFILE)
@@ -742,6 +743,7 @@ private:
   //    void * memmap;
   int                   iNumComponents;
   std::vector<CSystemComponent*> acComponents;
+  std::unique_ptr<QmpInput> qmp_input;
   int                   iNumMemories;
   std::vector<std::unique_ptr<SMemoryUser>> asMemories;
   // Startup permission only; not an emulated register or saved guest state.

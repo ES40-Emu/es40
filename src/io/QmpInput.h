@@ -33,9 +33,10 @@ public:
     ~QmpInput();
     void start();
     void stop();
-    void poll();
+    void check_state();
 
 private:
+    void poll();
     struct Impl;
     std::unique_ptr<Impl> impl;
 };

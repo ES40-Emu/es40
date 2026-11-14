@@ -48,6 +48,7 @@
 #define PICOJSON_USE_INT64
 #include "../../third_party/picojson/picojson.h"
 #include <algorithm>
+#include <atomic>
 #include <initializer_list>
 
 namespace {
@@ -260,8 +261,12 @@ bool nonblocking(Socket s)
 #endif
 }
 
-struct QmpInput::Impl {
+struct QmpInput::Impl : CRunnable {
+    QmpInput& owner;
     CKeyboard& keyboard;
+    CThread thread{"qmp"};
+    std::atomic<bool> stop_requested{true};
+    bool started = false;
     unsigned port = 0;
     bool negotiated = false;
     std::string pending, frame, nesting, output;
@@ -274,7 +279,8 @@ struct QmpInput::Impl {
     bool winsock = false;
 #endif
 
-    Impl(CKeyboard& keyboard, const char* setting) : keyboard(keyboard)
+    Impl(QmpInput& owner, CKeyboard& keyboard, const char* setting)
+        : owner(owner), keyboard(keyboard)
     {
         if (!setting || !*setting) FAILURE(Configuration, "Invalid qmp.port");
         for (const char* p = setting; *p; ++p) {
@@ -282,6 +288,14 @@ struct QmpInput::Impl {
             port = port * 10 + (*p - '0');
         }
         if (port > 65535) FAILURE(Configuration, "qmp.port must be 0..65535");
+    }
+
+    void run() override
+    {
+        while (!stop_requested) {
+            owner.poll();
+            CThread::sleep(20);
+        }
     }
 
     void disconnect()
@@ -502,14 +516,14 @@ struct QmpInput::Impl {
 #endif
 };
 
-QmpInput::QmpInput(CKeyboard& keyboard, const char* port) : impl(new Impl(keyboard, port)) {}
+QmpInput::QmpInput(CKeyboard& keyboard, const char* port) : impl(new Impl(*this, keyboard, port)) {}
 QmpInput::~QmpInput() { stop(); }
 
 void QmpInput::start()
 {
     if (!impl->port) return;
+    if (impl->started) { check_state(); return; }
 #ifdef ES40_QMP_SOCKETS
-    if (impl->listener != no_socket) return;
 #ifdef _WIN32
     WSADATA wsa;
     const int result = WSAStartup(MAKEWORD(2, 2), &wsa);
@@ -536,6 +550,17 @@ void QmpInput::start()
         stop();
         FAILURE(Configuration, "QMP listener failed (socket error " + std::to_string(code) + ")");
     }
+    try {
+        impl->stop_requested = false;
+        impl->thread.start(*impl);
+        impl->started = true;
+    } catch (const std::exception& e) {
+        stop();
+        FAILURE(Thread, "QMP thread start failed: " + std::string(e.what()));
+    } catch (...) {
+        stop();
+        FAILURE(Thread, "QMP thread start failed");
+    }
     printf("qmp: listening on 127.0.0.1:%u\n", impl->port);
 #else
     FAILURE(Configuration, "QMP sockets are not supported on this host");
@@ -544,6 +569,9 @@ void QmpInput::start()
 
 void QmpInput::stop()
 {
+    impl->stop_requested = true;
+    impl->thread.join();
+    impl->started = false;
     impl->disconnect();
 #ifdef ES40_QMP_SOCKETS
     close_socket(impl->listener);
@@ -552,6 +580,12 @@ void QmpInput::stop()
 #ifdef _WIN32
     if (impl->winsock) { WSACleanup(); impl->winsock = false; }
 #endif
+}
+
+void QmpInput::check_state()
+{
+    if (impl->started && !impl->thread.isRunning())
+        FAILURE(Thread, "QMP thread has died");
 }
 
 void QmpInput::poll()

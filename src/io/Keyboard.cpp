@@ -222,7 +222,7 @@ CKeyboard::~CKeyboard()
 }
 
 CKeyboard::InputResult CKeyboard::queue_input(const InputEvent* events, size_t count,
-	u64* batch_id)
+	u64* batch_id, const unsigned* expected_buttons)
 {
 	CFastMutex::ScopedLock guard(kbdLock);
 	if (count && !events)
@@ -249,8 +249,10 @@ CKeyboard::InputResult CKeyboard::queue_input(const InputEvent* events, size_t c
 	}
 	if (StopThread || input_release_pending)
 		return InputResult::Unavailable;
+	const bool buttons_changed = expected_buttons && *expected_buttons != input_buttons_locked();
 	for (size_t i = 0; i < count; ++i)
-		if (!input_available(events[i]))
+		if (!input_available(events[i])
+			|| (buttons_changed && events[i].type == InputEvent::Type::Mouse))
 			return InputResult::Unavailable;
 	if (count > INPUT_CAPACITY - input_count)
 		return InputResult::Full;
@@ -349,6 +351,11 @@ bool CKeyboard::input_wheel_enabled()
 unsigned CKeyboard::input_buttons()
 {
 	CFastMutex::ScopedLock guard(kbdLock);
+	return input_buttons_locked();
+}
+
+unsigned CKeyboard::input_buttons_locked() const
+{
 	for (size_t i = input_count; i; --i)
 	{
 		const InputEvent& event = input_queue[(input_head + i - 1) % INPUT_CAPACITY];

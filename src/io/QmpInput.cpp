@@ -331,7 +331,8 @@ struct QmpInput::Impl : CRunnable {
         if (events.get<picojson::array>().size() > CKeyboard::INPUT_CAPACITY)
             invalid("Too many input events");
         std::vector<CKeyboard::InputEvent> batch;
-        unsigned buttons = keyboard.input_buttons();
+        const unsigned initial_buttons = keyboard.input_buttons();
+        unsigned buttons = initial_buttons;
         for (const Json& item : events.get<picojson::array>()) {
             fields(item, {"type", "data"});
             const std::string& type = string_value(item.get("type"));
@@ -388,7 +389,8 @@ struct QmpInput::Impl : CRunnable {
             batch.push_back(event);
         }
         u64 batch_id = 0;
-        switch (keyboard.queue_input(batch.data(), batch.size(), tracked ? &batch_id : nullptr)) {
+        switch (keyboard.queue_input(batch.data(), batch.size(), tracked ? &batch_id : nullptr,
+            &initial_buttons)) {
         case CKeyboard::InputResult::Accepted:
             return tracked ? "{\"__es40-batch\":\"" + std::to_string(batch_id) + "\"}" : "{}";
         case CKeyboard::InputResult::Full:

@@ -120,7 +120,8 @@ public:
 
   // Keys use BX_KEY_* flags; mouse Y/wheel are positive upward, with deltas in [-32767, 32767].
   // Accepted means queued; guest disable/reset, stop and restore discard pending input.
-  InputResult queue_input(const InputEvent* events, size_t count, u64* batch_id = nullptr);
+  InputResult queue_input(const InputEvent* events, size_t count, u64* batch_id = nullptr,
+    const unsigned* expected_buttons = nullptr);
   bool input_status(u64 id, InputStatus& status);
   // Discard pending events without releasing already delivered keys or buttons.
   void discard_input();
@@ -152,6 +153,7 @@ private:
   unsigned local_buttons = 0, external_buttons = 0;
   bool input_release_pending = false;
   bool input_available(const InputEvent& event) const;
+  unsigned input_buttons_locked() const;
   bool input_busy() const;
   void finish_input_event(size_t index, bool cancelled);
   void discard_input_locked();

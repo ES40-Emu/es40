@@ -32,6 +32,8 @@
 
 #include "NetworkPcap.h"
 #include "config/Configurator.h"
+#include <memory>
+#include <string>
 
 #if defined(_WIN32)
 #include <io.h>
@@ -86,7 +88,7 @@ static void pcap_access_hint(const char *devid_string)
 /* Pointers to the real functions, resolved at runtime from wpcap.dll. */
 static const char *(*f_pcap_lib_version)(void);
 static int (*f_pcap_findalldevs)(pcap_if_t **, char *);
-static void (*f_pcap_freealldevs)(void *);
+static void (*f_pcap_freealldevs)(pcap_if_t *);
 static pcap_t *(*f_pcap_open_live)(const char *, int, int, int, char *);
 static int (*f_pcap_compile)(void *, void *, const char *, int, bpf_u_int32);
 static int (*f_pcap_setfilter)(void *, void *);
@@ -132,7 +134,7 @@ CNetworkPcap::CNetworkPcap() : fp(nullptr), opened(false), linktype(-1),
 
 		f_pcap_lib_version = (const char *(*)())GetProcAddress(libhandle, "pcap_lib_version");
 		f_pcap_findalldevs = (int (*)(pcap_if_t **, char *))GetProcAddress(libhandle, "pcap_findalldevs");
-		f_pcap_freealldevs = (void (*)(void *))GetProcAddress(libhandle, "pcap_freealldevs");
+		f_pcap_freealldevs = (void (*)(pcap_if_t *))GetProcAddress(libhandle, "pcap_freealldevs");
 		f_pcap_open_live   = (pcap_t *(*)(const char *, int, int, int, char *))GetProcAddress(libhandle, "pcap_open_live");
 		f_pcap_open        = (pcap_t *(*)(const char *, int, int, int, pcap_rmtauth *, char *))GetProcAddress(libhandle, "pcap_open");
 		f_pcap_compile     = (int (*)(void *, void *, const char *, int, bpf_u_int32))GetProcAddress(libhandle, "pcap_compile");
@@ -153,6 +155,7 @@ CNetworkPcap::CNetworkPcap() : fp(nullptr), opened(false), linktype(-1),
 		f_pcap_freecode    = (void (*)(void *))GetProcAddress(libhandle, "pcap_freecode");
 
 #define pcap_findalldevs f_pcap_findalldevs
+#define pcap_freealldevs f_pcap_freealldevs
 #define pcap_open f_pcap_open
 #define pcap_sendpacket f_pcap_sendpacket
 #define pcap_close f_pcap_close
@@ -183,13 +186,14 @@ CNetworkPcap::~CNetworkPcap()
 
 bool CNetworkPcap::init(const char *devid_string, CConfigurator *cfg)
 {
-	pcap_if_t *alldevs;
+	pcap_if_t *alldevs = nullptr;
 	pcap_if_t *d;
 	unsigned int inum;
 	unsigned int i = 0;
 	char errbuf[PCAP_ERRBUF_SIZE];
 
-	char *adapter = cfg->get_text_value("adapter");
+	std::string selected_adapter;
+	const char *adapter = cfg->get_text_value("adapter");
 	const bool from_menu = !adapter || !adapter[0] || !strcasecmp(adapter, "list");
 	if (from_menu) {
 		printf("\n%s: Choose a network adapter to connect to:\n", devid_string);
@@ -198,6 +202,9 @@ bool CNetworkPcap::init(const char *devid_string, CConfigurator *cfg)
 			pcap_access_hint(devid_string);
 			return false;
 		}
+
+		std::unique_ptr<pcap_if_t, void (*)(pcap_if_t *)> adapter_list(
+			alldevs, pcap_freealldevs);
 
 		for (d = alldevs; d; d = d->next) {
 			printf("%d. %s\n    ", ++i, d->name);
@@ -255,7 +262,9 @@ bool CNetworkPcap::init(const char *devid_string, CConfigurator *cfg)
 		for (d = alldevs, i = 0; i < inum - 1; d = d->next, i++)
 			;
 
-		adapter = d->name;
+		// Keep the selected name after releasing the list.
+		selected_adapter = d->name;
+		adapter = selected_adapter.c_str();
 	}
 
 #if defined(WIN32)

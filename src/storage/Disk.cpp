@@ -701,6 +701,8 @@ void CDisk::scsi_xfer_done_me(int bus)
 #define SCSI_HARDWARE_ERROR        - 10 /* Backing-media operation failed */
 #define SCSI_WRITE_PROTECTED       - 11 /* Medium is read-only */
 #define SCSI_OFFLINE               - 12 /* Attached drive requires intervention */
+#define SCSI_PARAM_LENGTH          - 13 /* Truncated mode parameter list */
+#define SCSI_INVALID_PARAM         - 14 /* Invalid field in parameter list */
 
 void CDisk::do_scsi_error(int errcode, int info)
 {
@@ -765,6 +767,18 @@ void CDisk::do_scsi_error(int errcode, int info)
 #if defined(DEBUG_SCSI)
 		printf("%s: Check sense: INVALID LUN.\n", devid_string);
 #endif
+		break;
+
+	case SCSI_PARAM_LENGTH:
+		state.scsi.sense.data[2] = 0x05;   // ILLEGAL REQUEST
+		state.scsi.sense.data[12] = 0x1a;  // PARAMETER LIST LENGTH ERROR
+		state.scsi.sense.data[13] = 0x00;
+		break;
+
+	case SCSI_INVALID_PARAM:
+		state.scsi.sense.data[2] = 0x05;   // ILLEGAL REQUEST
+		state.scsi.sense.data[12] = 0x26;  // INVALID FIELD IN PARAMETER LIST
+		state.scsi.sense.data[13] = 0x00;
 		break;
 
 	case SCSI_LBA_RANGE:
@@ -1007,9 +1021,9 @@ int read_sub_channel(uint8_t* buf, bool sub_q, bool msf, int start_track, int fo
  * \brief Emit one MODE SENSE mode page at offset q, returning the offset just
  *        past it.
  *
- * Used by the page 0x3F ("return all supported pages") request; mirrors the
- * single-page templates in do_scsi_command(). The body is zeroed first, so it
- * stays correct even when it lands past the caller's pre-zeroed region.
+ * Used for both single-page and page 0x3F ("return all supported pages")
+ * requests. The complete page is initialized independently of allocation
+ * length, which may only allow the initiator to read the mode header.
  **/
 int CDisk::mode_sense_page(int page, bool changeable, int q)
 {
@@ -1021,6 +1035,7 @@ int CDisk::mode_sense_page(int page, bool changeable, int q)
 	case SCSIMP_READ_WRITE_ERRREC: len = 10;   break;
 	case SCSIMP_FORMAT_PARAMS:     len = 22;   break;
 	case SCSIMP_RIGID_GEOMETRY:    len = 22;   break;
+	case SCSIMP_FLEX_PARAMS:       len = 0x1e; break;
 	case SCSIMP_CACHING:           len = 0x12; break;
 	case SCSIMP_INFO_EXCEPTIONS:   len = 0x0a; break;
 	case SCSIMP_CDROM_CAP:         len = 0x14; break;
@@ -1053,6 +1068,19 @@ int CDisk::mode_sense_page(int page, bool changeable, int q)
 
 		case SCSIMP_CACHING:
 			d[q + 2] = 0x0a;
+			break;
+
+		case SCSIMP_FLEX_PARAMS:
+			d[q + 2] = (5000 >> 8) & 255;
+			d[q + 3] = 5000 & 255;
+			d[q + 4] = (u8)get_heads();
+			d[q + 5] = (u8)get_sectors();
+			d[q + 6] = (u8)(get_block_size() >> 8) & 255;
+			d[q + 7] = (u8)get_block_size();
+			d[q + 8] = (u8)(get_cylinders() >> 8) & 255;
+			d[q + 9] = (u8)get_cylinders();
+			d[q + 28] = (7200 >> 8) & 255;
+			d[q + 29] = 7200 & 255;
 			break;
 
 		case SCSIMP_CDROM_CAP:
@@ -1574,13 +1602,13 @@ int CDisk::do_scsi_command()
 		printf("%s: MODE SENSE.\n", devid_string);
 #endif
 		{
-			int num_blk_desc = 1;
+			const int num_blk_desc = (state.scsi.cmd.data[1] & 0x08) ? 0 : 1;
 
 			if (state.scsi.cmd.data[0] == SCSICMD_MODE_SENSE)
 			{
 				q = 4;
 				retlen = state.scsi.cmd.data[4];
-				state.scsi.dati.data[0] = retlen; // mode data length
+				state.scsi.dati.data[0] = 0; // filled with the complete response length below
 				state.scsi.dati.data[1] = cdrom() ? 0x01 : 0x00;  // medium type (120 mm data for CD-ROM)
 				state.scsi.dati.data[2] = 0x00; // device specific parameter
 				state.scsi.dati.data[3] = 8 * num_blk_desc;       // block descriptor length: 1 page (?)
@@ -1589,8 +1617,8 @@ int CDisk::do_scsi_command()
 			{
 				q = 8;
 				retlen = state.scsi.cmd.data[7] * 256 + state.scsi.cmd.data[8];
-				state.scsi.dati.data[0] = (u8)(retlen >> 8);     // mode data length
-				state.scsi.dati.data[1] = (u8)retlen;
+				state.scsi.dati.data[0] = 0; // mode data length, filled below
+				state.scsi.dati.data[1] = 0;
 				state.scsi.dati.data[2] = cdrom() ? 0x01 : 0x00;  // medium type (120 mm data for CD-ROM)
 				state.scsi.dati.data[3] = 0x00; // device specific parameter
 				state.scsi.dati.data[4] = 0x00; // reserved
@@ -1616,28 +1644,24 @@ int CDisk::do_scsi_command()
 			}
 
 			state.scsi.dati.read = 0;
-			state.scsi.dati.available = retlen; //  Restore size.
+			state.scsi.dati.available = 0;
 			pagecode = state.scsi.cmd.data[2] & 0x3f;
 
-			//printf("[ MODE SENSE pagecode=%i ]\n", pagecode);
-			state.scsi.dati.data[q++] = 0x00;   //  density code
-			state.scsi.dati.data[q++] = 0;      //  nr of blocks, high (0 = all remaining blocks)
-			state.scsi.dati.data[q++] = 0;      //  nr of blocks, mid
-			state.scsi.dati.data[q++] = 0;      //  nr of blocks, low
-			state.scsi.dati.data[q++] = 0x00;   //  reserved
-			state.scsi.dati.data[q++] = (u8)(get_block_size() >> 16) & 255;
-			state.scsi.dati.data[q++] = (u8)(get_block_size() >> 8) & 255;
-			state.scsi.dati.data[q++] = (u8)(get_block_size() >> 0) & 255;
-
-			for (unsigned int x1 = q; x1 < retlen; x1++)
-				state.scsi.dati.data[x1] = 0;
-
-			do_scsi_error(SCSI_OK);
+			if (num_blk_desc)
+			{
+				state.scsi.dati.data[q++] = 0x00;   // density code
+				state.scsi.dati.data[q++] = 0;      // all remaining blocks
+				state.scsi.dati.data[q++] = 0;
+				state.scsi.dati.data[q++] = 0;
+				state.scsi.dati.data[q++] = 0x00;   // reserved
+				state.scsi.dati.data[q++] = (u8)(get_block_size() >> 16) & 255;
+				state.scsi.dati.data[q++] = (u8)(get_block_size() >> 8) & 255;
+				state.scsi.dati.data[q++] = (u8)(get_block_size() >> 0) & 255;
+			}
 
 			// Page 0x3F = return every mode page the device supports (SPC).
 			// Concatenate the implemented pages after the header + block
-			// descriptor and report the real mode data length; the buffer past
-			// them is already zero-padded to the allocation length we return.
+			// descriptor, using the same length/transfer handling as one page.
 			if (pagecode == 0x3f)
 			{
 				q = mode_sense_page(SCSIMP_READ_WRITE_ERRREC, changeable, q);
@@ -1650,184 +1674,43 @@ int CDisk::do_scsi_command()
 				q = mode_sense_page(SCSIMP_INFO_EXCEPTIONS, changeable, q);
 				if (cdrom())
 					q = mode_sense_page(SCSIMP_CDROM_CAP, changeable, q);
-
-				if (state.scsi.cmd.data[0] == SCSICMD_MODE_SENSE)
-					state.scsi.dati.data[0] = (u8)(q - 1);
-				else
-				{
-					state.scsi.dati.data[0] = (u8)((q - 2) >> 8);
-					state.scsi.dati.data[1] = (u8)(q - 2);
-				}
-				break;
 			}
-
-			//  descriptors, 8 bytes (each)
-			//  page, n bytes (each)
-			switch (pagecode)
+			else if (pagecode != SCSIMP_VENDOR)
 			{
-			case SCSIMP_VENDOR: // vendor specific
-				//  TODO: Nothing here?
-				break;
-
-			case SCSIMP_READ_WRITE_ERRREC:        //  read-write error recovery page
-				state.scsi.dati.data[q + 0] = pagecode;
-				state.scsi.dati.data[q + 1] = 10;
-				break;
-
-			case SCSIMP_FORMAT_PARAMS:            //  format device page
-				state.scsi.dati.data[q + 0] = pagecode;
-				state.scsi.dati.data[q + 1] = 22;
-				if (!changeable)
-				{
-
-					//  10,11 = sectors per track
-					state.scsi.dati.data[q + 10] = 0;
-					state.scsi.dati.data[q + 11] = (u8)get_sectors();
-
-					//  12,13 = physical sector size
-					state.scsi.dati.data[q + 12] = (u8)(get_block_size() >> 8) & 255;
-					state.scsi.dati.data[q + 13] = (u8)(get_block_size() >> 0) & 255;
-				}
-				break;
-
-			case SCSIMP_RIGID_GEOMETRY:           //  rigid disk geometry page
-				state.scsi.dati.data[q + 0] = pagecode;
-				state.scsi.dati.data[q + 1] = 22;
-				if (!changeable)
-				{
-					state.scsi.dati.data[q + 2] = (u8)(get_cylinders() >> 16) & 255;
-					state.scsi.dati.data[q + 3] = (u8)(get_cylinders() >> 8) & 255;
-					state.scsi.dati.data[q + 4] = (u8)get_cylinders() & 255;
-					state.scsi.dati.data[q + 5] = (u8)get_heads();
-
-					//rpms
-					state.scsi.dati.data[q + 20] = (7200 >> 8) & 255;
-					state.scsi.dati.data[q + 21] = 7200 & 255;
-				}
-				break;
-
-			case SCSIMP_FLEX_PARAMS:              //  flexible disk page
-				if (cdrom())
+				if (pagecode == SCSIMP_FLEX_PARAMS && cdrom())
 				{
 					FAILURE_1(NotImplemented,
 						"%s: CD-ROM write parameter page not implemented.\n", devid_string);
 				}
-
-				state.scsi.dati.data[q + 0] = pagecode;
-				state.scsi.dati.data[q + 1] = 0x1e; // length
-				if (!changeable)
+				const int end = mode_sense_page(pagecode, changeable, q);
+				if (end == q)
 				{
-
-					//  2,3 = transfer rate
-					state.scsi.dati.data[q + 2] = ((5000) >> 8) & 255;
-					state.scsi.dati.data[q + 3] = (5000) & 255;
-
-					state.scsi.dati.data[q + 4] = (u8)get_heads();
-					state.scsi.dati.data[q + 5] = (u8)get_sectors();
-
-					//  6,7 = data bytes per sector
-					state.scsi.dati.data[q + 6] = (u8)(get_block_size() >> 8) & 255;
-					state.scsi.dati.data[q + 7] = (u8)(get_block_size() >> 0) & 255;
-
-					state.scsi.dati.data[q + 8] = (u8)(get_cylinders() >> 8) & 255;
-					state.scsi.dati.data[q + 9] = (u8)get_cylinders() & 255;
-
-					//rpms
-					state.scsi.dati.data[q + 28] = (7200 >> 8) & 255;
-					state.scsi.dati.data[q + 29] = 7200 & 255;
+					// Optional pages are probed by several guest drivers.
+					printf("%s: MODE_SENSE page 0x%02x unsupported -> INVALID FIELD IN CDB\n",
+						devid_string, pagecode);
+					do_scsi_error(SCSI_INVALID_FIELD);
+					return 0;
 				}
-				break;
-
-			case SCSIMP_CACHING:  // Caching page
-				state.scsi.dati.data[q + 0] = pagecode; // page code
-				state.scsi.dati.data[q + 1] = 0x12;     // page length
-				if (!changeable)
-				{
-
-					// 2 = IC,ABPF,CAP,DISC,SIZE,WCE,MF,RCD
-					//     |  |    |   |    |    |   |  +- read cache disable (0=no)
-					//     |  |    |   |    |    |   +---- multiplication factor (0=block)
-					//     |  |    |   |    |    +-------- write cache enable (0=no cache)
-					//     |  |    |   |    +------------- use cache segment size (0=no)
-					//     |  |    |   +------------------ prefetch across cyls (1=yes)
-					//     |  |    +---------------------- cache analysis (0=drive)
-					//     |  +--------------------------- abort prefetch (1=abrt on cmd)
-					//     +------------------------------ initiator control (0=drive)
-					state.scsi.dati.data[q + 2] = 0x0a;
-
-					state.scsi.dati.data[q + 3] = 0;      // read/write cache retention
-					state.scsi.dati.data[q + 4] = 0x00;   // disable prefetch
-					state.scsi.dati.data[q + 5] = 0x00;   // for req's greater than this
-					state.scsi.dati.data[q + 6] = 0;      // minimum prefetch
-					state.scsi.dati.data[q + 7] = 0;
-
-					state.scsi.dati.data[q + 8] = 0;      // maximum prefetch
-					state.scsi.dati.data[q + 9] = 0;
-
-					state.scsi.dati.data[q + 10] = 0;     // maximum prefetch ceiling
-					state.scsi.dati.data[q + 11] = 0;
-
-					state.scsi.dati.data[q + 12] = 0;
-					state.scsi.dati.data[q + 13] = 0;     // # cache segments
-					state.scsi.dati.data[q + 14] = 0;     // cache segement size
-					state.scsi.dati.data[q + 15] = 0;
-
-					state.scsi.dati.data[q + 16] = 0;     // reserved
-					state.scsi.dati.data[q + 17] = 0;     // non-cache segement size
-					state.scsi.dati.data[q + 18] = 0;
-					state.scsi.dati.data[q + 19] = 0;
-				}
-				break;
-
-			case SCSIMP_INFO_EXCEPTIONS:  // informational exceptions control (IEC)
-				state.scsi.dati.data[q + 0] = pagecode;
-				state.scsi.dati.data[q + 1] = 0x0a;   // length
-				// Body left zero: DEXCPT=0, MRIE=0 (no informational-exception
-				// reporting). A valid, benign page so 0x1C no longer rejects.
-				break;
-
-			case SCSIMP_CDROM_CAP:  // CD-ROM capabilities
-				state.scsi.dati.data[q + 0] = pagecode;
-				state.scsi.dati.data[q + 1] = 0x14;   // length
-				if (!changeable)
-				{
-					state.scsi.dati.data[q + 2] = 0x03; // read CD-R/CD-RW
-					state.scsi.dati.data[q + 3] = 0x00; // no write
-					state.scsi.dati.data[q + 4] = 0x00; // dvd/audio capabilities
-					state.scsi.dati.data[q + 5] = 0x00; // cd-da capabilities
-					state.scsi.dati.data[q + 6] = state.scsi.locked ? 0x23 : 0x21;  // tray-loader
-					state.scsi.dati.data[q + 7] = 0x00;
-					state.scsi.dati.data[q + 8] = (u8)(2800 >> 8);   // max read speed in kBps (2.8Mbps = 16x)
-					state.scsi.dati.data[q + 9] = (u8)(2800 >> 0);
-					state.scsi.dati.data[q + 10] = (u8)(0 >> 8);     // number of volume levels
-					state.scsi.dati.data[q + 11] = (u8)(0 >> 0);
-					state.scsi.dati.data[q + 12] = (u8)(64 >> 8);    // buffer size in KBytes
-					state.scsi.dati.data[q + 13] = (u8)(64 >> 0);
-					state.scsi.dati.data[q + 14] = (u8)(2800 >> 8);  // current read speed
-					state.scsi.dati.data[q + 15] = (u8)(2800 >> 0);
-					state.scsi.dati.data[q + 16] = 0; // reserved
-					state.scsi.dati.data[q + 17] = 0; // digital output format
-					state.scsi.dati.data[q + 18] = (u8)(0 >> 8); // max write speed
-					state.scsi.dati.data[q + 19] = (u8)(0 >> 0);
-					state.scsi.dati.data[q + 20] = (u8)(0 >> 8); // current write speed
-					state.scsi.dati.data[q + 21] = (u8)(0 >> 0);
-				}
-				break;
-
-			default:
-				// SPC: an unsupported page in MODE SENSE returns CHECK CONDITION
-				// with sense ILLEGAL REQUEST / INVALID FIELD IN CDB. Drivers
-				// (Win2K cdrom.sys/atapi.sys among them) probe optional pages
-				// via this exact mechanism — the error path is the contract.
-				printf("%s: MODE_SENSE page 0x%02x unsupported -> INVALID FIELD IN CDB\n",
-					devid_string, pagecode);
-				do_scsi_error(SCSI_INVALID_FIELD);
-				return 0;
+				q = end;
 			}
+
+			// Mode data length describes the full response, excluding its own
+			// one- or two-byte field. Allocation length only limits the transfer.
+			// In particular, allocation 255 must not turn a 24-byte response
+			// into length 255 (256 total), which breaks MODE SELECT(6) callers.
+			if (state.scsi.cmd.data[0] == SCSICMD_MODE_SENSE)
+				state.scsi.dati.data[0] = (u8)(q - 1);
+			else
+			{
+				state.scsi.dati.data[0] = (u8)((q - 2) >> 8);
+				state.scsi.dati.data[1] = (u8)(q - 2);
+			}
+			state.scsi.dati.available = retlen < (unsigned int)q ? retlen : (unsigned int)q;
+			do_scsi_error(SCSI_OK);
 
 #if defined(DEBUG_SCSI)
 			printf("%s: Returning data: ", devid_string);
-			for (unsigned int x1 = 0; x1 < q + 30; x1++)
+			for (unsigned int x1 = 0; x1 < state.scsi.dati.available; x1++)
 				printf("%02x ", state.scsi.dati.data[x1]);
 			printf("\n");
 #endif
@@ -2085,44 +1968,79 @@ int CDisk::do_scsi_command()
 		printf("\n");
 #endif
 
-		bool block_size_updated = false;
-		if (!mode_select_10)
+		// A zero-length parameter list is a successful no-op.
+		const unsigned int length = state.scsi.dato.expected;
+		if (length == 0)
 		{
-			if (state.scsi.dato.written == 12
-				&& state.scsi.dato.data[0] == 0x00         // data length
-				//&& state.scsi.dato.data[1] == 0x05 // medium type - ignore
-				&& state.scsi.dato.data[2] == 0x00         // dev. specific
-				&& state.scsi.dato.data[3] == 0x08         // block descriptor length
-				&& state.scsi.dato.data[4] == 0x00         // density code
-				&& state.scsi.dato.data[5] == 0x00         // all blocks
-				&& state.scsi.dato.data[6] == 0x00         // all blocks
-				&& state.scsi.dato.data[7] == 0x00         // all blocks
-				&& state.scsi.dato.data[8] == 0x00)        // reserved
-			{
-				set_block_size((state.scsi.dato.data[9] << 16) |
-					(state.scsi.dato.data[10] << 8) | state.scsi.dato.data[11]);
-				block_size_updated = true;
-			}
+			do_scsi_error(SCSI_OK);
+			break;
 		}
-		else
+
+		const u8* params = state.scsi.dato.data;
+		const unsigned int header_size = mode_select_10 ? 8 : 4;
+		if (length < header_size)
 		{
-			if (state.scsi.dato.written >= 16
-				&& state.scsi.dato.data[0] == 0x00         // mode data length MSB/reserved
-				&& state.scsi.dato.data[1] == 0x00         // mode data length LSB/reserved
-				//&& state.scsi.dato.data[2] == 0x05 // medium type - ignore
-				&& state.scsi.dato.data[3] == 0x00         // dev. specific
-				&& state.scsi.dato.data[4] == 0x00         // reserved
-				&& state.scsi.dato.data[5] == 0x00         // reserved
-				&& state.scsi.dato.data[6] == 0x00         // block descriptor length MSB
-				&& state.scsi.dato.data[7] == 0x08         // block descriptor length LSB
-				&& state.scsi.dato.data[8] == 0x00         // density code
-				&& state.scsi.dato.data[9] == 0x00         // all blocks
-				&& state.scsi.dato.data[10] == 0x00        // all blocks
-				&& state.scsi.dato.data[11] == 0x00        // all blocks
-				&& state.scsi.dato.data[12] == 0x00)       // reserved
+			do_scsi_error(SCSI_PARAM_LENGTH);
+			break;
+		}
+		const unsigned int descriptor_length = mode_select_10 ?
+			((params[6] << 8) | params[7]) : params[3];
+		if (descriptor_length > length - header_size)
+		{
+			do_scsi_error(SCSI_PARAM_LENGTH);
+			break;
+		}
+		// Only a single short block descriptor is supported. Medium type is
+		// ignored, as before; mode data length and reserved fields must be zero.
+		if ((descriptor_length != 0 && descriptor_length != 8) ||
+			params[0] != 0 || params[mode_select_10 ? 3 : 2] != 0 ||
+			(mode_select_10 && (params[1] != 0 || params[4] != 0 || params[5] != 0)))
+		{
+			do_scsi_error(SCSI_INVALID_PARAM);
+			break;
+		}
+
+		// MODE SELECT may carry pages after the block descriptor (e.g. a
+		// 24-byte MODE SENSE(6) page 1 response). Validate the entire list
+		// before changing block size, so a truncated page cannot partly apply it.
+		// PF=0 uses a vendor-specific payload, not SCSI-2 mode pages.
+		unsigned int pos = (state.scsi.cmd.data[1] & 0x10) ?
+			header_size + descriptor_length : length;
+		while (pos < length)
+		{
+			const unsigned int page_header = (params[pos] & 0x40) ? 4 : 2;
+			if (length - pos < page_header)
+				break;
+			const unsigned int page_length = page_header == 4 ?
+				((params[pos + 2] << 8) | params[pos + 3]) : params[pos + 1];
+			if (page_length > length - pos - page_header)
+				break;
+			pos += page_header + page_length;
+		}
+		if (pos != length)
+		{
+			do_scsi_error(SCSI_PARAM_LENGTH);
+			break;
+		}
+
+		bool block_size_updated = false;
+		if (descriptor_length == 8)
+		{
+			const u8* descriptor = params + header_size;
+			const unsigned int block_size = (descriptor[5] << 16) |
+				(descriptor[6] << 8) | descriptor[7];
+			if (descriptor[0] != 0 || descriptor[1] != 0 ||
+				descriptor[2] != 0 || descriptor[3] != 0 || descriptor[4] != 0 ||
+				block_size > DATI_BUFSZ || block_size > DATO_BUFSZ ||
+				(byte_size > 0 && block_size > (u64)byte_size))
 			{
-				set_block_size((state.scsi.dato.data[13] << 16) |
-					(state.scsi.dato.data[14] << 8) | state.scsi.dato.data[15]);
+				do_scsi_error(SCSI_INVALID_PARAM);
+				break;
+			}
+			// A zero block length retains the current logical block size.
+			if (block_size != 0)
+			{
+				set_block_size(block_size);
 				block_size_updated = true;
 			}
 		}
@@ -2144,7 +2062,7 @@ int CDisk::do_scsi_command()
 			printf("\n");
 		}
 
-		// ignore it...
+		// Mode-page settings are still ignored; the block descriptor is applied above.
 		do_scsi_error(SCSI_OK);
 		break;
 	}

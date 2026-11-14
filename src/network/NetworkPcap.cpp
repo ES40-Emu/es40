@@ -33,6 +33,31 @@
 #include "NetworkPcap.h"
 #include "config/Configurator.h"
 
+#if defined(_WIN32)
+#include <io.h>
+#endif
+
+static bool pcap_stdin_available()
+{
+#if defined(_WIN32)
+	const int fd = _fileno(stdin);
+	if (fd < 0)
+		return false;
+	const intptr_t native = _get_osfhandle(fd);
+	if (native == -1 || native == -2)
+		return false;
+	const HANDLE input = reinterpret_cast<HANDLE>(native);
+	const DWORD type = GetFileType(input);
+	if (type == FILE_TYPE_DISK || type == FILE_TYPE_PIPE)
+		return true;
+	// NUL is a character device, but not a console.
+	DWORD mode;
+	return type == FILE_TYPE_CHAR && GetConsoleMode(input, &mode) != 0;
+#else
+	return true;
+#endif
+}
+
 #ifdef _WIN32
 /* Pointers to the real functions, resolved at runtime from wpcap.dll. */
 static const char *(*f_pcap_lib_version)(void);
@@ -169,6 +194,12 @@ bool CNetworkPcap::init(const char *devid_string, CConfigurator *cfg)
 		if (i == 1)
 			inum = 1;
 		else {
+			if (!pcap_stdin_available()) {
+				printf("%s: Cannot select a network adapter without input. "
+				       "Set adapter to a host interface name in the configuration.\n",
+				       devid_string);
+				return false;
+			}
 			for (;;) {
 				char input_buf[64];
 				int  parsed;
@@ -256,6 +287,14 @@ bool CNetworkPcap::init(const char *devid_string, CConfigurator *cfg)
 
 		/* Warn on non-ethernet adapter */
 		if (from_menu) {
+			if (!pcap_stdin_available()) {
+				printf("%s: Cannot confirm non-Ethernet adapter %s without input. "
+				       "Choose an Ethernet adapter or set adapter explicitly in the configuration.\n",
+				       devid_string, adapter);
+				pcap_close(fp);
+				fp = nullptr;
+				return false;
+			}
 			for (;;) {
 				char answer[16];
 				printf("%%NIC-Q-NONETH: Use this adapter anyway? (y/n): ");

@@ -1985,7 +1985,7 @@ void edit_pci_dec21143(const char *title)
 #if defined(HAVE_PCAP)
          "pcap",
 #elif defined(HAVE_TAP_NET)
-         "tap0",
+         "tap",
 #elif defined(HAVE_VMNET)
          "vmnet",
 #elif defined(HAVE_SLIRP)
@@ -2025,6 +2025,17 @@ void edit_pci_dec21143(const char *title)
          "What host network interface should we connect to?\n"
          "Choose 'list' to get a list at run-time.",
          validation_pci_dec21143_adapter},
+#elif defined(HAVE_TAP_NET)
+        {"adapter",
+#if defined(__FreeBSD__) || defined(__NetBSD__)
+         "/dev/tap0",
+#else
+         "tap0",
+#endif
+         "adapter",
+         "Enter the TAP interface name on Linux (e.g. tap0),\n"
+         "or device path on FreeBSD/NetBSD (e.g. /dev/tap0).",
+         NULL},
 #endif
         {"mac", "08-00-2B-E5-40-00", "mac",
          "What should the NIC's MAC address be?\n"

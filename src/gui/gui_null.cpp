@@ -1,5 +1,5 @@
 /* ES40 emulator.
- * Copyright (C) 2026 by the ES40 Emulator Project
+ * Copyright (C) 2026 by gdwnldsKSC
  * SPDX-License-Identifier: BSD-1-Clause
  *
  * Redistribution and use in source and binary forms, with or without

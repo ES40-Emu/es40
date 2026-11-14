@@ -159,6 +159,8 @@ noinst_HEADERS += storage/Disk.h \
        system/System.h \
        system/i2c_spd.h \
        io/Keyboard.h \
+       io/QmpInput.h \
+       io/QmpKeymap.h \
        io/Port80.h \
        io/Serial.h \
        io/SerialListenAddress.h \
@@ -264,6 +266,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        system/Flash.cpp \
        storage/FloppyController.cpp \
        io/Keyboard.cpp \
+       io/QmpInput.cpp \
        network/lockstep.cpp \
        network/NetworkBackend.cpp \
        network/NetworkPcap.cpp \

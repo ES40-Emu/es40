@@ -61,8 +61,10 @@
 #include "gui/gui.h"
 #include <array>
 #include <atomic>
+#include <memory>
 
 class CAliM1543C;
+class QmpInput;
 
 #define BX_KBD_ELEMENTS     16
 #define BX_MOUSE_BUFF_SIZE  48
@@ -117,6 +119,11 @@ public:
   InputResult queue_input(const InputEvent* events, size_t count);
   // Discard pending events without releasing already delivered keys or buttons.
   void discard_input();
+  // Cancel queued input and release only the external source's delivered holds.
+  void release_input();
+  bool input_releasing();
+  bool input_wheel_enabled();
+  unsigned input_buttons();
 
   virtual void  init();
   virtual void  start_threads();
@@ -127,15 +134,22 @@ private:
 
   CThread* myThread = nullptr;
   std::atomic<bool> StopThread{true};
+  std::unique_ptr<QmpInput> qmp_input;
 
   CFastMutex kbdLock{ "kbd" };
 
   std::array<InputEvent, INPUT_CAPACITY> input_queue{};
   size_t input_head = 0;
   size_t input_count = 0;
+  std::array<bool, BX_KEY_NBKEYS> local_keys{}, external_keys{};
+  unsigned local_buttons = 0, external_buttons = 0;
+  bool input_release_pending = false;
   bool input_available(const InputEvent& event) const;
+  bool input_busy() const;
   void discard_input_type(InputEvent::Type type);
   void service_input();
+  void service_input_release();
+  bool apply_input_key(u32 key, bool external);
   bool gen_scancode_locked(u32 key);
 
   u8        read_60();

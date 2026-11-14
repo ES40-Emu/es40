@@ -35,7 +35,7 @@
 ################################################################################
 
 ACLOCAL_AMFLAGS = -I m4
-EXTRA_DIST = reconf configure
+EXTRA_DIST = reconf configure third_party/picojson/picojson.h
 # The GPL and LGPL texts must accompany installed binaries.
 doc_DATA = COPYING
 dist_doc_DATA = COPYING.LGPL

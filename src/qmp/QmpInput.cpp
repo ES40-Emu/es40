@@ -38,6 +38,7 @@
 #include "QmpInput.h"
 #include "io/Keyboard.h"
 #include "QmpKeymap.h"
+#include "system/System.h"
 
 #ifdef min
 #undef min
@@ -263,6 +264,7 @@ bool nonblocking(Socket s)
 
 struct QmpInput::Impl : CRunnable {
     QmpInput& owner;
+    CSystem& system;
     CKeyboard& keyboard;
     CThread thread{"qmp"};
     std::atomic<bool> stop_requested{true};
@@ -279,8 +281,8 @@ struct QmpInput::Impl : CRunnable {
     bool winsock = false;
 #endif
 
-    Impl(QmpInput& owner, CKeyboard& keyboard, const char* setting)
-        : owner(owner), keyboard(keyboard)
+    Impl(QmpInput& owner, CSystem& system, CKeyboard& keyboard, const char* setting)
+        : owner(owner), system(system), keyboard(keyboard)
     {
         if (!setting || !*setting) FAILURE(Configuration, "Invalid qmp.port");
         for (const char* p = setting; *p; ++p) {
@@ -450,12 +452,20 @@ struct QmpInput::Impl : CRunnable {
             } else if (command == "query-version") {
                 fields(args, {});
                 reply(std::string("\"return\":") + version, id);
+            } else if (command == "query-status") {
+                fields(args, {});
+                const auto state = system.get_run_state();
+                const bool running = state == CSystem::RunState::Running;
+                const char* status = state == CSystem::RunState::Prelaunch ? "prelaunch"
+                    : running ? "running" : "paused";
+                reply(std::string("\"return\":{\"running\":") + (running ? "true" : "false")
+                    + ",\"status\":\"" + status + "\"}", id);
             } else if (command == "query-mice") {
                 fields(args, {});
                 reply(R"("return":[{"name":"ES40 PS/2 mouse","index":0,"current":true,"absolute":false}])", id);
             } else if (command == "query-commands") {
                 fields(args, {});
-                reply(R"("return":[{"name":"qmp_capabilities"},{"name":"query-version"},{"name":"query-commands"},{"name":"query-mice"},{"name":"input-send-event"},{"name":"__es40-input-send-event"},{"name":"__es40-query-input"}])", id);
+                reply(R"("return":[{"name":"qmp_capabilities"},{"name":"query-version"},{"name":"query-status"},{"name":"query-commands"},{"name":"query-mice"},{"name":"input-send-event"},{"name":"__es40-input-send-event"},{"name":"__es40-query-input"}])", id);
             } else error("CommandNotFound", "Command is not supported", id);
         } catch (const QmpError& e) {
             error(e.type, e.text, id);
@@ -518,7 +528,8 @@ struct QmpInput::Impl : CRunnable {
 #endif
 };
 
-QmpInput::QmpInput(CKeyboard& keyboard, const char* port) : impl(new Impl(*this, keyboard, port)) {}
+QmpInput::QmpInput(CSystem& system, CKeyboard& keyboard, const char* port)
+    : impl(new Impl(*this, system, keyboard, port)) {}
 QmpInput::~QmpInput() { stop(); }
 
 void QmpInput::start()

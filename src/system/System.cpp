@@ -2034,9 +2034,17 @@ void CSystem::init()
 	}
 	for (auto* component : acComponents)
 		if (auto* keyboard = dynamic_cast<CKeyboard*>(component))
-			qmp_input = std::make_unique<QmpInput>(*keyboard,
+			qmp_input = std::make_unique<QmpInput>(*this, *keyboard,
 				myCfg->get_text_value("qmp.port", "0"));
 }
+
+#if defined(IDB)
+void CSystem::SetDebugRunning(bool running) noexcept
+{
+	m_debug_running = running;
+	m_run_state.store(running ? RunState::Running : RunState::Paused, std::memory_order_release);
+}
+#endif
 
 void CSystem::start_threads()
 {
@@ -2061,6 +2069,11 @@ void CSystem::start_threads()
 
 	for (i = 0; i < iNumCPUs; i++)
 		acCPUs[i]->release_threads();
+#if defined(IDB)
+	m_run_state.store(m_debug_running ? RunState::Running : RunState::Paused, std::memory_order_release);
+#else
+	m_run_state.store(RunState::Running, std::memory_order_release);
+#endif
 }
 
 void CSystem::stop_threads()
@@ -2075,6 +2088,7 @@ void CSystem::stop_threads()
 	for (auto* component : acComponents)
 		if (component && !dynamic_cast<CAlphaCPU*>(component))
 			component->stop_threads();
+	m_run_state.store(RunState::Paused, std::memory_order_release);
 	printf("\n");
 }
 

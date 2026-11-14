@@ -265,6 +265,12 @@ public:
   void          Run();
   int           SingleStep();
 
+  enum class RunState { Prelaunch, Running, Paused };
+  RunState get_run_state() const noexcept { return m_run_state.load(std::memory_order_acquire); }
+#if defined(IDB)
+  void          SetDebugRunning(bool running) noexcept;
+#endif
+
   void          init();
   void          start_threads();
   void          stop_threads();
@@ -744,6 +750,10 @@ private:
   int                   iNumComponents;
   std::vector<CSystemComponent*> acComponents;
   std::unique_ptr<QmpInput> qmp_input;
+  std::atomic<RunState> m_run_state{ RunState::Prelaunch };
+#if defined(IDB)
+  bool m_debug_running = false;
+#endif
   int                   iNumMemories;
   std::vector<std::unique_ptr<SMemoryUser>> asMemories;
   // Startup permission only; not an emulated register or saved guest state.

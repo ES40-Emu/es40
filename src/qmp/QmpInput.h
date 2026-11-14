@@ -25,11 +25,12 @@
 #include <memory>
 
 class CKeyboard;
+class CSystem;
 
 class QmpInput
 {
 public:
-    QmpInput(CKeyboard& keyboard, const char* port);
+    QmpInput(CSystem& system, CKeyboard& keyboard, const char* port);
     ~QmpInput();
     void start();
     void stop();

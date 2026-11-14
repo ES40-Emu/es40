@@ -887,6 +887,13 @@ void CTraceEngine::run_script(const char* filename)
  **/
 int CTraceEngine::parse(char command[100][100])
 {
+	struct DebugRunGuard
+	{
+		CSystem* system;
+		explicit DebugRunGuard(CSystem* s) : system(s) { system->SetDebugRunning(true); }
+		~DebugRunGuard() { system->SetDebugRunning(false); }
+	};
+
 	int i = 0;
 	int numargs;
 	int result;
@@ -950,6 +957,7 @@ int CTraceEngine::parse(char command[100][100])
 
 		if (!strncasecmp(command[0], "STEP", strlen(command[0])))
 		{
+			DebugRunGuard running(theSystem);
 			printf("%%IDB-I-SSTEP : Single step.\n");
 			theSystem->SingleStep();
 			return 0;
@@ -1016,6 +1024,7 @@ int CTraceEngine::parse(char command[100][100])
 
 		if (!strncasecmp(command[0], "RUN", strlen(command[0])))
 		{
+			DebugRunGuard running(theSystem);
 			if (!bBreakPoint)
 			{
 				printf("%%IDB-F-NOBRKP: No breakpoint set, press Ctrl-C to end run.\n");
@@ -1293,6 +1302,7 @@ int CTraceEngine::parse(char command[100][100])
 				return 0;
 			}
 
+			DebugRunGuard running(theSystem);
 			if (bBreakPoint)
 			{
 				printf("%%IDB-I-RUNCBP: Running until breakpoint found or max cycles reached.\n");

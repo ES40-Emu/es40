@@ -73,6 +73,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <memory>
 
 #if defined(HAVE_PCAP)
 #ifdef _WIN32
@@ -135,7 +136,7 @@ typedef struct pcap_addr pcap_addr_t;
 /* Pointers to the real functions. */
 static const char *(*f_pcap_lib_version)(void);
 static int (*f_pcap_findalldevs)(pcap_if_t **, char *);
-static void (*f_pcap_freealldevs)(void *);
+static void (*f_pcap_freealldevs)(pcap_if_t *);
 static pcap_t* (*f_pcap_open_live)(const char *, int, int, int, char *);
 static int (*f_pcap_compile)(void *, void *, const char *, int, bpf_u_int32);
 static int (*f_pcap_setfilter)(void *, void *);
@@ -478,7 +479,7 @@ int main(int argc, char* argv[])
 		}
 		f_pcap_lib_version = (const char *(*)())GetProcAddress(libhandle, "pcap_lib_version");
 		f_pcap_findalldevs = (int (*)(pcap_if_t **, char *))GetProcAddress(libhandle, "pcap_findalldevs");
-		f_pcap_freealldevs = (void (*)(void *))GetProcAddress(libhandle, "pcap_freealldevs");
+		f_pcap_freealldevs = (void (*)(pcap_if_t *))GetProcAddress(libhandle, "pcap_freealldevs");
 		f_pcap_open_live   = (pcap_t *(*)(const char *, int, int, int, char *))GetProcAddress(libhandle, "pcap_open_live");
 		f_pcap_open   = (pcap_t* (*)(const char *, int , int , int , pcap_rmtauth *, char *))GetProcAddress(libhandle, "pcap_open");
 		f_pcap_compile = (int (*)(void *, void *, const char *, int, bpf_u_int32))GetProcAddress(libhandle, "pcap_compile");
@@ -496,6 +497,7 @@ int main(int argc, char* argv[])
 		f_pcap_next_ex = (int (*)(pcap *, pcap_pkthdr **, const unsigned char **))GetProcAddress(libhandle, "pcap_next_ex");
 
 		#define pcap_findalldevs f_pcap_findalldevs
+		#define pcap_freealldevs f_pcap_freealldevs
 		#define pcap_open f_pcap_open
 		#define pcap_sendpacket f_pcap_sendpacket
 		#define pcap_close f_pcap_close
@@ -1357,7 +1359,11 @@ int main(int argc, char* argv[])
 					"On Linux this can be any name (e.g. \"tap0\"). "
 					"FreeBSD/NetBSD this must be the device name, eg. "
 					"/dev/tapN or similar.");
+#if defined(__FreeBSD__) || defined(__NetBSD__)
+				tap_q.setDefault("/dev/tap0");
+#else
 				tap_q.setDefault("tap0");
+#endif
 				os << "    adapter = \"" << tap_q.ask() << "\";\n";
 #endif
 			} else {
@@ -1370,7 +1376,7 @@ int main(int argc, char* argv[])
 				/* Get a list of network interfaces and
 				 * add them to the list.
 				 */
-				pcap_if_t* alldevs;
+				pcap_if_t* alldevs = nullptr;
 				pcap_if_t* d;
 				char        errbuf[PCAP_ERRBUF_SIZE];
 
@@ -1382,6 +1388,8 @@ int main(int argc, char* argv[])
 				}
 				else
 				{
+					std::unique_ptr<pcap_if_t, void (*)(pcap_if_t *)> adapter_list(
+						alldevs, pcap_freealldevs);
 					int i = 1;
 					for (d = alldevs; d; d = d->next)
 					{

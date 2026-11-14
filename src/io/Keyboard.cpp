@@ -169,6 +169,8 @@ void CKeyboard::init()
 	state.mouse.delayed_dz = 0;
 	state.mouse.im_request = 0;       // wheel mouse mode request
 	state.mouse.im_mode = 0;          // wheel mouse mode
+	state.mouse.button_status = 0;
+	state.mouse.data_pending = false;
 	for (i = 0; i < BX_KBD_CONTROLLER_QSIZE; i++)
 		state.kbd_controller_Q[i] = 0;
 	state.kbd_controller_Qsize = 0;
@@ -200,6 +202,7 @@ void CKeyboard::stop_threads()
 		delete myThread;
 		myThread = 0;
 	}
+	discard_input();
 }
 
 /**
@@ -208,6 +211,114 @@ void CKeyboard::stop_threads()
 CKeyboard::~CKeyboard()
 {
 	stop_threads();
+	if (theKeyboard == this)
+		theKeyboard = nullptr;
+}
+
+CKeyboard::InputResult CKeyboard::queue_input(const InputEvent* events, size_t count)
+{
+	CFastMutex::ScopedLock guard(kbdLock);
+	if (count && !events)
+		return InputResult::Invalid;
+	if (count > INPUT_CAPACITY)
+		return InputResult::Full;
+	for (size_t i = 0; i < count; ++i)
+	{
+		const InputEvent& event = events[i];
+		if (event.type == InputEvent::Type::Key)
+		{
+			if ((event.key & ~BX_KEY_RELEASED) >= BX_KEY_NBKEYS)
+				return InputResult::Invalid;
+		}
+		else if (event.type == InputEvent::Type::Mouse)
+		{
+			if (event.buttons > 7 || event.dx < -32767 || event.dx > 32767
+				|| event.dy < -32767 || event.dy > 32767
+				|| event.dz < -32767 || event.dz > 32767)
+				return InputResult::Invalid;
+		}
+		else
+			return InputResult::Invalid;
+	}
+	if (StopThread)
+		return InputResult::Unavailable;
+	for (size_t i = 0; i < count; ++i)
+		if (!input_available(events[i]))
+			return InputResult::Unavailable;
+	if (count > INPUT_CAPACITY - input_count)
+		return InputResult::Full;
+	for (size_t i = 0; i < count; ++i)
+		input_queue[(input_head + input_count++) % INPUT_CAPACITY] = events[i];
+	return InputResult::Accepted;
+}
+
+void CKeyboard::discard_input()
+{
+	CFastMutex::ScopedLock guard(kbdLock);
+	input_head = input_count = 0;
+}
+
+void CKeyboard::discard_input_type(InputEvent::Type type)
+{
+	size_t kept = 0;
+	for (size_t i = 0; i < input_count; ++i)
+	{
+		const InputEvent event = input_queue[(input_head + i) % INPUT_CAPACITY];
+		if (event.type != type)
+			input_queue[(input_head + kept++) % INPUT_CAPACITY] = event;
+	}
+	input_count = kept;
+}
+
+bool CKeyboard::input_available(const InputEvent& event) const
+{
+	if (event.type == InputEvent::Type::Key)
+		return state.kbd_clock_enabled && state.kbd_internal_buffer.scanning_enabled;
+	return state.mouse.enable && state.mouse.mode == MOUSE_MODE_STREAM
+		&& state.aux_clock_enabled && (!event.dz || state.mouse.im_mode);
+}
+
+void CKeyboard::service_input()
+{
+	if (StopThread)
+		return;
+	while (input_count && !input_available(input_queue[input_head]))
+	{
+		input_head = (input_head + 1) % INPUT_CAPACITY;
+		--input_count;
+	}
+	if (!input_count)
+		return;
+	// Finish earlier input before admitting another key sequence or mouse packet.
+	if (input_transaction_active() || state.status.outb || state.kbd_controller_Qsize
+		|| state.deferred_scancode_valid || state.kbd_internal_buffer.num_elements
+		|| state.mouse_internal_buffer.num_elements || state.mouse.data_pending
+		|| state.mouse.delayed_dx || state.mouse.delayed_dy || state.mouse.delayed_dz)
+		return;
+	InputEvent& event = input_queue[input_head];
+	if (event.type == InputEvent::Type::Key)
+	{
+		if (!gen_scancode_locked(event.key))
+			return;
+	}
+	else
+	{
+		const int dx = event.dx > 254 ? 254 : event.dx < -254 ? -254 : event.dx;
+		const int dy = event.dy > 254 ? 254 : event.dy < -254 ? -254 : event.dy;
+		const int dz = event.dz > 127 ? 127 : event.dz < -127 ? -127 : event.dz;
+		const u8 header = (u8)(0x08 | event.buttons | (dx < 0 ? 0x10 : 0)
+			| (dy < 0 ? 0x20 : 0));
+		if (!mouse_enQ_packet(header, (u8)dx, (u8)dy, (u8)-dz))
+			return;
+		state.mouse.button_status = (u8)event.buttons;
+		event.dx -= dx;
+		event.dy -= dy;
+		event.dz -= dz;
+		if (event.dx || event.dy || event.dz)
+			return;
+	}
+	input_head = (input_head + 1) % INPUT_CAPACITY;
+	--input_count;
 }
 
 u64 CKeyboard::ReadMem(int index, u64 address, int dsize)
@@ -239,7 +350,13 @@ void CKeyboard::WriteMem(int index, u64 address, int dsize, u64 data)
 void CKeyboard::gen_scancode(u32 key)
 {
 	CFastMutex::ScopedLock guard(kbdLock);
+	gen_scancode_locked(key);
+}
 
+bool CKeyboard::gen_scancode_locked(u32 key)
+{
+	if ((key & ~BX_KEY_RELEASED) >= BX_KEY_NBKEYS || state.current_scancodes_set >= 3)
+		return false;
 	unsigned char* scancode;
 	u8              i;
 
@@ -252,11 +369,11 @@ void CKeyboard::gen_scancode(u32 key)
 
 	// Ignore scancode if keyboard clock is driven low
 	if (state.kbd_clock_enabled == 0)
-		return;
+		return false;
 
 	// Ignore scancode if scanning is disabled
 	if (state.kbd_internal_buffer.scanning_enabled == 0)
-		return;
+		return false;
 
 	// Source: http://www.win.tue.nl/~aeb/linux/kbd/scancodes-10.html
 	//
@@ -315,6 +432,12 @@ void CKeyboard::gen_scancode(u32 key)
 		scancode = (unsigned char*)scancodes[(key & 0xFF)][state.current_scancodes_set].brek;
 	else
 		scancode = (unsigned char*)scancodes[(key & 0xFF)][state.current_scancodes_set].make;
+	unsigned bytes = 0;
+	for (const unsigned char* p = scancode; *p; ++p)
+		if (!state.scancodes_translate || *p != 0xf0)
+			++bytes;
+	if (bytes > (unsigned)(BX_KBD_ELEMENTS - state.kbd_internal_buffer.num_elements))
+		return false;
 
 	// Translation
 	//
@@ -381,6 +504,7 @@ void CKeyboard::gen_scancode(u32 key)
 			enQ(scancode[i]);
 		}
 	}
+	return true;
 }
 
 /**
@@ -388,6 +512,7 @@ void CKeyboard::gen_scancode(u32 key)
  **/
 void CKeyboard::resetinternals(bool powerup)
 {
+	discard_input_type(InputEvent::Type::Key);
 	state.kbd_internal_buffer.num_elements = 0;
 	for (int i = 0; i < BX_KBD_ELEMENTS; i++)
 		state.kbd_internal_buffer.buffer[i] = 0;
@@ -812,6 +937,7 @@ void CKeyboard::write_64(u8 value)
 		printf("kbd_ctrl: command aa: self test.   \n");
 #endif
 		// A controller self-test discards pending asynchronous keyboard input.
+		discard_input_type(InputEvent::Type::Key);
 		state.kbd_internal_buffer.head = 0;
 		state.kbd_internal_buffer.num_elements = 0;
 		state.deferred_scancode = 0;
@@ -1167,6 +1293,7 @@ void CKeyboard::set_kbd_clock_enable(u8 value)
 	if (value == 0)
 	{
 		state.kbd_clock_enabled = 0;
+		discard_input_type(InputEvent::Type::Key);
 	}
 	else
 	{
@@ -1193,6 +1320,7 @@ void CKeyboard::set_aux_clock_enable(u8 value)
 	if (value == 0)
 	{
 		state.aux_clock_enabled = 0;
+		discard_input_type(InputEvent::Type::Mouse);
 
 		// Host movement must not survive an inhibited AUX interface and
 		// reappear as stale input when it is enabled later.
@@ -1712,6 +1840,8 @@ void CKeyboard::ctrl_to_mouse(u8 value)
 			controller_enQ(0xFE, 1);  /* send NACK */
 		}
 	}
+	if (!state.mouse.enable || state.mouse.mode != MOUSE_MODE_STREAM)
+		discard_input_type(InputEvent::Type::Mouse);
 }
 
 /**
@@ -1907,6 +2037,7 @@ void CKeyboard::create_mouse_packet(bool force_enq)
 	state.mouse.delayed_dz = 0;
 
 	mouse_enQ_packet(b1, b2, b3, b4);
+	state.mouse.data_pending = state.mouse.delayed_dx || state.mouse.delayed_dy;
 }
 
 /**
@@ -2006,6 +2137,7 @@ void CKeyboard::execute()
 		bx_gui->unlock();
 	  }
 	*/
+	service_input();
 	create_mouse_packet(0);  // sample any pending mouse movement into a packet
 	kbd_service();           // deliver queued bytes and drive the IRQ lines
 }
@@ -2067,6 +2199,7 @@ int CKeyboard::SaveState(FILE* f)
  **/
 int CKeyboard::RestoreState(FILE* f)
 {
+	discard_input();
 	long    ss;
 	u32     m1;
 	u32     m2;

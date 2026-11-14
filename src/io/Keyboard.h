@@ -59,6 +59,8 @@
 
 #include "emu/SystemComponent.h"
 #include "gui/gui.h"
+#include <array>
+#include <atomic>
 
 class CAliM1543C;
 
@@ -98,6 +100,24 @@ public:
   void          mouse_motion(int delta_x, int delta_y, int delta_z, unsigned button_state);
   void          set_mouse_capture(bool val);
 
+  struct InputEvent
+  {
+    enum class Type { Key, Mouse };
+    Type type = Type::Key;
+    u32 key = 0;
+    int dx = 0, dy = 0, dz = 0;
+    unsigned buttons = 0; // Left=1, right=2, middle=4.
+  };
+
+  enum class InputResult { Accepted, Full, Invalid, Unavailable };
+  static constexpr size_t INPUT_CAPACITY = 256;
+
+  // Keys use BX_KEY_* flags; mouse Y/wheel are positive upward, with deltas in [-32767, 32767].
+  // Accepted means queued; guest disable/reset, stop and restore discard pending input.
+  InputResult queue_input(const InputEvent* events, size_t count);
+  // Discard pending events without releasing already delivered keys or buttons.
+  void discard_input();
+
   virtual void  init();
   virtual void  start_threads();
   virtual void  stop_threads();
@@ -106,9 +126,17 @@ private:
   const CAliM1543C* isa_bridge = nullptr;
 
   CThread* myThread = nullptr;
-  bool      StopThread;
+  std::atomic<bool> StopThread{true};
 
   CFastMutex kbdLock{ "kbd" };
+
+  std::array<InputEvent, INPUT_CAPACITY> input_queue{};
+  size_t input_head = 0;
+  size_t input_count = 0;
+  bool input_available(const InputEvent& event) const;
+  void discard_input_type(InputEvent::Type type);
+  void service_input();
+  bool gen_scancode_locked(u32 key);
 
   u8        read_60();
   void      write_60(u8 data);

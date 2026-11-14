@@ -1,6 +1,6 @@
 /* ES40 Emulator.
  * Copyright (C) 2007-2008 by the ES40 Emulator Project
- * Copyright (C) 2026 by gdwnldsKSC
+ * Copyright (C) 2025-2026 by gdwnldsKSC
  *
  * WWW    : https://github.com/ES40-Emu/es40
  *
@@ -24,7 +24,7 @@
  *
  */
 
-// EV68 address, translation-fill and fault rules extracted from AlphaCPU.cpp/cpu_defs.h.
+// EV68 address, translation-fill and fault rules extracted from AlphaCPU and cpu_defs.h.
 #include "StdAfx.h"
 #include "AlphaCPU.h"
 #include "Ev68MMU.h"
@@ -70,6 +70,30 @@ AlphaMMUAddress Ev68MMU::map_address(const CAlphaCPU& cpu, std::uint64_t virt,
   // Superpages are kernel-only even for accesses carrying NO_CHECK.
   return mode ? AlphaMMUAddress{AlphaMMUAddressKind::AccessViolation, 0}
               : AlphaMMUAddress{AlphaMMUAddressKind::Direct, phys};
+}
+
+/**
+ * Convert a virtual address to va_form format.
+ * Used for IPR VA_FORM [HRM 5-5..6] and IPR IVA_FORM [HRM 5-9].
+ **/
+std::uint64_t Ev68MMU::va_form(const CAlphaCPU& cpu, std::uint64_t address, bool bIBOX)
+{
+  const auto& state = cpu.state;
+  switch (bIBOX ? state.i_ctl_va_mode : state.va_ctl_va_mode)
+  {
+  case 0:
+    return((bIBOX ? state.i_ctl_vptb : state.va_ctl_vptb) & U64(0xfffffffe00000000)) | ((address >> 10) & U64(0x00000001fffffff8));
+
+  case 1:
+    return
+      ((bIBOX ? state.i_ctl_vptb : state.va_ctl_vptb) & U64(0xfffff80000000000)) | ((address >> 10) & U64(0x0000003ffffffff8)) |
+      (((address >> 10) & U64(0x0000002000000000)) * U64(0x3e));
+
+  case 2:
+    return((bIBOX ? state.i_ctl_vptb : state.va_ctl_vptb) & U64(0xffffffffc0000000)) | ((address >> 10) & U64(0x00000000003ffff8));
+  }
+
+  return 0;
 }
 
 AlphaTBFill Ev68MMU::decode_fill(const CAlphaCPU&, std::uint64_t virt,

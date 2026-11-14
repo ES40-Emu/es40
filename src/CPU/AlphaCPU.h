@@ -326,8 +326,6 @@ public:
 
   u64           get_speed() { return cpu_hz; };
 
-  u64           va_form(u64 address, bool bIBOX);
-
 #if defined(IDB)
   void          listing(u64 from, u64 to);
   void          listing(u64 from, u64 to, u64 mark);
@@ -1049,29 +1047,6 @@ inline AlphaInstructionSource CAlphaCPU::instruction_sources()
   }};
 }
 
-
-/**
- * Convert a virtual address to va_form format.
- * Used for IPR VA_FORM [HRM 5-5..6] and IPR IVA_FORM [HRM 5-9].
- **/
-inline u64 CAlphaCPU::va_form(u64 address, bool bIBOX)
-{
-  switch (bIBOX ? state.i_ctl_va_mode : state.va_ctl_va_mode)
-  {
-  case 0:
-    return((bIBOX ? state.i_ctl_vptb : state.va_ctl_vptb) & U64(0xfffffffe00000000)) | ((address >> 10) & U64(0x00000001fffffff8));
-
-  case 1:
-    return
-      ((bIBOX ? state.i_ctl_vptb : state.va_ctl_vptb) & U64(0xfffff80000000000)) | ((address >> 10) & U64(0x0000003ffffffff8)) |
-      (((address >> 10) & U64(0x0000002000000000)) * U64(0x3e));
-
-  case 2:
-    return((bIBOX ? state.i_ctl_vptb : state.va_ctl_vptb) & U64(0xffffffffc0000000)) | ((address >> 10) & U64(0x00000000003ffff8));
-  }
-
-  return 0;
-}
 
 /**
  * Return processor number.

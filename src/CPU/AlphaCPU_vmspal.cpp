@@ -81,6 +81,7 @@
   **/
 #include "StdAfx.h"
 #include "AlphaCPU.h"
+#include "Ev68MMU.h"
 
 #include "io/Serial.h"
 #include "chipset/AliM1543C_ide.h"
@@ -1303,7 +1304,7 @@ int CAlphaCPU::vmspal_ent_dtbm_single(int flags)
 	u64 t26;
 
 	p23 = state.exc_addr;
-	p4 = va_form(state.fault_va, false);
+	p4 = Ev68MMU::va_form(*this, state.fault_va, false);
 	p5 = state.mm_stat;
 	p7 = state.exc_sum;
 	p6 = state.fault_va;
@@ -1433,7 +1434,7 @@ int CAlphaCPU::vmspal_ent_itbm(int flags)
 {
 	u64 pte_phys;
 
-	p4 = va_form(state.exc_addr, true);
+	p4 = Ev68MMU::va_form(*this, state.exc_addr, true);
 	p23 = state.exc_addr;
 	p6 = p23;
 	if (test_bit_64(p22, 63))

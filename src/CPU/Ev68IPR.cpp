@@ -28,6 +28,7 @@
 #include "StdAfx.h"
 #include "AlphaCPU.h"
 #include "Ev68IPR.h"
+#include "Ev68MMU.h"
 
 std::uint64_t Ev68IPR::read(CAlphaCPU& cpu, std::uint32_t instruction)
 {
@@ -41,7 +42,7 @@ std::uint64_t Ev68IPR::read(CAlphaCPU& cpu, std::uint32_t instruction)
   {
   case 0x05: return state.pmpc;                         // PMPC
   case 0x06: return state.exc_addr;                     // EXC_ADDR
-  case 0x07: return cpu.va_form(state.exc_addr, true);   // IVA_FORM
+  case 0x07: return Ev68MMU::va_form(cpu, state.exc_addr, true); // IVA_FORM
   case 0x08: case 0x09: case 0x0a: case 0x0b:            // IER_CM / CM / IER
     return (((u64)state.eien) << 33) | (((u64)state.slen) << 32)
       | (((u64)state.cren) << 31) | (((u64)state.pcen) << 29)
@@ -69,7 +70,7 @@ std::uint64_t Ev68IPR::read(CAlphaCPU& cpu, std::uint32_t instruction)
   case 0x2b: return 0;                                  // C_DATA
   case 0xc0: return (((u64)state.cc_offset) << 32) | (state.cc & U64(0xffffffff)); // CC
   case 0xc2: return state.fault_va;                     // VA
-  case 0xc3: return cpu.va_form(state.va_form_va, false); // VA_FORM
+  case 0xc3: return Ev68MMU::va_form(cpu, state.va_form_va, false); // VA_FORM
   default:
     // Unimplemented EV68 indices read zero and warn once per index.
     static bool warned_ipr[256];

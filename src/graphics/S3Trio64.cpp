@@ -1829,7 +1829,7 @@ static u32                 s3_cfg_mask[64] = {
  * Bind the card's sole display output; device initialization is done by init().
  **/
 CS3Trio64::CS3Trio64(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
-	bx_gui_c& display) : svga_device(cfg, c, pcibus, pcidev), CDisplayOutputProvider(0, display)
+	bx_gui_c& display) : svga_device(cfg, c, pcibus, pcidev), CDisplayOutputProvider(0, display, cfg)
 {
 	// PCI setup consults linear-enable state before the accelerator starts.
 	m_8514.ibm8514.advfunction_ctrl = 0;

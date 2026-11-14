@@ -208,11 +208,12 @@ private:
 };
 
 // Host presentation binding for one modeled output.
+class CConfigurator;
 class CShmFramebuffer;
 class CDisplayOutput
 {
 public:
-  CDisplayOutput(unsigned id, bx_gui_c& display);
+  CDisplayOutput(unsigned id, bx_gui_c& display, CConfigurator* cfg);
   ~CDisplayOutput();
 
   unsigned id() const { return m_id; }
@@ -240,8 +241,8 @@ private:
 class CDisplayOutputProvider
 {
 public:
-  CDisplayOutputProvider(unsigned id, bx_gui_c& display)
-    : m_output(id, display) {}
+  CDisplayOutputProvider(unsigned id, bx_gui_c& display, CConfigurator* cfg)
+    : m_output(id, display, cfg) {}
 
   virtual ~CDisplayOutputProvider() = default;
   virtual std::size_t output_count() const { return 1; }

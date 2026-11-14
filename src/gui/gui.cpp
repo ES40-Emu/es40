@@ -77,6 +77,7 @@
 #include "gui.h"
 #include "ShmFramebuffer.h"
 
+#include "config/Configurator.h"
 #include "io/Keyboard.h"
 
 bx_gui_c* bx_gui = NULL;
@@ -391,10 +392,10 @@ void bx_gui_c::graphics_tile_update_in_place(unsigned x0, unsigned y0,
 // Export ownership changes only on the configuration thread.
 static CDisplayOutput* exported_output = nullptr;
 
-CDisplayOutput::CDisplayOutput(unsigned id, bx_gui_c& display)
+CDisplayOutput::CDisplayOutput(unsigned id, bx_gui_c& display, CConfigurator* cfg)
 	: m_id(id), m_display(display)
 {
-	const char* path = std::getenv("ES40_SHM_PATH");
+	const char* path = cfg->get_myParent()->get_text_value("framebuffer.path", "");
 	if (path && *path && !exported_output)
 	{
 		try

@@ -1802,7 +1802,7 @@ bool CCirrus::is_pci() const noexcept
 CCirrus::CCirrus(const machine_config& mconfig, device_type type, const char* tag,
 	device_t* owner, uint32_t clock)
 	: svga_device(config_for(mconfig), type, tag, owner, clock),
-	  CDisplayOutputProvider(0, *mconfig.display),
+	  CDisplayOutputProvider(0, *mconfig.display, mconfig.cfg),
 	  m_type(type), m_snapshot_id(mconfig.snapshot_id)
 {
 	memset(&vga, 0, sizeof(vga));

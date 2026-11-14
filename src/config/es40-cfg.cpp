@@ -550,7 +550,7 @@ int main(int argc, char* argv[])
 	MultipleChoiceQuestion gui_q;
 
 	gui_q.setQuestion("Which display backend do you want to use?");
-	gui_q.setExplanation("Choose 'null' to run graphics without a window. ES40_SHM_PATH enables framebuffer export.");
+	gui_q.setExplanation("Choose 'null' to run graphics without a window. Set framebuffer.path in sys0 to export the framebuffer.");
 	gui_q.setDefault("null");
 	gui_q.addAnswer("null", "null", "Headless graphics output without a GUI.");
 

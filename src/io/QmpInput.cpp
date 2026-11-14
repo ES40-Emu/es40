@@ -95,6 +95,18 @@ int integer(const Json& value, int minimum, int maximum)
 bool whitespace(char c) { return c == ' ' || c == '\t' || c == '\r' || c == '\n'; }
 bool digit(char c) { return c >= '0' && c <= '9'; }
 
+u64 input_batch_id(const Json& value)
+{
+    const std::string& text = string_value(value);
+    if (text.empty() || text.size() > 20 || text[0] == '0') invalid("Invalid input batch ID");
+    u64 id = 0;
+    for (char c : text) {
+        if (!digit(c) || id > (~u64(0) - (c - '0')) / 10) invalid("Invalid input batch ID");
+        id = id * 10 + (c - '0');
+    }
+    return id;
+}
+
 void unicode_escape(std::string& out, unsigned cp)
 {
     if (cp > 0xffff) {
@@ -297,7 +309,7 @@ struct QmpInput::Impl {
         reply(std::string("\"error\":{\"class\":\"") + type + "\",\"desc\":\"" + text + "\"}", id);
     }
 
-    std::string input(const Json& args)
+    std::string input(const Json& args, bool tracked = false)
     {
         fields(args, {"events"});
         const Json& events = args.get("events");
@@ -361,13 +373,31 @@ struct QmpInput::Impl {
             }
             batch.push_back(event);
         }
-        switch (keyboard.queue_input(batch.data(), batch.size())) {
-        case CKeyboard::InputResult::Accepted: return "{}";
-        case CKeyboard::InputResult::Full: invalid("Input queue is full"); break;
+        u64 batch_id = 0;
+        switch (keyboard.queue_input(batch.data(), batch.size(), tracked ? &batch_id : nullptr)) {
+        case CKeyboard::InputResult::Accepted:
+            return tracked ? "{\"__es40-batch\":\"" + std::to_string(batch_id) + "\"}" : "{}";
+        case CKeyboard::InputResult::Full:
+            invalid(tracked ? "Input queue or completion history is full" : "Input queue is full"); break;
         case CKeyboard::InputResult::Unavailable: invalid("Input device or connection cleanup is not ready"); break;
         default: invalid("Unsupported input"); break;
         }
         return "{}";
+    }
+
+    std::string input_status(const Json& args)
+    {
+        fields(args, {"__es40-batch"});
+        CKeyboard::InputStatus status;
+        if (!keyboard.input_status(input_batch_id(args.get("__es40-batch")), status))
+            invalid("Unknown or expired input batch ID");
+        const char* state = status.pending ? "pending" : status.cancelled ? "cancelled" : "delivered";
+        return "{\"__es40-batch\":\"" + std::to_string(status.id)
+            + "\",\"__es40-state\":\"" + state
+            + "\",\"__es40-total\":" + std::to_string(status.pending + status.delivered + status.cancelled)
+            + ",\"__es40-pending\":" + std::to_string(status.pending)
+            + ",\"__es40-delivered\":" + std::to_string(status.delivered)
+            + ",\"__es40-cancelled\":" + std::to_string(status.cancelled) + "}";
     }
 
     void request(const std::string& raw)
@@ -397,6 +427,10 @@ struct QmpInput::Impl {
                 error("CommandNotFound", "Command is not available in this negotiation state", id);
             } else if (command == "input-send-event") {
                 reply("\"return\":" + input(args), id);
+            } else if (command == "__es40-input-send-event") {
+                reply("\"return\":" + input(args, true), id);
+            } else if (command == "__es40-query-input") {
+                reply("\"return\":" + input_status(args), id);
             } else if (command == "query-version") {
                 fields(args, {});
                 reply(std::string("\"return\":") + version, id);
@@ -405,7 +439,7 @@ struct QmpInput::Impl {
                 reply(R"("return":[{"name":"ES40 PS/2 mouse","index":0,"current":true,"absolute":false}])", id);
             } else if (command == "query-commands") {
                 fields(args, {});
-                reply(R"("return":[{"name":"qmp_capabilities"},{"name":"query-version"},{"name":"query-commands"},{"name":"query-mice"},{"name":"input-send-event"}])", id);
+                reply(R"("return":[{"name":"qmp_capabilities"},{"name":"query-version"},{"name":"query-commands"},{"name":"query-mice"},{"name":"input-send-event"},{"name":"__es40-input-send-event"},{"name":"__es40-query-input"}])", id);
             } else error("CommandNotFound", "Command is not supported", id);
         } catch (const QmpError& e) {
             error(e.type, e.text, id);

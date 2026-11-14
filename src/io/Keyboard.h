@@ -114,9 +114,16 @@ public:
   enum class InputResult { Accepted, Full, Invalid, Unavailable };
   static constexpr size_t INPUT_CAPACITY = 256;
 
+  struct InputStatus
+  {
+    u64 id = 0;
+    size_t pending = 0, delivered = 0, cancelled = 0;
+  };
+
   // Keys use BX_KEY_* flags; mouse Y/wheel are positive upward, with deltas in [-32767, 32767].
   // Accepted means queued; guest disable/reset, stop and restore discard pending input.
-  InputResult queue_input(const InputEvent* events, size_t count);
+  InputResult queue_input(const InputEvent* events, size_t count, u64* batch_id = nullptr);
+  bool input_status(u64 id, InputStatus& status);
   // Discard pending events without releasing already delivered keys or buttons.
   void discard_input();
   // Cancel queued input and release only the external source's delivered holds.
@@ -139,6 +146,9 @@ private:
   CFastMutex kbdLock{ "kbd" };
 
   std::array<InputEvent, INPUT_CAPACITY> input_queue{};
+  std::array<size_t, INPUT_CAPACITY> input_batch_tags{};
+  std::array<InputStatus, INPUT_CAPACITY> input_history{};
+  u64 last_input_batch = 0;
   size_t input_head = 0;
   size_t input_count = 0;
   std::array<bool, BX_KEY_NBKEYS> local_keys{}, external_keys{};
@@ -146,6 +156,8 @@ private:
   bool input_release_pending = false;
   bool input_available(const InputEvent& event) const;
   bool input_busy() const;
+  void finish_input_event(size_t index, bool cancelled);
+  void discard_input_locked();
   void discard_input_type(InputEvent::Type type);
   void service_input();
   void service_input_release();

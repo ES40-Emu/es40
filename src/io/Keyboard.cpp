@@ -117,6 +117,7 @@ bool CKeyboard::uses_subtractive_decode(int index, u64 address, int dsize,
 void CKeyboard::init()
 {
 	int i;
+	discard_input();
 	local_keys.fill(false);
 	external_keys.fill(false);
 	local_buttons = external_buttons = 0;
@@ -227,7 +228,8 @@ CKeyboard::~CKeyboard()
 		theKeyboard = nullptr;
 }
 
-CKeyboard::InputResult CKeyboard::queue_input(const InputEvent* events, size_t count)
+CKeyboard::InputResult CKeyboard::queue_input(const InputEvent* events, size_t count,
+	u64* batch_id)
 {
 	CFastMutex::ScopedLock guard(kbdLock);
 	if (count && !events)
@@ -259,21 +261,81 @@ CKeyboard::InputResult CKeyboard::queue_input(const InputEvent* events, size_t c
 			return InputResult::Unavailable;
 	if (count > INPUT_CAPACITY - input_count)
 		return InputResult::Full;
+	size_t tag = 0;
+	if (batch_id)
+	{
+		if (last_input_batch == (u64)-1)
+			return InputResult::Full;
+		size_t slot = INPUT_CAPACITY;
+		for (size_t i = 0; i < INPUT_CAPACITY; ++i)
+		{
+			if (!input_history[i].id)
+			{
+				slot = i;
+				break;
+			}
+			if (!input_history[i].pending && (slot == INPUT_CAPACITY
+				|| input_history[i].id < input_history[slot].id))
+				slot = i;
+		}
+		if (slot == INPUT_CAPACITY)
+			return InputResult::Full;
+		input_history[slot] = { ++last_input_batch, count, 0, 0 };
+		*batch_id = last_input_batch;
+		tag = slot + 1;
+	}
 	for (size_t i = 0; i < count; ++i)
-		input_queue[(input_head + input_count++) % INPUT_CAPACITY] = events[i];
+	{
+		const size_t index = (input_head + input_count++) % INPUT_CAPACITY;
+		input_queue[index] = events[i];
+		input_batch_tags[index] = tag;
+	}
 	return InputResult::Accepted;
+}
+
+bool CKeyboard::input_status(u64 id, InputStatus& status)
+{
+	CFastMutex::ScopedLock guard(kbdLock);
+	for (const InputStatus& batch : input_history)
+		if (id && batch.id == id)
+		{
+			status = batch;
+			return true;
+		}
+	return false;
+}
+
+void CKeyboard::finish_input_event(size_t index, bool cancelled)
+{
+	const size_t tag = input_batch_tags[index];
+	if (!tag)
+		return;
+	InputStatus& batch = input_history[tag - 1];
+	--batch.pending;
+	if (cancelled)
+		++batch.cancelled;
+	else
+		++batch.delivered;
+	input_batch_tags[index] = 0;
+}
+
+void CKeyboard::discard_input_locked()
+{
+	for (size_t i = 0; i < input_count; ++i)
+		finish_input_event((input_head + i) % INPUT_CAPACITY, true);
+	input_head = input_count = 0;
 }
 
 void CKeyboard::discard_input()
 {
 	CFastMutex::ScopedLock guard(kbdLock);
-	input_head = input_count = 0;
+	discard_input_locked();
 }
 
 void CKeyboard::release_input()
 {
 	CFastMutex::ScopedLock guard(kbdLock);
-	input_head = input_count = 0;
+	discard_input_locked();
 	input_release_pending = external_buttons != 0;
 	for (bool down : external_keys)
 		input_release_pending = input_release_pending || down;
@@ -308,9 +370,16 @@ void CKeyboard::discard_input_type(InputEvent::Type type)
 	size_t kept = 0;
 	for (size_t i = 0; i < input_count; ++i)
 	{
-		const InputEvent event = input_queue[(input_head + i) % INPUT_CAPACITY];
+		const size_t index = (input_head + i) % INPUT_CAPACITY;
+		const InputEvent event = input_queue[index];
 		if (event.type != type)
-			input_queue[(input_head + kept++) % INPUT_CAPACITY] = event;
+		{
+			const size_t target = (input_head + kept++) % INPUT_CAPACITY;
+			input_queue[target] = event;
+			input_batch_tags[target] = input_batch_tags[index];
+		}
+		else
+			finish_input_event(index, true);
 	}
 	input_count = kept;
 }
@@ -381,6 +450,7 @@ void CKeyboard::service_input()
 	}
 	while (input_count && !input_available(input_queue[input_head]))
 	{
+		finish_input_event(input_head, true);
 		input_head = (input_head + 1) % INPUT_CAPACITY;
 		--input_count;
 	}
@@ -412,6 +482,7 @@ void CKeyboard::service_input()
 		if (event.dx || event.dy || event.dz)
 			return;
 	}
+	finish_input_event(input_head, false);
 	input_head = (input_head + 1) % INPUT_CAPACITY;
 	--input_count;
 }

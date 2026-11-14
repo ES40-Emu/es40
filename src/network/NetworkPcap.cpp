@@ -58,6 +58,30 @@ static bool pcap_stdin_available()
 #endif
 }
 
+static void pcap_access_hint(const char *devid_string)
+{
+#if defined(__linux__)
+	printf("%s: For capture permission errors on Linux, grant CAP_NET_RAW to "
+	       "the emulator executable, e.g.:\n"
+	       "%s:   sudo setcap cap_net_raw+ep /absolute/path/to/es40\n"
+	       "%s: Use the executable you actually run; reapply after replacing it.\n",
+	       devid_string, devid_string, devid_string);
+#elif defined(_WIN32)
+	printf("%s: Check the Npcap installation, driver status and capture permissions.\n",
+	       devid_string);
+#elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || \
+      defined(__OpenBSD__) || defined(__DragonFly__)
+	printf("%s: For capture permission errors, check access to BPF devices (/dev/bpf*).\n",
+	       devid_string);
+#else
+	printf("%s: Check packet-capture permissions on this host.\n", devid_string);
+#endif
+#if defined(HAVE_SLIRP)
+	printf("%s: Alternatively, use type = \"slirp\" for user-mode NAT networking.\n",
+	       devid_string);
+#endif
+}
+
 #ifdef _WIN32
 /* Pointers to the real functions, resolved at runtime from wpcap.dll. */
 static const char *(*f_pcap_lib_version)(void);
@@ -170,7 +194,8 @@ bool CNetworkPcap::init(const char *devid_string, CConfigurator *cfg)
 	if (from_menu) {
 		printf("\n%s: Choose a network adapter to connect to:\n", devid_string);
 		if (pcap_findalldevs(&alldevs, errbuf) == -1) {
-			printf("%s: Error in pcap_findalldevs: %s\n", devid_string, errbuf);
+			printf("%s: Error enumerating network adapters: %s\n", devid_string, errbuf);
+			pcap_access_hint(devid_string);
 			return false;
 		}
 
@@ -188,6 +213,7 @@ bool CNetworkPcap::init(const char *devid_string, CConfigurator *cfg)
 
 		if (i == 0) {
 			printf("%s: No network interfaces found\n", devid_string);
+			pcap_access_hint(devid_string);
 			return false;
 		}
 
@@ -262,6 +288,9 @@ bool CNetworkPcap::init(const char *devid_string, CConfigurator *cfg)
 #endif
 	{
 		printf("%s: Error opening adapter %s:\n %s\n", devid_string, adapter, errbuf);
+		printf("%s: Check the adapter name; adapter = \"list\" lists available interfaces.\n",
+		       devid_string);
+		pcap_access_hint(devid_string);
 		return false;
 	}
 

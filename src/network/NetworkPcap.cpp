@@ -141,8 +141,8 @@ bool CNetworkPcap::init(const char *devid_string, CConfigurator *cfg)
 	char errbuf[PCAP_ERRBUF_SIZE];
 
 	char *adapter = cfg->get_text_value("adapter");
-	bool  from_menu = (adapter == NULL);
-	if (!adapter) {
+	const bool from_menu = !adapter || !adapter[0] || !strcasecmp(adapter, "list");
+	if (from_menu) {
 		printf("\n%s: Choose a network adapter to connect to:\n", devid_string);
 		if (pcap_findalldevs(&alldevs, errbuf) == -1) {
 			printf("%s: Error in pcap_findalldevs: %s\n", devid_string, errbuf);

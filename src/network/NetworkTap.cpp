@@ -90,7 +90,14 @@ bool CNetworkTap::tap_open(const char *devid_string, const char *name) {
 
 	tap_fd = open("/dev/net/tun", O_RDWR);
 	if (tap_fd < 0) {
-		printf("%s: Cannot open /dev/net/tun: %s\n", devid_string, strerror(errno));
+		const int error = errno;
+		printf("%s: Cannot open /dev/net/tun: %s\n", devid_string, strerror(error));
+		if (error == ENOENT || error == ENODEV || error == ENXIO)
+			printf("%s: Check host TUN/TAP support and availability of /dev/net/tun.\n",
+			       devid_string);
+		else if (error == EACCES || error == EPERM)
+			printf("%s: Check read/write permissions for /dev/net/tun and host access policy.\n",
+			       devid_string);
 		return false;
 	}
 
@@ -100,7 +107,21 @@ bool CNetworkTap::tap_open(const char *devid_string, const char *name) {
 		strncpy(ifr.ifr_name, name, IFNAMSIZ - 1);
 
 	if (ioctl(tap_fd, TUNSETIFF, &ifr) < 0) {
-		printf("%s: TUNSETIFF failed for %s: %s\n", devid_string, name, strerror(errno));
+		const int error = errno;
+		printf("%s: Cannot create or attach TAP interface %s (TUNSETIFF): %s\n",
+		       devid_string, name && name[0] ? name : "(automatic)", strerror(error));
+		if (error == EACCES || error == EPERM) {
+			printf("%s: Check owner/group permissions for an existing TAP; "
+			       "creating an interface requires CAP_NET_ADMIN.\n", devid_string);
+			if (!name || !name[0])
+				printf("%s: Set adapter to an existing TAP interface to avoid automatic creation.\n",
+				       devid_string);
+		} else if (error == EBUSY)
+			printf("%s: The TAP interface may already be attached to another process.\n",
+			       devid_string);
+		else if (error == EINVAL)
+			printf("%s: Check the interface name, TAP device type and compatible flags.\n",
+			       devid_string);
 		::close(tap_fd);
 		tap_fd = -1;
 		return false;
@@ -111,7 +132,19 @@ bool CNetworkTap::tap_open(const char *devid_string, const char *name) {
 #elif defined(__FreeBSD__) || defined(__NetBSD__)
 	tap_fd = open(name, O_RDWR);
 	if (tap_fd < 0) {
-		printf("%s: Cannot open %s: %s\n", devid_string, name, strerror(errno));
+		const int error = errno;
+		printf("%s: Cannot open %s: %s\n", devid_string,
+		       name && name[0] ? name : "(not configured)", strerror(error));
+		if (!name || !name[0])
+			printf("%s: Set adapter to a TAP device path, such as /dev/tap0.\n",
+			       devid_string);
+		else if (error == ENOENT || error == ENODEV || error == ENXIO)
+			printf("%s: Check the TAP device path and host TAP support.\n", devid_string);
+		else if (error == EACCES || error == EPERM)
+			printf("%s: Check TAP device read/write permissions and host TAP access policy.\n",
+			       devid_string);
+		else if (error == EBUSY)
+			printf("%s: The TAP device may already be open in another process.\n", devid_string);
 		return false;
 	}
 
@@ -131,7 +164,8 @@ bool CNetworkTap::init(const char *devid_string, CConfigurator *cfg)
 
 	int flags = fcntl(tap_fd, F_GETFL, 0);
 	if (flags < 0 || fcntl(tap_fd, F_SETFL, flags | O_NONBLOCK) < 0) {
-		printf("%s: Cannot set TAP fd non-blocking: %s\n", devid_string, strerror(errno));
+		const int error = errno;
+		printf("%s: Cannot set TAP fd %d non-blocking: %s\n", devid_string, tap_fd, strerror(error));
 		close();
 		return false;
 	}

@@ -329,7 +329,7 @@
 #include "SnapshotFile.h"
 #include "gui/gui.h"
 #include "io/Keyboard.h"
-#include "io/QmpInput.h"
+#include "qmp/QmpInput.h"
 
 #include <ctype.h>
 #include <stdlib.h>

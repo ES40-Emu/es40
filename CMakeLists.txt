@@ -498,9 +498,9 @@ list(APPEND ES40_SOURCES
     src/system/i2c_spd.cpp
     src/graphics/ibm8514a.cpp
     src/io/Keyboard.cpp
-    src/io/QmpInput.cpp
-    src/io/QmpInput.h
-    src/io/QmpKeymap.h
+    src/qmp/QmpInput.cpp
+    src/qmp/QmpInput.h
+    src/qmp/QmpKeymap.h
     third_party/picojson/picojson.h
     src/network/lockstep.cpp
     src/audio/MPU401.cpp

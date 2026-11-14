@@ -36,7 +36,7 @@
 #endif
 
 #include "QmpInput.h"
-#include "Keyboard.h"
+#include "io/Keyboard.h"
 #include "QmpKeymap.h"
 
 #ifdef min

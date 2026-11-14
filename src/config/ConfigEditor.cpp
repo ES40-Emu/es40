@@ -1960,6 +1960,9 @@ void validation_pci_dec21143_adapter(EditorField *field)
 
     editor_choices(field, choices.data());
 #ifdef HAVE_PCAP
+#ifdef HAVE_TAP_NET
+    field->type = EditorField::Type::EditableChoice;
+#endif
     if (alldevs) pcap_freealldevs(alldevs);
 #endif
 }
@@ -2023,7 +2026,12 @@ void edit_pci_dec21143(const char *title)
 #if defined(HAVE_PCAP)
         {"adapter", "list", "adapter",
          "What host network interface should we connect to?\n"
-         "Choose 'list' to get a list at run-time.",
+         "For PCAP, choose 'list' to get a list at run-time."
+#ifdef HAVE_TAP_NET
+         "\nFor TAP, enter the interface name on Linux (e.g. tap0),\n"
+         "or device path on FreeBSD/NetBSD (e.g. /dev/tap0)."
+#endif
+         ,
          validation_pci_dec21143_adapter},
 #elif defined(HAVE_TAP_NET)
         {"adapter",

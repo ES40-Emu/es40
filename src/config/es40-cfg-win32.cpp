@@ -102,6 +102,14 @@ static std::wstring window_text(HWND control)
     return text;
 }
 
+static HWND combo_edit(HWND control)
+{
+    COMBOBOXINFO info = {sizeof(info)};
+    if (!GetComboBoxInfo(control, &info) || !info.hwndItem)
+        throw std::runtime_error("Unable to access the editable settings control.");
+    return info.hwndItem;
+}
+
 class Win32EditorUI final : public EditorUI
 {
     enum class kind { menu, form, text };
@@ -188,8 +196,19 @@ class Win32EditorUI final : public EditorUI
         {
             const int top = px(10) + (int)i * row - active->scroll;
             MoveWindow(active->labels[i], px(12), top, std::max(1, (int)bounds.right - px(28)), px(22), TRUE);
-            const bool choice = (*active->fields)[i].type == EditorField::Type::Choice;
+            const auto& field = (*active->fields)[i];
+            const bool choice = field.is_choice();
+            HWND edit = field.type == EditorField::Type::EditableChoice ? combo_edit(active->inputs[i]) : nullptr;
+            const std::wstring draft = edit ? window_text(edit) : L"";
+            DWORD start = 0, end = 0;
+            if (edit) SendMessageW(edit, EM_GETSEL, (WPARAM)&start, (LPARAM)&end);
             MoveWindow(active->inputs[i], px(12), top + px(26), std::max(1, (int)bounds.right - px(28)), choice ? px(280) : px(28), TRUE);
+            // Resizing a combo can replace typed text with a case-insensitive match.
+            if (edit && window_text(edit) != draft)
+            {
+                SetWindowTextW(edit, draft.c_str());
+                SendMessageW(edit, EM_SETSEL, start, end);
+            }
         }
     }
 
@@ -272,19 +291,29 @@ class Win32EditorUI final : public EditorUI
                     label += range.str();
                 }
                 current.labels.push_back(add_control(viewport, L"STATIC", label, SS_LEFT, 3000 + (int)i));
-                const bool choice = field.type == EditorField::Type::Choice;
+                const bool choice = field.is_choice();
+                const DWORD combo_style = field.is_editable() ? CBS_DROPDOWN | CBS_AUTOHSCROLL : CBS_DROPDOWNLIST;
                 HWND input = add_control(viewport, choice ? L"COMBOBOX" : L"EDIT", choice ? L"" : current.drafts[i],
-                    WS_TABSTOP | (choice ? CBS_DROPDOWNLIST | CBS_HASSTRINGS | WS_VSCROLL : ES_AUTOHSCROLL), id_field + (int)i,
+                    WS_TABSTOP | (choice ? combo_style | CBS_HASSTRINGS | WS_VSCROLL : ES_AUTOHSCROLL), id_field + (int)i,
                     choice ? 0 : WS_EX_CLIENTEDGE);
                 current.inputs.push_back(input);
                 if (choice)
                 {
                     for (const auto& option : field.choices)
                     { const std::wstring text = wide(option); SendMessageW(input, CB_ADDSTRING, 0, (LPARAM)text.c_str()); }
-                    LRESULT selected = SendMessageW(input, CB_FINDSTRINGEXACT, (WPARAM)-1, (LPARAM)current.drafts[i].c_str());
-                    if (selected == CB_ERR)
-                        selected = SendMessageW(input, CB_ADDSTRING, 0, (LPARAM)current.drafts[i].c_str());
-                    SendMessageW(input, CB_SETCURSEL, selected, 0);
+                    if (field.is_editable())
+                    {
+                        SendMessageW(input, CB_LIMITTEXT, 32767, 0);
+                        // Use the edit child to preserve the exact spelling.
+                        SetWindowTextW(combo_edit(input), current.drafts[i].c_str());
+                    }
+                    else
+                    {
+                        LRESULT selected = SendMessageW(input, CB_FINDSTRINGEXACT, (WPARAM)-1, (LPARAM)current.drafts[i].c_str());
+                        if (selected == CB_ERR)
+                            selected = SendMessageW(input, CB_ADDSTRING, 0, (LPARAM)current.drafts[i].c_str());
+                        SendMessageW(input, CB_SETCURSEL, selected, 0);
+                    }
                     SendMessageW(input, CB_SETMINVISIBLE, 12, 0);
                 }
                 else SendMessageW(input, EM_SETLIMITTEXT, 32767, 0);
@@ -312,9 +341,18 @@ class Win32EditorUI final : public EditorUI
         UpdateWindow(window);
     }
 
+    void save_editable_drafts()
+    {
+        if (!active || active->type != kind::form) return;
+        for (size_t i = 0; i < active->inputs.size(); ++i)
+            if ((*active->fields)[i].type == EditorField::Type::EditableChoice)
+                active->drafts[i] = window_text(combo_edit(active->inputs[i]));
+    }
+
     void apply_form()
     {
         if (!active || !active->fields) return;
+        save_editable_drafts();
         auto proposal = *active->fields;
         for (size_t i = 0; i < proposal.size(); ++i)
         {
@@ -350,7 +388,8 @@ class Win32EditorUI final : public EditorUI
             if (id >= id_field && active->type == kind::form && id < id_field + (int)active->drafts.size())
             {
                 const int index = id - id_field;
-                const bool choice = (*active->fields)[index].type == EditorField::Type::Choice;
+                const auto& field = (*active->fields)[index];
+                const bool choice = field.is_choice();
                 if (notification == (choice ? CBN_SELCHANGE : EN_CHANGE))
                 {
                     if (choice)
@@ -366,6 +405,8 @@ class Win32EditorUI final : public EditorUI
                     }
                     else active->drafts[index] = window_text((HWND)lparam);
                 }
+                else if (choice && field.is_editable() && notification == CBN_EDITCHANGE)
+                    active->drafts[index] = window_text((HWND)lparam);
                 if (notification == (choice ? CBN_SETFOCUS : EN_SETFOCUS)) reveal_field(index);
                 return 0;
             }
@@ -433,7 +474,7 @@ class Win32EditorUI final : public EditorUI
                 if (message.message == WM_KEYDOWN && (message.hwnd == window || IsChild(window, message.hwnd)))
                 {
                     const bool dropdown = current.type == kind::form && current.current < (int)current.inputs.size() &&
-                        (*current.fields)[current.current].type == EditorField::Type::Choice &&
+                        (*current.fields)[current.current].is_choice() &&
                         SendMessageW(current.inputs[current.current], CB_GETDROPPEDSTATE, 0, 0);
                     if (message.wParam == VK_F1 && current.type != kind::text) { current.action = help_action; continue; }
                     if (message.wParam == VK_F2) { SendMessageW(window, WM_COMMAND, current.type == kind::menu ? IDCANCEL : IDOK, 0); continue; }
@@ -443,11 +484,13 @@ class Win32EditorUI final : public EditorUI
                     if (message.wParam == VK_RETURN && !dropdown && GetFocus() == list)
                     { current.action = IDOK; continue; }
                     if (message.wParam == VK_RETURN && !dropdown && current.type == kind::form &&
-                        std::find(current.inputs.begin(), current.inputs.end(), GetFocus()) != current.inputs.end())
+                        std::any_of(current.inputs.begin(), current.inputs.end(), [](HWND input)
+                        { return input == GetFocus() || IsChild(input, GetFocus()); }))
                     { SendMessageW(window, WM_COMMAND, IDOK, 0); continue; }
                 }
                 if (!IsDialogMessageW(window, &message)) { TranslateMessage(&message); DispatchMessageW(&message); }
             }
+            save_editable_drafts();
         }
         catch (...) { active = nullptr; destroy_controls(); throw; }
         active = nullptr; destroy_controls();

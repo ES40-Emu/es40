@@ -29,13 +29,16 @@
 // Frontends only render these descriptors. All option definitions live in ConfigEditor.cpp.
 struct EditorField
 {
-    enum class Type { Text, Choice, Integer, Number, Pattern };
+    enum class Type { Text, Choice, Integer, Number, Pattern, EditableChoice };
     Type type = Type::Text;
     std::string value;
     std::vector<std::string> choices;
     std::string pattern;
     int precision = 0;
     double minimum = 0, maximum = 0;
+
+    bool is_choice() const { return type == Type::Choice || type == Type::EditableChoice; }
+    bool is_editable() const { return type != Type::Choice; }
 };
 
 using SelectFuncPtr = void (*)(const char *);

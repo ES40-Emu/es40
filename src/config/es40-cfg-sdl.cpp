@@ -289,11 +289,12 @@ public:
             int idx = found == field.choices.end() ? (direction > 0 ? -1 : 0) : int(found - field.choices.begin());
             field.value = field.choices[(idx + direction + int(field.choices.size())) % field.choices.size()];
             cursor = field.value.size();
+            if (field.is_editable()) selected = true;
         };
         auto insert = [&](const std::string& value)
         {
             auto& field = fields[current];
-            if (field.type == EditorField::Type::Choice) return;
+            if (!field.is_editable()) return;
             if (selected) { field.value.clear(); cursor = 0; selected = false; }
             // Match the terminal frontend's 256-byte field limit without splitting UTF-8.
             if (field.value.size() + value.size() <= 256 && value.find_first_of("\r\n\t") == std::string::npos)
@@ -314,8 +315,8 @@ public:
                 if (i == current)
                     while (cursor - offset > 96) offset = next_char(field.value, offset);
                 label(38, y + 29, field.value.substr(offset), INK, 98);
-                if (field.type == EditorField::Type::Choice) label(WIDTH - 58, y + 29, "<>");
-                else if (i == current)
+                if (field.is_choice()) label(WIDTH - 58, y + 29, "<>");
+                if (field.is_editable() && i == current)
                 {
                     int column = 0;
                     for (size_t pos = offset; pos < cursor; pos = next_char(field.value, pos)) ++column;
@@ -341,7 +342,8 @@ public:
                 if (idx < count)
                 {
                     focus(idx);
-                    if (fields[idx].type == EditorField::Type::Choice) cycle(1);
+                    if (fields[idx].is_choice() && (!fields[idx].is_editable() || event.button.x >= WIDTH - 76))
+                        cycle(1);
                 }
             }
             if (event.type == SDL_EVENT_TEXT_INPUT) insert(event.text.text);
@@ -377,7 +379,7 @@ public:
             case SDLK_PAGEUP: focus(std::max(0, current - rows)); break;
             case SDLK_PAGEDOWN: focus(std::min(count - 1, current + rows)); break;
             case SDLK_TAB:
-                if (choice) cycle((event.key.mod & SDL_KMOD_SHIFT) ? -1 : 1);
+                if (field.is_choice()) cycle((event.key.mod & SDL_KMOD_SHIFT) ? -1 : 1);
                 else focus((current + ((event.key.mod & SDL_KMOD_SHIFT) ? count - 1 : 1)) % count);
                 break;
             case SDLK_LEFT:

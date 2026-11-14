@@ -38,6 +38,7 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -408,6 +409,7 @@ int tui_menu(
  * React to keys pressed:
  * <UP> / <DOWN>, <ENTER>: go to previous/next field, wrapping around
  * <TAB>, <RIGHT> / Shift-<TAB>, <LEFT>: in enum fields, go to next/previous choice
+ * <TAB> / Shift-<TAB>: also cycle suggestions in editable choice fields
  * <F1>: Display field description
  * <F2>: exit form
  * <F3>: quit form
@@ -475,6 +477,18 @@ bool tui_form(const char *title, FormEntry_t entry[], vector<EditorField>& field
         mvwprintw(win, 2 * i + 1, 1, "%s", entry[i].label);
     form_driver(form, REQ_FIRST_FIELD);
     form_driver(form, REQ_END_FIELD);
+    auto cycle_editable_choice = [&](int idx, int direction)
+    {
+        const auto& options = fields[idx].choices;
+        if (options.empty() || form_driver(form, REQ_VALIDATION) != E_OK) return;
+        string value = field_buffer(native[idx], 0);
+        while (!value.empty() && value.back() == ' ') value.pop_back();
+        auto found = find(options.begin(), options.end(), value);
+        int selected = found == options.end() ? (direction > 0 ? -1 : 0) : int(found - options.begin());
+        selected = (selected + direction + int(options.size())) % int(options.size());
+        set_field_buffer(native[idx], 0, options[selected].c_str());
+        form_driver(form, REQ_END_FIELD);
+    };
     bool apply = false, done = false;
     while (!done)
     {
@@ -502,10 +516,20 @@ bool tui_form(const char *title, FormEntry_t entry[], vector<EditorField>& field
         case KEY_UP:
             form_driver(form, idx == 0 ? REQ_LAST_FIELD : REQ_PREV_FIELD);
             form_driver(form, REQ_END_FIELD); break;
-        case MYKEY_TAB: case KEY_RIGHT:
-            form_driver(form, choice ? REQ_NEXT_CHOICE : (key == KEY_RIGHT ? REQ_NEXT_CHAR : REQ_END_FIELD)); break;
-        case KEY_STAB: case KEY_LEFT:
-            form_driver(form, choice ? REQ_PREV_CHOICE : (key == KEY_LEFT ? REQ_PREV_CHAR : REQ_BEG_FIELD)); break;
+        case MYKEY_TAB: case KEY_STAB:
+#if defined(KEY_BTAB) && KEY_BTAB != KEY_STAB
+        case KEY_BTAB:
+#endif
+            if (fields[idx].type == EditorField::Type::EditableChoice)
+                cycle_editable_choice(idx, key == MYKEY_TAB ? 1 : -1);
+            else
+                form_driver(form, choice ? (key == MYKEY_TAB ? REQ_NEXT_CHOICE : REQ_PREV_CHOICE)
+                                         : (key == MYKEY_TAB ? REQ_END_FIELD : REQ_BEG_FIELD));
+            break;
+        case KEY_RIGHT:
+            form_driver(form, choice ? REQ_NEXT_CHOICE : REQ_NEXT_CHAR); break;
+        case KEY_LEFT:
+            form_driver(form, choice ? REQ_PREV_CHOICE : REQ_PREV_CHAR); break;
         case KEY_BACKSPACE: case MYKEY_DEL:
 #ifdef _WIN32
         case 0x08:

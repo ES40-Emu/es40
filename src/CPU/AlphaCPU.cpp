@@ -1013,7 +1013,7 @@ void CAlphaCPU::init()
 		o.dpc_ll_watch_tag = (uint32_t)kDpcLLWatchTag;
 		o.state_cm = (uint32_t)((char*)&state.cm - (char*)this);
 		o.jit_mode_bit = (uint32_t)((char*)&m_jit_mode_bit - (char*)this);
-		o.state_asn = (uint32_t)((char*)&state.asn - (char*)this);
+		o.jit_asn = (uint32_t)((char*)&m_jit_asn - (char*)this);
 		o.dram_ptr = (uint32_t)((char*)&dram_ptr - (char*)this);
 		o.dram_size = (uint32_t)((char*)&dram_size - (char*)this);
 		o.state_pc = (uint32_t)((char*)&state.pc - (char*)this);
@@ -1263,6 +1263,7 @@ static double max_mips = 0.0;
 void CAlphaCPU::jit_note_asn_change()
 {
 #ifdef ES40_JIT
+	sync_instruction_context();
 	if (m_jit)
 		m_jit->note_asn_change();
 #endif
@@ -1272,6 +1273,7 @@ void CAlphaCPU::jit_note_asn_change()
 void CAlphaCPU::jit_note_mode_change()
 {
 #ifdef ES40_JIT
+	sync_instruction_context();
 	if (m_jit)
 		m_jit->note_mode_change();
 	m_link_from = nullptr;
@@ -1498,11 +1500,12 @@ void CAlphaCPU::jit_run(int budget)
 		// Wake CPUs napping on a line this CPU's last chain stored to.
 		cSystem->idle_watch_poll(state.iProcNum);
 		const u64 start_virt = state.pc;
-		const u32 start_asn = (u32)state.asn;
 		const bool start_pal_shadow = (start_virt & 1) && state.sde;
 
 		if (m_profile.instruction_fetch.prepare_dispatch)
 			m_profile.instruction_fetch.prepare_dispatch(*this);
+		const auto start_access = m_profile.mmu_address.access(*this, ACCESS_EXEC);
+		const u32 start_asn = (u32)start_access.asn;
 
 		// Host-side idle detection (JIT only, off by default). A qualifying
 		// sample follows at least 3/4 of the initial dispatch budget's work;
@@ -1567,7 +1570,7 @@ void CAlphaCPU::jit_run(int budget)
 #ifdef JIT_STATS
 				const uint64_t _trace_t0 = jit_rdtsc();
 #endif
-				dpc_sync_bank();
+				sync_native_context();
 				const u32 done = ((CJitEngine::JitFn)t->code)(this, &state.r[0]);
 #ifdef JIT_STATS
 				const uint64_t _trace_tsc = jit_rdtsc() - _trace_t0;
@@ -1614,7 +1617,7 @@ void CAlphaCPU::jit_run(int budget)
 			&& (!(b->tag & 1) || b->pal_shadow == (bool)state.sde))
 		{
 			b->vgen = m_jit->vgen();   // phys validated + lookup proved flush-fresh: refresh the chain epoch
-			m_jit->authorize_native(b, (uint32_t)state.cm);
+			m_jit->authorize_native(b, (uint32_t)start_access.mode);
 #ifdef JIT_TRACES
 			// after a block has dispatched 8x, promote it to a single-block trace (a
 			// future trace head). Dispatch-counted for now -- it undercounts chained loops, but they
@@ -1927,8 +1930,9 @@ void CAlphaCPU::jit_run(int budget)
 				m_jit_vlog_n = vn;
 				m_jit_slog_i = 0;
 				m_jit_slog_n = sn;
-				dpc_sync_bank();
-				m_jit->authorize_native(b, (uint32_t)state.cm); // replay uses the restored mode
+				sync_native_context();
+				const auto replay_access = m_profile.mmu_address.access(*this, ACCESS_EXEC);
+				m_jit->authorize_native(b, (uint32_t)replay_access.mode); // replay uses the restored mode
 				const u32 done = m_jit->run_block(this, jr, b);   // also writes state.pc (the JIT's next PC)
 				m_jit_vreplay = false;
 				if (!vtr && done == b->prefix_len)
@@ -1999,7 +2003,7 @@ void CAlphaCPU::jit_run(int budget)
 						memcpy(jr_t, snap, sizeof(jr_t));
 						m_jit_vreplay = true; m_jit_vmismatch = false; m_jit_vlog_i = 0; m_jit_slog_i = 0;
 						m_jit_vlog_n = vn; m_jit_slog_n = sn;
-						dpc_sync_bank();
+						sync_native_context();
 						const u32 done_t = ((CJitEngine::JitFn)tr->code)(this, jr_t);
 						m_jit_vreplay = false;
 							if (done_t == n_interp) {
@@ -2112,7 +2116,7 @@ void CAlphaCPU::jit_run(int budget)
 #ifdef JIT_STATS
 			const uint64_t _comp_t0 = jit_rdtsc();
 #endif
-			dpc_sync_bank();
+			sync_native_context();
 			const u32 done = m_jit->run_block(this, &state.r[0], b);
 #ifdef JIT_STATS
 			const uint64_t _comp_tsc = jit_rdtsc() - _comp_t0;   // host cycles in this compiled chain
@@ -2986,7 +2990,8 @@ void* CAlphaCPU::jit_indirect_impl(CAlphaCPU* cpu, u64 target, void* link_cache)
 	// Family entry preparation must not be bypassed by an indirect chain.
 	if (!cpu->instruction_source_can_chain(target))
 		return nullptr;
-	CJitEngine::JitBlock* b = cpu->m_jit->lookup(target, (u32)cpu->state.asn,
+	const auto access = cpu->m_profile.mmu_address.access(*cpu, ACCESS_EXEC);
+	CJitEngine::JitBlock* b = cpu->m_jit->lookup(target, (u32)access.asn,
 		(target & 1) && cpu->state.sde);
 	if (!b || !b->jit_body) return nullptr;
 	auto hit = [&](void* body) -> void* {
@@ -2994,7 +2999,7 @@ void* CAlphaCPU::jit_indirect_impl(CAlphaCPU* cpu, u64 target, void* link_cache)
 			cpu->m_jit->patch_edge(link_cache, target,
 				cpu->m_jit->vgen() | (b->pal_shadow ? (U64(1) << 63) : 0), body, b->asm_global,
 				b->jit_body_same_page);
-		cpu->m_jit->jcache_fill(target, b->pal_shadow, body, (u32)cpu->state.asn);
+		cpu->m_jit->jcache_fill(target, b->pal_shadow, body, (u32)access.asn);
 		cpu->m_jit->note_jmp_hit();
 		return body;
 	};
@@ -3014,7 +3019,7 @@ void* CAlphaCPU::jit_indirect_impl(CAlphaCPU* cpu, u64 target, void* link_cache)
 		return nullptr;
 	}
 	b->vgen = gen;                                             // re-validated -> fast path henceforth
-	cpu->m_jit->authorize_native(b, (uint32_t)cpu->state.cm);
+	cpu->m_jit->authorize_native(b, (uint32_t)access.mode);
 	return hit(b->jit_body);
 }
 #endif

@@ -152,7 +152,7 @@ void Ev68IPR::write(CAlphaCPU& cpu, std::uint32_t instruction, std::uint64_t val
       (void)old_cm;
 #endif
       if (context == AlphaIPRWriteContext::Compiled)
-        cpu.dpc_sync_bank();
+        cpu.sync_native_context();
       else
         cpu.flush_data_page_cache();
       cpu.kick_int_if_pending();
@@ -170,7 +170,7 @@ void Ev68IPR::write(CAlphaCPU& cpu, std::uint32_t instruction, std::uint64_t val
       (void)old_cm;
 #endif
       if (context == AlphaIPRWriteContext::Compiled)
-        cpu.dpc_sync_bank();
+        cpu.sync_native_context();
       else
         cpu.flush_data_page_cache();
     }

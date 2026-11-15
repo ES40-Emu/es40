@@ -89,7 +89,7 @@ struct AlphaInstructionFetchPolicy
   AlphaInstructionSourceView (*source)(CAlphaCPU& cpu, std::uint64_t pc) = nullptr;
 
   // Explicit source-coherence promise, separate from the model's execution support.
-  // probe validates current CM/ASN execute access, including PAL targets. Cache
+  // probe validates the selected EXEC mode/ASN, including PAL targets. Cache
   // word/span/availability changes require source invalidation (jit_flush_blocks);
   // an ITB/link epoch bump alone cannot reject changed words at the same identity.
   // Mapping/global/permission/chain-eligibility changes must retire incoming links

@@ -6121,7 +6121,7 @@ static asmjit::Error emit_a64_jump_cache_probe(asmjit::a64::Assembler& a,
   if (err != Error::kOk) return err;
   err = a.b_ne(miss);
   if (err != Error::kOk) return err;
-  err = emit_a64_load_cpu_u32(a, RA::kScratch4.w(), offsets.state_asn);
+  err = emit_a64_load_cpu_u32(a, RA::kScratch4.w(), offsets.jit_asn);
   if (err != Error::kOk) return err;
   err = a.ldr(RA::kScratch3, a64::ptr(RA::kScratch1, (int32_t) offsetof(E, asn)));
   if (err != Error::kOk) return err;
@@ -6770,7 +6770,7 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
   asmjit::Label exec_proof = a.new_label();
   if (a.bind(body) != asmjit::Error::kOk) return;
   if (!pal_block) {
-    // Check instruction access for CM. Static same-page branches enter below
+    // Check the selected execute mode. Static same-page branches enter below
     // this guard; their source checked the same 8 KiB page. The mask lives with
     // the generated code, so reusing a cache slot cannot overwrite it.
     const asmjit::Label authorized = a.new_label();

@@ -319,7 +319,7 @@ public:
     uint32_t dpc_write_row;          // byte distance from read cache [0] to write cache [1] (store fast path)
     uint32_t dpc_bank[2];            // offsets of the selected read/write banks
     uint32_t dpc_ll_watch_tag;       // value: monitored-page marker, not a CPU field offset
-    uint32_t state_cm, jit_mode_bit, state_asn, dram_ptr, dram_size, state_pc, state_current_pc;
+    uint32_t state_cm, jit_mode_bit, jit_asn, dram_ptr, dram_size, state_pc, state_current_pc;
     uint32_t fpen, exc_sum, fpcr, f_base;   // FP inline path: FPSTART gate + FPCR (rounding/INE) + f[] base (f[i] = f_base + i*8)
     uint32_t f_from_r;   // byte distance from state.r[0] to state.f[0]
     // For chaining: the budget ceiling and the interrupt-poll flags the compiled epilogue
@@ -470,7 +470,7 @@ public:
   inline void     note_itb_invalidate(int cause = kBumpTbia) { ++m_itb_gen; ++m_vgen_cur; invalidate_links(cause); }
   // ASN switch: only global-source edges can hold a wrong-ASN successor.
   inline void     note_asn_change()     { invalidate_links_global(); }
-  // Native entry guards check CM; traces still need their links cleared.
+  // Native entry guards check the selected execute mode; traces still need their links cleared.
   inline void     note_mode_change()    { ++m_vgen_cur; invalidate_links_mode(); }
   void authorize_native(JitBlock* block, uint32_t mode); // call after checking instruction access
   // A new proof starts with no modes authorized (epoch 0 never matches m_exec_epoch).

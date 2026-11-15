@@ -3045,9 +3045,9 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
   a.bind(body);
   const size_t body_off = code.code_size();   // byte offset of the chained entry from fn
   if (!pal_block) {
-    // Check instruction access for CM. Static same-page branches use body_same_page;
+    // Check the selected execute mode. Static same-page branches use body_same_page;
     // their source checked the same 8 KiB page. Authorization patches the imm8.
-    // jit_mode_bit is refreshed on C entry and compiled CM writes.
+    // jit_mode_bit is refreshed on native entry and family context changes.
     if (a.test(x86::byte_ptr(x86::rbp, m_off.jit_mode_bit), imm(0)) != Error::kOk)
       return;
     exec_mask_imm_off = a.offset() - 1; // TEST r/m8, imm8 ends with its one-byte immediate
@@ -3586,7 +3586,7 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
       a.mov(x86::rdx, imm((uint64_t) &m_jc_gen)); a.mov(x86::rdx, x86::qword_ptr(x86::rdx));
       a.mov(x86::rcx, x86::qword_ptr(x86::rax, (int32_t) offsetof(JumpCacheEntry, gen)));
       a.btr(x86::rcx, imm(63)); a.cmp(x86::rcx, x86::rdx); a.jne(jc_miss);
-      a.mov(x86::ecx, x86::dword_ptr(x86::rbp, m_off.state_asn));
+      a.mov(x86::ecx, x86::dword_ptr(x86::rbp, m_off.jit_asn));
       a.cmp(x86::qword_ptr(x86::rax, (int32_t) offsetof(JumpCacheEntry, asn)), x86::rcx); a.jne(jc_miss);
       a.test(x86::r10, imm(1)); a.jz(jc_mode_ok);
       a.mov(x86::rcx, x86::qword_ptr(x86::rax, (int32_t) offsetof(JumpCacheEntry, gen))); a.shr(x86::rcx, imm(63));

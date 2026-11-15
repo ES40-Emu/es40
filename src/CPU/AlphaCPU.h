@@ -645,13 +645,18 @@ private:
   u32 m_dpc_bank[2] = {};
   // Derived execution context, outside saved state.
   u32 m_jit_mode_bit = 1;
-  inline void dpc_sync_bank() {
-    const u32 mode = (u32)(state.cm & 3);
+  u32 m_jit_asn = 0;
+  inline void sync_instruction_context() {
+    const auto access = m_profile.mmu_address.access(*this, ACCESS_EXEC);
+    m_jit_mode_bit = 1u << (access.mode & 3);
+    m_jit_asn = (u32)access.asn;
+  }
+  inline void sync_native_context() {
     for (int rw = 0; rw < 2; ++rw) {
       const auto access = m_profile.mmu_address.access(*this, rw ? ACCESS_WRITE : ACCESS_READ);
       m_dpc_bank[rw] = (u32)(access.mode & 3) * kDpcEntries * (u32)sizeof(SDataPageCache);
     }
-    m_jit_mode_bit = 1u << mode;
+    sync_instruction_context();
   }
   inline SDataPageCache& dpc_slot(int rw, u64 va, int mode) { return data_page_cache[rw][((mode & 3) << kDpcBits) | dpc_index(va)]; }
   static_assert(sizeof(SDataPageCache) == 32, "DPC slots stay power-of-two for JIT shift indexing");

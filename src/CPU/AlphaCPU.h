@@ -619,7 +619,7 @@ private:
 
   // Data page translation cache: direct-mapped by virtual page (kDpcEntries slots/dir) so a
   // multi-page access pattern doesn't thrash a single slot. The inline load checks one slot.
-  // Cached normal accesses use the current CM/ASN0 context; family control writes that
+  // Cached normal accesses use the family-selected mode/ASN; control writes that
   // affect address rules must invalidate it. Privileged VPTE/ALT accesses bypass it.
   static constexpr int kDpcBits    = 7;                  // 128 slots per mode bank (8KB pages -> 1 MB)
   // Page-indexed hint into state.tb[]: FindTBEntry and add_tb probe it before anything else.
@@ -637,21 +637,23 @@ private:
     u64  virt_page;   // va & ~0x1FFF; write row may include kDpcLLWatchTag
     u64  phys_base;   // pa & ~0x1FFF
     u64  host_bias;   // dram_ptr + phys_base - unmarked VA page; 0 for MMIO (host = bias + va)
-    u8   cm;          // current mode (CM) at fill time
-    u8   asn;         // data ASN (asn0) at fill time
+    u8   cm;          // selected mode at fill time
+    u8   asn;         // selected data ASN at fill time
     bool valid;
   } data_page_cache[2][4 * kDpcEntries];  // [rw][cm bank | dpc_index(va)]; [0]=read, [1]=write
-  // Byte offset of the current mode's bank; compiled code adds it to the slot index, so a CM
-  // change selects another bank instead of flushing. Kept in step by dpc_sync_bank().
-  u32 m_dpc_bank = 0;
+  // Read/write bank offsets, refreshed on native entry and family context writes.
+  u32 m_dpc_bank[2] = {};
   // Derived execution context, outside saved state.
   u32 m_jit_mode_bit = 1;
   inline void dpc_sync_bank() {
     const u32 mode = (u32)(state.cm & 3);
-    m_dpc_bank = mode * kDpcEntries * (u32)sizeof(SDataPageCache);
+    for (int rw = 0; rw < 2; ++rw) {
+      const auto access = m_profile.mmu_address.access(*this, rw ? ACCESS_WRITE : ACCESS_READ);
+      m_dpc_bank[rw] = (u32)(access.mode & 3) * kDpcEntries * (u32)sizeof(SDataPageCache);
+    }
     m_jit_mode_bit = 1u << mode;
   }
-  inline SDataPageCache& dpc_slot(int rw, u64 va) { return data_page_cache[rw][((state.cm & 3) << kDpcBits) | dpc_index(va)]; }
+  inline SDataPageCache& dpc_slot(int rw, u64 va, int mode) { return data_page_cache[rw][((mode & 3) << kDpcBits) | dpc_index(va)]; }
   static_assert(sizeof(SDataPageCache) == 32, "DPC slots stay power-of-two for JIT shift indexing");
 
   inline void flush_data_page_cache() {
@@ -782,8 +784,7 @@ private:
     std::atomic<bool> check_timers; /**< Delayed-irq countdown pending; set cross-thread by irq_h() */
     bool  fpen;           /**< IPR PCTX: fpe (floating point enable) [HRM p 5-21..23] */
     int   cm;           /**< IPR IER_CM: cm (current mode) [HRM p 5-9..10] */
-    int   asn0;         /**< IPR DTB_ASN0: data ASN [HRM p 5-28]. Kept right after cm so the JIT dpc
-                             check loads {cm,asn0} as one 8-byte compare vs the slot's {cm,asn}. */
+    int   asn0;         /**< IPR DTB_ASN0: data ASN [HRM p 5-28] */
     int   asn;          /**< IPR PCTX: asn (address space number) [HRM p 5-21..22] */
     u64   exc_addr;     /**< IPR EXC_ADDR: address of last exception [HRM p 5-8] */
 

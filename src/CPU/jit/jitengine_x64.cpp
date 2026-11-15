@@ -783,7 +783,7 @@ static void emit_cold_mem_stub(asmjit::x86::Assembler& a, const uint8_t* gpa,
       a.shr(x86::r11, imm(13)); a.and_(x86::r11, imm(off.dpc_mask));
       a.imul(x86::r11, x86::r11, imm(off.dpc_stride));
     }
-    a.add(x86::r11d, x86::dword_ptr(x86::rbp, (int32_t) off.dpc_bank));   // current mode's bank
+    a.add(x86::r11d, x86::dword_ptr(x86::rbp, (int32_t) off.dpc_bank[s.kind == ColdMemStub::STORE]));   // selected data bank
     const int row = (s.kind == ColdMemStub::STORE) ? (int)off.dpc_write_row : 0;
     a.mov(x86::r10, x86::qword_ptr(x86::rbp, x86::r11, 0, row + (int)off.dpc_host_bias));
 
@@ -1160,7 +1160,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         };
 #endif
 
-        auto emit_dpc_offset = [&]() {
+        auto emit_dpc_offset = [&](bool is_write) {
             uint32_t shift = 0;
             while ((1u << shift) < m_off.dpc_stride) ++shift;
             if ((1u << shift) == m_off.dpc_stride && shift <= 13) {
@@ -1181,7 +1181,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                 a.and_(x86::r11, imm(m_off.dpc_mask));
                 a.imul(x86::r11, x86::r11, imm(m_off.dpc_stride));
             }
-            a.add(x86::r11d, x86::dword_ptr(x86::rbp, (int32_t) m_off.dpc_bank));   // current mode's bank
+            a.add(x86::r11d, x86::dword_ptr(x86::rbp, (int32_t) m_off.dpc_bank[is_write]));   // selected data bank
             };
         auto emit_address = [&](int disp) {
             if (rb == 31) {
@@ -1254,7 +1254,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                 a.cmp(x86::qword_ptr(x86::rbp, x86::r11, 0, m_off.dpc_virt_page), x86::rax);
                 a.je(dpc_ready);
             }
-            emit_dpc_offset();
+            emit_dpc_offset(false);
             a.mov(x86::r10, x86::rdx);
             a.and_(x86::r10, imm(tag_mask));
             a.cmp(x86::qword_ptr(x86::rbp, x86::r11, 0, m_off.dpc_virt_page), x86::r10); a.jne(slow);
@@ -1355,7 +1355,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                     a.je(watched_reuse); // same page + aligned: keep slot/bias
                 }
             }
-            emit_dpc_offset();
+            emit_dpc_offset(true);
             a.mov(x86::r10, x86::rdx);
             a.and_(x86::r10, imm(tag_mask));
             a.cmp(x86::qword_ptr(x86::rbp, x86::r11, 0,
@@ -1461,7 +1461,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             const Label raw_store = a.new_label();
             a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0));                          a.je(slow);   // fpen==0 -> FEN trap
             emit_fp_start_summary();
-            emit_dpc_offset();
+            emit_dpc_offset(!isload);
             const int dpc_row = isload ? 0 : (int)m_off.dpc_write_row;
             a.mov(x86::r10, x86::rdx);
             // Page tags have zero alignment bits, including watched tags (marker bit 3).
@@ -3133,6 +3133,7 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
     if (host_has_bmi2()) a.rorx(x86::rax, x86::r12, imm(8));
     else { a.mov(x86::rax, x86::r12); a.shr(x86::rax, imm(8)); }
     a.and_(x86::rax, imm(0x7e0));
+    a.add(x86::eax, x86::dword_ptr(x86::rbp, (int32_t)m_off.dpc_bank[0]));
     a.cmp(x86::qword_ptr(x86::rbp, x86::rax, 0, m_off.dpc_virt_page), x86::r10);
     a.jne(normal);
     a.mov(x86::r10, x86::qword_ptr(x86::rbp, x86::rax, 0, m_off.dpc_host_bias));
@@ -3349,6 +3350,7 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
       if (host_has_bmi2()) a.rorx(x86::rax, va, imm(8));  // stride=32: ((va>>13)&63)<<5
       else { a.mov(x86::rax, va); a.shr(x86::rax, imm(8)); }
       a.and_(x86::rax, imm(0x7e0));
+      a.add(x86::eax, x86::dword_ptr(x86::rbp, (int32_t)m_off.dpc_bank[0]));
       a.cmp(x86::qword_ptr(x86::rbp, x86::rax, 0, m_off.dpc_virt_page), x86::r10);
       a.jne(normal);
       a.mov(bias, x86::qword_ptr(x86::rbp, x86::rax, 0, m_off.dpc_host_bias));

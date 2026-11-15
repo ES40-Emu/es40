@@ -3319,8 +3319,8 @@ static asmjit::Error emit_a64_dpc_field(A64EmitContext& c, const asmjit::a64::Gp
   return err != Error::kOk ? err : a.ldr(dst, a64::ptr(RA::kScratch0));
 }
 
-// kScratch6 = cpu + ((va >> 13) & dpc_mask) * dpc_stride.
-static asmjit::Error emit_a64_dpc_slot(A64EmitContext& c)
+// kScratch6 = cpu + selected bank + page-slot offset.
+static asmjit::Error emit_a64_dpc_slot(A64EmitContext& c, bool is_write)
 {
   using RA = CJitEngine::RegAlloc;
   using namespace asmjit;
@@ -3344,7 +3344,7 @@ static asmjit::Error emit_a64_dpc_slot(A64EmitContext& c)
     if (err == Error::kOk) err = a.mul(RA::kScratch5, RA::kScratch5, RA::kScratch1);
   }
   if (err != Error::kOk) return err;
-  err = emit_a64_load_cpu_u32(a, RA::kScratch1.w(), c.offsets.dpc_bank);   // current mode's bank
+  err = emit_a64_load_cpu_u32(a, RA::kScratch1.w(), c.offsets.dpc_bank[is_write]);   // selected data bank
   if (err != Error::kOk) return err;
   err = a.add(RA::kScratch5, RA::kScratch5, RA::kScratch1);
   return err != Error::kOk ? err : a.add(RA::kScratch6, RA::kCpu, RA::kScratch5);
@@ -3397,7 +3397,7 @@ static asmjit::Error emit_a64_dpc_probe(A64EmitContext& c, int size_bits,
     const asmjit::Label* watched = nullptr)
 {
   using namespace asmjit;
-  asmjit::Error err = emit_a64_dpc_slot(c);
+  asmjit::Error err = emit_a64_dpc_slot(c, is_write);
   if (err == asmjit::Error::kOk)
     err = emit_a64_dpc_tag_cmp(c, a64_dpc_tag_mask(size_bits, force_align), is_write);
   if (watched) {
@@ -3423,7 +3423,7 @@ static asmjit::Error emit_a64_dpc_rederive(A64EmitContext& c, const A64DecodedOp
   c.prev_fwd = -1;
   asmjit::Error err = emit_a64_mem_va(c, op, force_align);
   c.prev_fwd = saved_fwd;
-  if (err == asmjit::Error::kOk) err = emit_a64_dpc_slot(c);
+  if (err == asmjit::Error::kOk) err = emit_a64_dpc_slot(c, is_write);
   return err != asmjit::Error::kOk ? err : emit_a64_dpc_bias(c, is_write);
 }
 

@@ -586,17 +586,18 @@ inline u64 fsqrt64(u64 asig, s32 exp)
     u64 _dpc_va = (addr);                                                       \
     if constexpr (((flags) & ~ACCESS_WRITE) == 0) {                             \
       /* Normal read/write — try data page cache. The hit must match the      \
-         current mode (cm) and data ASN (asn0): a hit bypasses virt2phys, so   \
+         family-selected mode and data ASN: a hit bypasses virt2phys, so     \
          the per-mode protection check and ASN tag are only safe to skip when  \
          both are unchanged from fill time (HRM: protection is per-mode, per   \
          address space). */                                                     \
       int _dpc_rw = (flags) & ACCESS_WRITE;                                     \
       u64 _dpc_vp = _dpc_va & ~U64(0x1FFF);                                     \
-      SDataPageCache& _dpc = dpc_slot(_dpc_rw, _dpc_va);                         \
+      const auto _dpc_access = m_profile.mmu_address.access(*this, flags);    \
+      SDataPageCache& _dpc = dpc_slot(_dpc_rw, _dpc_va, _dpc_access.mode);    \
       if ((_dpc.virt_page & ~(_dpc_rw ? kDpcLLWatchTag : 0)) == _dpc_vp       \
           && _dpc.valid                                                         \
-          && _dpc.cm  == state.cm                                              \
-          && _dpc.asn == state.asn0) {                                          \
+          && _dpc.cm  == _dpc_access.mode                                     \
+          && _dpc.asn == _dpc_access.asn) {                                   \
         phys_address = _dpc.phys_base | (_dpc_va & U64(0x1FFF));                \
       } else {                                                                  \
         if (virt2phys(_dpc_va, &phys_address, flags, NULL, ins))                \
@@ -608,8 +609,8 @@ inline u64 fsqrt64(u64 asig, s32 exp)
         _dpc.virt_page = _dpc.host_bias                                         \
           ? (_dpc_rw ? write_dpc_tag(_dpc_vp, phys_address) : _dpc_vp)           \
           : ~U64(0);                                                           \
-        _dpc.cm        = state.cm;                                              \
-        _dpc.asn       = state.asn0;                                            \
+        _dpc.cm        = _dpc_access.mode;                                    \
+        _dpc.asn       = _dpc_access.asn;                                     \
         _dpc.valid     = _dpc.host_bias != 0;                                   \
       }                                                                         \
     } else {                                                                    \

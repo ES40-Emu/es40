@@ -1008,11 +1008,11 @@ void CAlphaCPU::init()
 		o.dpc_stride = (uint32_t)sizeof(data_page_cache[0][0]);
 		o.dpc_mask = (uint32_t)kDpcMask;
 		o.dpc_write_row = (uint32_t)((char*)&data_page_cache[1][0] - (char*)&data_page_cache[0][0]);
-		o.dpc_bank = (uint32_t)((char*)&m_dpc_bank - (char*)this);
+		o.dpc_bank[0] = (uint32_t)((char*)&m_dpc_bank[0] - (char*)this);
+		o.dpc_bank[1] = (uint32_t)((char*)&m_dpc_bank[1] - (char*)this);
 		o.dpc_ll_watch_tag = (uint32_t)kDpcLLWatchTag;
 		o.state_cm = (uint32_t)((char*)&state.cm - (char*)this);
 		o.jit_mode_bit = (uint32_t)((char*)&m_jit_mode_bit - (char*)this);
-		o.state_asn0 = (uint32_t)((char*)&state.asn0 - (char*)this);
 		o.state_asn = (uint32_t)((char*)&state.asn - (char*)this);
 		o.dram_ptr = (uint32_t)((char*)&dram_ptr - (char*)this);
 		o.dram_size = (uint32_t)((char*)&dram_size - (char*)this);
@@ -2252,14 +2252,15 @@ int CAlphaCPU::jit_unaligned_rw(CAlphaCPU* cpu, u64 va, int size_bits, u32 ins, 
 	const u64 va_last = va + n - 1;
 	const int n1 = (int)(0x2000 - (va & U64(0x1FFF)));   // bytes on the first page
 	u64 phys[2];
+	const auto access = cpu->m_profile.mmu_address.access(*cpu, rw ? ACCESS_WRITE : ACCESS_READ);
 	for (int k = 0; k < 2; ++k)
 	{
 		const u64 a = k ? va_last : va;
 		if (k && ((va ^ va_last) >> 13) == 0) { phys[1] = phys[0] + n - 1; break; }
 		const u64 vp = a & ~U64(0x1FFF);
-		SDataPageCache& dpc = cpu->dpc_slot(rw, a);
+		SDataPageCache& dpc = cpu->dpc_slot(rw, a, access.mode);
 		if ((dpc.virt_page & ~(rw ? kDpcLLWatchTag : 0)) == vp
-			&& dpc.valid && dpc.cm == cpu->state.cm && dpc.asn == cpu->state.asn0)
+			&& dpc.valid && dpc.cm == access.mode && dpc.asn == access.asn)
 			phys[k] = dpc.phys_base | (a & U64(0x1FFF));
 		else
 		{
@@ -2269,8 +2270,8 @@ int CAlphaCPU::jit_unaligned_rw(CAlphaCPU* cpu, u64 va, int size_bits, u32 ins, 
 				? ((u64)cpu->dram_ptr + (phys[k] & ~U64(0x1FFF)) - vp) : 0;
 			dpc.virt_page = dpc.host_bias
 				? (rw ? cpu->write_dpc_tag(vp, phys[k]) : vp) : ~U64(0);
-			dpc.cm = (u8)cpu->state.cm;
-			dpc.asn = (u8)cpu->state.asn0;
+			dpc.cm = (u8)access.mode;
+			dpc.asn = (u8)access.asn;
 			dpc.valid = dpc.host_bias != 0;
 		}
 	}
@@ -2300,9 +2301,10 @@ int CAlphaCPU::jit_read(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 		                              : cpu->jit_unalign(va, ins, ACCESS_READ, (int)amask);
 
 	u64 phys;
+	const auto access = cpu->m_profile.mmu_address.access(*cpu, ACCESS_READ);
 	const u64 vp = va & ~U64(0x1FFF);
-	SDataPageCache& dpc = cpu->dpc_slot(0, va);
-	if (dpc.virt_page == vp && dpc.valid && dpc.cm == cpu->state.cm && dpc.asn == cpu->state.asn0)
+	SDataPageCache& dpc = cpu->dpc_slot(0, va, access.mode);
+	if (dpc.virt_page == vp && dpc.valid && dpc.cm == access.mode && dpc.asn == access.asn)
 	{
 		phys = dpc.phys_base | (va & U64(0x1FFF));
 	}
@@ -2321,7 +2323,6 @@ int CAlphaCPU::jit_read(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 		{
 			// Verify/legacy callers do not carry an instruction word and retain the old
 			// side-effect-free retry contract.
-			const auto access = cpu->m_profile.mmu_address.access(*cpu, ACCESS_READ);
 			const int i = cpu->FindTBEntry(va, ACCESS_READ, access.asn);
 			if (i < 0) return 1;
 			const auto& e = cpu->state.tb[TB_INDEX_DATA][i];
@@ -2332,8 +2333,8 @@ int CAlphaCPU::jit_read(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 		dpc.host_bias = ((phys | U64(0x1FFF)) < cpu->dram_size)
 			? ((u64)cpu->dram_ptr + (phys & ~U64(0x1FFF)) - vp) : 0;
 		dpc.virt_page = dpc.host_bias ? vp : ~U64(0);
-		dpc.cm = (u8)cpu->state.cm;
-		dpc.asn = (u8)cpu->state.asn0;
+		dpc.cm = (u8)access.mode;
+		dpc.asn = (u8)access.asn;
 		dpc.valid = dpc.host_bias != 0;
 	}
 
@@ -2559,9 +2560,10 @@ int CAlphaCPU::jit_read_locked(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 	if (va & amask) return cpu->jit_unalign(va, ins, ACCESS_READ, (int)amask);
 
 	u64 phys;
+	const auto access = cpu->m_profile.mmu_address.access(*cpu, ACCESS_READ);
 	const u64 vp = va & ~U64(0x1FFF);
-	SDataPageCache& dpc = cpu->dpc_slot(0, va);
-	if (dpc.virt_page == vp && dpc.valid && dpc.cm == cpu->state.cm && dpc.asn == cpu->state.asn0)
+	SDataPageCache& dpc = cpu->dpc_slot(0, va, access.mode);
+	if (dpc.virt_page == vp && dpc.valid && dpc.cm == access.mode && dpc.asn == access.asn)
 	{
 		phys = dpc.phys_base | (va & U64(0x1FFF));
 	}
@@ -2579,7 +2581,6 @@ int CAlphaCPU::jit_read_locked(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 		{
 			// Differential replay retains the side-effect-free lookup used by the
 			// interpreter.
-			const auto access = cpu->m_profile.mmu_address.access(*cpu, ACCESS_READ);
 			const int i = cpu->FindTBEntry(va, ACCESS_READ, access.asn);
 			if (i < 0) return 1;
 			const auto& e = cpu->state.tb[TB_INDEX_DATA][i];
@@ -2590,8 +2591,8 @@ int CAlphaCPU::jit_read_locked(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 		dpc.host_bias = ((phys | U64(0x1FFF)) < cpu->dram_size)
 			? ((u64)cpu->dram_ptr + (phys & ~U64(0x1FFF)) - vp) : 0;
 		dpc.virt_page = dpc.host_bias ? vp : ~U64(0);
-		dpc.cm = (u8)cpu->state.cm;
-		dpc.asn = (u8)cpu->state.asn0;
+		dpc.cm = (u8)access.mode;
+		dpc.asn = (u8)access.asn;
 		dpc.valid = dpc.host_bias != 0;
 	}
 
@@ -2795,10 +2796,11 @@ int CAlphaCPU::jit_write(CAlphaCPU* cpu, u64 va, u64 descr, u64 value)
 	}
 
 	u64 phys;
+	const auto access = cpu->m_profile.mmu_address.access(*cpu, ACCESS_WRITE);
 	const u64 vp = va & ~U64(0x1FFF);
-	SDataPageCache& dpc = cpu->dpc_slot(1, va);
+	SDataPageCache& dpc = cpu->dpc_slot(1, va, access.mode);
 	if ((dpc.virt_page & ~kDpcLLWatchTag) == vp
-		&& dpc.valid && dpc.cm == cpu->state.cm && dpc.asn == cpu->state.asn0)
+		&& dpc.valid && dpc.cm == access.mode && dpc.asn == access.asn)
 	{
 		phys = dpc.phys_base | (va & U64(0x1FFF));
 	}
@@ -2813,7 +2815,6 @@ int CAlphaCPU::jit_write(CAlphaCPU* cpu, u64 va, u64 descr, u64 value)
 		}
 		else
 		{
-			const auto access = cpu->m_profile.mmu_address.access(*cpu, ACCESS_WRITE);
 			const int i = cpu->FindTBEntry(va, ACCESS_WRITE, access.asn);
 			if (i < 0) return 1;
 			const auto& e = cpu->state.tb[TB_INDEX_DATA][i];
@@ -2824,8 +2825,8 @@ int CAlphaCPU::jit_write(CAlphaCPU* cpu, u64 va, u64 descr, u64 value)
 		dpc.host_bias = ((phys | U64(0x1FFF)) < cpu->dram_size)
 			? ((u64)cpu->dram_ptr + (phys & ~U64(0x1FFF)) - vp) : 0;
 		dpc.virt_page = dpc.host_bias ? cpu->write_dpc_tag(vp, phys) : ~U64(0);
-		dpc.cm = (u8)cpu->state.cm;
-		dpc.asn = (u8)cpu->state.asn0;
+		dpc.cm = (u8)access.mode;
+		dpc.asn = (u8)access.asn;
 		dpc.valid = dpc.host_bias != 0;
 	}
 
@@ -2894,10 +2895,11 @@ u64 CAlphaCPU::jit_stc(CAlphaCPU* cpu, u64 va, u64 descr, u64 value)
 	// Side-effect-free write-path translation (mirror jit_write); bail to the interpreter on a TB
 	// miss / protection / fault-on-write so it does the side-effecting translation.
 	u64 phys;
+	const auto access = cpu->m_profile.mmu_address.access(*cpu, ACCESS_WRITE);
 	const u64 vp = va & ~U64(0x1FFF);
-	SDataPageCache& dpc = cpu->dpc_slot(1, va);
+	SDataPageCache& dpc = cpu->dpc_slot(1, va, access.mode);
 	if ((dpc.virt_page & ~kDpcLLWatchTag) == vp
-		&& dpc.valid && dpc.cm == cpu->state.cm && dpc.asn == cpu->state.asn0)
+		&& dpc.valid && dpc.cm == access.mode && dpc.asn == access.asn)
 	{
 		phys = dpc.phys_base | (va & U64(0x1FFF));
 	}
@@ -2906,7 +2908,6 @@ u64 CAlphaCPU::jit_stc(CAlphaCPU* cpu, u64 va, u64 descr, u64 value)
 #if defined(JIT_REGPROF) && defined(_WIN32)
 		cpu->m_dpc_miss[dpc.virt_page == ~U64(0) ? 0 : (dpc.virt_page & ~kDpcLLWatchTag) != vp ? 1 : 2]++;
 #endif
-		const auto access = cpu->m_profile.mmu_address.access(*cpu, ACCESS_WRITE);
 		const auto address = cpu->m_profile.mmu_address.map(*cpu, va, ACCESS_WRITE, access.mode);
 		if (address.kind == AlphaMMUAddressKind::Direct)
 			phys = address.phys;                                             // KSEG: never in the TB
@@ -2924,8 +2925,8 @@ u64 CAlphaCPU::jit_stc(CAlphaCPU* cpu, u64 va, u64 descr, u64 value)
 		dpc.host_bias = ((phys | U64(0x1FFF)) < cpu->dram_size)
 			? ((u64)cpu->dram_ptr + (phys & ~U64(0x1FFF)) - vp) : 0;
 		dpc.virt_page = dpc.host_bias ? cpu->write_dpc_tag(vp, phys) : ~U64(0);
-		dpc.cm = (u8)cpu->state.cm;
-		dpc.asn = (u8)cpu->state.asn0;
+		dpc.cm = (u8)access.mode;
+		dpc.asn = (u8)access.asn;
 		dpc.valid = dpc.host_bias != 0;
 	}
 

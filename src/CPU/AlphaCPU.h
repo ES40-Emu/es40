@@ -266,6 +266,7 @@ class CAlphaCPU : public CSystemComponent, public CRunnable
   friend class Ev68ArithmeticTrap;
   friend class Ev68IEEETrap;
   friend class Ev68Reset;
+  friend class Ev68CPUState;
   friend class Ev68InstructionFetch;
 public:
   void          flush_icache_asm();

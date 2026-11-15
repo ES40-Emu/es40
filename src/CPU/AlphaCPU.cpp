@@ -361,6 +361,7 @@
 #include <intrin.h>       // _WriteStatusReg: pin host FPCR for the JIT A64 FP path
 #endif
 #include <thread>        // std::this_thread::sleep_for (idle_nap)
+#include <vector>
 
 void CAlphaCPU::release_threads()
 {
@@ -959,9 +960,14 @@ CAlphaCPU::CAlphaCPU(CConfigurator* cfg, CSystem* system, const AlphaCPUProfile&
  **/
 void CAlphaCPU::init()
 {
+#if defined(ES40_JIT) && defined(JIT_VERIFY)
+	if (!m_profile.cpu_state.verify.valid())
+		FAILURE(Configuration, "Incomplete CPU verifier policy");
+#endif
 	memset(&state, 0, sizeof(state));
 	reset_idle_detector();
-	last_dtb_virt[0] = last_dtb_virt[1] = 0;
+	if (m_profile.cpu_state.replaced)
+		m_profile.cpu_state.replaced(*this);
 	cc_last_read = 0;   // rpcc_read floor state tracks state.cc -- reset together
 	cc_borrow = 0;
 	cc_wall_remainder = 0;
@@ -1108,7 +1114,8 @@ void CAlphaCPU::ResetForSystemReset()
 	m_idle_armed = false;
 	memset(&state, 0, sizeof(state));
 	reset_idle_detector();
-	last_dtb_virt[0] = last_dtb_virt[1] = 0;
+	if (m_profile.cpu_state.replaced)
+		m_profile.cpu_state.replaced(*this);
 	cc_last_read = 0;   // rpcc_read floor state tracks state.cc -- reset together
 	cc_borrow = 0;
 	cc_wall_remainder = 0;
@@ -1698,64 +1705,20 @@ void CAlphaCPU::jit_run(int budget)
 			memcpy(snap, state.r, sizeof(snap));
 			u64 f_pre[64];  // FP file before the interp pass -- restored before the compiled pass below
 			memcpy(f_pre, state.f, sizeof(f_pre));   // so the compiled FP ops read the same f[] the interp did
-			// I_CTL/CM/SIRR + PCTX fields (HW_MFPR 0x40-7f reads astrr/aster/fpen/ppcen) are read-modify-written; a HW_MFPR reads, a later HW_MTPR writes,
-			// so the interp pass writes before the compiled pass's HW_MFPR reads. Snapshot the read-back
-			// fields here and restore them before b->code() below -- like snap/f_pre do for GPRs/FP.
-			const bool ictl_sde_pre = state.sde, ictl_hwe_pre = state.hwe;
-			const int  ictl_spe_pre = state.i_ctl_spe, ictl_vam_pre = state.i_ctl_va_mode;
-			const u64  ictl_vptb_pre = state.i_ctl_vptb, ictl_other_pre = state.i_ctl_other;
-			const int  cm_pre = state.cm, sir_pre = state.sir;   // CM/SIRR read-back (HW_MFPR CM/SIRR)
-			const int  aster_pre = state.aster, astrr_pre = state.astrr;   // AST/FPEN/PPCEN read-back via the
-			const int  fpen_pre = state.fpen, ppcen_pre = state.ppcen;     // PCTX group (HW_MFPR 0x40-7f)
-			const u64 exc_addr_pre = state.exc_addr; // Live input to IPR reads and family PAL returns.
-			// EXC_SUM REG[12:8] (HRM 5.2.13) reports the trapping op's dest register -- report state,
-			// not execution state, and which pass recorded it differs benignly. Compare the exception
-			// bits strictly, mask the REG field.
-			auto ipr_ne = [](int ii, u64 x, u64 y) {
-				if (ii == 13) { x &= ~U64(0x1f00); y &= ~U64(0x1f00); }
-				return x != y;
-			};
-			const u64  exc_sum_pre = state.exc_sum, fpcr_pre = state.fpcr; // Restore both before replay so reads
-			                                                               // see pre-span state, not the
-			                                                               // interpreter's final values.
-			// HW_MTPR verify: a compiled block writes IPR fields directly in LIVE state (its GPR
-			// writes go to jr scratch). cap_iprs snapshots the writable IPR set (the per-boundary
-			// snapshots below and the post-pass compares both use it); put_iprs restores it. Mostly
-			// pure stores; I_CTL is read-modify-written, so it's also reset pre-pass (ictl_*_pre,
-			// above). Keep this list in sync with jit_hw_mtpr.
-			constexpr int kVerifyIPRCount = 28;
+			const auto& verify = m_profile.cpu_state.verify;
+			const int ipr_count = verify.word_count;
 			auto cap_iprs = [&](u64* d) {
-				d[0] = state.last_tb_virt; d[1] = last_dtb_virt[0]; d[2] = last_dtb_virt[1];
-				d[3] = state.pctr_ctl; d[4] = state.dc_ctl; d[5] = (u64)state.cc_offset; d[6] = (u64)(u32)state.alt_cm;
-				// IER enables; check_int not snapshotted (rolling it back could suppress a poll)
-				d[7] = (u64)(u32)state.asten; d[8] = (u64)(u32)state.sien; d[9] = (u64)(u32)state.pcen;
-				d[10] = (u64)(u32)state.cren; d[11] = (u64)(u32)state.slen; d[12] = (u64)(u32)state.eien;
-				d[13] = state.exc_sum;   // FPSTART may clear it (compiled ITOFx/FTOIx/FLTL)
-				d[14] = state.fpcr;      // MT_FPCR (compiled FLTL) writes it
-				d[15] = (u64)state.sde; d[16] = (u64)state.hwe;            // I_CTL (compiled as terminator)
-				d[17] = (u64)(u32)state.i_ctl_spe; d[18] = (u64)(u32)state.i_ctl_va_mode;
-				d[19] = state.i_ctl_vptb; d[20] = state.i_ctl_other;
-				d[21] = (u64)(u32)state.cm;    d[22] = (u64)(u32)state.sir;     // CM, SIRR
-				d[23] = (u64)(u32)state.aster; d[24] = (u64)(u32)state.astrr;   // 0x40-group ASTER/ASTRR
-				d[25] = (u64)(u32)state.fpen;  d[26] = (u64)(u32)state.ppcen;   // 0x40-group FPEN/PPCEN
-				d[27] = state.exc_addr;   // PAL entry writes it; family returns may read it.
-				};
+				if (ipr_count) verify.capture(*this, d);
+			};
 			auto put_iprs = [&](const u64* s) {
-				state.last_tb_virt = s[0]; last_dtb_virt[0] = s[1]; last_dtb_virt[1] = s[2];
-				state.pctr_ctl = s[3]; state.dc_ctl = s[4]; state.cc_offset = (u32)s[5]; state.alt_cm = (int)s[6];
-				state.asten = (int)s[7]; state.sien = (int)s[8]; state.pcen = (int)s[9];
-				state.cren = (int)s[10]; state.slen = (int)s[11]; state.eien = (int)s[12];
-				state.exc_sum = s[13];
-				state.fpcr = s[14];
-				state.sde = (bool)s[15]; state.hwe = (bool)s[16];
-				state.i_ctl_spe = (int)s[17]; state.i_ctl_va_mode = (int)s[18];
-				state.i_ctl_vptb = s[19]; state.i_ctl_other = s[20];
-				state.cm = (int)s[21]; state.sir = (int)s[22];
-				flush_data_page_cache();
-				state.aster = (int)s[23]; state.astrr = (int)s[24];
-				state.fpen = (int)s[25]; state.ppcen = (int)s[26];
-				state.exc_addr = s[27];
-				};
+				if (ipr_count) verify.restore(*this, s);
+			};
+			auto ipr_ne = [&](int ii, u64 x, u64 y, bool side_exit = false) {
+				return verify.differs(ii, x, y, side_exit);
+			};
+			// Capture family inputs before the authoritative interpreter pass.
+			std::vector<u64> ipr_pre(ipr_count);
+			cap_iprs(ipr_pre.data());
 			// Side-exit-shaped verify: snapshot the interp reference at EVERY fused-block boundary it 
 			// crosses, so a compiled trace/region that legitimately exits early is compared AT ITS EXIT
 			// instead of being flagged as mismatch. Today's verify traces have no interior gates, so the
@@ -1767,7 +1730,7 @@ void CAlphaCPU::jit_run(int budget)
 			u64 bnd_pc[CJitEngine::kMaxTraceSegs];        // interp pc at boundary (the resume PC)
 			u64 bnd_r[CJitEngine::kMaxTraceSegs][64];     // GPRs incl. PALshadow bank
 			u64 bnd_f[CJitEngine::kMaxTraceSegs][64];     // FP file
-			u64 bnd_ipr[CJitEngine::kMaxTraceSegs][kVerifyIPRCount];   // cap_iprs set
+			std::vector<u64> bnd_ipr((size_t)CJitEngine::kMaxTraceSegs * ipr_count);   // cap_iprs set
 			u32 source_words[16] = {};   // observed backing words, copied before execution
 			u32 verify_words[16] = {};   // actual reference instructions for mismatch diagnostics
 			u32 vn = 0;   // loads recorded for replay
@@ -1937,7 +1900,7 @@ void CAlphaCPU::jit_run(int budget)
 					bnd_cnt[n_bnd] = n_interp; bnd_vn[n_bnd] = vn; bnd_sn[n_bnd] = sn; bnd_pc[n_bnd] = state.pc;
 					memcpy(bnd_r[n_bnd], state.r, sizeof(bnd_r[0]));
 					memcpy(bnd_f[n_bnd], state.f, sizeof(bnd_f[0]));
-					cap_iprs(bnd_ipr[n_bnd]);
+					if (ipr_count) cap_iprs(bnd_ipr.data() + (size_t)n_bnd * ipr_count);
 					n_bnd++;
 				}
 				if (vtr && seg + 1 < nseg && state.pc != vtr->segs[seg + 1].guest_pc) break;   // path left the fused trace -> side-exit
@@ -1946,8 +1909,8 @@ void CAlphaCPU::jit_run(int budget)
 			{
 				// (cap_iprs/put_iprs are defined above the interp reference pass -- the per-boundary
 				// side-exit snapshots need them there.)
-				u64 ipr_interp[kVerifyIPRCount];
-				cap_iprs(ipr_interp);
+				std::vector<u64> ipr_interp(ipr_count);
+				cap_iprs(ipr_interp.data());
 				// FP file: compiled ITOFx writes state.f live (like the IPR writes); snapshot the
 				// interp pass's result, compare after the compiled pass, then restore.
 				u64 f_interp[64];
@@ -1955,16 +1918,7 @@ void CAlphaCPU::jit_run(int budget)
 				u64 jr[64];   // 64: a compiled PALmode block may touch the shadow bank
 				memcpy(jr, snap, sizeof(jr));
 				memcpy(state.f, f_pre, sizeof(f_pre));   // restore the FP file like the GPRs: the compiled pass reads pre-interp f
-				state.sde = ictl_sde_pre; state.hwe = ictl_hwe_pre;   // restore I_CTL too: a compiled HW_MFPR must read the pre-interp value
-				state.i_ctl_spe = ictl_spe_pre; state.i_ctl_va_mode = ictl_vam_pre;
-				state.i_ctl_vptb = ictl_vptb_pre; state.i_ctl_other = ictl_other_pre;
-				state.cm = cm_pre; state.sir = sir_pre;                      // ...and CM/SIRR
-				flush_data_page_cache();
-				state.aster = aster_pre; state.astrr = astrr_pre;            // ...and the PCTX read-backs (a
-				state.fpen = fpen_pre; state.ppcen = ppcen_pre;              // HW_MFPR PCTX reads these live)
-				state.exc_addr = exc_addr_pre;
-				state.exc_sum = exc_sum_pre;
-				state.fpcr = fpcr_pre;
+				if (ipr_count) verify.prepare_replay(*this, ipr_pre.data());
 				const u64 interp_pc = state.pc;   // interpreter is authoritative for the PC
 					const u32 n_stores_interp = sn;   // interp's RECORDED store count (sn), NOT the replay cursor m_jit_slog_i; a compiled pass must consume exactly this many (catches a missing/extra store)
 				m_jit_vreplay = true;
@@ -1996,9 +1950,9 @@ void CAlphaCPU::jit_run(int budget)
 							(unsigned long long) state.r[2], (unsigned long long) jr[2],
 							(unsigned long long) snap[5]);
 					}
-					u64 ipr_jit[kVerifyIPRCount];
-					cap_iprs(ipr_jit);   // compiled pass wrote IPRs into live state; check vs interp
-					for (int ii = 0; ii < kVerifyIPRCount; ii++) if (ipr_ne(ii, ipr_jit[ii], ipr_interp[ii]))
+					std::vector<u64> ipr_jit(ipr_count);
+					cap_iprs(ipr_jit.data());   // compiled pass wrote IPRs into live state; check vs interp
+					for (int ii = 0; ii < ipr_count; ii++) if (ipr_ne(ii, ipr_jit[ii], ipr_interp[ii]))
 					{
 						m_jit_vmismatch = true;
 						printf("[JIT][VERIFY] IPR MISMATCH at %016llx slot %d: interp=%016llx jit=%016llx\n",
@@ -2038,15 +1992,7 @@ void CAlphaCPU::jit_run(int budget)
 					if (tr && m_jit->trace_ok(tr, start_phys, sources)
 							&& trace_segs_live(tr)) {
 						memcpy(state.f, f_pre, sizeof(f_pre));
-						state.sde = ictl_sde_pre; state.hwe = ictl_hwe_pre;
-						state.i_ctl_spe = ictl_spe_pre; state.i_ctl_va_mode = ictl_vam_pre;
-						state.i_ctl_vptb = ictl_vptb_pre; state.i_ctl_other = ictl_other_pre;
-						state.cm = cm_pre; state.sir = sir_pre;
-						flush_data_page_cache();
-						state.aster = aster_pre; state.astrr = astrr_pre;
-						state.fpen = fpen_pre; state.ppcen = ppcen_pre;
-						state.exc_addr = exc_addr_pre;
-						state.exc_sum = exc_sum_pre; state.fpcr = fpcr_pre;   // else the trace inherits the
+						if (ipr_count) verify.prepare_replay(*this, ipr_pre.data()); // else the trace inherits the
 						                                                      // interp's FINAL values -> false
 						                                                      // mismatch at interior boundaries
 						u64 jr_t[64];
@@ -2064,8 +2010,8 @@ void CAlphaCPU::jit_run(int budget)
 									(unsigned long long) start_virt, (unsigned long long) interp_pc,
 									(unsigned long long) state.pc, n_interp);
 							}
-							u64 ipr_jit_t[kVerifyIPRCount]; cap_iprs(ipr_jit_t);   // trace wrote IPRs into live state; check vs interp (parity with the block path)
-							for (int ii = 0; ii < kVerifyIPRCount; ii++) if (ipr_ne(ii, ipr_jit_t[ii], ipr_interp[ii])) {
+							std::vector<u64> ipr_jit_t(ipr_count); cap_iprs(ipr_jit_t.data());   // trace wrote IPRs into live state; check vs interp (parity with the block path)
+							for (int ii = 0; ii < ipr_count; ii++) if (ipr_ne(ii, ipr_jit_t[ii], ipr_interp[ii])) {
 								m_jit_vmismatch = true;
 								printf("[JIT][VERIFY] TRACE IPR MISMATCH at %016llx slot %d: interp=%016llx trace=%016llx\n", (unsigned long long) start_virt, ii, (unsigned long long) ipr_interp[ii], (unsigned long long) ipr_jit_t[ii]);
 							}
@@ -2119,13 +2065,11 @@ void CAlphaCPU::jit_run(int budget)
 										(unsigned long long) start_virt, (unsigned long long) bnd_pc[bi],
 										(unsigned long long) state.pc, done_t);
 								}
-								u64 ipr_jit_t[kVerifyIPRCount]; cap_iprs(ipr_jit_t);
-								// Slots 0-2 (last TB fills) are replay-invisible (verify loads skip translation),
-								// so they're only sound at full-span compares (by inheritance) -- skip here.
-								for (int ii = 3; ii < kVerifyIPRCount; ii++)
-									if (ipr_ne(ii, ipr_jit_t[ii], bnd_ipr[bi][ii])) {
+								std::vector<u64> ipr_jit_t(ipr_count); cap_iprs(ipr_jit_t.data());
+								for (int ii = 0; ii < ipr_count; ii++)
+									if (ipr_ne(ii, ipr_jit_t[ii], bnd_ipr[(size_t)bi * ipr_count + ii], true)) {
 										m_jit_vmismatch = true;
-										printf("[JIT][VERIFY] TRACE SIDE-EXIT IPR MISMATCH at %016llx slot %d: interp=%016llx trace=%016llx\n", (unsigned long long) start_virt, ii, (unsigned long long) bnd_ipr[bi][ii], (unsigned long long) ipr_jit_t[ii]);
+										printf("[JIT][VERIFY] TRACE SIDE-EXIT IPR MISMATCH at %016llx slot %d: interp=%016llx trace=%016llx\n", (unsigned long long) start_virt, ii, (unsigned long long) bnd_ipr[(size_t)bi * ipr_count + ii], (unsigned long long) ipr_jit_t[ii]);
 									}
 								for (int fi = 0; fi < 64; fi++) if (state.f[fi] != bnd_f[bi][fi]) {
 									m_jit_vmismatch = true;
@@ -2146,7 +2090,7 @@ void CAlphaCPU::jit_run(int budget)
 					}
 				}
 				state.pc = interp_pc;   // restore; the block's PC write was only for the check
-				put_iprs(ipr_interp);   // roll back the compiled pass's live IPR writes (verify-only)
+				put_iprs(ipr_interp.data());   // roll back the compiled pass's live IPR writes (verify-only)
 				memcpy(state.f, f_interp, sizeof(f_interp));   // ...and its FP writes
 				instruction_fetch_event(AlphaInstructionFetchEvent::CompiledExit);     // compiled pass + raw pc restore bypassed set_pc
 			}
@@ -4197,7 +4141,8 @@ int CAlphaCPU::RestoreState(FILE* f)
 
 	reset_idle_detector();
 	printf("%s: %d bytes restored.\n", devid_string, (int)ss);
-	last_dtb_virt[0] = last_dtb_virt[1] = 0;
+	if (m_profile.cpu_state.replaced)
+		m_profile.cpu_state.replaced(*this);
 	// RAM and TB state now belong to the restored state. Restored icache stays. Rest gets chucked.
 	flush_data_page_cache();
 	instruction_fetch_event(AlphaInstructionFetchEvent::Restore);

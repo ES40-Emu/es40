@@ -36,6 +36,7 @@
 #include "Ev68HWStore.h"
 #include "Ev68LLSC.h"
 #include "Ev68Reset.h"
+#include "Ev68CPUState.h"
 #include "Ev68InstructionFetch.h"
 #include "Ev68Interrupt.h"
 #include "Ev68FPCR.h"
@@ -66,6 +67,7 @@ inline constexpr AlphaCPUProfile kEv68CBProfile = [] {
   profile.arithmetic_trap = kEv68ArithmeticTrapPolicy;
   profile.ieee_trap = kEv68IEEETrapPolicy;
   profile.llsc = kEv68LLSCPolicy;
+  profile.cpu_state = kEv68CPUStatePolicy;
   return profile;
 }();
 

@@ -444,6 +444,9 @@ list(APPEND ES40_SOURCES
     src/CPU/AlphaReset.h
     src/CPU/Ev68Reset.h
     src/CPU/Ev68Reset.cpp
+    src/CPU/AlphaCPUState.h
+    src/CPU/Ev68CPUState.h
+    src/CPU/Ev68CPUState.cpp
     src/CPU/AlphaInterrupt.h
     src/CPU/Ev68Interrupt.h
     src/CPU/Ev68Interrupt.cpp

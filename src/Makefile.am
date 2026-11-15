@@ -84,6 +84,7 @@ noinst_HEADERS = config/ConfigEditor.h config/ConfigDocument.h \
        CPU/AlphaCPU.h \
        base/HostWakeEvent.h \
        CPU/AlphaCPUProfile.h \
+       CPU/Ev68CPUProfile.h \
        CPU/AlphaReset.h \
        CPU/Ev68Reset.h \
        CPU/AlphaInterrupt.h \
@@ -230,6 +231,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        chipset/AliM1543C_usb.cpp \
        chipset/AliM1543C_pmu.cpp \
        CPU/AlphaCPU.cpp \
+       CPU/Ev68PAL.cpp \
        CPU/Ev68IPR.cpp \
        CPU/Ev68MMU.cpp \
        CPU/Ev68Reset.cpp \

@@ -133,6 +133,7 @@
 
 #include "system/System.h"
 #include "CPU/AlphaCPU.h"
+#include "CPU/Ev68CPUProfile.h"
 #include "io/Serial.h"
 #include "system/Flash.h"
 #include "system/DPR.h"

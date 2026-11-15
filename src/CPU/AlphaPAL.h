@@ -29,6 +29,8 @@
 
 #include <cstdint>
 
+class CAlphaCPU;
+
 // Shared exceptions; each CPU supplies its own PAL entry rules.
 enum class AlphaPALException
 {
@@ -134,7 +136,7 @@ constexpr bool alpha_pal_instruction_compilable(AlphaPALInstructionAccess access
     || access == AlphaPALInstructionAccess::PalOrKernelHwe;
 }
 
-// Stateless family PAL rules, copied with the CPU profile.
+// Family PAL rules, copied with the CPU profile.
 struct AlphaPALPolicy
 {
   AlphaPALExceptionEntry (*exception_entry)(AlphaPALException reason,
@@ -147,6 +149,8 @@ struct AlphaPALPolicy
   // An absent access rule denies all.
   AlphaPALInstructionAccess (*hardware_instruction_access)(std::uint32_t instruction) = nullptr;
   AlphaPALReturnDescriptor (*hardware_return)(std::uint32_t instruction) = nullptr;
+  // Optional compatibility handling after the base write and HLE reset.
+  void (*base_changed)(CAlphaCPU& cpu, std::uint64_t old_base, bool old_hle) = nullptr;
 };
 
 constexpr AlphaPALReturnDescriptor alpha_pal_return_descriptor(

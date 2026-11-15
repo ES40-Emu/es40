@@ -31,19 +31,18 @@
 #include "AlphaDataFault.h"
 #include "AlphaInstructionSet.h"
 #include "AlphaRegisterBank.h"
-#include "Ev68InstructionSet.h"
-#include "Ev68PAL.h"
-#include "Ev68IPR.h"
-#include "Ev68MMU.h"
-#include "Ev68HWLoad.h"
-#include "Ev68HWStore.h"
-#include "Ev68Reset.h"
-#include "Ev68InstructionFetch.h"
-#include "Ev68Interrupt.h"
-#include "Ev68FPCR.h"
-#include "Ev68FPStart.h"
-#include "Ev68ArithmeticTrap.h"
-#include "Ev68IEEETrap.h"
+#include "AlphaPAL.h"
+#include "AlphaIPR.h"
+#include "AlphaMMU.h"
+#include "AlphaHWLoad.h"
+#include "AlphaHWStore.h"
+#include "AlphaReset.h"
+#include "AlphaInstructionFetch.h"
+#include "AlphaInterrupt.h"
+#include "AlphaFPCR.h"
+#include "AlphaFPStart.h"
+#include "AlphaArithmeticTrap.h"
+#include "AlphaIEEETrap.h"
 
 // Immutable model identity, execution capabilities, and family rules chosen by configuration.
 struct AlphaCPUProfile
@@ -53,26 +52,26 @@ struct AlphaCPUProfile
   std::uint32_t chip_id;     // Implementation-specific chip revision identifier.
   std::uint32_t type_major;  // System-reference processor type.
   std::uint32_t type_minor;  // System-reference processor revision.
-  AlphaPALPolicy pal = kEv68PALPolicy;  // Immutable family entry rules.
-  AlphaIPRReadPolicy ipr_read = kEv68IPRReadPolicy; // Immutable family IPR reads.
-  AlphaIPRWritePolicy ipr_write = kEv68IPRWritePolicy; // Immutable family IPR writes.
-  AlphaTBFillPolicy tb_fill = kEv68TBFillPolicy; // Immutable family PTE decoding.
-  AlphaMMUAddressPolicy mmu_address = kEv68MMUAddressPolicy; // Immutable address rules.
-  AlphaHWLoadPolicy hw_load = kEv68HWLoadPolicy; // Immutable hardware-load forms.
-  AlphaHWStorePolicy hw_store = kEv68HWStorePolicy; // Immutable hardware-store forms.
+  AlphaPALPolicy pal{};  // Immutable family entry rules.
+  AlphaIPRReadPolicy ipr_read{}; // Immutable family IPR reads.
+  AlphaIPRWritePolicy ipr_write{}; // Immutable family IPR writes.
+  AlphaTBFillPolicy tb_fill{}; // Immutable family PTE decoding.
+  AlphaMMUAddressPolicy mmu_address{}; // Immutable address rules.
+  AlphaHWLoadPolicy hw_load{}; // Immutable hardware-load forms.
+  AlphaHWStorePolicy hw_store{}; // Immutable hardware-store forms.
   bool jit_supported = true; // Disable only while the JIT lacks support for this family's fetch or execution rules.
-  AlphaResetPolicy reset = kEv68ResetPolicy; // Family state for init and system reset.
-  AlphaInstructionFetchPolicy instruction_fetch = kEv68InstructionFetchPolicy;
-  AlphaInstructionDecodePolicy instruction_decode = kEv68InstructionDecodePolicy;
-  AlphaRegisterBankPolicy register_bank = kEv68RegisterBankPolicy;
-  AlphaDataFaultPolicy data_fault = kEv68DataFaultPolicy;
-  AlphaTBMissPolicy tb_miss = kEv68TBMissPolicy;
-  AlphaInstructionFaultPolicy instruction_fault = kEv68InstructionFaultPolicy;
-  AlphaInterruptPolicy interrupt = kEv68InterruptPolicy;
-  AlphaFPCRPolicy fpcr = kEv68FPCRPolicy;
-  AlphaFPStartPolicy fp_start = kEv68FPStartPolicy;
-  AlphaArithmeticTrapPolicy arithmetic_trap = kEv68ArithmeticTrapPolicy;
-  AlphaIEEETrapPolicy ieee_trap = kEv68IEEETrapPolicy;
+  AlphaResetPolicy reset{}; // Family state for init and system reset.
+  AlphaInstructionFetchPolicy instruction_fetch{};
+  AlphaInstructionDecodePolicy instruction_decode{};
+  AlphaRegisterBankPolicy register_bank{};
+  AlphaDataFaultPolicy data_fault{};
+  AlphaTBMissPolicy tb_miss{};
+  AlphaInstructionFaultPolicy instruction_fault{};
+  AlphaInterruptPolicy interrupt{};
+  AlphaFPCRPolicy fpcr{};
+  AlphaFPStartPolicy fp_start{};
+  AlphaArithmeticTrapPolicy arithmetic_trap{};
+  AlphaIEEETrapPolicy ieee_trap{};
 
   constexpr bool supports_instruction(std::uint32_t ins) const
   {
@@ -84,8 +83,5 @@ struct AlphaCPUProfile
     return alpha_instruction_retires_at_decode(instruction_decode, ins);
   }
 };
-
-// EV68CB pass 4: BWX | FIX | CIX | MVI | precise traps | prefetch modify.
-inline constexpr AlphaCPUProfile kEv68CBProfile{0x1307, 2, 0x21, 12, 6};
 
 #endif

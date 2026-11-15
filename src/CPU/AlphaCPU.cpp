@@ -4242,13 +4242,9 @@ int CAlphaCPU::RestoreState(FILE* f)
   *
   * \param virt    Virtual address to find in translation buffer.
   * \param flags   ACCESS_EXEC determines which translation buffer to use.
+  * \param asn     Address space number to match.
   * \return        Number of matching entry, or -1 if no match found.
   **/
-int CAlphaCPU::FindTBEntry(u64 virt, int flags)
-{
-	return FindTBEntry(virt, flags, m_profile.mmu_address.access(*this, flags).asn);
-}
-
 int CAlphaCPU::FindTBEntry(u64 virt, int flags, int asn)
 {
 
@@ -4639,57 +4635,6 @@ void CAlphaCPU::add_tb(u64 virt, u64 pte_phys, u64 pte_flags, int flags, int asn
 }
 
 /**
- * \brief Add translation-buffer entry to the DTB
- *
- * The format of the PTE field is:
- * \code
- *   63 62           32 31     16  15  14  13  12  11  10  9   8  7 6  5  4  3  2   1  0
- *  +--+---------------+---------+---+---+---+---+---+---+---+---+-+----+---+-+---+---+-+
- *  |  |  PA <43:13>   |         |UWE|SWE|EWE|KWE|URE|SRE|ERE|KRE| | GH |ASM| |FOW|FOR| |
- *  +--+---------------+---------+---+---+---+---+---+---+---+---+-+----+---+-+---+---+-+
- *                               +-------------------------------+    |   |   +-------+
- *                                                           |        |   |       |
- *  (user,supervisor,executive,kernel)(read,write)enable ----+        |   |       |
- *                                              granularity hint -----+   |       |
- *                                               address space match -----+       |
- *                                                      fault-on-(read,write) ----+
- * \endcode
- *
- * \param virt    Virtual address.
- * \param pte     Translation in DTB_PTE format.
- * \param dtb     DTB fill port number (0 = DTB_PTE0, 1 = DTB_PTE1).
- **/
-void CAlphaCPU::add_tb_d(u64 virt, u64 pte, int dtb)
-{
-	add_tb(virt, pte >> (32 - 13), pte, ACCESS_READ, dtb ? state.asn1 : state.asn0);
-}
-
-/**
- * \brief Add translation-buffer entry to the ITB
- *
- * The format of the PTE field is:
- * \code
- *   63              44 43           13 12  11  10  9   8  7 6  5  4  3   0
- *  +------------------+---------------+--+---+---+---+---+-+----+---+-----+
- *  |                  |  PA <43:13>   |  |URE|SRE|ERE|KRE| | GH |ASM|     |
- *  +------------------+---------------+--+---+---+---+---+-+----+---+-----+
- *                                        +---------------+    |   |
- *                                                    |        |   |
- *  (user,supervisor,executive,kernel)read enable ----+        |   |
- *                                       granularity hint -----+   |
- *                                        address space match -----+
- *
- * \endcode
- *
- * \param virt    Virtual address.
- * \param pte     Translation in ITB_PTE format.
- **/
-void CAlphaCPU::add_tb_i(u64 virt, u64 pte)
-{
-	add_tb(virt, pte, pte & 0xf70, ACCESS_EXEC, state.asn);
-}
-
-/**
  * \brief Invalidate all translation-buffer entries
  *
  * Invalidate all translation-buffer entries in one of the translation buffers.
@@ -4756,20 +4701,19 @@ void CAlphaCPU::tbiap(int flags)
  *
  * \param virt    Virtual address for which the entry should be invalidated.
  * \param flags   ACCESS_EXEC determines which translation buffer to use.
+ * \param asn     Address space number to invalidate.
  **/
-void CAlphaCPU::tbis(u64 virt, int flags)
+void CAlphaCPU::tbis(u64 virt, int flags, int asn)
 {
 	int t = (flags & ACCESS_EXEC) ? TB_INDEX_ITB : TB_INDEX_DATA;
 
 	if (t == TB_INDEX_DATA)
 	{
-		tbis_d(virt, state.asn0);
-		if (state.asn1 != state.asn0)
-			tbis_d(virt, state.asn1);
+		tbis_d(virt, asn);
 		return;
 	}
 
-	int i = FindTBEntry(virt, flags);
+	int i = FindTBEntry(virt, flags, asn);
 	if (i >= 0)
 		state.tb[t][i].valid = false;
 	memset(icache_valid_modes, 0, sizeof(icache_valid_modes));

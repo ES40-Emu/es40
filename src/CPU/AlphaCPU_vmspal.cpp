@@ -541,8 +541,8 @@ void CAlphaCPU::vmspal_call_mtpr_tbiap()
  **/
 void CAlphaCPU::vmspal_call_mtpr_tbis()
 {
-	tbis(r16, ACCESS_READ);
-	tbis(r16, ACCESS_EXEC);
+	Ev68MMU::tbis(*this, r16, ACCESS_READ);
+	Ev68MMU::tbis(*this, r16, ACCESS_EXEC);
 }
 
 /**
@@ -610,7 +610,7 @@ void CAlphaCPU::vmspal_call_mtpr_usp()
  **/
 void CAlphaCPU::vmspal_call_mtpr_tbisd()
 {
-	tbis(r16, ACCESS_READ);
+	Ev68MMU::tbis(*this, r16, ACCESS_READ);
 }
 
 /**
@@ -618,7 +618,7 @@ void CAlphaCPU::vmspal_call_mtpr_tbisd()
  **/
 void CAlphaCPU::vmspal_call_mtpr_tbisi()
 {
-	tbis(r16, ACCESS_EXEC);
+	Ev68MMU::tbis(*this, r16, ACCESS_EXEC);
 }
 
 /**
@@ -1330,7 +1330,7 @@ int CAlphaCPU::vmspal_ent_dtbm_single(int flags)
 
 		p4 <<= 0x20;
 		p4 |= p5;
-		add_tb_d(p6, p4, 0);
+		Ev68MMU::add_tb_d(*this, p6, p4, 0);
 		return 0;
 	}
 
@@ -1423,7 +1423,7 @@ int CAlphaCPU::vmspal_ent_dtbm_single(int flags)
 		return vmspal_int_initiate_exception();
 	}
 
-	add_tb_d(p6, p4, 0);
+	Ev68MMU::add_tb_d(*this, p6, p4, 0);
 	return 0;
 }
 
@@ -1445,7 +1445,7 @@ int CAlphaCPU::vmspal_ent_itbm(int flags)
 		p5 = 0xf01;
 		p6 <<= 0x0d;
 		p6 |= p5;
-		add_tb_i(p23, p6);
+		Ev68MMU::add_tb_i(*this, p23, p6);
 		return 0;
 	}
 
@@ -1480,7 +1480,7 @@ int CAlphaCPU::vmspal_ent_itbm(int flags)
 	}
 
 	p6 |= p5;
-	add_tb_i(p23, p6);
+	Ev68MMU::add_tb_i(*this, p23, p6);
 	return 0;
 }
 
@@ -1510,7 +1510,7 @@ int CAlphaCPU::vmspal_ent_dtbm_double_3(int flags)
 		hw_ldq(t25, t25);
 		if (t25 & 1)
 		{
-			add_tb_d(p4, t25, 0);
+			Ev68MMU::add_tb_d(*this, p4, t25, 0);
 			return 0;
 		}
 	}
@@ -1656,7 +1656,7 @@ int CAlphaCPU::vmspal_ent_dfault(int flags)
 		{
 			t25 = p5 & 8;
 			p7 = t25 ? 0xb0 : 0xa0;
-			tbis(p6, ACCESS_READ);
+			Ev68MMU::tbis(*this, p6, ACCESS_READ);
 		}
 
 		hw_stq(p21 + 0x158, p7);
@@ -1683,7 +1683,7 @@ int CAlphaCPU::vmspal_ent_dfault(int flags)
 		{
 			t25 = p5 & 8;
 			p7 = t25 ? 0xb0 : 0xa0;
-			tbis(p6, ACCESS_READ);
+			Ev68MMU::tbis(*this, p6, ACCESS_READ);
 		}
 
 		hw_stq(p21 + 0x158, p7);
@@ -1708,7 +1708,7 @@ int CAlphaCPU::vmspal_ent_dfault(int flags)
 	if (!(state.mm_stat & 2))
 	{
 		p7 = (state.mm_stat & 4) ? 0xa0 : 0xb0;
-		tbis(p20, ACCESS_READ);
+		Ev68MMU::tbis(*this, p20, ACCESS_READ);
 	}
 
 	hw_stq(p21 + 0x158, p7);

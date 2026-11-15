@@ -364,15 +364,12 @@ private:
   bool            instruction_source_matches(u64 start_pc, u32 count) const;
   bool            instruction_source_can_chain(u64 target) const;
   AlphaInstructionSource instruction_sources();
-  int             FindTBEntry(u64 virt, int flags);
   int             FindTBEntry(u64 virt, int flags, int asn);
   int             initiate_acv_fault(u64 virt, int flags, u32 instruction);
   void            add_tb(u64 virt, u64 pte_phys, u64 pte_flags, int flags, int asn);
-  void            add_tb_i(u64 virt, u64 pte);
-  void            add_tb_d(u64 virt, u64 pte, int dtb);
   void            tbia(int flags);
   void            tbiap(int flags);
-  void            tbis(u64 virt, int flags);
+  void            tbis(u64 virt, int flags, int asn);
   void            tbis_d(u64 virt, int asn);
 
   /* Floating Point routines */

@@ -136,6 +136,70 @@ AlphaTBFill Ev68MMU::decode_fill(const CAlphaCPU&, std::uint64_t virt,
   return fill;
 }
 
+/**
+ * \brief Add translation-buffer entry to the DTB
+ *
+ * The format of the PTE field is:
+ * \code
+ *   63 62           32 31     16  15  14  13  12  11  10  9   8  7 6  5  4  3  2   1  0
+ *  +--+---------------+---------+---+---+---+---+---+---+---+---+-+----+---+-+---+---+-+
+ *  |  |  PA <43:13>   |         |UWE|SWE|EWE|KWE|URE|SRE|ERE|KRE| | GH |ASM| |FOW|FOR| |
+ *  +--+---------------+---------+---+---+---+---+---+---+---+---+-+----+---+-+---+---+-+
+ *                               +-------------------------------+    |   |   +-------+
+ *                                                           |        |   |       |
+ *  (user,supervisor,executive,kernel)(read,write)enable ----+        |   |       |
+ *                                              granularity hint -----+   |       |
+ *                                               address space match -----+       |
+ *                                                      fault-on-(read,write) ----+
+ * \endcode
+ *
+ * \param virt    Virtual address.
+ * \param pte     Translation in DTB_PTE format.
+ * \param dtb     DTB fill port number (0 = DTB_PTE0, 1 = DTB_PTE1).
+ **/
+void Ev68MMU::add_tb_d(CAlphaCPU& cpu, std::uint64_t virt, std::uint64_t pte, int dtb)
+{
+	cpu.add_tb(virt, pte >> (32 - 13), pte, ACCESS_READ, dtb ? cpu.state.asn1 : cpu.state.asn0);
+}
+
+/**
+ * \brief Add translation-buffer entry to the ITB
+ *
+ * The format of the PTE field is:
+ * \code
+ *   63              44 43           13 12  11  10  9   8  7 6  5  4  3   0
+ *  +------------------+---------------+--+---+---+---+---+-+----+---+-----+
+ *  |                  |  PA <43:13>   |  |URE|SRE|ERE|KRE| | GH |ASM|     |
+ *  +------------------+---------------+--+---+---+---+---+-+----+---+-----+
+ *                                        +---------------+    |   |
+ *                                                    |        |   |
+ *  (user,supervisor,executive,kernel)read enable ----+        |   |
+ *                                       granularity hint -----+   |
+ *                                        address space match -----+
+ *
+ * \endcode
+ *
+ * \param virt    Virtual address.
+ * \param pte     Translation in ITB_PTE format.
+ **/
+void Ev68MMU::add_tb_i(CAlphaCPU& cpu, std::uint64_t virt, std::uint64_t pte)
+{
+	cpu.add_tb(virt, pte, pte & 0xf70, ACCESS_EXEC, cpu.state.asn);
+}
+
+void Ev68MMU::tbis(CAlphaCPU& cpu, std::uint64_t virt, int flags)
+{
+  const auto& state = cpu.state;
+  if (flags & ACCESS_EXEC)
+    cpu.tbis(virt, flags, state.asn);
+  else
+  {
+    cpu.tbis(virt, flags, state.asn0);
+    if (state.asn1 != state.asn0)
+      cpu.tbis(virt, flags, state.asn1);
+  }
+}
+
 int Ev68MMU::tb_miss(CAlphaCPU& cpu, std::uint64_t virt, int flags, std::uint32_t ins)
 {
   auto& state = cpu.state;

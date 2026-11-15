@@ -40,6 +40,9 @@ public:
   static AlphaTBFill decode_fill(const CAlphaCPU& cpu, std::uint64_t virt,
                                  std::uint64_t pte_phys, std::uint64_t pte_flags,
                                  int access_flags);
+  static void add_tb_i(CAlphaCPU& cpu, std::uint64_t virt, std::uint64_t pte);
+  static void add_tb_d(CAlphaCPU& cpu, std::uint64_t virt, std::uint64_t pte, int dtb);
+  static void tbis(CAlphaCPU& cpu, std::uint64_t virt, int access_flags);
   static int tb_miss(CAlphaCPU& cpu, std::uint64_t virt, int access_flags,
                       std::uint32_t instruction);
   static int instruction_fault(CAlphaCPU& cpu, std::uint64_t virt,

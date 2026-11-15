@@ -126,7 +126,7 @@ void Ev68IPR::write(CAlphaCPU& cpu, std::uint32_t instruction, std::uint64_t val
       break;
 
     case 0x01:  /* ITB_PTE */
-      cpu.add_tb_i(state.last_tb_virt, value);
+      Ev68MMU::add_tb_i(cpu, state.last_tb_virt, value);
       break;
 
     case 0x02:  /* ITB_IAP */
@@ -138,7 +138,7 @@ void Ev68IPR::write(CAlphaCPU& cpu, std::uint32_t instruction, std::uint64_t val
       break;
 
     case 0x04:  /* ITB_IS */
-      cpu.tbis(value, ACCESS_EXEC);
+      cpu.tbis(value, ACCESS_EXEC, state.asn);
       break;
 
     case 0x09:  /* CM */
@@ -243,7 +243,7 @@ void Ev68IPR::write(CAlphaCPU& cpu, std::uint32_t instruction, std::uint64_t val
       break;
 
     case 0x21:  /* DTB_PTE0 */
-      cpu.add_tb_d(cpu.last_dtb_virt[0], value, 0);
+      Ev68MMU::add_tb_d(cpu, cpu.last_dtb_virt[0], value, 0);
       break;
 
     case 0x24:  /* DTB_IS0 */
@@ -278,7 +278,7 @@ void Ev68IPR::write(CAlphaCPU& cpu, std::uint32_t instruction, std::uint64_t val
       break;
 
     case 0xa1:  /* DTB_PTE1 */
-      cpu.add_tb_d(cpu.last_dtb_virt[1], value, 1);
+      Ev68MMU::add_tb_d(cpu, cpu.last_dtb_virt[1], value, 1);
       break;
 
     case 0xa2:  /* DTB_IAP */

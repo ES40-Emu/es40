@@ -473,6 +473,8 @@ list(APPEND ES40_SOURCES
     src/CPU/Ev68HWLoad.h
     src/CPU/AlphaHWStore.h
     src/CPU/Ev68HWStore.h
+    src/CPU/AlphaLLSC.h
+    src/CPU/Ev68LLSC.h
     src/AlphaSim.cpp
     src/graphics/Cirrus.cpp
     src/config/Configurator.cpp

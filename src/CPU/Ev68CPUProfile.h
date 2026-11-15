@@ -34,6 +34,7 @@
 #include "Ev68MMU.h"
 #include "Ev68HWLoad.h"
 #include "Ev68HWStore.h"
+#include "Ev68LLSC.h"
 #include "Ev68Reset.h"
 #include "Ev68InstructionFetch.h"
 #include "Ev68Interrupt.h"
@@ -64,6 +65,7 @@ inline constexpr AlphaCPUProfile kEv68CBProfile = [] {
   profile.fp_start = kEv68FPStartPolicy;
   profile.arithmetic_trap = kEv68ArithmeticTrapPolicy;
   profile.ieee_trap = kEv68IEEETrapPolicy;
+  profile.llsc = kEv68LLSCPolicy;
   return profile;
 }();
 

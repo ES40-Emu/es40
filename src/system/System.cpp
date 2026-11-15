@@ -1058,15 +1058,6 @@ int CSystem::SingleStep()
 u64 lastport;
 #endif //defined(DEBUG_PORTACCESS)
 
-// EV6/EV68 Dcache blocks are 64 bytes; LDx_L/STx_C monitor that cache line.
-#define CPU_LOCK_MATCH_MASK U64(0x00000807ffffffc0)
-#define CPU_LOCK_IO_MASK    U64(0x0000080000000000)
-
-static inline bool cpu_lock_matches(u64 locked_address, u64 address)
-{
-	return !((locked_address ^ address) & CPU_LOCK_MATCH_MASK);
-}
-
 // --- Load-locked / store-conditional (HRM 4.2) -----------------------------
 void CSystem::enter_ll_jit(int cpuid) noexcept
 {
@@ -1264,9 +1255,9 @@ void CSystem::cpu_lock(int cpuid, u64 address, u64 value)
 bool CSystem::cpu_take_lock(int cpuid, u64 address, u64* expected, bool* same_address)
 {
 	auto& reservation = m_ll_reservations[cpuid];
-	// I/O-space conditional stores have no cache line to watch; treat as held.
-	bool held = (address & CPU_LOCK_IO_MASK) ||
-	            (reservation.valid && cpu_lock_matches(reservation.address, address));
+	const auto& policy = acCPUs[cpuid]->get_profile().llsc;
+	const bool held = (policy.unreserved_store && policy.unreserved_store(address))
+		|| (reservation.valid && policy.matches && policy.matches(reservation.address, address));
 
 	// STx_C always consumes this CPU's lock, success or fail.
 	reservation.valid = false;

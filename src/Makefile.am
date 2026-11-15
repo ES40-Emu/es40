@@ -115,6 +115,8 @@ noinst_HEADERS = config/ConfigEditor.h config/ConfigDocument.h \
        CPU/Ev68HWLoad.h \
        CPU/AlphaHWStore.h \
        CPU/Ev68HWStore.h \
+       CPU/AlphaLLSC.h \
+       CPU/Ev68LLSC.h \
        CPU/cpu_arith.h \
        CPU/cpu_bwx.h \
        CPU/cpu_control.h \

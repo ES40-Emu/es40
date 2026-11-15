@@ -36,6 +36,7 @@
 #include "AlphaMMU.h"
 #include "AlphaHWLoad.h"
 #include "AlphaHWStore.h"
+#include "AlphaLLSC.h"
 #include "AlphaReset.h"
 #include "AlphaInstructionFetch.h"
 #include "AlphaInterrupt.h"
@@ -72,6 +73,7 @@ struct AlphaCPUProfile
   AlphaFPStartPolicy fp_start{};
   AlphaArithmeticTrapPolicy arithmetic_trap{};
   AlphaIEEETrapPolicy ieee_trap{};
+  AlphaLLSCPolicy llsc{};
 
   constexpr bool supports_instruction(std::uint32_t ins) const
   {

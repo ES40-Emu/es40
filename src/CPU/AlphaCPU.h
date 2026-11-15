@@ -363,8 +363,6 @@ private:
   bool            instruction_source_matches(u64 start_pc, u32 count) const;
   bool            instruction_source_can_chain(u64 target) const;
   AlphaInstructionSource instruction_sources();
-  bool            icache_line_matches(int i, u64 address) const;
-  bool            icache_hit(int i, u64 address) const;
   int             FindTBEntry(u64 virt, int flags);
   int             FindTBEntry(u64 virt, int flags, int asn);
   int             initiate_acv_fault(u64 virt, int flags, u32 instruction);
@@ -992,20 +990,6 @@ inline bool CAlphaCPU::fp_start()
   if (!state.fpen) return false;
   if (m_profile.fp_start.clear_exception_summary) state.exc_sum = 0;
   return true;
-}
-
-// EV68 cache predicates used by the family fetch and source-observation policy.
-inline bool CAlphaCPU::icache_line_matches(int i, u64 address) const
-{
-  const auto& line = state.icache[i];
-  return line.valid && (line.asn == state.asn || line.asm_bit)
-    && line.address == (address & ICACHE_MATCH_MASK);
-}
-
-inline bool CAlphaCPU::icache_hit(int i, u64 address) const
-{
-  return icache_enabled && icache_line_matches(i, address)
-    && ((address & 1) || (icache_valid_modes[i] & (1u << state.cm)));
 }
 
 inline int CAlphaCPU::fetch_instruction(u32* instruction)

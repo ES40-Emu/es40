@@ -42,6 +42,8 @@ public:
   static AlphaInstructionSourceView source(CAlphaCPU& cpu, std::uint64_t pc);
 
 private:
+  static bool icache_line_matches(const CAlphaCPU& cpu, int i, std::uint64_t address);
+  static bool icache_hit(const CAlphaCPU& cpu, int i, std::uint64_t address);
   static int read_cache(CAlphaCPU& cpu, std::uint64_t address, std::uint32_t* data);
 };
 

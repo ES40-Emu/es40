@@ -30,6 +30,20 @@
 #include "AlphaCPU.h"
 #include "Ev68InstructionFetch.h"
 
+// EV68 cache predicates used by the family fetch and source-observation policy.
+bool Ev68InstructionFetch::icache_line_matches(const CAlphaCPU& cpu, int i, u64 address)
+{
+  const auto& line = cpu.state.icache[i];
+  return line.valid && (line.asn == cpu.state.asn || line.asm_bit)
+    && line.address == (address & ICACHE_MATCH_MASK);
+}
+
+bool Ev68InstructionFetch::icache_hit(const CAlphaCPU& cpu, int i, u64 address)
+{
+  return cpu.icache_enabled && icache_line_matches(cpu, i, address)
+    && ((address & 1) || (cpu.icache_valid_modes[i] & (1u << cpu.state.cm)));
+}
+
 void Ev68InstructionFetch::prepare_dispatch(CAlphaCPU& cpu)
 {
   // Preserve the ES40 firmware entry behavior after an in-place image rewrite.
@@ -49,7 +63,7 @@ AlphaInstructionMapping Ev68InstructionFetch::probe(CAlphaCPU& cpu, u64 pc)
   else
   {
     const int line = (int)(((pc & ~U64(3)) >> 11) & (ICACHE_ENTRIES - 1));
-    if (cpu.icache_hit(line, pc))
+    if (icache_hit(cpu, line, pc))
     {
       mapping.physical = cpu.state.icache[line].p_address + (pc & ICACHE_BYTE_MASK);
       mapping.asm_global = cpu.state.icache[line].asm_bit;
@@ -72,7 +86,7 @@ bool Ev68InstructionFetch::peek_cached(const CAlphaCPU& cpu, u32* instruction)
   if (cpu.icache_enabled)
   {
     const int line = (int)((cpu.state.pc >> 11) & (ICACHE_ENTRIES - 1));
-    if (cpu.icache_hit(line, cpu.state.pc))
+    if (icache_hit(cpu, line, cpu.state.pc))
     {
       *instruction = endian_32(cpu.state.icache[line].data[(cpu.state.pc >> 2) & ICACHE_INDEX_MASK]);
       return true;
@@ -152,7 +166,7 @@ int Ev68InstructionFetch::fetch(CAlphaCPU& cpu, u32* instruction)
     if (result)
       return result;
 
-    if (!(cpu.state.pc & 1) && cpu.icache_hit(cpu.state.last_found_icache, cpu.state.pc))
+    if (!(cpu.state.pc & 1) && icache_hit(cpu, cpu.state.last_found_icache, cpu.state.pc))
     {
       const int line = cpu.state.last_found_icache;
       cpu.seq_line_ptr = cpu.state.icache[line].data;
@@ -205,7 +219,7 @@ int Ev68InstructionFetch::read_cache(CAlphaCPU& cpu, u64 address, u32* data)
 
   if (cpu.icache_enabled)
   {
-    bool hit = cpu.icache_line_matches(i, address);
+    bool hit = icache_line_matches(cpu, i, address);
     if (hit && !(address & 1) && !(cpu.icache_valid_modes[i] & (1u << cpu.state.cm))) {
       // A cached instruction is still subject to the current mode's access
       // checks, including for ASM lines. Keep its bytes until IMB when the

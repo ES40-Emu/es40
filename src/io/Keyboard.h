@@ -111,6 +111,7 @@ public:
 
   enum class InputResult { Accepted, Full, Invalid, Unavailable };
   static constexpr size_t INPUT_CAPACITY = 256;
+  static constexpr size_t INPUT_SOURCES = 4;
 
   struct InputStatus
   {
@@ -121,15 +122,17 @@ public:
   // Keys use BX_KEY_* flags; mouse Y/wheel are positive upward, with deltas in [-32767, 32767].
   // Accepted means queued; guest disable/reset, stop and restore discard pending input.
   InputResult queue_input(const InputEvent* events, size_t count, u64* batch_id = nullptr,
-    const unsigned* expected_buttons = nullptr);
+    const unsigned* expected_buttons = nullptr, size_t source = 0);
   bool input_status(u64 id, InputStatus& status);
   // Discard pending events without releasing already delivered keys or buttons.
   void discard_input();
-  // Cancel queued input and release only the external source's delivered holds.
+  // Cancel queued input and release delivered holds, preserving all other sources.
+  void release_input(size_t source);
   void release_input();
+  bool input_releasing(size_t source);
   bool input_releasing();
   bool input_wheel_enabled();
-  unsigned input_buttons();
+  unsigned input_buttons(size_t source = 0);
 
   virtual void  init();
   virtual void  start_threads();
@@ -145,22 +148,28 @@ private:
 
   std::array<InputEvent, INPUT_CAPACITY> input_queue{};
   std::array<size_t, INPUT_CAPACITY> input_batch_tags{};
+  std::array<size_t, INPUT_CAPACITY> input_sources{};
   std::array<InputStatus, INPUT_CAPACITY> input_history{};
   u64 last_input_batch = 0;
   size_t input_head = 0;
   size_t input_count = 0;
-  std::array<bool, BX_KEY_NBKEYS> local_keys{}, external_keys{};
-  unsigned local_buttons = 0, external_buttons = 0;
-  bool input_release_pending = false;
+  std::array<bool, BX_KEY_NBKEYS> local_keys{};
+  std::array<std::array<bool, BX_KEY_NBKEYS>, INPUT_SOURCES> external_keys{};
+  unsigned local_buttons = 0;
+  std::array<unsigned, INPUT_SOURCES> external_buttons{};
+  std::array<bool, INPUT_SOURCES> input_release_pending{};
   bool input_available(const InputEvent& event) const;
-  unsigned input_buttons_locked() const;
+  unsigned input_buttons_locked(size_t source) const;
+  unsigned combined_buttons(size_t except = INPUT_SOURCES) const;
+  bool other_key_held(u32 key, size_t source) const;
   bool input_busy() const;
   void finish_input_event(size_t index, bool cancelled);
   void discard_input_locked();
+  void release_input_locked(size_t source);
   void discard_input_type(InputEvent::Type type);
   void service_input();
   void service_input_release();
-  bool apply_input_key(u32 key, bool external);
+  bool apply_input_key(u32 key, size_t source = INPUT_SOURCES);
   bool gen_scancode_locked(u32 key);
 
   u8        read_60();

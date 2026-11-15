@@ -49,6 +49,7 @@
 #define PICOJSON_USE_INT64
 #include "../../third_party/picojson/picojson.h"
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <initializer_list>
 
@@ -262,43 +263,21 @@ bool nonblocking(Socket s)
 #endif
 }
 
-struct QmpInput::Impl : CRunnable {
-    QmpInput& owner;
+namespace {
+struct QmpClient {
     CSystem& system;
     CKeyboard& keyboard;
-    CThread thread{"qmp"};
-    std::atomic<bool> stop_requested{true};
-    bool started = false;
-    unsigned port = 0;
+    const size_t source;
     bool negotiated = false;
     std::string pending, frame, nesting, output;
     char quote = 0;
     bool escape = false;
 #ifdef ES40_QMP_SOCKETS
-    Socket listener = no_socket, client = no_socket;
-#endif
-#ifdef _WIN32
-    bool winsock = false;
+    Socket client = no_socket;
 #endif
 
-    Impl(QmpInput& owner, CSystem& system, CKeyboard& keyboard, const char* setting)
-        : owner(owner), system(system), keyboard(keyboard)
-    {
-        if (!setting || !*setting) FAILURE(Configuration, "Invalid qmp.port");
-        for (const char* p = setting; *p; ++p) {
-            if (!digit(*p) || port > 6553) FAILURE(Configuration, "Invalid qmp.port");
-            port = port * 10 + (*p - '0');
-        }
-        if (port > 65535) FAILURE(Configuration, "qmp.port must be 0..65535");
-    }
-
-    void run() override
-    {
-        while (!stop_requested) {
-            owner.poll();
-            CThread::sleep(20);
-        }
-    }
+    QmpClient(CSystem& system, CKeyboard& keyboard, size_t source)
+        : system(system), keyboard(keyboard), source(source) {}
 
     void disconnect()
     {
@@ -306,7 +285,7 @@ struct QmpInput::Impl : CRunnable {
         if (client != no_socket) {
             close_socket(client);
             client = no_socket;
-            keyboard.release_input();
+            keyboard.release_input(source);
         }
 #endif
         pending.clear(); frame.clear(); nesting.clear(); output.clear();
@@ -333,7 +312,7 @@ struct QmpInput::Impl : CRunnable {
         if (events.get<picojson::array>().size() > CKeyboard::INPUT_CAPACITY)
             invalid("Too many input events");
         std::vector<CKeyboard::InputEvent> batch;
-        const unsigned initial_buttons = keyboard.input_buttons();
+        const unsigned initial_buttons = keyboard.input_buttons(source);
         unsigned buttons = initial_buttons;
         for (const Json& item : events.get<picojson::array>()) {
             fields(item, {"type", "data"});
@@ -392,7 +371,7 @@ struct QmpInput::Impl : CRunnable {
         }
         u64 batch_id = 0;
         switch (keyboard.queue_input(batch.data(), batch.size(), tracked ? &batch_id : nullptr,
-            &initial_buttons)) {
+            &initial_buttons, source)) {
         case CKeyboard::InputResult::Accepted:
             return tracked ? "{\"__es40-batch\":\"" + std::to_string(batch_id) + "\"}" : "{}";
         case CKeyboard::InputResult::Full:
@@ -525,7 +504,66 @@ struct QmpInput::Impl : CRunnable {
         if (n > 0) output.erase(0, (size_t)n);
         else if (n == 0 || !would_block()) disconnect();
     }
+
+    void poll()
+    {
+        flush();
+        if (client == no_socket) return;
+        if (pending.size() < 4096 && output.size() < output_limit / 2) {
+            char buffer[4096];
+            const int n = (int)recv(client, buffer, sizeof buffer, 0);
+            if (n > 0) pending.append(buffer, (size_t)n);
+            else if (n == 0 || !would_block()) { disconnect(); return; }
+        }
+        size_t consumed = 0;
+        unsigned messages = 0;
+        while (consumed < pending.size() && messages < 32
+            && client != no_socket && output.size() < output_limit / 2) {
+            const char c = pending[consumed++];
+            if (consume(c)) ++messages;
+        }
+        if (client != no_socket) pending.erase(0, consumed);
+        flush();
+    }
 #endif
+};
+}
+
+struct QmpInput::Impl : CRunnable {
+    QmpInput& owner;
+    CThread thread{"qmp"};
+    std::atomic<bool> stop_requested{true};
+    bool started = false;
+    unsigned port = 0;
+    std::array<std::unique_ptr<QmpClient>, CKeyboard::INPUT_SOURCES> clients;
+    size_t next_client = 0;
+#ifdef ES40_QMP_SOCKETS
+    Socket listener = no_socket;
+#endif
+#ifdef _WIN32
+    bool winsock = false;
+#endif
+
+    Impl(QmpInput& owner, CSystem& system, CKeyboard& keyboard, const char* setting)
+        : owner(owner)
+    {
+        if (!setting || !*setting) FAILURE(Configuration, "Invalid qmp.port");
+        for (const char* p = setting; *p; ++p) {
+            if (!digit(*p) || port > 6553) FAILURE(Configuration, "Invalid qmp.port");
+            port = port * 10 + (*p - '0');
+        }
+        if (port > 65535) FAILURE(Configuration, "qmp.port must be 0..65535");
+        for (size_t i = 0; i < clients.size(); ++i)
+            clients[i] = std::make_unique<QmpClient>(system, keyboard, i);
+    }
+
+    void run() override
+    {
+        while (!stop_requested) {
+            owner.poll();
+            CThread::sleep(20);
+        }
+    }
 };
 
 QmpInput::QmpInput(CSystem& system, CKeyboard& keyboard, const char* port)
@@ -585,7 +623,8 @@ void QmpInput::stop()
     impl->stop_requested = true;
     impl->thread.join();
     impl->started = false;
-    impl->disconnect();
+    for (auto& client : impl->clients)
+        client->disconnect();
 #ifdef ES40_QMP_SOCKETS
     close_socket(impl->listener);
     impl->listener = no_socket;
@@ -608,29 +647,18 @@ void QmpInput::poll()
     for (unsigned i = 0; i < 8; ++i) {
         Socket socket = accept(impl->listener, nullptr, nullptr);
         if (socket == no_socket) break;
-        if (impl->client != no_socket || !nonblocking(socket)) { close_socket(socket); continue; }
+        const auto slot = std::find_if(impl->clients.begin(), impl->clients.end(),
+            [](const auto& client) { return client->client == no_socket; });
+        if (slot == impl->clients.end() || !nonblocking(socket)) { close_socket(socket); continue; }
         int one = 1;
         setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, (const char*)&one, sizeof one);
-        impl->client = socket;
-        impl->reply(std::string("\"QMP\":{\"version\":") + version + ",\"capabilities\":[]}");
+        (*slot)->client = socket;
+        (*slot)->reply(std::string("\"QMP\":{\"version\":") + version + ",\"capabilities\":[]}");
     }
-    impl->flush();
-    if (impl->client == no_socket) return;
-    if (impl->pending.size() < 4096 && impl->output.size() < output_limit / 2) {
-        char buffer[4096];
-        const int n = (int)recv(impl->client, buffer, sizeof buffer, 0);
-        if (n > 0) impl->pending.append(buffer, (size_t)n);
-        else if (n == 0 || !would_block()) { impl->disconnect(); return; }
-    }
-    size_t consumed = 0;
-    unsigned messages = 0;
-    while (consumed < impl->pending.size() && messages < 32
-        && impl->client != no_socket && impl->output.size() < output_limit / 2) {
-        const char c = impl->pending[consumed++];
-        if (impl->consume(c)) ++messages;
-    }
-    if (impl->client != no_socket) impl->pending.erase(0, consumed);
-    impl->flush();
+    // Rotate first service as clients also share the bounded guest input queue.
+    for (size_t i = 0; i < impl->clients.size(); ++i)
+        impl->clients[(impl->next_client + i) % impl->clients.size()]->poll();
+    impl->next_client = (impl->next_client + 1) % impl->clients.size();
 #endif
 }
 

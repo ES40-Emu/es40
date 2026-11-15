@@ -119,9 +119,11 @@ void CKeyboard::init()
 	int i;
 	discard_input_locked();
 	local_keys.fill(false);
-	external_keys.fill(false);
-	local_buttons = external_buttons = 0;
-	input_release_pending = false;
+	for (auto& keys : external_keys)
+		keys.fill(false);
+	local_buttons = 0;
+	external_buttons.fill(0);
+	input_release_pending.fill(false);
 
 	cSystem->RegisterMemory(this, 0, U64(0x00000801fc000060), 1);
 	cSystem->RegisterMemory(this, 1, U64(0x00000801fc000064), 1);
@@ -222,10 +224,10 @@ CKeyboard::~CKeyboard()
 }
 
 CKeyboard::InputResult CKeyboard::queue_input(const InputEvent* events, size_t count,
-	u64* batch_id, const unsigned* expected_buttons)
+	u64* batch_id, const unsigned* expected_buttons, size_t source)
 {
 	CFastMutex::ScopedLock guard(kbdLock);
-	if (count && !events)
+	if (source >= INPUT_SOURCES || (count && !events))
 		return InputResult::Invalid;
 	if (count > INPUT_CAPACITY)
 		return InputResult::Full;
@@ -247,9 +249,9 @@ CKeyboard::InputResult CKeyboard::queue_input(const InputEvent* events, size_t c
 		else
 			return InputResult::Invalid;
 	}
-	if (StopThread || input_release_pending)
+	if (StopThread || input_release_pending[source])
 		return InputResult::Unavailable;
-	const bool buttons_changed = expected_buttons && *expected_buttons != input_buttons_locked();
+	const bool buttons_changed = expected_buttons && *expected_buttons != input_buttons_locked(source);
 	for (size_t i = 0; i < count; ++i)
 		if (!input_available(events[i])
 			|| (buttons_changed && events[i].type == InputEvent::Type::Mouse))
@@ -284,6 +286,7 @@ CKeyboard::InputResult CKeyboard::queue_input(const InputEvent* events, size_t c
 		const size_t index = (input_head + input_count++) % INPUT_CAPACITY;
 		input_queue[index] = events[i];
 		input_batch_tags[index] = tag;
+		input_sources[index] = source;
 	}
 	return InputResult::Accepted;
 }
@@ -330,16 +333,52 @@ void CKeyboard::discard_input()
 void CKeyboard::release_input()
 {
 	CFastMutex::ScopedLock guard(kbdLock);
-	discard_input_locked();
-	input_release_pending = external_buttons != 0;
-	for (bool down : external_keys)
-		input_release_pending = input_release_pending || down;
+	for (size_t source = 0; source < INPUT_SOURCES; ++source)
+		release_input_locked(source);
+}
+
+void CKeyboard::release_input(size_t source)
+{
+	CFastMutex::ScopedLock guard(kbdLock);
+	if (source < INPUT_SOURCES)
+		release_input_locked(source);
+}
+
+void CKeyboard::release_input_locked(size_t source)
+{
+	size_t kept = 0;
+	for (size_t i = 0; i < input_count; ++i)
+	{
+		const size_t index = (input_head + i) % INPUT_CAPACITY;
+		if (input_sources[index] == source)
+			finish_input_event(index, true);
+		else
+		{
+			const size_t target = (input_head + kept++) % INPUT_CAPACITY;
+			input_queue[target] = input_queue[index];
+			input_batch_tags[target] = input_batch_tags[index];
+			input_sources[target] = input_sources[index];
+		}
+	}
+	input_count = kept;
+	input_release_pending[source] = external_buttons[source] != 0;
+	for (bool down : external_keys[source])
+		input_release_pending[source] = input_release_pending[source] || down;
 }
 
 bool CKeyboard::input_releasing()
 {
 	CFastMutex::ScopedLock guard(kbdLock);
-	return input_release_pending;
+	for (bool pending : input_release_pending)
+		if (pending)
+			return true;
+	return false;
+}
+
+bool CKeyboard::input_releasing(size_t source)
+{
+	CFastMutex::ScopedLock guard(kbdLock);
+	return source < INPUT_SOURCES && input_release_pending[source];
 }
 
 bool CKeyboard::input_wheel_enabled()
@@ -348,21 +387,41 @@ bool CKeyboard::input_wheel_enabled()
 	return state.mouse.im_mode;
 }
 
-unsigned CKeyboard::input_buttons()
+unsigned CKeyboard::input_buttons(size_t source)
 {
 	CFastMutex::ScopedLock guard(kbdLock);
-	return input_buttons_locked();
+	return source < INPUT_SOURCES ? input_buttons_locked(source) : 0;
 }
 
-unsigned CKeyboard::input_buttons_locked() const
+unsigned CKeyboard::input_buttons_locked(size_t source) const
 {
 	for (size_t i = input_count; i; --i)
 	{
-		const InputEvent& event = input_queue[(input_head + i - 1) % INPUT_CAPACITY];
-		if (event.type == InputEvent::Type::Mouse)
+		const size_t index = (input_head + i - 1) % INPUT_CAPACITY;
+		const InputEvent& event = input_queue[index];
+		if (input_sources[index] == source && event.type == InputEvent::Type::Mouse)
 			return event.buttons;
 	}
-	return external_buttons;
+	return external_buttons[source];
+}
+
+unsigned CKeyboard::combined_buttons(size_t except) const
+{
+	unsigned buttons = local_buttons;
+	for (size_t source = 0; source < INPUT_SOURCES; ++source)
+		if (source != except)
+			buttons |= external_buttons[source];
+	return buttons;
+}
+
+bool CKeyboard::other_key_held(u32 key, size_t source) const
+{
+	if (source != INPUT_SOURCES && local_keys[key])
+		return true;
+	for (size_t other = 0; other < INPUT_SOURCES; ++other)
+		if (other != source && external_keys[other][key])
+			return true;
+	return false;
 }
 
 void CKeyboard::discard_input_type(InputEvent::Type type)
@@ -377,6 +436,7 @@ void CKeyboard::discard_input_type(InputEvent::Type type)
 			const size_t target = (input_head + kept++) % INPUT_CAPACITY;
 			input_queue[target] = event;
 			input_batch_tags[target] = input_batch_tags[index];
+			input_sources[target] = input_sources[index];
 		}
 		else
 			finish_input_event(index, true);
@@ -402,52 +462,51 @@ bool CKeyboard::input_busy() const
 
 void CKeyboard::service_input_release()
 {
-	bool waiting = false;
-	for (u32 key = 0; key < BX_KEY_NBKEYS; ++key)
+	for (size_t source = 0; source < INPUT_SOURCES; ++source)
 	{
-		if (!external_keys[key])
+		if (!input_release_pending[source])
 			continue;
-		if (local_keys[key])
+		bool waiting = false;
+		for (u32 key = 0; key < BX_KEY_NBKEYS; ++key)
 		{
-			external_keys[key] = false;
-			continue;
+			if (!external_keys[source][key])
+				continue;
+			if (other_key_held(key, source))
+				external_keys[source][key] = false;
+			else if (input_busy() || !gen_scancode_locked(key | BX_KEY_RELEASED))
+				waiting = true;
+			else
+				external_keys[source][key] = false;
 		}
-		if (input_busy())
-			return;
-		if (!gen_scancode_locked(key | BX_KEY_RELEASED))
+		if (external_buttons[source])
 		{
-			waiting = true;
-			continue;
+			const unsigned remaining = combined_buttons(source);
+			bool released = (external_buttons[source] | remaining) == remaining;
+			if (!released)
+			{
+				InputEvent event;
+				event.type = InputEvent::Type::Mouse;
+				released = !input_busy() && input_available(event)
+					&& mouse_enQ_packet((u8)(0x08 | remaining), 0, 0, 0);
+			}
+			if (released)
+			{
+				external_buttons[source] = 0;
+				state.mouse.button_status = (u8)remaining;
+			}
+			else
+				waiting = true;
 		}
-		external_keys[key] = false;
-		return;
+		input_release_pending[source] = waiting;
 	}
-	if (external_buttons)
-	{
-		if ((external_buttons | local_buttons) != local_buttons)
-		{
-			InputEvent event;
-			event.type = InputEvent::Type::Mouse;
-			if (input_busy() || !input_available(event)
-				|| !mouse_enQ_packet((u8)(0x08 | local_buttons), 0, 0, 0))
-				return;
-		}
-		external_buttons = 0;
-		state.mouse.button_status = (u8)local_buttons;
-	}
-	input_release_pending = waiting;
 }
 
 void CKeyboard::service_input()
 {
 	if (StopThread)
 		return;
-	if (input_release_pending)
-	{
-		service_input_release();
-		if (input_release_pending)
-			return;
-	}
+	// A disabled device may defer one source's release without blocking other input.
+	service_input_release();
 	while (input_count && !input_available(input_queue[input_head]))
 	{
 		finish_input_event(input_head, true);
@@ -460,9 +519,10 @@ void CKeyboard::service_input()
 	if (input_busy())
 		return;
 	InputEvent& event = input_queue[input_head];
+	const size_t source = input_sources[input_head];
 	if (event.type == InputEvent::Type::Key)
 	{
-		if (!apply_input_key(event.key, true))
+		if (!apply_input_key(event.key, source))
 			return;
 	}
 	else
@@ -470,12 +530,13 @@ void CKeyboard::service_input()
 		const int dx = event.dx > 254 ? 254 : event.dx < -254 ? -254 : event.dx;
 		const int dy = event.dy > 254 ? 254 : event.dy < -254 ? -254 : event.dy;
 		const int dz = event.dz > 127 ? 127 : event.dz < -127 ? -127 : event.dz;
-		const u8 header = (u8)(0x08 | event.buttons | local_buttons | (dx < 0 ? 0x10 : 0)
+		const unsigned buttons = event.buttons | combined_buttons(source);
+		const u8 header = (u8)(0x08 | buttons | (dx < 0 ? 0x10 : 0)
 			| (dy < 0 ? 0x20 : 0));
 		if (!mouse_enQ_packet(header, (u8)dx, (u8)dy, (u8)-dz))
 			return;
-		external_buttons = event.buttons;
-		state.mouse.button_status = (u8)(external_buttons | local_buttons);
+		external_buttons[source] = event.buttons;
+		state.mouse.button_status = (u8)buttons;
 		event.dx -= dx;
 		event.dy -= dy;
 		event.dz -= dz;
@@ -516,16 +577,17 @@ void CKeyboard::WriteMem(int index, u64 address, int dsize, u64 data)
 void CKeyboard::gen_scancode(u32 key)
 {
 	CFastMutex::ScopedLock guard(kbdLock);
-	apply_input_key(key, false);
+	apply_input_key(key);
 }
 
-bool CKeyboard::apply_input_key(u32 key, bool external)
+bool CKeyboard::apply_input_key(u32 key, size_t source)
 {
 	const u32 code = key & ~BX_KEY_RELEASED;
-	if (code >= BX_KEY_NBKEYS)
+	if (code >= BX_KEY_NBKEYS || source > INPUT_SOURCES)
 		return false;
-	bool& held = external ? external_keys[code] : local_keys[code];
-	const bool other = external ? local_keys[code] : external_keys[code];
+	const bool external = source != INPUT_SOURCES;
+	bool& held = external ? external_keys[source][code] : local_keys[code];
+	const bool other = other_key_held(code, source);
 	const bool down = (key & BX_KEY_RELEASED) == 0;
 	if (!external && down
 		&& (!state.kbd_clock_enabled || !state.kbd_internal_buffer.scanning_enabled))
@@ -2100,7 +2162,7 @@ void CKeyboard::mouse_motion(int delta_x, int delta_y, int delta_z, unsigned but
 		|| !state.aux_clock_enabled)
 	{
 		local_buttons &= button_state & 0x07;
-		state.mouse.button_status = (u8)(local_buttons | external_buttons);
+		state.mouse.button_status = (u8)combined_buttons();
 		return;
 	}
 
@@ -2108,7 +2170,7 @@ void CKeyboard::mouse_motion(int delta_x, int delta_y, int delta_z, unsigned but
 	state.mouse.delayed_dy += delta_y;
 	state.mouse.delayed_dz += delta_z;
 	local_buttons = button_state & 0x07;
-	state.mouse.button_status = (u8)(local_buttons | external_buttons);
+	state.mouse.button_status = (u8)combined_buttons();
 	state.mouse.data_pending = true;
 
 	if (state.mouse.enable && state.mouse.mode == MOUSE_MODE_STREAM)
@@ -2392,9 +2454,11 @@ int CKeyboard::RestoreState(FILE* f)
 	CFastMutex::ScopedLock guard(kbdLock);
 	discard_input_locked();
 	local_keys.fill(false);
-	external_keys.fill(false);
-	local_buttons = external_buttons = 0;
-	input_release_pending = false;
+	for (auto& keys : external_keys)
+		keys.fill(false);
+	local_buttons = 0;
+	external_buttons.fill(0);
+	input_release_pending.fill(false);
 	long    ss;
 	u32     m1;
 	u32     m2;

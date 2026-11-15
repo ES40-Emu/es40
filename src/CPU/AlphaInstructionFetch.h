@@ -93,6 +93,10 @@ struct AlphaInstructionFetchPolicy
   // page only when the family guarantees uniform execute permissions there.
   bool jit_same_page_access = false;
 
+  // Clear family cache/cursors before JIT invalidation, including init/reset.
+  // Non-global flushes preserve global sources; null means no family cache.
+  void (*invalidate)(CAlphaCPU& cpu, bool non_global) = nullptr;
+
   constexpr bool supports_jit() const
   {
     return jit_coherent && fetch && probe && matches_interpreted && can_chain && source;

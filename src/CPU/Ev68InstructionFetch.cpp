@@ -44,6 +44,30 @@ bool Ev68InstructionFetch::icache_hit(const CAlphaCPU& cpu, int i, u64 address)
     && ((address & 1) || (cpu.icache_valid_modes[i] & (1u << cpu.state.cm)));
 }
 
+void Ev68InstructionFetch::invalidate(CAlphaCPU& cpu, bool non_global)
+{
+  auto& state = cpu.state;
+  if (cpu.icache_enabled)
+  {
+    if (non_global)
+    {
+      int i;
+      for (i = 0; i < ICACHE_ENTRIES; i++)
+        if (!state.icache[i].asm_bit)
+          state.icache[i].valid = false;
+    }
+    else
+    {
+      for (int i = 0; i < ICACHE_ENTRIES; i++) {
+        state.icache[i].valid = false;
+      }
+      state.next_icache = 0; // old version, may be relied on elsewhere
+      state.last_found_icache = 0;
+    }
+  }
+  cpu.break_seq_icache();
+}
+
 void Ev68InstructionFetch::prepare_dispatch(CAlphaCPU& cpu)
 {
   // Preserve the ES40 firmware entry behavior after an in-place image rewrite.

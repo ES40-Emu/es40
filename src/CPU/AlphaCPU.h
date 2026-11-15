@@ -906,15 +906,8 @@ private:
      **/
 inline void CAlphaCPU::flush_icache()
 {
-  if (icache_enabled)
-  {
-    for (int i = 0; i < ICACHE_ENTRIES; i++) {
-      state.icache[i].valid = false;
-    }
-    state.next_icache = 0; // old version, may be relied on elsewhere
-    state.last_found_icache = 0;
-  }
-  break_seq_icache();
+  if (m_profile.instruction_fetch.invalidate)
+    m_profile.instruction_fetch.invalidate(*this, false);
 #ifdef ES40_JIT
   jit_flush_blocks();
 #endif
@@ -925,14 +918,8 @@ inline void CAlphaCPU::flush_icache()
  **/
 inline void CAlphaCPU::flush_icache_asm()
 {
-  if (icache_enabled)
-  {
-    int i;
-    for (i = 0; i < ICACHE_ENTRIES; i++)
-      if (!state.icache[i].asm_bit)
-        state.icache[i].valid = false;
-  }
-  break_seq_icache();
+  if (m_profile.instruction_fetch.invalidate)
+    m_profile.instruction_fetch.invalidate(*this, true);
 #ifdef ES40_JIT
   jit_flush_blocks_asm();   // preserve global (ASM-bit) JIT blocks, matching the icache ASM-bit rule
 #endif

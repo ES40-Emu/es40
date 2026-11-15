@@ -42,6 +42,16 @@ struct AlphaInstructionMapping
   bool valid = false;
 };
 
+enum class AlphaInstructionFetchEvent
+{
+  Initialize,
+  AdvancePC,
+  RedirectPC,
+  CompiledExit,
+  TranslationChanged,
+  Restore
+};
+
 // Family fetch behavior, copied with the immutable CPU profile.
 struct AlphaInstructionFetchPolicy
 {
@@ -96,6 +106,9 @@ struct AlphaInstructionFetchPolicy
   // Clear family cache/cursors before JIT invalidation, including init/reset.
   // Non-global flushes preserve global sources; null means no family cache.
   void (*invalidate)(CAlphaCPU& cpu, bool non_global) = nullptr;
+
+  // Optional bookkeeping after shared PC, translation, and state updates.
+  void (*lifecycle)(CAlphaCPU& cpu, AlphaInstructionFetchEvent event) = nullptr;
 
   constexpr bool supports_jit() const
   {

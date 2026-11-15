@@ -65,7 +65,38 @@ void Ev68InstructionFetch::invalidate(CAlphaCPU& cpu, bool non_global)
       state.last_found_icache = 0;
     }
   }
-  cpu.break_seq_icache();
+  cpu.seq_remaining = 0;
+}
+
+void Ev68InstructionFetch::lifecycle(CAlphaCPU& cpu, AlphaInstructionFetchEvent event)
+{
+  switch (event)
+  {
+  case AlphaInstructionFetchEvent::Initialize:
+    cpu.seq_line_ptr = nullptr;
+    cpu.seq_offset = 0;
+    cpu.seq_remaining = 0;
+    cpu.seq_next_pc = 0;
+    break;
+  case AlphaInstructionFetchEvent::AdvancePC:
+    cpu.state.pc_phys += 4;
+    if (cpu.state.rem_ins_in_page)
+      cpu.state.rem_ins_in_page--;
+    break;
+  case AlphaInstructionFetchEvent::RedirectPC:
+    cpu.state.rem_ins_in_page = 0;
+    cpu.seq_remaining = 0;
+    break;
+  case AlphaInstructionFetchEvent::CompiledExit:
+    cpu.seq_remaining = 0;
+    break;
+  case AlphaInstructionFetchEvent::TranslationChanged:
+  case AlphaInstructionFetchEvent::Restore:
+    memset(cpu.icache_valid_modes, 0, sizeof(cpu.icache_valid_modes));
+    cpu.seq_remaining = 0;
+    cpu.state.rem_ins_in_page = 0;
+    break;
+  }
 }
 
 void Ev68InstructionFetch::prepare_dispatch(CAlphaCPU& cpu)

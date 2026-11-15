@@ -41,6 +41,7 @@ public:
   static bool can_chain(const CAlphaCPU& cpu, std::uint64_t target);
   static AlphaInstructionSourceView source(CAlphaCPU& cpu, std::uint64_t pc);
   static void invalidate(CAlphaCPU& cpu, bool non_global);
+  static void lifecycle(CAlphaCPU& cpu, AlphaInstructionFetchEvent event);
 
 private:
   static bool icache_line_matches(const CAlphaCPU& cpu, int i, std::uint64_t address);
@@ -55,7 +56,7 @@ inline constexpr AlphaInstructionFetchPolicy kEv68InstructionFetchPolicy{
   &Ev68InstructionFetch::source,
   true, // Coherent EV68 RAM/cache sources participate in JIT invalidation.
   true, // Execute permissions are uniform within an 8 KiB translation.
-  &Ev68InstructionFetch::invalidate
+  &Ev68InstructionFetch::invalidate, &Ev68InstructionFetch::lifecycle
 };
 
 #endif

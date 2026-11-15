@@ -1085,10 +1085,7 @@ void CAlphaCPU::init()
 
 	flush_data_page_cache();
 
-	seq_line_ptr = nullptr;
-	seq_offset = 0;
-	seq_remaining = 0;
-	seq_next_pc = 0;
+	instruction_fetch_event(AlphaInstructionFetchEvent::Initialize);
 
 	printf("%s(%d): $Id$\n",
 		devid_string, state.iProcNum);
@@ -1161,10 +1158,7 @@ void CAlphaCPU::ResetForSystemReset()
 
 	flush_data_page_cache();
 
-	seq_line_ptr = nullptr;
-	seq_offset = 0;
-	seq_remaining = 0;
-	seq_next_pc = 0;
+	instruction_fetch_event(AlphaInstructionFetchEvent::Initialize);
 }
 
 void CAlphaCPU::start_threads()
@@ -1572,7 +1566,7 @@ void CAlphaCPU::jit_run(int budget)
 				const uint64_t _trace_tsc = jit_rdtsc() - _trace_t0;
 #endif
 				state.r[31] = 0;
-				break_seq_icache();      // the trace wrote state.pc natively; drop the stale cursor
+				instruction_fetch_event(AlphaInstructionFetchEvent::CompiledExit);      // the trace wrote state.pc natively; drop the stale cursor
 				state.instruction_count += done;
 				cc_large += (u64)done * cc_per_instruction;
 				budget -= done;
@@ -2154,7 +2148,7 @@ void CAlphaCPU::jit_run(int budget)
 				state.pc = interp_pc;   // restore; the block's PC write was only for the check
 				put_iprs(ipr_interp);   // roll back the compiled pass's live IPR writes (verify-only)
 				memcpy(state.f, f_interp, sizeof(f_interp));   // ...and its FP writes
-				break_seq_icache();     // compiled pass + raw pc restore bypassed set_pc
+				instruction_fetch_event(AlphaInstructionFetchEvent::CompiledExit);     // compiled pass + raw pc restore bypassed set_pc
 			}
 			continue;
 #else
@@ -2180,7 +2174,7 @@ void CAlphaCPU::jit_run(int budget)
 			const uint64_t _comp_tsc = jit_rdtsc() - _comp_t0;   // host cycles in this compiled chain
 #endif
 			state.r[31] = 0;
-			break_seq_icache();   // compiled block wrote pc natively (no set_pc); drop the stale cursor
+			instruction_fetch_event(AlphaInstructionFetchEvent::CompiledExit);   // compiled block wrote pc natively (no set_pc); drop the stale cursor
 			// state.pc is written by the compiled block itself (next PC, or the bail PC).
 			// Account for the compiled ops: instruction count (+ cc_large for the legacy speed
 			// calibration). state.cc (RPCC) is no longer advanced per-instruction.
@@ -3416,7 +3410,6 @@ _next_instruction:
 			{
 			case AlphaInterruptResult::EnterPAL:
 				GO_PAL(AlphaPALException::Interrupt);
-				seq_remaining = 0;
 #ifndef ES40_JIT
 				goto _next_instruction;
 #else
@@ -4207,9 +4200,7 @@ int CAlphaCPU::RestoreState(FILE* f)
 	last_dtb_virt[0] = last_dtb_virt[1] = 0;
 	// RAM and TB state now belong to the restored state. Restored icache stays. Rest gets chucked.
 	flush_data_page_cache();
-	break_seq_icache();
-	memset(icache_valid_modes, 0, sizeof(icache_valid_modes));
-	state.rem_ins_in_page = 0;
+	instruction_fetch_event(AlphaInstructionFetchEvent::Restore);
 #ifdef ES40_JIT
 	m_link_from = nullptr;      // pending link-patch request into pre-restore code
 	if (m_jit) m_jit->flush();  // epoch bump: blocks/traces re-hash against restored RAM before running
@@ -4603,9 +4594,7 @@ void CAlphaCPU::add_tb(u64 virt, u64 pte_phys, u64 pte_flags, int flags, int asn
 	{
 		// Keep cached instruction bytes until IMB, but discard derived access proofs.
 		// Recheck same-physical permission change on next fetch.
-		memset(icache_valid_modes, 0, sizeof(icache_valid_modes));
-		break_seq_icache();
-		state.rem_ins_in_page = 0;
+		instruction_fetch_event(AlphaInstructionFetchEvent::TranslationChanged);
 	}
 
 #if defined(DEBUG_TB_)
@@ -4656,9 +4645,7 @@ void CAlphaCPU::tbia(int flags)
 	if (t == TB_INDEX_DATA) flush_data_page_cache();
 	else
 	{
-		memset(icache_valid_modes, 0, sizeof(icache_valid_modes));
-		break_seq_icache();
-		state.rem_ins_in_page = 0;
+		instruction_fetch_event(AlphaInstructionFetchEvent::TranslationChanged);
 	}
 #ifdef ES40_JIT
 	if (t == TB_INDEX_ITB && m_jit) m_jit->note_itb_invalidate(CJitEngine::kBumpTbia);
@@ -4687,9 +4674,7 @@ void CAlphaCPU::tbiap(int flags)
 	if (t == TB_INDEX_DATA) flush_data_page_cache();
 	else
 	{
-		memset(icache_valid_modes, 0, sizeof(icache_valid_modes));
-		break_seq_icache();
-		state.rem_ins_in_page = 0;
+		instruction_fetch_event(AlphaInstructionFetchEvent::TranslationChanged);
 	}
 #ifdef ES40_JIT
 	if (t == TB_INDEX_ITB && m_jit) m_jit->note_itb_invalidate(CJitEngine::kBumpTbiap);
@@ -4716,9 +4701,7 @@ void CAlphaCPU::tbis(u64 virt, int flags, int asn)
 	int i = FindTBEntry(virt, flags, asn);
 	if (i >= 0)
 		state.tb[t][i].valid = false;
-	memset(icache_valid_modes, 0, sizeof(icache_valid_modes));
-	break_seq_icache();
-	state.rem_ins_in_page = 0;
+	instruction_fetch_event(AlphaInstructionFetchEvent::TranslationChanged);
 #ifdef ES40_JIT
 	// Native permission proofs can outlive the ITB entry that supplied them.
 	// Its original granularity hint may cover other 8 KiB pages even if today's matching entry is absent or smaller.

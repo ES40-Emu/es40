@@ -358,6 +358,7 @@ private:
   void service_interval_timer(std::chrono::steady_clock::time_point now);
   void count_down_irq_timers(int step);
 
+  void            instruction_fetch_event(AlphaInstructionFetchEvent event);
   int             fetch_instruction(u32* instruction);
   AlphaInstructionMapping probe_instruction_source(u64 pc);
   bool            peek_cached_instruction(u32* instruction) const;
@@ -615,10 +616,6 @@ private:
   // derived metadata outside state so the saved-state layout stays unchanged.
   u8    icache_valid_modes[ICACHE_ENTRIES] = {};
 
-  inline void break_seq_icache() {
-    seq_remaining = 0;
-  }
-  
   // Data page translation cache: direct-mapped by virtual page (kDpcEntries slots/dir) so a
   // multi-page access pattern doesn't thrash a single slot. The inline load checks one slot.
   // Cached normal accesses use the current CM/ASN0 context; family control writes that
@@ -943,6 +940,12 @@ inline bool CAlphaCPU::fp_start()
   return true;
 }
 
+inline void CAlphaCPU::instruction_fetch_event(AlphaInstructionFetchEvent event)
+{
+  if (m_profile.instruction_fetch.lifecycle)
+    m_profile.instruction_fetch.lifecycle(*this, event);
+}
+
 inline int CAlphaCPU::fetch_instruction(u32* instruction)
 {
   return m_profile.instruction_fetch.fetch
@@ -1087,9 +1090,7 @@ inline u64 CAlphaCPU::get_clean_pc()
 inline void CAlphaCPU::next_pc()
 {
   state.pc += 4;
-  state.pc_phys += 4;
-  if (state.rem_ins_in_page)
-    state.rem_ins_in_page--;
+  instruction_fetch_event(AlphaInstructionFetchEvent::AdvancePC);
 }
 
 /**
@@ -1098,8 +1099,7 @@ inline void CAlphaCPU::next_pc()
 inline void CAlphaCPU::set_pc(u64 p_pc)
 {
   state.pc = p_pc;
-  state.rem_ins_in_page = 0;
-  seq_remaining = 0;
+  instruction_fetch_event(AlphaInstructionFetchEvent::RedirectPC);
 }
 
 /**
@@ -1108,8 +1108,7 @@ inline void CAlphaCPU::set_pc(u64 p_pc)
 inline void CAlphaCPU::add_pc(u64 a_pc)
 {
   state.pc += a_pc;
-  state.rem_ins_in_page = 0;
-  seq_remaining = 0;
+  instruction_fetch_event(AlphaInstructionFetchEvent::RedirectPC);
 }
 
 /**

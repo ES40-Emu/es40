@@ -932,7 +932,7 @@ void CAlphaCPU::enter_native_call_pal(u32 function)
 	const auto entry = m_profile.pal.call_pal_entry(function, state.current_pc, state.pc);
 	state.exc_addr = entry.saved_pc;
 	if (entry.write_link)
-		state.r[state.sde ? entry.shadow_link_register : entry.link_register] = entry.return_pc;
+		state.r[m_pal_shadow_enabled ? entry.shadow_link_register : entry.link_register] = entry.return_pc;
 	set_pc(state.pal_base | entry.offset);
 }
 
@@ -1030,7 +1030,7 @@ void CAlphaCPU::init()
 		o.fpcr = (uint32_t)((char*)&state.fpcr - (char*)this);
 		o.exc_addr = (uint32_t)((char*)&state.exc_addr - (char*)this);
 		o.pal_base = (uint32_t)((char*)&state.pal_base - (char*)this);
-		o.sde = (uint32_t)((char*)&state.sde - (char*)this);
+		o.pal_shadow_enabled = (uint32_t)((char*)&m_pal_shadow_enabled - (char*)this);
 		o.mm_stat = (uint32_t)((char*)&state.mm_stat - (char*)this);
 		o.fault_va = (uint32_t)((char*)&state.fault_va - (char*)this);
 		// CPU-resident helper table:
@@ -1064,6 +1064,7 @@ void CAlphaCPU::init()
 
 	if (m_profile.reset.initialize)
 		m_profile.reset.initialize(*this);
+	sync_register_bank();
 
 #if defined(IDB)
 	bListing = false;
@@ -1141,6 +1142,7 @@ void CAlphaCPU::ResetForSystemReset()
 
 	if (m_profile.reset.initialize)
 		m_profile.reset.initialize(*this);
+	sync_register_bank();
 
 	myThread = 0;
 
@@ -1500,7 +1502,7 @@ void CAlphaCPU::jit_run(int budget)
 		// Wake CPUs napping on a line this CPU's last chain stored to.
 		cSystem->idle_watch_poll(state.iProcNum);
 		const u64 start_virt = state.pc;
-		const bool start_pal_shadow = (start_virt & 1) && state.sde;
+		const bool start_pal_shadow = (start_virt & 1) && m_pal_shadow_enabled;
 
 		if (m_profile.instruction_fetch.prepare_dispatch)
 			m_profile.instruction_fetch.prepare_dispatch(*this);
@@ -1549,14 +1551,14 @@ void CAlphaCPU::jit_run(int budget)
 #if !defined(JIT_VERIFY) && defined(JIT_TRACES)
 		// Same run-gates as the block path below: a compiled trace has no per-instruction interrupt
 		// poll, so DON'T enter it while an interrupt/timer is pending (the interpreter must service it,
-		// or the CPU livelocks -> OS sanity-timer bugcheck), nor a PALmode trace without SDE, nor one
+		// or the CPU livelocks -> OS sanity-timer bugcheck), nor a PALmode trace without shadowing, nor one
 		// that would overrun the budget. JIT_TRACES-off builds compile the whole hook away.
 		if (have_phys && !(start_virt & 1) && m_jit->traces_enabled()
 			&& !state.check_int && !state.check_timers)
 		{
 			CJitEngine::TraceFragment* t = m_jit->trace_lookup(start_virt, start_asn);
 			if (t && t->underrun >= 64) { m_jit->demote_trace(t); t = nullptr; }   // R3b: stopped looping -> net tax
-			if (t && (int)t->n_instr <= budget && (!(t->head_tag & 1) || state.sde)
+			if (t && (int)t->n_instr <= budget && (!(t->head_tag & 1) || m_pal_shadow_enabled)
 				&& m_jit->trace_ok(t, start_phys, sources) && trace_segs_live(t))
 			{
 				// chain-in: a predecessor's exit missed here and the trace is validated (vgen just
@@ -1614,7 +1616,7 @@ void CAlphaCPU::jit_run(int budget)
 		if (b && b->code && b->phys == start_phys && b->asm_global == start_asm
 			&& (int)b->prefix_len <= budget
 			&& (!state.check_int || (b->tag & 1)) && !state.check_timers
-			&& (!(b->tag & 1) || b->pal_shadow == (bool)state.sde))
+			&& (!(b->tag & 1) || b->pal_shadow == m_pal_shadow_enabled))
 		{
 			b->vgen = m_jit->vgen();   // phys validated + lookup proved flush-fresh: refresh the chain epoch
 			m_jit->authorize_native(b, (uint32_t)start_access.mode);
@@ -1715,6 +1717,7 @@ void CAlphaCPU::jit_run(int budget)
 			};
 			auto put_iprs = [&](const u64* s) {
 				if (ipr_count) verify.restore(*this, s);
+				sync_register_bank();
 			};
 			auto ipr_ne = [&](int ii, u64 x, u64 y, bool side_exit = false) {
 				return verify.differs(ii, x, y, side_exit);
@@ -2992,7 +2995,7 @@ void* CAlphaCPU::jit_indirect_impl(CAlphaCPU* cpu, u64 target, void* link_cache)
 		return nullptr;
 	const auto access = cpu->m_profile.mmu_address.access(*cpu, ACCESS_EXEC);
 	CJitEngine::JitBlock* b = cpu->m_jit->lookup(target, (u32)access.asn,
-		(target & 1) && cpu->state.sde);
+		(target & 1) && cpu->m_pal_shadow_enabled);
 	if (!b || !b->jit_body) return nullptr;
 	auto hit = [&](void* body) -> void* {
 		if (link_cache)
@@ -4149,6 +4152,7 @@ int CAlphaCPU::RestoreState(FILE* f)
 	printf("%s: %d bytes restored.\n", devid_string, (int)ss);
 	if (m_profile.cpu_state.replaced)
 		m_profile.cpu_state.replaced(*this);
+	sync_register_bank();
 	// RAM and TB state now belong to the restored state. Restored icache stays. Rest gets chucked.
 	flush_data_page_cache();
 	instruction_fetch_event(AlphaInstructionFetchEvent::Restore);

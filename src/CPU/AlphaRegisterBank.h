@@ -27,10 +27,13 @@
 
 #include <cstdint>
 
+class CAlphaCPU;
+
 // Operand routing into the existing two banks. R31 never shadows.
 struct AlphaRegisterBankPolicy
 {
   std::uint32_t pal_shadow_mask = 0;
+  bool (*pal_shadow_enabled)(const CAlphaCPU&) = nullptr; // Null disables shadowing.
 
   constexpr bool shadowable(std::uint32_t reg) const
   {

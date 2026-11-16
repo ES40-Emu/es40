@@ -4515,8 +4515,8 @@ static A64OpEmitReceipt emit_a64_call_pal(A64EmitContext& context,
   if (err != Error::kOk) return a64_completed_op_receipt(op, err);
 
   if (entry.write_link) {
-    // The family selects the link slots; LIVE SDE chooses the runtime destination.
-    err = emit_a64_load_cpu_u8(a, RA::kScratch3.w(), context.offsets.sde, false);
+    // The family selects the link slots and runtime shadow enable.
+    err = emit_a64_load_cpu_u8(a, RA::kScratch3.w(), context.offsets.pal_shadow_enabled, false);
     if (err == Error::kOk) err = emit_a64_mov_u64(a, RA::kScratch5, entry.return_pc);
     if (err != Error::kOk) return a64_completed_op_receipt(op, err);
     const Label shadow = a.new_label(), linked = a.new_label();
@@ -5907,7 +5907,7 @@ static asmjit::Error emit_a64_source_pal_guard(asmjit::a64::Assembler& a,
   using namespace asmjit;
   if (!enabled) return Error::kOk;
 
-  Error err = emit_a64_load_cpu_u8(a, RA::kScratch6.w(), offsets.sde, false);
+  Error err = emit_a64_load_cpu_u8(a, RA::kScratch6.w(), offsets.pal_shadow_enabled, false);
   if (err != Error::kOk) return err;
   err = a.cmp(RA::kScratch6.w(), imm(expected_shadow ? 1 : 0));
   return err != Error::kOk ? err : a.b_ne(bailout);
@@ -5932,7 +5932,7 @@ static asmjit::Error emit_a64_link_slots_probe(asmjit::a64::Assembler& a,
                                reinterpret_cast<uintptr_t>(slots));
   if (err != Error::kOk) return err;
   if (variant_policy != A64LinkVariantPolicy::kNone) {
-    err = emit_a64_load_cpu_u8(a, RA::kScratch6.w(), offsets.sde, false);
+    err = emit_a64_load_cpu_u8(a, RA::kScratch6.w(), offsets.pal_shadow_enabled, false);
     if (err != Error::kOk) return err;
   }
 
@@ -5960,7 +5960,7 @@ static asmjit::Error emit_a64_link_slots_probe(asmjit::a64::Assembler& a,
       if (err != Error::kOk) return err;
     }
     if (variant_policy != A64LinkVariantPolicy::kNone) {
-      // Match the register-bank variant recorded in this link against the live SDE state.
+      // Match the register-bank variant recorded in this link against the live shadow enable.
       err = a.ldr(RA::kScratch3,
                   ptr(RA::kScratch1, base + offsetof(CJitEngine::LinkSlot, vgen)));
       if (err != Error::kOk) return err;
@@ -6134,7 +6134,7 @@ static asmjit::Error emit_a64_jump_cache_probe(asmjit::a64::Assembler& a,
   if (err != Error::kOk) return err;
   err = a.lsr(RA::kScratch2, RA::kScratch2, 63);
   if (err != Error::kOk) return err;
-  err = emit_a64_load_cpu_u8(a, RA::kScratch4.w(), offsets.sde, false);
+  err = emit_a64_load_cpu_u8(a, RA::kScratch4.w(), offsets.pal_shadow_enabled, false);
   if (err != Error::kOk) return err;
   err = a.cmp(RA::kScratch2.w(), RA::kScratch4.w());
   if (err != Error::kOk) return err;
@@ -6483,7 +6483,7 @@ static bool a64_validate_tail_emitters(const asmjit::Environment& environment,
   offsets.link_from = 4096;
   offsets.check_timers = 32760;
   offsets.helpers = 32768;
-  offsets.sde = 0x00ffffffu;
+  offsets.pal_shadow_enabled = 0x00ffffffu;
   offsets.check_int = 0x01000000u;
   offsets.jit_budget = UINT32_MAX;
 

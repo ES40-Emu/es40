@@ -261,6 +261,7 @@ class CAlphaCPU : public CSystemComponent, public CRunnable
   friend class AlphaCPUAlignmentTest;
   friend class Ev68IPR;
   friend class Ev68PALCompatibility;
+  friend class Ev68RegisterBank;
   friend class Ev68MMU;
   friend class Ev68Interrupt;
   friend class Ev68ArithmeticTrap;
@@ -644,6 +645,12 @@ private:
   // Read/write bank offsets, refreshed on native entry and family context writes.
   u32 m_dpc_bank[2] = {};
   // Derived execution context, outside saved state.
+  bool m_pal_shadow_enabled = false;
+  // Refresh after family control writes.
+  inline void sync_register_bank() {
+    const auto enabled = m_profile.register_bank.pal_shadow_enabled;
+    m_pal_shadow_enabled = enabled && enabled(*this);
+  }
   u32 m_jit_mode_bit = 1;
   u32 m_jit_asn = 0;
   inline void sync_instruction_context() {
@@ -652,6 +659,7 @@ private:
     m_jit_asn = (u32)access.asn;
   }
   inline void sync_native_context() {
+    sync_register_bank();
     for (int rw = 0; rw < 2; ++rw) {
       const auto access = m_profile.mmu_address.access(*this, rw ? ACCESS_WRITE : ACCESS_READ);
       m_dpc_bank[rw] = (u32)(access.mode & 3) * kDpcEntries * (u32)sizeof(SDataPageCache);
@@ -900,8 +908,8 @@ private:
 
 /** Translate raw register (0..31) number to a number that takes PALshadow
     registers into consideration (0..63). Considers the program counter
-    (to determine if we're in PALmode), and the SDE (Shadow Enable) bit. */
-#define RREG(a) m_profile.register_bank.slot((a), (state.pc & 1) && state.sde)
+    (to determine if we're in PALmode), and the model-selected shadow enable. */
+#define RREG(a) m_profile.register_bank.slot((a), (state.pc & 1) && m_pal_shadow_enabled)
 
     /**
      * Empty the instruction cache.

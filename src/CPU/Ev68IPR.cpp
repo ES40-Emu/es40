@@ -209,6 +209,7 @@ void Ev68IPR::write(CAlphaCPU& cpu, std::uint32_t instruction, std::uint64_t val
       state.sde = (value >> 7) & 1;
       state.hwe = (value >> 12) & 1;
       state.i_ctl_va_mode = (int) (value >> 15) & 3;
+      cpu.sync_register_bank();
       break;
 
     case 0x12:  /* ic_flush_asm */

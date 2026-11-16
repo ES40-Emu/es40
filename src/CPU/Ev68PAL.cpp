@@ -28,6 +28,11 @@
 #include "AlphaCPU.h"
 #include "Ev68PAL.h"
 
+bool Ev68RegisterBank::pal_shadow_enabled(const CAlphaCPU& cpu)
+{
+  return cpu.state.sde;
+}
+
 void Ev68PALCompatibility::base_changed(CAlphaCPU& cpu, std::uint64_t old_base, bool old_hle)
 {
   auto& state = cpu.state;

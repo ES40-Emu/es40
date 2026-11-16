@@ -985,7 +985,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         regalloc.rax_holds = -1;
 
         auto reg = [&](int r) {
-            // PALshadow (RREG, AlphaCPU.h): in a PALmode block with SDE set, registers selected by
+            // PALshadow (RREG, AlphaCPU.h): in a PALmode block with shadowing enabled, registers selected by
             // the profile map to the shadow bank r[r+32].
             const auto idx = m_profile.register_bank.slot(r, b->pal_shadow);
             return x86::qword_ptr(x86::rbx, idx * 8);
@@ -2320,7 +2320,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             a.mov(x86::rax, imm(entry.saved_pc));
             a.mov(x86::qword_ptr(x86::rbp, m_off.exc_addr), x86::rax);
             if (entry.write_link) {
-                a.movzx(x86::eax, x86::byte_ptr(x86::rbp, m_off.sde));      // SDE (0/1)
+                a.movzx(x86::eax, x86::byte_ptr(x86::rbp, m_off.pal_shadow_enabled));      // PAL shadow enable (0/1)
                 a.mov(x86::rcx, imm(entry.return_pc));
                 // Link descriptors name physical slots.
                 const int link_pin = entry.link_register < 32
@@ -3472,13 +3472,13 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
     if (pal_block) {
       // PAL-source slots are tag-keyed and rely on this guard to imply the target
       // register-bank variant. A mismatch must bypass the link-patch request.
-      a.cmp(x86::byte_ptr(x86::rbp, m_off.sde), imm(b->pal_shadow ? 1 : 0)); a.jne(lbl);
+      a.cmp(x86::byte_ptr(x86::rbp, m_off.pal_shadow_enabled), imm(b->pal_shadow ? 1 : 0)); a.jne(lbl);
     }
   };
   auto emit_chain = [&](Label& lbl) {
     Label miss = a.new_label();
     // Mapping/code invalidation clears links. Mode changes keep them; native
-    // entries check CM and PAL entries check SDE.
+    // entries check CM and PAL entries check shadow enable.
     // Poly-link: walk the cached successor snapshots, 2-successor cache both.
     for (int sl = 0; sl < kLinkSlots; ++sl) {
       Label nxt = (sl + 1 < kLinkSlots) ? a.new_label() : miss;
@@ -3487,10 +3487,10 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
       a.cmp(x86::qword_ptr(x86::rax, (int32_t) offsetof(LinkSlot, tag)), x86::r10); a.jne(nxt);   // not this exit's target
       if (!pal_block && terminator_branch && (words[plen - 1] >> 26) == 0x00) {
         // CALL_PAL may enter either register-bank variant.
-        // Match the variant recorded in this link against the live SDE state.
+        // Match the variant recorded in this link against the live shadow enable.
         a.mov(x86::rcx, x86::qword_ptr(x86::rax, (int32_t) offsetof(LinkSlot, vgen)));
         a.shr(x86::rcx, imm(63));
-        a.cmp(x86::cl, x86::byte_ptr(x86::rbp, m_off.sde)); a.jne(nxt);
+        a.cmp(x86::cl, x86::byte_ptr(x86::rbp, m_off.pal_shadow_enabled)); a.jne(nxt);
       }
       // Invalid slots carry the impossible tag ~0. A matching tag therefore proves body
       // was published. Removed redundant test. 
@@ -3561,7 +3561,7 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
           a.test(x86::r10, imm(1)); a.jz(mode_ok);
           a.mov(x86::rcx, x86::qword_ptr(x86::rax, off + (int) offsetof(LinkSlot, vgen)));
           a.shr(x86::rcx, imm(63));
-          a.cmp(x86::cl, x86::byte_ptr(x86::rbp, m_off.sde)); a.jne(next);
+          a.cmp(x86::cl, x86::byte_ptr(x86::rbp, m_off.pal_shadow_enabled)); a.jne(next);
           a.bind(mode_ok);
         }
         a.mov(x86::rcx, x86::qword_ptr(x86::rax, off + (int) offsetof(LinkSlot, body)));
@@ -3590,7 +3590,7 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
       a.cmp(x86::qword_ptr(x86::rax, (int32_t) offsetof(JumpCacheEntry, asn)), x86::rcx); a.jne(jc_miss);
       a.test(x86::r10, imm(1)); a.jz(jc_mode_ok);
       a.mov(x86::rcx, x86::qword_ptr(x86::rax, (int32_t) offsetof(JumpCacheEntry, gen))); a.shr(x86::rcx, imm(63));
-      a.cmp(x86::cl, x86::byte_ptr(x86::rbp, m_off.sde)); a.jne(jc_miss);
+      a.cmp(x86::cl, x86::byte_ptr(x86::rbp, m_off.pal_shadow_enabled)); a.jne(jc_miss);
       a.bind(jc_mode_ok);
       if ((words[plen - 1] >> 26) == 0x1e) {
         // Targeted invalidation clears body/tag but retains the matching generation.
@@ -4147,7 +4147,7 @@ void CJitEngine::compile_trace(TraceFragment* t, JitBlock** blocks, uint32_t n_b
   }
   if (TraceChainOut) {
     // Shared chain-out stub: r10 = target, r11 = this exit's LinkSlot array, count in R13.
-    // Gate + PAL/SDE run BEFORE the adapter, so bail paths return with trace pins live (-> done).
+    // Gate + PAL/shadow checks run BEFORE the adapter, so bail paths return with trace pins live (-> done).
     a.bind(chain_stub);
     Label stub_ret = a.new_label(), miss = a.new_label();
     a.mov(x86::rcx, imm((uint64_t) &t->underrun));   // count the side-exit (closure resets)
@@ -4180,7 +4180,7 @@ void CJitEngine::compile_trace(TraceFragment* t, JitBlock** blocks, uint32_t n_b
       { Label mode_ok = a.new_label();
         a.test(x86::r10, imm(1)); a.jz(mode_ok);
         a.shr(x86::rax, imm(63));
-        a.cmp(x86::al, x86::byte_ptr(x86::rbp, m_off.sde)); a.jne(nxt);
+        a.cmp(x86::al, x86::byte_ptr(x86::rbp, m_off.pal_shadow_enabled)); a.jne(nxt);
         a.bind(mode_ok); }
       a.mov(x86::rcx, x86::qword_ptr(x86::r11, off + (int) offsetof(LinkSlot, body)));
       a.jmp(x86::rcx);                                    // HIT: tail into the block body

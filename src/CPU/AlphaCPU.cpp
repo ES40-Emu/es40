@@ -901,6 +901,12 @@ AlphaPALAccessContext CAlphaCPU::pal_access_context() const
 	return context ? context(*this) : AlphaPALAccessContext{};
 }
 
+bool CAlphaCPU::handle_call_pal_override(u32 function)
+{
+	const auto handler = alpha_pal_call_override(m_profile.pal, function);
+	return handler && handler(*this);
+}
+
 bool CAlphaCPU::pal_hardware_instruction_valid(u32 instruction) const
 {
 	const auto describe = m_profile.pal.hardware_instruction_access;

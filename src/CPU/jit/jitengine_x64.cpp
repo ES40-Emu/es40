@@ -304,11 +304,10 @@ SafeOp classify(uint32_t ins, bool pal_block, const AlphaIPRReadPolicy& ipr_read
         case 0xF000: return OP_RS;   // RS (read & set soft-intr flag); Ra==31 -> set-only
       }
       break;
-    case 0x00: {                // CALL_PAL: use the family's function permissions.
+    case 0x00: {                // CALL_PAL: use family execution rules.
       const uint32_t fn = ins & 0x1FFFFFFF;
-      if (fn == 0x3E) break;    // WTINT: interpret -> DO_CALL_PAL (native idle completion when enabled)
-      if (alpha_pal_call_allowed_modes(pal, fn)) return OP_CALL_PAL;
-      break;                    // No mode admits this function.
+      if (alpha_pal_call_compilable(pal, fn)) return OP_CALL_PAL;
+      break;
     }
     case 0x08: return OP_LDA;   // load address (Ra = Rb + disp16) -- pure ALU, no memory
     case 0x09: return OP_LDAH;  // load address high (Ra = Rb + (disp16 << 16))

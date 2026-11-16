@@ -142,6 +142,9 @@ struct AlphaPALAccessContext
   bool hardware_enabled = false;
 };
 
+// True consumes the call; false continues normal dispatch.
+using AlphaPALCallHandler = bool (*)(CAlphaCPU& cpu);
+
 // Family PAL rules, copied with the CPU profile.
 struct AlphaPALPolicy
 {
@@ -159,6 +162,8 @@ struct AlphaPALPolicy
   void (*base_changed)(CAlphaCPU& cpu, std::uint64_t old_base, bool old_hle) = nullptr;
   // An absent context is unprivileged, with hardware access disabled.
   AlphaPALAccessContext (*access_context)(const CAlphaCPU& cpu) = nullptr;
+  // Pure selection; handlers run after validation and keep calls interpreted.
+  AlphaPALCallHandler (*call_pal_override)(std::uint32_t function) = nullptr;
 };
 
 constexpr std::uint32_t alpha_pal_call_allowed_modes(
@@ -169,6 +174,19 @@ constexpr std::uint32_t alpha_pal_call_allowed_modes(
     for (std::uint32_t mode = 0; mode < 4; ++mode)
       if (policy.call_pal_valid(function, mode)) modes |= 1u << mode;
   return modes;
+}
+
+constexpr AlphaPALCallHandler alpha_pal_call_override(
+    const AlphaPALPolicy& policy, std::uint32_t function)
+{
+  return policy.call_pal_override ? policy.call_pal_override(function) : nullptr;
+}
+
+constexpr bool alpha_pal_call_compilable(
+    const AlphaPALPolicy& policy, std::uint32_t function)
+{
+  return !alpha_pal_call_override(policy, function)
+    && alpha_pal_call_allowed_modes(policy, function) != 0;
 }
 
 constexpr AlphaPALReturnDescriptor alpha_pal_return_descriptor(

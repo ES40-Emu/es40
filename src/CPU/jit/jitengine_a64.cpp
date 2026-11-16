@@ -1233,10 +1233,9 @@ static constexpr A64OpClass classify_a64_op(uint32_t ins, bool pal_block,
       static_cast<uint8_t>(kA64GprRa | (is_literal ? 0 : kA64GprRb));
 
   switch (opcode) {
-    case 0x00: {   // CALL_PAL, WTINT interprets. HW format: no pin-mask roles.
+    case 0x00: {   // CALL_PAL. HW format: no pin-mask roles.
       const uint32_t fn = ins & 0x1fffffffu;
-      if (fn == 0x3E) break;
-      if (alpha_pal_call_allowed_modes(pal, fn))
+      if (alpha_pal_call_compilable(pal, fn))
         return {A64OpKind::kCallPal, A64TerminatorKind::kCallPal, 0, 0};
       break;
     }

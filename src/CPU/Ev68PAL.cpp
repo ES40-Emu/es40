@@ -38,6 +38,24 @@ bool Ev68RegisterBank::pal_shadow_enabled(const CAlphaCPU& cpu)
   return cpu.state.sde;
 }
 
+bool Ev68PALCompatibility::wait_for_interrupt(CAlphaCPU& cpu)
+{
+  if (cpu.idle_nap_enabled && cpu.state.pal_base == U64(0x8000))
+  {
+    /* WTINT before the VMS vs native PAL decision, to accommodate
+     * the WTINT usage scenario under JIT */
+    cpu.vmspal_call_wtint();
+    return true;
+  }
+  if (!cpu.state.pal_vms)
+  {
+    /* Non-VMS WTINT implementation */
+    cpu.idle_nap();
+    return true;
+  }
+  return false;
+}
+
 void Ev68PALCompatibility::base_changed(CAlphaCPU& cpu, std::uint64_t old_base, bool old_hle)
 {
   auto& state = cpu.state;

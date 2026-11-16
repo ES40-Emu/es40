@@ -99,13 +99,7 @@
   {                                                                    \
     if (function == 0x00 && exit_on_pal_halt)                          \
       {FAILURE(Graceful, "HALT invoked, exit_on_pal_halt configured");}\
-    else if((function == 0x3e) && idle_nap_enabled                     \
-       && (state.pal_base == U64(0x8000)))                             \
-    {                                                                  \
-      /* WTINT before the VMS vs native PAL decision, to accommodate   \
-       * the WTINT usage scenario under JIT */                         \
-      vmspal_call_wtint();                                             \
-    }                                                                  \
+    else if (handle_call_pal_override(function)) {}                  \
     else if(state.pal_vms)                                             \
     {                                                                  \
       switch(function)                                                 \
@@ -316,11 +310,8 @@
     }                                                                  \
     else                                                               \
     {                                                                  \
-      if(function == 0x3e) { /* Non-VMS WTINT implementation */        \
-        idle_nap();                                                    \
-      } else { /* all other native PAL calls */                        \
+      /* all other native PAL calls */                                 \
       ENTER_NATIVE_CALL_PAL();                                         \
-      }                                                                \
     }                                                                  \
   }
 

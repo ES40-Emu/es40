@@ -161,6 +161,16 @@ struct AlphaPALPolicy
   AlphaPALAccessContext (*access_context)(const CAlphaCPU& cpu) = nullptr;
 };
 
+constexpr std::uint32_t alpha_pal_call_allowed_modes(
+    const AlphaPALPolicy& policy, std::uint32_t function)
+{
+  std::uint32_t modes = 0;
+  if (policy.call_pal_valid)
+    for (std::uint32_t mode = 0; mode < 4; ++mode)
+      if (policy.call_pal_valid(function, mode)) modes |= 1u << mode;
+  return modes;
+}
+
 constexpr AlphaPALReturnDescriptor alpha_pal_return_descriptor(
     const AlphaPALPolicy& policy, std::uint32_t instruction)
 {

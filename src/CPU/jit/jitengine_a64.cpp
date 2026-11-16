@@ -1236,7 +1236,7 @@ static constexpr A64OpClass classify_a64_op(uint32_t ins, bool pal_block,
     case 0x00: {   // CALL_PAL, WTINT interprets. HW format: no pin-mask roles.
       const uint32_t fn = ins & 0x1fffffffu;
       if (fn == 0x3E) break;
-      if (fn <= 0x3F || (fn >= 0x80 && fn <= 0xBF))
+      if (alpha_pal_call_allowed_modes(pal, fn))
         return {A64OpKind::kCallPal, A64TerminatorKind::kCallPal, 0, 0};
       break;
     }
@@ -4482,9 +4482,7 @@ static A64OpEmitReceipt emit_a64_call_pal(A64EmitContext& context,
   const uint64_t cpc = a64_advance_pc(context.start_pc, index);
   const AlphaPALCallEntry entry = context.profile.pal.call_pal_entry(
       fn, cpc, a64_advance_pc(context.start_pc, index + 1));
-  uint32_t allowed_modes = 0;
-  for (uint32_t mode = 0; mode < 4; ++mode)
-    if (context.profile.pal.call_pal_valid(fn, mode)) allowed_modes |= 1u << mode;
+  const uint32_t allowed_modes = alpha_pal_call_allowed_modes(context.profile.pal, fn);
   Error err = Error::kOk;
 
   const Label do_vector = a.new_label();

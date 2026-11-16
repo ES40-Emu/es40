@@ -304,11 +304,11 @@ SafeOp classify(uint32_t ins, bool pal_block, const AlphaIPRReadPolicy& ipr_read
         case 0xF000: return OP_RS;   // RS (read & set soft-intr flag); Ra==31 -> set-only
       }
       break;
-    case 0x00: {                // CALL_PAL: compile valid standard funcs (priv 0x00-0x3f, unpriv 0x80-0xbf)
+    case 0x00: {                // CALL_PAL: use the family's function permissions.
       const uint32_t fn = ins & 0x1FFFFFFF;
       if (fn == 0x3E) break;    // WTINT: interpret -> DO_CALL_PAL (native idle completion when enabled)
-      if (fn <= 0x3F || (fn >= 0x80 && fn <= 0xBF)) return OP_CALL_PAL;
-      break;                    // SRM specials (0x1234xx) / invalid ranges -> interpret
+      if (alpha_pal_call_allowed_modes(pal, fn)) return OP_CALL_PAL;
+      break;                    // No mode admits this function.
     }
     case 0x08: return OP_LDA;   // load address (Ra = Rb + disp16) -- pure ALU, no memory
     case 0x09: return OP_LDAH;  // load address high (Ra = Rb + (disp16 << 16))
@@ -2301,9 +2301,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             const uint64_t cpc = b->tag + 4 * (uint64_t)i;                          // CALL_PAL address
             const AlphaPALCallEntry entry = m_profile.pal.call_pal_entry(
                 func, cpc, b->tag + 4 * (uint64_t)(i + 1));
-            uint32_t allowed_modes = 0;
-            for (uint32_t mode = 0; mode < 4; ++mode)
-                if (m_profile.pal.call_pal_valid(func, mode)) allowed_modes |= 1u << mode;
+            const uint32_t allowed_modes = alpha_pal_call_allowed_modes(m_profile.pal, func);
             Label do_vector = a.new_label();
             if (allowed_modes != 0xfu) {   // Only modes admitted by the family may vector.
                 for (uint32_t mode = 0; mode < 4; ++mode) {

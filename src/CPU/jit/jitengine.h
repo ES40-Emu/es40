@@ -319,7 +319,7 @@ public:
     uint32_t dpc_write_row;          // byte distance from read cache [0] to write cache [1] (store fast path)
     uint32_t dpc_bank[2];            // offsets of the selected read/write banks
     uint32_t dpc_ll_watch_tag;       // value: monitored-page marker, not a CPU field offset
-    uint32_t state_cm, jit_mode_bit, jit_asn, dram_ptr, dram_size, state_pc, state_current_pc;
+    uint32_t jit_pal_mode, jit_mode_bit, jit_asn, dram_ptr, dram_size, state_pc, state_current_pc;
     uint32_t fpen, exc_sum, fpcr, f_base;   // FP inline path: FPSTART gate + FPCR (rounding/INE) + f[] base (f[i] = f_base + i*8)
     uint32_t f_from_r;   // byte distance from state.r[0] to state.f[0]
     // For chaining: the budget ceiling and the interrupt-poll flags the compiled epilogue

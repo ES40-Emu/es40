@@ -28,6 +28,11 @@
 #include "AlphaCPU.h"
 #include "Ev68PAL.h"
 
+AlphaPALAccessContext Ev68PALAccess::context(const CAlphaCPU& cpu)
+{
+  return {(std::uint32_t)cpu.state.cm, cpu.state.hwe};
+}
+
 bool Ev68RegisterBank::pal_shadow_enabled(const CAlphaCPU& cpu)
 {
   return cpu.state.sde;

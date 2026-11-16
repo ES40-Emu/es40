@@ -895,11 +895,18 @@ void CAlphaCPU::write_ipr(u32 instruction, u64 value, AlphaIPRWriteContext conte
 	m_profile.ipr_write.write(*this, instruction, value, context);
 }
 
+AlphaPALAccessContext CAlphaCPU::pal_access_context() const
+{
+	const auto context = m_profile.pal.access_context;
+	return context ? context(*this) : AlphaPALAccessContext{};
+}
+
 bool CAlphaCPU::pal_hardware_instruction_valid(u32 instruction) const
 {
 	const auto describe = m_profile.pal.hardware_instruction_access;
+	const auto access = pal_access_context();
 	return describe && alpha_pal_instruction_allowed(describe(instruction),
-		(state.pc & 1) != 0, (u32)state.cm, state.hwe);
+		(state.pc & 1) != 0, access.mode, access.hardware_enabled);
 }
 
 AlphaPALExceptionEntry CAlphaCPU::pal_exception_entry(AlphaPALException reason, u64 pc) const
@@ -1011,7 +1018,7 @@ void CAlphaCPU::init()
 		o.dpc_bank[0] = (uint32_t)((char*)&m_dpc_bank[0] - (char*)this);
 		o.dpc_bank[1] = (uint32_t)((char*)&m_dpc_bank[1] - (char*)this);
 		o.dpc_ll_watch_tag = (uint32_t)kDpcLLWatchTag;
-		o.state_cm = (uint32_t)((char*)&state.cm - (char*)this);
+		o.jit_pal_mode = (uint32_t)((char*)&m_jit_pal_mode - (char*)this);
 		o.jit_mode_bit = (uint32_t)((char*)&m_jit_mode_bit - (char*)this);
 		o.jit_asn = (uint32_t)((char*)&m_jit_asn - (char*)this);
 		o.dram_ptr = (uint32_t)((char*)&dram_ptr - (char*)this);

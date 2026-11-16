@@ -2308,7 +2308,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             if (allowed_modes != 0xfu) {   // Only modes admitted by the family may vector.
                 for (uint32_t mode = 0; mode < 4; ++mode) {
                     if (!(allowed_modes & (1u << mode))) continue;
-                    a.cmp(x86::dword_ptr(x86::rbp, m_off.state_cm), imm(mode));
+                    a.cmp(x86::dword_ptr(x86::rbp, m_off.jit_pal_mode), imm(mode));
                     a.je(do_vector);
                 }
                 emit_call(opcdec_helper, { {JA_CPU, 0}, {JA_I64, cpc} });  // jit_opcdec: sets state.pc/exc_addr, clears lock

@@ -261,6 +261,7 @@ class CAlphaCPU : public CSystemComponent, public CRunnable
   friend class AlphaCPUAlignmentTest;
   friend class Ev68IPR;
   friend class Ev68PALCompatibility;
+  friend class Ev68PALAccess;
   friend class Ev68RegisterBank;
   friend class Ev68MMU;
   friend class Ev68Interrupt;
@@ -342,6 +343,7 @@ public:
 private:
   u64 read_ipr(u32 instruction);
   void write_ipr(u32 instruction, u64 value, AlphaIPRWriteContext context);
+  AlphaPALAccessContext pal_access_context() const;
   bool pal_hardware_instruction_valid(u32 instruction) const;
 
   // Family PAL rules are immutable and live outside the saved CPU state.
@@ -653,6 +655,7 @@ private:
   }
   u32 m_jit_mode_bit = 1;
   u32 m_jit_asn = 0;
+  u32 m_jit_pal_mode = 3;
   inline void sync_instruction_context() {
     const auto access = m_profile.mmu_address.access(*this, ACCESS_EXEC);
     m_jit_mode_bit = 1u << (access.mode & 3);
@@ -660,6 +663,7 @@ private:
   }
   inline void sync_native_context() {
     sync_register_bank();
+    m_jit_pal_mode = pal_access_context().mode;
     for (int rw = 0; rw < 2; ++rw) {
       const auto access = m_profile.mmu_address.access(*this, rw ? ACCESS_WRITE : ACCESS_READ);
       m_dpc_bank[rw] = (u32)(access.mode & 3) * kDpcEntries * (u32)sizeof(SDataPageCache);

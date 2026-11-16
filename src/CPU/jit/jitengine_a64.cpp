@@ -4490,7 +4490,7 @@ static A64OpEmitReceipt emit_a64_call_pal(A64EmitContext& context,
   const Label do_vector = a.new_label();
   if (allowed_modes != 0xfu) {   // Only modes admitted by the family may vector.
     if (allowed_modes)
-      err = emit_a64_load_cpu_u8(a, RA::kScratch3.w(), context.offsets.state_cm, false);
+      err = emit_a64_load_cpu_u32(a, RA::kScratch3.w(), context.offsets.jit_pal_mode);
     for (uint32_t mode = 0; mode < 4; ++mode) {
       if (!(allowed_modes & (1u << mode))) continue;
       if (mode == 0) {

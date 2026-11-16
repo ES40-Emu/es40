@@ -104,6 +104,12 @@ public:
   static void base_changed(CAlphaCPU& cpu, std::uint64_t old_base, bool old_hle);
 };
 
+class Ev68PALAccess
+{
+public:
+  static AlphaPALAccessContext context(const CAlphaCPU& cpu);
+};
+
 class Ev68RegisterBank
 {
 public:
@@ -117,7 +123,7 @@ inline constexpr AlphaRegisterBankPolicy kEv68RegisterBankPolicy{
 inline constexpr AlphaPALPolicy kEv68PALPolicy{
   &Ev68PAL::exception_entry, &Ev68PAL::call_pal_valid, &Ev68PAL::call_pal_entry,
   &Ev68PAL::hardware_instruction_access, &Ev68PAL::hardware_return,
-  &Ev68PALCompatibility::base_changed
+  &Ev68PALCompatibility::base_changed, &Ev68PALAccess::context
 };
 
 #endif

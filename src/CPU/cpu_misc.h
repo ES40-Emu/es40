@@ -91,7 +91,7 @@
   } while (0)
 
 
-#define DO_CALL_PAL if(!m_profile.pal.call_pal_valid(function, state.cm)) \
+#define DO_CALL_PAL if(!m_profile.pal.call_pal_valid(function, pal_access_context().mode)) \
   {                                                                    \
     UNKNOWN2                                                           \
   }                                                                    \

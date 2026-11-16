@@ -136,6 +136,12 @@ constexpr bool alpha_pal_instruction_compilable(AlphaPALInstructionAccess access
     || access == AlphaPALInstructionAccess::PalOrKernelHwe;
 }
 
+struct AlphaPALAccessContext
+{
+  std::uint32_t mode = 3; // Architectural mode, 0..3.
+  bool hardware_enabled = false;
+};
+
 // Family PAL rules, copied with the CPU profile.
 struct AlphaPALPolicy
 {
@@ -151,6 +157,8 @@ struct AlphaPALPolicy
   AlphaPALReturnDescriptor (*hardware_return)(std::uint32_t instruction) = nullptr;
   // Optional compatibility handling after the base write and HLE reset.
   void (*base_changed)(CAlphaCPU& cpu, std::uint64_t old_base, bool old_hle) = nullptr;
+  // An absent context is unprivileged, with hardware access disabled.
+  AlphaPALAccessContext (*access_context)(const CAlphaCPU& cpu) = nullptr;
 };
 
 constexpr AlphaPALReturnDescriptor alpha_pal_return_descriptor(

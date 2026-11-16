@@ -1454,12 +1454,12 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             if (!israw || (isload && fa == 31)) { emit_helper(); continue; }
 
             // Inline fast path for LDT/STT: FPSTART (FEN gate and family summary rule), then the data-cache hit.
-            // misalign / cache miss / MMIO / fpen==0 fall to the helper. R11 = slot byte offset; RAX/R10/R9 scratch.
+            // misalign / cache miss / MMIO / FP disabled fall to the helper. R11 = slot byte offset; RAX/R10/R9 scratch.
             Label slow = a.new_label();
             Label fdone = a.new_label();
             const Label watched_page = a.new_label();
             const Label raw_store = a.new_label();
-            a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0));                          a.je(slow);   // fpen==0 -> FEN trap
+            a.cmp(x86::byte_ptr(x86::rbp, m_off.jit_fp_enabled), imm(0));                          a.je(slow);   // FP disabled -> FEN trap
             emit_fp_start_summary();
             emit_dpc_offset(!isload);
             const int dpc_row = isload ? 0 : (int)m_off.dpc_write_row;
@@ -1791,7 +1791,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         if (op == OP_CVTQT || op == OP_CVTQS) {
             const bool dyn = (((ins >> 11) & 3) == 3);      // /D: rounding is FPCR<59:58>, checked at runtime
             Label bail = a.new_label(), fdone = a.new_label(), cont = a.new_label();
-            a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0));   // FPSTART: FP disabled -> FEN trap (interp)
+            a.cmp(x86::byte_ptr(x86::rbp, m_off.jit_fp_enabled), imm(0));   // FPSTART: FP disabled -> FEN trap (interp)
             a.je(bail);
             emit_fp_start_summary();
             if (dyn) {                                      // dynamic rounding: only nearest is SSE's default
@@ -1836,7 +1836,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                 a.bind(ok);
                 };
             if (!prev_fp_t_guarded) {
-                a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0)); a.je(bail);      // FPSTART: FP disabled -> FEN trap
+                a.cmp(x86::byte_ptr(x86::rbp, m_off.jit_fp_enabled), imm(0)); a.je(bail);      // FPSTART: FP disabled -> FEN trap
             }
             if (!prev_fp_t_exc_zero)
                 emit_fp_start_summary();
@@ -1920,7 +1920,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                 a.shl(x86::rax, imm(12)); a.jnz(bail);                          // mantissa != 0 -> denormal or NaN -> bail
                 a.bind(ok);                                                     // mantissa == 0 -> zero or Inf -> compare inline
                 };
-            a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0)); a.je(bail);   // FPSTART
+            a.cmp(x86::byte_ptr(x86::rbp, m_off.jit_fp_enabled), imm(0)); a.je(bail);   // FPSTART
             emit_fp_start_summary();
             a.movq(x86::xmm0, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)ra));   // f[Fa]
             a.movq(x86::xmm1, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rb));   // f[Fb]
@@ -1975,7 +1975,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         // (renormalizes) and NaN (quiets / may INV) go to the interpreter. No rounding or inexact.
         if (op == OP_CVTST) {
             Label bail = a.new_label(), cont = a.new_label();
-            a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0)); a.je(bail);          // FPSTART
+            a.cmp(x86::byte_ptr(x86::rbp, m_off.jit_fp_enabled), imm(0)); a.je(bail);          // FPSTART
             emit_fp_start_summary();
             a.movq(x86::xmm0, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rb));   // f[Fb]
             dbl_bail(x86::xmm0, true, bail);                                        // denormal/Inf/NaN -> interp
@@ -1994,7 +1994,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         if (op == OP_CVTTS) {
             const bool dyn = (((ins >> 11) & 3) == 3);
             Label bail = a.new_label(), cont = a.new_label();
-            a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0)); a.je(bail);          // FPSTART
+            a.cmp(x86::byte_ptr(x86::rbp, m_off.jit_fp_enabled), imm(0)); a.je(bail);          // FPSTART
             emit_fp_start_summary();
             emit_inexact_gate(bail, alpha_ieee_inexact_rule(m_profile.ieee_trap, ins));
             if (dyn) fp_dyn_bail(bail);
@@ -2030,7 +2030,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             const bool chop = (((ins >> 11) & 3) == 0);
             const bool dyn = (((ins >> 11) & 3) == 3);
             Label bail = a.new_label(), cont = a.new_label(), exact = a.new_label();
-            a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0)); a.je(bail);          // FPSTART
+            a.cmp(x86::byte_ptr(x86::rbp, m_off.jit_fp_enabled), imm(0)); a.je(bail);          // FPSTART
             emit_fp_start_summary();
             if (dyn) fp_dyn_bail(bail);
             a.movq(x86::xmm0, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rb));   // f[Fb] (double)
@@ -2056,7 +2056,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         if (op == OP_SQRTT || op == OP_SQRTS) {
             const bool dyn = (((ins >> 11) & 3) == 3);
             Label bail = a.new_label(), cont = a.new_label();
-            a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0)); a.je(bail);          // FPSTART
+            a.cmp(x86::byte_ptr(x86::rbp, m_off.jit_fp_enabled), imm(0)); a.je(bail);          // FPSTART
             emit_fp_start_summary();
             emit_inexact_gate(bail, alpha_ieee_inexact_rule(m_profile.ieee_trap, ins));
             if (dyn) fp_dyn_bail(bail);
@@ -2087,7 +2087,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         if (op == OP_ADDS || op == OP_SUBS || op == OP_MULS || op == OP_DIVS) {
             const bool dyn = (((ins >> 11) & 3) == 3);
             Label bail = a.new_label(), cont = a.new_label();
-            a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0)); a.je(bail);          // FPSTART
+            a.cmp(x86::byte_ptr(x86::rbp, m_off.jit_fp_enabled), imm(0)); a.je(bail);          // FPSTART
             emit_fp_start_summary();
             emit_inexact_gate(bail, alpha_ieee_inexact_rule(m_profile.ieee_trap, ins));
             if (dyn) fp_dyn_bail(bail);
@@ -2150,7 +2150,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         if (op == OP_FLTL && ((fltl_func >= 0x020 && fltl_func <= 0x022)
             || (fltl_func >= 0x02a && fltl_func <= 0x02f))) {
             Label bail = a.new_label(), cont = a.new_label();
-            a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0));
+            a.cmp(x86::byte_ptr(x86::rbp, m_off.jit_fp_enabled), imm(0));
             a.je(bail);
             emit_fp_start_summary();
             a.mov(x86::rax, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)ra));
@@ -2363,7 +2363,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             const uint64_t fall = b->tag + 4 * (uint64_t)(i + 1);
             const uint64_t tgt = fall + (uint64_t)(bdisp * 4);
             Label bail = a.new_label(), cont = a.new_label();
-            a.cmp(x86::byte_ptr(x86::rbp, m_off.fpen), imm(0));   // FPSTART: FP disabled -> FEN trap (interp)
+            a.cmp(x86::byte_ptr(x86::rbp, m_off.jit_fp_enabled), imm(0));   // FPSTART: FP disabled -> FEN trap (interp)
             a.je(bail);
             emit_fp_start_summary();
             if (ra == 31) a.xor_(x86::eax, x86::eax);             // f[31] = 0 -> s = 0

@@ -4889,7 +4889,7 @@ static A64OpEmitReceipt emit_a64_fp_mem(A64EmitContext& context,
     stub.kind = A64ColdStub::kFpMem;
     const Label watched = a.new_label();
 
-    err = emit_a64_load_cpu_u8(a, RA::kScratch3.w(), context.offsets.fpen, false);
+    err = emit_a64_load_cpu_u8(a, RA::kScratch3.w(), context.offsets.jit_fp_enabled, false);
     if (err == Error::kOk) err = a.cbz(RA::kScratch3.w(), stub.slow);
     if (err == Error::kOk) err = emit_a64_fp_start_summary(context);
     if (err == Error::kOk)
@@ -5072,7 +5072,7 @@ static A64OpEmitReceipt emit_a64_branch_fp(A64EmitContext& context,
 
   const Label fen_ok = a.new_label();
   Error err = emit_a64_load_cpu_u8(a, RA::kScratch3.w(),
-                                   context.offsets.fpen, false);
+                                   context.offsets.jit_fp_enabled, false);
   if (err == Error::kOk) err = a.cbnz(RA::kScratch3.w(), fen_ok);
   if (err == Error::kOk) err = emit_a64_retry_bail(context, index);
   if (err == Error::kOk) err = a.bind(fen_ok);
@@ -5178,12 +5178,12 @@ static asmjit::Error emit_a64_fp_start_summary(A64EmitContext& c)
   return err;
 }
 
-// FPSTART: fpen==0 -> FEN bail, then the family summary rule.
+// FPSTART: FP disabled -> FEN bail, then the family summary rule.
 static asmjit::Error emit_a64_fp_start(A64EmitContext& c, const asmjit::Label& bail)
 {
   using RA = CJitEngine::RegAlloc;
   asmjit::a64::Assembler& a = c.assembler;
-  asmjit::Error err = emit_a64_load_cpu_u8(a, RA::kScratch3.w(), c.offsets.fpen, false);
+  asmjit::Error err = emit_a64_load_cpu_u8(a, RA::kScratch3.w(), c.offsets.jit_fp_enabled, false);
   if (err == asmjit::Error::kOk) err = a.cbz(RA::kScratch3.w(), bail);
   if (err == asmjit::Error::kOk) err = emit_a64_fp_start_summary(c);
   return err;
@@ -5276,7 +5276,7 @@ static A64OpEmitReceipt emit_a64_flti_arith(A64EmitContext& context,
   const auto inexact_rule = alpha_ieee_inexact_rule(context.profile.ieee_trap, op.ins);
   Error err = Error::kOk;
   if (!prev.guarded) {
-    err = emit_a64_load_cpu_u8(a, RA::kScratch3.w(), context.offsets.fpen, false);
+    err = emit_a64_load_cpu_u8(a, RA::kScratch3.w(), context.offsets.jit_fp_enabled, false);
     if (err == Error::kOk) err = a.cbz(RA::kScratch3.w(), bail);
   }
   if (err == Error::kOk && !prev.exc_zero) err = emit_a64_fp_start_summary(context);

@@ -267,6 +267,7 @@ class CAlphaCPU : public CSystemComponent, public CRunnable
   friend class Ev68Interrupt;
   friend class Ev68ArithmeticTrap;
   friend class Ev68IEEETrap;
+  friend class Ev68FPStart;
   friend class Ev68Reset;
   friend class Ev68CPUState;
   friend class Ev68InstructionFetch;
@@ -480,6 +481,7 @@ private:
   int             vmspal_int_kernel_stack_not_valid();
 
   // New FP helpers.....
+  bool fp_enabled() const;
   bool fp_start();
   void write_fpcr_arch(u64 arch_val);
   u64  read_fpcr_arch() const;
@@ -656,6 +658,7 @@ private:
   u32 m_jit_mode_bit = 1;
   u32 m_jit_asn = 0;
   u32 m_jit_pal_mode = 3;
+  bool m_jit_fp_enabled = false;
   inline void sync_instruction_context() {
     const auto access = m_profile.mmu_address.access(*this, ACCESS_EXEC);
     m_jit_mode_bit = 1u << (access.mode & 3);
@@ -664,6 +667,7 @@ private:
   inline void sync_native_context() {
     sync_register_bank();
     m_jit_pal_mode = pal_access_context().mode;
+    m_jit_fp_enabled = fp_enabled();
     for (int rw = 0; rw < 2; ++rw) {
       const auto access = m_profile.mmu_address.access(*this, rw ? ACCESS_WRITE : ACCESS_READ);
       m_dpc_bank[rw] = (u32)(access.mode & 3) * kDpcEntries * (u32)sizeof(SDataPageCache);
@@ -952,9 +956,15 @@ inline void CAlphaCPU::set_PAL_BASE(u64 pb)
     m_profile.pal.base_changed(*this, old_base, old_hle);
 }
 
+inline bool CAlphaCPU::fp_enabled() const
+{
+  const auto enabled = m_profile.fp_start.enabled;
+  return enabled && enabled(*this);
+}
+
 inline bool CAlphaCPU::fp_start()
 {
-  if (!state.fpen) return false;
+  if (!fp_enabled()) return false;
   if (m_profile.fp_start.clear_exception_summary) state.exc_sum = 0;
   return true;
 }

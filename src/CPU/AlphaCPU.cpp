@@ -1030,7 +1030,7 @@ void CAlphaCPU::init()
 		o.check_timers = (uint32_t)((char*)&state.check_timers - (char*)this);
 		o.link_from = (uint32_t)((char*)&m_link_from - (char*)this);
 		o.jit_exit = (uint32_t)((char*)&m_jit_exit - (char*)this);
-		o.fpen = (uint32_t)((char*)&state.fpen - (char*)this);
+		o.jit_fp_enabled = (uint32_t)((char*)&m_jit_fp_enabled - (char*)this);
 		o.exc_sum = (uint32_t)((char*)&state.exc_sum - (char*)this);
 		o.f_base = (uint32_t)((char*)&state.f[0] - (char*)this);
 		o.f_from_r = (uint32_t)(offsetof(decltype(state), f) - offsetof(decltype(state), r));
@@ -2383,7 +2383,7 @@ int CAlphaCPU::jit_read(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 }
 
 // JIT FP load helper (static). descr packs size[7:0], format[17:16], instruction[63:32].
-// FPSTART (fpen -> FEN bail; family summary rule) precedes the discarded-f31 and alignment checks.
+// FPSTART (FP disabled -> FEN bail; family summary rule) precedes the discarded-f31 and alignment checks.
 // Production reuses jit_read's cache read/direct PAL faults; verify replays the interp's CONVERTED
 // f-value (FP loads join the load log), so it consumes m_jit_vlog like an integer load.
 int CAlphaCPU::jit_fp_read(CAlphaCPU* cpu, u64 va, u32 fa, u64 descr)
@@ -2469,7 +2469,7 @@ u64 CAlphaCPU::jit_misc(CAlphaCPU* cpu, u32 sel)
 }
 
 // JIT int->FP move helper (static). ITOFx: f[fc] = fmt(value). Mirrors DO_ITOFx incl. FPSTART
-// (fpen==0 -> return 1, the FEN-trap bail; family summary rule). fmt: 0=T raw, 1=S, 2=F.
+// (FP disabled -> return 1, the FEN-trap bail; family summary rule). fmt: 0=T raw, 1=S, 2=F.
 int CAlphaCPU::jit_itof(CAlphaCPU* cpu, u32 fc, u64 value, u32 fmt)
 {
 	if (!cpu->fp_start()) return 1;          // FEN trap: the interpreter vectors it

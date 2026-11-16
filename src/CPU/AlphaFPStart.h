@@ -25,10 +25,13 @@
 #if !defined(INCLUDED_ALPHAFPSTART_H)
 #define INCLUDED_ALPHAFPSTART_H
 
-// Applied after the floating-point enable check, before execution.
+class CAlphaCPU;
+
+// Floating-point enable and pre-execution rules.
 struct AlphaFPStartPolicy
 {
   bool clear_exception_summary = false;
+  bool (*enabled)(const CAlphaCPU&) = nullptr; // Null disables floating point.
 };
 
 #endif

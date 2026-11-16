@@ -113,7 +113,11 @@ void Ev68IPR::write(CAlphaCPU& cpu, std::uint32_t instruction, std::uint64_t val
     if (function & 8)
       state.ppcen = (int) (value >> 1) & 1;
     if (function & 16)
+    {
       state.fpen = (int) (value >> 2) & 1;
+      if (context == AlphaIPRWriteContext::Compiled)
+        cpu.sync_native_context();
+    }
     if (function & 6)
       cpu.kick_int_if_pending();
   }

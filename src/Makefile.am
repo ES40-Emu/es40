@@ -242,6 +242,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        CPU/Ev68CPUState.cpp \
        CPU/Ev68Interrupt.cpp \
        CPU/Ev68FPCR.cpp \
+       CPU/Ev68FPStart.cpp \
        CPU/Ev68ArithmeticTrap.cpp \
        CPU/Ev68IEEETrap.cpp \
        CPU/Ev68InstructionFetch.cpp \

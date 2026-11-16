@@ -27,6 +27,12 @@
 
 #include "AlphaFPStart.h"
 
-inline constexpr AlphaFPStartPolicy kEv68FPStartPolicy{true};
+class Ev68FPStart
+{
+public:
+  static bool enabled(const CAlphaCPU& cpu);
+};
+
+inline constexpr AlphaFPStartPolicy kEv68FPStartPolicy{true, &Ev68FPStart::enabled};
 
 #endif

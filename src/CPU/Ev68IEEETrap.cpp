@@ -81,6 +81,12 @@
 #include "AlphaCPU.h"
 #include "Ev68IEEETrap.h"
 
+std::uint64_t Ev68IEEETrap::underflow_result(bool negative)
+{
+	/* Preserve sign of zero on underflow per IEEE-754 / HRM 4.7.7.3. */
+	return std::uint64_t(negative) << FPR_V_SIGN;
+}
+
 AlphaIEEETrapResult Ev68IEEETrap::evaluate(CAlphaCPU& cpu, std::uint64_t trap,
     std::uint32_t instenb, std::uint64_t fpcrdsb, std::uint32_t ins)
 {

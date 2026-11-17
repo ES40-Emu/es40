@@ -63,6 +63,9 @@ struct AlphaIEEETrapPolicy
   // Pure rule for effect-free INE skips (enable=0); keep paired with evaluate.
   // Missing rules defer; exact paths need no rule.
   AlphaIEEEInexactRule (*describe_inexact)(std::uint32_t instruction) = nullptr;
+
+  // Pure underflow result after UNF/INE reporting; null preserves signed zero.
+  std::uint64_t (*underflow_result)(bool negative) = nullptr;
 };
 
 inline AlphaIEEEInexactRule alpha_ieee_inexact_rule(

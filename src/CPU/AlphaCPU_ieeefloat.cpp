@@ -998,9 +998,9 @@ u64 CAlphaCPU::ieee_rpack(UFP* r, u32 ins, u32 dp)
 		   flush-to-zero result. The two bits are independent per HRM 4.7.7.1. */
 		ieee_trap(TRAP_UNF, ins & I_FTRP_U, FPCR_UNFD, ins);
 		ieee_trap(TRAP_INE, Q_SUI(ins), FPCR_INED, ins);          /* set inexact */
-		/* Preserve sign of zero on underflow per IEEE-754 / HRM 4.7.7.3. */
-		return ((u64)r->sign) << FPR_V_SIGN;
-	} /* underflow to signed zero */
+		const auto result = m_profile.ieee_trap.underflow_result;
+		return result ? result(r->sign != 0) : ((u64)r->sign) << FPR_V_SIGN;
+	} /* underflow to zero */
 
 	res = (((u64)r->sign) << FPR_V_SIGN) |           /* form result */
 		(((u64)r->exp) << FPR_V_EXP) | ((r->frac >> FPR_GUARD) & FPR_FRAC);

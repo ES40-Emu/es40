@@ -34,6 +34,8 @@ public:
       std::uint32_t instruction_enable, std::uint64_t fpcr_disable,
       std::uint32_t instruction);
 
+  static std::uint64_t underflow_result(bool negative);
+
   static constexpr AlphaIEEEInexactRule describe_inexact(std::uint32_t)
   {
     return {AlphaIEEEInexactKind::FpcrBitSet, 56}; // FPCR.INE already set.
@@ -41,7 +43,7 @@ public:
 };
 
 inline constexpr AlphaIEEETrapPolicy kEv68IEEETrapPolicy{
-  &Ev68IEEETrap::evaluate, &Ev68IEEETrap::describe_inexact
+  &Ev68IEEETrap::evaluate, &Ev68IEEETrap::describe_inexact, &Ev68IEEETrap::underflow_result
 };
 
 #endif

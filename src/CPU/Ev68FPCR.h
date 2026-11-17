@@ -31,10 +31,11 @@ class Ev68FPCR
 {
 public:
   static std::uint64_t normalize(std::uint64_t value);
+  static std::uint64_t cvtql_overflow(std::uint64_t stored);
 };
 
 inline constexpr AlphaFPCRPolicy kEv68FPCRPolicy{
-  &Ev68FPCR::normalize, &Ev68FPCR::normalize
+  &Ev68FPCR::normalize, &Ev68FPCR::normalize, &Ev68FPCR::cvtql_overflow
 };
 
 #endif

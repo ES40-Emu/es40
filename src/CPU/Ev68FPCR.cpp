@@ -71,3 +71,8 @@ std::uint64_t Ev68FPCR::normalize(std::uint64_t value)
 
   return val;
 }
+
+std::uint64_t Ev68FPCR::cvtql_overflow(std::uint64_t stored)
+{
+  return stored | FPCR_IOV;
+}

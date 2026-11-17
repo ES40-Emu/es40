@@ -490,6 +490,7 @@ private:
   bool fp_start();
   void write_fpcr_arch(u64 arch_val);
   u64  read_fpcr_arch() const;
+  void record_cvtql_overflow();
 
   bool            icache_enabled;
   bool            vmspal_lle_enabled;

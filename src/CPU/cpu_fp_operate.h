@@ -215,7 +215,7 @@
     if(FPR_GETSIGN(cvtql_src) ? (cvtql_src < U64(0xFFFFFFFF80000000)) :                              \
          (cvtql_src > U64(0x000000007FFFFFFF)))                                                      \
     {                                                                                                \
-      write_fpcr_arch(state.fpcr | FPCR_IOV);                                                        \
+      record_cvtql_overflow();                                                                      \
       if(ins & I_FTRP_V)                                                                             \
         vax_trap(TRAP_IOV, ins);                                                                     \
     }                                                                                                \

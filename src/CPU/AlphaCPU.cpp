@@ -1254,6 +1254,12 @@ void CAlphaCPU::write_fpcr_arch(u64 arch_val) {
 	state.fpcr = m_profile.fpcr.write(arch_val);
 }
 
+void CAlphaCPU::record_cvtql_overflow()
+{
+	const auto update = m_profile.fpcr.cvtql_overflow;
+	if (update) write_fpcr_arch(update(state.fpcr));
+}
+
 /**
  * Destructor.
  **/
@@ -2548,7 +2554,7 @@ int CAlphaCPU::jit_fltl(CAlphaCPU* cpu, u32 ins)
 		f[fc] = ((cvtql_src & U64(0xC0000000)) << 32) | ((cvtql_src & U64(0x3FFFFFFF)) << 29);
 		if (FPR_GETSIGN(cvtql_src) ? (cvtql_src < U64(0xFFFFFFFF80000000)) :
 			(cvtql_src > U64(0x000000007FFFFFFF)))
-			cpu->write_fpcr_arch(cpu->state.fpcr | FPCR_IOV);
+			cpu->record_cvtql_overflow();
 		break;
 	}
 	}

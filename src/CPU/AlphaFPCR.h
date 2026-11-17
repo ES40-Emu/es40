@@ -27,11 +27,13 @@
 
 #include <cstdint>
 
-// Pure value rules for architectural FPCR reads and writes.
+// Pure value rules for FPCR access and instruction status.
 struct AlphaFPCRPolicy
 {
   std::uint64_t (*read)(std::uint64_t stored);
   std::uint64_t (*write)(std::uint64_t value);
+  // CVTQL overflow status before normalization and /V traps; null preserves FPCR.
+  std::uint64_t (*cvtql_overflow)(std::uint64_t stored) = nullptr;
 };
 
 #endif

@@ -1226,6 +1226,7 @@ static constexpr A64OpClass classify_a64_op(uint32_t ins, bool pal_block,
   if (!alpha_instruction_supported(amask, ins)) return {};
   if (alpha_instruction_retires_at_decode(decode, ins))
     return {A64OpKind::kDecodeRetire, A64TerminatorKind::kNone, 0, 0};
+  if (alpha_instruction_fen_at_decode(decode, ins)) return {};
   const uint32_t opcode = ins >> 26;
   const uint32_t func = (ins >> 5) & 0x7fu;
   const bool is_literal = ((ins >> 12) & 1u) != 0;

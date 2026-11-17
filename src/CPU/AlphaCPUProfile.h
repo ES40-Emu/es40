@@ -90,6 +90,11 @@ struct AlphaCPUProfile
   {
     return alpha_instruction_retires_at_decode(instruction_decode, ins);
   }
+
+  constexpr bool requires_fen_at_decode(std::uint32_t ins) const
+  {
+    return alpha_instruction_fen_at_decode(instruction_decode, ins);
+  }
 };
 
 #endif

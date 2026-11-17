@@ -149,6 +149,7 @@ SafeOp classify(uint32_t ins, bool pal_block, const AlphaIPRReadPolicy& ipr_read
 {
   if (!alpha_instruction_supported(amask, ins)) return OP_NONE;
   if (alpha_instruction_retires_at_decode(decode, ins)) return OP_DECODE_RETIRE;
+  if (alpha_instruction_fen_at_decode(decode, ins)) return OP_NONE;
   uint32_t opcode = ins >> 26;
   uint32_t func = (ins >> 5) & 0x7F;
   switch (opcode) {
@@ -2926,7 +2927,8 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
   const auto span_supported = [&](uint32_t count) {
     for (uint32_t i = 0; i < count; ++i)
       if (!m_profile.supports_instruction(words[i])
-          || m_profile.retires_instruction_at_decode(words[i])) return false;
+          || m_profile.retires_instruction_at_decode(words[i])
+          || m_profile.requires_fen_at_decode(words[i])) return false;
     return true;
   };
   if (!pal_block && plen == 6 && snapshot_len >= 39) {
@@ -3830,7 +3832,9 @@ void CJitEngine::compile_trace(TraceFragment* t, JitBlock** blocks, uint32_t n_b
     if (!source.copy_words(source_words[bi].data(), source_desc[bi].n_instr))
       return;
     for (uint32_t word : source_words[bi])
-      if (!m_profile.supports_instruction(word)) return;
+      if (!m_profile.supports_instruction(word)
+          || (!m_profile.retires_instruction_at_decode(word)
+              && m_profile.requires_fen_at_decode(word))) return;
     // Trace tails must set R10; retired tails stay in the block JIT.
     if (m_profile.retires_instruction_at_decode(source_words[bi].back())) return;
   }

@@ -65,17 +65,25 @@ constexpr bool alpha_instruction_supported(std::uint64_t amask, std::uint32_t in
   return (alpha_instruction_extensions(ins) & ~amask) == 0;
 }
 
-// Pure, immutable family rule, after extension checks and zero-register cleanup.
-// True skips operand checks, execution, and exceptions; null decodes normally.
+// Pure family decode rules, after extension checks and zero-register cleanup.
 struct AlphaInstructionDecodePolicy
 {
+  // True skips operand checks, execution, and exceptions; null decodes normally.
   bool (*retire_at_decode)(std::uint32_t ins) = nullptr;
+  // Pure encoding-only FEN rule after retirement; null decodes normally.
+  bool (*fen_at_decode)(std::uint32_t ins) = nullptr;
 };
 
 constexpr bool alpha_instruction_retires_at_decode(
     const AlphaInstructionDecodePolicy& policy, std::uint32_t ins)
 {
   return policy.retire_at_decode && policy.retire_at_decode(ins);
+}
+
+constexpr bool alpha_instruction_fen_at_decode(
+    const AlphaInstructionDecodePolicy& policy, std::uint32_t ins)
+{
+  return policy.fen_at_decode && policy.fen_at_decode(ins);
 }
 
 #endif

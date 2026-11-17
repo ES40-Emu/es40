@@ -166,6 +166,8 @@ struct AlphaPALPolicy
   AlphaPALCallHandler (*call_pal_override)(std::uint32_t function) = nullptr;
   // Interpreter PAL replacements; JIT calls use native PAL. False falls through.
   bool (*call_pal_compatibility)(CAlphaCPU& cpu, std::uint32_t function) = nullptr;
+  // Host instruction-count throttle only; null leaves it disabled.
+  bool (*instruction_pacing)(const CAlphaCPU& cpu) = nullptr;
 };
 
 constexpr std::uint32_t alpha_pal_call_allowed_modes(

@@ -38,6 +38,14 @@ bool Ev68RegisterBank::pal_shadow_enabled(const CAlphaCPU& cpu)
   return cpu.state.sde;
 }
 
+bool Ev68PALCompatibility::instruction_pacing(const CAlphaCPU& cpu)
+{
+  // Gated off for the firmware/VMS PALcode (base 0x8000, and the pre-PAL reset state):
+  // SRM runs under it, and SRM's per-CPU speed calibration counts cycles
+  // per tick in a tight spin. NT and OSF-style PALcodes load at other bases and are paced.
+  return cpu.state.pal_base && cpu.state.pal_base != U64(0x8000);
+}
+
 bool Ev68PALCompatibility::wait_for_interrupt(CAlphaCPU& cpu)
 {
   if (cpu.idle_nap_enabled && cpu.state.pal_base == U64(0x8000))

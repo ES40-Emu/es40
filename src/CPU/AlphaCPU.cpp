@@ -928,6 +928,12 @@ bool CAlphaCPU::handle_call_pal_compatibility(u32 function)
 	return handler && handler(*this, function);
 }
 
+bool CAlphaCPU::instruction_pacing_enabled() const
+{
+	const auto enabled = m_profile.pal.instruction_pacing;
+	return enabled && enabled(*this);
+}
+
 bool CAlphaCPU::pal_hardware_instruction_valid(u32 instruction) const
 {
 	const auto describe = m_profile.pal.hardware_instruction_access;
@@ -1483,13 +1489,10 @@ void CAlphaCPU::jit_run(int budget)
 	service_interval_timer(batch_now);
 
 	// Instruction-paced interval-tick envelope, for EVERY CPU.
-	// Gated off for the firmware/VMS PALcode (base 0x8000, and the pre-PAL reset state):
-	// SRM runs under it, and SRM's per-CPU speed calibration counts cycles
-	// per tick in a tight spin. NT and OSF-style PALcodes load at other bases and are paced.
 	// A CPU that retires the envelope before the wall-clock tick is due shall sleep until
 	// the correct tick time, the cpu should never receive early/extra. 
 	// The RPCC/cycle counter is unaffected (it stays wall-clock accurate via sync_cc_wallclock).
-	const u64 pace_period_ns = (m_max_instr_per_tick && theAli && state.pal_base && state.pal_base != U64(0x8000))
+	const u64 pace_period_ns = (m_max_instr_per_tick && theAli && instruction_pacing_enabled())
 		? theAli->get_interval_period_ns() : 0;   // 0 = pacing off, or the guest hasn't programmed the tick yet
 	if (pace_period_ns)
 	{

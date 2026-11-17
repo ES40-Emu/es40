@@ -357,6 +357,7 @@ private:
   void enter_native_call_pal(u32 function);
   bool handle_call_pal_override(u32 function);
   bool handle_call_pal_compatibility(u32 function);
+  bool instruction_pacing_enabled() const;
 
   // Immutable for the CPU lifetime; deliberately outside the saved state.
   const AlphaCPUProfile m_profile;

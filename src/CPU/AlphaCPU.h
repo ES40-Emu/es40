@@ -269,6 +269,7 @@ class CAlphaCPU : public CSystemComponent, public CRunnable
   friend class Ev68IEEETrap;
   friend class Ev68FPStart;
   friend class Ev68CycleCounter;
+  friend class Ev68Idle;
   friend class Ev68Reset;
   friend class Ev68CPUState;
   friend class Ev68InstructionFetch;
@@ -548,7 +549,7 @@ private:
   int                                   m_spin_rejected_n = 0;
   u64                                   m_spin_traced[16] = { 0 };   // PCs already reported by idle_mp_wake, | 2 if not watched
   int                                   m_spin_traced_n = 0;
-  // IER enables last sampled in user mode (IPL 0 under OSF).
+  // Interrupt enables last sampled in user mode (IPL 0 under OSF).
   bool                                  m_ipl0_ier_known = false;
   int                                   m_ipl0_eien = 0;
   int                                   m_ipl0_sien = 0;

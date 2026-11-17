@@ -31,7 +31,7 @@ enum EIdleRule
   RULE_NONE      = 0,
   RULE_SPIN      = 1,   // spinning within a small set of PCs
   RULE_SPIN_IPL3 = 2,   // ...and VMS PAL PS reports IPL 3 at each qualifying sample
-  RULE_SPIN_KERNEL = 3  // ...and the CPU is in kernel mode (IER_CM), outside PALmode
+  RULE_SPIN_KERNEL = 3  // ...and the CPU is in kernel mode, outside PALmode
 };
 
 struct SIdleMethod
@@ -51,7 +51,7 @@ struct SIdleMethod
  * RULE_SPIN cannot distinguish idle loops from repetitive computation and
  * can repeatedly sleep during useful work. netbsd selects it: reduced host
  * CPU use trades off against guest throughput and latency.
- * RULE_SPIN_IPL3 additionally samples the VMS PAL PS layout in p22; it does
+ * RULE_SPIN_IPL3 additionally samples the model-decoded VMS PAL IPL; it does
  * not prove that an entire dispatch stayed at IPL 3 or did no useful work.
  * RULE_SPIN_KERNEL is for Tru64, which idles in kernel mode at IPL 0. A
  * sample must be in kernel mode, have the IER enables last seen in user

@@ -42,6 +42,7 @@
 #include "Ev68FPCR.h"
 #include "Ev68FPStart.h"
 #include "Ev68CycleCounter.h"
+#include "Ev68Idle.h"
 #include "Ev68ArithmeticTrap.h"
 #include "Ev68IEEETrap.h"
 
@@ -70,6 +71,7 @@ inline constexpr AlphaCPUProfile kEv68CBProfile = [] {
   profile.llsc = kEv68LLSCPolicy;
   profile.cpu_state = kEv68CPUStatePolicy;
   profile.cycle_counter = kEv68CycleCounterPolicy;
+  profile.idle = kEv68IdlePolicy;
   return profile;
 }();
 

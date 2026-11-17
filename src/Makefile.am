@@ -97,6 +97,8 @@ noinst_HEADERS = config/ConfigEditor.h config/ConfigDocument.h \
        CPU/Ev68FPStart.h \
        CPU/AlphaCycleCounter.h \
        CPU/Ev68CycleCounter.h \
+       CPU/AlphaIdle.h \
+       CPU/Ev68Idle.h \
        CPU/AlphaArithmeticTrap.h \
        CPU/Ev68ArithmeticTrap.h \
        CPU/AlphaIEEETrap.h \
@@ -246,6 +248,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        CPU/Ev68FPCR.cpp \
        CPU/Ev68FPStart.cpp \
        CPU/Ev68CycleCounter.cpp \
+       CPU/Ev68Idle.cpp \
        CPU/Ev68ArithmeticTrap.cpp \
        CPU/Ev68IEEETrap.cpp \
        CPU/Ev68InstructionFetch.cpp \

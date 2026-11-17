@@ -604,17 +604,32 @@ bool CAlphaCPU::idle_load_ram(u64 va, int bytes, u64* value, u64* phys)
 void CAlphaCPU::idle_detect_sample(u64 start_virt, const AlphaInstructionSource& sources)
 {
 	const u64 _ic = state.instruction_count;
-	const int _ipl = (int) ((state.r[32 + 22] >> 8) & 0x1f);   // VMS PALcode keeps PS in p22
+	const auto observe = m_profile.idle.observe;
+	const auto context = observe ? observe(*this) : AlphaIdleContext{};
+	if (!context.available)
+	{
+		m_spin_hits = 0;
+		m_spin_set_n = 0;
+		m_ipl0_ier_known = false;
+		if (m_idle_armed)
+		{
+			cSystem->idle_watch_disarm(state.iProcNum);
+			m_idle_armed = false;
+		}
+		m_spin_ic = _ic;
+		return;
+	}
+	const int _ipl = context.ipl;
 
-	const bool _kernel = state.cm == 0 && !(start_virt & 1);   // IER_CM kernel, not PALmode
+	const bool _kernel = context.mode == 0 && !(start_virt & 1);   // Decoded kernel mode, not PALmode
 	const bool _in_window = !idle_pc_hi
 		|| (start_virt >= idle_pc_lo && start_virt < idle_pc_hi);
 
 	// OSF user mode always runs at IPL 0, so its IER enables are the reference.
-	if (idle_rule == RULE_SPIN_KERNEL && state.cm != 0 && !(start_virt & 1))
+	if (idle_rule == RULE_SPIN_KERNEL && context.mode != 0 && !(start_virt & 1))
 	{
-		m_ipl0_eien = state.eien;
-		m_ipl0_sien = state.sien;
+		m_ipl0_eien = context.external_enables;
+		m_ipl0_sien = context.software_enables;
 		m_ipl0_ier_known = true;
 	}
 	if (idle_detect_debug)
@@ -679,7 +694,7 @@ void CAlphaCPU::idle_detect_sample(u64 start_virt, const AlphaInstructionSource&
 			{
 				if (!m_ipl0_ier_known)
 					_why = "no user-mode IPL 0 reference yet";
-				else if (state.eien != m_ipl0_eien || state.sien != m_ipl0_sien)
+				else if (context.external_enables != m_ipl0_eien || context.software_enables != m_ipl0_sien)
 					_why = "interrupt enables differ from IPL 0";
 				else
 				{
@@ -728,7 +743,7 @@ void CAlphaCPU::idle_detect_sample(u64 start_virt, const AlphaInstructionSource&
 					if (_at)
 						printf(" at %016llx insn=%08x", (unsigned long long) _at, _insn);
 					printf(" (eien=%02x sien=%04x, IPL 0 eien=%02x sien=%04x) ***\n",
-						state.eien, state.sien, m_ipl0_eien, m_ipl0_sien);
+						context.external_enables, context.software_enables, m_ipl0_eien, m_ipl0_sien);
 					fflush(stdout);
 				}
 			}
@@ -788,8 +803,8 @@ void CAlphaCPU::idle_detect_sample(u64 start_virt, const AlphaInstructionSource&
 							get_cpuid(), (unsigned long long) start_virt, _mp_off);
 					else
 						printf("*** CPU%d *** idle_detect engaged at pc=%016llx ipl=%d cm=%d eien=%02x sien=%04x ***\n",
-							get_cpuid(), (unsigned long long) start_virt, _ipl, state.cm,
-							state.eien, state.sien);
+							get_cpuid(), (unsigned long long) start_virt, _ipl, context.mode,
+							context.external_enables, context.software_enables);
 					fflush(stdout);
 				}
 				if (_nap)

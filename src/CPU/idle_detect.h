@@ -21,6 +21,7 @@
 #include <bitset>
 #include <cstdint>
 #include <cstring>
+#include "AlphaIdle.h"
 
 /* Internal rules. Several guest OSes can share one, and the user never names
  * a rule -- only an OS label, so a rule can be improved without anyone's
@@ -97,22 +98,9 @@ enum EIdleLoop
 static const int kIdleLoopMax = 128;   // instructions scanned for the back edge
 static const int kIdleSpanMax = 256;   // instructions in the loop span
 
-// OSF PAL calls that only read state: rdmces, draina, rdval, rdps, rdusp,
-// whami, imb, rdunique.
-inline bool idle_pal_reads_only(std::uint32_t function)
-{
-  switch (function)
-  {
-  case 0x10: case 0x02: case 0x32: case 0x36: case 0x3a: case 0x3c:
-  case 0x86: case 0x9e:
-    return true;
-  default:
-    return false;
-  }
-}
-
 template <class Read>
-int idle_loop_check(std::uint64_t pc, Read read, std::uint64_t* at = nullptr)
+int idle_loop_check(std::uint64_t pc, Read read, const AlphaIdlePolicy& policy,
+                    std::uint64_t* at = nullptr)
 {
   std::uint64_t lo = 0, hi = 0;
   for (int i = 0; i < kIdleLoopMax && !hi; i++)
@@ -171,11 +159,14 @@ int idle_loop_check(std::uint64_t pc, Read read, std::uint64_t* at = nullptr)
     switch (op)
     {
     case 0x00:                                    // CALL_PAL
-      if (idle_pal_reads_only(insn & 0x3ffffff))
+    {
+      const auto pal = alpha_idle_pal_call(policy, insn & 0x3ffffff);
+      if (pal.allowed)
       {
-        dest[i] = 0;                              // v0 receives the result
+        dest[i] = pal.destination;
         break;
       }
+    }
       [[fallthrough]];
     case 0x0d: case 0x0e: case 0x0f:              // STW, STB, STQ_U
     case 0x1f:                                    // HW_ST

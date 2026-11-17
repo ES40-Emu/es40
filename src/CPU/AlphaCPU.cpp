@@ -700,7 +700,7 @@ void CAlphaCPU::idle_detect_sample(u64 start_virt, const AlphaInstructionSource&
 				{
 					u8& _loop = m_spin_loop[_slot];
 					if (_loop == IDLE_LOOP_UNKNOWN)
-						_loop = (u8) idle_loop_check(start_virt, _read);
+						_loop = (u8) idle_loop_check(start_virt, _read, m_profile.idle);
 					if (_loop == IDLE_LOOP_STORES)
 						_why = "loop writes memory or leaves";
 					else if (_loop == IDLE_LOOP_WALKS)
@@ -735,7 +735,7 @@ void CAlphaCPU::idle_detect_sample(u64 start_virt, const AlphaInstructionSource&
 					u32 _insn = 0;
 					const int _loop = m_spin_loop[_slot];
 					if (_loop != IDLE_LOOP_UNKNOWN && _loop != IDLE_LOOP_UNREADABLE)
-						idle_loop_check(start_virt, _read, &_at);   // again, for the deciding instruction
+						idle_loop_check(start_virt, _read, m_profile.idle, &_at);   // again, for the deciding instruction
 					if (_at)
 						_read(_at, &_insn);
 					printf("*** CPU%d *** idle_detect rejected pc=%016llx: %s",

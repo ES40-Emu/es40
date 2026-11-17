@@ -31,8 +31,24 @@ class Ev68Idle
 {
 public:
   static AlphaIdleContext observe(const CAlphaCPU& cpu);
+
+  // OSF PAL calls that only read state: rdmces, draina, rdval, rdps, rdusp,
+  // whami, imb, rdunique.
+  static constexpr AlphaIdlePALCall describe_pal_call(std::uint32_t function)
+  {
+    switch (function)
+    {
+    case 0x10: case 0x02: case 0x32: case 0x36: case 0x3a: case 0x3c:
+    case 0x86: case 0x9e:
+      return {true, 0};                              // v0 receives the result
+    default:
+      return {};
+    }
+  }
 };
 
-inline constexpr AlphaIdlePolicy kEv68IdlePolicy{&Ev68Idle::observe};
+inline constexpr AlphaIdlePolicy kEv68IdlePolicy{
+  &Ev68Idle::observe, &Ev68Idle::describe_pal_call
+};
 
 #endif

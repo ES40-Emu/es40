@@ -25,6 +25,8 @@
 #if !defined(INCLUDED_ALPHAIDLE_H)
 #define INCLUDED_ALPHAIDLE_H
 
+#include <cstdint>
+
 class CAlphaCPU;
 
 struct AlphaIdleContext
@@ -36,9 +38,27 @@ struct AlphaIdleContext
   int software_enables = 0;
 };
 
+// Read-only PAL calls with no GPR inputs and at most one GPR output.
+struct AlphaIdlePALCall
+{
+  bool allowed = false;
+  int destination = -1; // -1 means no GPR output.
+};
+
 struct AlphaIdlePolicy
 {
   AlphaIdleContext (*observe)(const CAlphaCPU& cpu) = nullptr; // Null disables detection.
+  // Pure, stable classification; null rejects PAL-containing loops.
+  AlphaIdlePALCall (*describe_pal_call)(std::uint32_t function) = nullptr;
 };
+
+constexpr AlphaIdlePALCall alpha_idle_pal_call(const AlphaIdlePolicy& policy,
+                                              std::uint32_t function)
+{
+  const auto call = policy.describe_pal_call
+    ? policy.describe_pal_call(function) : AlphaIdlePALCall{};
+  return call.allowed && call.destination >= -1 && call.destination < 32
+    ? call : AlphaIdlePALCall{};
+}
 
 #endif

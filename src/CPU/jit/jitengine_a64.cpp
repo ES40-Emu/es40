@@ -5276,6 +5276,8 @@ static A64OpEmitReceipt emit_a64_flti_arith(A64EmitContext& context,
   const Label bail = a.new_label(), cont = a.new_label();
   const A64FpTState prev = sgl ? A64FpTState{} : context.prev_fp_t;
   const auto inexact_rule = alpha_ieee_inexact_rule(context.profile.ieee_trap, op.ins);
+  const bool invalid_infinity = alpha_ieee_nonfinite_input_invalid(
+      context.profile.ieee_trap, AlphaIEEENonfiniteInput::Infinity);
   Error err = Error::kOk;
   if (!prev.guarded) {
     err = emit_a64_load_cpu_u8(a, RA::kScratch3.w(), context.offsets.jit_fp_enabled, false);
@@ -5287,10 +5289,10 @@ static A64OpEmitReceipt emit_a64_flti_arith(A64EmitContext& context,
   if (err == Error::kOk && dyn && !prev.nearest) err = emit_a64_fp_dyn_gate(context, bail);
   if (err == Error::kOk) err = emit_a64_load_f(context, a64::d16, op.ra);
   if (err == Error::kOk) err = emit_a64_load_f(context, a64::d17, op.rb);
-  if (err == Error::kOk && !(prev.non_denormal & (uint32_t{1} << op.ra)))
-    err = emit_a64_dbl_class_bail(context, a64::d16, false, bail);
-  if (err == Error::kOk && !(prev.non_denormal & (uint32_t{1} << op.rb)))
-    err = emit_a64_dbl_class_bail(context, a64::d17, false, bail);
+  if (err == Error::kOk && (invalid_infinity || !(prev.non_denormal & (uint32_t{1} << op.ra))))
+    err = emit_a64_dbl_class_bail(context, a64::d16, invalid_infinity, bail);
+  if (err == Error::kOk && (invalid_infinity || !(prev.non_denormal & (uint32_t{1} << op.rb))))
+    err = emit_a64_dbl_class_bail(context, a64::d17, invalid_infinity, bail);
   if (err != Error::kOk) return a64_completed_op_receipt(op, err);
 
   if (sgl) {
@@ -5365,13 +5367,15 @@ static A64OpEmitReceipt emit_a64_flti_cmp(A64EmitContext& context,
   a64::Assembler& a = context.assembler;
   const uint32_t f = (op.ins >> 5) & 0x7ffu;
   const uint32_t which = f & 3u;   // a4=UN a5=EQ a6=LT a7=LE (low bits of the func)
+  const bool invalid_infinity = alpha_ieee_nonfinite_input_invalid(
+      context.profile.ieee_trap, AlphaIEEENonfiniteInput::Infinity);
 
   const Label bail = a.new_label(), cont = a.new_label();
   Error err = emit_a64_fp_start(context, bail);
   if (err == Error::kOk) err = emit_a64_load_f(context, a64::d16, op.ra);
   if (err == Error::kOk) err = emit_a64_load_f(context, a64::d17, op.rb);
   // Compare-shaped class check: exp==0x7ff or exp==0 with a nonzero mantissa
-  // (NaN / denormal) bails; Inf and zero (mantissa 0) compare inline.
+  // (NaN / denormal) bails; permitted Inf and zero (mantissa 0) compare inline.
   for (int i2 = 0; i2 < 2 && err == Error::kOk; ++i2) {
     const a64::Vec& v = i2 ? a64::d17 : a64::d16;
     const Label ok = a.new_label(), special = a.new_label();
@@ -5379,7 +5383,7 @@ static A64OpEmitReceipt emit_a64_flti_cmp(A64EmitContext& context,
     if (err == Error::kOk) err = a.lsr(RA::kScratch5, RA::kScratch3, imm(52));
     if (err == Error::kOk) err = a.and_(RA::kScratch5, RA::kScratch5, imm(0x7ff));
     if (err == Error::kOk) err = a.cmp(RA::kScratch5, imm(0x7ff));
-    if (err == Error::kOk) err = a.b_eq(special);
+    if (err == Error::kOk) err = a.b_eq(invalid_infinity ? bail : special);
     if (err == Error::kOk) err = a.cbnz(RA::kScratch5, ok);
     if (err == Error::kOk) err = a.bind(special);
     if (err == Error::kOk) err = a.lsl(RA::kScratch3, RA::kScratch3, imm(12));

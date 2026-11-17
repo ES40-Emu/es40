@@ -1844,6 +1844,8 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         if (op == OP_ADDT || op == OP_SUBT || op == OP_MULT || op == OP_DIVT) {
             const bool dyn = (((ins >> 11) & 3) == 3);      // /D: rounding is FPCR<59:58>, checked at runtime
             const auto inexact_rule = alpha_ieee_inexact_rule(m_profile.ieee_trap, ins);
+            const bool invalid_infinity = alpha_ieee_nonfinite_input_invalid(
+                m_profile.ieee_trap, AlphaIEEENonfiniteInput::Infinity);
             Label bail = a.new_label(), cont = a.new_label();
             auto class_bail = [&](const x86::Vec& x, bool chk_inf_nan) {   // bail if denormal (always) / Inf|NaN (if asked)
                 Label ok = a.new_label();
@@ -1869,10 +1871,10 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             }
             a.movq(x86::xmm0, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)ra));   // f[Fa]
             a.movq(x86::xmm1, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rb));   // f[Fb]
-            if (!(prev_fp_t_non_denormal & (uint32_t{1} << ra)))
-                class_bail(x86::xmm0, false);                                       // denormal operand -> interp (DNZ/trap)
-            if (!(prev_fp_t_non_denormal & (uint32_t{1} << rb)))
-                class_bail(x86::xmm1, false);
+            if (invalid_infinity || !(prev_fp_t_non_denormal & (uint32_t{1} << ra)))
+                class_bail(x86::xmm0, invalid_infinity);                                       // denormal operand -> interp (DNZ/trap)
+            if (invalid_infinity || !(prev_fp_t_non_denormal & (uint32_t{1} << rb)))
+                class_bail(x86::xmm1, invalid_infinity);
             switch (op) {
             case OP_ADDT: a.addsd(x86::xmm0, x86::xmm1); break;
             case OP_SUBT: a.subsd(x86::xmm0, x86::xmm1); break;
@@ -1925,16 +1927,18 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
 
         // IEEE T-float compares (0x16 CMPTUN/EQ/LT/LE): f[Fc] = (Fa cmp Fb) ? 2.0 : 0.0. No rounding or
         // inexact. A NaN operand (INV / quiet-NaN / SWC rules) or a denormal operand (unmaskable denormal
-        // trap -- the interp's ieee_fcmp traps via ieee_unpack) goes to the interp; +/-Inf, zero and
+        // trap -- the interp's ieee_fcmp traps via ieee_unpack) goes to the interp; permitted +/-Inf, zero and
         // normals compare inline via ucomisd. Two ordered operands make CMPTUN always false.
         if (op == OP_CMPTUN || op == OP_CMPTEQ || op == OP_CMPTLT || op == OP_CMPTLE) {
+            const bool invalid_infinity = alpha_ieee_nonfinite_input_invalid(
+                m_profile.ieee_trap, AlphaIEEENonfiniteInput::Infinity);
             Label bail = a.new_label(), cont = a.new_label();
-            auto cmp_bail = [&](const x86::Vec& x) {                          // bail on NaN or denormal; Inf/zero/normal -> ok
+            auto cmp_bail = [&](const x86::Vec& x) {                          // bail on NaN, denormal or forbidden Inf
                 Label ok = a.new_label(), special = a.new_label();
                 a.movq(x86::rax, x);
                 a.mov(x86::rcx, x86::rax);
                 a.shr(x86::rcx, imm(52)); a.and_(x86::ecx, imm(0x7ff));         // biased exponent
-                a.cmp(x86::ecx, imm(0x7ff)); a.je(special);                     // exp all-ones -> Inf or NaN
+                a.cmp(x86::ecx, imm(0x7ff)); a.je(invalid_infinity ? bail : special);                     // exp all-ones -> Inf or NaN
                 a.test(x86::ecx, x86::ecx); a.jnz(ok);                          // exp != 0 -> normal
                 a.bind(special);                                                // exp == 0 (zero/denormal) or all-ones (Inf/NaN)
                 a.shl(x86::rax, imm(12)); a.jnz(bail);                          // mantissa != 0 -> denormal or NaN -> bail
@@ -1991,8 +1995,8 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             a.cmp(x86::eax, imm(2)); a.jne(bl);
             };
 
-        // CVTST (S->T widen): zero/normal/Inf are already valid T bit patterns -> copy. S-denormal
-        // (renormalizes) and NaN (quiets / may INV) go to the interpreter. No rounding or inexact.
+        // CVTST (S->T widen): zero/normal are already valid T bit patterns -> copy. S-denormal
+        // (renormalizes), Inf and NaN (quiets / may INV) go to the interpreter. No rounding or inexact.
         if (op == OP_CVTST) {
             Label bail = a.new_label(), cont = a.new_label();
             a.cmp(x86::byte_ptr(x86::rbp, m_off.jit_fp_enabled), imm(0)); a.je(bail);          // FPSTART
@@ -2105,6 +2109,8 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         // op, re-widen). Same bail policy as the T-float arith -- FP-off, /D-not-nearest, denormal
         // operand, an unsatisfied inexact rule, or an Inf/NaN/denormal single result.
         if (op == OP_ADDS || op == OP_SUBS || op == OP_MULS || op == OP_DIVS) {
+            const bool invalid_infinity = alpha_ieee_nonfinite_input_invalid(
+                m_profile.ieee_trap, AlphaIEEENonfiniteInput::Infinity);
             const bool dyn = (((ins >> 11) & 3) == 3);
             Label bail = a.new_label(), cont = a.new_label();
             a.cmp(x86::byte_ptr(x86::rbp, m_off.jit_fp_enabled), imm(0)); a.je(bail);          // FPSTART
@@ -2113,8 +2119,8 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             if (dyn) fp_dyn_bail(bail);
             a.movq(x86::xmm0, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)ra));   // f[Fa]
             a.movq(x86::xmm1, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rb));   // f[Fb]
-            dbl_bail(x86::xmm0, false, bail);                                       // denormal operands -> interp
-            dbl_bail(x86::xmm1, false, bail);
+            dbl_bail(x86::xmm0, invalid_infinity, bail);                             // denormal or forbidden nonfinite operands -> interp
+            dbl_bail(x86::xmm1, invalid_infinity, bail);
             a.cvtsd2ss(x86::xmm0, x86::xmm0);                                       // operands -> single (exact)
             a.cvtsd2ss(x86::xmm1, x86::xmm1);
             switch (op) {

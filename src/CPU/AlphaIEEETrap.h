@@ -53,6 +53,13 @@ struct AlphaIEEEInexactRule
   }
 };
 
+enum class AlphaIEEENonfiniteInput : std::uint32_t
+{
+  Infinity = 1,
+  QuietNaN = 2,
+  SignalingNaN = 4
+};
+
 struct AlphaIEEETrapPolicy
 {
   // Updates family state before the caller reports a delivered arithmetic trap.
@@ -69,7 +76,17 @@ struct AlphaIEEETrapPolicy
 
   // Pure rule from live FPCR; null leaves denormal inputs unflushed.
   bool (*denormal_input_zero)(std::uint64_t fpcr) = nullptr;
+
+  // Input classes requesting INV; delivery remains with evaluate.
+  std::uint32_t invalid_nonfinite_inputs =
+    static_cast<std::uint32_t>(AlphaIEEENonfiniteInput::SignalingNaN);
 };
+
+constexpr bool alpha_ieee_nonfinite_input_invalid(
+    const AlphaIEEETrapPolicy& policy, AlphaIEEENonfiniteInput input)
+{
+  return (policy.invalid_nonfinite_inputs & static_cast<std::uint32_t>(input)) != 0;
+}
 
 inline AlphaIEEEInexactRule alpha_ieee_inexact_rule(
     const AlphaIEEETrapPolicy& policy, std::uint32_t instruction)

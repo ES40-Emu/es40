@@ -303,7 +303,7 @@ u64 CAlphaCPU::ieee_cvtst(u64 op, u32 ins)
 	}
 
 	/* For zero / normal / infinity / NaN the S-format bit pattern is
-	   already a valid T value. ieee_unpack raises INV on sNaN; we must
+	   already a valid T value. ieee_unpack applies family input rules; we must
 	   also silence the NaN to qNaN on the result (HRM 4.8.4 / IEEE-754
 	   7.2: an invalid-op result that returns a NaN must set the QNAN bit).
 	   Mirrors the sibling helper ieee_cvtts. */
@@ -873,11 +873,12 @@ int CAlphaCPU::ieee_unpack(u64 op, UFP* r, u32 ins)
 
 	if (r->exp == FPR_NAN)   /* exponent = max? */
 	{
-		if (r->frac == 0)
-			return UFT_INF;     /* frac = 0? then inf */
-		if (!(r->frac & QNAN)) /* signaling NaN? */
+		const auto input = r->frac == 0 ? AlphaIEEENonfiniteInput::Infinity
+			: (r->frac & QNAN) ? AlphaIEEENonfiniteInput::QuietNaN
+			: AlphaIEEENonfiniteInput::SignalingNaN;
+		if (alpha_ieee_nonfinite_input_invalid(m_profile.ieee_trap, input))
 			ieee_trap(TRAP_INV, 1, FPCR_INVD, ins); /* signal inv op */
-		return UFT_NAN;
+		return r->frac == 0 ? UFT_INF : UFT_NAN;
 	}
 
 	r->frac = (r->frac | FPR_HB) << FPR_GUARD;  /* ins hidden bit, guard */

@@ -105,6 +105,7 @@ public:
   static bool wait_for_interrupt(CAlphaCPU& cpu);
   static bool call_pal(CAlphaCPU& cpu, std::uint32_t function);
   static bool instruction_pacing(const CAlphaCPU& cpu);
+  static void interpreter_step(CAlphaCPU& cpu);
   static constexpr AlphaPALCallHandler call_pal_override(std::uint32_t function)
   {
     return function == 0x3e ? &wait_for_interrupt : nullptr;
@@ -132,7 +133,7 @@ inline constexpr AlphaPALPolicy kEv68PALPolicy{
   &Ev68PAL::hardware_instruction_access, &Ev68PAL::hardware_return,
   &Ev68PALCompatibility::base_changed, &Ev68PALAccess::context,
   &Ev68PALCompatibility::call_pal_override, &Ev68PALCompatibility::call_pal,
-  &Ev68PALCompatibility::instruction_pacing
+  &Ev68PALCompatibility::instruction_pacing, &Ev68PALCompatibility::interpreter_step
 };
 
 #endif

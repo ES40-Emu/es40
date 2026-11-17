@@ -3266,84 +3266,10 @@ _next_instruction:
 #endif
 	state.current_pc = state.pc;
 
-	//--------------------------------------------------------------------------------
-	// This section skips the memory check in SRM. Set the define in config_debug  
-	// for the memory check to run.
-	//--------------------------------------------------------------------------------
-#if defined(SKIP_SRM_MEMTEST) && !defined(ES40_JIT)
-	// All five SRM mem-test patch points are in page 0x8b000 and only fire
-	// during early SRM boot. Gate on the page so every other instruction pays
-	// one compare instead of five.
-	// JIT builds must NOT use these hooks - a block-cache miss interprets a few 
-	// iterations, thus only one hook like 0x8bb90 fires alone, and aborts the
-	// fill while a still-compiled verify loop then runs, warm inits show mem errors
-	// JIT is fast enough, even 16GB configs don't take long. 
-	if ((state.current_pc & ~U64(0xFFF)) == U64(0x8b000))
-	{
-		if (state.current_pc == U64(0x8bb90))
-		{
-			if (state.r[5] != U64(0xaaaaaaaaaaaaaaaa))
-			{
-				printf("wrong memory check skip!\n");
-			}
-			else
-			{
-				state.r[0] = state.r[4];
-			}
-		}
-
-		if (state.current_pc == U64(0x8bbe0))
-		{
-			if (state.r[5] != U64(0xaaaaaaaaaaaaaaaa))
-			{
-				printf("wrong memory check skip!\n");
-			}
-			else
-			{
-				state.r[16] = 0;
-			}
-		}
-
-		if (state.current_pc == U64(0x8bc28))
-		{
-			if (state.r[5] != U64(0xaaaaaaaaaaaaaaaa))
-			{
-				printf("wrong memory check skip!\n");
-			}
-			else
-			{
-				state.r[8] = state.r[4];
-			}
-		}
-
-		if (state.current_pc == U64(0x8bc70))
-		{
-			if (state.r[7] != U64(0x5555555555555555))
-			{
-				printf("wrong memory check skip1!\n");
-			}
-			else
-			{
-				state.r[0] = 0;
-			}
-		}
-
-		if (state.current_pc == U64(0x8bcb0))
-		{
-			if (state.r[7] != U64(0x5555555555555555))
-			{
-				printf("wrong memory check skip2!\n");
-			}
-			else
-			{
-				state.r[3] = state.r[4];
-			}
-		}
-	}
+#ifndef ES40_JIT
+	if (m_profile.pal.interpreter_step)
+		m_profile.pal.interpreter_step(*this);
 #endif
-	//--------------------------------------------------------------------------------
-	// end of skip memory test section
-	//--------------------------------------------------------------------------------
 
 	// Service interrupts
 	if (DO_ACTION)

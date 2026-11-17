@@ -168,6 +168,8 @@ struct AlphaPALPolicy
   bool (*call_pal_compatibility)(CAlphaCPU& cpu, std::uint32_t function) = nullptr;
   // Host instruction-count throttle only; null leaves it disabled.
   bool (*instruction_pacing)(const CAlphaCPU& cpu) = nullptr;
+  // Standalone interpreter compatibility before interrupt service; null does nothing.
+  void (*interpreter_step)(CAlphaCPU& cpu) = nullptr;
 };
 
 constexpr std::uint32_t alpha_pal_call_allowed_modes(

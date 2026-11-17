@@ -81,6 +81,11 @@
 #include "AlphaCPU.h"
 #include "Ev68IEEETrap.h"
 
+bool Ev68IEEETrap::denormal_input_zero(std::uint64_t fpcr)
+{
+	return (fpcr & FPCR_DNZ) != 0;
+}
+
 std::uint64_t Ev68IEEETrap::underflow_result(bool negative)
 {
 	/* Preserve sign of zero on underflow per IEEE-754 / HRM 4.7.7.3. */

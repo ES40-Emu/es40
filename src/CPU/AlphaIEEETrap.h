@@ -66,6 +66,9 @@ struct AlphaIEEETrapPolicy
 
   // Pure underflow result after UNF/INE reporting; null preserves signed zero.
   std::uint64_t (*underflow_result)(bool negative) = nullptr;
+
+  // Pure rule from live FPCR; null leaves denormal inputs unflushed.
+  bool (*denormal_input_zero)(std::uint64_t fpcr) = nullptr;
 };
 
 inline AlphaIEEEInexactRule alpha_ieee_inexact_rule(

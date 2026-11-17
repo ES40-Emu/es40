@@ -292,7 +292,7 @@ u64 CAlphaCPU::ieee_cvtst(u64 op, u32 ins)
 	   to T format (ARM 4.10.14). This describes the numerical conversion;
 	   denormal-operand trap handling is a separate requirement. */
 	if (FPR_GETEXP(op) == 0 && FPR_GETFRAC(op) != 0
-	    && !(state.fpcr & FPCR_DNZ))
+	    && !ieee_denormal_input_zero())
 	{
 		b.sign = FPR_GETSIGN(op);
 		b.exp = 1; /* encoded exponent zero means 1 - S_BIAS (ARM 2.2.6.1) */
@@ -311,7 +311,7 @@ u64 CAlphaCPU::ieee_cvtst(u64 op, u32 ins)
 	if (ftpb == UFT_NAN)
 		return op | QNAN;
 	if (ftpb == UFT_ZERO)
-		return op & FPR_SIGN; /* DNZ flushed a denormal to its signed zero (AAR 4.7.7.11) */
+		return op & FPR_SIGN; /* Denormal input became signed zero (AAR 4.7.7.11) */
 	return op;
 }
 
@@ -824,6 +824,12 @@ u64 CAlphaCPU::ieee_sqrt(u64 op, u32 ins, u32 dp)
 
  //\{
 
+bool CAlphaCPU::ieee_denormal_input_zero() const
+{
+	const auto rule = m_profile.ieee_trap.denormal_input_zero;
+	return rule && rule(state.fpcr);
+}
+
  /**
   * \brief Unpack IEEE floating-point value
   *
@@ -846,7 +852,7 @@ int CAlphaCPU::ieee_unpack(u64 op, UFP* r, u32 ins)
 	{
 		if (r->frac == 0)
 			return UFT_ZERO;  /* frac = 0? then true 0 */
-		if (state.fpcr & FPCR_DNZ)       /* denorms to 0? */
+		if (ieee_denormal_input_zero())       /* denorms to 0? */
 		{
 			r->frac = 0;                  /* clear fraction */
 			return UFT_ZERO;
@@ -855,7 +861,7 @@ int CAlphaCPU::ieee_unpack(u64 op, UFP* r, u32 ins)
 		r->exp = 1; /* encoded exponent zero means 1 - T_BIAS (ARM 2.2.6.2) */
 		r->frac = r->frac << FPR_GUARD; /* guard fraction */
 		ieee_norm(r); /* normalize dnorm */
-		/* Denormal input operands take an *unmaskable* trap when
+		/* EV68 denormal input operands take an *unmaskable* trap when
 		   FPCR[DNZ] is clear (HRM A.11: "denormal input operands for
 		   arithmetic operations produce an unmaskable denormal trap").
 		   Pass fpcrdsb = 0 so neither the /S qualifier nor FPCR[INVD]

@@ -35,6 +35,7 @@ public:
       std::uint32_t instruction);
 
   static std::uint64_t underflow_result(bool negative);
+  static bool denormal_input_zero(std::uint64_t fpcr);
 
   static constexpr AlphaIEEEInexactRule describe_inexact(std::uint32_t)
   {
@@ -43,7 +44,8 @@ public:
 };
 
 inline constexpr AlphaIEEETrapPolicy kEv68IEEETrapPolicy{
-  &Ev68IEEETrap::evaluate, &Ev68IEEETrap::describe_inexact, &Ev68IEEETrap::underflow_result
+  &Ev68IEEETrap::evaluate, &Ev68IEEETrap::describe_inexact, &Ev68IEEETrap::underflow_result,
+  &Ev68IEEETrap::denormal_input_zero
 };
 
 #endif

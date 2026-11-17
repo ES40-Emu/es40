@@ -395,6 +395,7 @@ private:
   u64             ieee_fmul(u64 s1, u64 s2, u32 ins, u32 dp);
   u64             ieee_fdiv(u64 s1, u64 s2, u32 ins, u32 dp);
   u64             ieee_sqrt(u64 op, u32 ins, u32 dp);
+  bool            ieee_denormal_input_zero() const;
   int             ieee_unpack(u64 op, UFP* r, u32 ins);
   void            ieee_norm(UFP* r);
   u64             ieee_rpack(UFP* r, u32 ins, u32 dp);

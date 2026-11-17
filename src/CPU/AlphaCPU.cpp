@@ -1822,7 +1822,8 @@ void CAlphaCPU::jit_run(int budget)
 				const u32 opc = ins >> 26;
 				// Compare retired or faulting state without replay effects.
 				const bool executes = !m_profile.retires_instruction_at_decode(ins)
-					&& !m_profile.requires_fen_at_decode(ins);
+					&& !m_profile.requires_fen_at_decode(ins)
+					&& !m_profile.requires_fen_for_fpcr(ins, state.fpcr);
 				const int lra = (ins >> 21) & 0x1F;
 				// Replay the family-selected compiled loads using their original address.
 				const auto hw_load = (executes && opc == 0x1b)
@@ -3410,7 +3411,8 @@ _next_instruction:
 		)
 		ES40_EXECUTE_END();
 
-	if (m_profile.requires_fen_at_decode(ins)
+	if ((m_profile.requires_fen_at_decode(ins)
+		|| m_profile.requires_fen_for_fpcr(ins, state.fpcr))
 #if defined(IDB)
 		&& !bListing
 #endif

@@ -5695,10 +5695,37 @@ static A64OpEmitReceipt emit_a64_dispatch_op(A64EmitContext& context,
   return {};
 }
 
+// Read live FPCR before instruction effects; x9/x10 leave cross-op caches intact.
+static asmjit::Error emit_a64_rounding_fen_guard(A64EmitContext& context,
+    const A64DecodedOp& op, uint32_t index)
+{
+  using RA = CJitEngine::RegAlloc;
+  using namespace asmjit;
+  if (op.kind == A64OpKind::kDecodeRetire) return Error::kOk;
+  const uint32_t modes = context.profile.fen_rounding_modes(op.ins);
+  if (!modes) return Error::kOk;
+  a64::Assembler& a = context.assembler;
+  const Label bail = a.new_label(), cont = a.new_label();
+  Error err = emit_a64_load_cpu_u64(a, RA::kScratch0, context.offsets.fpcr);
+  if (err == Error::kOk) err = a.lsr(RA::kScratch0, RA::kScratch0, imm(58));
+  if (err == Error::kOk) err = a.and_(RA::kScratch0, RA::kScratch0, imm(3));
+  for (uint32_t mode = 0; mode < 4 && err == Error::kOk; ++mode) {
+    if (!(modes & (1u << mode))) continue;
+    err = a.cmp(RA::kScratch0, imm(mode));
+    if (err == Error::kOk) err = a.b_eq(bail);
+  }
+  if (err == Error::kOk) err = a.b(cont);
+  if (err == Error::kOk) err = a.bind(bail);
+  if (err == Error::kOk) err = emit_a64_retry_bail(context, index);
+  return err != Error::kOk ? err : a.bind(cont);
+}
+
 // Wrap dispatch with cross-op caches and conservative architectural FP facts.
 static A64OpEmitReceipt emit_a64_planned_op(A64EmitContext& context,
     const A64DecodedOp& op, uint32_t index)
 {
+  const auto guard = emit_a64_rounding_fen_guard(context, op, index);
+  if (guard != asmjit::Error::kOk) return a64_completed_op_receipt(op, guard);
   context.prev_fp_t = context.regs.fp_t;
   context.regs.fp_t = {};
   // Only explicit helper-free integer operations preserve every FP fact. 

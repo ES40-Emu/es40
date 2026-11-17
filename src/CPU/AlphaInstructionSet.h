@@ -72,6 +72,8 @@ struct AlphaInstructionDecodePolicy
   bool (*retire_at_decode)(std::uint32_t ins) = nullptr;
   // Pure encoding-only FEN rule after retirement; null decodes normally.
   bool (*fen_at_decode)(std::uint32_t ins) = nullptr;
+  // Pure selector: low four bits mark forbidden FPCR.DYN modes; null permits all.
+  std::uint32_t (*fen_rounding_modes)(std::uint32_t ins) = nullptr;
 };
 
 constexpr bool alpha_instruction_retires_at_decode(
@@ -84,6 +86,19 @@ constexpr bool alpha_instruction_fen_at_decode(
     const AlphaInstructionDecodePolicy& policy, std::uint32_t ins)
 {
   return policy.fen_at_decode && policy.fen_at_decode(ins);
+}
+
+constexpr std::uint32_t alpha_instruction_fen_rounding_modes(
+    const AlphaInstructionDecodePolicy& policy, std::uint32_t ins)
+{
+  return policy.fen_rounding_modes ? policy.fen_rounding_modes(ins) & 0xfu : 0;
+}
+
+constexpr bool alpha_instruction_fen_for_fpcr(
+    const AlphaInstructionDecodePolicy& policy, std::uint32_t ins, std::uint64_t fpcr)
+{
+  return (alpha_instruction_fen_rounding_modes(policy, ins)
+      & (1u << ((fpcr >> 58) & 3))) != 0;
 }
 
 #endif

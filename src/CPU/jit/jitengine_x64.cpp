@@ -940,6 +940,26 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         regalloc.dpc_force_align = prev_dpc_force_align;
         };
 
+    // Check live rounding permissions without clobbering cached registers.
+    const uint32_t fen_modes = op == OP_DECODE_RETIRE ? 0 : m_profile.fen_rounding_modes(ins);
+    if (fen_modes) {
+        Label bail = a.new_label(), cont = a.new_label();
+        for (uint32_t mode = 0; mode < 4; ++mode) {
+            if (!(fen_modes & (1u << mode))) continue;
+            Label next = a.new_label();
+            a.bt(x86::qword_ptr(x86::rbp, m_off.fpcr), imm(58));
+            if (mode & 1) a.jnc(next); else a.jc(next);
+            a.bt(x86::qword_ptr(x86::rbp, m_off.fpcr), imm(59));
+            if (mode & 2) a.jc(bail); else a.jnc(bail);
+            a.bind(next);
+        }
+        a.jmp(cont);
+        a.bind(bail);
+        set_pc(b->tag + 4 * (uint64_t)i);
+        JIT_STAT_EXIT(5); a.mov(x86::eax, imm(i)); a.add(x86::eax, x86::r13d); a.jmp(done);
+        a.bind(cont);
+    }
+
     do {
         // MB: a locked RMW on our frame is a full barrier, cheaper than mfence.
         if (op == OP_NOP)    { preserve_dpc(); continue; }
@@ -2928,7 +2948,8 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
     for (uint32_t i = 0; i < count; ++i)
       if (!m_profile.supports_instruction(words[i])
           || m_profile.retires_instruction_at_decode(words[i])
-          || m_profile.requires_fen_at_decode(words[i])) return false;
+          || m_profile.requires_fen_at_decode(words[i])
+          || m_profile.fen_rounding_modes(words[i])) return false;
     return true;
   };
   if (!pal_block && plen == 6 && snapshot_len >= 39) {

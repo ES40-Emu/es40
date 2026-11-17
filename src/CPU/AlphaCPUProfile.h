@@ -95,6 +95,16 @@ struct AlphaCPUProfile
   {
     return alpha_instruction_fen_at_decode(instruction_decode, ins);
   }
+
+  constexpr std::uint32_t fen_rounding_modes(std::uint32_t ins) const
+  {
+    return alpha_instruction_fen_rounding_modes(instruction_decode, ins);
+  }
+
+  constexpr bool requires_fen_for_fpcr(std::uint32_t ins, std::uint64_t fpcr) const
+  {
+    return alpha_instruction_fen_for_fpcr(instruction_decode, ins, fpcr);
+  }
 };
 
 #endif

@@ -56,6 +56,215 @@ bool Ev68PALCompatibility::wait_for_interrupt(CAlphaCPU& cpu)
   return false;
 }
 
+bool Ev68PALCompatibility::call_pal(CAlphaCPU& cpu, std::uint32_t function)
+{
+  if (!cpu.state.pal_vms) return false;
+  switch (function)
+  {
+  case 0x01:  /* CFLUSH */
+    cpu.vmspal_call_cflush();
+    return true;
+
+  case 0x02:  /* DRAINA */
+    cpu.vmspal_call_draina();
+    return true;
+
+  case 0x03:  /* LDQP */
+    cpu.vmspal_call_ldqp();
+    return true;
+
+  case 0x04:  /* STQP */
+    cpu.vmspal_call_stqp();
+    return true;
+
+  case 0x05:  /* SWPCTX */
+    cpu.vmspal_call_swpctx();
+    return true;
+
+  case 0x06:  /* MFPR_ASN */
+    cpu.vmspal_call_mfpr_asn();
+    return true;
+
+  case 0x07:  /* MTPR_ASTEN */
+    cpu.vmspal_call_mtpr_asten();
+    return true;
+
+  case 0x08:  /* MTPR_ASTSR */
+    cpu.vmspal_call_mtpr_astsr();
+    return true;
+
+  case 0x09:  /* CSERVE */
+    return false;
+
+  case 0x0b:  /* MFPR_FEN */
+    cpu.vmspal_call_mfpr_fen();
+    return true;
+
+  case 0x0c:  /* MTPR_FEN */
+    cpu.vmspal_call_mtpr_fen();
+    return true;
+
+  case 0x0e:  /* MFPR_IPL */
+    cpu.vmspal_call_mfpr_ipl();
+    return true;
+
+  case 0x0f:  /* MTPR_IPL */
+    cpu.vmspal_call_mtpr_ipl();
+    return true;
+
+  case 0x10:  /* MFPR_MCES */
+    cpu.vmspal_call_mfpr_mces();
+    return true;
+
+  case 0x11:  /* MTPR_MCES */
+    cpu.vmspal_call_mtpr_mces();
+    return true;
+
+  case 0x12:  /* MFPR_PCBB */
+    cpu.vmspal_call_mfpr_pcbb();
+    return true;
+
+  case 0x13:  /* MFPR_PRBR */
+    cpu.vmspal_call_mfpr_prbr();
+    return true;
+
+  case 0x14:  /* MTPR_PRBR */
+    cpu.vmspal_call_mtpr_prbr();
+    return true;
+
+  case 0x15:  /* MFPR_PTBR */
+    cpu.vmspal_call_mfpr_ptbr();
+    return true;
+
+  case 0x16:  /* MFPR_SCBB */
+    cpu.vmspal_call_mfpr_scbb();
+    return true;
+
+  case 0x17:  /* MTPR_SCBB */
+    cpu.vmspal_call_mtpr_scbb();
+    return true;
+
+  case 0x18:  /* MTPR_SIRR */
+    cpu.vmspal_call_mtpr_sirr();
+    return true;
+
+  case 0x19:  /* MFPR_SISR */
+    cpu.vmspal_call_mfpr_sisr();
+    return true;
+
+  case 0x1a:  /* MFPR_TBCHK */
+    cpu.vmspal_call_mfpr_tbchk();
+    return true;
+
+  case 0x1b:  /* MTPR_TBIA */
+    cpu.vmspal_call_mtpr_tbia();
+    return true;
+
+  case 0x1c:  /* MTPR_TBIAP */
+    cpu.vmspal_call_mtpr_tbiap();
+    return true;
+
+  case 0x1d:  /* MTPR_TBIS */
+    cpu.vmspal_call_mtpr_tbis();
+    return true;
+
+  case 0x1e:  /* MFPR_ESP */
+    cpu.vmspal_call_mfpr_esp();
+    return true;
+
+  case 0x1f:  /* MTPR_ESP */
+    cpu.vmspal_call_mtpr_esp();
+    return true;
+
+  case 0x20:  /* MFPR_SSP */
+    cpu.vmspal_call_mfpr_ssp();
+    return true;
+
+  case 0x21:  /* MTPR_SSP */
+    cpu.vmspal_call_mtpr_ssp();
+    return true;
+
+  case 0x22:  /* MFPR_USP */
+    cpu.vmspal_call_mfpr_usp();
+    return true;
+
+  case 0x23:  /* MTPR_USP */
+    cpu.vmspal_call_mtpr_usp();
+    return true;
+
+  case 0x24:  /* MTPR_TBISD */
+    cpu.vmspal_call_mtpr_tbisd();
+    return true;
+
+  case 0x25:  /* MTPR_TBISI */
+    cpu.vmspal_call_mtpr_tbisi();
+    return true;
+
+  case 0x26:  /* MFPR_ASTEN */
+    cpu.vmspal_call_mfpr_asten();
+    return true;
+
+  case 0x27:  /* MFPR_ASTSR */
+    cpu.vmspal_call_mfpr_astsr();
+    return true;
+
+  case 0x29:  /* MFPR_VPTB */
+    cpu.vmspal_call_mfpr_vptb();
+    return true;
+
+  case 0x2e:  /* MTPR_DATFX */
+    cpu.vmspal_call_mtpr_datfx();
+    return true;
+
+  case 0x3f:  /* MFPR_WHAMI */
+    cpu.vmspal_call_mfpr_whami();
+    return true;
+
+  case 0x86:  /* IMB */
+    cpu.vmspal_call_imb();
+    return true;
+
+  case 0x8f:  /* PROBER */
+    cpu.vmspal_call_prober();
+    return true;
+
+  case 0x90:  /* PROBEW */
+    cpu.vmspal_call_probew();
+    return true;
+
+  case 0x91:  /* RD_PS */
+    cpu.vmspal_call_rd_ps();
+    return true;
+
+  case 0x92:  /* REI */
+    cpu.vmspal_call_rei();
+    return true;
+
+  case 0x9b:  /* SWASTEN */
+    cpu.vmspal_call_swasten();
+    return true;
+
+  case 0x9c:  /* WR_PS_SW */
+    cpu.vmspal_call_wr_ps_sw();
+    return true;
+
+  case 0x9d:  /* RSCC */
+    cpu.vmspal_call_rscc();
+    return true;
+
+  case 0x9e:  /* READ_UNQ */
+    cpu.vmspal_call_read_unq();
+    return true;
+
+  case 0x9f:  /* WRITE_UNQ */
+    cpu.vmspal_call_write_unq();
+    return true;
+
+  default:
+    return false;
+  }
+}
+
 void Ev68PALCompatibility::base_changed(CAlphaCPU& cpu, std::uint64_t old_base, bool old_hle)
 {
   auto& state = cpu.state;

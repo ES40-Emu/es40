@@ -114,7 +114,7 @@ enum SafeOp {
   OP_HW_MTPR_TERM,               // HW_MTPR: a family write changes compiled assumptions -> redispatch
   OP_HW_STL, OP_HW_STQ,          // HW_ST (0x1f): normalized physical longword/quadword stores
   OP_JMP,                        // JMP/JSR/RET (0x1a): Ra = PC+4; PC = Rb & ~3 (computed target)
-  OP_HW_RET,                     // HW_RET (0x1e), PALmode: family-selected pure return-target transform
+  OP_HW_RET,                     // HW_RET (0x1e), PALmode: family-selected target and reservation rules
   OP_CALL_PAL,                   // CALL_PAL (0x00): save exc_addr/optional link; PC = pal_base | entry offset
   // Branch-format terminators (contiguous; see is_branch). Conditional on Ra, plus BR/BSR.
   OP_BEQ, OP_BNE, OP_BLT, OP_BLE, OP_BGT, OP_BGE, OP_BLBC, OP_BLBS, OP_BR, OP_BSR,
@@ -357,7 +357,7 @@ SafeOp classify(uint32_t ins, bool pal_block, const AlphaIPRReadPolicy& ipr_read
     case 0x1a: return OP_JMP;   // JMP/JSR/RET: computed jump (target = Rb & ~3). Now compiled --
                                 // chained in-frame via a block-cache lookup (jit_indirect), which
                                 // handles varying targets without the old single-slot thrash.
-    case 0x1e:                  // HW_RET (HWREI): the family selects a compilable pure target transform.
+    case 0x1e:                  // HW_RET (HWREI): the family selects compilable return rules.
       return pal_block && pal.hardware_instruction_access
           && alpha_pal_instruction_compilable(pal.hardware_instruction_access(ins))
           && alpha_pal_return_compilable(alpha_pal_return_descriptor(pal, ins))
@@ -2312,6 +2312,10 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             if (!defer_pc || pal_block)
                 a.mov(x86::qword_ptr(x86::rbp, m_off.state_pc), x86::r10);
 #endif
+            if (descriptor.clear_lock) {
+                emit_call(hs.clear_lock_helper, { {JA_CPU, 0} });
+                a.mov(x86::r10, x86::qword_ptr(x86::rbp, m_off.state_pc));
+            }
             continue;
         }
 
@@ -2843,7 +2847,7 @@ void CJitEngine::build_trampolines()
   }
 }
 
-void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& sources, void* read_helper, void* write_helper, void* opcdec_helper, void* hw_mfpr_helper, void* hw_ld_helper, void* hw_mtpr_helper, void* hw_st_helper, void* indirect_helper, void* read_locked_helper, void* stc_helper, void* misc_helper, void* read_vpte_helper, void* read_wchk_helper, void* itof_helper, void* ftoi_helper, void* fltl_helper, void* fp_read_helper, void* fp_write_helper, void* fltv_helper)
+void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& sources, void* read_helper, void* write_helper, void* opcdec_helper, void* hw_mfpr_helper, void* hw_ld_helper, void* hw_mtpr_helper, void* hw_st_helper, void* indirect_helper, void* read_locked_helper, void* stc_helper, void* misc_helper, void* read_vpte_helper, void* read_wchk_helper, void* itof_helper, void* ftoi_helper, void* fltl_helper, void* fp_read_helper, void* fp_write_helper, void* fltv_helper, void* clear_lock_helper)
 {
   // Only the interpreted miss path calls this for an uncompiled block. Keep the
   // first encounter interpreted; compiled dispatch and chaining pay no counter cost.
@@ -3128,7 +3132,7 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
   const HelperSet hs = { read_helper, write_helper, opcdec_helper, hw_mfpr_helper, hw_ld_helper,
                        hw_mtpr_helper, hw_st_helper, indirect_helper, read_locked_helper, stc_helper,
                        misc_helper, read_vpte_helper, read_wchk_helper, itof_helper, ftoi_helper,
-                       fltl_helper, fp_read_helper, fp_write_helper, fltv_helper };
+                       fltl_helper, fp_read_helper, fp_write_helper, fltv_helper, clear_lock_helper };
 
   std::vector<ColdMemStub> cold;   // outlined memop slow paths, emitted after the epilogue
   Label fused_done = a.new_label();

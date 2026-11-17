@@ -1085,7 +1085,7 @@ void CAlphaCPU::init()
 				(void*)&CAlphaCPU::jit_itof,        (void*)&CAlphaCPU::jit_ftoi,
 				(void*)&CAlphaCPU::jit_fltl,
 				(void*)&CAlphaCPU::jit_fp_read,     (void*)&CAlphaCPU::jit_fp_write,
-				(void*)&CAlphaCPU::jit_fltv };
+				(void*)&CAlphaCPU::jit_fltv,        (void*)&CAlphaCPU::jit_clear_lock };
 			static_assert(sizeof(ht) == sizeof(m_jit_helper_tab),
 				"m_jit_helper_tab must match HelperSet exactly (the JIT indexes it as void*[])");
 			memcpy(m_jit_helper_tab, &ht, sizeof(ht));
@@ -1680,7 +1680,7 @@ void CAlphaCPU::jit_run(int budget)
 					(void*)&CAlphaCPU::jit_itof,        (void*)&CAlphaCPU::jit_ftoi,
 					(void*)&CAlphaCPU::jit_fltl,
 					(void*)&CAlphaCPU::jit_fp_read,     (void*)&CAlphaCPU::jit_fp_write,
-					(void*)&CAlphaCPU::jit_fltv };
+					(void*)&CAlphaCPU::jit_fltv,        (void*)&CAlphaCPU::jit_clear_lock };
 				// Loop/superblock FUSION: follow each block's STATIC taken branch target, growing the trace,
 				// until the chain branches back to the head (compile_trace then closes the loop) or hits a
 				// non-branch / non-live target / a non-head cycle / the segment cap. Works under verify too
@@ -2263,7 +2263,7 @@ void CAlphaCPU::jit_run(int budget)
 					(void*)&CAlphaCPU::jit_itof, (void*)&CAlphaCPU::jit_ftoi,
 					(void*)&CAlphaCPU::jit_fltl,
 					(void*)&CAlphaCPU::jit_fp_read, (void*)&CAlphaCPU::jit_fp_write,
-					(void*)&CAlphaCPU::jit_fltv);
+					(void*)&CAlphaCPU::jit_fltv, (void*)&CAlphaCPU::jit_clear_lock);
 		}
 	}
 }
@@ -3014,6 +3014,13 @@ u64 CAlphaCPU::jit_hw_mfpr(CAlphaCPU* cpu, u32 ins, u64 cur)
 void CAlphaCPU::jit_hw_mtpr(CAlphaCPU* cpu, u32 instruction, u64 value)
 {
 	cpu->write_ipr(instruction, value, AlphaIPRWriteContext::Compiled);
+}
+
+void CAlphaCPU::jit_clear_lock(CAlphaCPU* cpu)
+{
+	// Replay retains the interpreter's final reservation.
+	if (!cpu->m_jit_vreplay)
+		cpu->cSystem->cpu_clear_lock(cpu->state.iProcNum);
 }
 
 // JIT indirect-jump chaining helper (static). For a compiled JMP/HW_RET, look up the block at the

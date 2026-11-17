@@ -345,7 +345,7 @@ public:
     void* hw_ld_helper;       void* hw_mtpr_helper;   void* hw_st_helper;    void* indirect_helper;
     void* read_locked_helper; void* stc_helper;       void* misc_helper;     void* read_vpte_helper;
     void* read_wchk_helper;   void* itof_helper;      void* ftoi_helper;     void* fltl_helper;
-    void* fp_read_helper;     void* fp_write_helper;  void* fltv_helper;
+    void* fp_read_helper;     void* fp_write_helper;  void* fltv_helper;     void* clear_lock_helper;
   };
 
   explicit CJitEngine(const AlphaCPUProfile& profile, int cpu_id = 0);   // cpu_id tags the stats/diagnostic prints
@@ -440,7 +440,7 @@ public:
 
   JitBlock* record(uint64_t virt_pc, uint64_t phys_pc, uint32_t asn, bool pal_shadow,
                    bool asm_global, uint32_t n_instr, const AlphaInstructionSource& sources);
-  void compile_block(JitBlock* b, const AlphaInstructionSource& sources, void* read_helper, void* write_helper, void* opcdec_helper, void* hw_mfpr_helper, void* hw_ld_helper, void* hw_mtpr_helper, void* hw_st_helper, void* indirect_helper, void* read_locked_helper, void* stc_helper, void* misc_helper, void* read_vpte_helper, void* read_wchk_helper, void* itof_helper, void* ftoi_helper, void* fltl_helper, void* fp_read_helper, void* fp_write_helper, void* fltv_helper);
+  void compile_block(JitBlock* b, const AlphaInstructionSource& sources, void* read_helper, void* write_helper, void* opcdec_helper, void* hw_mfpr_helper, void* hw_ld_helper, void* hw_mtpr_helper, void* hw_st_helper, void* indirect_helper, void* read_locked_helper, void* stc_helper, void* misc_helper, void* read_vpte_helper, void* read_wchk_helper, void* itof_helper, void* ftoi_helper, void* fltl_helper, void* fp_read_helper, void* fp_write_helper, void* fltv_helper, void* clear_lock_helper);
   void flush();
 
   // Per-op codegen state, shared by compile_block and compile_trace within a backend.

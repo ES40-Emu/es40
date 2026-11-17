@@ -1470,7 +1470,7 @@ static constexpr A64OpClass classify_a64_op(uint32_t ins, bool pal_block,
     case 0x1a:   // JMP/JSR/RET: computed jump, Ra = link -- indirect terminator
       return {A64OpKind::kJmpIndirect, A64TerminatorKind::kIndirect,
               static_cast<uint8_t>(kA64GprRb), static_cast<uint8_t>(kA64GprRa)};
-    case 0x1e:   // HW_RET/HWREI (PALmode only): family-selected pure target transform, no link.
+    case 0x1e:   // HW_RET/HWREI (PALmode only): family-selected target and reservation rules, no link.
       // HW format: excluded from the pin-selection mask (regprof_mask parity).
       if (!pal_block || !pal.hardware_instruction_access
           || !alpha_pal_instruction_compilable(pal.hardware_instruction_access(ins)))
@@ -2534,7 +2534,7 @@ static_assert(kA64MaxCallArgs == 8
 static int a64_helper_index(const CJitEngine::HelperSet& helpers,
                             const void* helper) noexcept
 {
-  constexpr size_t kHelperCount = 19;
+  constexpr size_t kHelperCount = 20;
   static_assert(sizeof(CJitEngine::HelperSet) == kHelperCount * sizeof(void*),
                 "HelperSet must remain the CPU helper table's pure pointer layout");
   if (helper == nullptr) return -1;
@@ -3704,24 +3704,28 @@ static A64OpEmitReceipt emit_a64_jmp_indirect(A64EmitContext& context,
     if (src.id() == a64::xzr.id() || descriptor.target_mask == 0
         || descriptor.target_bits == ~uint64_t(0)) {
       err = emit_a64_mov_u64(a, RA::kNextPc, descriptor.target_bits);
-      return a64_completed_op_receipt(op, err);
-    }
-    if (descriptor.target_mask == ~uint64_t(0)) {
-      err = a.mov(RA::kNextPc, src);
-    } else if (arm::Utils::is_logical_imm(descriptor.target_mask, 64)) {
-      err = a.and_(RA::kNextPc, src, imm(descriptor.target_mask));
     } else {
-      err = emit_a64_mov_u64(a, RA::kScratch1, descriptor.target_mask);
-      if (err == Error::kOk) err = a.and_(RA::kNextPc, src, RA::kScratch1);
-    }
-    if (err == Error::kOk && descriptor.target_bits != 0) {
-      if (arm::Utils::is_logical_imm(descriptor.target_bits, 64)) {
-        err = a.orr(RA::kNextPc, RA::kNextPc, imm(descriptor.target_bits));
+      if (descriptor.target_mask == ~uint64_t(0)) {
+        err = a.mov(RA::kNextPc, src);
+      } else if (arm::Utils::is_logical_imm(descriptor.target_mask, 64)) {
+        err = a.and_(RA::kNextPc, src, imm(descriptor.target_mask));
       } else {
-        err = emit_a64_mov_u64(a, RA::kScratch1, descriptor.target_bits);
-        if (err == Error::kOk) err = a.orr(RA::kNextPc, RA::kNextPc, RA::kScratch1);
+        err = emit_a64_mov_u64(a, RA::kScratch1, descriptor.target_mask);
+        if (err == Error::kOk) err = a.and_(RA::kNextPc, src, RA::kScratch1);
+      }
+      if (err == Error::kOk && descriptor.target_bits != 0) {
+        if (arm::Utils::is_logical_imm(descriptor.target_bits, 64)) {
+          err = a.orr(RA::kNextPc, RA::kNextPc, imm(descriptor.target_bits));
+        } else {
+          err = emit_a64_mov_u64(a, RA::kScratch1, descriptor.target_bits);
+          if (err == Error::kOk) err = a.orr(RA::kNextPc, RA::kNextPc, RA::kScratch1);
+        }
       }
     }
+    if (err == Error::kOk && descriptor.clear_lock)
+      err = emit_a64_helper_call(a, context.offsets, context.helpers,
+          context.regs, context.pal_shadow, context.helpers.clear_lock_helper,
+          {{A64CallArgKind::kCpu, 0}});
     return a64_completed_op_receipt(op, err);
   }
 
@@ -6666,7 +6670,7 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
     void* hw_ld_helper, void* hw_mtpr_helper, void* hw_st_helper, void* indirect_helper,
     void* read_locked_helper, void* stc_helper, void* misc_helper, void* read_vpte_helper,
     void* read_wchk_helper, void* itof_helper, void* ftoi_helper, void* fltl_helper,
-    void* fp_read_helper, void* fp_write_helper, void* fltv_helper)
+    void* fp_read_helper, void* fp_write_helper, void* fltv_helper, void* clear_lock_helper)
 {
   // Only the interpreted miss path calls this for an uncompiled block. Keep the
   // first encounter interpreted; compiled dispatch and chaining pay no counter cost.
@@ -6783,7 +6787,7 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
       read_helper, write_helper, opcdec_helper, hw_mfpr_helper, hw_ld_helper,
       hw_mtpr_helper, hw_st_helper, indirect_helper, read_locked_helper, stc_helper,
       misc_helper, read_vpte_helper, read_wchk_helper, itof_helper, ftoi_helper,
-      fltl_helper, fp_read_helper, fp_write_helper, fltv_helper};
+      fltl_helper, fp_read_helper, fp_write_helper, fltv_helper, clear_lock_helper};
   if (emit_a64_prologue(a) != asmjit::Error::kOk) return;
   // Cold entry materializes the shared block convention. Chained entries target
   // body directly and inherit these live values plus x19-x22 from their predecessor.

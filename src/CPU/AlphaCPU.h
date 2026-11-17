@@ -726,7 +726,7 @@ private:
   CJitEngine* m_jit = nullptr;
   s64  m_jit_budget = 0;       // instruction ceiling for a compiled chain
   void* m_link_from = nullptr; // LinkSlot* array the dispatcher should patch
-  void* m_jit_helper_tab[19] = {}; // helper fn table
+  void* m_jit_helper_tab[20] = {}; // helper fn table
   void* m_jit_exit = nullptr;      // shared epilogue, jumped through by compiled code
 #ifdef JIT_STATS
   u64 m_stat_tb[10] = {};          // windowed: dtbm-single, double, itb-miss, dfault, tbia-D, tbiap-D, tbis_d, fills-D, miss w/ hint slot invalid, miss w/ hint slot other page
@@ -770,6 +770,7 @@ private:
   static u64 jit_hw_mfpr(CAlphaCPU* cpu, u32 ins, u64 cur);
   // HW_MTPR (PALmode): dispatch a family-approved compiled write of value (Rb).
   static void jit_hw_mtpr(CAlphaCPU* cpu, u32 instruction, u64 value);
+  static void jit_clear_lock(CAlphaCPU* cpu);
   // Indirect jump (JMP/HW_RET): look up the target block; return its chained re-entry or null.
   static void* jit_indirect(CAlphaCPU* cpu, u64 target, void* link_cache);
   static void* jit_indirect_impl(CAlphaCPU* cpu, u64 target, void* link_cache);

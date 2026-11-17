@@ -170,6 +170,9 @@ struct AlphaPALPolicy
   bool (*instruction_pacing)(const CAlphaCPU& cpu) = nullptr;
   // Standalone interpreter compatibility before interrupt service; null does nothing.
   void (*interpreter_step)(CAlphaCPU& cpu) = nullptr;
+  // Legacy trace addresses; absent callbacks return zero.
+  std::uint64_t (*trace_prbr)(CAlphaCPU& cpu) = nullptr;
+  std::uint64_t (*trace_hwpcb)(CAlphaCPU& cpu) = nullptr;
 };
 
 constexpr std::uint32_t alpha_pal_call_allowed_modes(

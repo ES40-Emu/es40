@@ -38,6 +38,40 @@ bool Ev68RegisterBank::pal_shadow_enabled(const CAlphaCPU& cpu)
   return cpu.state.sde;
 }
 
+std::uint64_t Ev68PALCompatibility::trace_prbr(CAlphaCPU& cpu)
+{
+  u64   v_prbr; // virtual
+  u64   p_prbr; // physical
+  bool  b;
+  if (cpu.state.r[21 + 32] && ((u64)(cpu.state.r[21 + 32] + 0xaf) < (u64)
+    ((U64(0x1) << cpu.cSystem->get_memory_bits()))))
+    v_prbr = cpu.cSystem->ReadMem(cpu.state.r[21 + 32] + 0xa8, 64, &cpu);
+  else
+    v_prbr = cpu.cSystem->ReadMem(0x70a8 + (0x200 * cpu.get_cpuid()), 64, &cpu);
+  if (cpu.virt2phys(v_prbr, &p_prbr, ACCESS_READ | FAKE | NO_CHECK, &b, 0))
+    p_prbr = v_prbr;
+  if ((u64)p_prbr > (u64)(U64(0x1) << cpu.cSystem->get_memory_bits()))
+    p_prbr = 0;
+  return p_prbr;
+}
+
+std::uint64_t Ev68PALCompatibility::trace_hwpcb(CAlphaCPU& cpu)
+{
+  u64   v_pcb;  // virtual
+  u64   p_pcb;  // physical
+  bool  b;
+  if (cpu.state.r[21 + 32] && ((u64)(cpu.state.r[21 + 32] + 0x17) < (u64)
+    ((U64(0x1) << cpu.cSystem->get_memory_bits()))))
+    v_pcb = cpu.cSystem->ReadMem(cpu.state.r[21 + 32] + 0x10, 64, &cpu);
+  else
+    v_pcb = cpu.cSystem->ReadMem(0x7010 + (0x200 * cpu.get_cpuid()), 64, &cpu);
+  if (cpu.virt2phys(v_pcb, &p_pcb, ACCESS_READ | NO_CHECK | FAKE, &b, 0))
+    p_pcb = v_pcb;
+  if (p_pcb > (u64)(U64(0x1) << cpu.cSystem->get_memory_bits()))
+    p_pcb = 0;
+  return p_pcb;
+}
+
 void Ev68PALCompatibility::interpreter_step(CAlphaCPU& cpu)
 {
   //--------------------------------------------------------------------------------

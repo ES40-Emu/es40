@@ -1202,19 +1202,8 @@ inline u64 CAlphaCPU::get_pal_base()
  **/
 inline u64 CAlphaCPU::get_prbr(void)
 {
-  u64   v_prbr; // virtual
-  u64   p_prbr; // physical
-  bool  b;
-  if (state.r[21 + 32] && ((u64)(state.r[21 + 32] + 0xaf) < (u64)
-    ((U64(0x1) << cSystem->get_memory_bits()))))
-    v_prbr = cSystem->ReadMem(state.r[21 + 32] + 0xa8, 64, this);
-  else
-    v_prbr = cSystem->ReadMem(0x70a8 + (0x200 * get_cpuid()), 64, this);
-  if (virt2phys(v_prbr, &p_prbr, ACCESS_READ | FAKE | NO_CHECK, &b, 0))
-    p_prbr = v_prbr;
-  if ((u64)p_prbr > (u64)(U64(0x1) << cSystem->get_memory_bits()))
-    p_prbr = 0;
-  return p_prbr;
+  const auto read = m_profile.pal.trace_prbr;
+  return read ? read(*this) : 0;
 }
 
 /**
@@ -1222,19 +1211,8 @@ inline u64 CAlphaCPU::get_prbr(void)
  **/
 inline u64 CAlphaCPU::get_hwpcb(void)
 {
-  u64   v_pcb;  // virtual
-  u64   p_pcb;  // physical
-  bool  b;
-  if (state.r[21 + 32] && ((u64)(state.r[21 + 32] + 0x17) < (u64)
-    ((U64(0x1) << cSystem->get_memory_bits()))))
-    v_pcb = cSystem->ReadMem(state.r[21 + 32] + 0x10, 64, this);
-  else
-    v_pcb = cSystem->ReadMem(0x7010 + (0x200 * get_cpuid()), 64, this);
-  if (virt2phys(v_pcb, &p_pcb, ACCESS_READ | NO_CHECK | FAKE, &b, 0))
-    p_pcb = v_pcb;
-  if (p_pcb > (u64)(U64(0x1) << cSystem->get_memory_bits()))
-    p_pcb = 0;
-  return p_pcb;
+  const auto read = m_profile.pal.trace_hwpcb;
+  return read ? read(*this) : 0;
 }
 
 #if defined(IDB)

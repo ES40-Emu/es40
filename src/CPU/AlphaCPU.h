@@ -268,6 +268,7 @@ class CAlphaCPU : public CSystemComponent, public CRunnable
   friend class Ev68ArithmeticTrap;
   friend class Ev68IEEETrap;
   friend class Ev68FPStart;
+  friend class Ev68CycleCounter;
   friend class Ev68Reset;
   friend class Ev68CPUState;
   friend class Ev68InstructionFetch;
@@ -557,9 +558,15 @@ private:
   void idle_detect_sample(u64 start_virt, const AlphaInstructionSource& sources);
   bool idle_load_ram(u64 va, int bytes, u64* value, u64* phys);
 
+  bool cycle_counter_enabled() const
+  {
+    const auto enabled = m_profile.cycle_counter.enabled;
+    return enabled && enabled(*this);
+  }
+
   // Wall-clock RPCC: state.cc advances by real elapsed time * cpu_hz so it tracks the configured
   // CPU frequency regardless of how fast/bursty the JIT runs. This is the last sync timestamp;
-  // the delta since it (when cc_ena) is added to state.cc at each sync point, then it's reset to now.
+  // the delta since it (when enabled) is added to state.cc at each sync point, then it's reset to now.
   std::chrono::steady_clock::time_point cc_last_sync;
   u64                                   cc_wall_remainder = 0; // fractional cycle numerator, / 1e9
 
@@ -571,7 +578,7 @@ private:
       cc_last_sync = now;
     auto cc_delta = now - cc_last_sync;
     cc_last_sync = now;
-    if (state.cc_ena)
+    if (cycle_counter_enabled())
     {
       if (cc_delta > std::chrono::seconds(1))   // cap (not drop) odd deltas, as at batch top
         cc_delta = std::chrono::seconds(1);
@@ -598,13 +605,14 @@ private:
   u64 rpcc_read()
   {
     sync_cc_wallclock();
-    if (state.cc_ena && state.cc <= cc_last_read)
+    if (cycle_counter_enabled() && state.cc <= cc_last_read)
     {
       cc_borrow += cc_last_read + kRpccCollisionStep - state.cc;
       state.cc = cc_last_read + kRpccCollisionStep;
     }
     cc_last_read = state.cc;
-    return ((u64) state.cc_offset) << 32 | (state.cc & U64(0xffffffff));
+    const auto read = m_profile.cycle_counter.read;
+    return read ? read(*this) : 0;
   }
 
   // DRAM fast-path cache

@@ -2463,7 +2463,7 @@ u64 CAlphaCPU::jit_misc(CAlphaCPU* cpu, u32 sel)
 
 	switch (sel)
 	{
-	case 0:                                            // RPCC: Ra = cc_offset : cc[31:0]
+	case 0:                                            // RPCC: model-selected counter value
 		return cpu->rpcc_read();                       // live read (NetBSD PCC timecounter) + collision progress
 	case 1:                                            // RC: Ra = bIntrFlag; bIntrFlag = false
 	{

@@ -456,6 +456,9 @@ list(APPEND ES40_SOURCES
     src/CPU/AlphaFPStart.h
     src/CPU/Ev68FPStart.h
     src/CPU/Ev68FPStart.cpp
+    src/CPU/AlphaCycleCounter.h
+    src/CPU/Ev68CycleCounter.h
+    src/CPU/Ev68CycleCounter.cpp
     src/CPU/AlphaArithmeticTrap.h
     src/CPU/Ev68ArithmeticTrap.h
     src/CPU/Ev68ArithmeticTrap.cpp

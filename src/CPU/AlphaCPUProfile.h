@@ -43,6 +43,7 @@
 #include "AlphaInterrupt.h"
 #include "AlphaFPCR.h"
 #include "AlphaFPStart.h"
+#include "AlphaCycleCounter.h"
 #include "AlphaArithmeticTrap.h"
 #include "AlphaIEEETrap.h"
 
@@ -76,6 +77,7 @@ struct AlphaCPUProfile
   AlphaIEEETrapPolicy ieee_trap{};
   AlphaLLSCPolicy llsc{};
   AlphaCPUStatePolicy cpu_state{};
+  AlphaCycleCounterPolicy cycle_counter{};
 
   constexpr bool supports_instruction(std::uint32_t ins) const
   {

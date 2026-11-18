@@ -52,4 +52,19 @@ constexpr AlphaPALReturnDescriptor ev4_hardware_return(std::uint32_t instruction
     : AlphaPALReturnDescriptor{};
 }
 
+constexpr AlphaPALInstructionAccess ev4_hardware_instruction_access(std::uint32_t instruction)
+{
+  switch (instruction >> 26)
+  {
+  case 0x19: // HW_MFPR.
+  case 0x1b: // HW_LD.
+  case 0x1d: // HW_MTPR.
+  case 0x1e: // HW_REI.
+  case 0x1f: // HW_ST.
+    return AlphaPALInstructionAccess::PalOrKernelHwe;
+  default:
+    return AlphaPALInstructionAccess::Denied;
+  }
+}
+
 #endif

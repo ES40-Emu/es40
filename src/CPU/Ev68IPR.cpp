@@ -146,38 +146,12 @@ void Ev68IPR::write(CAlphaCPU& cpu, std::uint32_t instruction, std::uint64_t val
       break;
 
     case 0x09:  /* CM */
-    {
-      const int old_cm = state.cm;
-      state.cm = (int) (value >> 3) & 3;
-#ifdef ES40_JIT
-      if (state.cm != old_cm)
-        cpu.jit_note_mode_change();
-#else
-      (void)old_cm;
-#endif
-      if (context == AlphaIPRWriteContext::Compiled)
-        cpu.sync_native_context();
-      else
-        cpu.flush_data_page_cache();
+      cpu.set_current_mode(static_cast<u32>((value >> 3) & 3), context);
       cpu.kick_int_if_pending();
       break;
-    }
 
     case 0x0b:  /* IER_CM */
-    {
-      const int old_cm = state.cm;
-      state.cm = (int) (value >> 3) & 3;
-#ifdef ES40_JIT
-      if (state.cm != old_cm)
-        cpu.jit_note_mode_change();
-#else
-      (void)old_cm;
-#endif
-      if (context == AlphaIPRWriteContext::Compiled)
-        cpu.sync_native_context();
-      else
-        cpu.flush_data_page_cache();
-    }
+      cpu.set_current_mode(static_cast<u32>((value >> 3) & 3), context);
       [[fallthrough]];
     case 0x0a:  /* IER */
       state.asten = (int) (value >> 13) & 1;

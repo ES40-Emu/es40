@@ -910,6 +910,22 @@ void CAlphaCPU::write_ipr(u32 instruction, u64 value, AlphaIPRWriteContext conte
 	m_profile.ipr_write.write(*this, instruction, value, context);
 }
 
+void CAlphaCPU::set_current_mode(u32 mode, AlphaIPRWriteContext context)
+{
+	const int old_cm = state.cm;
+	state.cm = static_cast<int>(mode);
+#ifdef ES40_JIT
+	if (state.cm != old_cm)
+		jit_note_mode_change();
+#else
+	(void)old_cm;
+#endif
+	if (context == AlphaIPRWriteContext::Compiled)
+		sync_native_context();
+	else
+		flush_data_page_cache();
+}
+
 AlphaPALAccessContext CAlphaCPU::pal_access_context() const
 {
 	const auto context = m_profile.pal.access_context;

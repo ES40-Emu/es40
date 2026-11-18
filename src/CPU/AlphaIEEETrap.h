@@ -27,12 +27,11 @@
 
 #include <cstdint>
 
-class CAlphaCPU;
-
 struct AlphaIEEETrapResult
 {
   bool deliver;
   std::uint64_t flags;
+  std::uint64_t fpcr;
 };
 
 enum class AlphaIEEEInexactKind
@@ -69,8 +68,8 @@ enum class AlphaIEEETrapMasking
 
 struct AlphaIEEETrapPolicy
 {
-  // Updates family state before the caller reports a delivered arithmetic trap.
-  AlphaIEEETrapResult (*evaluate)(CAlphaCPU& cpu, std::uint64_t trap,
+  // Returns FPCR state to apply before reporting an arithmetic trap.
+  AlphaIEEETrapResult (*evaluate)(std::uint64_t fpcr, std::uint64_t trap,
       std::uint32_t instruction_enable, AlphaIEEETrapMasking masking,
       std::uint32_t instruction);
 

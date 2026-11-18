@@ -1026,7 +1026,8 @@ u64 CAlphaCPU::ieee_rpack(UFP* r, u32 ins, u32 dp, bool report_inexact)
  **/
 void CAlphaCPU::ieee_trap(u64 trap, u32 instenb, AlphaIEEETrapMasking masking, u32 ins)
 {
-	const auto result = m_profile.ieee_trap.evaluate(*this, trap, instenb, masking, ins);
+	const auto result = m_profile.ieee_trap.evaluate(state.fpcr, trap, instenb, masking, ins);
+	state.fpcr = result.fpcr;
 	if (result.deliver)
 		ARITH_TRAP(result.flags, I_GETRC(ins));
 }

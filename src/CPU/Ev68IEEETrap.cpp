@@ -78,24 +78,23 @@
 
 // EV68 IEEE exception rules extracted from AlphaCPU_ieeefloat.cpp.
 #include "StdAfx.h"
-#include "AlphaCPU.h"
+#include "cpu_defs.h"
 #include "Ev68IEEETrap.h"
 
-bool Ev68IEEETrap::denormal_input_zero(std::uint64_t fpcr)
+bool ev68_ieee_denormal_input_zero(std::uint64_t fpcr)
 {
 	return (fpcr & FPCR_DNZ) != 0;
 }
 
-std::uint64_t Ev68IEEETrap::underflow_result(bool negative)
+std::uint64_t ev68_ieee_underflow_result(bool negative)
 {
 	/* Preserve sign of zero on underflow per IEEE-754 / HRM 4.7.7.3. */
 	return std::uint64_t(negative) << FPR_V_SIGN;
 }
 
-AlphaIEEETrapResult Ev68IEEETrap::evaluate(CAlphaCPU& cpu, std::uint64_t trap,
+AlphaIEEETrapResult ev68_ieee_evaluate(std::uint64_t fpcr, std::uint64_t trap,
     std::uint32_t instenb, AlphaIEEETrapMasking masking, std::uint32_t ins)
 {
-	auto& state = cpu.state;
 	u64 real_trap = U64(0x0);
 	u64 fpcrdsb = 0;
 	if (masking == AlphaIEEETrapMasking::SoftwareCompletion)
@@ -109,14 +108,14 @@ AlphaIEEETrapResult Ev68IEEETrap::evaluate(CAlphaCPU& cpu, std::uint64_t trap,
 
 	/* HRM 4.7.6: the FPCR sticky bit is set whenever the corresponding
 	   exception is detected, regardless of whether a trap is delivered. */
-	if (~state.fpcr & (trap << 51))  // trap bit not set in FPCR
+	if (~fpcr & (trap << 51))  // trap bit not set in FPCR
 	{
-		state.fpcr |= trap << 51;     // set FPCR sticky bit (newly detected)
+		fpcr |= trap << 51;     // set FPCR sticky bit (newly detected)
 		real_trap |= trap << 41;      // SET trap bit in EXC_SUM
 	}
 	if ((instenb != 0) /* not enabled in inst? ignore */
-		&& !((ins & I_FTRP_S) && (state.fpcr & fpcrdsb)))  /* /S and disabled? ignore */real_trap |= trap; // trap bit in EXC_SUM
+		&& !((ins & I_FTRP_S) && (fpcr & fpcrdsb)))  /* /S and disabled? ignore */real_trap |= trap; // trap bit in EXC_SUM
 	if (real_trap)
-		return {true, real_trap | ((ins & I_FTRP_S) ? TRAP_SWC : 0)};
-	return {false, 0};
+		return {true, real_trap | ((ins & I_FTRP_S) ? TRAP_SWC : 0), fpcr};
+	return {false, 0, fpcr};
 }

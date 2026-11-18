@@ -266,7 +266,6 @@ class CAlphaCPU : public CSystemComponent, public CRunnable
   friend class Ev68MMU;
   friend class Ev68Interrupt;
   friend class Ev68ArithmeticTrap;
-  friend class Ev68IEEETrap;
   friend class Ev68FPStart;
   friend class Ev68CycleCounter;
   friend class Ev68Idle;

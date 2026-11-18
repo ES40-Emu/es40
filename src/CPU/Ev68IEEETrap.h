@@ -27,30 +27,22 @@
 
 #include "AlphaIEEETrap.h"
 
-class Ev68IEEETrap
+AlphaIEEETrapResult ev68_ieee_evaluate(std::uint64_t fpcr, std::uint64_t trap,
+    std::uint32_t instruction_enable, AlphaIEEETrapMasking masking,
+    std::uint32_t instruction);
+
+std::uint64_t ev68_ieee_underflow_result(bool negative);
+bool ev68_ieee_denormal_input_zero(std::uint64_t fpcr);
+
+constexpr AlphaIEEEInexactRule ev68_ieee_describe_inexact(std::uint32_t)
 {
-public:
-  static AlphaIEEETrapResult evaluate(CAlphaCPU& cpu, std::uint64_t trap,
-      std::uint32_t instruction_enable, AlphaIEEETrapMasking masking,
-      std::uint32_t instruction);
-
-  static std::uint64_t underflow_result(bool negative);
-  static bool denormal_input_zero(std::uint64_t fpcr);
-
-  static constexpr bool divide_rounding_inexact = true;
-  static constexpr std::uint32_t invalid_nonfinite_inputs =
-    static_cast<std::uint32_t>(AlphaIEEENonfiniteInput::SignalingNaN);
-
-  static constexpr AlphaIEEEInexactRule describe_inexact(std::uint32_t)
-  {
-    return {AlphaIEEEInexactKind::FpcrBitSet, 56}; // FPCR.INE already set.
-  }
-};
+  return {AlphaIEEEInexactKind::FpcrBitSet, 56}; // FPCR.INE already set.
+}
 
 inline constexpr AlphaIEEETrapPolicy kEv68IEEETrapPolicy{
-  &Ev68IEEETrap::evaluate, &Ev68IEEETrap::describe_inexact, &Ev68IEEETrap::underflow_result,
-  &Ev68IEEETrap::denormal_input_zero, Ev68IEEETrap::invalid_nonfinite_inputs,
-  Ev68IEEETrap::divide_rounding_inexact
+  &ev68_ieee_evaluate, &ev68_ieee_describe_inexact, &ev68_ieee_underflow_result,
+  &ev68_ieee_denormal_input_zero,
+  static_cast<std::uint32_t>(AlphaIEEENonfiniteInput::SignalingNaN), true
 };
 
 #endif

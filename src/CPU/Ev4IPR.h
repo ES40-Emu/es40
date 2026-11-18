@@ -61,6 +61,8 @@ constexpr AlphaIPRReadDescriptor ev4_describe_ipr_read(std::uint32_t instruction
     return {AlphaIPRReadKind::Helper, false, true};
   if (selector.banks == 0x20 && selector.index == 4) // EXC_ADDR.
     return {AlphaIPRReadKind::ExceptionAddress, false, true};
+  if (selector.banks == 0x20 && selector.index == 9) // PS.
+    return {AlphaIPRReadKind::Helper, false, true};
   if (selector.banks == 0x20 && selector.index == 10) // EXC_SUM shifts MSK, even to R31.
     return {AlphaIPRReadKind::Helper, false, false};
   if (selector.banks == 0x20 && selector.index == 11) // PAL_BASE.
@@ -78,11 +80,24 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
     return AlphaIPRWriteKind::Noop;
   if (selector.banks == 0x80) // PAL_TEMP only.
     return AlphaIPRWriteKind::Helper;
+  if (selector.banks == 0x20 && selector.index == 9) // PS.
+    return AlphaIPRWriteKind::Helper;
   if (selector.banks == 0x20 && selector.index == 10) // EXC_SUM.
     return AlphaIPRWriteKind::Helper;
   if (selector.banks == 0x20 && selector.index == 11) // PAL_BASE.
     return AlphaIPRWriteKind::Helper;
   return AlphaIPRWriteKind::Interpreter;
+}
+
+// PS reads use bits 34/1; writes use bits 4:3 (HRM 5.2.11).
+constexpr std::uint64_t ev4_read_processor_status(std::uint32_t mode)
+{
+  return (std::uint64_t(mode & 1) << 1) | (std::uint64_t(mode & 2) << 33);
+}
+
+constexpr std::uint32_t ev4_decode_processor_status(std::uint64_t value)
+{
+  return static_cast<std::uint32_t>((value >> 3) & 3);
 }
 
 // PAL_BASE holds bits 33:14 (HRM 5.2.13).

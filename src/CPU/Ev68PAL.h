@@ -30,11 +30,9 @@
 #include "AlphaPAL.h"
 #include "AlphaRegisterBank.h"
 
-namespace Ev68PAL
-{
 // EV6/EV68 PAL exception vectors.
-constexpr AlphaPALExceptionEntry exception_entry(AlphaPALException reason,
-                                                std::uint64_t current_pc)
+constexpr AlphaPALExceptionEntry ev68_pal_exception_entry(AlphaPALException reason,
+                                                          std::uint64_t current_pc)
 {
   switch (reason)
   {
@@ -56,16 +54,16 @@ constexpr AlphaPALExceptionEntry exception_entry(AlphaPALException reason,
   return {0, current_pc, true};
 }
 
-constexpr bool call_pal_valid(std::uint32_t function, std::uint32_t mode)
+constexpr bool ev68_call_pal_valid(std::uint32_t function, std::uint32_t mode)
 {
   return function <= 0x3f ? mode == 0 : function >= 0x80 && function <= 0xbf;
 }
 
 // EV68 records the CALL_PAL instruction address and writes next PC to R23,
 // or R55 when the PAL shadow bank is enabled.
-constexpr AlphaPALCallEntry call_pal_entry(std::uint32_t function,
-                                           std::uint64_t current_pc,
-                                           std::uint64_t next_pc)
+constexpr AlphaPALCallEntry ev68_call_pal_entry(std::uint32_t function,
+                                                std::uint64_t current_pc,
+                                                std::uint64_t next_pc)
 {
   const std::uint64_t offset = std::uint64_t(0x2000)
     | (std::uint64_t(function & 0x80) << 5)
@@ -74,7 +72,7 @@ constexpr AlphaPALCallEntry call_pal_entry(std::uint32_t function,
 }
 
 // EV68 HW_RET reads Rb, ignores hints/qualifiers, clears bit 1 and preserves the lock.
-constexpr AlphaPALReturnDescriptor hardware_return(std::uint32_t instruction)
+constexpr AlphaPALReturnDescriptor ev68_hardware_return(std::uint32_t instruction)
 {
   return (instruction >> 26) == 0x1e
     ? AlphaPALReturnDescriptor{true, ~std::uint64_t(2), 0, false, true,
@@ -82,7 +80,7 @@ constexpr AlphaPALReturnDescriptor hardware_return(std::uint32_t instruction)
     : AlphaPALReturnDescriptor{};
 }
 
-constexpr AlphaPALInstructionAccess hardware_instruction_access(std::uint32_t instruction)
+constexpr AlphaPALInstructionAccess ev68_hardware_instruction_access(std::uint32_t instruction)
 {
   switch (instruction >> 26)
   {
@@ -95,7 +93,6 @@ constexpr AlphaPALInstructionAccess hardware_instruction_access(std::uint32_t in
   default:
     return AlphaPALInstructionAccess::Denied;
   }
-}
 }
 
 class Ev68PALCompatibility
@@ -131,8 +128,8 @@ inline constexpr AlphaRegisterBankPolicy kEv68RegisterBankPolicy{
 };
 
 inline constexpr AlphaPALPolicy kEv68PALPolicy{
-  &Ev68PAL::exception_entry, &Ev68PAL::call_pal_valid, &Ev68PAL::call_pal_entry,
-  &Ev68PAL::hardware_instruction_access, &Ev68PAL::hardware_return,
+  &ev68_pal_exception_entry, &ev68_call_pal_valid, &ev68_call_pal_entry,
+  &ev68_hardware_instruction_access, &ev68_hardware_return,
   &Ev68PALCompatibility::base_changed, &Ev68PALAccess::context,
   &Ev68PALCompatibility::call_pal_override, &Ev68PALCompatibility::call_pal,
   &Ev68PALCompatibility::instruction_pacing, &Ev68PALCompatibility::interpreter_step,

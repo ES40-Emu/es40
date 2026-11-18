@@ -37,7 +37,7 @@ enum class AlphaHWStoreAddress
 };
 
 // Decoded hardware store, outside saved CPU state. Plain stores translate before
-// rounding down the physical write. Conditional stores use the original PA.
+// rounding down the physical write. Conditional stores use the aligned PA.
 struct AlphaHWStoreDescriptor
 {
   AlphaHWStoreAddress address = AlphaHWStoreAddress::Invalid;

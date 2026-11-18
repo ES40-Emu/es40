@@ -29,9 +29,7 @@
 
 #include "AlphaHWLoad.h"
 
-namespace Ev68HWLoad
-{
-constexpr AlphaHWLoadDescriptor decode(std::uint32_t instruction)
+constexpr AlphaHWLoadDescriptor ev68_decode_hw_load(std::uint32_t instruction)
 {
   AlphaHWLoadDescriptor load{};
   if ((instruction >> 26) != 0x1b)
@@ -56,8 +54,7 @@ constexpr AlphaHWLoadDescriptor decode(std::uint32_t instruction)
   load.discard_safe = load.address == AlphaHWLoadAddress::Physical && !load.locked;
   return load;
 }
-}
 
-inline constexpr AlphaHWLoadPolicy kEv68HWLoadPolicy{&Ev68HWLoad::decode};
+inline constexpr AlphaHWLoadPolicy kEv68HWLoadPolicy{&ev68_decode_hw_load};
 
 #endif

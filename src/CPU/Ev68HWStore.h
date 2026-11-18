@@ -29,9 +29,7 @@
 
 #include "AlphaHWStore.h"
 
-namespace Ev68HWStore
-{
-constexpr AlphaHWStoreDescriptor decode(std::uint32_t instruction)
+constexpr AlphaHWStoreDescriptor ev68_decode_hw_store(std::uint32_t instruction)
 {
   AlphaHWStoreDescriptor store{};
   if ((instruction >> 26) != 0x1f)
@@ -54,8 +52,7 @@ constexpr AlphaHWStoreDescriptor decode(std::uint32_t instruction)
   store.compilable = form == 0 || form == 1;
   return store;
 }
-}
 
-inline constexpr AlphaHWStorePolicy kEv68HWStorePolicy{&Ev68HWStore::decode};
+inline constexpr AlphaHWStorePolicy kEv68HWStorePolicy{&ev68_decode_hw_store};
 
 #endif

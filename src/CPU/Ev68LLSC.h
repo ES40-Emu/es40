@@ -28,26 +28,23 @@
 
 #include "AlphaLLSC.h"
 
-namespace Ev68LLSC
-{
 // EV6/EV68 Dcache blocks are 64 bytes; LDx_L/STx_C monitor that cache line.
-constexpr std::uint64_t match_mask = 0x00000807ffffffc0;
-constexpr std::uint64_t io_mask = 0x0000080000000000;
+inline constexpr std::uint64_t kEv68LLSCMatchMask = 0x00000807ffffffc0;
+inline constexpr std::uint64_t kEv68LLSCIOMask = 0x0000080000000000;
 
-constexpr bool matches(std::uint64_t locked_address, std::uint64_t address)
+constexpr bool ev68_llsc_matches(std::uint64_t locked_address, std::uint64_t address)
 {
-  return !((locked_address ^ address) & match_mask);
+  return !((locked_address ^ address) & kEv68LLSCMatchMask);
 }
 
 // I/O-space conditional stores have no cache line to watch; treat as held.
-constexpr bool unreserved_store(std::uint64_t address)
+constexpr bool ev68_llsc_unreserved_store(std::uint64_t address)
 {
-  return (address & io_mask) != 0;
-}
+  return (address & kEv68LLSCIOMask) != 0;
 }
 
 inline constexpr AlphaLLSCPolicy kEv68LLSCPolicy{
-  &Ev68LLSC::matches, &Ev68LLSC::unreserved_store
+  &ev68_llsc_matches, &ev68_llsc_unreserved_store
 };
 
 #endif

@@ -27,9 +27,7 @@
 
 #include "AlphaHWLoad.h"
 
-namespace Ev4HWLoad
-{
-constexpr AlphaHWLoadDescriptor decode(std::uint32_t instruction)
+constexpr AlphaHWLoadDescriptor ev4_decode_hw_load(std::uint32_t instruction)
 {
   AlphaHWLoadDescriptor load{};
   if ((instruction >> 26) != 0x1b)
@@ -49,8 +47,7 @@ constexpr AlphaHWLoadDescriptor decode(std::uint32_t instruction)
   load.compilable = !load.locked;
   return load;
 }
-}
 
-inline constexpr AlphaHWLoadPolicy kEv4HWLoadPolicy{&Ev4HWLoad::decode};
+inline constexpr AlphaHWLoadPolicy kEv4HWLoadPolicy{&ev4_decode_hw_load};
 
 #endif

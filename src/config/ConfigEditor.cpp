@@ -1697,6 +1697,11 @@ void edit_pcicard(
         else
         {
             char *p = !is_new_card && entry[i].name ? c->get_text_value(entry[i].name) : NULL;
+            // An existing NIC without a type uses pcap, even when this build
+            // chooses a different default for newly added cards.
+            if (!p && !is_new_card && !strcmp(type, "dec21143") &&
+                entry[i].name && !strcmp(entry[i].name, "type"))
+                p = (char *)"pcap";
             preset[i] = p ? p : (char *)entry[i].preset;
         }
     }
@@ -1978,6 +1983,9 @@ void validation_pci_dec21143_type(EditorField *field)
 
 #ifdef HAVE_PCAP
     choices.push_back("pcap");
+#else
+    // Keep an existing pcap backend editable without silently replacing it.
+    if (!strcasecmp(field->value.c_str(), "pcap")) choices.push_back("pcap");
 #endif
 #ifdef HAVE_TAP_NET
     choices.push_back("tap");
@@ -2035,6 +2043,19 @@ void validation_pci_dec21143_queue(EditorField *field)
     editor_number(field, EditorField::Type::Integer, 1, 1, INT_MAX);
 }
 
+static void set_nic_values(CConfigurator *c, FormEntry_t entry[], int num_entries, FormValues_t values)
+{
+    const bool is_new_card = !strcmp(c->get_myName(), PCI_SLOT_TEMP);
+    set_pcicard_values_default(c, entry, num_entries, values);
+    // New PCI cards are already in the model when the form snapshots it, so
+    // an unchanged backend default otherwise goes unwritten.
+    if (is_new_card && !c->get_text_value("type"))
+    {
+        const int idx = fentry_index(entry, num_entries, "type");
+        set_form_value(c, idx, "type", values[idx], true);
+    }
+}
+
 // Form for DEC21143 PCI NIC
 void edit_pci_dec21143(const char *title)
 {
@@ -2061,6 +2082,9 @@ void edit_pci_dec21143(const char *title)
 #endif
          "type",
          "How should this NIC connect to the host network?"
+#ifndef HAVE_PCAP
+         "\nAn existing pcap setting can be kept, but pcap is unavailable in this build."
+#endif
 #ifdef HAVE_PCAP
          "\n"
          "'pcap' captures/injects packets on an existing host adapter\n"
@@ -2170,7 +2194,7 @@ void edit_pci_dec21143(const char *title)
 #endif
     };
 
-    edit_pcicard(title, "dec21143", entry, ARRAY_SIZE(entry));
+    edit_pcicard(title, "dec21143", entry, ARRAY_SIZE(entry), NULL, set_nic_values);
 #endif // defined(HAVE_PCAP) || defined(HAVE_TAP_NET) || defined(HAVE_VMNET) || defined(HAVE_SLIRP)
 }
 

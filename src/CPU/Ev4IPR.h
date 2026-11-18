@@ -48,7 +48,7 @@ constexpr bool ev4_ipr_ignored(Ev4IPRSelector selector, bool pal_mode)
     && (selector.index == 0 || selector.index == 1 || selector.index == 3));
 }
 
-// Other register banks await their execution handlers.
+// Unimplemented registers stay with the interpreter.
 constexpr AlphaIPRReadDescriptor ev4_describe_ipr_read(std::uint32_t instruction,
                                                       bool pal_mode)
 {
@@ -59,6 +59,8 @@ constexpr AlphaIPRReadDescriptor ev4_describe_ipr_read(std::uint32_t instruction
     return {AlphaIPRReadKind::Noop, false, true};
   if (selector.banks == 0x80) // PAL_TEMP only.
     return {AlphaIPRReadKind::Helper, false, true};
+  if (selector.banks == 0x20 && selector.index == 10) // EXC_SUM shifts MSK, even to R31.
+    return {AlphaIPRReadKind::Helper, false, false};
   return {AlphaIPRReadKind::Unsupported, false, false};
 }
 
@@ -71,6 +73,8 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
   if (ev4_ipr_ignored(selector, pal_mode))
     return AlphaIPRWriteKind::Noop;
   if (selector.banks == 0x80) // PAL_TEMP only.
+    return AlphaIPRWriteKind::Helper;
+  if (selector.banks == 0x20 && selector.index == 10) // EXC_SUM.
     return AlphaIPRWriteKind::Helper;
   return AlphaIPRWriteKind::Interpreter;
 }

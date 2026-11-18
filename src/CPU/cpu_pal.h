@@ -88,11 +88,17 @@
 
 #define DO_HW_MFPR do {                                                       \
   const auto describe = m_profile.ipr_read.describe;                          \
-  if (!describe || describe(ins).kind != AlphaIPRReadKind::Noop)              \
+  if (!describe || describe(ins, (state.current_pc & 1) != 0).kind             \
+      != AlphaIPRReadKind::Noop)                                             \
     state.r[REG_1] = read_ipr(ins);                                           \
 } while (0)
 
-#define DO_HW_MTPR write_ipr(ins, state.r[REG_2], AlphaIPRWriteContext::Interpreter);
+#define DO_HW_MTPR do {                                                       \
+  const auto describe = m_profile.ipr_write.describe;                         \
+  if (!describe || describe(ins, (state.current_pc & 1) != 0)                  \
+      != AlphaIPRWriteKind::Noop)                                            \
+    write_ipr(ins, state.r[REG_2], AlphaIPRWriteContext::Interpreter);          \
+} while (0)
 
 // Family return rules feed the shared executor after the hardware-access check.
 #define DO_HW_RET do {                                                         \

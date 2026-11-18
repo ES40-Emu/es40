@@ -90,7 +90,7 @@ void Ev68IPR::write(CAlphaCPU& cpu, std::uint32_t instruction, std::uint64_t val
   const auto function = selector(instruction);
   // Keep writes that may change dispatch context out of a compiled frame.
   if (context == AlphaIPRWriteContext::Compiled
-      && describe_write(instruction) == AlphaIPRWriteKind::Interpreter)
+      && describe_write(instruction, true) == AlphaIPRWriteKind::Interpreter)
     return;
 
   auto& state = cpu.state;

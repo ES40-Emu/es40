@@ -53,19 +53,20 @@ struct AlphaIPRReadDescriptor
 
 // Family read behavior, copied with the immutable CPU profile. Every callback
 // receives the complete instruction; the family owns selector/bank decoding.
+// Descriptors use the executing instruction's PAL mode, including compiled blocks.
 struct AlphaIPRReadPolicy
 {
   std::uint64_t (*read)(CAlphaCPU& cpu, std::uint32_t instruction);
-  AlphaIPRReadDescriptor (*describe)(std::uint32_t instruction);
+  AlphaIPRReadDescriptor (*describe)(std::uint32_t instruction, bool pal_mode);
 };
 
-// The family determines which writes the JIT can perform in a compiled frame.
+// The family selects write behavior and compiled eligibility.
 enum class AlphaIPRWriteKind
 {
   Interpreter,
   Helper,
   HelperTerminator,
-  Noop
+  Noop // No write callback; privilege checks still apply.
 };
 
 // Compiled execution may retain caches that the interpreter normally flushes.
@@ -81,7 +82,7 @@ struct AlphaIPRWritePolicy
 {
   void (*write)(CAlphaCPU& cpu, std::uint32_t instruction, std::uint64_t value,
                 AlphaIPRWriteContext context);
-  AlphaIPRWriteKind (*describe)(std::uint32_t instruction);
+  AlphaIPRWriteKind (*describe)(std::uint32_t instruction, bool pal_mode);
 };
 
 #endif

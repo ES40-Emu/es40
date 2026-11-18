@@ -41,7 +41,7 @@ public:
   static void write(CAlphaCPU& cpu, std::uint32_t instruction, std::uint64_t value,
                     AlphaIPRWriteContext context);
 
-  static constexpr AlphaIPRReadDescriptor describe(std::uint32_t instruction)
+  static constexpr AlphaIPRReadDescriptor describe(std::uint32_t instruction, bool)
   {
     const auto function = selector(instruction);
     if ((function & 0xc0) == 0x40)
@@ -65,7 +65,7 @@ public:
     }
   }
 
-  static constexpr AlphaIPRWriteKind describe_write(std::uint32_t instruction)
+  static constexpr AlphaIPRWriteKind describe_write(std::uint32_t instruction, bool)
   {
     const auto function = selector(instruction);
     // ASN changes require interpreter dispatch; the other PCTX fields can compile.

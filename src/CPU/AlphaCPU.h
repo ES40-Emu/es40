@@ -767,7 +767,7 @@ private:
   // CALL_PAL OPCDEC trap (privileged func in user mode): GO_PAL(OPCDEC) incl. cpu_clear_lock.
   static void jit_opcdec(CAlphaCPU* cpu, u64 cpc);
   // HW_MFPR (PALmode): return the IPR named in ins; the caller (compiled codegen) writes Ra.
-  static u64 jit_hw_mfpr(CAlphaCPU* cpu, u32 ins, u64 cur);
+  static u64 jit_hw_mfpr(CAlphaCPU* cpu, u32 ins, bool pal_mode);
   // HW_MTPR (PALmode): dispatch a family-approved compiled write of value (Rb).
   static void jit_hw_mtpr(CAlphaCPU* cpu, u32 instruction, u64 value);
   static void jit_clear_lock(CAlphaCPU* cpu);

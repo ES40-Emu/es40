@@ -316,7 +316,7 @@ SafeOp classify(uint32_t ins, bool pal_block, const AlphaIPRReadPolicy& ipr_read
       if (!pal_block || !pal.hardware_instruction_access
           || !alpha_pal_instruction_compilable(pal.hardware_instruction_access(ins)))
         return OP_NONE;
-      const auto descriptor = ipr_read.describe(ins);
+      const auto descriptor = ipr_read.describe(ins, pal_block);
       if (descriptor.kind == AlphaIPRReadKind::Unsupported) return OP_NONE;
       if (descriptor.kind == AlphaIPRReadKind::Noop) return OP_NOP;
       if (((ins >> 21) & 0x1f) == 31 && descriptor.discard_safe) return OP_NOP;
@@ -339,7 +339,7 @@ SafeOp classify(uint32_t ins, bool pal_block, const AlphaIPRReadPolicy& ipr_read
       if (!pal_block || !pal.hardware_instruction_access
           || !alpha_pal_instruction_compilable(pal.hardware_instruction_access(ins)))
         return OP_NONE;
-      switch (ipr_write.describe(ins)) {
+      switch (ipr_write.describe(ins, pal_block)) {
         case AlphaIPRWriteKind::Helper: return OP_HW_MTPR;
         case AlphaIPRWriteKind::HelperTerminator: return OP_HW_MTPR_TERM;
         case AlphaIPRWriteKind::Noop: return OP_NOP;
@@ -1740,7 +1740,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         // and verification retain the helper. Destination routing honors PALshadow.
         if (op == OP_HW_MFPR) {
 #ifndef JIT_VERIFY
-            const auto descriptor = m_profile.ipr_read.describe(ins);
+            const auto descriptor = m_profile.ipr_read.describe(ins, pal_block);
             uint32_t field_offset = 0;
             bool direct_field = ra != 31 && descriptor.discard_safe;
             switch (descriptor.kind) {
@@ -1755,7 +1755,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                 a.mov(x86::rax, x86::qword_ptr(x86::rbp, field_offset));
             else
 #endif
-                emit_call(hw_mfpr_helper, { {JA_CPU, 0}, {JA_I32, (uint64_t)ins}, {JA_GPZ, (uint64_t)ra} });  // -> RAX = IPR value
+                emit_call(hw_mfpr_helper, { {JA_CPU, 0}, {JA_I32, (uint64_t)ins}, {JA_I32, (uint64_t)pal_block} });  // -> RAX = IPR value
             if (ra != 31)
                 mov_to_reg(ra, x86::rax);                      // Ra = value (reg() applies the PALshadow remap)
             // A family may require the read's side effect even when Ra discards it.

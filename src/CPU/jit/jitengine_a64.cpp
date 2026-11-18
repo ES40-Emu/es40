@@ -1255,7 +1255,7 @@ static constexpr A64OpClass classify_a64_op(uint32_t ins, bool pal_block,
       if (!pal_block || !pal.hardware_instruction_access
           || !alpha_pal_instruction_compilable(pal.hardware_instruction_access(ins)))
         break;
-      switch (ipr_write.describe(ins)) {
+      switch (ipr_write.describe(ins, pal_block)) {
         case AlphaIPRWriteKind::Helper:
         case AlphaIPRWriteKind::Noop:
           return {A64OpKind::kHwMtpr, A64TerminatorKind::kNone, 0, 0};
@@ -1463,7 +1463,7 @@ static constexpr A64OpClass classify_a64_op(uint32_t ins, bool pal_block,
       if (!pal_block || !pal.hardware_instruction_access
           || !alpha_pal_instruction_compilable(pal.hardware_instruction_access(ins)))
         break;
-      if (ipr_read.describe(ins).kind != AlphaIPRReadKind::Unsupported)
+      if (ipr_read.describe(ins, pal_block).kind != AlphaIPRReadKind::Unsupported)
         return {A64OpKind::kHwMfpr, A64TerminatorKind::kNone, 0, 0};
       break;
     }
@@ -4555,7 +4555,7 @@ static A64OpEmitReceipt emit_a64_hw_mtpr(A64EmitContext& context,
                                          const A64DecodedOp& op)
 {
   using namespace asmjit;
-  if (context.profile.ipr_write.describe(op.ins) == AlphaIPRWriteKind::Noop)
+  if (context.profile.ipr_write.describe(op.ins, context.pal_block) == AlphaIPRWriteKind::Noop)
     return a64_completed_op_receipt(op);   // no-op IPRs
 
   const Error err = emit_a64_helper_call(context.assembler, context.offsets,
@@ -5572,7 +5572,7 @@ static A64OpEmitReceipt emit_a64_hw_mfpr(A64EmitContext& context,
   using RA = CJitEngine::RegAlloc;
   using namespace asmjit;
 
-  const auto descriptor = context.profile.ipr_read.describe(op.ins);
+  const auto descriptor = context.profile.ipr_read.describe(op.ins, context.pal_block);
   if (descriptor.kind == AlphaIPRReadKind::Noop)
     return a64_completed_op_receipt(op);
   const A64GprRoute wa =
@@ -5610,7 +5610,7 @@ static A64OpEmitReceipt emit_a64_hw_mfpr(A64EmitContext& context,
       context.regs, context.pal_shadow, context.helpers.hw_mfpr_helper,
       {{A64CallArgKind::kCpu, 0},
        {A64CallArgKind::kImm32, op.ins},
-       {A64CallArgKind::kGuestOrZero, op.ra}});
+       {A64CallArgKind::kImm32, context.pal_block}});
   if (err != Error::kOk) return a64_completed_op_receipt(op, err);
 
   if (wa.kind == A64GprRouteKind::kPinned)
@@ -5792,10 +5792,10 @@ static A64OpEmitReceipt emit_a64_planned_op(A64EmitContext& context,
     case A64OpKind::kLoadAddress:
       emits_nothing = op.ra == 31; break;
     case A64OpKind::kHwMfpr:
-      emits_nothing = context.profile.ipr_read.describe(op.ins).kind == AlphaIPRReadKind::Noop;
+      emits_nothing = context.profile.ipr_read.describe(op.ins, context.pal_block).kind == AlphaIPRReadKind::Noop;
       break;
     case A64OpKind::kHwMtpr: {
-      emits_nothing = context.profile.ipr_write.describe(op.ins) == AlphaIPRWriteKind::Noop;
+      emits_nothing = context.profile.ipr_write.describe(op.ins, context.pal_block) == AlphaIPRWriteKind::Noop;
       break;
     }
     default: break;

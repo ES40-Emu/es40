@@ -1843,7 +1843,7 @@ void CAlphaCPU::jit_run(int budget)
 				// forms compile too); RPCC (0xC000) only when it has a GPR dest (Ra!=31).
 				const bool is_miscrd = (opc == 0x18) && (miscfn == 0xE000 || miscfn == 0xF000 || (miscfn == 0xC000 && lra != 31));
 				const auto ipr_read = (executes && opc == 0x19)
-					? m_profile.ipr_read.describe(ins) : AlphaIPRReadDescriptor{};
+					? m_profile.ipr_read.describe(ins, (state.pc & 1) != 0) : AlphaIPRReadDescriptor{};
 				const bool is_ipr_replay = (opc == 0x19)
 					&& ipr_read.kind != AlphaIPRReadKind::Noop && ipr_read.replay
 					&& (lra != 31 || !ipr_read.discard_safe);
@@ -3005,15 +3005,14 @@ void CAlphaCPU::jit_opcdec(CAlphaCPU* cpu, u64 cpc)
 }
 
 /* HW_MFPR (PALmode): the family decodes the complete instruction. */
-u64 CAlphaCPU::jit_hw_mfpr(CAlphaCPU* cpu, u32 ins, u64 cur)
+u64 CAlphaCPU::jit_hw_mfpr(CAlphaCPU* cpu, u32 ins, bool pal_mode)
 {
 	// Replay reads of asynchronous state from the interpreter reference pass.
-	if (cpu->m_jit_vreplay && cpu->m_profile.ipr_read.describe(ins).replay)
+	if (cpu->m_jit_vreplay && cpu->m_profile.ipr_read.describe(ins, pal_mode).replay)
 	{
 		u32 i;
 		return cpu->jit_verify_load_slot(i) ? cpu->m_jit_vlog[i] : 0;
 	}
-	(void)cur;
 	return cpu->read_ipr(ins);
 }
 

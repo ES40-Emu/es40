@@ -523,7 +523,7 @@ void validation_disk_type(EditorField *field)
 
 void validation_disk_file(EditorField *field)
 {
-    // can be filename, device name, or empty for ramdisk
+    // Can be a filename, device name, or empty for ramdisks and file-backed removable media.
     /* NYI */
 }
 
@@ -556,15 +556,17 @@ void validation_disk_autocreate_format(EditorField *field)
     editor_choices(field, choices);
 }
 
-bool check_add_disks(FormEntry_t entry[], int num_entries, FormValues_t values)
+static bool check_disk_values(FormEntry_t entry[], int num_entries, FormValues_t values, bool is_floppy)
 {
     int idx = fentry_index(entry, num_entries, "Type");
     char *disk_type = values[idx];
 
-    // FIXME: No check for non-empty file name for changeable media (floppy and cd-com drives)
+    // File-backed CD-ROM and floppy drives may start without media.
+    const bool removable_file = !strcasecmp(disk_type, "file") &&
+        (is_floppy || !strcmp(values[fentry_index(entry, num_entries, "Harddisk or CD-ROM")], "cd-rom"));
     idx = fentry_index(entry, num_entries, "File / Device name");
     if ((!strcasecmp(disk_type, "file") || !strcasecmp(disk_type, "device")) &&
-        !strcmp(values[idx], ""))
+        !strcmp(values[idx], "") && !removable_file)
     {
         string msg = string("No ") + disk_type + " name has been specified.";
         show_text("Error", msg.c_str());
@@ -581,7 +583,7 @@ bool check_add_disks(FormEntry_t entry[], int num_entries, FormValues_t values)
     const char *format = values[fentry_index(entry, num_entries, "Image format (auto, raw, qcow2)")];
     const char *create_format = values[fentry_index(entry, num_entries, "Autocreate format (raw, qcow2)")];
     const bool non_raw = (strcmp(format, "auto") && strcmp(format, "raw")) || strcmp(create_format, "raw");
-    if (non_raw && (strcasecmp(disk_type, "file") ||
+    if (non_raw && (is_floppy || strcasecmp(disk_type, "file") ||
         !strcmp(values[fentry_index(entry, num_entries, "Harddisk or CD-ROM")], "cd-rom")))
     {
         show_text("Error", "Non-raw image formats require a file-backed hard disk.");
@@ -591,17 +593,29 @@ bool check_add_disks(FormEntry_t entry[], int num_entries, FormValues_t values)
     return true;
 }
 
+bool check_add_disks(FormEntry_t entry[], int num_entries, FormValues_t values)
+{
+    return check_disk_values(entry, num_entries, values, false);
+}
+
+static bool check_add_floppy_disks(FormEntry_t entry[], int num_entries, FormValues_t values)
+{
+    return check_disk_values(entry, num_entries, values, true);
+}
+
 /**
  * Add disk 'disk_name' to the controller 'parent' of the configuration.
  **/
 void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
 {
+    const bool is_floppy = !strcasecmp(parent->get_myName(), "fdc0");
     FormEntry_t entry[] = {
         {"Type", "file", NULL, // no name - config entry myValue
          "Disks can be emulated in several ways.",
          validation_disk_type},
         {"File / Device name", "", NULL, // "file" | "device",
          "Enter the path to the file or device to use for this disk.\n"
+         "Leave blank for an empty file-backed CD-ROM or floppy drive.\n"
          "This parameter is ignored for type 'ramdisk'.",
          validation_disk_file},
         {"Image format (auto, raw, qcow2)", "auto", "format",
@@ -685,7 +699,8 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
             if (!strcmp(entry[i].label, "File / Device name"))
             {
                 if (!strcasecmp(disk_type, "file") || !strcasecmp(disk_type, "device"))
-                    preset[i] = c->get_text_value(disk_type, "?");
+                    preset[i] = c->get_text_value(disk_type,
+                        !strcasecmp(disk_type, "file") && (is_floppy || c->get_bool_value("cdrom")) ? "" : "?");
                 else
                     preset[i] = (char *)entry[i].preset;
                 continue;
@@ -707,7 +722,8 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
         preset[i] = (char *)entry[i].preset;
     }
 
-    values = show_form(title, entry, preset, num_entries, check_add_disks);
+    values = show_form(title, entry, preset, num_entries,
+                       is_floppy ? check_add_floppy_disks : check_add_disks);
 
     if (values != NULL)
     {
@@ -717,23 +733,11 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
 
         idx = fentry_index(entry, num_entries, "Harddisk or CD-ROM");
         bool is_cdrom = !strcmp(values[idx], "cd-rom");
-        bool is_floppy = !strcasecmp(parent->get_myName(), "fdc0");
-        const char *format = values[fentry_index(entry, num_entries, "Image format (auto, raw, qcow2)")];
-        const char *create_format = values[fentry_index(entry, num_entries, "Autocreate format (raw, qcow2)")];
-        if (is_floppy && ((strcmp(format, "auto") && strcmp(format, "raw")) ||
-                         strcmp(create_format, "raw")))
-        {
-            show_text("Error", "Floppy drives require raw images.");
-            for (int i = 0; i < num_entries; ++i)
-                free(values[i]);
-            free(values);
-            free(preset);
-            return;
-        }
         if (is_cdrom && (is_ramdisk || is_floppy))
         {
             free(values[idx]);
             values[idx] = strdup("disk");
+            is_cdrom = false;
         }
 
         idx = fentry_index(entry, num_entries, "Read-only?");
@@ -783,7 +787,10 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
 
             if (!strcmp(entry[i].label, "File / Device name") &&
                 (!strcasecmp(disk_type, "file") || !strcasecmp(disk_type, "device")))
-                set_form_value(c, i, disk_type, values[i], type_changed);
+            {
+                if (values[i][0]) set_form_value(c, i, disk_type, values[i], type_changed);
+                else if (type_changed || changed_fields[i]) c->remove_value((char *)disk_type);
+            }
 
             if (!strcmp(entry[i].label, "Autocreate size"))
             {

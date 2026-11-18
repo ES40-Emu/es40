@@ -80,7 +80,15 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
     return AlphaIPRWriteKind::Helper;
   if (selector.banks == 0x20 && selector.index == 10) // EXC_SUM.
     return AlphaIPRWriteKind::Helper;
+  if (selector.banks == 0x20 && selector.index == 11) // PAL_BASE.
+    return AlphaIPRWriteKind::Helper;
   return AlphaIPRWriteKind::Interpreter;
+}
+
+// PAL_BASE holds bits 33:14 (HRM 5.2.13).
+constexpr std::uint64_t ev4_normalize_pal_base(std::uint64_t value)
+{
+  return value & UINT64_C(0x00000003ffffc000);
 }
 
 // PAL_TEMP reset contents are architecturally undefined.

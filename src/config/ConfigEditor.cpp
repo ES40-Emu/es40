@@ -665,7 +665,7 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
 
         if (!strcmp(entry[i].label, "Harddisk or CD-ROM") && c != nullptr)
         {
-            bool is_cdrom = !strcmp(c->get_text_value(entry[i].name, STR_NO), STR_YES);
+            bool is_cdrom = c->get_bool_value(entry[i].name);
             preset[i] = (char *)(is_cdrom ? "cd-rom" : "disk");
             continue;
         }
@@ -1502,7 +1502,7 @@ void edit_ali(const char *title)
     char *p;
     idx = fentry_index(entry, num_entries, "Console Output"); // name == "vga_console"
     if (c != nullptr && (p = c->get_text_value(entry[idx].name)) != NULL)
-        preset[idx] = (char *)(!strcmp(p, STR_YES) ? "graphics" : "serial");
+        preset[idx] = (char *)(c->get_bool_value(entry[idx].name) ? "graphics" : "serial");
     else
         preset[idx] = (char *)entry[idx].preset;
 
@@ -2865,11 +2865,10 @@ bool main_menu(void)
             c = sys0->find_child(PCI_SLOT_ALI);
             if (c != nullptr)
             {
-                char *vga_console = c->get_text_value("vga_console", STR_NO);
-                if (!strcmp(vga_console, STR_YES) && vgacard == nullptr)
+                if (c->get_bool_value("vga_console") && vgacard == nullptr)
                 {
                     show_text("Error",
-                              "You set vga_console=" STR_YES " (in the ALI settings)\n"
+                              "Graphics console output is enabled (in the ALI settings)\n"
                               "without configuring a VGA card (on the PCI bus).");
                     check_failed = true;
                 }

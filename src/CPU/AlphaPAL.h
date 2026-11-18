@@ -55,6 +55,7 @@ struct AlphaPALExceptionEntry
   std::uint64_t offset;    // Exception vector offset, withuot PALmode bit 0.
   std::uint64_t saved_pc;  // Value for EXC_ADDR.
   bool clear_lock;
+  bool valid = true;      // False for unsupported family exception causes.
 };
 
 struct AlphaPALCallEntry

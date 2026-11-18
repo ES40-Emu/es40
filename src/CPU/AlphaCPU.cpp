@@ -944,7 +944,13 @@ bool CAlphaCPU::pal_hardware_instruction_valid(u32 instruction) const
 
 AlphaPALExceptionEntry CAlphaCPU::pal_exception_entry(AlphaPALException reason, u64 pc) const
 {
-	return m_profile.pal.exception_entry(reason, pc);
+	const auto describe = m_profile.pal.exception_entry;
+	if (!describe)
+		FAILURE(Configuration, "Missing CPU PAL exception policy");
+	const auto entry = describe(reason, pc);
+	if (!entry.valid)
+		FAILURE(Configuration, "Unsupported CPU PAL exception");
+	return entry;
 }
 
 u64 CAlphaCPU::pal_exception_offset(AlphaPALException reason) const

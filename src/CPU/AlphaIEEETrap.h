@@ -87,6 +87,8 @@ struct AlphaIEEETrapPolicy
   // Input classes requesting INV; delivery remains with evaluate.
   std::uint32_t invalid_nonfinite_inputs =
     static_cast<std::uint32_t>(AlphaIEEENonfiniteInput::SignalingNaN);
+
+  bool divide_rounding_inexact = true; // DIV rounding reports INE.
 };
 
 constexpr bool alpha_ieee_nonfinite_input_invalid(
@@ -105,6 +107,13 @@ inline AlphaIEEEInexactRule alpha_ieee_inexact_rule(
   if (rule.kind == AlphaIEEEInexactKind::FpcrBitSet && rule.fpcr_bit < 64)
     return rule;
   return {};
+}
+
+inline AlphaIEEEInexactRule alpha_ieee_divide_inexact_rule(
+    const AlphaIEEETrapPolicy& policy, std::uint32_t instruction)
+{
+  return policy.divide_rounding_inexact ? alpha_ieee_inexact_rule(policy, instruction)
+    : AlphaIEEEInexactRule{AlphaIEEEInexactKind::Noop, 0};
 }
 
 #endif

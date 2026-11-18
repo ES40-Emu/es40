@@ -5275,7 +5275,9 @@ static A64OpEmitReceipt emit_a64_flti_arith(A64EmitContext& context,
 
   const Label bail = a.new_label(), cont = a.new_label();
   const A64FpTState prev = sgl ? A64FpTState{} : context.prev_fp_t;
-  const auto inexact_rule = alpha_ieee_inexact_rule(context.profile.ieee_trap, op.ins);
+  const auto inexact_rule = k == 3
+      ? alpha_ieee_divide_inexact_rule(context.profile.ieee_trap, op.ins)
+      : alpha_ieee_inexact_rule(context.profile.ieee_trap, op.ins);
   const bool invalid_infinity = alpha_ieee_nonfinite_input_invalid(
       context.profile.ieee_trap, AlphaIEEENonfiniteInput::Infinity);
   Error err = Error::kOk;

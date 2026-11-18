@@ -398,7 +398,7 @@ private:
   bool            ieee_denormal_input_zero() const;
   int             ieee_unpack(u64 op, UFP* r, u32 ins);
   void            ieee_norm(UFP* r);
-  u64             ieee_rpack(UFP* r, u32 ins, u32 dp);
+  u64             ieee_rpack(UFP* r, u32 ins, u32 dp, bool report_inexact = true);
   void            ieee_trap(u64 trap, u32 instenb, AlphaIEEETrapMasking masking, u32 ins);
   u64             vax_ldf(u32 op);
   u64             vax_ldg(u64 op);

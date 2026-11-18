@@ -1843,7 +1843,9 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         // denormal result (overflow/invalid/div-zero/underflow). 
         if (op == OP_ADDT || op == OP_SUBT || op == OP_MULT || op == OP_DIVT) {
             const bool dyn = (((ins >> 11) & 3) == 3);      // /D: rounding is FPCR<59:58>, checked at runtime
-            const auto inexact_rule = alpha_ieee_inexact_rule(m_profile.ieee_trap, ins);
+            const auto inexact_rule = op == OP_DIVT
+                ? alpha_ieee_divide_inexact_rule(m_profile.ieee_trap, ins)
+                : alpha_ieee_inexact_rule(m_profile.ieee_trap, ins);
             const bool invalid_infinity = alpha_ieee_nonfinite_input_invalid(
                 m_profile.ieee_trap, AlphaIEEENonfiniteInput::Infinity);
             Label bail = a.new_label(), cont = a.new_label();
@@ -2109,13 +2111,16 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         // op, re-widen). Same bail policy as the T-float arith -- FP-off, /D-not-nearest, denormal
         // operand, an unsatisfied inexact rule, or an Inf/NaN/denormal single result.
         if (op == OP_ADDS || op == OP_SUBS || op == OP_MULS || op == OP_DIVS) {
+            const auto inexact_rule = op == OP_DIVS
+                ? alpha_ieee_divide_inexact_rule(m_profile.ieee_trap, ins)
+                : alpha_ieee_inexact_rule(m_profile.ieee_trap, ins);
             const bool invalid_infinity = alpha_ieee_nonfinite_input_invalid(
                 m_profile.ieee_trap, AlphaIEEENonfiniteInput::Infinity);
             const bool dyn = (((ins >> 11) & 3) == 3);
             Label bail = a.new_label(), cont = a.new_label();
             a.cmp(x86::byte_ptr(x86::rbp, m_off.jit_fp_enabled), imm(0)); a.je(bail);          // FPSTART
             emit_fp_start_summary();
-            emit_inexact_gate(bail, alpha_ieee_inexact_rule(m_profile.ieee_trap, ins));
+            emit_inexact_gate(bail, inexact_rule);
             if (dyn) fp_dyn_bail(bail);
             a.movq(x86::xmm0, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)ra));   // f[Fa]
             a.movq(x86::xmm1, x86::qword_ptr(x86::rbp, m_off.f_base + 8u * (uint32_t)rb));   // f[Fb]

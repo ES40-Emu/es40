@@ -772,7 +772,7 @@ u64 CAlphaCPU::ieee_fdiv(u64 s1, u64 s2, u32 ins, u32 dp)
 	a.frac = ufdiv64(a.frac, b.frac, 55, &sticky);  /* divide */
 	ieee_norm(&a);            /* normalize */
 	a.frac = a.frac | sticky; /* insert sticky */
-	return ieee_rpack(&a, ins, dp); /* round and pack */
+	return ieee_rpack(&a, ins, dp, m_profile.ieee_trap.divide_rounding_inexact); /* round and pack */
 }
 
 /**
@@ -932,31 +932,23 @@ void CAlphaCPU::ieee_norm(UFP* r)
  *
  * Much of the treachery of the IEEE standard is buried here:
  *   - Rounding modes (chopped, +infinity, nearest, -infinity).
- *   - Inexact (set if there are any rounding bits, regardless of rounding).
+ *   - Inexact (reported for rounding bits when enabled).
  *   - Overflow (result is infinite if rounded, max if not).
  *   - Underflow (no denorms!).
  *   .
  *
- * Underflow handling is particularly complicated:
- *   - Result is always 0.
- *   - UNF and INE are always set in FPCR.
- *   - If /U is set,
- *      - If /S is clear, trap.
- *      - If /S is set, UNFD is set, but UNFZ is clear, ignore UNFD and
- *        trap, because the hardware cannot produce denormals.
- *      - If /S is set, UNFD is set, and UNFZ is set, do not trap.
- *      .
- *   - If /SUI is set, and INED is clear, trap
- *   .
+ * Underflow reports UNF, then INE if requested, before selecting the family's
+ * result. Exception delivery and FPCR updates follow the family policy.
  *
  * \param r   Pointer to the unpacked-floating-point UFP structure
  *            to be packed.
  * \param ins The instruction currently being executed. Used to properly
  *            handle exceptions and to determine the rounding mode.
  * \param dp  DT_S for S-floating or DT_T for T-floating.
+ * \param report_inexact Whether rounding reports INE.
  * \return    IEEE floating.
  **/
-u64 CAlphaCPU::ieee_rpack(UFP* r, u32 ins, u32 dp)
+u64 CAlphaCPU::ieee_rpack(UFP* r, u32 ins, u32 dp, bool report_inexact)
 {
 	static const u64  stdrnd[2] = { UF_SRND, UF_TRND };
 	static const u64  infrnd[2] = { UF_SINF, UF_TINF };
@@ -987,12 +979,13 @@ u64 CAlphaCPU::ieee_rpack(UFP* r, u32 ins, u32 dp)
 		r->exp = r->exp + 1;
 	}
 
-	if (rndbits) /* inexact? */
+	if (report_inexact && rndbits) /* inexact? */
 		ieee_trap(TRAP_INE, Q_SUI(ins), AlphaIEEETrapMasking::SoftwareCompletion, ins);  /* set inexact */
 	if (r->exp > expmax[dp])
 	{ /* ovflo? */
 		ieee_trap(TRAP_OVF, 1, AlphaIEEETrapMasking::SoftwareCompletion, ins);           /* set overflow trap */
-		ieee_trap(TRAP_INE, Q_SUI(ins), AlphaIEEETrapMasking::SoftwareCompletion, ins);  /* set inexact */
+		if (report_inexact)
+			ieee_trap(TRAP_INE, Q_SUI(ins), AlphaIEEETrapMasking::SoftwareCompletion, ins);  /* set inexact */
 		if (rndadd)  /* did we round? */
 			return(r->sign ? FMINF : FPINF);  /* return infinity */
 		/* ARM 4.7.7.6: use the destination format's largest finite value. */
@@ -1004,7 +997,8 @@ u64 CAlphaCPU::ieee_rpack(UFP* r, u32 ins, u32 dp)
 		/* UNFD (with /S) disables the underflow trap; UNDZ separately controls
 		   flush-to-zero result. The two bits are independent per HRM 4.7.7.1. */
 		ieee_trap(TRAP_UNF, ins & I_FTRP_U, AlphaIEEETrapMasking::SoftwareCompletion, ins);
-		ieee_trap(TRAP_INE, Q_SUI(ins), AlphaIEEETrapMasking::SoftwareCompletion, ins);          /* set inexact */
+		if (report_inexact)
+			ieee_trap(TRAP_INE, Q_SUI(ins), AlphaIEEETrapMasking::SoftwareCompletion, ins);          /* set inexact */
 		const auto result = m_profile.ieee_trap.underflow_result;
 		return result ? result(r->sign != 0) : ((u64)r->sign) << FPR_V_SIGN;
 	} /* underflow to zero */

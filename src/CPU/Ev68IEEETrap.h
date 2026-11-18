@@ -37,6 +37,7 @@ public:
   static std::uint64_t underflow_result(bool negative);
   static bool denormal_input_zero(std::uint64_t fpcr);
 
+  static constexpr bool divide_rounding_inexact = true;
   static constexpr std::uint32_t invalid_nonfinite_inputs =
     static_cast<std::uint32_t>(AlphaIEEENonfiniteInput::SignalingNaN);
 
@@ -48,7 +49,8 @@ public:
 
 inline constexpr AlphaIEEETrapPolicy kEv68IEEETrapPolicy{
   &Ev68IEEETrap::evaluate, &Ev68IEEETrap::describe_inexact, &Ev68IEEETrap::underflow_result,
-  &Ev68IEEETrap::denormal_input_zero, Ev68IEEETrap::invalid_nonfinite_inputs
+  &Ev68IEEETrap::denormal_input_zero, Ev68IEEETrap::invalid_nonfinite_inputs,
+  Ev68IEEETrap::divide_rounding_inexact
 };
 
 #endif

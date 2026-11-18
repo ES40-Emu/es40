@@ -27,6 +27,31 @@
 
 #include "AlphaPAL.h"
 
+// EV4 PAL entry offsets; reservations remain with PALcode and system logic.
+constexpr AlphaPALExceptionEntry ev4_pal_exception_entry(AlphaPALException reason,
+                                                        std::uint64_t current_pc)
+{
+  const auto saved_pc = current_pc & ~std::uint64_t(2);
+  switch (reason)
+  {
+  case AlphaPALException::Reset:                       return {0x0000, saved_pc, false};
+  // EXC_ADDR[1] marks the restart PC as correct for MCHK/ARITH.
+  case AlphaPALException::MachineCheck:                return {0x0020, saved_pc | 2, false};
+  // Arithmetic completes with no trap shadow.
+  case AlphaPALException::Arithmetic:                  return {0x0060, (saved_pc + 4) | 2, false};
+  case AlphaPALException::Interrupt:                   return {0x00e0, saved_pc, false};
+  case AlphaPALException::DataFault:                    return {0x01e0, saved_pc, false};
+  case AlphaPALException::InstructionTlbMiss:           return {0x03e0, saved_pc, false};
+  case AlphaPALException::InstructionAccessViolation:  return {0x07e0, saved_pc, false};
+  case AlphaPALException::DataTlbMiss:
+    return {(current_pc & 1) ? 0x09e0u : 0x08e0u, saved_pc, false};
+  case AlphaPALException::Unaligned:                   return {0x11e0, saved_pc, false};
+  case AlphaPALException::OpcodeDecode:                return {0x13e0, saved_pc, false};
+  case AlphaPALException::FloatingPointDisabled:       return {0x17e0, saved_pc, false};
+  default: return {0, saved_pc, false, false};
+  }
+}
+
 constexpr bool ev4_call_pal_valid(std::uint32_t function, std::uint32_t mode)
 {
   return function <= 0x3f ? mode == 0 : function >= 0x80 && function <= 0xbf;

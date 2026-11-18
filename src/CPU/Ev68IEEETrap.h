@@ -31,7 +31,7 @@ class Ev68IEEETrap
 {
 public:
   static AlphaIEEETrapResult evaluate(CAlphaCPU& cpu, std::uint64_t trap,
-      std::uint32_t instruction_enable, std::uint64_t fpcr_disable,
+      std::uint32_t instruction_enable, AlphaIEEETrapMasking masking,
       std::uint32_t instruction);
 
   static std::uint64_t underflow_result(bool negative);

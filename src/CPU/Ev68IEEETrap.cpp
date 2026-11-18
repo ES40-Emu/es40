@@ -93,10 +93,19 @@ std::uint64_t Ev68IEEETrap::underflow_result(bool negative)
 }
 
 AlphaIEEETrapResult Ev68IEEETrap::evaluate(CAlphaCPU& cpu, std::uint64_t trap,
-    std::uint32_t instenb, std::uint64_t fpcrdsb, std::uint32_t ins)
+    std::uint32_t instenb, AlphaIEEETrapMasking masking, std::uint32_t ins)
 {
 	auto& state = cpu.state;
 	u64 real_trap = U64(0x0);
+	u64 fpcrdsb = 0;
+	if (masking == AlphaIEEETrapMasking::SoftwareCompletion)
+	{
+		if (trap & TRAP_INV) fpcrdsb |= FPCR_INVD;
+		if (trap & TRAP_DZE) fpcrdsb |= FPCR_DZED;
+		if (trap & TRAP_OVF) fpcrdsb |= FPCR_OVFD;
+		if (trap & TRAP_UNF) fpcrdsb |= FPCR_UNFD;
+		if (trap & TRAP_INE) fpcrdsb |= FPCR_INED;
+	}
 
 	/* HRM 4.7.6: the FPCR sticky bit is set whenever the corresponding
 	   exception is detected, regardless of whether a trap is delivered. */

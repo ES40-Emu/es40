@@ -377,7 +377,7 @@ s32 CAlphaCPU::ieee_fcmp(u64 s1, u64 s2, u32 ins, u32 trap_nan)
 	if ((ftpa == UFT_NAN) || (ftpb == UFT_NAN))
 	{ /* NaN involved? */
 		if (trap_nan)
-			ieee_trap(TRAP_INV, 1, FPCR_INVD, ins);
+			ieee_trap(TRAP_INV, 1, AlphaIEEETrapMasking::SoftwareCompletion, ins);
 		return 2; // FIXED: Return 2 for unordered, not +1
 	} /* force failure */
 
@@ -448,7 +448,7 @@ u64 CAlphaCPU::ieee_cvtfi(u64 op, u32 ins)
 	ftpa = ieee_unpack(op, &a, ins);  /* unpack */
 	if (!Q_FINITE(ftpa)) /* inf, NaN, dnorm? */
 	{
-		ieee_trap(TRAP_INV, 1, FPCR_INVD, ins); /* inv operation */
+		ieee_trap(TRAP_INV, 1, AlphaIEEETrapMasking::SoftwareCompletion, ins); /* inv operation */
 		return 0;
 	}
 
@@ -503,9 +503,9 @@ u64 CAlphaCPU::ieee_cvtfi(u64 op, u32 ins)
 	if (ovf)
 		/* Pass `ins` (not 0) so I_GETRC(ins) reports the real destination
 		   register and ins & I_FTRP_S sets TRAP_SWC correctly on /S. */
-		ieee_trap(TRAP_IOV, ins & I_FTRP_V, 0, ins);  /* overflow trap */
+		ieee_trap(TRAP_IOV, ins & I_FTRP_V, AlphaIEEETrapMasking::None, ins);  /* overflow trap */
 	if (ovf || sticky) /* ovflo or round? */
-		ieee_trap(TRAP_INE, Q_SUI(ins), FPCR_INED, ins);
+		ieee_trap(TRAP_INE, Q_SUI(ins), AlphaIEEETrapMasking::SoftwareCompletion, ins);
 	return(a.sign ? NEG_Q(a.frac) : a.frac);
 }
 
@@ -561,7 +561,7 @@ u64 CAlphaCPU::ieee_fadd(u64 s1, u64 s2, u32 ins, u32 dp, bool sub)
 	{   /* B = inf? */
 		if ((ftpa == UFT_INF) && (a.sign ^ b.sign))
 		{ /* eff sub of inf? */
-			ieee_trap(TRAP_INV, 1, FPCR_INVD, ins); /* inv op trap */
+			ieee_trap(TRAP_INV, 1, AlphaIEEETrapMasking::SoftwareCompletion, ins); /* inv op trap */
 			return CQNAN;
 		}           /* canonical NaN */
 
@@ -678,7 +678,7 @@ u64 CAlphaCPU::ieee_fmul(u64 s1, u64 s2, u32 ins, u32 dp)
 	{   /* zero operand? */
 		if ((ftpa == UFT_INF) || (ftpb == UFT_INF))
 		{ /* 0 * inf? */
-			ieee_trap(TRAP_INV, 1, FPCR_INVD, ins); /* inv op trap */
+			ieee_trap(TRAP_INV, 1, AlphaIEEETrapMasking::SoftwareCompletion, ins); /* inv op trap */
 			return CQNAN;
 		} /* canonical NaN */
 
@@ -737,7 +737,7 @@ u64 CAlphaCPU::ieee_fdiv(u64 s1, u64 s2, u32 ins, u32 dp)
 	{   /* B = inf? */
 		if (ftpa == UFT_INF)
 		{ /* inf/inf? */
-			ieee_trap(TRAP_INV, 1, FPCR_INVD, ins); /* inv op trap */
+			ieee_trap(TRAP_INV, 1, AlphaIEEETrapMasking::SoftwareCompletion, ins); /* inv op trap */
 			return CQNAN;
 		} /* canonical NaN */
 
@@ -756,11 +756,11 @@ u64 CAlphaCPU::ieee_fdiv(u64 s1, u64 s2, u32 ins, u32 dp)
 	{   /* B = 0? */
 		if (ftpa == UFT_ZERO)
 		{ /* 0/0? */
-			ieee_trap(TRAP_INV, 1, FPCR_INVD, ins); /* inv op trap */
+			ieee_trap(TRAP_INV, 1, AlphaIEEETrapMasking::SoftwareCompletion, ins); /* inv op trap */
 			return CQNAN;
 		} /* canonical NaN */
 
-		ieee_trap(TRAP_DZE, 1, FPCR_DZED, ins); /* div by 0 trap */
+		ieee_trap(TRAP_DZE, 1, AlphaIEEETrapMasking::SoftwareCompletion, ins); /* div by 0 trap */
 		return(a.sign ? FMINF : FPINF);
 	} /* return inf */
 
@@ -803,7 +803,7 @@ u64 CAlphaCPU::ieee_sqrt(u64 op, u32 ins, u32 dp)
 		return op;        /* +infinity? */
 	if (b.sign)
 	{ /* minus? */
-		ieee_trap(TRAP_INV, 1, FPCR_INVD, ins); /* signal inv op */
+		ieee_trap(TRAP_INV, 1, AlphaIEEETrapMasking::SoftwareCompletion, ins); /* signal inv op */
 		return CQNAN;
 	}
 
@@ -864,10 +864,10 @@ int CAlphaCPU::ieee_unpack(u64 op, UFP* r, u32 ins)
 		/* EV68 denormal input operands take an *unmaskable* trap when
 		   FPCR[DNZ] is clear (HRM A.11: "denormal input operands for
 		   arithmetic operations produce an unmaskable denormal trap").
-		   Pass fpcrdsb = 0 so neither the /S qualifier nor FPCR[INVD]
+		   Select None so neither the /S qualifier nor FPCR[INVD]
 		   can suppress it -- same idiom as the unmaskable integer-
 		   overflow trap in ieee_cvtfi(). */
-		ieee_trap(TRAP_INV, 1, 0, ins); /* signal denormal-operand trap */
+		ieee_trap(TRAP_INV, 1, AlphaIEEETrapMasking::None, ins); /* signal denormal-operand trap */
 		return UFT_DENORM;
 	}
 
@@ -877,7 +877,7 @@ int CAlphaCPU::ieee_unpack(u64 op, UFP* r, u32 ins)
 			: (r->frac & QNAN) ? AlphaIEEENonfiniteInput::QuietNaN
 			: AlphaIEEENonfiniteInput::SignalingNaN;
 		if (alpha_ieee_nonfinite_input_invalid(m_profile.ieee_trap, input))
-			ieee_trap(TRAP_INV, 1, FPCR_INVD, ins); /* signal inv op */
+			ieee_trap(TRAP_INV, 1, AlphaIEEETrapMasking::SoftwareCompletion, ins); /* signal inv op */
 		return r->frac == 0 ? UFT_INF : UFT_NAN;
 	}
 
@@ -988,11 +988,11 @@ u64 CAlphaCPU::ieee_rpack(UFP* r, u32 ins, u32 dp)
 	}
 
 	if (rndbits) /* inexact? */
-		ieee_trap(TRAP_INE, Q_SUI(ins), FPCR_INED, ins);  /* set inexact */
+		ieee_trap(TRAP_INE, Q_SUI(ins), AlphaIEEETrapMasking::SoftwareCompletion, ins);  /* set inexact */
 	if (r->exp > expmax[dp])
 	{ /* ovflo? */
-		ieee_trap(TRAP_OVF, 1, FPCR_OVFD, ins);           /* set overflow trap */
-		ieee_trap(TRAP_INE, Q_SUI(ins), FPCR_INED, ins);  /* set inexact */
+		ieee_trap(TRAP_OVF, 1, AlphaIEEETrapMasking::SoftwareCompletion, ins);           /* set overflow trap */
+		ieee_trap(TRAP_INE, Q_SUI(ins), AlphaIEEETrapMasking::SoftwareCompletion, ins);  /* set inexact */
 		if (rndadd)  /* did we round? */
 			return(r->sign ? FMINF : FPINF);  /* return infinity */
 		/* ARM 4.7.7.6: use the destination format's largest finite value. */
@@ -1003,8 +1003,8 @@ u64 CAlphaCPU::ieee_rpack(UFP* r, u32 ins, u32 dp)
 	{ /* underflow? */
 		/* UNFD (with /S) disables the underflow trap; UNDZ separately controls
 		   flush-to-zero result. The two bits are independent per HRM 4.7.7.1. */
-		ieee_trap(TRAP_UNF, ins & I_FTRP_U, FPCR_UNFD, ins);
-		ieee_trap(TRAP_INE, Q_SUI(ins), FPCR_INED, ins);          /* set inexact */
+		ieee_trap(TRAP_UNF, ins & I_FTRP_U, AlphaIEEETrapMasking::SoftwareCompletion, ins);
+		ieee_trap(TRAP_INE, Q_SUI(ins), AlphaIEEETrapMasking::SoftwareCompletion, ins);          /* set inexact */
 		const auto result = m_profile.ieee_trap.underflow_result;
 		return result ? result(r->sign != 0) : ((u64)r->sign) << FPR_V_SIGN;
 	} /* underflow to zero */
@@ -1026,14 +1026,13 @@ u64 CAlphaCPU::ieee_rpack(UFP* r, u32 ins, u32 dp)
  * \param trap    A bitmask in which the bits are set that correspond to
  *                the exception that occurred.
  * \param instenb True if the exception is enabled in the instruction.
- * \param fpcrdsb A bitmask containing the bits that, if set in the floating-
- *                point control register (fpcr), disable the trap.
+ * \param masking Whether family exception-disable controls may apply.
  * \param ins     The instruction currently being executed. Used to properly
  *                set some registers for the trap to be handled.
  **/
-void CAlphaCPU::ieee_trap(u64 trap, u32 instenb, u64 fpcrdsb, u32 ins)
+void CAlphaCPU::ieee_trap(u64 trap, u32 instenb, AlphaIEEETrapMasking masking, u32 ins)
 {
-	const auto result = m_profile.ieee_trap.evaluate(*this, trap, instenb, fpcrdsb, ins);
+	const auto result = m_profile.ieee_trap.evaluate(*this, trap, instenb, masking, ins);
 	if (result.deliver)
 		ARITH_TRAP(result.flags, I_GETRC(ins));
 }

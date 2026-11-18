@@ -399,7 +399,7 @@ private:
   int             ieee_unpack(u64 op, UFP* r, u32 ins);
   void            ieee_norm(UFP* r);
   u64             ieee_rpack(UFP* r, u32 ins, u32 dp);
-  void            ieee_trap(u64 trap, u32 instenb, u64 fpcrdsb, u32 ins);
+  void            ieee_trap(u64 trap, u32 instenb, AlphaIEEETrapMasking masking, u32 ins);
   u64             vax_ldf(u32 op);
   u64             vax_ldg(u64 op);
   u32             vax_stf(u64 op);

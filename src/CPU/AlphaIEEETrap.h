@@ -60,11 +60,18 @@ enum class AlphaIEEENonfiniteInput : std::uint32_t
   SignalingNaN = 4
 };
 
+// Whether /S may use family exception-disable controls.
+enum class AlphaIEEETrapMasking
+{
+  None,
+  SoftwareCompletion
+};
+
 struct AlphaIEEETrapPolicy
 {
   // Updates family state before the caller reports a delivered arithmetic trap.
   AlphaIEEETrapResult (*evaluate)(CAlphaCPU& cpu, std::uint64_t trap,
-      std::uint32_t instruction_enable, std::uint64_t fpcr_disable,
+      std::uint32_t instruction_enable, AlphaIEEETrapMasking masking,
       std::uint32_t instruction);
 
   // Pure rule for effect-free INE skips (enable=0); keep paired with evaluate.

@@ -627,6 +627,17 @@ static bool check_add_floppy_disks(FormEntry_t entry[], int num_entries, FormVal
     return check_disk_values(entry, num_entries, values, true);
 }
 
+static CConfigurator *disk_in_slot(CConfigurator *controller, const char *name)
+{
+    if (controller)
+        for (int i = 0; i < controller->editor_child_count(); ++i)
+        {
+            CConfigurator *child = controller->editor_child(i);
+            if (!strcasecmp(child->get_myName(), name)) return child;
+        }
+    return nullptr;
+}
+
 /**
  * Add disk 'disk_name' to the controller 'parent' of the configuration.
  **/
@@ -703,7 +714,7 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
     int idx;
     char *disk_type;
 
-    c = parent->find_child(disk_name);
+    c = disk_in_slot(parent, disk_name);
 
     preset = (FormValues_t)calloc(num_entries, sizeof(char *));
 
@@ -871,54 +882,106 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
     free(preset);
 }
 
+struct DiskMenuSlot
+{
+    string name, label;
+    string details = "";
+};
+
+static string short_menu_text(string text, size_t limit)
+{
+    for (char& c : text)
+        if (static_cast<unsigned char>(c) < 32 || c == 127) c = ' ';
+    if (text.size() <= limit) return text;
+    size_t end = limit > 3 ? limit - 3 : 0;
+    // Do not cut a UTF-8 character in the middle.
+    while (end && (static_cast<unsigned char>(text[end]) & 0xc0) == 0x80) --end;
+    return text.substr(0, end) + "...";
+}
+
+static string disk_menu_summary(CConfigurator *disk, bool floppy, size_t limit = 0)
+{
+    if (!disk) return "No drive configured";
+    const char *type = disk->get_myValue();
+    string summary;
+    if (!strcasecmp(type, "ramdisk"))
+        summary = string("RAM disk - ") + disk->get_text_value("size", "size not configured");
+    else if (!strcasecmp(type, "file") || !strcasecmp(type, "device"))
+    {
+        const bool file = !strcasecmp(type, "file");
+        const bool cdrom = !floppy && disk->get_bool_value("cdrom");
+        string kind = floppy ? "Floppy" : cdrom ? "CD-ROM" : "Hard disk";
+        if (!file) kind += " (host device)";
+        if (!cdrom && disk->get_bool_value("read_only")) kind += " [RO]";
+        const string path = disk->get_text_value(file ? "file" : "device", "");
+        if (path.empty())
+            summary = kind + (file && (floppy || cdrom) ? " - no media" :
+                              file ? " - no image configured" : " - no device configured");
+        else
+        {
+            string suffix;
+            const char *size = disk->get_text_value("autocreate_size", "");
+            if (file && strtoull(size, nullptr, 10) > 0)
+                suffix = string(" (create if missing, ") + (limit ? short_menu_text(size, 12) : size) + ")";
+            string shown_path = path;
+            if (limit)
+            {
+                // Recognize Unix, Windows and OpenVMS directory syntax.
+                const size_t separator = shown_path.find_last_of("/\\]>");
+                if (separator != string::npos) shown_path.erase(0, separator + 1);
+                const size_t fixed = kind.size() + 3 + suffix.size();
+                shown_path = short_menu_text(shown_path, limit > fixed + 3 ? limit - fixed : 3);
+            }
+            summary = kind + " - " + shown_path + suffix;
+        }
+    }
+    else
+        summary = string("Drive type: ") + type;
+    return limit ? short_menu_text(summary, limit) : summary;
+}
+
+static int show_disk_menu(const char *title, CConfigurator *controller,
+                         const vector<DiskMenuSlot>& slots, bool floppy,
+                         const char *action, const char *action_help, int y, int x)
+{
+    vector<string> labels, descriptions;
+    for (const auto& slot : slots)
+    {
+        CConfigurator *disk = disk_in_slot(controller, slot.name.c_str());
+        const string prefix = slot.label + ": ";
+        labels.push_back(prefix + disk_menu_summary(disk, floppy, 68 - prefix.size()));
+        string help = slot.label + " (" + slot.name + ")\n" + disk_menu_summary(disk, floppy);
+        if (!slot.details.empty()) help += "\n" + slot.details;
+        if (disk && !strcasecmp(disk->get_myValue(), "file"))
+        {
+            help += string("\nImage format: ") + disk->get_text_value("format", "auto");
+            if (*disk->get_text_value("autocreate_size", ""))
+                help += string("\nCreate format: ") + disk->get_text_value("autocreate_format", "raw");
+        }
+        descriptions.push_back(help);
+    }
+    vector<MenuEntry_t> entry;
+    for (size_t i = 0; i < slots.size(); ++i)
+        entry.push_back({labels[i].c_str(), descriptions[i].c_str(), NULL});
+    entry.push_back({action, action_help, NULL});
+    return show_menu(title, entry.data(), static_cast<int>(entry.size()), y, x);
+}
+
 /**
  * Add SCSI disks (up to ID 'max_scsi_id') to the controller 'parent' of the configuration.
  **/
 void add_scsi_disks(const char *title, const int max_scsi_id, CConfigurator *parent)
 {
-    vector<MenuEntry_t> entry;
-
-    entry.push_back({"none", "Stop adding disks", NULL});
-
+    vector<DiskMenuSlot> slots;
     for (int i = 0; i < max_scsi_id; ++i)
-    {
-        string desc = "Target " + i2s(i);
-        string text = "disk0." + i2s(i);
-        CConfigurator *c = parent->find_child(text.c_str());
-        if (c != nullptr)
-            text = text + "  " + c->get_myValue();
-        else
-            text = text + "  -";
-        entry.push_back({strdup(text.c_str()), strdup(desc.c_str()), NULL});
-    }
-    int num_entries = entry.size();
-
+        slots.push_back({"disk0." + i2s(i), "Target " + i2s(i)});
     while (true)
     {
-        int sel = show_menu(title, entry.data(), num_entries, MENU_4TH_LEVEL);
-
-        if (sel <= 0)
-            break;
-
-        char disk_name[sizeof("disk0.xx")];
-        strncpy(disk_name, entry[sel].text, sizeof(disk_name));
-        disk_name[(max_scsi_id < 10) ? 7 : 8] = '\0';
-
-        string subtitle = string(title) + ": " + disk_name;
-        add_disks(subtitle.c_str(), disk_name, parent);
-
-        // Update display of disk entry
-        CConfigurator *c = parent->find_child(disk_name);
-        free((void *)entry[sel].text);
-        string text = disk_name + string("  ") + (c ? c->get_myValue() : "-");
-        entry[sel].text = strdup(text.c_str());
-    }
-
-    // Clean up
-    for (int i = 1; i <= max_scsi_id; ++i)
-    {
-        free((void *)entry[i].text);
-        free((void *)entry[i].description);
+        const int sel = show_disk_menu(title, parent, slots, false,
+            "Done", "Finish configuring drives.", MENU_4TH_LEVEL);
+        if (sel < 0 || sel >= static_cast<int>(slots.size())) break;
+        const string subtitle = string(title) + ": " + slots[sel].label;
+        add_disks(subtitle.c_str(), slots[sel].name.c_str(), parent);
     }
 }
 
@@ -1193,28 +1256,55 @@ void edit_gui_x11(const char *title) { edit_gui_settings(title, "X11"); }
 // Menu for GUI
 void edit_gui(const char *title)
 {
-    MenuEntry_t entry[] = {
-        {"null", "Headless graphics output without a GUI.", NULL}
+    struct GuiChoice
+    {
+        const char *backend;
+        const char *label;
+        const char *description;
+        SelectFuncPtr settings;
+    };
+    const GuiChoice choices[] = {
+        {"null", "Headless graphics (null)", "Headless graphics output without a window.", NULL}
 #if defined(HAVE_SDL)
         ,
-        {"sdl", "Simple Directmedia Layer. Preferred GUI mechanism.", edit_gui_sdl}
+        {"sdl", "SDL", "Simple Directmedia Layer graphics window.", edit_gui_sdl}
 #endif
 #if defined(HAVE_X11)
         ,
-        {"X11", "Unix X-Windows GUI support.", edit_gui_x11}
+        {"X11", "X11", "Unix X-Windows graphics window.", edit_gui_x11}
 #endif
 #if defined(_WIN32)
         ,
-        {"win32", "Native Windows GUI.", edit_gui_win32}
+        {"win32", "Native Windows", "Native Windows graphics window.", edit_gui_win32}
 #endif
     };
-    int num_entries = ARRAY_SIZE(entry);
-
-    int sel = show_menu(title, entry, num_entries, MENU_2ND_LEVEL);
-
-    if (sel == 0)
+    const int num_entries = ARRAY_SIZE(choices);
+    while (true)
     {
-        edit_node(theConfig, theConfig->find_child("gui"), "gui", "null");
+        CConfigurator *current = theConfig->find_child("gui");
+        const char *backend = current ? current->get_myValue() : NULL;
+        bool available = false;
+        vector<string> labels(num_entries);
+        vector<MenuEntry_t> entry(num_entries);
+        for (int i = 0; i < num_entries; ++i)
+        {
+            const bool selected = backend && !strcasecmp(backend, choices[i].backend);
+            available = available || selected;
+            labels[i] = choices[i].label;
+            if (selected) labels[i] += " [current]";
+            // Dispatch below so the current marker refreshes after settings close.
+            entry[i] = {labels[i].c_str(), choices[i].description, NULL};
+        }
+        string menu_title = title;
+        if (!current) menu_title += " - Not configured";
+        else if (!available) menu_title += string(" - Current: ") + (backend ? backend : "") + " (unavailable)";
+
+        const int sel = show_menu(menu_title.c_str(), entry.data(), num_entries, MENU_2ND_LEVEL);
+        if (sel < 0 || sel >= num_entries) return;
+        if (choices[sel].settings)
+            choices[sel].settings(choices[sel].label);
+        else
+            edit_node(theConfig, theConfig->find_child("gui"), "gui", choices[sel].backend);
     }
 }
 
@@ -2200,10 +2290,10 @@ void edit_pci_dec21143(const char *title)
 
 void add_pci_sym53c810_disks(CConfigurator *c)
 {
-    add_scsi_disks("Add disks", 7, c);
+    add_scsi_disks("Configure drives", 7, c);
 }
 
-// Menu for Symbios 53c819 SCSI PCI card
+// Menu for Symbios 53C810 SCSI PCI card
 void edit_pci_sym53c810(const char *title)
 {
     FormEntry_t entry[] = {
@@ -2267,7 +2357,7 @@ void set_pci_lsi53c1020_values(CConfigurator *c, FormEntry_t entry[], int num_en
 
 void add_pci_lsi53c1020_disks(CConfigurator *c)
 {
-    add_scsi_disks("Add disks", 16, c);
+    add_scsi_disks("Configure drives", 16, c);
 }
 
 // Form for LSI 53c1020 SCSI PCI card settings
@@ -2378,8 +2468,8 @@ void edit_pci(const char *title)
         {"List PCI bus", "Show a list of devices on the PCI bus.", show_pcislots},
         {"Add VGA", "Add a VGA card", edit_pci_vga},
         {"Add NIC", "Add a DEC 21143 Network Interface Card", edit_pci_dec21143},
-        {"Add Symbios SCSI", "Add a Symbios 53C810 narrow SCSI controller (most tested/proven for OS boot/install)", edit_pci_sym53c810},
-        {"Add LSI SCSI", "Add a LSI 53C1020 Fusion-MPT Ultra320 SCSI controller (NOT SRM BOOT CAPABLE!)", edit_pci_lsi53c1020},
+        {"Add Symbios 53C810 SCSI", "Add a Symbios 53C810 narrow SCSI controller (most tested/proven for OS boot/install)", edit_pci_sym53c810},
+        {"Add LSI 53C1020 SCSI", "Add a LSI 53C1020 Fusion-MPT Ultra320 SCSI controller (NOT SRM BOOT CAPABLE!)", edit_pci_lsi53c1020},
         {"Add ES1370 Audio", "Add an Ensoniq AudioPCI ES1370 sound card (works only with Windows NT 4.0 guest)", edit_pci_es1370},
         {"Add ES1371 Audio", "Add an Ensoniq AudioPCI ES1371 sound card with an AC'97 codec (requires an ES1371 guest driver)", edit_pci_es1371}
     };
@@ -2667,30 +2757,26 @@ void edit_serial(const char *title)
 // Menu for floppy disks
 void edit_floppy(const char *title)
 {
-    MenuEntry_t entry[] = {
-        {"empty", "Don't add drives to the floppy controller", NULL},
-        {"disk0.0", "Drive A: / DVA0:", NULL},
-        {"disk0.1", "Drive B: / DVA1:", NULL}};
-    int num_entries = ARRAY_SIZE(entry);
-
-    CConfigurator *c = sys0->find_child("fdc0");
-    if (c == nullptr)
-        c = new CConfigurator(sys0, (char *)"fdc0", (char *)"floppy");
-
+    const vector<DiskMenuSlot> slots = {
+        {"disk0.0", "Drive A", "SRM device: DVA0:"},
+        {"disk0.1", "Drive B", "SRM device: DVA1:"}};
     while (true)
     {
-        int sel = show_menu(title, entry, num_entries, MENU_2ND_LEVEL);
-
-        if (sel < 0)
-            break;
-        if (sel == 0)
+        CConfigurator *c = disk_in_slot(sys0, "fdc0");
+        const int sel = show_disk_menu(title, c, slots, true, "Remove all floppy drives",
+            "Remove all drives from the floppy controller. Image files are kept.\n"
+            "To keep a drive attached without media, configure it and choose Empty drive.", MENU_2ND_LEVEL);
+        if (sel < 0) break;
+        if (sel == static_cast<int>(slots.size()))
         {
-            c->remove_all_children();
+            if (c) c->remove_all_children();
             break;
         }
-
-        string subtitle = string(title) + ": " + entry[sel].text;
-        add_disks(subtitle.c_str(), entry[sel].text, c);
+        const bool new_controller = !c;
+        if (new_controller) c = new CConfigurator(sys0, (char *)"fdc0", (char *)"floppy");
+        const string subtitle = string(title) + ": " + slots[sel].label;
+        add_disks(subtitle.c_str(), slots[sel].name.c_str(), c);
+        if (new_controller && !c->editor_child_count()) sys0->remove_child("fdc0");
     }
 }
 
@@ -2727,6 +2813,7 @@ void edit_ide_settings(const char *title)
 
     if (values != NULL)
     {
+        c = edit_node(sys0, c, PCI_SLOT_IDE, "ali_ide");
         idx = fentry_index(entry, num_entries, "dma?");
         set_form_value(c, idx, entry[idx].name, values[idx]);
 
@@ -2741,30 +2828,25 @@ void edit_ide_settings(const char *title)
 // Menu for IDE bus disks
 void edit_ide_disks(const char *title)
 {
-    MenuEntry_t entry[] = {
-        {"empty", "Don't add disks to the IDE controller (recommended).", NULL},
-        {"disk0.0", "primary master", NULL},
-        {"disk0.1", "primary slave", NULL},
-        {"disk1.0", "secondary master", NULL},
-        {"disk1.1", "secondary slave", NULL}};
-    int num_entries = ARRAY_SIZE(entry);
-
-    CConfigurator *c = sys0->find_child(PCI_SLOT_IDE);
-
+    const vector<DiskMenuSlot> slots = {
+        {"disk0.0", "Primary master"}, {"disk0.1", "Primary slave"},
+        {"disk1.0", "Secondary master"}, {"disk1.1", "Secondary slave"}};
     while (true)
     {
-        int sel = show_menu(title, entry, num_entries, MENU_3RD_LEVEL);
-
-        if (sel < 0)
-            break;
-        if (sel == 0)
+        CConfigurator *c = disk_in_slot(sys0, PCI_SLOT_IDE);
+        const int sel = show_disk_menu(title, c, slots, false, "Remove all IDE drives",
+            "Remove all drives from the IDE controller. Image files are kept.", MENU_3RD_LEVEL);
+        if (sel < 0) break;
+        if (sel == static_cast<int>(slots.size()))
         {
-            c->remove_all_children();
+            if (c) c->remove_all_children();
             break;
         }
-
-        string subtitle = string(title) + ": " + entry[sel].text;
-        add_disks(subtitle.c_str(), entry[sel].text, c);
+        const bool new_controller = !c;
+        if (new_controller) c = new CConfigurator(sys0, (char *)PCI_SLOT_IDE, (char *)"ali_ide");
+        const string subtitle = string(title) + ": " + slots[sel].label;
+        add_disks(subtitle.c_str(), slots[sel].name.c_str(), c);
+        if (new_controller && !c->editor_child_count()) sys0->remove_child(PCI_SLOT_IDE);
     }
 }
 
@@ -2773,12 +2855,8 @@ void edit_ide(const char *title)
 {
     MenuEntry_t entry[] = {
         {"Settings", "Edit the IDE controller settings.", edit_ide_settings},
-        {"Add disks", "Add disks to the IDE controller.", edit_ide_disks}};
+        {"Configure drives", "Add or edit drives on the IDE controller.", edit_ide_disks}};
     int num_entries = ARRAY_SIZE(entry);
-
-    CConfigurator *c = sys0->find_child(PCI_SLOT_IDE);
-    if (c == nullptr)
-        c = new CConfigurator(sys0, (char *)PCI_SLOT_IDE, (char *)"ali_ide");
 
     show_menu(title, entry, num_entries, MENU_2ND_LEVEL);
 }

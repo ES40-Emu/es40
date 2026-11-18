@@ -82,8 +82,22 @@ class ConfigDocumentParser
     size_t pos = 0;
     bool line_has_content = false;
     ConfigDocumentToken token;
+    [[noreturn]] void fail(size_t offset) const
+    {
+        size_t line = 1;
+        for (size_t i = 0; i < offset; ++i)
+        {
+            if (source[i] == '\r')
+            {
+                ++line;
+                if (i + 1 < offset && source[i + 1] == '\n') ++i;
+            }
+            else if (source[i] == '\n') ++line;
+        }
+        throw std::runtime_error("Invalid configuration syntax near line " + std::to_string(line));
+    }
     [[noreturn]] void fail() const
-    { throw std::runtime_error("Invalid configuration syntax near byte " + std::to_string(pos)); }
+    { fail(token.begin); }
     ConfigDocumentToken next()
     {
         for (;;)
@@ -101,7 +115,7 @@ class ConfigDocumentParser
             if (source.compare(pos, 2, "/*") == 0)
             {
                 size_t end = source.find("*/", pos + 2);
-                if (end == std::string::npos) fail();
+                if (end == std::string::npos) fail(pos);
                 if (source.find_first_of("\r\n", pos) < end) line_has_content = false;
                 pos = end + 2; continue;
             }
@@ -116,9 +130,9 @@ class ConfigDocumentParser
             t.kind = 'v';
             for (;;)
             {
-                if (pos == source.size()) fail();
+                if (pos == source.size()) fail(t.begin);
                 char ch = source[pos++];
-                if (ch == '\r' || ch == '\n' || ch == '\0') fail();
+                if (ch == '\r' || ch == '\n' || ch == '\0') fail(pos - 1);
                 if (ch != '"') { t.value += ch; continue; }
                 if (pos < source.size() && source[pos] == '"') { t.value += '"'; ++pos; }
                 else break;
@@ -128,7 +142,7 @@ class ConfigDocumentParser
         {
             t.kind = 'v'; t.value += c;
             while (pos < source.size() && bare(std::string(1, source[pos]))) t.value += source[pos++];
-            if (!bare(t.value)) fail();
+            if (!bare(t.value)) fail(t.begin);
         }
         t.end = pos;
         return t;

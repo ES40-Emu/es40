@@ -59,8 +59,12 @@ constexpr AlphaIPRReadDescriptor ev4_describe_ipr_read(std::uint32_t instruction
     return {AlphaIPRReadKind::Noop, false, true};
   if (selector.banks == 0x80) // PAL_TEMP only.
     return {AlphaIPRReadKind::Helper, false, true};
+  if (selector.banks == 0x20 && selector.index == 4) // EXC_ADDR.
+    return {AlphaIPRReadKind::ExceptionAddress, false, true};
   if (selector.banks == 0x20 && selector.index == 10) // EXC_SUM shifts MSK, even to R31.
     return {AlphaIPRReadKind::Helper, false, false};
+  if (selector.banks == 0x20 && selector.index == 11) // PAL_BASE.
+    return {AlphaIPRReadKind::PalBase, false, true};
   return {AlphaIPRReadKind::Unsupported, false, false};
 }
 

@@ -764,15 +764,23 @@ u64 CAlphaCPU::ieee_fdiv(u64 s1, u64 s2, u32 ins, u32 dp)
 		return(a.sign ? FMINF : FPINF);
 	} /* return inf */
 
+	u64 result;
 	if (ftpa == UFT_ZERO)
-		return(a.sign ? FMZERO : FPZERO); /* A = 0? */
-	a.exp = a.exp - b.exp + T_BIAS;     /* unbiased exp */
-	a.frac = a.frac >> 1; /* allow 1 bit left */
-	b.frac = b.frac >> 1;
-	a.frac = ufdiv64(a.frac, b.frac, 55, &sticky);  /* divide */
-	ieee_norm(&a);            /* normalize */
-	a.frac = a.frac | sticky; /* insert sticky */
-	return ieee_rpack(&a, ins, dp, m_profile.ieee_trap.divide_rounding_inexact); /* round and pack */
+		result = a.sign ? FMZERO : FPZERO; /* A = 0? */
+	else
+	{
+		a.exp = a.exp - b.exp + T_BIAS;     /* unbiased exp */
+		a.frac = a.frac >> 1; /* allow 1 bit left */
+		b.frac = b.frac >> 1;
+		a.frac = ufdiv64(a.frac, b.frac, 55, &sticky);  /* divide */
+		ieee_norm(&a);            /* normalize */
+		a.frac = a.frac | sticky; /* insert sticky */
+		result = ieee_rpack(&a, ins, dp, m_profile.ieee_trap.divide_rounding_inexact); /* round and pack */
+	}
+	if (m_profile.ieee_trap.divide_inexact_completion && Q_SUI(ins)
+		&& Q_FINITE(ftpa) && Q_FINITE(ftpb))
+		ieee_trap(TRAP_INE, 1, AlphaIEEETrapMasking::SoftwareCompletion, ins);
+	return result;
 }
 
 /**

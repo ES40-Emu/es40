@@ -544,6 +544,22 @@ void validation_disk_autocreate_size(EditorField *field)
     editor_pattern(field, "^ *([0-9]+[KkMmGg])? *$");
 }
 
+static void validation_floppy_media(EditorField *field)
+{
+    const char *choices[] = {"Empty drive", "Use an existing image", "Create a new image", NULL};
+    editor_choices(field, choices);
+}
+
+static void validation_floppy_capacity(EditorField *field)
+{
+    const char *choices[] = {"360K", "720K", "1200K", "1440K", "2880K", NULL};
+    if (field->value.empty()) field->value = "1440K";
+    editor_choices(field, choices);
+    // Keep an existing custom capacity available without rewriting its spelling.
+    if (find(field->choices.begin(), field->choices.end(), field->value) == field->choices.end())
+        field->choices.push_back(field->value);
+}
+
 void validation_disk_format(EditorField *field)
 {
     const char *choices[] = {"auto", "raw", "qcow2", NULL};
@@ -561,9 +577,12 @@ static bool check_disk_values(FormEntry_t entry[], int num_entries, FormValues_t
     int idx = fentry_index(entry, num_entries, "Type");
     char *disk_type = values[idx];
 
-    // File-backed CD-ROM and floppy drives may start without media.
+    const bool floppy_file = is_floppy && !strcasecmp(disk_type, "file");
+    const char *floppy_media = is_floppy ? values[fentry_index(entry, num_entries, "Media")] : "";
+    // Only the explicit empty-drive choice leaves a floppy without media.
     const bool removable_file = !strcasecmp(disk_type, "file") &&
-        (is_floppy || !strcmp(values[fentry_index(entry, num_entries, "Harddisk or CD-ROM")], "cd-rom"));
+        (is_floppy ? !strcmp(floppy_media, "Empty drive") :
+         !strcmp(values[fentry_index(entry, num_entries, "Harddisk or CD-ROM")], "cd-rom"));
     idx = fentry_index(entry, num_entries, "File / Device name");
     if ((!strcasecmp(disk_type, "file") || !strcasecmp(disk_type, "device")) &&
         !strcmp(values[idx], "") && !removable_file)
@@ -574,6 +593,11 @@ static bool check_disk_values(FormEntry_t entry[], int num_entries, FormValues_t
     }
 
     idx = fentry_index(entry, num_entries, "Autocreate size");
+    if (floppy_file && !strcmp(floppy_media, "Create a new image") && !values[idx][0])
+    {
+        show_text("Error", "Choose a capacity for the new floppy image.");
+        return false;
+    }
     if (!strcasecmp(disk_type, "ramdisk") && !strcmp(values[idx], ""))
     {
         show_text("Error", "Autocreate size can't be empty for type 'ramdisk'.");
@@ -609,13 +633,21 @@ static bool check_add_floppy_disks(FormEntry_t entry[], int num_entries, FormVal
 void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
 {
     const bool is_floppy = !strcasecmp(parent->get_myName(), "fdc0");
-    FormEntry_t entry[] = {
+    FormEntry_t all_entries[] = {
+        {"Media", "Empty drive", NULL,
+         "Empty drive: keep the drive attached with no disk inserted.\n"
+         "Use an existing image: use the named file without creating it.\n"
+         "Create a new image: create a missing file on first emulator startup; existing files are unchanged.\n"
+         "New images are blank and must be formatted by the guest operating system.\n"
+         "This choice applies only to type 'file'.",
+         validation_floppy_media},
         {"Type", "file", NULL, // no name - config entry myValue
          "Disks can be emulated in several ways.",
          validation_disk_type},
         {"File / Device name", "", NULL, // "file" | "device",
          "Enter the path to the file or device to use for this disk.\n"
-         "Leave blank for an empty file-backed CD-ROM or floppy drive.\n"
+         "For floppies, choose Empty drive to leave it empty; otherwise enter an image filename.\n"
+         "Leave blank for an empty file-backed CD-ROM drive.\n"
          "This parameter is ignored for type 'ramdisk'.",
          validation_disk_file},
         {"Image format (auto, raw, qcow2)", "auto", "format",
@@ -633,14 +665,19 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
          "Do you want the OS to see this as a hard-disk, or as a cd-rom?\n"
          "This parameter is ignored for type 'ramdisk' and floppy drives, as they always are disks.",
          validation_disk_hd_cd},
-        {"Autocreate size", "", NULL, // "autocreate_size" | "size"
+        {"Autocreate size", is_floppy ? "1440K" : "", NULL, // "autocreate_size" | "size"
+         is_floppy ?
+         "For Create a new image, choose the floppy capacity: 360K, 720K, 1200K (1.2 MB),\n"
+         "1440K (1.44 MB), or 2880K (2.88 MB). K means 1024 bytes.\n"
+         "The raw image is created on first emulator startup, only if the file is missing.\n"
+         "For type 'ramdisk', this is its size. Otherwise this field is ignored." :
          "For type 'file': Do you want the program to create it? And in what size?\n"
          "Leave blank to not autocreate the file.\n"
          "For type 'ramdisk': Required to be non-empty.\n"
          "For type 'device': Ignored."
          "The file/ramdisk will be created the first time the emulator runs.\n"
          "Format: number followed by K (kilo), M (mega), or G (giga)",
-         validation_disk_autocreate_size},
+         is_floppy ? validation_floppy_capacity : validation_disk_autocreate_size},
         {"Read-only?", STR_NO, "read_only",
          "Should the disk be set to read-only?\n"
          "This parameter is ignored for CD-ROMs (always true),\n"
@@ -659,7 +696,8 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
         {"Serial number", "", "serial_number",
          "Would you like to set a serial number?",
          NULL}};
-    int num_entries = ARRAY_SIZE(entry);
+    FormEntry_t *entry = all_entries + (is_floppy ? 0 : 1);
+    int num_entries = ARRAY_SIZE(all_entries) - (is_floppy ? 0 : 1);
     CConfigurator *c;
     FormValues_t values, preset;
     int idx;
@@ -676,6 +714,15 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
     {
         if (i == idx)
             continue;
+
+        if (is_floppy && !strcmp(entry[i].label, "Media"))
+        {
+            const char *path = c ? c->get_text_value("file", "") : "";
+            const char *size = c ? c->get_text_value("autocreate_size", "") : "";
+            preset[i] = (char *)(!path[0] ? "Empty drive" :
+                size[0] ? "Create a new image" : "Use an existing image");
+            continue;
+        }
 
         if (!strcmp(entry[i].label, "Harddisk or CD-ROM") && c != nullptr)
         {
@@ -730,6 +777,11 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
         idx = fentry_index(entry, num_entries, "Type");
         disk_type = values[idx];
         bool is_ramdisk = !strcasecmp(disk_type, "ramdisk");
+        const bool floppy_file = is_floppy && !strcasecmp(disk_type, "file");
+        const int media_idx = is_floppy ? fentry_index(entry, num_entries, "Media") : -1;
+        const bool media_changed = floppy_file && changed_fields[media_idx];
+        const bool empty_floppy = floppy_file && !strcmp(values[media_idx], "Empty drive");
+        const bool create_floppy = floppy_file && !strcmp(values[media_idx], "Create a new image");
 
         idx = fentry_index(entry, num_entries, "Harddisk or CD-ROM");
         bool is_cdrom = !strcmp(values[idx], "cd-rom");
@@ -788,8 +840,10 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
             if (!strcmp(entry[i].label, "File / Device name") &&
                 (!strcasecmp(disk_type, "file") || !strcasecmp(disk_type, "device")))
             {
-                if (values[i][0]) set_form_value(c, i, disk_type, values[i], type_changed);
-                else if (type_changed || changed_fields[i]) c->remove_value((char *)disk_type);
+                if (values[i][0] && !empty_floppy)
+                    set_form_value(c, i, disk_type, values[i], type_changed || media_changed);
+                else if (type_changed || media_changed || changed_fields[i])
+                    c->remove_value((char *)disk_type);
             }
 
             if (!strcmp(entry[i].label, "Autocreate size"))
@@ -800,8 +854,10 @@ void add_disks(const char *title, const char *disk_name, CConfigurator *parent)
                     set_form_value(c, i, "size", values[i], type_changed);
                 if (!strcasecmp(disk_type, "file"))
                 {
-                    if (strcmp(values[i], "")) set_form_value(c, i, "autocreate_size", values[i], type_changed);
-                    else if (changed_fields[i]) c->remove_value((char *)"autocreate_size");
+                    if (values[i][0] && (!floppy_file || create_floppy))
+                        set_form_value(c, i, "autocreate_size", values[i], type_changed || media_changed);
+                    else if (type_changed || media_changed || changed_fields[i])
+                        c->remove_value((char *)"autocreate_size");
                 }
             }
         }

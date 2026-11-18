@@ -982,14 +982,15 @@ bool CDiskFile::load_file_transactional(const char* _filename,
             {
                 printf("%s: Could not open file %s!\n", devid_string, _filename);
 
-                int sz = allow_autocreate ?
-                    myCfg->get_num_value("autocreate_size", false, 0) /
-                    1024 / 1024 : 0;
-                if (!sz)
+                const u64 size = allow_autocreate ?
+                    myCfg->get_num_value("autocreate_size", false, 0) : 0;
+                if (!size)
                 {
                     restore_old();
                     return false;
                 }
+                if (size > static_cast<u64>((std::numeric_limits<off_t_large>::max)()))
+                    FAILURE_1(Configuration, "%s: Raw image size must fit this host's file offsets", _filename);
 
                 handle = overlay ? open_image(_filename, "w+bx") : fopen_large(_filename, "wb");
                 if (!handle)
@@ -998,27 +999,31 @@ bool CDiskFile::load_file_transactional(const char* _filename,
                     return false;
                 }
 
-                void* crt_buf = calloc(1024, 1024);
+                const size_t chunk_size = 1024 * 1024;
+                void* crt_buf = calloc(1, chunk_size);
                 if (!crt_buf)
                 {
                     restore_old();
                     return false;
                 }
 
-                printf("%s: writing %d 1kB blocks:   0%%\b\b\b\b",
-                       devid_string, sz);
+                printf("%s: writing %" PRIu64 " bytes:   0%%\b\b\b\b",
+                       devid_string, size);
 
                 int lastpc = 0;
                 bool write_ok = true;
-                for (int a = 0; a < sz; a++)
+                for (u64 written = 0; written < size;)
                 {
-                    if (fwrite(crt_buf, 1024, 1024, handle) != 1024)
+                    const size_t count = static_cast<size_t>((std::min)(
+                        size - written, static_cast<u64>(chunk_size)));
+                    if (fwrite(crt_buf, 1, count, handle) != count)
                     {
                         write_ok = false;
                         break;
                     }
+                    written += count;
 
-                    int pc = a * 100 / sz;
+                    const int pc = static_cast<int>(100.0 * written / size);
                     if (pc != lastpc)
                     {
                         printf("%3d\b\b\b", pc);
@@ -1064,8 +1069,8 @@ bool CDiskFile::load_file_transactional(const char* _filename,
                 if (overlay && file_identity(handle) != created_identity)
                     FAILURE_1(IO, "%s: Base file changed while reopening", _filename);
 
-                printf("%s: %d MB file %s created.\n",
-                       devid_string, sz, _filename);
+                printf("%s: %" PRIu64 " byte file %s created.\n",
+                       devid_string, size, _filename);
             }
 
             if (overlay && created_qcow2)

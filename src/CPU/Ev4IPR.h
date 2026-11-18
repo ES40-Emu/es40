@@ -86,6 +86,8 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
     return AlphaIPRWriteKind::Helper;
   if (selector.banks == 0x20 && selector.index == 11) // PAL_BASE.
     return AlphaIPRWriteKind::Helper;
+  if (selector.banks == 0x40 && selector.index == 15) // ALT_MODE.
+    return AlphaIPRWriteKind::Helper;
   return AlphaIPRWriteKind::Interpreter;
 }
 
@@ -96,6 +98,12 @@ constexpr std::uint64_t ev4_read_processor_status(std::uint32_t mode)
 }
 
 constexpr std::uint32_t ev4_decode_processor_status(std::uint64_t value)
+{
+  return static_cast<std::uint32_t>((value >> 3) & 3);
+}
+
+// ALT_MODE selects the alternate mode with bits 4:3 (HRM 5.3.12).
+constexpr std::uint32_t ev4_decode_alternate_mode(std::uint64_t value)
 {
   return static_cast<std::uint32_t>((value >> 3) & 3);
 }

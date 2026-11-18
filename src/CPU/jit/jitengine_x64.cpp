@@ -318,6 +318,7 @@ SafeOp classify(uint32_t ins, bool pal_block, const AlphaIPRReadPolicy& ipr_read
         return OP_NONE;
       const auto descriptor = ipr_read.describe(ins);
       if (descriptor.kind == AlphaIPRReadKind::Unsupported) return OP_NONE;
+      if (descriptor.kind == AlphaIPRReadKind::Noop) return OP_NOP;
       if (((ins >> 21) & 0x1f) == 31 && descriptor.discard_safe) return OP_NOP;
       return OP_HW_MFPR;
     }

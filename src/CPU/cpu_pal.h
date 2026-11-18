@@ -86,7 +86,11 @@
   *      File created. Contains code previously found in AlphaCPU.h
   **/
 
-#define DO_HW_MFPR state.r[REG_1] = read_ipr(ins);
+#define DO_HW_MFPR do {                                                       \
+  const auto describe = m_profile.ipr_read.describe;                          \
+  if (!describe || describe(ins).kind != AlphaIPRReadKind::Noop)              \
+    state.r[REG_1] = read_ipr(ins);                                           \
+} while (0)
 
 #define DO_HW_MTPR write_ipr(ins, state.r[REG_2], AlphaIPRWriteContext::Interpreter);
 

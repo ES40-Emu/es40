@@ -1844,7 +1844,8 @@ void CAlphaCPU::jit_run(int budget)
 				const bool is_miscrd = (opc == 0x18) && (miscfn == 0xE000 || miscfn == 0xF000 || (miscfn == 0xC000 && lra != 31));
 				const auto ipr_read = (executes && opc == 0x19)
 					? m_profile.ipr_read.describe(ins) : AlphaIPRReadDescriptor{};
-				const bool is_ipr_replay = (opc == 0x19) && ipr_read.replay
+				const bool is_ipr_replay = (opc == 0x19)
+					&& ipr_read.kind != AlphaIPRReadKind::Noop && ipr_read.replay
 					&& (lra != 31 || !ipr_read.discard_safe);
 				const bool is_fpld = (opc == 0x22 || opc == 0x23 || opc == 0x20 || opc == 0x21);   // LDS/LDT/LDF/LDG: dest is f[lra]
 				// Ordinary loads log only with a destination. Stateful misc/IPR reads log

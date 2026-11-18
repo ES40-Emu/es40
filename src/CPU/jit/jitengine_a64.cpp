@@ -5572,11 +5572,13 @@ static A64OpEmitReceipt emit_a64_hw_mfpr(A64EmitContext& context,
   using RA = CJitEngine::RegAlloc;
   using namespace asmjit;
 
+  const auto descriptor = context.profile.ipr_read.describe(op.ins);
+  if (descriptor.kind == AlphaIPRReadKind::Noop)
+    return a64_completed_op_receipt(op);
   const A64GprRoute wa =
       a64_guest_gpr_write_route(context.regs, op.ra, context.pal_shadow);
   if (wa.kind == A64GprRouteKind::kInvalid || wa.kind == A64GprRouteKind::kZero)
     return {Error::kInvalidArgument, op.kind};
-  const auto descriptor = context.profile.ipr_read.describe(op.ins);
   if (wa.kind == A64GprRouteKind::kDiscard && descriptor.discard_safe)
     return a64_completed_op_receipt(op);
 
@@ -5789,6 +5791,9 @@ static A64OpEmitReceipt emit_a64_planned_op(A64EmitContext& context,
       emits_nothing = op.rc == 31; break;
     case A64OpKind::kLoadAddress:
       emits_nothing = op.ra == 31; break;
+    case A64OpKind::kHwMfpr:
+      emits_nothing = context.profile.ipr_read.describe(op.ins).kind == AlphaIPRReadKind::Noop;
+      break;
     case A64OpKind::kHwMtpr: {
       emits_nothing = context.profile.ipr_write.describe(op.ins) == AlphaIPRWriteKind::Noop;
       break;

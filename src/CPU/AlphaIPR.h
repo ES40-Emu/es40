@@ -40,7 +40,8 @@ enum class AlphaIPRReadKind
   ExceptionSummary,
   PalBase,
   MemoryFaultStatus,
-  FaultAddress
+  FaultAddress,
+  Noop // No read or destination write; privilege checks still apply.
 };
 
 struct AlphaIPRReadDescriptor

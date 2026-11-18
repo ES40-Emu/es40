@@ -88,6 +88,8 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
     return AlphaIPRWriteKind::Helper;
   if (selector.banks == 0x40 && selector.index == 15) // ALT_MODE.
     return AlphaIPRWriteKind::Helper;
+  if (selector.banks == 0x40 && selector.index == 16) // CC.
+    return AlphaIPRWriteKind::Helper;
   return AlphaIPRWriteKind::Interpreter;
 }
 
@@ -106,6 +108,12 @@ constexpr std::uint32_t ev4_decode_processor_status(std::uint64_t value)
 constexpr std::uint32_t ev4_decode_alternate_mode(std::uint64_t value)
 {
   return static_cast<std::uint32_t>((value >> 3) & 3);
+}
+
+// CC writes update only the offset in bits 63:32 (HRM 5.3.13).
+constexpr std::uint32_t ev4_decode_cycle_counter_offset(std::uint64_t value)
+{
+  return static_cast<std::uint32_t>(value >> 32);
 }
 
 // PAL_BASE holds bits 33:14 (HRM 5.2.13).

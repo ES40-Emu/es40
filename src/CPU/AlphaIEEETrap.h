@@ -89,6 +89,7 @@ struct AlphaIEEETrapPolicy
 
   bool divide_rounding_inexact = true; // DIV rounding reports INE.
   bool divide_inexact_completion = false; // /I DIV reports INE after valid inputs.
+  bool stop_on_invalid_input = false; // Stop after an input requests INV.
 };
 
 constexpr bool alpha_ieee_nonfinite_input_invalid(

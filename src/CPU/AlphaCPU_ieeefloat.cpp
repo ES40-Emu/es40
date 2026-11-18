@@ -289,11 +289,13 @@ u64 CAlphaCPU::ieee_cvtst(u64 op, u32 ins)
 	UFP b;
 
 	/* S-denormal conversion requires normalization and an exponent rebias
-	   to T format (ARM 4.10.14). This describes the numerical conversion;
-	   denormal-operand trap handling is a separate requirement. */
+	   to T format (ARM 4.10.14), after the family input check. */
 	if (FPR_GETEXP(op) == 0 && FPR_GETFRAC(op) != 0
 	    && !ieee_denormal_input_zero())
 	{
+		if (m_profile.ieee_trap.stop_on_invalid_input
+			&& ieee_unpack(op, &b, ins) == UFT_INVALID)
+			return 0;
 		b.sign = FPR_GETSIGN(op);
 		b.exp = 1; /* encoded exponent zero means 1 - S_BIAS (ARM 2.2.6.1) */
 		b.frac = FPR_GETFRAC(op) << FPR_GUARD;
@@ -308,6 +310,8 @@ u64 CAlphaCPU::ieee_cvtst(u64 op, u32 ins)
 	   7.2: an invalid-op result that returns a NaN must set the QNAN bit).
 	   Mirrors the sibling helper ieee_cvtts. */
 	u32 ftpb = ieee_unpack(op, &b, ins);
+	if (ftpb == UFT_INVALID)
+		return 0;
 	if (ftpb == UFT_NAN)
 		return op | QNAN;
 	if (ftpb == UFT_ZERO)
@@ -329,6 +333,8 @@ u64 CAlphaCPU::ieee_cvtts(u64 op, u32 ins)
 	u32 ftpb;
 
 	ftpb = ieee_unpack(op, &b, ins);    /* unpack */
+	if (ftpb == UFT_INVALID)
+		return 0;
 	if (Q_FINITE(ftpb))
 		return ieee_rpack(&b, ins, DT_S); /* finite? round, pack */
 	if (ftpb == UFT_NAN)
@@ -373,7 +379,11 @@ s32 CAlphaCPU::ieee_fcmp(u64 s1, u64 s2, u32 ins, u32 trap_nan)
 	u32 ftpb;
 
 	ftpa = ieee_unpack(s1, &a, ins);
+	if (ftpa == UFT_INVALID)
+		return 2;
 	ftpb = ieee_unpack(s2, &b, ins);
+	if (ftpb == UFT_INVALID)
+		return 2;
 	if ((ftpa == UFT_NAN) || (ftpb == UFT_NAN))
 	{ /* NaN involved? */
 		if (trap_nan)
@@ -446,6 +456,8 @@ u64 CAlphaCPU::ieee_cvtfi(u64 op, u32 ins)
 	s32 ubexp;
 
 	ftpa = ieee_unpack(op, &a, ins);  /* unpack */
+	if (ftpa == UFT_INVALID)
+		return 0;
 	if (!Q_FINITE(ftpa)) /* inf, NaN, dnorm? */
 	{
 		ieee_trap(TRAP_INV, 1, AlphaIEEETrapMasking::SoftwareCompletion, ins); /* inv operation */
@@ -550,7 +562,11 @@ u64 CAlphaCPU::ieee_fadd(u64 s1, u64 s2, u32 ins, u32 dp, bool sub)
 	s32 ediff;
 
 	ftpa = ieee_unpack(s1, &a, ins);  /* unpack operands */
+	if (ftpa == UFT_INVALID)
+		return 0;
 	ftpb = ieee_unpack(s2, &b, ins);
+	if (ftpb == UFT_INVALID)
+		return 0;
 	if (ftpb == UFT_NAN)
 		return ieee_quiet_nan_result(s2, dp); /* B = NaN? quiet B */
 	if (ftpa == UFT_NAN)
@@ -668,7 +684,11 @@ u64 CAlphaCPU::ieee_fmul(u64 s1, u64 s2, u32 ins, u32 dp)
 	u64 resl;
 
 	ftpa = ieee_unpack(s1, &a, ins);  /* unpack operands */
+	if (ftpa == UFT_INVALID)
+		return 0;
 	ftpb = ieee_unpack(s2, &b, ins);
+	if (ftpb == UFT_INVALID)
+		return 0;
 	if (ftpb == UFT_NAN)
 		return ieee_quiet_nan_result(s2, dp); /* B = NaN? quiet B */
 	if (ftpa == UFT_NAN)
@@ -727,7 +747,11 @@ u64 CAlphaCPU::ieee_fdiv(u64 s1, u64 s2, u32 ins, u32 dp)
 	u32 sticky;
 
 	ftpa = ieee_unpack(s1, &a, ins);
+	if (ftpa == UFT_INVALID)
+		return 0;
 	ftpb = ieee_unpack(s2, &b, ins);
+	if (ftpb == UFT_INVALID)
+		return 0;
 	if (ftpb == UFT_NAN)
 		return ieee_quiet_nan_result(s2, dp); /* B = NaN? quiet B */
 	if (ftpa == UFT_NAN)
@@ -805,6 +829,8 @@ u64 CAlphaCPU::ieee_sqrt(u64 op, u32 ins, u32 dp)
 	UFP b;
 
 	ftpb = ieee_unpack(op, &b, ins);  /* unpack */
+	if (ftpb == UFT_INVALID)
+		return 0;
 	if (ftpb == UFT_NAN)
 		return ieee_quiet_nan_result(op, dp); /* NaN? */
 	if ((ftpb == UFT_ZERO) || /* zero? */ ((ftpb == UFT_INF) && !b.sign))
@@ -876,7 +902,7 @@ int CAlphaCPU::ieee_unpack(u64 op, UFP* r, u32 ins)
 		   can suppress it -- same idiom as the unmaskable integer-
 		   overflow trap in ieee_cvtfi(). */
 		ieee_trap(TRAP_INV, 1, AlphaIEEETrapMasking::None, ins); /* signal denormal-operand trap */
-		return UFT_DENORM;
+		return m_profile.ieee_trap.stop_on_invalid_input ? UFT_INVALID : UFT_DENORM;
 	}
 
 	if (r->exp == FPR_NAN)   /* exponent = max? */
@@ -885,7 +911,11 @@ int CAlphaCPU::ieee_unpack(u64 op, UFP* r, u32 ins)
 			: (r->frac & QNAN) ? AlphaIEEENonfiniteInput::QuietNaN
 			: AlphaIEEENonfiniteInput::SignalingNaN;
 		if (alpha_ieee_nonfinite_input_invalid(m_profile.ieee_trap, input))
+		{
 			ieee_trap(TRAP_INV, 1, AlphaIEEETrapMasking::SoftwareCompletion, ins); /* signal inv op */
+			if (m_profile.ieee_trap.stop_on_invalid_input)
+				return UFT_INVALID;
+		}
 		return r->frac == 0 ? UFT_INF : UFT_NAN;
 	}
 

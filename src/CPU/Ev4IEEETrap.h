@@ -61,7 +61,7 @@ inline constexpr AlphaIEEETrapPolicy kEv4IEEETrapPolicy{
   static_cast<std::uint32_t>(AlphaIEEENonfiniteInput::Infinity)
     | static_cast<std::uint32_t>(AlphaIEEENonfiniteInput::QuietNaN)
     | static_cast<std::uint32_t>(AlphaIEEENonfiniteInput::SignalingNaN),
-  false, true
+  false, true, true
 };
 
 #endif

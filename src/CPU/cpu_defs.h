@@ -389,6 +389,7 @@ typedef struct ufp  UFP;
 #define UFT_DENORM  2 /* denormal */
 #define UFT_INF     3 /* infinity */
 #define UFT_NAN     4 /* not a number */
+#define UFT_INVALID 5 /* input exception; stop calculation */
 
 #define Q_FINITE(x) ((x) <= UFT_FIN)  /* finite */
 #define Q_SUI(x)    (((x) & I_FTRP) == I_FTRP_SVI)

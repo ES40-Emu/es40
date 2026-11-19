@@ -282,13 +282,8 @@ void Ev68IPR::write(CAlphaCPU& cpu, std::uint32_t instruction, std::uint64_t val
       break;
 
     case 0xc1:  /* CC_CTL */
-      state.cc_ena = (value >> 32) & 1;
-      state.cc = (u32) (value & U64(0xfffffff0));
-      cpu.cc_last_read = state.cc;  /* counter rewritten: rebase the rpcc_read floor
-                                   epoch or the next read would jump/false-borrow
-                                   against the old counter value */
-      cpu.cc_borrow = 0;
-      cpu.cc_wall_remainder = 0;
+      cpu.set_cycle_counter(static_cast<u32>(value & U64(0xfffffff0)),
+                            ((value >> 32) & 1) != 0);
       break;
 
     case 0xc4:  /* VA_CTL */

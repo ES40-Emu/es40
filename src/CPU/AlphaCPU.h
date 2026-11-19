@@ -346,6 +346,7 @@ private:
   u64 read_ipr(u32 instruction);
   void write_ipr(u32 instruction, u64 value, AlphaIPRWriteContext context);
   void set_current_mode(u32 mode, AlphaIPRWriteContext context);
+  void set_cycle_counter(u32 counter, bool enabled);
   AlphaPALAccessContext pal_access_context() const;
   bool pal_hardware_instruction_valid(u32 instruction) const;
 

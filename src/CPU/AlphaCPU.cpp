@@ -926,6 +926,17 @@ void CAlphaCPU::set_current_mode(u32 mode, AlphaIPRWriteContext context)
 		flush_data_page_cache();
 }
 
+void CAlphaCPU::set_cycle_counter(u32 counter, bool enabled)
+{
+	state.cc_ena = enabled;
+	state.cc = counter;
+	cc_last_read = state.cc;  /* counter rewritten: rebase the rpcc_read floor
+                              epoch or the next read would jump/false-borrow
+                              against the old counter value */
+	cc_borrow = 0;
+	cc_wall_remainder = 0;
+}
+
 AlphaPALAccessContext CAlphaCPU::pal_access_context() const
 {
 	const auto context = m_profile.pal.access_context;

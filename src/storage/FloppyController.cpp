@@ -795,7 +795,11 @@ void CFloppyController::WriteMem(int index, u64 address, int dsize, u64 data)
 					size_t fdc_count = sectors_to_read * 512;
 					size_t count;
 					if (state.dma) {
-						size_t dma_count = theDMA->get_count(2) + 1;
+						if (!isa_dma) {
+							fail_rw(ST1_OR);
+							break;
+						}
+						size_t dma_count = isa_dma->get_count(2) + 1;
 						count = (fdc_count < dma_count) ? fdc_count : dma_count;
 					} else {
 						count = fdc_count;
@@ -934,9 +938,9 @@ void CFloppyController::WriteMem(int index, u64 address, int dsize, u64 data)
 						printf("\n");
 #endif
 						if (io_ok)
-							theDMA->send_data(2, buffer, count);
+							isa_dma->send_data(2, buffer, count);
 					} else {
-						theDMA->recv_data(2, buffer, count);
+						isa_dma->recv_data(2, buffer, count);
 #if defined(DEBUG_FDC)
 						printf("FDC: write data:  %zx @ %x\n  ", count, pos * 512);
 						for (int i = 0; i < count; i++)
@@ -1010,14 +1014,14 @@ void CFloppyController::WriteMem(int index, u64 address, int dsize, u64 data)
 
 					size_t id_bytes = (size_t)sector_count * 4;
 					if (state.dma) {
-						if (theDMA->get_transfer_size(2) < id_bytes) {
+						if (!isa_dma || isa_dma->get_transfer_size(2) < id_bytes) {
 							fail_format(0x40 | (head << 2) | drive_idx, ST1_OR);
 							break;
 						}
 
 						u8 sector_ids[256 * 4];
 						memset(sector_ids, 0, sizeof(sector_ids));
-						theDMA->recv_data(2, sector_ids, id_bytes);
+						isa_dma->recv_data(2, sector_ids, id_bytes);
 						format_track(drive_idx, head, sector_size, sector_count,
 							fill, sector_ids, id_bytes);
 						do_interrupt();

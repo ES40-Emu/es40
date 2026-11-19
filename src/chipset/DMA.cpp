@@ -66,8 +66,6 @@
 #include "AliM1543C.h"
 #include "emu/PCIDevice.h"
 
-CDMA* theDMA = 0;
-
 /**
  * Constructor.
  **/
@@ -88,7 +86,6 @@ CDMA::CDMA(CConfigurator* cfg, CSystem* c, CAliM1543C& bridge) :
 	ResetPCI();
 
 	isa_bridge.bind_dma(*this);
-	theDMA = this;
 	printf("dma: $Id$\n");
 }
 

@@ -1989,9 +1989,10 @@ void CSystem::bind_isa_devices()
 		{
 			const auto* pci = dynamic_cast<const CPCIDevice*>(component);
 			// Non-PCI endpoints currently have fixed hose-0 I/O registrations.
-			component->bind_isa_bridge(bridge && (pci ?
-				pci->pci_bus() == bridge->pci_bus() : bridge->pci_bus() == 0)
-				? bridge : nullptr);
+			const int bus = pci ? pci->pci_bus() : 0;
+			auto* owner = bridge && bridge->pci_bus() == bus ? bridge : nullptr;
+			component->bind_isa_bridge(owner);
+			component->bind_isa_dma(owner ? owner->dma_controller() : nullptr);
 		}
 }
 

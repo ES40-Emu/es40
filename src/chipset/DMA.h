@@ -243,6 +243,4 @@ private:
 #define DMA0_IO_EXT DMA_IO_BASE + 6
 #define DMA1_IO_EXT DMA_IO_BASE + 7
 
-extern CDMA* theDMA;
-
 #endif // !defined(INCLUDED_DMA_H)

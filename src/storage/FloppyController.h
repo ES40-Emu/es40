@@ -94,6 +94,7 @@ public:
   virtual       ~CFloppyController();
 
   void bind_isa_bridge(CAliM1543C* bridge) override { isa_bridge = bridge; }
+  void bind_isa_dma(CDMA* dma) override { isa_dma = dma; }
   const CSystemComponent* memory_decode_owner() const noexcept override;
   bool decodes_memory_access(int index, u64 address, int dsize,
     bool write) const noexcept override;
@@ -108,6 +109,7 @@ public:
 private:
   // Borrowed routing owner; not part of the saved device state.
   const CAliM1543C* isa_bridge = nullptr;
+  CDMA* isa_dma = nullptr;
   const u32 isa_io_base;
 
   void          service_pending_media_actions_if_idle();

@@ -198,20 +198,16 @@ inline u64 real_address(u64 address, CAlphaCPU* c, bool bIBOX)
 {
 	bool  b;
 	u64   a;
+	const u64 mask = bIBOX ? ~U64(3) : ~U64(0);
 
 	if (bIBOX && (address & 1))
-		return address & U64(0xfffffffffffffffc);
+		return address & mask;
 
 	if (!(c->virt2phys(address, &a, ACCESS_READ | NO_CHECK | FAKE, &b, 0)))
-		return a & (bIBOX ? U64(0xfffffffffffffffc) : U64(0xffffffffffffffff));
+		return a & mask;
 
-	return
-		((address & U64(0xfffffffff0000000)) == U64(0x0000000020000000)) ? address -
-		U64(0x000000001fe00000) :
-		(
-			((address & U64(0xfffffffff0000000)) == U64(0x0000000010000000)) ? address -
-			U64(0x000000000fffe000) : address
-			) & (bIBOX ? U64(0xfffffffffffffffc) : U64(0xffffffffffffffff));
+	const auto fallback = c->get_profile().trace_address_fallback;
+	return fallback ? fallback(address, bIBOX) : (address & mask);
 }
 
 /**

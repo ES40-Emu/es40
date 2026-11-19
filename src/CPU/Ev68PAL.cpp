@@ -74,6 +74,16 @@ const char* ev68_call_pal_name(std::uint32_t function, std::uint64_t pal_base)
     return unprivileged[function - 0x80];
   return nullptr;
 }
+
+std::uint64_t ev68_trace_address_fallback(std::uint64_t address, bool instruction)
+{
+  const auto region = address >> 28;
+  if (region == 2)
+    return address - 0x1fe00000; // This trace alias preserves the low bits.
+  if (region == 1)
+    address -= 0x0fffe000;
+  return instruction ? address & ~U64(3) : address;
+}
 #endif
 
 AlphaPALAccessContext Ev68PALAccess::context(const CAlphaCPU& cpu)

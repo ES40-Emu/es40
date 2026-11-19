@@ -32,6 +32,7 @@
 
 #if defined(IDB)
 const char* ev68_call_pal_name(std::uint32_t function, std::uint64_t pal_base);
+std::uint64_t ev68_trace_address_fallback(std::uint64_t address, bool instruction);
 #endif
 
 // EV6/EV68 PAL exception vectors.

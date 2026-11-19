@@ -116,6 +116,18 @@ constexpr std::uint32_t ev4_decode_cycle_counter_offset(std::uint64_t value)
   return static_cast<std::uint32_t>(value >> 32);
 }
 
+struct Ev4CycleCounterControl
+{
+  std::uint32_t counter;
+  bool enabled;
+};
+
+// CC_CTL: counter[31:0], enable[32]; bits 3:0 must be zero (HRM 5.3.14).
+constexpr Ev4CycleCounterControl ev4_decode_cycle_counter_control(std::uint64_t value)
+{
+  return {static_cast<std::uint32_t>(value), ((value >> 32) & 1) != 0};
+}
+
 // PAL_BASE holds bits 33:14 (HRM 5.2.13).
 constexpr std::uint64_t ev4_normalize_pal_base(std::uint64_t value)
 {

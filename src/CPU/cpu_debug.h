@@ -463,22 +463,20 @@ void          handle_debug_string(char* s);
     TRC(1, 1);                    \
   }
 
-#define PRE_RET(mnemonic)                                        \
-  if(bDisassemble)                                               \
-  {                                                              \
-    DEBUG_XX;                                                   \
-    if(hw_return.source == AlphaPALReturnSource::ExceptionAddress) \
-      sprintf(dbg_strptr, #mnemonic " EXC_ADDR");                \
-    else                                                        \
-      sprintf(dbg_strptr, #mnemonic " r%d", REG_2 & 31);         \
-    dbg_strptr += strlen(dbg_strptr);                            \
-    if(!bListing)                                                \
-    {                                                            \
-      sprintf(dbg_strptr, ": (%" PRIx64 ")",                     \
-        hw_return.source == AlphaPALReturnSource::ExceptionAddress \
-          ? state.exc_addr : state.r[REG_2]);                    \
-      dbg_strptr += strlen(dbg_strptr);                          \
-    }                                                            \
+#define PRE_RET(op)                                                             \
+  if(bDisassemble)                                                              \
+  {                                                                             \
+    DEBUG_XX;                                                                   \
+    const char* name = hw_return.mnemonic ? hw_return.mnemonic : #op;           \
+    const bool from_exc_addr =                                                  \
+      hw_return.source == AlphaPALReturnSource::ExceptionAddress;               \
+    if(from_exc_addr)                                                           \
+      dbg_strptr += sprintf(dbg_strptr, "%s EXC_ADDR", name);                   \
+    else                                                                        \
+      dbg_strptr += sprintf(dbg_strptr, "%s r%d", name, REG_2 & 31);            \
+    if(!bListing)                                                               \
+      dbg_strptr += sprintf(dbg_strptr, ": (%" PRIx64 ")",                      \
+        from_exc_addr ? state.exc_addr : state.r[REG_2]);                       \
   }
 
 #define POST_RET  TRC(0, 1);

@@ -85,6 +85,9 @@ struct AlphaPALReturnDescriptor
   bool clear_lock = false;
   bool compilable = false;
   AlphaPALReturnSource source = AlphaPALReturnSource::RegisterB;
+#if defined(IDB)
+  const char* mnemonic = nullptr; // Use the opcode name by default.
+#endif
 };
 
 constexpr bool alpha_pal_return_valid(const AlphaPALReturnDescriptor& entry)

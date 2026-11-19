@@ -71,10 +71,14 @@ constexpr AlphaPALCallEntry ev4_call_pal_entry(std::uint32_t function,
 // HW_REI uses EXC_ADDR; PALcode handles reservation clearing.
 constexpr AlphaPALReturnDescriptor ev4_hardware_return(std::uint32_t instruction)
 {
-  return (instruction >> 26) == 0x1e
-    ? AlphaPALReturnDescriptor{true, ~std::uint64_t(2), 0, false, true,
-                               AlphaPALReturnSource::ExceptionAddress}
-    : AlphaPALReturnDescriptor{};
+  if ((instruction >> 26) != 0x1e)
+    return {};
+  AlphaPALReturnDescriptor entry{true, ~std::uint64_t(2), 0, false, true,
+                                 AlphaPALReturnSource::ExceptionAddress};
+#if defined(IDB)
+  entry.mnemonic = "HW_REI";
+#endif
+  return entry;
 }
 
 constexpr AlphaPALInstructionAccess ev4_hardware_instruction_access(std::uint32_t instruction)

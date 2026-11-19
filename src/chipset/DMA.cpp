@@ -87,6 +87,7 @@ CDMA::CDMA(CConfigurator* cfg, CSystem* c, CAliM1543C& bridge) :
 
 	ResetPCI();
 
+	isa_bridge.bind_dma(*this);
 	theDMA = this;
 	printf("dma: $Id$\n");
 }
@@ -231,6 +232,24 @@ size_t CDMA::increment_chunk_size(u32 current, size_t length,
 #define DMA_TRACE_CONTROLLER(controller) false
 #endif
 
+
+u8 CDMA::read_ali_shadow(u8 selector) const
+{
+	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
+	if (selector == 0x84 || selector == 0xa4)
+	{
+		const auto& controller = state.controller[selector == 0x84 ? 1 : 0];
+		// ALi leaves the request and mask nibble order unspecified.
+		return (u8)((controller.request << 4) | (controller.mask & 0x0f));
+	}
+
+	switch (selector & 0xfc)
+	{
+	case 0x80: return state.channel[4 + (selector & 3)].mode;
+	case 0xa0: return state.channel[selector & 3].mode;
+	default:   return 0;
+	}
+}
 
 u64 CDMA::ReadMem(int index, u64 address, int dsize)
 {

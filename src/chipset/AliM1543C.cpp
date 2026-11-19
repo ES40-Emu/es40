@@ -271,6 +271,7 @@
 #include "StdAfx.h"
 #include "AliM1543C.h"
 #include "AliM1543C_pmu.h"
+#include "DMA.h"
 #include "system/System.h"
 #include "graphics/VGA.h"
 
@@ -574,9 +575,19 @@ bool CAliM1543C::is_pmu_hidden() const noexcept
 
 u32 CAliM1543C::config_read_custom(int func, u32 address, int dsize, u32 data)
 {
+	if (func != 0 || (dsize != 8 && dsize != 16 && dsize != 32))
+		return data;
+
+	// 6Fh reads the shadow register selected by 6Eh.
+	if (isa_dma && address <= 0x6f && address + (u32)dsize / 8 > 0x6f)
+	{
+		const u8 selector = (u8)(endian_32(pci_state.config_data[0][0x6c / 4]) >> 16);
+		const u32 shift = (0x6f - address) * 8;
+		return (data & ~(0xffU << shift)) | ((u32)isa_dma->read_ali_shadow(selector) << shift);
+	}
+
 	// M1543C 5Fh<2>, p.71: hidden M7101 registers 7Ch-FFh alias here.
-	if (func != 0 || !is_pmu_hidden() || !docking_pmu ||
-		(dsize != 8 && dsize != 16 && dsize != 32))
+	if (!is_pmu_hidden() || !docking_pmu)
 		return data;
 	for (u32 lane = 0; lane < (u32)dsize / 8; ++lane)
 		if (address + lane >= 0x7c && address + lane < 0x100)

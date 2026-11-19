@@ -144,6 +144,7 @@
 #include <chrono>
 
 class CAliM1543C_pmu;
+class CDMA;
 
   /**
    * \brief Emulated ISA part of the ALi M1543C chipset.
@@ -182,6 +183,7 @@ public:
   bool programmable_io_is_subtractive() const noexcept;
   bool superio_claims_port(u32 port, bool write) const noexcept;
   void bind_pmu(CAliM1543C_pmu* pmu) { docking_pmu = pmu; }
+  void bind_dma(const CDMA& dma) { isa_dma = &dma; }
   u32 config_read_custom(int func, u32 address, int dsize, u32 data) override;
   void config_write_custom(int func, u32 address, int dsize,
     u32 old_data, u32 new_data, u32 data) override;
@@ -206,6 +208,7 @@ public:
 private:
   // Host wiring; the PMU's selector bytes already live in saved PCI state.
   CAliM1543C_pmu* docking_pmu = nullptr;
+  const CDMA* isa_dma = nullptr;
   CThread* myThread = nullptr;
   CMutex* myRegLock;
   bool      StopThread;

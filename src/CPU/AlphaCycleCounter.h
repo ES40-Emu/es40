@@ -40,4 +40,11 @@ struct AlphaCycleCounterPolicy
   std::uint64_t (*read)(const CAlphaCPU& cpu) = nullptr; // Null reads zero.
 };
 
+bool alpha_cycle_counter_enabled(const CAlphaCPU& cpu);
+std::uint64_t alpha_read_cycle_counter(const CAlphaCPU& cpu);
+
+inline constexpr AlphaCycleCounterPolicy kAlphaCycleCounterPolicy{
+  &alpha_cycle_counter_enabled, &alpha_read_cycle_counter
+};
+
 #endif

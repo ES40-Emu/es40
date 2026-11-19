@@ -267,7 +267,8 @@ class CAlphaCPU : public CSystemComponent, public CRunnable
   friend class Ev68Interrupt;
   friend class Ev68ArithmeticTrap;
   friend class Ev68FPStart;
-  friend class Ev68CycleCounter;
+  friend bool alpha_cycle_counter_enabled(const CAlphaCPU& cpu);
+  friend std::uint64_t alpha_read_cycle_counter(const CAlphaCPU& cpu);
   friend class Ev68Idle;
   friend class Ev68Reset;
   friend class Ev68CPUState;

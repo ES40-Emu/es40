@@ -26,14 +26,14 @@
 
 #include "StdAfx.h"
 #include "AlphaCPU.h"
-#include "Ev68CycleCounter.h"
+#include "AlphaCycleCounter.h"
 
-bool Ev68CycleCounter::enabled(const CAlphaCPU& cpu)
+bool alpha_cycle_counter_enabled(const CAlphaCPU& cpu)
 {
   return cpu.state.cc_ena;
 }
 
-std::uint64_t Ev68CycleCounter::read(const CAlphaCPU& cpu)
+std::uint64_t alpha_read_cycle_counter(const CAlphaCPU& cpu)
 {
   const auto& state = cpu.state;
   return alpha_cycle_counter_value(state.cc, state.cc_offset);

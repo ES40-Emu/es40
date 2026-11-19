@@ -667,26 +667,16 @@ void          handle_debug_string(char* s);
 
 #define POST_HW_LD  POST_X64(state.r[REG_1]);
 
-#define PRE_HW_ST(mnemonic)                                                         \
-  if(bDisassemble)                                                                  \
-  {                                                                                 \
-    DEBUG_XX;                                                                       \
-    sprintf(dbg_strptr, #mnemonic);                                                 \
-    dbg_strptr += strlen(dbg_strptr);                                               \
-    switch(function &~1)                                                            \
-    {                                                                               \
-    case 0:   sprintf(dbg_strptr, "/Phys"); break;                                  \
-    case 2:   sprintf(dbg_strptr, "/Phys/Cond"); break;                             \
-    case 12:  sprintf(dbg_strptr, "/Alt"); break;                                   \
-    }                                                                               \
-    dbg_strptr += strlen(dbg_strptr);                                               \
-    sprintf(dbg_strptr, " r%d, %04xH(r%d)", REG_1 & 31, (u32) DISP_12, REG_2 & 31); \
-    dbg_strptr += strlen(dbg_strptr);                                               \
-    if(!bListing)                                                                   \
-    {                                                                               \
-      sprintf(dbg_strptr, ": (%" PRIx64 ")", state.r[REG_2]);                           \
-      dbg_strptr += strlen(dbg_strptr);                                             \
-    }                                                                               \
+#define PRE_HW_ST(mnemonic)                                                     \
+  if(bDisassemble)                                                              \
+  {                                                                             \
+    DEBUG_XX;                                                                   \
+    dbg_strptr += sprintf(dbg_strptr, #mnemonic "%s%s%s r%d, %04xH(r%d)",       \
+      hw_store.address == AlphaHWStoreAddress::Physical ? "/Phys" : "",         \
+      hw_store.conditional ? "/Cond" : "", hw_store.alternate ? "/Alt" : "",    \
+      REG_1 & 31, (u32) hw_store.displacement, REG_2 & 31);                     \
+    if(!bListing)                                                               \
+      dbg_strptr += sprintf(dbg_strptr, ": (%" PRIx64 ")", state.r[REG_2]);     \
   }
 
 #define POST_HW_ST  POST_X64(state.r[REG_1]);

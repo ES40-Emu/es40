@@ -383,7 +383,13 @@ inline string pcislot_str(int bus, int slot)
  **/
 CConfigurator *get_pcislot(const char *bus_slot)
 {
-    return sys0->find_child((string("pci") + bus_slot).c_str());
+    const string name = string("pci") + bus_slot;
+    for (int i = 0; i < sys0->editor_child_count(); ++i)
+    {
+        CConfigurator *child = sys0->editor_child(i);
+        if (!strcasecmp(child->get_myName(), name.c_str())) return child;
+    }
+    return nullptr;
 }
 
 /**
@@ -423,8 +429,7 @@ char *find_first_free_pcislot(void)
  */
 char *device_in_pcislot(int bus, int slot)
 {
-    string pcislot = string("pci") + pcislot_str(bus, slot);
-    CConfigurator *c = sys0->find_child(pcislot.c_str());
+    CConfigurator *c = get_pcislot(bus, slot);
     if (c == nullptr)
         return (char *)"-";
     else
@@ -1737,6 +1742,7 @@ void set_pcicard_values_default(CConfigurator *c, FormEntry_t entry[], int num_e
 
 void edit_pcicard(
     const char *title,
+    CConfigurator *c,
     const char *type,
     FormEntry_t entry[],
     int num_entries,
@@ -1745,45 +1751,29 @@ void edit_pcicard(
     void (*add_children)(CConfigurator*) = NULL
 )
 {
-    vector<MenuEntry_t> choices = {
-        {"Add new card", "", NULL}
-    };
-    for (auto c : sys0->find_children_myValue(type)) {
-        choices.push_back({c->get_myName(), "", NULL});
-    }
-    int sel = 0;
-    if (choices.size() > 1)
-    {
-        string title = string("Select ") + type + " card in PCI slot to edit";
-        sel = show_menu(title.c_str(), choices.data(), choices.size(), MENU_2ND_LEVEL);
-    }
-    if (sel < 0)
-        return;
-
-    CConfigurator *c;
-    bool is_new_card = (sel == 0);
+    const bool is_new_card = (c == nullptr);
     int idx = fentry_index(entry, num_entries, "PCI slot");
+    string slot;
     if (is_new_card)
     {
-        c = new CConfigurator(sys0, (char *)PCI_SLOT_TEMP, (char *)type);
-        entry[idx].preset = find_first_free_pcislot();
-        if (entry[idx].preset == NULL)
+        char *free_slot = find_first_free_pcislot();
+        if (free_slot == NULL)
         {
             show_text(title, "No free PCI slots");
             return;
         }
+        slot = free_slot;
+        free(free_slot);
+        c = new CConfigurator(sys0, (char *)PCI_SLOT_TEMP, (char *)type);
     }
     else
-    {
-        c = sys0->find_child(choices[sel].text);
-        entry[idx].preset = strdup(c->get_myName() + strlen("pci"));
-    }
+        slot = c->get_myName() + strlen("pci");
 
     FormValues_t preset = (FormValues_t)calloc(num_entries, sizeof(char *));
     for (int i = 0; i < num_entries; ++i)
     {
         if (i == idx)
-            preset[i] = (char *)entry[i].preset;
+            preset[i] = (char *)slot.c_str();
         else
         {
             char *p = !is_new_card && entry[i].name ? c->get_text_value(entry[i].name) : NULL;
@@ -1805,7 +1795,7 @@ void edit_pcicard(
             free(values[i]);
         free(values);
 
-        if (add_children != NULL)
+        if (is_new_card && add_children != NULL)
             add_children(c);
     }
     else if (is_new_card)
@@ -1834,7 +1824,7 @@ bool check_pci_vga_s3(FormEntry_t entry[], int num_entries, FormValues_t values)
 }
 
 // Form for S3 VGA PCI card
-void edit_pci_vga_s3(const char *title)
+void edit_pci_vga_s3(const char *title, CConfigurator *c)
 {
     FormEntry_t entry[] = {
         {"PCI slot", NULL, NULL,
@@ -1857,20 +1847,13 @@ void edit_pci_vga_s3(const char *title)
          validation_file}
     };
 
-    edit_pcicard(title, "s3", entry, ARRAY_SIZE(entry), check_pci_vga_s3);
+    edit_pcicard(title, c, "s3", entry, ARRAY_SIZE(entry), check_pci_vga_s3);
 }
 
 bool check_pci_vga_gloria(FormEntry_t entry[], int num_entries, FormValues_t values)
 {
-    if (!strcmp(values[fentry_index(entry, num_entries, "rom file")], ""))
-        return false;
-    CConfigurator *occupant = get_pcislot(values[fentry_index(entry, num_entries, "PCI slot")]);
-    if (occupant && occupant != sys0->find_child_myValue("gloria"))
-    {
-        show_text("Error", "That PCI slot belongs to another device. Choose a free slot.");
-        return false;
-    }
-    return true;
+    // The PCI slot field already allows only this card's slot or a free slot.
+    return strcmp(values[fentry_index(entry, num_entries, "rom file")], "");
 }
 
 void validation_gloria_rom_layout(EditorField *field)
@@ -1880,7 +1863,7 @@ void validation_gloria_rom_layout(EditorField *field)
 }
 
 // Preserve advanced board settings when editing the basic display/ROM options.
-void edit_pci_vga_gloria(const char *title)
+void edit_pci_vga_gloria(const char *title, CConfigurator *c)
 {
     FormEntry_t entry[] = {
         {"PCI slot", NULL, NULL,
@@ -1907,20 +1890,12 @@ void edit_pci_vga_gloria(const char *title)
          validation_yes_no}
     };
 
-    edit_pcicard(title, "gloria", entry, ARRAY_SIZE(entry), check_pci_vga_gloria);
+    edit_pcicard(title, c, "gloria", entry, ARRAY_SIZE(entry), check_pci_vga_gloria);
 }
 
 bool check_pci_vga_radeon(FormEntry_t entry[], int num_entries, FormValues_t values)
 {
-    if (!strcmp(values[fentry_index(entry, num_entries, "rom file")], ""))
-        return false;
-    CConfigurator *occupant = get_pcislot(values[fentry_index(entry, num_entries, "PCI slot")]);
-    if (occupant && occupant != sys0->find_child_myValue("radeon"))
-    {
-        show_text("Error", "That PCI slot belongs to another device. Choose a free slot.");
-        return false;
-    }
-    return true;
+    return strcmp(values[fentry_index(entry, num_entries, "rom file")], "");
 }
 
 void validation_radeon_rom_layout(EditorField *field)
@@ -1930,7 +1905,7 @@ void validation_radeon_rom_layout(EditorField *field)
 }
 
 // Preserve advanced board settings when editing the basic display/ROM options.
-void edit_pci_vga_radeon(const char *title)
+void edit_pci_vga_radeon(const char *title, CConfigurator *c)
 {
     FormEntry_t entry[] = {
         {"PCI slot", NULL, NULL,
@@ -1947,20 +1922,12 @@ void edit_pci_vga_radeon(const char *title)
          validation_radeon_rom_layout}
     };
 
-    edit_pcicard(title, "radeon", entry, ARRAY_SIZE(entry), check_pci_vga_radeon);
+    edit_pcicard(title, c, "radeon", entry, ARRAY_SIZE(entry), check_pci_vga_radeon);
 }
 
 bool check_pci_vga_powerstorm(FormEntry_t entry[], int num_entries, FormValues_t values)
 {
-    if (!strcmp(values[fentry_index(entry, num_entries, "rom file")], ""))
-        return false;
-    CConfigurator *occupant = get_pcislot(values[fentry_index(entry, num_entries, "PCI slot")]);
-    if (occupant && occupant != sys0->find_child_myValue("powerstorm"))
-    {
-        show_text("Error", "That PCI slot belongs to another device. Choose a free slot.");
-        return false;
-    }
-    return true;
+    return strcmp(values[fentry_index(entry, num_entries, "rom file")], "");
 }
 
 void validation_powerstorm_rom_layout(EditorField *field)
@@ -1976,7 +1943,7 @@ void validation_powerstorm_model(EditorField *field)
 }
 
 // Preserve advanced board settings when editing the basic display/ROM options.
-void edit_pci_vga_powerstorm(const char *title)
+void edit_pci_vga_powerstorm(const char *title, CConfigurator *c)
 {
     FormEntry_t entry[] = {
         {"PCI slot", NULL, NULL,
@@ -1998,20 +1965,12 @@ void edit_pci_vga_powerstorm(const char *title)
          validation_powerstorm_model}
     };
 
-    edit_pcicard(title, "powerstorm", entry, ARRAY_SIZE(entry), check_pci_vga_powerstorm);
+    edit_pcicard(title, c, "powerstorm", entry, ARRAY_SIZE(entry), check_pci_vga_powerstorm);
 }
 
 bool check_pci_vga_cirrus(FormEntry_t entry[], int num_entries, FormValues_t values)
 {
-    if (!strcmp(values[fentry_index(entry, num_entries, "rom file")], ""))
-        return false;
-    CConfigurator *occupant = get_pcislot(values[fentry_index(entry, num_entries, "PCI slot")]);
-    if (occupant && occupant != sys0->find_child_myValue("cirrus"))
-    {
-        show_text("Error", "That PCI slot belongs to another device. Choose a free slot.");
-        return false;
-    }
-    return true;
+    return strcmp(values[fentry_index(entry, num_entries, "rom file")], "");
 }
 
 void validation_cirrus_model(EditorField *field)
@@ -2020,7 +1979,7 @@ void validation_cirrus_model(EditorField *field)
     editor_choices(field, choices);
 }
 
-void edit_pci_vga_cirrus(const char *title)
+void edit_pci_vga_cirrus(const char *title, CConfigurator *c)
 {
     FormEntry_t entry[] = {
         {"PCI slot", NULL, NULL,
@@ -2036,35 +1995,7 @@ void edit_pci_vga_cirrus(const char *title)
          validation_cirrus_model}
     };
 
-    edit_pcicard(title, "cirrus", entry, ARRAY_SIZE(entry), check_pci_vga_cirrus);
-}
-
-// Form for VGA PCI card
-void edit_pci_vga(const char *title)
-{
-    MenuEntry_t entry[] = {
-        {"none", "No graphics card", NULL},
-        {"s3", "S3 Trio 64", edit_pci_vga_s3},
-        {"gloria", "ELSA GLoria Synergy (Permedia 2)", edit_pci_vga_gloria},
-        {"radeon", "ATI Radeon 7500 (RV200)", edit_pci_vga_radeon},
-        {"powerstorm", "Digital PowerStorm 300/350 (REALimage 2100)", edit_pci_vga_powerstorm}
-//#if 0 && defined(HAVE_CIRRUS)
-        ,
-        {"cirrus", "Cirrus Logic / Acumos VGA", edit_pci_vga_cirrus}
-//#endif
-    };
-    int num_entries = ARRAY_SIZE(entry);
-
-    int sel = show_menu(title, entry, num_entries, MENU_3RD_LEVEL);
-
-    if (sel == 0)
-    {
-        // Remove any VGA cards that may have been added
-        CConfigurator *c;
-        for (int i = 1; i < num_entries; ++i)
-            while ((c = sys0->find_child_myValue(entry[i].text)) != nullptr)
-                sys0->remove_child(c->get_myName());
-    }
+    edit_pcicard(title, c, "cirrus", entry, ARRAY_SIZE(entry), check_pci_vga_cirrus);
 }
 
 void validation_pci_dec21143_type(EditorField *field)
@@ -2147,7 +2078,7 @@ static void set_nic_values(CConfigurator *c, FormEntry_t entry[], int num_entrie
 }
 
 // Form for DEC21143 PCI NIC
-void edit_pci_dec21143(const char *title)
+void edit_pci_dec21143(const char *title, CConfigurator *c)
 {
 #if !defined(HAVE_PCAP) && !defined(HAVE_TAP_NET) && !defined(HAVE_VMNET) && !defined(HAVE_SLIRP)
     show_text("Error", "This program has been compiled with no network support.");
@@ -2156,7 +2087,7 @@ void edit_pci_dec21143(const char *title)
     FormEntry_t entry[] = {
         {"PCI slot", NULL, NULL,
          "Which PCI slot should the NIC be on?\n"
-         "Only free PCI slots are listed.",
+         "The card's current slot and free PCI slots are listed.",
          validation_pcislot},
         {"type",
 #if defined(HAVE_PCAP)
@@ -2284,7 +2215,7 @@ void edit_pci_dec21143(const char *title)
 #endif
     };
 
-    edit_pcicard(title, "dec21143", entry, ARRAY_SIZE(entry), NULL, set_nic_values);
+    edit_pcicard(title, c, "dec21143", entry, ARRAY_SIZE(entry), NULL, set_nic_values);
 #endif // defined(HAVE_PCAP) || defined(HAVE_TAP_NET) || defined(HAVE_VMNET) || defined(HAVE_SLIRP)
 }
 
@@ -2294,16 +2225,16 @@ void add_pci_sym53c810_disks(CConfigurator *c)
 }
 
 // Menu for Symbios 53C810 SCSI PCI card
-void edit_pci_sym53c810(const char *title)
+void edit_pci_sym53c810(const char *title, CConfigurator *c)
 {
     FormEntry_t entry[] = {
         {"PCI slot", NULL, NULL,
          "Which PCI slot should the Symbios 53C810 narrow SCSI controller be on?\n"
-         "Only free PCI slots are listed.",
+         "The card's current slot and free PCI slots are listed.",
          validation_pcislot}
     };
 
-    edit_pcicard(title, "sym53c810", entry, ARRAY_SIZE(entry), NULL, set_pcicard_values_default, add_pci_sym53c810_disks);
+    edit_pcicard(title, c, "sym53c810", entry, ARRAY_SIZE(entry), NULL, set_pcicard_values_default, add_pci_sym53c810_disks);
 }
 
 bool check_pci_lsi53c1020_settings(FormEntry_t entry[], int num_entries, FormValues_t values)
@@ -2335,7 +2266,8 @@ bool check_pci_lsi53c1020_settings(FormEntry_t entry[], int num_entries, FormVal
 void set_pci_lsi53c1020_values(CConfigurator *c, FormEntry_t entry[], int num_entries, FormValues_t values)
 {
     int idx = fentry_index(entry, num_entries, "PCI slot");
-    c->set_value(strdup("pci_slot"), strdup(values[idx]));
+    const string name = string("pci") + values[idx];
+    if (strcasecmp(c->get_myName(), name.c_str())) c->set_myName((char *)name.c_str());
 
     idx = fentry_index(entry, num_entries, "persistant flash?");
     if (!strcmp(values[idx], STR_YES))
@@ -2361,12 +2293,12 @@ void add_pci_lsi53c1020_disks(CConfigurator *c)
 }
 
 // Form for LSI 53c1020 SCSI PCI card settings
-void edit_pci_lsi53c1020(const char *title)
+void edit_pci_lsi53c1020(const char *title, CConfigurator *c)
 {
     FormEntry_t entry[] = {
         {"PCI slot", NULL, NULL,
          "Which PCI slot should the LSI 53C1020 Fusion-MPT Ultra320 SCSI controller be on?\n"
-         "Only free PCI slots are listed.",
+         "The card's current slot and free PCI slots are listed.",
          validation_pcislot},
         {"persistant flash?", STR_NO, NULL,
          "Do you want the LSI card flash to persist between emulator runs?\n"
@@ -2422,21 +2354,21 @@ void edit_pci_lsi53c1020(const char *title)
          validation_file}
     };
 
-    edit_pcicard(title, "lsi53c1020", entry, ARRAY_SIZE(entry),
-        check_pci_lsi53c1020_settings, set_pci_lsi53c1020_values, add_pci_sym53c810_disks);
+    edit_pcicard(title, c, "lsi53c1020", entry, ARRAY_SIZE(entry),
+        check_pci_lsi53c1020_settings, set_pci_lsi53c1020_values, add_pci_lsi53c1020_disks);
 }
 
 // Form for Ensoniq ES1370 PCI card
-void edit_pci_es1370(const char *title)
+void edit_pci_es1370(const char *title, CConfigurator *c)
 {
     FormEntry_t entry[] = {
         {"PCI slot", NULL, NULL,
          "Which PCI slot should the Ensoniq AudioPCI ES1370 sound card be on?\n"
-         "Only free PCI slots are listed.",
+         "The card's current slot and free PCI slots are listed.",
          validation_pcislot}
     };
 
-    edit_pcicard(title, "es1370", entry, ARRAY_SIZE(entry));
+    edit_pcicard(title, c, "es1370", entry, ARRAY_SIZE(entry));
 }
 
 void validation_audio_latency(EditorField *field)
@@ -2445,12 +2377,12 @@ void validation_audio_latency(EditorField *field)
 }
 
 // Form for Ensoniq ES1371 PCI card
-void edit_pci_es1371(const char *title)
+void edit_pci_es1371(const char *title, CConfigurator *c)
 {
     FormEntry_t entry[] = {
         {"PCI slot", NULL, NULL,
          "Which PCI slot should the Ensoniq AudioPCI ES1371 sound card be on?\n"
-         "Only free PCI slots are listed.",
+         "The card's current slot and free PCI slots are listed.",
          validation_pcislot},
         {"Audio latency (ms)", "40", "latency_ms",
          "How much playback audio should be queued on the host?\n"
@@ -2458,24 +2390,128 @@ void edit_pci_es1371(const char *title)
          validation_audio_latency}
     };
 
-    edit_pcicard(title, "es1371", entry, ARRAY_SIZE(entry));
+    edit_pcicard(title, c, "es1371", entry, ARRAY_SIZE(entry));
 }
 
-// Menu for PCI bus
+struct PciCardEditor
+{
+    const char *type;
+    const char *label;
+    const char *description;
+    void (*settings)(const char *, CConfigurator *);
+    void (*drives)(CConfigurator *) = nullptr;
+};
+
+static const PciCardEditor pci_card_editors[] = {
+    {"s3", "S3 Trio64 VGA", "S3 Trio64 graphics card.", edit_pci_vga_s3},
+    {"gloria", "ELSA GLoria Synergy VGA", "ELSA GLoria Synergy (Permedia 2) graphics card.", edit_pci_vga_gloria},
+    {"radeon", "ATI Radeon 7500 VGA", "ATI Radeon 7500 (RV200) graphics card.", edit_pci_vga_radeon},
+    {"powerstorm", "Digital PowerStorm 300/350 VGA", "Digital PowerStorm 300/350 (REALimage 2100) graphics card.", edit_pci_vga_powerstorm},
+    {"cirrus", "Cirrus Logic / Acumos VGA", "Cirrus Logic / Acumos graphics card.", edit_pci_vga_cirrus},
+    {"dec21143", "DEC 21143 NIC", "DEC 21143 network interface card.", edit_pci_dec21143},
+    {"sym53c810", "Symbios 53C810 SCSI", "Symbios 53C810 narrow SCSI controller (most tested/proven for OS boot/install).",
+     edit_pci_sym53c810, add_pci_sym53c810_disks},
+    {"lsi53c1020", "LSI 53C1020 SCSI", "LSI 53C1020 Fusion-MPT Ultra320 SCSI controller (NOT SRM BOOT CAPABLE!).",
+     edit_pci_lsi53c1020, add_pci_lsi53c1020_disks},
+    {"es1370", "Ensoniq ES1370 Audio", "Ensoniq AudioPCI ES1370 sound card (works only with Windows NT 4.0 guest).", edit_pci_es1370},
+    {"es1371", "Ensoniq ES1371 Audio", "Ensoniq AudioPCI ES1371 sound card with an AC'97 codec (requires an ES1371 guest driver).", edit_pci_es1371}
+};
+
+static const PciCardEditor *pci_card_editor(CConfigurator *card)
+{
+    for (const auto& editor : pci_card_editors)
+        if (!strcasecmp(card->get_myValue(), editor.type)) return &editor;
+    return nullptr;
+}
+
+static string pci_card_menu_label(CConfigurator *card)
+{
+    const PciCardEditor *editor = pci_card_editor(card);
+    string model = editor ? editor->label : card->get_myValue();
+    if (!strcasecmp(card->get_myValue(), "sym53c895")) model = "Symbios 53C895 SCSI";
+    if (!strcasecmp(card->get_myValue(), "powerstorm"))
+        model = string("Digital PowerStorm ") + card->get_text_value("model", "300") + " VGA";
+    if (!strcasecmp(card->get_myValue(), "cirrus"))
+        model = string("Cirrus / Acumos ") + card->get_text_value("model", "GD5430") + " VGA";
+    if (!editor) model += " (no editor)";
+    return short_menu_text(string(card->get_myName()) + ": " + model, 68);
+}
+
+static void edit_existing_pci_card(CConfigurator *card)
+{
+    const PciCardEditor *editor = pci_card_editor(card);
+    if (!editor)
+    {
+        show_text(pci_card_menu_label(card).c_str(), "This card is not supported by the configuration editor.");
+        return;
+    }
+    if (!editor->drives)
+    {
+        editor->settings(pci_card_menu_label(card).c_str(), card);
+        return;
+    }
+
+    MenuEntry_t entry[] = {
+        {"Controller settings", "Edit this controller's PCI slot and settings.", NULL},
+        {"Configure drives", "Add or edit drives attached to this controller.", NULL}
+    };
+    while (true)
+    {
+        const string title = pci_card_menu_label(card);
+        const int sel = show_menu(title.c_str(), entry, ARRAY_SIZE(entry), MENU_3RD_LEVEL);
+        if (sel < 0) return;
+        if (sel == 0) editor->settings(title.c_str(), card);
+        else if (sel == 1) editor->drives(card);
+    }
+}
+
+static void add_pci_card()
+{
+    vector<MenuEntry_t> entry;
+    for (const auto& editor : pci_card_editors)
+        entry.push_back({editor.label, editor.description, NULL});
+    const int sel = show_menu("Add card", entry.data(), static_cast<int>(entry.size()), MENU_3RD_LEVEL);
+    if (sel < 0 || sel >= static_cast<int>(entry.size())) return;
+    const auto& editor = pci_card_editors[sel];
+    const string title = string("Add ") + editor.label;
+    editor.settings(title.c_str(), nullptr);
+}
+
+// List each add-in card directly; onboard devices have their own main-menu editors.
 void edit_pci(const char *title)
 {
-    MenuEntry_t entry[] = {
-        {"List PCI bus", "Show a list of devices on the PCI bus.", show_pcislots},
-        {"Add VGA", "Add a VGA card", edit_pci_vga},
-        {"Add NIC", "Add a DEC 21143 Network Interface Card", edit_pci_dec21143},
-        {"Add Symbios 53C810 SCSI", "Add a Symbios 53C810 narrow SCSI controller (most tested/proven for OS boot/install)", edit_pci_sym53c810},
-        {"Add LSI 53C1020 SCSI", "Add a LSI 53C1020 Fusion-MPT Ultra320 SCSI controller (NOT SRM BOOT CAPABLE!)", edit_pci_lsi53c1020},
-        {"Add ES1370 Audio", "Add an Ensoniq AudioPCI ES1370 sound card (works only with Windows NT 4.0 guest)", edit_pci_es1370},
-        {"Add ES1371 Audio", "Add an Ensoniq AudioPCI ES1371 sound card with an AC'97 codec (requires an ES1371 guest driver)", edit_pci_es1371}
-    };
-    int num_entries = ARRAY_SIZE(entry);
+    while (true)
+    {
+        vector<CConfigurator *> cards;
+        vector<string> labels;
+        for (int i = 0; i < sys0->editor_child_count(); ++i)
+        {
+            CConfigurator *card = sys0->editor_child(i);
+            const char *name = card->get_myName();
+            if (strncasecmp(name, "pci", 3) ||
+                !strcasecmp(name, PCI_SLOT_ALI) || !strcasecmp(name, PCI_SLOT_IDE) ||
+                !strcasecmp(name, PCI_SLOT_PMU) || !strcasecmp(name, PCI_SLOT_USB))
+                continue;
+            cards.push_back(card);
+            labels.push_back(pci_card_menu_label(card));
+        }
 
-    show_menu(title, entry, num_entries, MENU_2ND_LEVEL);
+        vector<MenuEntry_t> entry;
+        for (size_t i = 0; i < cards.size(); ++i)
+        {
+            const PciCardEditor *editor = pci_card_editor(cards[i]);
+            const char *help = !editor ? "This card has no settings editor." :
+                editor->drives ? "Edit controller settings or configure attached drives." : editor->description;
+            entry.push_back({labels[i].c_str(), help, NULL});
+        }
+        entry.push_back({"Add card", "Add a new PCI card to a free slot.", NULL});
+        entry.push_back({"List PCI bus", "Show all add-in slots, including empty slots.", NULL});
+        const int sel = show_menu(title, entry.data(), static_cast<int>(entry.size()), MENU_2ND_LEVEL);
+        if (sel < 0) return;
+        if (sel < static_cast<int>(cards.size())) edit_existing_pci_card(cards[sel]);
+        else if (sel == static_cast<int>(cards.size())) add_pci_card();
+        else if (sel == static_cast<int>(cards.size()) + 1) show_pcislots("List PCI bus");
+    }
 }
 
 /**

@@ -236,19 +236,29 @@ size_t CDMA::increment_chunk_size(u32 current, size_t length,
 u8 CDMA::read_ali_shadow(u8 selector) const
 {
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
-	if (selector == 0x84 || selector == 0xa4)
+	const int device = selector & 0xe0;
+	if (device != 0x80 && device != 0xa0)
+		return 0;
+
+	const int ctrlr = device == 0x80 ? 1 : 0;
+	const int reg = selector & 0x1f;
+	if (reg < 4)
+		return state.channel[ctrlr * 4 + reg].mode;
+	if (reg == 4)
 	{
-		const auto& controller = state.controller[selector == 0x84 ? 1 : 0];
+		const auto& controller = state.controller[ctrlr];
 		// ALi leaves the request and mask nibble order unspecified.
 		return (u8)((controller.request << 4) | (controller.mask & 0x0f));
 	}
 
-	switch (selector & 0xfc)
-	{
-	case 0x80: return state.channel[4 + (selector & 3)].mode;
-	case 0xa0: return state.channel[selector & 3].mode;
-	default:   return 0;
-	}
+	if (reg > 0x14)
+		return 0;
+
+	// Each channel exposes its base address and count in little-endian order.
+	const int offset = reg - 5;
+	const auto& channel = state.channel[ctrlr * 4 + offset / 4];
+	const u16 value = (offset & 2) ? channel.base_count : channel.base;
+	return (u8)((offset & 1) ? value >> 8 : value);
 }
 
 u64 CDMA::ReadMem(int index, u64 address, int dsize)

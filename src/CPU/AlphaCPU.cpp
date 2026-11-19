@@ -3860,7 +3860,7 @@ _next_instruction:
 			ES40_EXECUTE_END();
 		}
 		const auto hw_load = alpha_decode_hw_load(m_profile.hw_load, ins);
-		function = (ins >> 12) & 0xf; // Debug formatting / unknown-form diagnostics only.
+		function = (ins >> 12) & 0xf; // Report the raw form for unknown loads.
 		if (hw_load.size_bits == 64)
 		{
 			OP(HW_LDQ, HW_LD);

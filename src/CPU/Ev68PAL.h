@@ -30,6 +30,10 @@
 #include "AlphaPAL.h"
 #include "AlphaRegisterBank.h"
 
+#if defined(IDB)
+const char* ev68_call_pal_name(std::uint32_t function, std::uint64_t pal_base);
+#endif
+
 // EV6/EV68 PAL exception vectors.
 constexpr AlphaPALExceptionEntry ev68_pal_exception_entry(AlphaPALException reason,
                                                           std::uint64_t current_pc)

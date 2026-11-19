@@ -82,6 +82,7 @@ struct AlphaCPUProfile
   AlphaIdlePolicy idle{};
 #if defined(IDB)
   const char* (*ipr_name)(std::uint32_t instruction) = nullptr;
+  const char* (*call_pal_name)(std::uint32_t function, std::uint64_t pal_base) = nullptr;
 #endif
 
   constexpr bool supports_instruction(std::uint32_t ins) const

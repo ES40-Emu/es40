@@ -28,6 +28,54 @@
 #include "AlphaCPU.h"
 #include "Ev68PAL.h"
 
+static constexpr std::uint64_t kVmsPalBase = 0x8000;
+
+#if defined(IDB)
+const char* ev68_call_pal_name(std::uint32_t function, std::uint64_t pal_base)
+{
+  if (pal_base != kVmsPalBase)
+    return nullptr;
+
+  static constexpr const char* privileged[] = {
+    "HALT", "CFLUSH", "DRAINA", "LDQP", "STQP", "SWPCTX", "MFPR_ASN",
+    "MTPR_ASTEN",
+    "MTPR_ASTSR", "CSERVE", "SWPPAL", "MFPR_FEN", "MTPR_FEN", "MTPR_IPIR",
+    "MFPR_IPL", "MTPR_IPL",
+    "MFPR_MCES", "MTPR_MCES", "MFPR_PCBB", "MFPR_PRBR", "MTPR_PRBR",
+    "MFPR_PTBR", "MFPR_SCBB", "MTPR_SCBB",
+    "MTPR_SIRR", "MFPR_SISR", "MFPR_TBCHK", "MTPR_TBIA", "MTPR_TBIAP",
+    "MTPR_TBIS", "MFPR_ESP", "MTPR_ESP",
+    "MFPR_SSP", "MTPR_SSP", "MFPR_USP", "MTPR_USP", "MTPR_TBISD", "MTPR_TBISI",
+    "MFPR_ASTEN", "MFPR_ASTSR",
+    "28", "MFPR_VPTB", "MTPR_VPTB", "MTPR_PERFMON", "2C", "2D", "MTPR_DATFX",
+    "2F",
+    "30", "31", "32", "33", "34", "35", "36", "37",
+    "38", "39", "3A", "3B", "3C", "3D", "WTINT", "MFPR_WHAMI",
+  };
+  static constexpr const char* unprivileged[] = {
+    "BPT", "BUGCHK", "CHME", "CHMK", "CHMS", "CHMU", "IMB", "INSQHIL",
+    "INSQTIL", "INSQHIQ", "INSQTIQ", "INSQUEL", "INSQUEQ", "INSQUEL/D",
+    "INSQUEQ/D", "PROBER",
+    "PROBEW", "RD_PS", "REI", "REMQHIL", "REMQTIL", "REMQHIQ", "REMQTIQ",
+    "REMQUEL",
+    "REMQUEQ", "REMQUEL/D", "REMQUEQ/D", "SWASTEN", "WR_PS_SW", "RSCC",
+    "READ_UNQ", "WRITE_UNQ",
+    "AMOVRR", "AMOVRM", "INSQHILR", "INSQTILR", "INSQHIQR", "INSQTIQR",
+    "REMQHILR", "REMQTILR",
+    "REMQHIQR", "REMQTIQR", "GENTRAP", "AB", "AC", "AD", "CLRFEN", "AF",
+    "B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "BA", "BB",
+    "BC", "BD", "BE", "BF"
+  };
+  static_assert(sizeof(privileged) / sizeof(privileged[0]) == 0x40);
+  static_assert(sizeof(unprivileged) / sizeof(unprivileged[0]) == 0x40);
+  if (function < 0x40)
+    return privileged[function];
+  if (function >= 0x80 && function <= 0xbf)
+    return unprivileged[function - 0x80];
+  return nullptr;
+}
+#endif
+
 AlphaPALAccessContext Ev68PALAccess::context(const CAlphaCPU& cpu)
 {
   return {(std::uint32_t)cpu.state.cm, cpu.state.hwe};
@@ -161,12 +209,12 @@ bool Ev68PALCompatibility::instruction_pacing(const CAlphaCPU& cpu)
   // Gated off for the firmware/VMS PALcode (base 0x8000, and the pre-PAL reset state):
   // SRM runs under it, and SRM's per-CPU speed calibration counts cycles
   // per tick in a tight spin. NT and OSF-style PALcodes load at other bases and are paced.
-  return cpu.state.pal_base && cpu.state.pal_base != U64(0x8000);
+  return cpu.state.pal_base && cpu.state.pal_base != kVmsPalBase;
 }
 
 bool Ev68PALCompatibility::wait_for_interrupt(CAlphaCPU& cpu)
 {
-  if (cpu.idle_nap_enabled && cpu.state.pal_base == U64(0x8000))
+  if (cpu.idle_nap_enabled && cpu.state.pal_base == kVmsPalBase)
   {
     /* WTINT before the VMS vs native PAL decision, to accommodate
      * the WTINT usage scenario under JIT */
@@ -397,14 +445,14 @@ void Ev68PALCompatibility::base_changed(CAlphaCPU& cpu, std::uint64_t old_base, 
   const u64 pb = state.pal_base;
 
   // VMS PALcode uses base 0x8000
-  state.pal_vms = (pb == U64(0x8000)) && !cpu.vmspal_lle_enabled;
+  state.pal_vms = (pb == kVmsPalBase) && !cpu.vmspal_lle_enabled;
   //state.pal_vms = false;
 
 #ifdef DEBUG_PAL
   if (pb != old_base || old_hle != state.pal_vms)
   {
     // Only the VMS PALcode (base 0x8000) is a type the emulator knows about.
-    const char* type = (pb == U64(0x8000)) ? "VMS PALcode" : "unknown PALcode type";
+    const char* type = (pb == kVmsPalBase) ? "VMS PALcode" : "unknown PALcode type";
     printf("%%CPU-I-PALSWITCH: cpu%d PAL_BASE %016" PRIx64 " -> %016" PRIx64 ": %s, %s\n",
       cpu.get_cpuid(), old_base, pb, type,
       state.pal_vms        ? "vmspal replacement routines engaged" :

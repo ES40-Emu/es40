@@ -147,8 +147,6 @@
 #endif
 
 #if defined(IDB)
-extern const char* PAL_NAME[];
-
 extern char   dbg_string[1000];
 #if !defined(LS_MASTER) && !defined(LS_SLAVE)
 extern char* dbg_strptr;
@@ -352,15 +350,16 @@ void          handle_debug_string(char* s);
     }                                         \
   }
 
-#define PRE_PAL(mnemonic)                                       \
-  if(bDisassemble)                                              \
-  {                                                             \
-    DEBUG_XX;                                                   \
-    if(function < 0x40 || (function > 0x7f && function < 0xc0)) \
-      sprintf(dbg_strptr, #mnemonic " %s", PAL_NAME[function]); \
-    else                                                        \
-      sprintf(dbg_strptr, #mnemonic " ?%x?", function);         \
-    dbg_strptr += strlen(dbg_strptr);                           \
+#define PRE_PAL(mnemonic)                                                       \
+  if(bDisassemble)                                                              \
+  {                                                                             \
+    DEBUG_XX;                                                                   \
+    const char* name = m_profile.call_pal_name                                  \
+      ? m_profile.call_pal_name(function, state.pal_base) : nullptr;            \
+    if(name)                                                                    \
+      dbg_strptr += sprintf(dbg_strptr, #mnemonic " %s", name);                 \
+    else                                                                        \
+      dbg_strptr += sprintf(dbg_strptr, #mnemonic " ?%x?", (unsigned)function); \
   }
 
 #define POST_PAL  TRC(1, 0);

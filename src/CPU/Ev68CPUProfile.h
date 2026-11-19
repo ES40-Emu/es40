@@ -74,6 +74,7 @@ inline constexpr AlphaCPUProfile kEv68CBProfile = [] {
   profile.idle = kEv68IdlePolicy;
 #if defined(IDB)
   profile.ipr_name = &ev68_ipr_name;
+  profile.call_pal_name = &ev68_call_pal_name;
 #endif
   return profile;
 }();

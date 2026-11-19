@@ -154,6 +154,25 @@ static int dma_page_channel(u64 address)
 	return channelmap[address];
 }
 
+// Wide accesses can cross from the channel bank into the control bank.
+static bool dma_decode_controller_byte(int& index, u64& address)
+{
+	if (index == DMA1_IO_CHANNEL || index == DMA1_IO_MAIN)
+		address >>= 1;
+
+	if (index == DMA0_IO_CHANNEL || index == DMA1_IO_CHANNEL)
+	{
+		if (address < 8)
+			return true;
+		index = (index == DMA0_IO_CHANNEL) ? DMA0_IO_MAIN : DMA1_IO_MAIN;
+		address -= 8;
+	}
+
+	if (index == DMA0_IO_MAIN || index == DMA1_IO_MAIN)
+		return address < 8;
+	return true;
+}
+
 void CDMA::validate_device_channel(int channel)
 {
 	if (channel < 0 || channel >= 8 || channel == 4)
@@ -236,14 +255,8 @@ u64 CDMA::ReadMem(int index, u64 address, int dsize)
 		return ret;
 
 	case 8:
-
-
-
-
-		if (index == DMA1_IO_CHANNEL || index == DMA1_IO_MAIN)
-			address >>= 1;
-
-
+		if (!dma_decode_controller_byte(index, address))
+			return 0xff;
 
 		switch (index)
 		{
@@ -333,9 +346,9 @@ void CDMA::WriteMem(int index, u64 address, int dsize, u64 data)
 		return;
 
 	case 8:
+		if (!dma_decode_controller_byte(index, address))
+			return;
 		data &= 0xff;
-		if (index == DMA1_IO_CHANNEL || index == DMA1_IO_MAIN)
-			address >>= 1;
 
 #if defined(DEBUG_DMA)
 		//printf("dma: write %s, %02x: %02x.   \n", DMA_INDEX(index), (u32)address, data);

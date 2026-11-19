@@ -36,5 +36,5 @@ bool Ev68CycleCounter::enabled(const CAlphaCPU& cpu)
 std::uint64_t Ev68CycleCounter::read(const CAlphaCPU& cpu)
 {
   const auto& state = cpu.state;
-  return ((u64) state.cc_offset) << 32 | (state.cc & U64(0xffffffff));
+  return alpha_cycle_counter_value(state.cc, state.cc_offset);
 }

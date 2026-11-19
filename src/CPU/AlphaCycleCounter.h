@@ -29,6 +29,11 @@
 
 class CAlphaCPU;
 
+constexpr std::uint64_t alpha_cycle_counter_value(std::uint64_t counter, std::uint32_t offset)
+{
+  return (std::uint64_t{offset} << 32) | static_cast<std::uint32_t>(counter);
+}
+
 struct AlphaCycleCounterPolicy
 {
   bool (*enabled)(const CAlphaCPU& cpu) = nullptr; // Null disables counting.

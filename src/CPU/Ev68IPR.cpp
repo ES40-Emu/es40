@@ -27,6 +27,7 @@
 // EV68 HW_MFPR/HW_MTPR behavior extracted from cpu_pal.h.
 #include "StdAfx.h"
 #include "AlphaCPU.h"
+#include "AlphaCycleCounter.h"
 #include "Ev68IPR.h"
 #include "Ev68MMU.h"
 
@@ -68,7 +69,7 @@ std::uint64_t Ev68IPR::read(CAlphaCPU& cpu, std::uint32_t instruction)
   case 0x27: return state.mm_stat;                      // MM_STAT
   case 0x2a: return state.dc_stat;                      // DC_STAT
   case 0x2b: return 0;                                  // C_DATA
-  case 0xc0: return (((u64)state.cc_offset) << 32) | (state.cc & U64(0xffffffff)); // CC
+  case 0xc0: return alpha_cycle_counter_value(state.cc, state.cc_offset); // CC
   case 0xc2: return state.fault_va;                     // VA
   case 0xc3: return Ev68MMU::va_form(cpu, state.va_form_va, false); // VA_FORM
   default:

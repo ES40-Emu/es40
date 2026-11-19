@@ -72,6 +72,9 @@ inline constexpr AlphaCPUProfile kEv68CBProfile = [] {
   profile.cpu_state = kEv68CPUStatePolicy;
   profile.cycle_counter = kAlphaCycleCounterPolicy;
   profile.idle = kEv68IdlePolicy;
+#if defined(IDB)
+  profile.ipr_name = &ev68_ipr_name;
+#endif
   return profile;
 }();
 

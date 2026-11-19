@@ -29,6 +29,10 @@
 
 #include "AlphaIPR.h"
 
+#if defined(IDB)
+const char* ev68_ipr_name(std::uint32_t instruction);
+#endif
+
 class Ev68IPR
 {
 public:

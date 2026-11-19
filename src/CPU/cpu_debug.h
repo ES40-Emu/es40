@@ -148,7 +148,6 @@
 
 #if defined(IDB)
 extern const char* PAL_NAME[];
-extern const char* IPR_NAME[];
 
 extern char   dbg_string[1000];
 #if !defined(LS_MASTER) && !defined(LS_SLAVE)
@@ -484,24 +483,22 @@ void          handle_debug_string(char* s);
 
 #define POST_RET  TRC(0, 1);
 
-#define PRE_MFPR(mnemonic)                                                     \
+#define PRE_IPR(mnemonic, reg)                                                 \
   if(bDisassemble)                                                             \
   {                                                                            \
     DEBUG_XX;                                                                  \
-    sprintf(dbg_strptr, #mnemonic " r%d, %s", REG_1 & 31, IPR_NAME[function]); \
-    dbg_strptr += strlen(dbg_strptr);                                          \
+    const char* name = m_profile.ipr_name ? m_profile.ipr_name(ins) : nullptr; \
+    dbg_strptr += sprintf(dbg_strptr, #mnemonic " r%d, ", (reg) & 31);         \
+    if(name)                                                                   \
+      dbg_strptr += sprintf(dbg_strptr, "%s", name);                           \
+    else                                                                       \
+      dbg_strptr += sprintf(dbg_strptr, "0x%04x", ins & 0xffffu);              \
   }
 
+#define PRE_MFPR(mnemonic) PRE_IPR(mnemonic, REG_1)
 #define POST_MFPR POST_X64(state.r[REG_1]);
 
-#define PRE_MTPR(mnemonic)                                                     \
-  if(bDisassemble)                                                             \
-  {                                                                            \
-    DEBUG_XX;                                                                  \
-    sprintf(dbg_strptr, #mnemonic " r%d, %s", REG_2 & 31, IPR_NAME[function]); \
-    dbg_strptr += strlen(dbg_strptr);                                          \
-  }
-
+#define PRE_MTPR(mnemonic) PRE_IPR(mnemonic, REG_2)
 #define POST_MTPR POST_X64(state.r[REG_2]);
 
 #define PRE_NOP(mnemonic)              \

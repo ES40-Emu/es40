@@ -80,6 +80,9 @@ struct AlphaCPUProfile
   AlphaCPUStatePolicy cpu_state{};
   AlphaCycleCounterPolicy cycle_counter{};
   AlphaIdlePolicy idle{};
+#if defined(IDB)
+  const char* (*ipr_name)(std::uint32_t instruction) = nullptr;
+#endif
 
   constexpr bool supports_instruction(std::uint32_t ins) const
   {

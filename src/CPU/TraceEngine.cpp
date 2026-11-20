@@ -969,45 +969,7 @@ int CTraceEngine::parse(char command[100][100])
 			printf("Instruction count: %" PRId64 "\n",
 				cpu->get_instruction_count());
 			printf("\n==================== REGISTER VALUES ====================\n");
-			for (i = 0; i < 32; i++)
-			{
-				if (i < 10)
-					printf("R");
-				printf("%d:%016" PRIx64, i, cpu->get_r(i, false));
-				if (i % 4 == 3)
-					printf("\n");
-				else
-					printf(" ");
-			}
-
-			const auto& bank = cpu->get_profile().register_bank;
-			int shadows = 0;
-			for (i = 0; i < 32; i++)
-			{
-				const int slot = bank.slot(i, true);
-				if (slot == i)
-					continue;
-				putchar(shadows % 4 == 0 ? '\n' : ' ');
-				if (i < 10)
-					printf("S");
-				printf("%d:%016" PRIx64, i, cpu->get_r(slot, false));
-				shadows++;
-			}
-			if (shadows)
-				printf("\n");
-
-			printf("\n");
-			for (i = 0; i < 32; i++)
-			{
-				if (i < 10)
-					printf("F");
-				printf("%d:%016" PRIx64, i, cpu->get_f(i));
-				if (i % 4 == 3)
-					printf("\n");
-				else
-					printf(" ");
-			}
-
+			cpu->dump_registers();
 			printf("=========================================================\n");
 			return 0;
 		}

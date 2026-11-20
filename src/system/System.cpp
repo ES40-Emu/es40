@@ -2341,8 +2341,6 @@ void CSystem::DumpMemory(unsigned int filenum)
 void CSystem::panic(char* message, int flags)
 {
 	int         cpunum;
-
-	int         i;
 	CAlphaCPU* cpu;
 	printf("\n******** SYSTEM PANIC *********\n");
 	printf("* %s\n", message);
@@ -2359,52 +2357,7 @@ void CSystem::panic(char* message, int flags)
 		printf("Instruction Count: %" PRId64 "\n", cpu->get_instruction_count());
 #endif
 		printf("\n");
-
-		for (i = 0; i < 32; i++)
-		{
-			if (i < 10)
-				printf("R");
-			printf("%d:%016" PRIx64, i, cpu->get_r(i, false));
-			if (i % 4 == 3)
-				printf("\n");
-			else
-				printf(" ");
-		}
-
-		printf("\n");
-		for (i = 4; i < 8; i++)
-		{
-			if (i < 10)
-				printf("S");
-			printf("%d:%016" PRIx64, i, cpu->get_r(i + 32, false));
-			if (i % 4 == 3)
-				printf("\n");
-			else
-				printf(" ");
-		}
-
-		for (i = 20; i < 24; i++)
-		{
-			if (i < 10)
-				printf("S");
-			printf("%d:%016" PRIx64, i, cpu->get_r(i + 32, false));
-			if (i % 4 == 3)
-				printf("\n");
-			else
-				printf(" ");
-		}
-
-		printf("\n");
-		for (i = 0; i < 32; i++)
-		{
-			if (i < 10)
-				printf("F");
-			printf("%d:%016" PRIx64, i, cpu->get_f(i));
-			if (i % 4 == 3)
-				printf("\n");
-			else
-				printf(" ");
-		}
+		cpu->dump_registers();
 	}
 
 	printf("\n");

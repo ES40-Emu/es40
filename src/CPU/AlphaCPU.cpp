@@ -4091,6 +4091,36 @@ u64 CAlphaCPU::get_instruction_count()
 }
 #endif
 
+void CAlphaCPU::dump_registers() const
+{
+	auto print_register = [](char prefix, int reg, u64 value, int position)
+	{
+		if (position)
+			putchar(position % 4 == 0 ? '\n' : ' ');
+		if (reg < 10)
+			putchar(prefix);
+		printf("%d:%016" PRIx64, reg, value);
+	};
+
+	for (int reg = 0; reg < 32; reg++)
+		print_register('R', reg, state.r[reg], reg);
+	printf("\n\n");
+
+	int shadows = 0;
+	for (int reg = 0; reg < 32; reg++)
+	{
+		const int slot = m_profile.register_bank.slot(reg, true);
+		if (slot != reg)
+			print_register('S', reg, state.r[slot], shadows++);
+	}
+	if (shadows)
+		printf("\n\n");
+
+	for (int reg = 0; reg < 32; reg++)
+		print_register('F', reg, state.f[reg], reg);
+	putchar('\n');
+}
+
 /**
  * Save state to a Virtual Machine State file.
  **/

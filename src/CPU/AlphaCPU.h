@@ -304,6 +304,7 @@ public:
   u64           get_f(int i);
   void          set_r(int reg, u64 val);
   void          set_f(int reg, u64 val);
+  void          dump_registers() const;
   u64           get_prbr(void);
   u64           get_hwpcb(void);
   u64           get_pc();

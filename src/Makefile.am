@@ -162,6 +162,7 @@ noinst_HEADERS += storage/Disk.h \
        chipset/AliM1543C_pmu.h \
        chipset/AliM1543C_usb.h \
        chipset/DMA.h \
+       chipset/ISABus.h \
        system/DPR.h \
        system/Flash.h \
        system/System.h \
@@ -173,6 +174,7 @@ noinst_HEADERS += storage/Disk.h \
        io/Serial.h \
        io/SerialListenAddress.h \
        config/Configurator.h \
+       config/ISASlot.h \
        config/FreeTextQuestion.h \
        config/MultipleChoiceQuestion.h \
        config/NumberQuestion.h \

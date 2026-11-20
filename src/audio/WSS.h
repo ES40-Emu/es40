@@ -13,10 +13,12 @@
 #include <atomic>
 #include <chrono>
 
+class CISABus;
+
 class CWSS : public CSystemComponent, public CRunnable
 {
 public:
-    CWSS(CConfigurator* cfg, CSystem* system);
+    CWSS(CConfigurator* cfg, CSystem* system, CISABus& bus, u16 io_port);
     ~CWSS() override;
     void init() override;
     void ResetPCI() override;
@@ -24,8 +26,6 @@ public:
     void stop_threads() override;
     void check_state() override;
     void run() override;
-    void bind_isa_bridge(CAliM1543C* owner) override { bridge = owner; }
-    void bind_isa_dma(CDMA* controller) override { dma = controller; }
     const CSystemComponent* memory_decode_owner() const noexcept override;
     bool decodes_memory_access(int index, u64 address, int dsize, bool write) const noexcept override;
     bool uses_subtractive_decode(int index, u64 address, int dsize, bool write) const noexcept override;
@@ -33,6 +33,7 @@ public:
     void WriteMem(int index, u64 address, int dsize, u64 data) override;
     int SaveState(FILE* file) override;
     int RestoreState(FILE* file) override;
+    std::string snapshot_identity() const override;
 
 private:
     struct {
@@ -41,8 +42,9 @@ private:
         u8 drq, irq;
     } state{};
 
-    CAliM1543C* bridge = nullptr;
-    CDMA* dma = nullptr;
+    CISABus& bus;
+    CDMA* const dma;
+    const u16 io_port;
     host_audio::Backend backend{};
     host_audio::DeviceId output{}, input{};
     host_audio::Stream playback{}, capture{};

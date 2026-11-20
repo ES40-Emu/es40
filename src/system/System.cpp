@@ -1959,9 +1959,18 @@ int CSystem::LoadROM()
 	return 0;
 }
 
-/**
- * Initialize all devices.
- **/
+void CSystem::register_isa_bus(unsigned bus, CISABus& owner)
+{
+	if (!isa_buses.emplace(bus, &owner).second)
+		FAILURE_1(Configuration, "ISA bus %u is already registered", bus);
+}
+
+CISABus* CSystem::isa_bus(unsigned bus) const
+{
+	const auto it = isa_buses.find(bus);
+	return it == isa_buses.end() ? nullptr : it->second;
+}
+
 void CSystem::bind_isa_devices()
 {
 	CAliM1543C* bridge = nullptr;
@@ -1988,7 +1997,7 @@ void CSystem::bind_isa_devices()
 		if (component)
 		{
 			const auto* pci = dynamic_cast<const CPCIDevice*>(component);
-			// Non-PCI endpoints currently have fixed hose-0 I/O registrations.
+			// Legacy devices using these bindings map their ports on hose 0.
 			const int bus = pci ? pci->pci_bus() : 0;
 			auto* owner = bridge && bridge->pci_bus() == bus ? bridge : nullptr;
 			component->bind_isa_bridge(owner);

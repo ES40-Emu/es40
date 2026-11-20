@@ -79,16 +79,14 @@ CDMA::CDMA(CConfigurator* cfg, CSystem* c, CAliM1543C& bridge) :
 	CDMA(cfg, c, static_cast<CDMAHost&>(bridge))
 {
 	ali_bridge = &bridge;
-	// DMA Setup
-#define LEGACY_IO(id,port,size) c->RegisterMemory(this, id, U64(0x00000801fc000000) + port, size)
-	LEGACY_IO(DMA0_IO_CHANNEL, 0x00, 8);
-	LEGACY_IO(DMA0_IO_MAIN, 0x08, 8);
-	LEGACY_IO(DMA_IO_LPAGE, 0x81, 11);
-	LEGACY_IO(DMA1_IO_CHANNEL, 0xc0, 16);
-	LEGACY_IO(DMA1_IO_MAIN, 0xd0, 16);
-	LEGACY_IO(DMA_IO_HPAGE, 0x481, 11);
-	LEGACY_IO(DMA0_IO_EXT, 0x040b, 1);
-	LEGACY_IO(DMA1_IO_EXT, 0x04D6, 1);
+	bridge.register_isa_io(*this, DMA0_IO_CHANNEL, 0x00, 8);
+	bridge.register_isa_io(*this, DMA0_IO_MAIN, 0x08, 8);
+	bridge.register_isa_io(*this, DMA_IO_LPAGE, 0x81, 11);
+	bridge.register_isa_io(*this, DMA1_IO_CHANNEL, 0xc0, 16);
+	bridge.register_isa_io(*this, DMA1_IO_MAIN, 0xd0, 16);
+	bridge.register_isa_io(*this, DMA_IO_HPAGE, 0x481, 11);
+	bridge.register_isa_io(*this, DMA0_IO_EXT, 0x040b, 1);
+	bridge.register_isa_io(*this, DMA1_IO_EXT, 0x04d6, 1);
 
 	bridge.bind_dma(*this);
 }

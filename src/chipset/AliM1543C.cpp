@@ -543,8 +543,8 @@ void CAliM1543C::init()
 	add_legacy_io(9, 0x22, 2); // PIC backdoor control
 	state.pic_control_index = 0;
 
-	// odd one, byte read in PCI IACK (interrupt acknowledge) cycle. Interrupt vector.
-	cSystem->RegisterMemory(this, 20, U64(0x00000801f8000000), 1);
+	// A PCI IACK cycle reads the interrupt vector on this hose.
+	cSystem->RegisterMemory(this, 20, U64(0x00000801f8000000) + U64(0x200000000) * myPCIBus, 1);
 
 	for (i = 0; i < 2; i++)
 	{
@@ -649,6 +649,16 @@ bool CAliM1543C::uses_subtractive_decode(int index, u64, int, bool write) const 
 bool CAliM1543C::is_docking_mode() const noexcept
 {
 	return (endian_32(pci_state.config_data[0][0x5c / 4]) & 1) != 0;
+}
+
+void CAliM1543C::register_isa_io(CSystemComponent& device, int index, u16 port, u32 length)
+{
+	cSystem->RegisterMemory(&device, index, pci_io_address(port), length);
+}
+
+void CAliM1543C::set_isa_irq(int irq, bool asserted)
+{
+	pic_set_line(irq >> 3, irq & 7, asserted);
 }
 
 bool CAliM1543C::dma_transfer_enabled()

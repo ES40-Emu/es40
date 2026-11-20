@@ -4,13 +4,13 @@
  */
 #include "StdAfx.h"
 #include "WSS.h"
-#include "chipset/AliM1543C.h"
+#include "chipset/ISABus.h"
 #include "chipset/DMA.h"
+#include "config/ISASlot.h"
 #include "system/System.h"
 #include <algorithm>
 
 namespace {
-constexpr u32 base = 0x530;
 constexpr int dma_channels[] = {0, 0, 1, 3};
 constexpr int irq_lines[] = {5, 7, 9, 10, 11, 12, 14, 15};
 constexpr int batch_frames = 1024;
@@ -21,10 +21,13 @@ host_audio::Format host_format(unsigned rate)
 }
 }
 
-CWSS::CWSS(CConfigurator* cfg, CSystem* system) : CSystemComponent(cfg, system)
+CWSS::CWSS(CConfigurator* cfg, CSystem* system, CISABus& bus, u16 io_port)
+    : CSystemComponent(cfg, system), bus(bus), dma(bus.dma_controller()), io_port(io_port)
 {
-    system->RegisterMemory(this, 0, U64(0x00000801fc000000) + base, 8);
+    if (!dma)
+        FAILURE(Configuration, "WSS requires an ISA DMA controller");
     backend = host_audio::backend_for_gui(cfg->get_gui_name());
+    bus.register_isa_io(*this, 0, io_port, wss_io_port_count);
 }
 
 CWSS::~CWSS()
@@ -64,24 +67,24 @@ void CWSS::ResetPCI()
 
 const CSystemComponent* CWSS::memory_decode_owner() const noexcept
 {
-    return bridge ? static_cast<const CSystemComponent*>(bridge) : this;
+    return bus.isa_decode_owner();
 }
 
 bool CWSS::decodes_memory_access(int, u64 address, int, bool) const noexcept
 {
-    return address < 8 && bridge &&
-        bridge->isa_io_decode(base + (u32)address) != CAliM1543C::IsaIoDecode::None;
+    return address < wss_io_port_count &&
+        bus.isa_io_decode(io_port + (u32)address) != CISABus::IsaIoDecode::None;
 }
 
 bool CWSS::uses_subtractive_decode(int, u64 address, int, bool) const noexcept
 {
-    return address < 8 && bridge &&
-        bridge->isa_io_decode(base + (u32)address) == CAliM1543C::IsaIoDecode::Subtractive;
+    return address < wss_io_port_count &&
+        bus.isa_io_decode(io_port + (u32)address) == CISABus::IsaIoDecode::Subtractive;
 }
 
 void CWSS::set_drq(bool asserted)
 {
-    if (dma && asserted != state.drq) {
+    if (asserted != state.drq) {
         dma->set_drq(dma_channels[state.config & 3], asserted);
         state.drq = asserted;
     }
@@ -89,9 +92,9 @@ void CWSS::set_drq(bool asserted)
 
 void CWSS::set_irq(bool asserted)
 {
-    if (bridge && asserted != state.irq) {
+    if (asserted != state.irq) {
         const int irq = irq_lines[(state.config >> 3) & 7];
-        bridge->pic_set_line(irq >> 3, irq & 7, asserted);
+        bus.set_isa_irq(irq, asserted);
         state.irq = asserted;
     }
 }
@@ -237,7 +240,7 @@ void CWSS::service_audio(std::chrono::steady_clock::time_point now)
     const auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(now - last_tick).count();
     last_tick = now;
     const bool playing = state.codec.playback_enabled();
-    if (!dma || (!playing && !state.codec.capture_enabled())) return;
+    if (!playing && !state.codec.capture_enabled()) return;
     // Limit catch-up after host stalls while retaining the fractional sample clock.
     constexpr s64 second = 1000000000;
     frame_credit += (std::min<s64>)(ns, second / 50) * state.codec.sample_rate();
@@ -298,6 +301,11 @@ void CWSS::service_audio(std::chrono::steady_clock::time_point now)
         if (queued < 0 || (queued < (int)host_rate && !host_audio::write(playback, pcm, complete * 4)))
             HOST_AUDIO_FAILURE(backend, "WSS: unable to queue playback");
     }
+}
+
+std::string CWSS::snapshot_identity() const
+{
+    return CSystemComponent::snapshot_identity() + ":" + std::to_string(io_port);
 }
 
 int CWSS::SaveState(FILE* file)

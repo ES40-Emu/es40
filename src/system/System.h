@@ -161,6 +161,7 @@
 #define INCLUDED_SYSTEM_H
 
 class CDisplayOutput;
+class CISABus;
 class QmpInput;
 class vga_device;
 
@@ -285,6 +286,8 @@ public:
   int           RegisterComponent(CSystemComponent* component);
   void          UnregisterComponent(CSystemComponent* component);
   int           RegisterCPU(class CAlphaCPU* cpu);
+  void          register_isa_bus(unsigned bus, CISABus& owner);
+  CISABus*      isa_bus(unsigned bus) const;
 
   bool has_vga_device(const vga_device* exclude = nullptr) const noexcept;
   bool graphics_multihead_enabled() const noexcept { return graphics_multihead; }
@@ -749,6 +752,7 @@ private:
   //    void * memmap;
   int                   iNumComponents;
   std::vector<CSystemComponent*> acComponents;
+  std::unordered_map<unsigned, CISABus*> isa_buses;
   std::unique_ptr<QmpInput> qmp_input;
   std::atomic<RunState> m_run_state{ RunState::Prelaunch };
 #if defined(IDB)

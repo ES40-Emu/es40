@@ -102,6 +102,8 @@ typedef enum
   c_ev68cb,
   c_serial,
   c_floppy,
+
+  // isa cards
   c_wss,
 
   // pci devices
@@ -176,6 +178,8 @@ public:
   CConfigurator* get_myParent() { return pParent; };
 
   void            initialize();
+  const char*     isa_card_config_error(const CConfigurator* card, const char* name, classid type, const char* io_port) const;
+  const char*     isa_config_error() const;
   bool            win32_workstation_enabled() const;
 
 #ifdef CONFIGURATION_ONLY
@@ -191,6 +195,7 @@ public:
   void remove_value(char *name);
   void set_child(class CConfigurator *child);
   CConfigurator *find_child(const char *name);
+  CConfigurator *find_direct_child(const char *name);
   CConfigurator *find_child_myValue(const char *myValue);
   std::vector<CConfigurator *> find_children_myValue(const char *myValue);
   void remove_child(const char *name);
@@ -198,6 +203,7 @@ public:
   void write_configuration(FILE *fp, int indent = 0);
 #endif
 private:
+  const char* wss_port_error(const CConfigurator* card, unsigned bus, const char* io_port) const;
   class CConfigurator* pParent;
   class CConfigurator* pChildren[CFG_MAX_CHILDREN];
   int                   iNumChildren;

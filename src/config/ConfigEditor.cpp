@@ -29,6 +29,7 @@
 #include "StdAfx.h"
 #include "ConfigEditor.h"
 #include "ConfigDocument.h"
+#include "ISASlot.h"
 #include <optional>
 #include <set>
 #include <fcntl.h>
@@ -1654,7 +1655,12 @@ void edit_ali(const char *title)
     FormValues_t preset;
     int idx;
 
-    c = sys0->find_child(PCI_SLOT_ALI);
+    c = sys0->find_child_myValue("ali");
+    if (!c && sys0->find_direct_child(PCI_SLOT_ALI))
+    {
+        show_text("Error", "Another device occupies the default ALi bridge slot at pci0.7.");
+        return;
+    }
     preset = (FormValues_t)calloc(num_entries, sizeof(char *));
 
     char *p;
@@ -1683,8 +1689,7 @@ void edit_ali(const char *title)
 
     if (values != NULL)
     {
-        c = sys0->find_child(PCI_SLOT_ALI);
-        c = edit_node(sys0, c, PCI_SLOT_ALI, "ali");
+        if (!c) c = new CConfigurator(sys0, (char *)PCI_SLOT_ALI, (char *)"ali");
 
         idx = fentry_index(entry, num_entries, "Console Output");
         set_form_value(c, idx, entry[idx].name, !strcmp(values[idx], "graphics") ? STR_YES : STR_NO);
@@ -2514,6 +2519,68 @@ void edit_pci(const char *title)
     }
 }
 
+static void edit_wss(CConfigurator *card)
+{
+    FormEntry_t entry[] = {
+        {"ISA slot", nullptr, nullptr, "ISA bus and logical slot, for example 0.1.", nullptr},
+        {"I/O port", "0x530", "io_port", "First of the card's eight I/O ports, in decimal or 0x-prefixed hexadecimal.", nullptr}
+    };
+    set<unsigned> used_slots;
+    for (int i = 0; i < sys0->editor_child_count(); ++i)
+    {
+        unsigned bus, slot;
+        if (parse_isa_slot(sys0->editor_child(i)->get_myName(), bus, slot) && bus == 0)
+            used_slots.insert(slot);
+    }
+    unsigned next_slot = 1;
+    while (used_slots.count(next_slot)) ++next_slot;
+    unsigned bus, slot;
+    string location = card && parse_isa_slot(card->get_myName(), bus, slot)
+        ? card->get_myName() + 3 : "0." + to_string(next_slot);
+    const string original_port = card ? card->get_text_value("io_port", "0x530") : "0x530";
+    string port = original_port;
+
+    for (;;)
+    {
+        char *preset[] = {(char *)location.c_str(), (char *)port.c_str()};
+        FormValues_t values = show_form("Windows Sound System", entry, preset, ARRAY_SIZE(entry), nullptr);
+        if (!values) return;
+        location = values[0];
+        port = values[1];
+        free(values[0]);
+        free(values[1]);
+        free(values);
+
+        const string name = "isa" + location;
+        if (const char *error = sys0->isa_card_config_error(card, name.c_str(), c_wss, port.c_str()))
+        {
+            show_text("Error", error);
+            continue;
+        }
+        const bool write_port = !card || port != original_port;
+        card = edit_node(sys0, card, name, "wss");
+        if (write_port) card->set_value((char *)"io_port", strdup(port.c_str()));
+        return;
+    }
+}
+
+static void edit_isa(const char *title)
+{
+    for (;;)
+    {
+        const auto cards = sys0->find_children_myValue("wss");
+        vector<string> labels;
+        for (auto *card : cards)
+            labels.push_back(string(card->get_myName()) + ": WSS at " + card->get_text_value("io_port", "0x530"));
+        vector<MenuEntry_t> menu;
+        for (const auto& label : labels) menu.push_back({label.c_str(), "Edit the card's ISA slot and I/O port.", nullptr});
+        menu.push_back({"Add Windows Sound System card", "Attach a WSS sound card to an ISA slot.", nullptr});
+        const int sel = show_menu(title, menu.data(), static_cast<int>(menu.size()), MENU_2ND_LEVEL);
+        if (sel < 0) return;
+        edit_wss(sel == static_cast<int>(cards.size()) ? nullptr : cards[sel]);
+    }
+}
+
 /**
  * Serial lines configuration
  **/
@@ -3020,6 +3087,7 @@ bool main_menu(void)
         {"Edit CPU settings", "", edit_ev68cb},
         {"Edit ALI 1543 settings", "", edit_ali},
         {"Edit PCI devices", "", edit_pci},
+        {"Edit ISA devices", "", edit_isa},
         {"Edit Serial devices", "", edit_serial},
         {"Edit Floppy devices", "", edit_floppy},
         {"Edit IDE devices", "", edit_ide}
@@ -3049,6 +3117,12 @@ bool main_menu(void)
         save_results = (sel == MENU_SEL_EXIT || sel == num_entries - 1);
         if (save_results)
         {
+            if (const char *error = theConfig->isa_config_error())
+            {
+                show_text("Error", error);
+                check_failed = true;
+            }
+
             // Find any VGA card
             CConfigurator *vgacard;
             vgacard = sys0->find_child_myValue("s3");
@@ -3063,7 +3137,7 @@ bool main_menu(void)
                 vgacard = sys0->find_child_myValue("cirrus");
 //#endif
 
-            c = sys0->find_child(PCI_SLOT_ALI);
+            c = sys0->find_child_myValue("ali");
             if (c != nullptr)
             {
                 if (c->get_bool_value("vga_console") && vgacard == nullptr)

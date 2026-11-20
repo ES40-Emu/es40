@@ -172,14 +172,17 @@ void CPCIDevice::add_function(int func, u32 data[64], u32 mask[64])
 	device_at[func] = true;
 }
 
+u64 CPCIDevice::pci_io_address(u32 port) const
+{
+	return U64(0x00000801fc000000) + (U64(0x0000000200000000) * myPCIBus) + port;
+}
+
 void CPCIDevice::add_legacy_io(int id, u32 base, u32 length)
 {
 	if (id < 0 || id >= MAX_DEV_RANGES)
 		FAILURE(InvalidArgument, "Legacy PCI range index out of bounds");
 	dev_range_is_io[id] = true;
-	cSystem->RegisterMemory(this, id,
-		U64(0x00000801fc000000) + (U64(0x0000000200000000) * myPCIBus) + base,
-		length);
+	cSystem->RegisterMemory(this, id, pci_io_address(base), length);
 }
 
 void CPCIDevice::add_legacy_mem(int id, u32 base, u32 length)
@@ -358,7 +361,7 @@ void CPCIDevice::register_bar(int func, int bar, u32 data, u32 mask)
 			return;
 		}
 
-		const u64 t = U64(0x00000801fc000000) + (U64(0x0000000200000000) * myPCIBus) + base;
+		const u64 t = pci_io_address(base);
 
 		cSystem->RegisterMemory(this, id, t, length);
 		printf("%s(%s).%d PCI BAR %d set to IO   %" PRIx64 ", len %x.\n",

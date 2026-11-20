@@ -141,6 +141,7 @@
 
 #include "emu/PCIDevice.h"
 #include "DMA.h"
+#include "ISABus.h"
 
 #include <chrono>
 
@@ -157,7 +158,7 @@ class CAliM1543C_pmu;
    *  - Keyboard Scancodes, by Andries Brouwer (http://www.win.tue.nl/~aeb/linux/kbd/scancodes.html)
    *  .
    **/
-class CAliM1543C : public CPCIDevice, public CRunnable, public CDMAHost
+class CAliM1543C : public CPCIDevice, public CRunnable, public CDMAHost, public CISABus
 {
 public:
   virtual int   SaveState(FILE* f);
@@ -175,16 +176,18 @@ public:
     bool write) const noexcept override;
   bool memory_decode_fallback(int index) const noexcept override;
 
+  void register_isa_io(CSystemComponent& device, int index, u16 port, u32 length) override;
+  const CSystemComponent* isa_decode_owner() const noexcept override { return this; }
+  void set_isa_irq(int irq, bool asserted) override;
   // Read existing register state under the system device-bus lock.
-  enum class IsaIoDecode { None, Positive, Subtractive };
-  IsaIoDecode isa_io_decode(u32 port) const noexcept;
+  IsaIoDecode isa_io_decode(u32 port) const noexcept override;
   bool is_docking_mode() const noexcept;
   bool is_pmu_hidden() const noexcept;
   bool programmable_io_is_subtractive() const noexcept;
   bool superio_claims_port(u32 port, bool write) const noexcept;
   void bind_pmu(CAliM1543C_pmu* pmu) { docking_pmu = pmu; }
   void bind_dma(CDMA& dma) { isa_dma = &dma; }
-  CDMA* dma_controller() noexcept { return isa_dma; }
+  CDMA* dma_controller() noexcept override { return isa_dma; }
   bool dma_transfer_enabled() override;
   void dma_read_memory(u32 address, void* dest, size_t bytes) override;
   void dma_write_memory(u32 address, const void* source, size_t bytes) override;

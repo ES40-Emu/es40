@@ -58,6 +58,7 @@
 
 #include "StdAfx.h"
 #include "banner.h"
+#include "ISASlot.h"
 #include "io/SerialListenAddress.h"
 
 #ifdef _WIN32
@@ -74,6 +75,7 @@
 #include <sstream>
 #include <algorithm>
 #include <memory>
+#include <set>
 
 #if defined(HAVE_PCAP)
 #ifdef _WIN32
@@ -184,6 +186,45 @@ static const GUIHotkeyPrompt gui_hotkey_prompts[] = {
 	{ "hotkey.scale_up", "Increase runtime window scale", "Ctrl+PageUp" },
 	{ "hotkey.scale_down", "Decrease runtime window scale", "Ctrl+PageDown" }
 };
+
+static void add_isa_cards(ostream& os)
+{
+	MultipleChoiceQuestion card_q;
+	card_q.setQuestion("Which ISA card would you like to add?");
+	card_q.setDefault("none");
+	card_q.addAnswer("none", "", "Finish adding ISA cards");
+	card_q.addAnswer("wss", "wss", "Windows Sound System");
+
+	set<unsigned> slots;
+	vector<uint16_t> ports;
+	while (!card_q.ask().empty())
+	{
+		unsigned slot = 1, bus;
+		while (slots.count(slot)) ++slot;
+		FreeTextQuestion slot_q;
+		slot_q.setQuestion("Which logical slot on ISA bus 0 should the card use?");
+		slot_q.setDefault(to_string(slot));
+		while (!parse_isa_slot("isa0." + slot_q.ask(), bus, slot) || slots.count(slot))
+			cout << "Enter an unused decimal slot number.\n";
+
+		FreeTextQuestion port_q;
+		port_q.setQuestion("Which base I/O port should the card use?");
+		port_q.setDefault("0x530");
+		uint16_t port;
+		for (;;)
+		{
+			const string value = port_q.ask();
+			if (!parse_wss_io_port(value.c_str(), port))
+				cout << "Enter a decimal or 0x-prefixed address between 0 and 0xfff8.\n";
+			else if (any_of(ports.begin(), ports.end(), [port](uint16_t other) { return wss_io_ports_overlap(port, other); }))
+				cout << "Those ports overlap another WSS card's eight-port range.\n";
+			else break;
+		}
+		slots.insert(slot);
+		ports.push_back(port);
+		os << "  isa0." << slot << " = wss\n  {\n    io_port = " << port_q.getAnswer() << ";\n  }\n\n";
+	}
+}
 
 static string trim_answer(const string& value)
 {
@@ -1596,6 +1637,8 @@ int main(int argc, char* argv[])
 	usb_q.setDefault("yes");
 	usb_q.ask();
 
+	add_isa_cards(os);
+
 	MultipleChoiceQuestion arc_compat_q;
 	arc_compat_q.setQuestion("Which OS the reported year should be compatible with?");
 	arc_compat_q.setExplanation("This only affects the year reported to the guest. Use \"nt\" if planning to run Windows OSes.");
@@ -1643,7 +1686,7 @@ int main(int argc, char* argv[])
 	os << "  {\n";
 	os << "    vga_console = " << vgacons_q.getAnswer() << ";\n";
 	if (lpt_q.getAnswer() != "")
-		os << "    lpt.outfile = \"" << lpt_q.getAnswer() << "\"\n";
+		os << "    lpt.outfile = \"" << lpt_q.getAnswer() << "\";\n";
 	os << "  }\n\n";
 
 	if (usb_q.getAnswer() == "true")

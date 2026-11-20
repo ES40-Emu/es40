@@ -128,6 +128,7 @@
   **/
 #include "StdAfx.h"
 #include "Configurator.h"
+#include "ISASlot.h"
 
 #ifndef CONFIGURATION_ONLY
 
@@ -490,6 +491,8 @@ CConfigurator::CConfigurator(class CConfigurator* parent, char* name,
 				child_depth--;
 				if (!child_depth)
 				{
+					if (iNumChildren >= CFG_MAX_CHILDREN)
+						FAILURE(Configuration, "Too many child devices in configuration block");
 					cur_name = (char*)malloc(name_len + 1);
 					memcpy(cur_name, &text[name_start], name_len);
 					cur_name[name_len] = '\0';
@@ -808,6 +811,7 @@ static const char* const kv_gui_win32[] = {
   "hotkey.reset_window", "video.scale_ratio", "video.scale_change_enable",
   "hotkey.scale_up", "hotkey.scale_down", "video.linear", "hotkey.media", "workstation", 0 };
 static const char* const kv_mpu401[] = { "midi_out", 0 };
+static const char* const kv_wss[] = { "io_port", 0 };
 
 classinfo classes[] = {
   {"tsunami", c_tsunami, N_P | IS_CS | HAS_PCI, kv_tsunami},
@@ -835,11 +839,79 @@ classinfo classes[] = {
   {"win32", c_win32, N_P | IS_GUI, kv_gui_win32},
   {"X11", c_x11, N_P | IS_GUI, kv_gui_x11},
   {"mpu401", c_mpu401, ON_CS, kv_mpu401},
-  {"wss", c_wss, ON_CS, kv_none},
+  {"wss", c_wss, IS_ISA | ON_CS, kv_wss},
   {"es1370", c_es1370, IS_PCI, kv_es1370},
   {"es1371", c_es1371, IS_PCI, kv_es1371},
   {0, c_none, 0, 0}
 };
+
+static const classinfo& config_class(const char* name)
+{
+	int i = 0;
+	while (classes[i].name && (!name || strcasecmp(name, classes[i].name))) ++i;
+	return classes[i];
+}
+
+const char* CConfigurator::isa_card_config_error(const CConfigurator* card, const char* name,
+	classid type, const char* io_port) const
+{
+	unsigned bus, slot;
+	const auto& board = config_class(myValue);
+	if (!(board.flags & IS_CS)) return "ISA slots must be direct children of the system";
+	if (!parse_isa_slot(name, bus, slot))
+		return "Name an ISA card isa<bus>.<slot> using decimal bus and slot numbers";
+	if (board.id == c_tsunami && bus != 0) return "The ES40 ISA bridge provides bus isa0";
+	for (int i = 0; i < iNumChildren; ++i)
+	{
+		unsigned other_bus, other_slot;
+		if (pChildren[i] != card && parse_isa_slot(pChildren[i]->myName, other_bus, other_slot) &&
+			bus == other_bus && slot == other_slot)
+			return "Two ISA cards use the same slot";
+	}
+	return type == c_wss ? wss_port_error(card, bus, io_port) : nullptr;
+}
+
+const char* CConfigurator::wss_port_error(const CConfigurator* card, unsigned bus, const char* io_port) const
+{
+	u16 port;
+	if (!parse_wss_io_port(io_port, port))
+		return "WSS io_port must be a decimal or hexadecimal address from 0 through 0xfff8";
+	for (int i = 0; i < iNumChildren; ++i)
+	{
+		CConfigurator* other = pChildren[i];
+		unsigned other_bus, other_slot;
+		if (other == card || config_class(other->myValue).id != c_wss ||
+			!parse_isa_slot(other->myName, other_bus, other_slot) || bus != other_bus)
+			continue;
+		u16 other_port;
+		if (parse_wss_io_port(other->get_text_value("io_port"), other_port) && wss_io_ports_overlap(port, other_port))
+			return "WSS cards on the same ISA bus must have separate eight-port I/O ranges";
+	}
+	return nullptr;
+}
+
+const char* CConfigurator::isa_config_error() const
+{
+	bool has_cards = false;
+	bool has_bridge = (config_class(myValue).flags & HAS_ISA) != 0;
+	for (int i = 0; i < iNumChildren; ++i)
+	{
+		CConfigurator* child = pChildren[i];
+		const classinfo& device = config_class(child->myValue);
+		if (device.flags & HAS_ISA) has_bridge = true;
+		if (device.flags & IS_ISA)
+		{
+			has_cards = true;
+			if (const char* error = isa_card_config_error(child, child->myName, device.id, child->get_text_value("io_port")))
+				return error;
+		}
+		else if (!strncasecmp(child->myName, "isa", 3) && isdigit((unsigned char)child->myName[3]))
+			return "An ISA slot requires an ISA card";
+		if (const char* error = child->isa_config_error()) return error;
+	}
+	if (has_cards && !has_bridge) return "ISA cards require an ISA bridge on this system";
+	return nullptr;
+}
 
 const char* CConfigurator::get_gui_name() const
 {
@@ -867,6 +939,8 @@ void CConfigurator::initialize()
 {
 	if (!pParent)
 	{
+		if (const char* error = isa_config_error())
+			FAILURE_1(Configuration, "%s", error);
 #if defined(_WIN32) && !defined(CONFIGURATION_ONLY)
 		// Serial-only children still need a shutdown endpoint.
 		const char* managed_gui = getenv("ES40_GUI");
@@ -897,8 +971,6 @@ void CConfigurator::initialize()
 		return;
 	}
 
-	myClassId = c_none;
-
 	int     i = 0;
 	int     pcibus = 0;
 	int     pcidev = 0;
@@ -908,16 +980,9 @@ void CConfigurator::initialize()
 	int     number;
 	char* pt;
 
-	for (i = 0; classes[i].id != c_none; i++)
-	{
-		if (!strcasecmp(myValue, classes[i].name))
-		{
-			myClassId = classes[i].id;
-			myFlags = classes[i].flags;
-			break;
-		}
-	}
-
+	const classinfo* device = &config_class(myValue);
+	myClassId = device->id;
+	myFlags = device->flags;
 	if (myClassId == c_none)
 		FAILURE_2(Configuration, "Class %s for %s not known", myValue, myName);
 
@@ -926,21 +991,20 @@ void CConfigurator::initialize()
 	const char* requested_gui = getenv("ES40_GUI");
 	if ((myFlags & IS_GUI) && requested_gui && !strcasecmp(requested_gui, "win32"))
 	{
-		for (i = 0; classes[i].id != c_none; ++i)
-			if (classes[i].id == c_win32) break;
-		myClassId = classes[i].id;
-		myFlags = classes[i].flags;
+		device = &config_class("win32");
+		myClassId = device->id;
+		myFlags = device->flags;
 	}
 #endif
 
 	// Warn about configuration values this device class does not read;
 	// they have no effect and should be removed from the config file.
-	if (classes[i].known_values)
+	if (device->known_values)
 	{
 		for (int v = 0; v < iNumValues; v++)
 		{
 			bool recognized = false;
-			for (const char* const* k = classes[i].known_values; *k; k++)
+			for (const char* const* k = device->known_values; *k; k++)
 			{
 				if (!strcasecmp(pValues[v].name, *k))
 				{
@@ -1092,13 +1156,16 @@ void CConfigurator::initialize()
 		break;
 
 	case c_ali:
-		myDevice = new CAliM1543C(this, (CSystem*)pParent->get_device(), pcibus,
-			pcidev);
-		new CPort80(this, (CSystem*)pParent->get_device());
-		new CKeyboard(this, (CSystem*)pParent->get_device());
-		new CDMA(this, (CSystem*)pParent->get_device(),
-			*static_cast<CAliM1543C*>(myDevice));
+	{
+		auto* system = static_cast<CSystem*>(pParent->get_device());
+		auto* bridge = new CAliM1543C(this, system, pcibus, pcidev);
+		myDevice = bridge;
+		new CPort80(this, system);
+		new CKeyboard(this, system);
+		new CDMA(this, system, *bridge);
+		system->register_isa_bus(0, *bridge);
 		break;
+	}
 
 	case c_floppy:
 		/* For disk controllers, myDevice points to the
@@ -1180,8 +1247,17 @@ void CConfigurator::initialize()
 		break;
 	}
 	case c_wss:
-		myDevice = new CWSS(this, (CSystem*)pParent->get_device());
+	{
+		auto* system = static_cast<CSystem*>(pParent->myDevice);
+		unsigned bus, slot;
+		u16 port;
+		if (!parse_isa_slot(myName, bus, slot) || !parse_wss_io_port(get_text_value("io_port"), port))
+			FAILURE_1(Configuration, "Invalid ISA slot or io_port for %s", myName);
+		auto* owner = system->isa_bus(bus);
+		if (!owner) FAILURE_1(Configuration, "No ISA bridge provides bus isa%u", bus);
+		myDevice = new CWSS(this, system, *owner, port);
 		break;
+	}
 	case c_es1370:
 		myDevice = new CES1370(this, (CSystem*)pParent->get_device(), pcibus,
 			pcidev);
@@ -1432,8 +1508,17 @@ void CConfigurator::initialize()
 		}
 	}
 
+	// ISA cards need their bridge even when their slots appear first in the file.
+	std::vector<CConfigurator*> isa_cards;
 	for (i = 0; i < iNumChildren; i++)
-		pChildren[i]->initialize();
+	{
+		auto* child = pChildren[i];
+		if ((myFlags & IS_CS) && (config_class(child->myValue).flags & IS_ISA))
+			isa_cards.push_back(child);
+		else
+			child->initialize();
+	}
+	for (auto* card : isa_cards) card->initialize();
 
 	if (myFlags & IS_CS)
 		((CSystem*)myDevice)->init();
@@ -1541,6 +1626,14 @@ CConfigurator *CConfigurator::find_child_myValue(const char *myValue)
 		if (!strcasecmp(pChildren[i]->myValue, myValue))
 			return pChildren[i];
     return nullptr;
+}
+
+CConfigurator *CConfigurator::find_direct_child(const char *name)
+{
+	for (int i = 0; i < iNumChildren; ++i)
+		if (!strcasecmp(pChildren[i]->myName, name))
+			return pChildren[i];
+	return nullptr;
 }
 
 /**

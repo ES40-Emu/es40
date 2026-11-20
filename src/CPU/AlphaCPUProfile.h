@@ -27,6 +27,7 @@
 #if !defined(INCLUDED_ALPHACPUPROFILE_H)
 #define INCLUDED_ALPHACPUPROFILE_H
 
+#include <cstddef>
 #include <cstdint>
 #include "AlphaDataFault.h"
 #include "AlphaInstructionSet.h"
@@ -84,6 +85,8 @@ struct AlphaCPUProfile
   const char* (*ipr_name)(std::uint32_t instruction) = nullptr;
   const char* (*call_pal_name)(std::uint32_t function, std::uint64_t pal_base) = nullptr;
   std::uint64_t (*trace_address_fallback)(std::uint64_t address, bool instruction) = nullptr;
+  void (*trace_process_name)(const CAlphaCPU& cpu, std::uint64_t prbr,
+                             char* name, std::size_t capacity) = nullptr;
 #endif
 
   constexpr bool supports_instruction(std::uint32_t ins) const

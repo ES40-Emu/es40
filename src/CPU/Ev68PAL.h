@@ -27,6 +27,7 @@
 #if !defined(INCLUDED_EV68PAL_H)
 #define INCLUDED_EV68PAL_H
 
+#include <cstddef>
 #include "AlphaPAL.h"
 #include "AlphaRegisterBank.h"
 
@@ -110,6 +111,10 @@ public:
   static void interpreter_step(CAlphaCPU& cpu);
   static std::uint64_t trace_prbr(CAlphaCPU& cpu);
   static std::uint64_t trace_hwpcb(CAlphaCPU& cpu);
+#if defined(IDB)
+  static void trace_process_name(const CAlphaCPU& cpu, std::uint64_t prbr,
+                                 char* name, std::size_t capacity);
+#endif
   static constexpr AlphaPALCallHandler call_pal_override(std::uint32_t function)
   {
     return function == 0x3e ? &wait_for_interrupt : nullptr;

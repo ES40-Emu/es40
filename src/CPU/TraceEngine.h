@@ -156,7 +156,7 @@ protected:
   struct STraceFunction asFunctions[25000];
   struct STraceCPU      asCPUs[4];
   struct STracePRBR     asPRBRs[1000];
-  int                   get_prbr(u64 prbr, u64 hwpcb);
+  int                   get_prbr(CAlphaCPU* cpu);
   void                  write_arglist(CAlphaCPU* c, FILE* f, const char* a);
   FILE* current_trace_file;
   u64                   iBreakPoint;

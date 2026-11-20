@@ -84,6 +84,26 @@ std::uint64_t ev68_trace_address_fallback(std::uint64_t address, bool instructio
     address -= 0x0fffe000;
   return instruction ? address & ~U64(3) : address;
 }
+
+void Ev68PALCompatibility::trace_process_name(const CAlphaCPU& cpu, std::uint64_t prbr,
+                                             char* name, std::size_t capacity)
+{
+  if (!capacity)
+    return;
+  name[0] = '\0';
+  if (cpu.state.pal_base != kVmsPalBase || !prbr)
+    return;
+
+  constexpr std::uint64_t offset = 0x154;
+  constexpr std::size_t field_size = 20;
+  const auto ram_size = U64(1) << cpu.cSystem->get_memory_bits();
+  if (prbr >= ram_size || ram_size - prbr < offset + field_size)
+    return;
+
+  const auto length = capacity > field_size ? field_size : capacity - 1;
+  strncpy(name, cpu.cSystem->PtrToMem(prbr + offset), length);
+  name[length] = '\0';
+}
 #endif
 
 AlphaPALAccessContext Ev68PALAccess::context(const CAlphaCPU& cpu)

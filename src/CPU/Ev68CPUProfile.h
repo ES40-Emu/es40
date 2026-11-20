@@ -76,6 +76,7 @@ inline constexpr AlphaCPUProfile kEv68CBProfile = [] {
   profile.ipr_name = &ev68_ipr_name;
   profile.call_pal_name = &ev68_call_pal_name;
   profile.trace_address_fallback = &ev68_trace_address_fallback;
+  profile.trace_process_name = &Ev68PALCompatibility::trace_process_name;
 #endif
   return profile;
 }();

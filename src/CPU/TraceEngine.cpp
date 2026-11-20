@@ -257,7 +257,7 @@ void CTraceEngine::trace(CAlphaCPU* cpu, u64 f, u64 t, bool down, bool up,
 		return;
 
 	// p = new process context
-	int p = get_prbr(cpu->get_prbr(), cpu->get_hwpcb());
+	int p = get_prbr(cpu);
 
 	// o = old process context
 	int o = asCPUs[cpu->get_cpuid()].last_prbr;
@@ -446,7 +446,7 @@ void CTraceEngine::trace_br(CAlphaCPU* cpu, u64 f, u64 t)
 	u64 pc_t = real_address(t, cpu, true);
 
 	// p = new process context
-	p = get_prbr(cpu->get_prbr(), cpu->get_hwpcb());
+	p = get_prbr(cpu);
 
 	// o = old process context
 	o = asCPUs[cpu->get_cpuid()].last_prbr;
@@ -546,7 +546,7 @@ void CTraceEngine::add_function(u64 address, const char* fn_name, const char* fn
 void CTraceEngine::set_waitfor(CAlphaCPU* cpu, u64 address)
 {
 	int p;
-	p = get_prbr(cpu->get_prbr(), cpu->get_hwpcb());
+	p = get_prbr(cpu);
 
 	if (asPRBRs[p].trc_waitfor == 0)
 		asPRBRs[p].trc_waitfor = address & ~U64(0x3);
@@ -577,18 +577,21 @@ bool CTraceEngine::get_fnc_name(CAlphaCPU* c, u64 address, char** p_fn_name)
 /**
  * Get process context record for a PRBR/HWPCB combination
  **/
-int CTraceEngine::get_prbr(u64 prbr, u64 hwpcb)
+int CTraceEngine::get_prbr(CAlphaCPU* cpu)
 {
 	int   i;
 	char  filename[100];
+	const u64 prbr = cpu->get_prbr();
+	const u64 hwpcb = cpu->get_hwpcb();
+	char name[sizeof(asPRBRs[0].procname)]{};
+	if (const auto read_name = cpu->get_profile().trace_process_name)
+		read_name(*cpu, prbr, name, sizeof(name));
 
 	for (i = 0; i < iNumPRBRs; i++)
 	{
 		if ((asPRBRs[i].prbr == prbr) && (asPRBRs[i].hwpcb == hwpcb))
 		{
-			if (asPRBRs[i].f == current_trace_file)
-				return i;
-			if (!strncmp(asPRBRs[i].procname, cSystem->PtrToMem(prbr + 0x154), 20))
+			if (!strcmp(asPRBRs[i].procname, name))
 			{
 				current_trace_file = asPRBRs[i].f;
 				return i;
@@ -609,10 +612,7 @@ int CTraceEngine::get_prbr(u64 prbr, u64 hwpcb)
 
 	asPRBRs[i].prbr = prbr;
 	asPRBRs[i].hwpcb = hwpcb;
-	if (prbr > 0 && prbr < (U64(0x1) << cSystem->get_memory_bits()))
-		strncpy(asPRBRs[i].procname, cSystem->PtrToMem(prbr + 0x154), 20);
-	else
-		strcpy(asPRBRs[i].procname, "");
+	memcpy(asPRBRs[i].procname, name, sizeof(name));
 	sprintf(filename, "trace_%08" PRIx64 "_%08" PRIx64 "_%02d_%s.trc", prbr, hwpcb,
 		asPRBRs[i].generation, asPRBRs[i].procname);
 	asPRBRs[i].f = fopen(filename, "w");

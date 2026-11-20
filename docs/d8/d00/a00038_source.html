@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.95</span>
    </div>
   </td>
  </tr>
@@ -137,90 +137,62 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d8/d00/a00038_
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#ifdef _WIN32</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &quot;<a class="code" href="../../d6/d00/a00626.html">StdAfx.h</a>&quot;</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;<a class="code" href="../../d8/d00/a00725.html">system/System.h</a>&quot;</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;<a class="code" href="../../d6/d00/a00356.html">emu/SystemComponent.h</a>&quot;</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;windows.h&gt;</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;mmsystem.h&gt;</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keyword">class </span><a class="code hl_class" href="../../df/d00/a00949.html">CAliM1543C</a>;</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="keyword">class </span>CMPU401 : <span class="keyword">public</span> <a class="code hl_class" href="../../d7/d00/a01373.html">CSystemComponent</a></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>{</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  <span class="keyword">virtual</span> <span class="keywordtype">int</span>   RestoreState(FILE* f)<span class="keyword"> override</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="keyword">  </span>{</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  }</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  <span class="keyword">virtual</span> <span class="keywordtype">int</span>   SaveState(FILE* f)<span class="keyword"> override</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="keyword">  </span>{</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  }</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  <span class="comment">// Borrowed routing owner; not part of the saved device state.</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  <span class="keyword">const</span> CAliM1543C* isa_bridge = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  HMIDIOUT hmo;</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  MIDIHDR hdr;</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> midi_lengths[8] = { 3, 3, 3, 3, 2, 2, 3, 1 };</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> midi_buffer[32] = {};</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> midi_ptr = 0;</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> midi_status_byte = 0x80;</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> midi_mpu_status = 0x80;</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>  <span class="keywordtype">bool</span> bReset = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>  std::vector&lt;uint8_t&gt; sysex_data;</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>  CMPU401(CConfigurator* cfg, CSystem* c) : CSystemComponent(cfg, c)</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>  {</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    MIDIOUTCAPSA caps;</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keywordflow">if</span> (midiOutOpen(&amp;hmo, cfg-&gt;<a class="code hl_function" href="../../d2/d00/a01085.html#a672e2f061245308cbd65d432a4d61674">get_num_value</a>(<span class="stringliteral">&quot;midi_out&quot;</span>, <span class="keyword">true</span>, 0), 0, 0, CALLBACK_NULL) != MMSYSERR_NOERROR)</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    {</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>      FAILURE(Configuration, <span class="stringliteral">&quot;MPU-401: Failed to open MIDI output device.&quot;</span>);</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    }</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    UINT <span class="keywordtype">id</span> = 0;</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    if (midiOutGetID(hmo, &amp;<span class="keywordtype">id</span>) == MMSYSERR_NOERROR)</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    {</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>      midiOutGetDevCapsA(<span class="keywordtype">id</span>, &amp;caps, <span class="keyword">sizeof</span>(caps));</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>      printf(<span class="stringliteral">&quot;MPU-401: Opened MIDI device \&quot;%s\&quot;.\n&quot;</span>, caps.szPname);</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    }</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    {</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>      printf(<span class="stringliteral">&quot;MPU-401: Opened MIDI device.\n&quot;</span>);</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    }</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    ZeroMemory(&amp;hdr, <span class="keyword">sizeof</span>(hdr));</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    c-&gt;<a class="code hl_function" href="../../d7/d00/a02109.html#ae4c22f949ba698a0462e26416983ba7d">RegisterMemory</a>(<span class="keyword">this</span>, 0, <a class="code hl_define" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000801fc000330), 1);</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    c-&gt;<a class="code hl_function" href="../../d7/d00/a02109.html#ae4c22f949ba698a0462e26416983ba7d">RegisterMemory</a>(<span class="keyword">this</span>, 1, <a class="code hl_define" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x00000801fc000331), 1);</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  }</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  <span class="keyword">virtual</span> ~CMPU401()</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  {</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    midiOutClose(hmo);</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  }</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  <span class="keywordtype">void</span> bind_isa_bridge(CAliM1543C* bridge)<span class="keyword"> override </span>{ isa_bridge = bridge; }</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  <span class="keyword">const</span> CSystemComponent* memory_decode_owner() const noexcept override;</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  <span class="keywordtype">bool</span> decodes_memory_access(<span class="keywordtype">int</span> <a class="code hl_define" href="../../da/d00/a00149.html#a4da57af702c29650efdb4449c5266f8f">index</a>, <a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> address, <span class="keywordtype">int</span> dsize,</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <span class="keywordtype">bool</span> write) const noexcept override;</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  <span class="keywordtype">bool</span> uses_subtractive_decode(<span class="keywordtype">int</span> <a class="code hl_define" href="../../da/d00/a00149.html#a4da57af702c29650efdb4449c5266f8f">index</a>, <a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> address, <span class="keywordtype">int</span> dsize,</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <span class="keywordtype">bool</span> write) const noexcept override;</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  virtual <a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a>   ReadMem(<span class="keywordtype">int</span> <a class="code hl_define" href="../../da/d00/a00149.html#a4da57af702c29650efdb4449c5266f8f">index</a>, <a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> address, <span class="keywordtype">int</span> dsize) override;</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  virtual <span class="keywordtype">void</span>  WriteMem(<span class="keywordtype">int</span> <a class="code hl_define" href="../../da/d00/a00149.html#a4da57af702c29650efdb4449c5266f8f">index</a>, <a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> address, <span class="keywordtype">int</span> dsize, <a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> data) override;</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>};</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="aa00149_html_a4da57af702c29650efdb4449c5266f8f"><div class="ttname"><a href="../../da/d00/a00149.html#a4da57af702c29650efdb4449c5266f8f">index</a></div><div class="ttdeci">#define index(s, c)</div><div class="ttdef"><b>Definition</b> <a href="../../da/d00/a00149_source.html#l00042">bsd_compat.h:42</a></div></div>
-<div class="ttc" id="aa00326_html_a1af9f95651e921615e75917a6dd1b574"><div class="ttname"><a href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a></div><div class="ttdeci">uint64_t u64</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00126">datatypes.h:126</a></div></div>
-<div class="ttc" id="aa00326_html_a87a27db8f6877dc5bbc36ec833e88c58"><div class="ttname"><a href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a></div><div class="ttdeci">#define U64(a)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00119">datatypes.h:119</a></div></div>
-<div class="ttc" id="aa00356_html"><div class="ttname"><a href="../../d6/d00/a00356.html">SystemComponent.h</a></div><div class="ttdoc">Contains definitions for the base class for devices that connect to the chipset.</div></div>
-<div class="ttc" id="aa00626_html"><div class="ttname"><a href="../../d6/d00/a00626.html">StdAfx.h</a></div><div class="ttdoc">Standard includes.</div></div>
-<div class="ttc" id="aa00725_html"><div class="ttname"><a href="../../d8/d00/a00725.html">System.h</a></div><div class="ttdoc">Contains the definitions for the emulated Typhoon Chipset devices.</div></div>
-<div class="ttc" id="aa00949_html"><div class="ttname"><a href="../../df/d00/a00949.html">CAliM1543C</a></div><div class="ttdoc">Emulated ISA part of the ALi M1543C chipset.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00074_source.html#l00159">AliM1543C.h:160</a></div></div>
-<div class="ttc" id="aa01085_html_a672e2f061245308cbd65d432a4d61674"><div class="ttname"><a href="../../d2/d00/a01085.html#a672e2f061245308cbd65d432a4d61674">CConfigurator::get_num_value</a></div><div class="ttdeci">u64 get_num_value(const char *n, bool decimal_suffixes)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00116_source.html#l00162">Configurator.h:162</a></div></div>
-<div class="ttc" id="aa01373_html"><div class="ttname"><a href="../../d7/d00/a01373.html">CSystemComponent</a></div><div class="ttdoc">Abstract base class for devices that connect to the Typhoon chipset.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00356_source.html#l00095">SystemComponent.h:96</a></div></div>
-<div class="ttc" id="aa02109_html_ae4c22f949ba698a0462e26416983ba7d"><div class="ttname"><a href="../../d7/d00/a02109.html#ae4c22f949ba698a0462e26416983ba7d">CSystem::RegisterMemory</a></div><div class="ttdeci">int RegisterMemory(CSystemComponent *component, int index, u64 base, u64 length)</div><div class="ttdoc">Reserve a range of the 64-bit system address space for a device.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00722_source.html#l00674">System.cpp:674</a></div></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &quot;<a class="code" href="../../d3/d00/a00779.html">StdAfx.h</a>&quot;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;<a class="code" href="../../d6/d00/a00491.html">emu/SystemComponent.h</a>&quot;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;windows.h&gt;</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;mmsystem.h&gt;</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keyword">class </span><a class="code hl_class" href="../../dc/d00/a01200.html">CISABus</a>;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keyword">class </span>CMPU401 : <span class="keyword">public</span> <a class="code hl_class" href="../../dc/d00/a01712.html">CSystemComponent</a></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>{</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  <span class="keyword">virtual</span> <span class="keywordtype">int</span>   RestoreState(FILE* f)<span class="keyword"> override</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="keyword">  </span>{</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  }</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  <span class="keyword">virtual</span> <span class="keywordtype">int</span>   SaveState(FILE* f)<span class="keyword"> override</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="keyword">  </span>{</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  }</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  CISABus&amp; bus;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  <span class="keyword">const</span> <a class="code hl_typedef" href="../../d5/d00/a00461.html#a6dbf9516e516c901604625282c174aa4">u16</a> io_port;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  HMIDIOUT hmo{};</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  MIDIHDR hdr{};</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> midi_lengths[8] = { 3, 3, 3, 3, 2, 2, 3, 1 };</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> midi_buffer[32] = {};</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> midi_ptr = 0;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> midi_status_byte = 0x80;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>  <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> midi_mpu_status = 0x80;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  <span class="keywordtype">bool</span> bReset = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>  std::vector&lt;uint8_t&gt; sysex_data;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  CMPU401(CConfigurator* cfg, CSystem* system, CISABus&amp; bus, <a class="code hl_typedef" href="../../d5/d00/a00461.html#a6dbf9516e516c901604625282c174aa4">u16</a> io_port);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  ~CMPU401() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>  <span class="keywordtype">void</span> init() <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>  std::string snapshot_identity() <span class="keyword">const override</span>;</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>  <span class="keyword">const</span> CSystemComponent* memory_decode_owner() const noexcept override;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>  <span class="keywordtype">bool</span> decodes_memory_access(<span class="keywordtype">int</span> <a class="code hl_define" href="../../dc/d00/a00167.html#a4da57af702c29650efdb4449c5266f8f">index</a>, <a class="code hl_typedef" href="../../d5/d00/a00461.html#a1af9f95651e921615e75917a6dd1b574">u64</a> address, <span class="keywordtype">int</span> dsize,</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keywordtype">bool</span> write) const noexcept override;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>  <span class="keywordtype">bool</span> uses_subtractive_decode(<span class="keywordtype">int</span> <a class="code hl_define" href="../../dc/d00/a00167.html#a4da57af702c29650efdb4449c5266f8f">index</a>, <a class="code hl_typedef" href="../../d5/d00/a00461.html#a1af9f95651e921615e75917a6dd1b574">u64</a> address, <span class="keywordtype">int</span> dsize,</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keywordtype">bool</span> write) const noexcept override;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>  virtual <a class="code hl_typedef" href="../../d5/d00/a00461.html#a1af9f95651e921615e75917a6dd1b574">u64</a>   ReadMem(<span class="keywordtype">int</span> <a class="code hl_define" href="../../dc/d00/a00167.html#a4da57af702c29650efdb4449c5266f8f">index</a>, <a class="code hl_typedef" href="../../d5/d00/a00461.html#a1af9f95651e921615e75917a6dd1b574">u64</a> address, <span class="keywordtype">int</span> dsize) override;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  virtual <span class="keywordtype">void</span>  WriteMem(<span class="keywordtype">int</span> <a class="code hl_define" href="../../dc/d00/a00167.html#a4da57af702c29650efdb4449c5266f8f">index</a>, <a class="code hl_typedef" href="../../d5/d00/a00461.html#a1af9f95651e921615e75917a6dd1b574">u64</a> address, <span class="keywordtype">int</span> dsize, <a class="code hl_typedef" href="../../d5/d00/a00461.html#a1af9f95651e921615e75917a6dd1b574">u64</a> data) override;</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>};</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aa00167_html_a4da57af702c29650efdb4449c5266f8f"><div class="ttname"><a href="../../dc/d00/a00167.html#a4da57af702c29650efdb4449c5266f8f">index</a></div><div class="ttdeci">#define index(s, c)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00167_source.html#l00042">bsd_compat.h:42</a></div></div>
+<div class="ttc" id="aa00461_html_a1af9f95651e921615e75917a6dd1b574"><div class="ttname"><a href="../../d5/d00/a00461.html#a1af9f95651e921615e75917a6dd1b574">u64</a></div><div class="ttdeci">uint64_t u64</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00461_source.html#l00126">datatypes.h:126</a></div></div>
+<div class="ttc" id="aa00461_html_a6dbf9516e516c901604625282c174aa4"><div class="ttname"><a href="../../d5/d00/a00461.html#a6dbf9516e516c901604625282c174aa4">u16</a></div><div class="ttdeci">uint16_t u16</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00461_source.html#l00124">datatypes.h:124</a></div></div>
+<div class="ttc" id="aa00491_html"><div class="ttname"><a href="../../d6/d00/a00491.html">SystemComponent.h</a></div><div class="ttdoc">Contains definitions for the base class for devices that connect to the chipset.</div></div>
+<div class="ttc" id="aa00779_html"><div class="ttname"><a href="../../d3/d00/a00779.html">StdAfx.h</a></div><div class="ttdoc">Standard includes.</div></div>
+<div class="ttc" id="aa01200_html"><div class="ttname"><a href="../../dc/d00/a01200.html">CISABus</a></div><div class="ttdef"><b>Definition</b> <a href="../../d3/d00/a00113_source.html#l00036">ISABus.h:37</a></div></div>
+<div class="ttc" id="aa01712_html"><div class="ttname"><a href="../../dc/d00/a01712.html">CSystemComponent</a></div><div class="ttdoc">Abstract base class for devices that connect to the Typhoon chipset.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00491_source.html#l00102">SystemComponent.h:103</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->

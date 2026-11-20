@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: CPU/cpu_logical.h Source File</title>
+<title>ES40: CPU/AlphaIEEETrap.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.95</span>
    </div>
   </td>
  </tr>
@@ -109,90 +109,187 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('dd/d00/a00248_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">cpu_logical.h</div></div>
+  <div class="headertitle"><div class="title">AlphaIEEETrap.h</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../dd/d00/a00248.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 Emulator.</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2007-2008 by the ES40 Emulator Project</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * This program is free software; you can redistribute it and/or</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * modify it under the terms of the GNU General Public License</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * as published by the Free Software Foundation; either version 2</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * of the License, or (at your option) any later version.</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * This program is distributed in the hope that it will be useful,</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * GNU General Public License for more details.</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * You should have received a copy of the GNU General Public License</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * along with this program; if not, write to the Free Software</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * Although this is not required, the author would appreciate being notified of,</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * and receiving any modifications you may make to the source code that might serve</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * the general public.</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> *</span></div>
+<a href="../../dd/d00/a00248.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator -- Alpha IEEE exception policy</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2026 by gdwnldsKSC</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * All rights reserved.</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * SPDX-License-Identifier: BSD-1-Clause</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * Redistribution and use in source and binary forms, with or without</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * modification, are permitted provided that the following conditions are met:</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * 1. Redistributions of source code must retain the above copyright notice,</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> *    this list of conditions and the following disclaimer.</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> * POSSIBILITY OF SUCH DAMAGE.</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span></div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a00d46ec3f762fecdf14180a634890996">   53</a></span><span class="preprocessor">#define DO_AND      state.r[REG_3] = state.r[REG_1] &amp; V_2;</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#ab06ae6a6cb53d86fe78d0e1d682e5589">   54</a></span><span class="preprocessor">#define DO_BIC      state.r[REG_3] = state.r[REG_1] &amp;~V_2;</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a9f7dba4dde8222a99d0a3e69d0bfcf5c">   55</a></span><span class="preprocessor">#define DO_BIS      state.r[REG_3] = state.r[REG_1] | V_2;</span></div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#add05eaebb83bc2a6797e2f9a2896754a">   56</a></span><span class="preprocessor">#define DO_EQV      state.r[REG_3] = state.r[REG_1] ^ ~V_2;</span></div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#ac976bc321be108863585602eb0e80291">   57</a></span><span class="preprocessor">#define DO_ORNOT    state.r[REG_3] = state.r[REG_1] | ~V_2;</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a493fcec6ea00498b4f0c15822b8a614f">   58</a></span><span class="preprocessor">#define DO_XOR      state.r[REG_3] = state.r[REG_1] ^ V_2;</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
-<div class="foldopen" id="foldopen00060" data-start="" data-end="">
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a77a35e570315202f95105b5ee3c391c2">   60</a></span><span class="preprocessor">#define DO_CMOVEQ   if(!state.r[REG_1]) \</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">    state.r[REG_3] = V_2;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#if !defined(INCLUDED_ALPHAIEEETRAP_H)</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#define INCLUDED_ALPHAIEEETRAP_H</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;cstdint&gt;</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="foldopen" id="foldopen00030" data-start="{" data-end="};">
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="../../d5/d00/a01416.html">   30</a></span><span class="keyword">struct </span><a class="code hl_struct" href="../../d5/d00/a01416.html">AlphaIEEETrapResult</a></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>{</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="../../d5/d00/a01416.html#a7f3721cb79139c3d7c42087c9cd7be42">   32</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d5/d00/a01416.html#a7f3721cb79139c3d7c42087c9cd7be42">deliver</a>;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="../../d5/d00/a01416.html#a54ae95d51cca5e581f46c27a330d16c1">   33</a></span>  std::uint64_t <a class="code hl_variable" href="../../d5/d00/a01416.html#a54ae95d51cca5e581f46c27a330d16c1">flags</a>;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="../../d5/d00/a01416.html#ac6f159ce33d1161de4e47a83b26f86d9">   34</a></span>  std::uint64_t <a class="code hl_variable" href="../../d5/d00/a01416.html#ac6f159ce33d1161de4e47a83b26f86d9">fpcr</a>;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>};</div>
 </div>
-<div class="foldopen" id="foldopen00062" data-start="" data-end="">
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#af03ff61ce0244cb77b30ffb5317664d0">   62</a></span><span class="preprocessor">#define DO_CMOVGE   if((s64) state.r[REG_1] &gt;= 0) \</span></div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="preprocessor">    state.r[REG_3] = V_2;</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="foldopen" id="foldopen00037" data-start="{" data-end="};">
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9c">   37</a></span><span class="keyword">enum class</span> <a class="code hl_enumeration" href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9c">AlphaIEEEInexactKind</a></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>{</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9cadf608edb53fcc79c12759cdbdf58d9db">   39</a></span>  <a class="code hl_enumvalue" href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9cadf608edb53fcc79c12759cdbdf58d9db">Interpreter</a>,</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9ca35721c181ec6a9cca6cdb99dd844d07b">   40</a></span>  <a class="code hl_enumvalue" href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9ca35721c181ec6a9cca6cdb99dd844d07b">Noop</a>,</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9ca0f470b5c41655a73edd1e7b50102e251">   41</a></span>  <a class="code hl_enumvalue" href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9ca0f470b5c41655a73edd1e7b50102e251">FpcrBitSet</a></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>};</div>
 </div>
-<div class="foldopen" id="foldopen00064" data-start="" data-end="">
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#aeb67463f3c22efe83ea78d806c3a6ae1">   64</a></span><span class="preprocessor">#define DO_CMOVGT   if((s64) state.r[REG_1] &gt; 0) \</span></div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">    state.r[REG_3] = V_2;</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="foldopen" id="foldopen00044" data-start="{" data-end="};">
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="../../d0/d00/a01420.html">   44</a></span><span class="keyword">struct </span><a class="code hl_struct" href="../../d0/d00/a01420.html">AlphaIEEEInexactRule</a></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>{</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="../../d0/d00/a01420.html#aac54ba7f847b48d6ffcd2211f79ff6b7">   46</a></span>  <a class="code hl_enumeration" href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9c">AlphaIEEEInexactKind</a> <a class="code hl_variable" href="../../d0/d00/a01420.html#aac54ba7f847b48d6ffcd2211f79ff6b7">kind</a> = <a class="code hl_enumvalue" href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9cadf608edb53fcc79c12759cdbdf58d9db">AlphaIEEEInexactKind::Interpreter</a>;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="../../d0/d00/a01420.html#aeea63de52b570f31dfa2afa59851799e">   47</a></span>  std::uint32_t <a class="code hl_variable" href="../../d0/d00/a01420.html#aeea63de52b570f31dfa2afa59851799e">fpcr_bit</a> = 0;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="foldopen" id="foldopen00049" data-start="{" data-end="}">
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="../../d0/d00/a01420.html#a1548a81ffad6da5eacdbd6f27d4a48fe">   49</a></span>  <span class="keyword">constexpr</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d0/d00/a01420.html#a1548a81ffad6da5eacdbd6f27d4a48fe">operator==</a>(<span class="keyword">const</span> <a class="code hl_struct" href="../../d0/d00/a01420.html">AlphaIEEEInexactRule</a>&amp; other)<span class="keyword"> const</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="keyword">  </span>{</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d0/d00/a01420.html#aac54ba7f847b48d6ffcd2211f79ff6b7">kind</a> == other.<a class="code hl_variable" href="../../d0/d00/a01420.html#aac54ba7f847b48d6ffcd2211f79ff6b7">kind</a> &amp;&amp; <a class="code hl_variable" href="../../d0/d00/a01420.html#aeea63de52b570f31dfa2afa59851799e">fpcr_bit</a> == other.<a class="code hl_variable" href="../../d0/d00/a01420.html#aeea63de52b570f31dfa2afa59851799e">fpcr_bit</a>;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  }</div>
 </div>
-<div class="foldopen" id="foldopen00066" data-start="" data-end="">
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#aabdaf0c4d11c280bdf712304c886a375">   66</a></span><span class="preprocessor">#define DO_CMOVLBC  if(!(state.r[REG_1] &amp; U64(0x1))) \</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">    state.r[REG_3] = V_2;</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>};</div>
 </div>
-<div class="foldopen" id="foldopen00068" data-start="" data-end="">
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a529f1a5b728ef3fd6b69e86f761626e4">   68</a></span><span class="preprocessor">#define DO_CMOVLBS  if(state.r[REG_1] &amp; U64(0x1)) \</span></div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">    state.r[REG_3] = V_2;</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="foldopen" id="foldopen00055" data-start="{" data-end="};">
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6">   55</a></span><span class="keyword">enum class</span> <a class="code hl_enumeration" href="../../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6">AlphaIEEENonfiniteInput</a> : std::uint32_t</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>{</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6aeb2ac5b04180d8d6011a016aeb8f75b3">   57</a></span>  <a class="code hl_enumvalue" href="../../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6aeb2ac5b04180d8d6011a016aeb8f75b3">Infinity</a> = 1,</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6a9fb0a0af84dd973affb54be00c226af9">   58</a></span>  <a class="code hl_enumvalue" href="../../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6a9fb0a0af84dd973affb54be00c226af9">QuietNaN</a> = 2,</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6ae895e2f2464e7dc5bc8d6abf30b2d6f8">   59</a></span>  <a class="code hl_enumvalue" href="../../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6ae895e2f2464e7dc5bc8d6abf30b2d6f8">SignalingNaN</a> = 4</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>};</div>
 </div>
-<div class="foldopen" id="foldopen00070" data-start="" data-end="">
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#aa7897ea4313b8a59ffca2593e28efa27">   70</a></span><span class="preprocessor">#define DO_CMOVLE   if((s64) state.r[REG_1] &lt;= 0) \</span></div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">    state.r[REG_3] = V_2;</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="comment">// Whether /S may use family exception-disable controls.</span></div>
+<div class="foldopen" id="foldopen00063" data-start="{" data-end="};">
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a30aba9db4a74bb9372479295f2787bf4">   63</a></span><span class="keyword">enum class</span> <a class="code hl_enumeration" href="../../dd/d00/a00248.html#a30aba9db4a74bb9372479295f2787bf4">AlphaIEEETrapMasking</a></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>{</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a30aba9db4a74bb9372479295f2787bf4a6adf97f83acf6453d4a6a4b1070f3754">   65</a></span>  <a class="code hl_enumvalue" href="../../dd/d00/a00248.html#a30aba9db4a74bb9372479295f2787bf4a6adf97f83acf6453d4a6a4b1070f3754">None</a>,</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a30aba9db4a74bb9372479295f2787bf4a43bb415f6efa7bd91511ba0d6dd99361">   66</a></span>  <a class="code hl_enumvalue" href="../../dd/d00/a00248.html#a30aba9db4a74bb9372479295f2787bf4a43bb415f6efa7bd91511ba0d6dd99361">SoftwareCompletion</a></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>};</div>
 </div>
-<div class="foldopen" id="foldopen00072" data-start="" data-end="">
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a355c172fee51de2949a08d2bd6e63fa2">   72</a></span><span class="preprocessor">#define DO_CMOVLT   if((s64) state.r[REG_1] &lt; 0) \</span></div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="preprocessor">    state.r[REG_3] = V_2;</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="foldopen" id="foldopen00069" data-start="{" data-end="};">
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="../../d5/d00/a01424.html">   69</a></span><span class="keyword">struct </span><a class="code hl_struct" href="../../d5/d00/a01424.html">AlphaIEEETrapPolicy</a></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>{</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  <span class="comment">// Returns FPCR state to apply before reporting an arithmetic trap.</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="../../d5/d00/a01424.html#a22be7614f1b3bab0362c0252b613ecfe">   72</a></span>  <a class="code hl_struct" href="../../d5/d00/a01416.html">AlphaIEEETrapResult</a> (*<a class="code hl_variable" href="../../d5/d00/a01424.html#a22be7614f1b3bab0362c0252b613ecfe">evaluate</a>)(std::uint64_t fpcr, std::uint64_t trap,</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>      std::uint32_t instruction_enable, <a class="code hl_enumeration" href="../../dd/d00/a00248.html#a30aba9db4a74bb9372479295f2787bf4">AlphaIEEETrapMasking</a> masking,</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>      std::uint32_t instruction);</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>  <span class="comment">// Pure rule for effect-free INE skips (enable=0); keep paired with evaluate.</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>  <span class="comment">// Missing rules defer; exact paths need no rule.</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="../../d5/d00/a01424.html#a513decf30c34658cdff8577c154a902f">   78</a></span>  <a class="code hl_struct" href="../../d0/d00/a01420.html">AlphaIEEEInexactRule</a> (*<a class="code hl_variable" href="../../d5/d00/a01424.html#a513decf30c34658cdff8577c154a902f">describe_inexact</a>)(std::uint32_t instruction) = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  <span class="comment">// Pure underflow result after UNF/INE reporting; null preserves signed zero.</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="../../d5/d00/a01424.html#a3b13bd3cc6789b195e1d4d9ce922bf4d">   81</a></span>  std::uint64_t (*<a class="code hl_variable" href="../../d5/d00/a01424.html#a3b13bd3cc6789b195e1d4d9ce922bf4d">underflow_result</a>)(<span class="keywordtype">bool</span> negative) = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>  <span class="comment">// Pure rule from live FPCR; null leaves denormal inputs unflushed.</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="../../d5/d00/a01424.html#ad029ab7aa9de3977fa61a34e205860a7">   84</a></span>  bool (*<a class="code hl_variable" href="../../d5/d00/a01424.html#ad029ab7aa9de3977fa61a34e205860a7">denormal_input_zero</a>)(std::uint64_t fpcr) = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  <span class="comment">// Input classes requesting INV; delivery remains with evaluate.</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="../../d5/d00/a01424.html#a8d2a75af866c5b1659c6b87f3ed4306d">   87</a></span>  std::uint32_t <a class="code hl_variable" href="../../d5/d00/a01424.html#a8d2a75af866c5b1659c6b87f3ed4306d">invalid_nonfinite_inputs</a> =</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keyword">static_cast&lt;</span>std::uint32_t<span class="keyword">&gt;</span>(<a class="code hl_enumvalue" href="../../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6ae895e2f2464e7dc5bc8d6abf30b2d6f8">AlphaIEEENonfiniteInput::SignalingNaN</a>);</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="../../d5/d00/a01424.html#aae2c864d7db4608933931f34f1530c29">   90</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d5/d00/a01424.html#aae2c864d7db4608933931f34f1530c29">divide_rounding_inexact</a> = <span class="keyword">true</span>; <span class="comment">// DIV rounding reports INE.</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="../../d5/d00/a01424.html#a324dc94a7390710baa5a870f7c34eac4">   91</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d5/d00/a01424.html#a324dc94a7390710baa5a870f7c34eac4">divide_inexact_completion</a> = <span class="keyword">false</span>; <span class="comment">// /I DIV reports INE after valid inputs.</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="../../d5/d00/a01424.html#af3c70607a49c6c81a1f88c76f041c577">   92</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d5/d00/a01424.html#af3c70607a49c6c81a1f88c76f041c577">stop_on_invalid_input</a> = <span class="keyword">false</span>; <span class="comment">// Stop after an input requests INV.</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>};</div>
 </div>
-<div class="foldopen" id="foldopen00074" data-start="" data-end="">
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a0679dd6f65579c079c6e2a87d6f8d603">   74</a></span><span class="preprocessor">#define DO_CMOVNE   if(state.r[REG_1]) \</span></div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="preprocessor">    state.r[REG_3] = V_2;</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
+<div class="foldopen" id="foldopen00095" data-start="{" data-end="}">
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a5e300f0a3a234fddf27692598997d799">   95</a></span><span class="keyword">constexpr</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../dd/d00/a00248.html#a5e300f0a3a234fddf27692598997d799">alpha_ieee_nonfinite_input_invalid</a>(</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="keyword">const</span> <a class="code hl_struct" href="../../d5/d00/a01424.html">AlphaIEEETrapPolicy</a>&amp; policy, <a class="code hl_enumeration" href="../../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6">AlphaIEEENonfiniteInput</a> input)</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>{</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>  <span class="keywordflow">return</span> (policy.<a class="code hl_variable" href="../../d5/d00/a01424.html#a8d2a75af866c5b1659c6b87f3ed4306d">invalid_nonfinite_inputs</a> &amp; <span class="keyword">static_cast&lt;</span>std::uint32_t<span class="keyword">&gt;</span>(input)) != 0;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>}</div>
 </div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#aa9c5ef75a8fc4f666d59066529c37c6c">   77</a></span><span class="preprocessor">#define DO_SLL      state.r[REG_3] = state.r[REG_1] &lt;&lt; (V_2 &amp; 63);</span></div>
-<div class="foldopen" id="foldopen00078" data-start="" data-end="">
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a133471753e6c10ff034eff677ab1db45">   78</a></span><span class="preprocessor">#define DO_SRA      state.r[REG_3] = (V_2 &amp; 63) ?                      \</span></div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="preprocessor">    (                                                                  \</span></div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="preprocessor">      (state.r[REG_1] &gt;&gt; (V_2 &amp; 63)) |                                 \</span></div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="preprocessor">        ((state.r[REG_1] &gt;&gt; 63) ? (X64_QUAD &lt;&lt; (64 - (V_2 &amp; 63))) : 0) \</span></div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="preprocessor">    ) : state.r[REG_1];</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="foldopen" id="foldopen00101" data-start="{" data-end="}">
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#acdc5958154034809ae6213aabad58934">  101</a></span><span class="keyword">inline</span> <a class="code hl_struct" href="../../d0/d00/a01420.html">AlphaIEEEInexactRule</a> <a class="code hl_function" href="../../dd/d00/a00248.html#acdc5958154034809ae6213aabad58934">alpha_ieee_inexact_rule</a>(</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    <span class="keyword">const</span> <a class="code hl_struct" href="../../d5/d00/a01424.html">AlphaIEEETrapPolicy</a>&amp; policy, std::uint32_t instruction)</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>{</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  <span class="keywordflow">if</span> (!policy.<a class="code hl_variable" href="../../d5/d00/a01424.html#a513decf30c34658cdff8577c154a902f">describe_inexact</a>) <span class="keywordflow">return</span> {};</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>  <span class="keyword">const</span> <span class="keyword">auto</span> rule = policy.<a class="code hl_variable" href="../../d5/d00/a01424.html#a513decf30c34658cdff8577c154a902f">describe_inexact</a>(instruction);</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  <span class="keywordflow">if</span> (rule.kind == <a class="code hl_enumvalue" href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9ca35721c181ec6a9cca6cdb99dd844d07b">AlphaIEEEInexactKind::Noop</a>)</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <span class="keywordflow">return</span> {<a class="code hl_enumvalue" href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9ca35721c181ec6a9cca6cdb99dd844d07b">AlphaIEEEInexactKind::Noop</a>, 0};</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  <span class="keywordflow">if</span> (rule.kind == <a class="code hl_enumvalue" href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9ca0f470b5c41655a73edd1e7b50102e251">AlphaIEEEInexactKind::FpcrBitSet</a> &amp;&amp; rule.fpcr_bit &lt; 64)</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keywordflow">return</span> rule;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>  <span class="keywordflow">return</span> {};</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>}</div>
 </div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#a94b495ce2b14d9beb81c54f5923e4852">   83</a></span><span class="preprocessor">#define DO_SRL      state.r[REG_3] = state.r[REG_1] &gt;&gt; (V_2 &amp; 63);</span></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="foldopen" id="foldopen00113" data-start="{" data-end="}">
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno"><a class="line" href="../../dd/d00/a00248.html#abab313fcf7b2945bd1b723de1331e826">  113</a></span><span class="keyword">inline</span> <a class="code hl_struct" href="../../d0/d00/a01420.html">AlphaIEEEInexactRule</a> <a class="code hl_function" href="../../dd/d00/a00248.html#abab313fcf7b2945bd1b723de1331e826">alpha_ieee_divide_inexact_rule</a>(</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <span class="keyword">const</span> <a class="code hl_struct" href="../../d5/d00/a01424.html">AlphaIEEETrapPolicy</a>&amp; policy, std::uint32_t instruction)</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>{</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>  <span class="keywordflow">return</span> policy.<a class="code hl_variable" href="../../d5/d00/a01424.html#aae2c864d7db4608933931f34f1530c29">divide_rounding_inexact</a> ? <a class="code hl_function" href="../../dd/d00/a00248.html#acdc5958154034809ae6213aabad58934">alpha_ieee_inexact_rule</a>(policy, instruction)</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    : <a class="code hl_struct" href="../../d0/d00/a01420.html">AlphaIEEEInexactRule</a>{<a class="code hl_enumvalue" href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9ca35721c181ec6a9cca6cdb99dd844d07b">AlphaIEEEInexactKind::Noop</a>, 0};</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>}</div>
+</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span> </div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aa00248_html_a1724134c85a96c5499dc8d4152bf10a6"><div class="ttname"><a href="../../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6">AlphaIEEENonfiniteInput</a></div><div class="ttdeci">AlphaIEEENonfiniteInput</div><div class="ttdef"><b>Definition</b> <a href="#l00055">AlphaIEEETrap.h:56</a></div></div>
+<div class="ttc" id="aa00248_html_a1724134c85a96c5499dc8d4152bf10a6a9fb0a0af84dd973affb54be00c226af9"><div class="ttname"><a href="../../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6a9fb0a0af84dd973affb54be00c226af9">AlphaIEEENonfiniteInput::QuietNaN</a></div><div class="ttdeci">@ QuietNaN</div><div class="ttdef"><b>Definition</b> <a href="#l00058">AlphaIEEETrap.h:58</a></div></div>
+<div class="ttc" id="aa00248_html_a1724134c85a96c5499dc8d4152bf10a6ae895e2f2464e7dc5bc8d6abf30b2d6f8"><div class="ttname"><a href="../../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6ae895e2f2464e7dc5bc8d6abf30b2d6f8">AlphaIEEENonfiniteInput::SignalingNaN</a></div><div class="ttdeci">@ SignalingNaN</div><div class="ttdef"><b>Definition</b> <a href="#l00059">AlphaIEEETrap.h:59</a></div></div>
+<div class="ttc" id="aa00248_html_a1724134c85a96c5499dc8d4152bf10a6aeb2ac5b04180d8d6011a016aeb8f75b3"><div class="ttname"><a href="../../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6aeb2ac5b04180d8d6011a016aeb8f75b3">AlphaIEEENonfiniteInput::Infinity</a></div><div class="ttdeci">@ Infinity</div><div class="ttdef"><b>Definition</b> <a href="#l00057">AlphaIEEETrap.h:57</a></div></div>
+<div class="ttc" id="aa00248_html_a30aba9db4a74bb9372479295f2787bf4"><div class="ttname"><a href="../../dd/d00/a00248.html#a30aba9db4a74bb9372479295f2787bf4">AlphaIEEETrapMasking</a></div><div class="ttdeci">AlphaIEEETrapMasking</div><div class="ttdef"><b>Definition</b> <a href="#l00063">AlphaIEEETrap.h:64</a></div></div>
+<div class="ttc" id="aa00248_html_a30aba9db4a74bb9372479295f2787bf4a43bb415f6efa7bd91511ba0d6dd99361"><div class="ttname"><a href="../../dd/d00/a00248.html#a30aba9db4a74bb9372479295f2787bf4a43bb415f6efa7bd91511ba0d6dd99361">AlphaIEEETrapMasking::SoftwareCompletion</a></div><div class="ttdeci">@ SoftwareCompletion</div><div class="ttdef"><b>Definition</b> <a href="#l00066">AlphaIEEETrap.h:66</a></div></div>
+<div class="ttc" id="aa00248_html_a30aba9db4a74bb9372479295f2787bf4a6adf97f83acf6453d4a6a4b1070f3754"><div class="ttname"><a href="../../dd/d00/a00248.html#a30aba9db4a74bb9372479295f2787bf4a6adf97f83acf6453d4a6a4b1070f3754">AlphaIEEETrapMasking::None</a></div><div class="ttdeci">@ None</div><div class="ttdef"><b>Definition</b> <a href="#l00065">AlphaIEEETrap.h:65</a></div></div>
+<div class="ttc" id="aa00248_html_a5e300f0a3a234fddf27692598997d799"><div class="ttname"><a href="../../dd/d00/a00248.html#a5e300f0a3a234fddf27692598997d799">alpha_ieee_nonfinite_input_invalid</a></div><div class="ttdeci">constexpr bool alpha_ieee_nonfinite_input_invalid(const AlphaIEEETrapPolicy &amp;policy, AlphaIEEENonfiniteInput input)</div><div class="ttdef"><b>Definition</b> <a href="#l00095">AlphaIEEETrap.h:95</a></div></div>
+<div class="ttc" id="aa00248_html_a8ee8f1dc2a1d2eae7c5a63989dc55b9c"><div class="ttname"><a href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9c">AlphaIEEEInexactKind</a></div><div class="ttdeci">AlphaIEEEInexactKind</div><div class="ttdef"><b>Definition</b> <a href="#l00037">AlphaIEEETrap.h:38</a></div></div>
+<div class="ttc" id="aa00248_html_a8ee8f1dc2a1d2eae7c5a63989dc55b9ca0f470b5c41655a73edd1e7b50102e251"><div class="ttname"><a href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9ca0f470b5c41655a73edd1e7b50102e251">AlphaIEEEInexactKind::FpcrBitSet</a></div><div class="ttdeci">@ FpcrBitSet</div><div class="ttdef"><b>Definition</b> <a href="#l00041">AlphaIEEETrap.h:41</a></div></div>
+<div class="ttc" id="aa00248_html_a8ee8f1dc2a1d2eae7c5a63989dc55b9ca35721c181ec6a9cca6cdb99dd844d07b"><div class="ttname"><a href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9ca35721c181ec6a9cca6cdb99dd844d07b">AlphaIEEEInexactKind::Noop</a></div><div class="ttdeci">@ Noop</div><div class="ttdef"><b>Definition</b> <a href="#l00040">AlphaIEEETrap.h:40</a></div></div>
+<div class="ttc" id="aa00248_html_a8ee8f1dc2a1d2eae7c5a63989dc55b9cadf608edb53fcc79c12759cdbdf58d9db"><div class="ttname"><a href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9cadf608edb53fcc79c12759cdbdf58d9db">AlphaIEEEInexactKind::Interpreter</a></div><div class="ttdeci">@ Interpreter</div><div class="ttdef"><b>Definition</b> <a href="#l00039">AlphaIEEETrap.h:39</a></div></div>
+<div class="ttc" id="aa00248_html_abab313fcf7b2945bd1b723de1331e826"><div class="ttname"><a href="../../dd/d00/a00248.html#abab313fcf7b2945bd1b723de1331e826">alpha_ieee_divide_inexact_rule</a></div><div class="ttdeci">AlphaIEEEInexactRule alpha_ieee_divide_inexact_rule(const AlphaIEEETrapPolicy &amp;policy, std::uint32_t instruction)</div><div class="ttdef"><b>Definition</b> <a href="#l00113">AlphaIEEETrap.h:113</a></div></div>
+<div class="ttc" id="aa00248_html_acdc5958154034809ae6213aabad58934"><div class="ttname"><a href="../../dd/d00/a00248.html#acdc5958154034809ae6213aabad58934">alpha_ieee_inexact_rule</a></div><div class="ttdeci">AlphaIEEEInexactRule alpha_ieee_inexact_rule(const AlphaIEEETrapPolicy &amp;policy, std::uint32_t instruction)</div><div class="ttdef"><b>Definition</b> <a href="#l00101">AlphaIEEETrap.h:101</a></div></div>
+<div class="ttc" id="aa01416_html"><div class="ttname"><a href="../../d5/d00/a01416.html">AlphaIEEETrapResult</a></div><div class="ttdef"><b>Definition</b> <a href="#l00030">AlphaIEEETrap.h:31</a></div></div>
+<div class="ttc" id="aa01416_html_a54ae95d51cca5e581f46c27a330d16c1"><div class="ttname"><a href="../../d5/d00/a01416.html#a54ae95d51cca5e581f46c27a330d16c1">AlphaIEEETrapResult::flags</a></div><div class="ttdeci">std::uint64_t flags</div><div class="ttdef"><b>Definition</b> <a href="#l00033">AlphaIEEETrap.h:33</a></div></div>
+<div class="ttc" id="aa01416_html_a7f3721cb79139c3d7c42087c9cd7be42"><div class="ttname"><a href="../../d5/d00/a01416.html#a7f3721cb79139c3d7c42087c9cd7be42">AlphaIEEETrapResult::deliver</a></div><div class="ttdeci">bool deliver</div><div class="ttdef"><b>Definition</b> <a href="#l00032">AlphaIEEETrap.h:32</a></div></div>
+<div class="ttc" id="aa01416_html_ac6f159ce33d1161de4e47a83b26f86d9"><div class="ttname"><a href="../../d5/d00/a01416.html#ac6f159ce33d1161de4e47a83b26f86d9">AlphaIEEETrapResult::fpcr</a></div><div class="ttdeci">std::uint64_t fpcr</div><div class="ttdef"><b>Definition</b> <a href="#l00034">AlphaIEEETrap.h:34</a></div></div>
+<div class="ttc" id="aa01420_html"><div class="ttname"><a href="../../d0/d00/a01420.html">AlphaIEEEInexactRule</a></div><div class="ttdef"><b>Definition</b> <a href="#l00044">AlphaIEEETrap.h:45</a></div></div>
+<div class="ttc" id="aa01420_html_a1548a81ffad6da5eacdbd6f27d4a48fe"><div class="ttname"><a href="../../d0/d00/a01420.html#a1548a81ffad6da5eacdbd6f27d4a48fe">AlphaIEEEInexactRule::operator==</a></div><div class="ttdeci">constexpr bool operator==(const AlphaIEEEInexactRule &amp;other) const</div><div class="ttdef"><b>Definition</b> <a href="#l00049">AlphaIEEETrap.h:49</a></div></div>
+<div class="ttc" id="aa01420_html_aac54ba7f847b48d6ffcd2211f79ff6b7"><div class="ttname"><a href="../../d0/d00/a01420.html#aac54ba7f847b48d6ffcd2211f79ff6b7">AlphaIEEEInexactRule::kind</a></div><div class="ttdeci">AlphaIEEEInexactKind kind</div><div class="ttdef"><b>Definition</b> <a href="#l00046">AlphaIEEETrap.h:46</a></div></div>
+<div class="ttc" id="aa01420_html_aeea63de52b570f31dfa2afa59851799e"><div class="ttname"><a href="../../d0/d00/a01420.html#aeea63de52b570f31dfa2afa59851799e">AlphaIEEEInexactRule::fpcr_bit</a></div><div class="ttdeci">std::uint32_t fpcr_bit</div><div class="ttdef"><b>Definition</b> <a href="#l00047">AlphaIEEETrap.h:47</a></div></div>
+<div class="ttc" id="aa01424_html"><div class="ttname"><a href="../../d5/d00/a01424.html">AlphaIEEETrapPolicy</a></div><div class="ttdef"><b>Definition</b> <a href="#l00069">AlphaIEEETrap.h:70</a></div></div>
+<div class="ttc" id="aa01424_html_a22be7614f1b3bab0362c0252b613ecfe"><div class="ttname"><a href="../../d5/d00/a01424.html#a22be7614f1b3bab0362c0252b613ecfe">AlphaIEEETrapPolicy::evaluate</a></div><div class="ttdeci">AlphaIEEETrapResult(*) evaluate(std::uint64_t fpcr, std::uint64_t trap, std::uint32_t instruction_enable, AlphaIEEETrapMasking masking, std::uint32_t instruction)</div><div class="ttdef"><b>Definition</b> <a href="#l00072">AlphaIEEETrap.h:72</a></div></div>
+<div class="ttc" id="aa01424_html_a324dc94a7390710baa5a870f7c34eac4"><div class="ttname"><a href="../../d5/d00/a01424.html#a324dc94a7390710baa5a870f7c34eac4">AlphaIEEETrapPolicy::divide_inexact_completion</a></div><div class="ttdeci">bool divide_inexact_completion</div><div class="ttdef"><b>Definition</b> <a href="#l00091">AlphaIEEETrap.h:91</a></div></div>
+<div class="ttc" id="aa01424_html_a3b13bd3cc6789b195e1d4d9ce922bf4d"><div class="ttname"><a href="../../d5/d00/a01424.html#a3b13bd3cc6789b195e1d4d9ce922bf4d">AlphaIEEETrapPolicy::underflow_result</a></div><div class="ttdeci">std::uint64_t(*) underflow_result(bool negative)</div><div class="ttdef"><b>Definition</b> <a href="#l00081">AlphaIEEETrap.h:81</a></div></div>
+<div class="ttc" id="aa01424_html_a513decf30c34658cdff8577c154a902f"><div class="ttname"><a href="../../d5/d00/a01424.html#a513decf30c34658cdff8577c154a902f">AlphaIEEETrapPolicy::describe_inexact</a></div><div class="ttdeci">AlphaIEEEInexactRule(*) describe_inexact(std::uint32_t instruction)</div><div class="ttdef"><b>Definition</b> <a href="#l00078">AlphaIEEETrap.h:78</a></div></div>
+<div class="ttc" id="aa01424_html_a8d2a75af866c5b1659c6b87f3ed4306d"><div class="ttname"><a href="../../d5/d00/a01424.html#a8d2a75af866c5b1659c6b87f3ed4306d">AlphaIEEETrapPolicy::invalid_nonfinite_inputs</a></div><div class="ttdeci">std::uint32_t invalid_nonfinite_inputs</div><div class="ttdef"><b>Definition</b> <a href="#l00087">AlphaIEEETrap.h:87</a></div></div>
+<div class="ttc" id="aa01424_html_aae2c864d7db4608933931f34f1530c29"><div class="ttname"><a href="../../d5/d00/a01424.html#aae2c864d7db4608933931f34f1530c29">AlphaIEEETrapPolicy::divide_rounding_inexact</a></div><div class="ttdeci">bool divide_rounding_inexact</div><div class="ttdef"><b>Definition</b> <a href="#l00090">AlphaIEEETrap.h:90</a></div></div>
+<div class="ttc" id="aa01424_html_ad029ab7aa9de3977fa61a34e205860a7"><div class="ttname"><a href="../../d5/d00/a01424.html#ad029ab7aa9de3977fa61a34e205860a7">AlphaIEEETrapPolicy::denormal_input_zero</a></div><div class="ttdeci">bool(*) denormal_input_zero(std::uint64_t fpcr)</div><div class="ttdef"><b>Definition</b> <a href="#l00084">AlphaIEEETrap.h:84</a></div></div>
+<div class="ttc" id="aa01424_html_af3c70607a49c6c81a1f88c76f041c577"><div class="ttname"><a href="../../d5/d00/a01424.html#af3c70607a49c6c81a1f88c76f041c577">AlphaIEEETrapPolicy::stop_on_invalid_input</a></div><div class="ttdeci">bool stop_on_invalid_input</div><div class="ttdef"><b>Definition</b> <a href="#l00092">AlphaIEEETrap.h:92</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../dd/d00/a00248.html">cpu_logical.h</a></li>
+    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../dd/d00/a00248.html">AlphaIEEETrap.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

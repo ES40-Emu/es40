@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: emu/xtal.h File Reference</title>
+<title>ES40: CPU/Ev68CPUState.cpp File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.95</span>
    </div>
   </td>
  </tr>
@@ -109,450 +109,163 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d4/d00/a00359.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">xtal.h File Reference</div></div>
+  <div class="headertitle"><div class="title">Ev68CPUState.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;cstdint&gt;</code><br />
-<code>#include &lt;cmath&gt;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d3/d00/a00779_source.html">StdAfx.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d5/d00/a00206_source.html">AlphaCPU.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../de/d00/a00362_source.html">Ev68CPUState.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
-Include dependency graph for xtal.h:</div>
+Include dependency graph for Ev68CPUState.cpp:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../d0/d00/a00360.png" border="0" usemap="#aemu_2xtal_8h" loading="lazy" alt=""/></div>
-<map name="aemu_2xtal_8h" id="aemu_2xtal_8h">
-<area shape="rect" title=" " alt="" coords="36,5,118,32"/>
-<area shape="rect" title=" " alt="" coords="5,80,66,107"/>
-<area shape="poly" title=" " alt="" coords="72,31,52,68,48,65,67,34"/>
-<area shape="rect" title=" " alt="" coords="90,80,147,107"/>
-<area shape="poly" title=" " alt="" coords="85,30,106,67,101,67,83,35"/>
-</map>
-</div>
-</div><div class="textblock"><div class="dynheader">
-This graph shows which files directly or indirectly include this file:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d7/d00/a00361.png" border="0" usemap="#aemu_2xtal_8hdep" loading="lazy" alt=""/></div>
-<map name="aemu_2xtal_8hdep" id="aemu_2xtal_8hdep">
-<area shape="rect" title=" " alt="" coords="361,5,443,32"/>
-<area shape="rect" href="../../df/d00/a00335.html" title="Support functions for working with attotime data." alt="" coords="225,80,334,107"/>
-<area shape="poly" title=" " alt="" coords="365,42,302,82,300,77,370,39"/>
-<area shape="rect" href="../../d6/d00/a00371.html" title=" " alt="" coords="360,229,495,256"/>
-<area shape="poly" title=" " alt="" coords="407,46,429,230,424,228,403,49"/>
-<area shape="rect" href="../../d3/d00/a00419.html" title=" " alt="" coords="185,229,336,256"/>
-<area shape="poly" title=" " alt="" coords="401,46,387,113,373,149,354,183,324,211,291,231,289,226,320,207,349,180,369,147,382,112,397,50"/>
-<area shape="rect" href="../../d3/d00/a00341.html" title=" " alt="" coords="504,155,591,181"/>
-<area shape="poly" title=" " alt="" coords="426,41,538,154,532,154,424,46"/>
-<area shape="rect" href="../../d5/d00/a00374.html" title=" " alt="" coords="219,155,340,181"/>
-<area shape="poly" title=" " alt="" coords="281,120,282,156,277,153,278,125"/>
-<area shape="rect" href="../../db/d00/a00422.html" title=" " alt="" coords="58,155,195,181"/>
-<area shape="poly" title=" " alt="" coords="237,115,154,156,152,152,241,112"/>
-<area shape="rect" href="../../d3/d00/a00113.html" title="Contains the code for the configuration file interpreter." alt="" coords="5,229,162,256"/>
-<area shape="poly" title=" " alt="" coords="233,189,119,231,117,226,229,186"/>
-<area shape="poly" title=" " alt="" coords="320,186,404,229,399,229,318,191"/>
-<area shape="poly" title=" " alt="" coords="113,194,93,231,89,227,109,196"/>
-<area shape="poly" title=" " alt="" coords="163,186,240,228,235,229,162,191"/>
-<area shape="poly" title=" " alt="" coords="516,189,450,231,448,226,511,190"/>
-<area shape="poly" title=" " alt="" coords="492,184,312,231,311,226,487,184"/>
-<area shape="rect" href="../../dc/d00/a00425.html" title=" " alt="" coords="519,229,656,256"/>
-<area shape="poly" title=" " alt="" coords="563,193,583,230,578,228,561,198"/>
-<area shape="rect" href="../../df/d00/a00431.html" title=" " alt="" coords="680,229,807,256"/>
-<area shape="poly" title=" " alt="" coords="596,184,712,229,706,229,595,190"/>
-<area shape="rect" href="../../da/d00/a00383.html" title=" " alt="" coords="831,229,986,256"/>
-<area shape="poly" title=" " alt="" coords="606,178,848,229,843,229,606,184"/>
+<div class="center"><img src="../../d0/d00/a00360.png" border="0" usemap="#a_c_p_u_2_ev68_c_p_u_state_8cpp" loading="lazy" alt=""/></div>
+<map name="a_c_p_u_2_ev68_c_p_u_state_8cpp" id="a_c_p_u_2_ev68_c_p_u_state_8cpp">
+<area shape="rect" title=" " alt="" coords="1866,5,2035,32"/>
+<area shape="rect" href="../../d3/d00/a00779.html" title="Standard includes." alt="" coords="854,80,927,107"/>
+<area shape="poly" title=" " alt="" coords="1864,28,943,91,942,86,1868,24"/>
+<area shape="rect" href="../../d5/d00/a00206.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="1904,80,1998,107"/>
+<area shape="poly" title=" " alt="" coords="1952,31,1953,66,1949,63,1949,35"/>
+<area shape="rect" href="../../de/d00/a00362.html" title=" " alt="" coords="2423,80,2545,107"/>
+<area shape="poly" title=" " alt="" coords="2036,29,2410,81,2405,82,2036,34"/>
+<area shape="rect" href="../../d9/d00/a00191.html" title=" " alt="" coords="5,155,115,181"/>
+<area shape="poly" title=" " alt="" coords="852,97,559,116,349,133,131,157,129,152,349,128,559,111,856,95"/>
+<area shape="rect" href="../../d5/d00/a00461.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="139,155,229,181"/>
+<area shape="poly" title=" " alt="" coords="852,97,603,117,427,134,245,157,243,152,427,128,602,111,857,96"/>
+<area shape="rect" title=" " alt="" coords="2114,304,2182,331"/>
+<area shape="poly" title=" " alt="" coords="927,92,1173,91,1536,96,1720,103,1883,114,2007,130,2050,141,2077,152,2107,182,2127,218,2140,256,2147,290,2142,287,2135,257,2122,220,2103,185,2075,157,2048,146,2006,136,1882,120,1720,109,1536,102,1173,96,928,97"/>
+<area shape="rect" href="../../d3/d00/a00059.html" title=" " alt="" coords="252,155,374,181"/>
+<area shape="poly" title=" " alt="" coords="853,101,394,157,391,158,389,153,393,152,856,96"/>
+<area shape="rect" href="../../de/d00/a00065.html" title=" " alt="" coords="908,229,1009,256"/>
+<area shape="poly" title=" " alt="" coords="898,105,949,216,944,214,895,109"/>
+<area shape="rect" href="../../d1/d00/a00077.html" title=" " alt="" coords="449,229,554,256"/>
+<area shape="poly" title=" " alt="" coords="860,106,550,226,548,221,855,108"/>
+<area shape="rect" href="../../da/d00/a00068.html" title=" " alt="" coords="192,304,280,331"/>
+<area shape="poly" title=" " alt="" coords="851,104,657,157,547,192,438,232,278,300,276,295,436,227,545,187,655,152,856,102"/>
+<area shape="rect" href="../../db/d00/a00074.html" title=" " alt="" coords="1548,229,1678,256"/>
+<area shape="poly" title=" " alt="" coords="927,97,1078,118,1273,152,1426,188,1558,225,1552,225,1425,193,1271,157,1078,123,927,102"/>
+<area shape="rect" href="../../d0/d00/a00071.html" title=" " alt="" coords="775,155,889,181"/>
+<area shape="poly" title=" " alt="" coords="883,106,853,145,850,140,878,109"/>
+<area shape="rect" href="../../de/d00/a00500.html" title="Contains macro&#39;s and prototypes for debugging." alt="" coords="1006,155,1108,181"/>
+<area shape="poly" title=" " alt="" coords="920,105,1017,148,1012,148,919,110"/>
+<area shape="rect" href="../../d4/d00/a00503.html" title="Contains byte&#45;order conversion helpers." alt="" coords="1154,155,1259,181"/>
+<area shape="poly" title=" " alt="" coords="927,100,1142,151,1136,152,927,106"/>
+<area shape="rect" title=" " alt="" coords="275,229,352,256"/>
+<area shape="poly" title=" " alt="" coords="315,180,316,215,311,213,312,184"/>
+<area shape="rect" title=" " alt="" coords="1319,379,1372,405"/>
+<area shape="poly" title=" " alt="" coords="287,184,245,212,199,249,181,269,171,290,171,310,182,329,198,336,232,342,344,354,680,372,1047,383,1306,390,1300,390,1047,388,679,378,343,360,231,348,196,341,178,333,166,311,166,289,177,266,195,245,242,207,291,180"/>
+<area shape="rect" title=" " alt="" coords="1754,304,1811,331"/>
+<area shape="poly" title=" " alt="" coords="1009,247,1072,253,1258,265,1405,268,1552,276,1638,286,1741,304,1736,304,1637,291,1551,281,1405,273,1258,270,1072,259,1009,252"/>
+<area shape="rect" title=" " alt="" coords="1430,304,1490,331"/>
+<area shape="poly" title=" " alt="" coords="1009,250,1028,253,1417,310,1412,310,1028,259,1009,256"/>
+<area shape="rect" title=" " alt="" coords="930,304,987,331"/>
+<area shape="poly" title=" " alt="" coords="960,255,961,290,957,287,957,259"/>
+<area shape="rect" title=" " alt="" coords="849,304,906,331"/>
+<area shape="poly" title=" " alt="" coords="947,255,904,296,901,291,942,258"/>
+<area shape="rect" title=" " alt="" coords="1096,304,1174,331"/>
+<area shape="poly" title=" " alt="" coords="990,254,1092,298,1087,297,989,259"/>
+<area shape="poly" title=" " alt="" coords="554,248,663,267,726,282,788,302,813,315,838,328,902,346,969,359,1100,377,1217,386,1306,391,1300,391,1216,391,1099,383,968,364,901,351,836,333,811,320,786,306,725,287,662,272,554,253"/>
+<area shape="poly" title=" " alt="" coords="554,246,667,253,829,260,967,262,1203,259,1317,260,1439,265,1577,278,1741,304,1736,304,1576,284,1438,271,1317,265,1203,264,967,267,829,266,667,259,554,251"/>
+<area shape="poly" title=" " alt="" coords="554,245,1415,310,1413,315,554,251"/>
+<area shape="poly" title=" " alt="" coords="554,247,712,266,917,304,912,304,711,271,554,252"/>
+<area shape="poly" title=" " alt="" coords="554,250,831,301,837,305,831,305,830,307,554,256"/>
+<area shape="poly" title=" " alt="" coords="554,246,816,270,1083,303,1077,304,815,275,554,251"/>
+<area shape="rect" title=" " alt="" coords="1011,304,1072,331"/>
+<area shape="poly" title=" " alt="" coords="554,245,746,263,869,279,999,304,993,304,868,284,745,268,554,250"/>
+<area shape="rect" title=" " alt="" coords="706,304,774,331"/>
+<area shape="poly" title=" " alt="" coords="543,254,694,301,688,301,543,259"/>
+<area shape="rect" title=" " alt="" coords="1604,304,1729,331"/>
+<area shape="poly" title=" " alt="" coords="554,245,667,253,925,265,1127,271,1330,279,1592,304,1586,304,1329,285,1127,276,925,271,667,259,554,251"/>
+<area shape="rect" title=" " alt="" coords="1915,304,1984,331"/>
+<area shape="poly" title=" " alt="" coords="554,246,667,253,992,268,1246,275,1499,283,1824,301,1902,311,1897,311,1824,307,1499,288,1245,280,992,274,667,259,554,251"/>
+<area shape="rect" title=" " alt="" coords="304,304,400,331"/>
+<area shape="poly" title=" " alt="" coords="478,256,393,299,391,294,473,257"/>
+<area shape="poly" title=" " alt="" coords="453,257,295,303,294,298,458,256"/>
+<area shape="rect" title=" " alt="" coords="424,304,499,331"/>
+<area shape="poly" title=" " alt="" coords="497,255,477,292,474,288,492,258"/>
+<area shape="rect" title=" " alt="" coords="524,304,591,331"/>
+<area shape="poly" title=" " alt="" coords="512,254,541,293,536,291,510,259"/>
+<area shape="rect" title=" " alt="" coords="615,304,681,331"/>
+<area shape="poly" title=" " alt="" coords="527,254,611,297,606,297,526,259"/>
+<area shape="poly" title=" " alt="" coords="1643,254,1742,298,1737,297,1642,259"/>
+<area shape="poly" title=" " alt="" coords="1589,256,1501,299,1500,294,1584,257"/>
+<area shape="poly" title=" " alt="" coords="1550,254,1190,310,1189,305,1545,254"/>
+<area shape="poly" title=" " alt="" coords="1624,254,1651,292,1646,290,1621,259"/>
+<area shape="rect" title=" " alt="" coords="1516,304,1580,331"/>
+<area shape="poly" title=" " alt="" coords="1604,255,1570,295,1568,290,1600,258"/>
+<area shape="poly" title=" " alt="" coords="855,179,926,222,921,221,854,184"/>
+<area shape="poly" title=" " alt="" coords="880,179,948,200,1022,227,1048,241,1073,254,1166,278,1261,295,1417,314,1412,314,1260,301,1165,284,1071,258,1045,246,1020,232,947,205,880,185"/>
+<area shape="poly" title=" " alt="" coords="772,179,728,192,686,208,671,218,663,229,661,241,669,254,694,279,720,293,746,300,774,301,838,297,874,297,917,304,912,304,874,302,838,302,774,306,745,305,718,298,691,283,665,258,656,242,658,227,668,214,684,203,726,187,777,177"/>
+<area shape="poly" title=" " alt="" coords="772,174,713,184,655,199,633,210,620,222,616,237,625,254,646,276,668,289,691,295,714,297,768,295,798,296,831,301,837,305,831,305,830,307,797,301,768,300,714,302,690,301,666,294,643,281,620,258,611,237,615,220,630,205,653,194,712,179,777,173"/>
+<area shape="poly" title=" " alt="" coords="839,179,862,217,878,237,897,254,1083,303,1078,303,895,258,874,241,857,220,836,184"/>
+<area shape="poly" title=" " alt="" coords="833,180,837,218,843,237,854,254,999,302,993,302,850,258,838,239,832,219,830,184"/>
+<area shape="rect" title=" " alt="" coords="679,229,782,256"/>
+<area shape="poly" title=" " alt="" coords="817,181,762,222,760,217,812,183"/>
+<area shape="rect" title=" " alt="" coords="1084,229,1153,256"/>
+<area shape="poly" title=" " alt="" coords="1069,179,1101,218,1096,217,1067,184"/>
+<area shape="rect" href="../../d7/d00/a00182.html" title=" " alt="" coords="1177,229,1271,256"/>
+<area shape="poly" title=" " alt="" coords="1211,180,1220,216,1215,213,1208,184"/>
+<area shape="poly" title=" " alt="" coords="1948,105,1916,186,1895,228,1877,258,1852,280,1824,299,1822,294,1849,276,1873,254,1891,226,1911,184,1944,109"/>
+<area shape="poly" title=" " alt="" coords="1900,97,1819,107,1712,128,1656,145,1600,168,1548,196,1501,231,1480,259,1467,291,1464,287,1475,256,1497,227,1545,192,1598,163,1654,140,1711,123,1818,102,1906,96"/>
+<area shape="poly" title=" " alt="" coords="1900,96,1822,102,1715,112,1597,129,1479,157,1435,173,1402,189,1328,232,1307,246,1284,258,1208,280,1146,288,1083,293,1003,306,1002,301,1082,288,1145,283,1207,275,1282,254,1304,242,1325,227,1399,184,1433,168,1478,152,1596,124,1715,107,1821,97,1906,95"/>
+<area shape="poly" title=" " alt="" coords="1900,99,1753,120,1660,136,1569,157,1472,189,1379,232,1354,246,1328,258,1263,277,1210,287,1156,294,1087,306,1086,301,1155,288,1209,281,1262,272,1326,254,1351,241,1376,227,1470,184,1567,152,1659,131,1752,115,1905,98"/>
+<area shape="rect" href="../../df/d00/a00062.html" title=" " alt="" coords="1703,229,1862,256"/>
+<area shape="poly" title=" " alt="" coords="1939,106,1883,157,1809,221,1807,216,1880,153,1934,108"/>
+<area shape="rect" href="../../d4/d00/a00437.html" title=" " alt="" coords="2503,155,2598,181"/>
+<area shape="poly" title=" " alt="" coords="1998,98,2490,159,2485,159,1998,103"/>
+<area shape="rect" href="../../d6/d00/a00491.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="2191,229,2364,256"/>
+<area shape="poly" title=" " alt="" coords="1998,94,2070,99,2152,110,2225,127,2253,139,2273,153,2281,167,2286,183,2285,216,2281,212,2280,184,2276,169,2269,156,2251,143,2224,132,2151,115,2069,105,1998,99"/>
+<area shape="rect" href="../../d5/d00/a00878.html" title="Contains the definitions for the emulated Typhoon Chipset devices." alt="" coords="1939,155,2064,181"/>
+<area shape="poly" title=" " alt="" coords="1961,105,1987,143,1982,141,1958,110"/>
+<area shape="rect" href="../../d6/d00/a00293.html" title="Contains some macro definitions and some inline functions for the Alpha CPU." alt="" coords="2173,155,2259,181"/>
+<area shape="poly" title=" " alt="" coords="1997,105,2161,151,2156,151,1997,110"/>
+<area shape="rect" href="../../d3/d00/a00209.html" title=" " alt="" coords="2648,155,2779,181"/>
+<area shape="poly" title=" " alt="" coords="1998,96,2260,118,2611,152,2635,157,2630,157,2610,157,2259,124,1998,101"/>
+<area shape="poly" title=" " alt="" coords="1785,255,1785,290,1781,287,1781,258"/>
+<area shape="poly" title=" " alt="" coords="1722,256,1506,306,1505,301,1717,257"/>
+<area shape="poly" title=" " alt="" coords="1765,256,1701,298,1699,293,1760,257"/>
+<area shape="rect" title=" " alt="" coords="2664,304,2725,331"/>
+<area shape="poly" title=" " alt="" coords="1863,248,2651,312,2646,313,1863,253"/>
+<area shape="poly" title=" " alt="" coords="2564,179,2674,294,2669,292,2562,184"/>
+<area shape="rect" title=" " alt="" coords="2524,229,2577,256"/>
+<area shape="poly" title=" " alt="" coords="2552,180,2553,215,2549,212,2549,184"/>
+<area shape="rect" title=" " alt="" coords="2439,229,2500,256"/>
+<area shape="poly" title=" " alt="" coords="2539,181,2496,221,2493,217,2534,183"/>
+<area shape="rect" href="../../d6/d00/a00245.html" title=" " alt="" coords="2652,229,2738,256"/>
+<area shape="poly" title=" " alt="" coords="2576,179,2658,222,2653,221,2575,184"/>
+<area shape="poly" title=" " alt="" coords="2697,255,2697,290,2693,287,2693,258"/>
+<area shape="poly" title=" " alt="" coords="2257,256,2185,299,2183,293,2252,257"/>
+<area shape="poly" title=" " alt="" coords="2187,250,1190,315,1189,310,2193,249"/>
+<area shape="poly" title=" " alt="" coords="2217,256,1999,306,1998,301,2212,257"/>
+<area shape="rect" href="../../d7/d00/a00131.html" title="Contains the definitions for the configuration file interpreter." alt="" coords="2206,304,2348,331"/>
+<area shape="poly" title=" " alt="" coords="2279,255,2279,290,2275,287,2275,258"/>
+<area shape="rect" title=" " alt="" coords="2535,379,2593,405"/>
+<area shape="poly" title=" " alt="" coords="2365,252,2468,271,2511,285,2540,302,2551,316,2559,331,2565,365,2561,361,2553,333,2547,318,2537,306,2509,290,2466,277,2364,257"/>
+<area shape="rect" title=" " alt="" coords="2372,304,2449,331"/>
+<area shape="poly" title=" " alt="" coords="2301,254,2377,297,2372,296,2300,259"/>
+<area shape="rect" title=" " alt="" coords="2474,304,2526,331"/>
+<area shape="poly" title=" " alt="" coords="2317,254,2462,303,2456,302,2316,259"/>
+<area shape="rect" title=" " alt="" coords="2008,304,2090,331"/>
+<area shape="poly" title=" " alt="" coords="2240,256,2104,301,2103,296,2235,257"/>
+<area shape="poly" title=" " alt="" coords="2209,329,2194,333,1955,355,1722,372,1388,391,1388,386,1721,367,1955,350,2193,328,2203,329"/>
+<area shape="poly" title=" " alt="" coords="2328,329,2523,380,2517,379,2327,334"/>
+<area shape="poly" title=" " alt="" coords="1999,180,1982,219,1954,258,1923,287,1895,305,1865,319,1825,333,1765,351,1703,365,1580,383,1470,391,1388,394,1388,388,1470,386,1579,378,1702,359,1764,346,1823,328,1863,314,1893,301,1920,282,1950,254,1978,216,1994,183"/>
+<area shape="poly" title=" " alt="" coords="1995,180,1964,219,1920,258,1873,285,1827,304,1826,299,1871,280,1917,254,1960,216,1990,183"/>
+<area shape="poly" title=" " alt="" coords="1936,172,1839,181,1722,192,1613,208,1569,219,1537,232,1519,244,1502,260,1476,293,1473,288,1499,256,1516,240,1535,227,1568,214,1612,203,1721,186,1838,175,1941,172"/>
+<area shape="poly" title=" " alt="" coords="1936,175,1742,198,1499,232,1438,245,1378,259,1234,281,1169,290,1087,306,1086,301,1169,285,1233,276,1377,253,1437,240,1498,227,1742,193,1941,175"/>
+<area shape="poly" title=" " alt="" coords="2010,179,2025,215,2027,236,2022,257,2007,279,1986,297,1984,292,2003,276,2018,255,2022,236,2020,217,2007,184"/>
+<area shape="poly" title=" " alt="" coords="2050,179,2217,225,2212,225,2049,185"/>
+<area shape="poly" title=" " alt="" coords="2064,170,2209,188,2294,204,2377,227,2403,240,2428,254,2469,264,2505,267,2537,275,2553,286,2568,303,2575,317,2577,333,2574,366,2570,362,2572,333,2570,319,2563,305,2549,290,2535,280,2504,272,2468,270,2426,258,2400,244,2375,232,2293,209,2208,193,2064,176"/>
+<area shape="poly" title=" " alt="" coords="2025,179,2052,200,2073,228,2077,244,2077,261,2066,293,2063,288,2071,260,2072,245,2068,230,2048,204,2024,185"/>
+<area shape="poly" title=" " alt="" coords="2726,179,2749,214,2754,235,2752,257,2740,278,2724,296,2722,291,2736,275,2747,255,2749,236,2744,216,2724,184"/>
+<area shape="poly" title=" " alt="" coords="2712,180,2703,216,2700,212,2708,184"/>
+<area shape="rect" href="../../dd/d00/a00212.html" title=" " alt="" coords="2812,229,2937,256"/>
+<area shape="poly" title=" " alt="" coords="2742,179,2835,223,2830,222,2741,184"/>
+<area shape="poly" title=" " alt="" coords="2846,256,2740,301,2738,296,2841,257"/>
+<area shape="poly" title=" " alt="" coords="2546,93,2601,98,2664,108,2730,126,2792,152,2831,182,2860,218,2855,216,2827,186,2789,157,2728,131,2663,114,2600,103,2546,99"/>
 </map>
 </div>
 </div>
 <p><a href="../../d4/d00/a00359_source.html">Go to the source code of this file.</a></p>
-<table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
-Data Structures</h2></td></tr>
-<tr class="memitem:XTAL" id="r_XTAL"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../da/d00/a01381.html">XTAL</a></td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:aef23c7ee83b39b9108cf2f0c33cd1d96" id="r_aef23c7ee83b39b9108cf2f0c33cd1d96"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:aef23c7ee83b39b9108cf2f0c33cd1d96 template"><td class="memItemLeft">constexpr auto&#160;</td><td class="memItemRight"><a class="el" href="#aef23c7ee83b39b9108cf2f0c33cd1d96">operator/</a> (T &amp;&amp;div, const <a class="el" href="../../da/d00/a01381.html">XTAL</a> &amp;xtal)</td></tr>
-<tr class="memitem:aad516d96ab0b89508fc74c02df50a4fa" id="r_aad516d96ab0b89508fc74c02df50a4fa"><td class="memItemLeft">constexpr <a class="el" href="../../da/d00/a01381.html">XTAL</a>&#160;</td><td class="memItemRight"><a class="el" href="#aad516d96ab0b89508fc74c02df50a4fa">operator*</a> (int mult, const <a class="el" href="../../da/d00/a01381.html">XTAL</a> &amp;xtal)</td></tr>
-<tr class="memitem:a6ac1cb08c22f42c1e724324c74b129ba" id="r_a6ac1cb08c22f42c1e724324c74b129ba"><td class="memItemLeft">constexpr <a class="el" href="../../da/d00/a01381.html">XTAL</a>&#160;</td><td class="memItemRight"><a class="el" href="#a6ac1cb08c22f42c1e724324c74b129ba">operator*</a> (unsigned int mult, const <a class="el" href="../../da/d00/a01381.html">XTAL</a> &amp;xtal)</td></tr>
-<tr class="memitem:a6ffb3cc66163278ee8c214c799035a99" id="r_a6ffb3cc66163278ee8c214c799035a99"><td class="memItemLeft">constexpr <a class="el" href="../../da/d00/a01381.html">XTAL</a>&#160;</td><td class="memItemRight"><a class="el" href="#a6ffb3cc66163278ee8c214c799035a99">operator*</a> (double mult, const <a class="el" href="../../da/d00/a01381.html">XTAL</a> &amp;xtal)</td></tr>
-<tr class="memitem:ad1dfaf260b39a5a88fd31d6faa68c5f1" id="r_ad1dfaf260b39a5a88fd31d6faa68c5f1"><td class="memItemLeft">constexpr <a class="el" href="../../da/d00/a01381.html">XTAL</a>&#160;</td><td class="memItemRight"><a class="el" href="#ad1dfaf260b39a5a88fd31d6faa68c5f1">operator&quot;&quot;_Hz_XTAL</a> (long double clock)</td></tr>
-<tr class="memitem:a92bdefcb1394cab49429be665e15b54e" id="r_a92bdefcb1394cab49429be665e15b54e"><td class="memItemLeft">constexpr <a class="el" href="../../da/d00/a01381.html">XTAL</a>&#160;</td><td class="memItemRight"><a class="el" href="#a92bdefcb1394cab49429be665e15b54e">operator&quot;&quot;_kHz_XTAL</a> (long double clock)</td></tr>
-<tr class="memitem:abc99a571f8ae026e5f42a688c0b39a91" id="r_abc99a571f8ae026e5f42a688c0b39a91"><td class="memItemLeft">constexpr <a class="el" href="../../da/d00/a01381.html">XTAL</a>&#160;</td><td class="memItemRight"><a class="el" href="#abc99a571f8ae026e5f42a688c0b39a91">operator&quot;&quot;_MHz_XTAL</a> (long double clock)</td></tr>
-<tr class="memitem:a42145cc4e44196b3dfdbe4891112172a" id="r_a42145cc4e44196b3dfdbe4891112172a"><td class="memItemLeft">constexpr <a class="el" href="../../da/d00/a01381.html">XTAL</a>&#160;</td><td class="memItemRight"><a class="el" href="#a42145cc4e44196b3dfdbe4891112172a">operator&quot;&quot;_Hz_XTAL</a> (unsigned long long clock)</td></tr>
-<tr class="memitem:ae14871cc48032ede39146b09c26ed75d" id="r_ae14871cc48032ede39146b09c26ed75d"><td class="memItemLeft">constexpr <a class="el" href="../../da/d00/a01381.html">XTAL</a>&#160;</td><td class="memItemRight"><a class="el" href="#ae14871cc48032ede39146b09c26ed75d">operator&quot;&quot;_kHz_XTAL</a> (unsigned long long clock)</td></tr>
-<tr class="memitem:ae224abfa73ac3e6c7d073d64a5315b5d" id="r_ae224abfa73ac3e6c7d073d64a5315b5d"><td class="memItemLeft">constexpr <a class="el" href="../../da/d00/a01381.html">XTAL</a>&#160;</td><td class="memItemRight"><a class="el" href="#ae224abfa73ac3e6c7d073d64a5315b5d">operator&quot;&quot;_MHz_XTAL</a> (unsigned long long clock)</td></tr>
-</table>
-<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
-<a id="ad1dfaf260b39a5a88fd31d6faa68c5f1" name="ad1dfaf260b39a5a88fd31d6faa68c5f1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad1dfaf260b39a5a88fd31d6faa68c5f1">&#9670;&#160;</a></span>operator&quot;&quot;_Hz_XTAL() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../da/d00/a01381.html">XTAL</a> operator&quot;&quot;_Hz_XTAL </td>
-          <td>(</td>
-          <td class="paramtype">long double</td>          <td class="paramname"><span class="paramname"><em>clock</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00359_source.html#l00080">80</a> of file <a class="el" href="../../d4/d00/a00359_source.html">xtal.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d4/d00/a00359_source.html#l00054">XTAL::XTAL()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d4/d00/a00359_ad1dfaf260b39a5a88fd31d6faa68c5f1_cgraph.png" border="0" usemap="#ad4/d00/a00359_ad1dfaf260b39a5a88fd31d6faa68c5f1_cgraph" loading="lazy" alt=""/></div>
-<map name="ad4/d00/a00359_ad1dfaf260b39a5a88fd31d6faa68c5f1_cgraph" id="ad4/d00/a00359_ad1dfaf260b39a5a88fd31d6faa68c5f1_cgraph">
-<area shape="rect" title=" " alt="" coords="5,5,147,32"/>
-<area shape="rect" href="../../da/d00/a01381.html#a2d648ad97168de7c15132e89b13b2a48" title=" " alt="" coords="195,5,288,32"/>
-<area shape="poly" title=" " alt="" coords="147,16,182,19,176,19,147,21"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a42145cc4e44196b3dfdbe4891112172a" name="a42145cc4e44196b3dfdbe4891112172a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a42145cc4e44196b3dfdbe4891112172a">&#9670;&#160;</a></span>operator&quot;&quot;_Hz_XTAL() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../da/d00/a01381.html">XTAL</a> operator&quot;&quot;_Hz_XTAL </td>
-          <td>(</td>
-          <td class="paramtype">unsigned long long</td>          <td class="paramname"><span class="paramname"><em>clock</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00359_source.html#l00084">84</a> of file <a class="el" href="../../d4/d00/a00359_source.html">xtal.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d4/d00/a00359_source.html#l00054">XTAL::XTAL()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d4/d00/a00359_a42145cc4e44196b3dfdbe4891112172a_cgraph.png" border="0" usemap="#ad4/d00/a00359_a42145cc4e44196b3dfdbe4891112172a_cgraph" loading="lazy" alt=""/></div>
-<map name="ad4/d00/a00359_a42145cc4e44196b3dfdbe4891112172a_cgraph" id="ad4/d00/a00359_a42145cc4e44196b3dfdbe4891112172a_cgraph">
-<area shape="rect" title=" " alt="" coords="5,5,147,32"/>
-<area shape="rect" href="../../da/d00/a01381.html#a2d648ad97168de7c15132e89b13b2a48" title=" " alt="" coords="195,5,288,32"/>
-<area shape="poly" title=" " alt="" coords="147,16,182,19,176,19,147,21"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a92bdefcb1394cab49429be665e15b54e" name="a92bdefcb1394cab49429be665e15b54e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a92bdefcb1394cab49429be665e15b54e">&#9670;&#160;</a></span>operator&quot;&quot;_kHz_XTAL() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../da/d00/a01381.html">XTAL</a> operator&quot;&quot;_kHz_XTAL </td>
-          <td>(</td>
-          <td class="paramtype">long double</td>          <td class="paramname"><span class="paramname"><em>clock</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00359_source.html#l00081">81</a> of file <a class="el" href="../../d4/d00/a00359_source.html">xtal.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d4/d00/a00359_source.html#l00054">XTAL::XTAL()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d4/d00/a00359_a92bdefcb1394cab49429be665e15b54e_cgraph.png" border="0" usemap="#ad4/d00/a00359_a92bdefcb1394cab49429be665e15b54e_cgraph" loading="lazy" alt=""/></div>
-<map name="ad4/d00/a00359_a92bdefcb1394cab49429be665e15b54e_cgraph" id="ad4/d00/a00359_a92bdefcb1394cab49429be665e15b54e_cgraph">
-<area shape="rect" title=" " alt="" coords="5,5,154,32"/>
-<area shape="rect" href="../../da/d00/a01381.html#a2d648ad97168de7c15132e89b13b2a48" title=" " alt="" coords="202,5,295,32"/>
-<area shape="poly" title=" " alt="" coords="154,16,189,19,183,19,154,21"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="ae14871cc48032ede39146b09c26ed75d" name="ae14871cc48032ede39146b09c26ed75d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae14871cc48032ede39146b09c26ed75d">&#9670;&#160;</a></span>operator&quot;&quot;_kHz_XTAL() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../da/d00/a01381.html">XTAL</a> operator&quot;&quot;_kHz_XTAL </td>
-          <td>(</td>
-          <td class="paramtype">unsigned long long</td>          <td class="paramname"><span class="paramname"><em>clock</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00359_source.html#l00085">85</a> of file <a class="el" href="../../d4/d00/a00359_source.html">xtal.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d4/d00/a00359_source.html#l00054">XTAL::XTAL()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d4/d00/a00359_ae14871cc48032ede39146b09c26ed75d_cgraph.png" border="0" usemap="#ad4/d00/a00359_ae14871cc48032ede39146b09c26ed75d_cgraph" loading="lazy" alt=""/></div>
-<map name="ad4/d00/a00359_ae14871cc48032ede39146b09c26ed75d_cgraph" id="ad4/d00/a00359_ae14871cc48032ede39146b09c26ed75d_cgraph">
-<area shape="rect" title=" " alt="" coords="5,5,154,32"/>
-<area shape="rect" href="../../da/d00/a01381.html#a2d648ad97168de7c15132e89b13b2a48" title=" " alt="" coords="202,5,295,32"/>
-<area shape="poly" title=" " alt="" coords="154,16,189,19,183,19,154,21"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="abc99a571f8ae026e5f42a688c0b39a91" name="abc99a571f8ae026e5f42a688c0b39a91"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abc99a571f8ae026e5f42a688c0b39a91">&#9670;&#160;</a></span>operator&quot;&quot;_MHz_XTAL() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../da/d00/a01381.html">XTAL</a> operator&quot;&quot;_MHz_XTAL </td>
-          <td>(</td>
-          <td class="paramtype">long double</td>          <td class="paramname"><span class="paramname"><em>clock</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00359_source.html#l00082">82</a> of file <a class="el" href="../../d4/d00/a00359_source.html">xtal.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d4/d00/a00359_source.html#l00054">XTAL::XTAL()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d4/d00/a00359_abc99a571f8ae026e5f42a688c0b39a91_cgraph.png" border="0" usemap="#ad4/d00/a00359_abc99a571f8ae026e5f42a688c0b39a91_cgraph" loading="lazy" alt=""/></div>
-<map name="ad4/d00/a00359_abc99a571f8ae026e5f42a688c0b39a91_cgraph" id="ad4/d00/a00359_abc99a571f8ae026e5f42a688c0b39a91_cgraph">
-<area shape="rect" title=" " alt="" coords="5,5,158,32"/>
-<area shape="rect" href="../../da/d00/a01381.html#a2d648ad97168de7c15132e89b13b2a48" title=" " alt="" coords="206,5,299,32"/>
-<area shape="poly" title=" " alt="" coords="158,16,193,19,187,19,158,21"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="ae224abfa73ac3e6c7d073d64a5315b5d" name="ae224abfa73ac3e6c7d073d64a5315b5d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae224abfa73ac3e6c7d073d64a5315b5d">&#9670;&#160;</a></span>operator&quot;&quot;_MHz_XTAL() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../da/d00/a01381.html">XTAL</a> operator&quot;&quot;_MHz_XTAL </td>
-          <td>(</td>
-          <td class="paramtype">unsigned long long</td>          <td class="paramname"><span class="paramname"><em>clock</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00359_source.html#l00086">86</a> of file <a class="el" href="../../d4/d00/a00359_source.html">xtal.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d4/d00/a00359_source.html#l00054">XTAL::XTAL()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d4/d00/a00359_ae224abfa73ac3e6c7d073d64a5315b5d_cgraph.png" border="0" usemap="#ad4/d00/a00359_ae224abfa73ac3e6c7d073d64a5315b5d_cgraph" loading="lazy" alt=""/></div>
-<map name="ad4/d00/a00359_ae224abfa73ac3e6c7d073d64a5315b5d_cgraph" id="ad4/d00/a00359_ae224abfa73ac3e6c7d073d64a5315b5d_cgraph">
-<area shape="rect" title=" " alt="" coords="5,5,158,32"/>
-<area shape="rect" href="../../da/d00/a01381.html#a2d648ad97168de7c15132e89b13b2a48" title=" " alt="" coords="206,5,299,32"/>
-<area shape="poly" title=" " alt="" coords="158,16,193,19,187,19,158,21"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a6ffb3cc66163278ee8c214c799035a99" name="a6ffb3cc66163278ee8c214c799035a99"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6ffb3cc66163278ee8c214c799035a99">&#9670;&#160;</a></span>operator*() <span class="overload">[1/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../da/d00/a01381.html">XTAL</a> operator* </td>
-          <td>(</td>
-          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>mult</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="../../da/d00/a01381.html">XTAL</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>xtal</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00359_source.html#l00077">77</a> of file <a class="el" href="../../d4/d00/a00359_source.html">xtal.h</a>.</p>
-
-</div>
-</div>
-<a id="aad516d96ab0b89508fc74c02df50a4fa" name="aad516d96ab0b89508fc74c02df50a4fa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aad516d96ab0b89508fc74c02df50a4fa">&#9670;&#160;</a></span>operator*() <span class="overload">[2/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../da/d00/a01381.html">XTAL</a> operator* </td>
-          <td>(</td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>mult</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="../../da/d00/a01381.html">XTAL</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>xtal</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00359_source.html#l00075">75</a> of file <a class="el" href="../../d4/d00/a00359_source.html">xtal.h</a>.</p>
-
-</div>
-</div>
-<a id="a6ac1cb08c22f42c1e724324c74b129ba" name="a6ac1cb08c22f42c1e724324c74b129ba"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6ac1cb08c22f42c1e724324c74b129ba">&#9670;&#160;</a></span>operator*() <span class="overload">[3/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../da/d00/a01381.html">XTAL</a> operator* </td>
-          <td>(</td>
-          <td class="paramtype">unsigned int</td>          <td class="paramname"><span class="paramname"><em>mult</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="../../da/d00/a01381.html">XTAL</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>xtal</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00359_source.html#l00076">76</a> of file <a class="el" href="../../d4/d00/a00359_source.html">xtal.h</a>.</p>
-
-</div>
-</div>
-<a id="aef23c7ee83b39b9108cf2f0c33cd1d96" name="aef23c7ee83b39b9108cf2f0c33cd1d96"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aef23c7ee83b39b9108cf2f0c33cd1d96">&#9670;&#160;</a></span>operator/()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">auto operator/ </td>
-          <td>(</td>
-          <td class="paramtype">T &amp;&amp;</td>          <td class="paramname"><span class="paramname"><em>div</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="../../da/d00/a01381.html">XTAL</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>xtal</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00359_source.html#l00073">73</a> of file <a class="el" href="../../d4/d00/a00359_source.html">xtal.h</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d4/d00/a00359_source.html#l00056">XTAL::dvalue()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d4/d00/a00359_aef23c7ee83b39b9108cf2f0c33cd1d96_cgraph.png" border="0" usemap="#ad4/d00/a00359_aef23c7ee83b39b9108cf2f0c33cd1d96_cgraph" loading="lazy" alt=""/></div>
-<map name="ad4/d00/a00359_aef23c7ee83b39b9108cf2f0c33cd1d96_cgraph" id="ad4/d00/a00359_aef23c7ee83b39b9108cf2f0c33cd1d96_cgraph">
-<area shape="rect" title=" " alt="" coords="5,5,78,32"/>
-<area shape="rect" href="../../da/d00/a01381.html#a81210eb5a8d1f3ce32ec6118f0cf765a" title=" " alt="" coords="126,5,225,32"/>
-<area shape="poly" title=" " alt="" coords="78,16,113,18,107,19,78,21"/>
-</map>
-</div>
-
-</div>
-</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
@@ -566,7 +279,7 @@ Here is the call graph for this function:</div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_450cafc1c0b54ccdbdec0997809be7cf.html">emu</a></li><li class="navelem"><a href="../../d4/d00/a00359.html">xtal.h</a></li>
+    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d4/d00/a00359.html">Ev68CPUState.cpp</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

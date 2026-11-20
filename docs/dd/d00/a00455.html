@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: gui/keymap.h File Reference</title>
+<title>ES40: CPU/TraceEngine.cpp File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.95</span>
    </div>
   </td>
  </tr>
@@ -109,41 +109,171 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('dd/d00/a00455.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">keymap.h File Reference</div></div>
+  <div class="headertitle"><div class="title">TraceEngine.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>Contains the definitions for the <a class="el" href="../../d2/d00/a01713.html" title="Keymap, used to map host keys to scancodes.">bx_keymap_c</a> class used for keyboard interfacing with SDL and other device interfaces.  
+<p>Contains the code for the CPU tracing engine.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &quot;<a class="el" href="../../d4/d00/a00116_source.html">config/Configurator.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d3/d00/a00779_source.html">StdAfx.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/d00/a00458_source.html">TraceEngine.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d5/d00/a00206_source.html">AlphaCPU.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d5/d00/a00878_source.html">system/System.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d2/d00/a00860_source.html">system/DPR.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dd/d00/a00866_source.html">system/Flash.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d00/a00710_source.html">network/lockstep.h</a>&quot;</code><br />
+<code>#include &lt;signal.h&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
-Include dependency graph for keymap.h:</div>
+Include dependency graph for TraceEngine.cpp:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../de/d00/a00456.png" border="0" usemap="#agui_2keymap_8h" loading="lazy" alt=""/></div>
-<map name="agui_2keymap_8h" id="agui_2keymap_8h">
-<area shape="rect" title="Contains the definitions for the bx_keymap_c class used for keyboard interfacing with SDL and other d..." alt="" coords="27,5,126,32"/>
-<area shape="rect" href="../../d4/d00/a00116.html" title="Contains the definitions for the configuration file interpreter." alt="" coords="5,80,148,107"/>
-<area shape="poly" title=" " alt="" coords="77,30,79,65,74,64,76,35"/>
-<area shape="rect" title=" " alt="" coords="10,155,63,181"/>
-<area shape="poly" title=" " alt="" coords="72,106,53,142,49,139,67,109"/>
-<area shape="rect" title=" " alt="" coords="88,155,145,181"/>
-<area shape="poly" title=" " alt="" coords="85,105,105,141,100,141,82,110"/>
-</map>
-</div>
-</div><div class="textblock"><div class="dynheader">
-This graph shows which files directly or indirectly include this file:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d1/d00/a00457.png" border="0" usemap="#agui_2keymap_8hdep" loading="lazy" alt=""/></div>
-<map name="agui_2keymap_8hdep" id="agui_2keymap_8hdep">
-<area shape="rect" title="Contains the definitions for the bx_keymap_c class used for keyboard interfacing with SDL and other d..." alt="" coords="278,5,377,32"/>
-<area shape="rect" href="../../d1/d00/a00077.html" title="Contains the code for the emulated Ali M1543C IDE chipset part." alt="" coords="5,80,186,107"/>
-<area shape="poly" title=" " alt="" coords="275,39,137,82,135,77,271,35"/>
-<area shape="rect" href="../../d1/d00/a00452.html" title="Contains the code for the bx_keymap_c class used for keyboard interfacing with SDL and other device i..." alt="" coords="210,80,323,107"/>
-<area shape="poly" title=" " alt="" coords="310,43,278,82,275,77,305,45"/>
-<area shape="rect" href="../../d7/d00/a00467.html" title="Contains the code for the bx_sdl_gui_c class used for interfacing with SDL." alt="" coords="347,80,431,107"/>
-<area shape="poly" title=" " alt="" coords="349,42,381,80,376,79,347,46"/>
-<area shape="rect" href="../../d5/d00/a00518.html" title="Contains the code for the emulated Keyboard and mouse devices and controller." alt="" coords="455,80,570,107"/>
-<area shape="poly" title=" " alt="" coords="374,35,483,79,478,79,373,41"/>
+<div class="center"><img src="../../de/d00/a00456.png" border="0" usemap="#a_c_p_u_2_trace_engine_8cpp" loading="lazy" alt=""/></div>
+<map name="a_c_p_u_2_trace_engine_8cpp" id="a_c_p_u_2_trace_engine_8cpp">
+<area shape="rect" title="Contains the code for the CPU tracing engine." alt="" coords="2386,5,2538,32"/>
+<area shape="rect" href="../../d3/d00/a00779.html" title="Standard includes." alt="" coords="1454,80,1526,107"/>
+<area shape="poly" title=" " alt="" coords="2382,26,1541,91,1541,86,2388,25"/>
+<area shape="rect" title=" " alt="" coords="1147,229,1214,256"/>
+<area shape="poly" title=" " alt="" coords="2382,23,1905,44,1637,61,1526,71,1442,83,1365,90,1301,94,1273,99,1246,110,1219,129,1192,156,1184,169,1180,184,1178,216,1174,213,1175,183,1179,167,1188,153,1216,124,1243,106,1271,94,1300,89,1364,85,1441,77,1526,66,1637,56,1904,39,2388,22"/>
+<area shape="rect" href="../../da/d00/a00458.html" title="Contains the definitions for the CPU tracing engine." alt="" coords="2456,229,2561,256"/>
+<area shape="poly" title=" " alt="" coords="2461,31,2454,98,2456,139,2464,180,2474,199,2487,219,2482,217,2469,202,2459,182,2450,140,2449,97,2457,34"/>
+<area shape="rect" href="../../d5/d00/a00206.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="2304,80,2398,107"/>
+<area shape="poly" title=" " alt="" coords="2445,32,2384,74,2382,69,2440,33"/>
+<area shape="rect" href="../../d5/d00/a00878.html" title="Contains the definitions for the emulated Typhoon Chipset devices." alt="" coords="2738,155,2863,181"/>
+<area shape="poly" title=" " alt="" coords="2491,30,2760,148,2755,148,2490,35"/>
+<area shape="rect" href="../../d2/d00/a00860.html" title="Contains the definitions for the emulated Dual Port Ram and RMC devices." alt="" coords="2833,80,2941,107"/>
+<area shape="poly" title=" " alt="" coords="2536,30,2821,80,2815,80,2536,35"/>
+<area shape="rect" href="../../dd/d00/a00866.html" title="Contains the definitions for the emulated Flash ROM devices." alt="" coords="3041,80,3152,107"/>
+<area shape="poly" title=" " alt="" coords="2538,26,3028,84,3022,84,2538,31"/>
+<area shape="rect" href="../../d4/d00/a00710.html" title="Contains telnet declarations for the lock&#45;step code." alt="" coords="3213,80,3345,107"/>
+<area shape="poly" title=" " alt="" coords="2538,23,3165,77,3201,83,3195,83,3164,83,2538,29"/>
+<area shape="rect" href="../../d9/d00/a00191.html" title=" " alt="" coords="1202,155,1311,181"/>
+<area shape="poly" title=" " alt="" coords="1456,105,1312,152,1311,147,1451,106"/>
+<area shape="rect" href="../../d5/d00/a00461.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="2364,304,2453,331"/>
+<area shape="poly" title=" " alt="" coords="1526,94,1648,102,1828,124,1930,141,2035,164,2140,192,2241,227,2315,260,2378,297,2372,295,2312,265,2239,232,2139,197,2034,169,1929,147,1827,129,1648,108,1526,99"/>
+<area shape="rect" title=" " alt="" coords="3305,304,3373,331"/>
+<area shape="poly" title=" " alt="" coords="1526,92,1729,94,2060,102,2462,120,2671,134,2875,152,2950,155,3018,150,3139,137,3193,138,3246,150,3272,162,3297,178,3323,200,3349,228,3357,242,3359,259,3352,292,3349,288,3354,258,3352,244,3345,231,3320,204,3294,183,3269,167,3244,155,3193,143,3139,142,3019,155,2950,160,2875,157,2670,139,2461,125,2060,107,1729,99,1526,97"/>
+<area shape="rect" href="../../d3/d00/a00059.html" title=" " alt="" coords="1834,155,1956,181"/>
+<area shape="poly" title=" " alt="" coords="1527,99,1821,153,1816,153,1526,104"/>
+<area shape="rect" href="../../de/d00/a00065.html" title=" " alt="" coords="416,229,516,256"/>
+<area shape="poly" title=" " alt="" coords="1450,99,1261,124,1003,157,741,198,532,233,531,227,741,192,1003,152,1260,119,1456,98"/>
+<area shape="rect" href="../../d1/d00/a00077.html" title=" " alt="" coords="1015,155,1119,181"/>
+<area shape="poly" title=" " alt="" coords="1456,101,1135,158,1134,153,1450,101"/>
+<area shape="rect" href="../../da/d00/a00068.html" title=" " alt="" coords="23,229,111,256"/>
+<area shape="poly" title=" " alt="" coords="1451,96,1236,102,910,113,573,131,433,143,328,157,268,171,209,189,111,225,109,221,207,184,266,166,327,152,432,137,573,125,909,108,1236,97,1456,95"/>
+<area shape="rect" href="../../db/d00/a00074.html" title=" " alt="" coords="1289,229,1419,256"/>
+<area shape="poly" title=" " alt="" coords="1481,106,1377,220,1374,215,1476,108"/>
+<area shape="rect" href="../../d0/d00/a00071.html" title=" " alt="" coords="339,155,454,181"/>
+<area shape="poly" title=" " alt="" coords="1453,100,470,165,469,159,1454,94"/>
+<area shape="rect" href="../../de/d00/a00500.html" title="Contains macro&#39;s and prototypes for debugging." alt="" coords="1492,155,1594,181"/>
+<area shape="poly" title=" " alt="" coords="1500,105,1527,143,1522,141,1498,110"/>
+<area shape="rect" href="../../d4/d00/a00503.html" title="Contains byte&#45;order conversion helpers." alt="" coords="1705,155,1810,181"/>
+<area shape="poly" title=" " alt="" coords="1527,102,1699,150,1694,150,1526,107"/>
+<area shape="rect" title=" " alt="" coords="1916,229,1994,256"/>
+<area shape="poly" title=" " alt="" coords="1907,179,1938,219,1933,217,1904,184"/>
+<area shape="rect" title=" " alt="" coords="1839,229,1892,256"/>
+<area shape="poly" title=" " alt="" coords="1892,180,1878,217,1875,213,1888,183"/>
+<area shape="rect" title=" " alt="" coords="1836,304,1893,331"/>
+<area shape="poly" title=" " alt="" coords="516,245,630,253,1340,291,1823,314,1818,314,1339,296,630,259,516,251"/>
+<area shape="rect" title=" " alt="" coords="1221,304,1281,331"/>
+<area shape="poly" title=" " alt="" coords="516,251,535,253,696,272,822,281,1110,301,1208,312,1203,312,1110,307,822,287,696,277,535,259,516,256"/>
+<area shape="rect" title=" " alt="" coords="433,304,490,331"/>
+<area shape="poly" title=" " alt="" coords="467,255,465,290,461,287,463,258"/>
+<area shape="rect" title=" " alt="" coords="350,304,406,331"/>
+<area shape="poly" title=" " alt="" coords="453,256,406,296,403,292,448,257"/>
+<area shape="rect" title=" " alt="" coords="1020,304,1098,331"/>
+<area shape="poly" title=" " alt="" coords="516,250,535,253,799,286,1007,311,1002,311,798,292,535,259,516,256"/>
+<area shape="poly" title=" " alt="" coords="1120,172,1190,179,1367,189,1507,192,1647,201,1728,211,1826,229,1821,229,1728,216,1646,206,1507,197,1367,194,1190,184,1120,177"/>
+<area shape="poly" title=" " alt="" coords="1120,171,1273,190,1367,206,1460,227,1497,240,1533,253,1691,288,1823,311,1818,310,1690,293,1532,259,1495,245,1458,232,1366,212,1273,196,1120,177"/>
+<area shape="poly" title=" " alt="" coords="1076,180,1101,216,1137,254,1172,278,1209,299,1204,298,1169,282,1133,258,1097,219,1073,184"/>
+<area shape="poly" title=" " alt="" coords="1012,171,938,178,841,188,735,205,631,232,556,263,494,298,492,293,554,258,629,227,734,200,841,183,938,173,1017,171"/>
+<area shape="poly" title=" " alt="" coords="1012,171,863,179,671,190,498,207,437,218,405,232,394,243,387,258,380,291,376,287,382,256,390,240,402,227,436,213,497,202,670,185,863,174,1017,170"/>
+<area shape="poly" title=" " alt="" coords="1068,180,1063,290,1059,287,1064,184"/>
+<area shape="rect" title=" " alt="" coords="1637,229,1697,256"/>
+<area shape="poly" title=" " alt="" coords="1120,172,1384,199,1624,229,1619,229,1384,204,1120,177"/>
+<area shape="rect" title=" " alt="" coords="642,229,711,256"/>
+<area shape="poly" title=" " alt="" coords="1017,177,888,201,726,232,725,226,887,195,1012,178"/>
+<area shape="rect" title=" " alt="" coords="1402,304,1527,331"/>
+<area shape="poly" title=" " alt="" coords="1120,172,1303,196,1386,212,1416,219,1433,227,1445,241,1454,256,1463,291,1459,288,1449,258,1441,244,1430,231,1414,224,1385,217,1302,202,1120,178"/>
+<area shape="rect" title=" " alt="" coords="2792,304,2860,331"/>
+<area shape="poly" title=" " alt="" coords="1120,172,1190,179,1485,194,1716,198,1946,205,2241,227,2502,262,2779,308,2773,308,2501,268,2240,232,1945,210,1715,204,1485,199,1190,184,1120,178"/>
+<area shape="rect" title=" " alt="" coords="735,229,831,256"/>
+<area shape="poly" title=" " alt="" coords="1020,181,847,228,846,223,1015,182"/>
+<area shape="poly" title=" " alt="" coords="1012,173,662,195,174,232,127,237,125,232,174,227,662,190,1017,171"/>
+<area shape="rect" title=" " alt="" coords="855,229,930,256"/>
+<area shape="poly" title=" " alt="" coords="1039,181,938,225,936,220,1034,182"/>
+<area shape="rect" title=" " alt="" coords="955,229,1022,256"/>
+<area shape="poly" title=" " alt="" coords="1056,181,1014,221,1012,216,1051,183"/>
+<area shape="poly" title=" " alt="" coords="1088,179,1150,221,1145,220,1086,184"/>
+<area shape="poly" title=" " alt="" coords="1420,251,1823,310,1818,310,1419,256"/>
+<area shape="poly" title=" " alt="" coords="1338,256,1283,297,1281,292,1333,257"/>
+<area shape="poly" title=" " alt="" coords="1305,256,1114,305,1113,300,1299,257"/>
+<area shape="poly" title=" " alt="" coords="1374,254,1435,296,1430,295,1372,259"/>
+<area shape="rect" title=" " alt="" coords="1314,304,1378,331"/>
+<area shape="poly" title=" " alt="" coords="1354,255,1351,290,1347,286,1350,258"/>
+<area shape="poly" title=" " alt="" coords="409,179,446,218,441,217,408,184"/>
+<area shape="poly" title=" " alt="" coords="424,179,515,217,572,237,630,253,876,279,1208,312,1203,312,876,284,629,259,570,242,513,222,423,185"/>
+<area shape="poly" title=" " alt="" coords="336,173,273,182,209,197,185,208,170,221,166,236,176,254,201,279,225,293,251,299,279,300,341,297,378,297,420,305,415,305,377,303,341,302,279,306,250,304,223,298,197,283,172,258,161,236,166,218,182,203,207,192,272,177,341,171"/>
+<area shape="poly" title=" " alt="" coords="336,171,253,175,155,185,67,202,34,215,13,231,8,243,13,254,34,270,67,283,155,301,252,310,337,315,331,316,252,315,154,306,66,288,32,275,9,258,3,243,9,228,32,211,65,197,154,179,252,170,341,168"/>
+<area shape="poly" title=" " alt="" coords="395,180,392,219,395,238,405,254,436,268,494,280,663,297,853,308,1007,315,1002,315,853,313,663,303,493,285,434,273,401,258,390,240,387,219,391,184"/>
+<area shape="poly" title=" " alt="" coords="454,168,1020,184,1361,201,1507,213,1624,229,1619,229,1507,218,1361,207,1020,189,454,173"/>
+<area shape="rect" title=" " alt="" coords="186,229,289,256"/>
+<area shape="poly" title=" " alt="" coords="371,181,281,225,278,220,366,183"/>
+<area shape="rect" title=" " alt="" coords="1545,229,1613,256"/>
+<area shape="poly" title=" " alt="" coords="1551,180,1568,216,1564,214,1548,184"/>
+<area shape="rect" href="../../d7/d00/a00182.html" title=" " alt="" coords="1722,229,1815,256"/>
+<area shape="poly" title=" " alt="" coords="1761,180,1767,216,1762,212,1758,184"/>
+<area shape="poly" title=" " alt="" coords="2494,256,2439,297,2437,292,2488,257"/>
+<area shape="poly" title=" " alt="" coords="2339,106,2316,130,2293,156,2279,184,2273,210,2264,235,2242,258,2216,272,2179,283,2088,300,1990,311,1908,317,1908,311,1990,306,2087,295,2178,278,2214,267,2239,254,2259,232,2267,209,2274,183,2289,153,2312,126,2334,108"/>
+<area shape="poly" title=" " alt="" coords="2301,96,1893,117,1654,135,1555,145,1481,157,1368,176,1346,183,1324,193,1302,209,1279,231,1262,259,1254,291,1251,287,1257,257,1274,228,1299,205,1322,188,1344,178,1367,171,1480,152,1555,140,1654,129,1892,112,2306,96"/>
+<area shape="poly" title=" " alt="" coords="2301,96,1284,120,681,138,458,147,327,157,276,161,230,161,149,159,113,164,79,175,46,196,13,231,8,243,13,254,42,274,84,286,136,293,194,296,315,297,420,305,415,305,315,303,194,302,135,299,83,292,39,279,9,258,3,243,9,228,43,192,77,170,112,158,149,154,230,156,276,156,327,152,458,142,681,132,1284,114,2306,95"/>
+<area shape="poly" title=" " alt="" coords="2301,96,2154,104,1962,115,1788,132,1727,144,1694,157,1684,169,1677,183,1669,216,1666,212,1672,182,1679,166,1691,152,1726,139,1787,127,1962,110,2154,99,2306,96"/>
+<area shape="rect" href="../../df/d00/a00062.html" title=" " alt="" coords="2069,229,2228,256"/>
+<area shape="poly" title=" " alt="" coords="2329,106,2249,157,2208,189,2173,221,2171,216,2205,185,2246,152,2324,108"/>
+<area shape="rect" href="../../d4/d00/a00437.html" title=" " alt="" coords="2303,155,2399,181"/>
+<area shape="poly" title=" " alt="" coords="2353,105,2353,141,2349,137,2349,109"/>
+<area shape="rect" href="../../d6/d00/a00491.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="3162,229,3335,256"/>
+<area shape="poly" title=" " alt="" coords="2399,96,2606,115,2740,132,2876,152,3046,187,3190,225,3185,225,3045,192,2875,157,2740,137,2606,121,2399,101"/>
+<area shape="poly" title=" " alt="" coords="2399,100,2726,154,2720,154,2398,105"/>
+<area shape="rect" href="../../d6/d00/a00293.html" title="Contains some macro definitions and some inline functions for the Alpha CPU." alt="" coords="2628,155,2714,181"/>
+<area shape="poly" title=" " alt="" coords="2399,103,2616,154,2610,153,2398,108"/>
+<area shape="rect" href="../../d3/d00/a00209.html" title=" " alt="" coords="2473,155,2605,181"/>
+<area shape="poly" title=" " alt="" coords="2384,105,2495,149,2489,148,2383,110"/>
+<area shape="poly" title=" " alt="" coords="2102,256,1909,308,1908,302,2096,257"/>
+<area shape="poly" title=" " alt="" coords="2071,254,2050,259,1839,272,1675,276,1511,283,1415,292,1302,307,1296,308,1296,302,1301,301,1415,286,1511,277,1675,270,1839,267,2050,253,2066,254"/>
+<area shape="poly" title=" " alt="" coords="2071,254,2050,259,1543,311,1543,306,2049,253,2066,254"/>
+<area shape="rect" title=" " alt="" coords="2478,304,2539,331"/>
+<area shape="poly" title=" " alt="" coords="2224,254,2333,274,2466,304,2461,304,2332,279,2224,259"/>
+<area shape="poly" title=" " alt="" coords="2365,179,2445,254,2486,294,2481,293,2441,258,2363,184"/>
+<area shape="poly" title=" " alt="" coords="3265,254,3314,295,3309,294,3263,259"/>
+<area shape="poly" title=" " alt="" coords="3164,250,3049,259,2531,275,2128,280,1726,286,1209,307,1113,314,1113,308,1208,301,1726,280,2128,274,2531,270,3048,253,3159,250"/>
+<area shape="poly" title=" " alt="" coords="3177,256,2875,310,2875,305,3172,257"/>
+<area shape="rect" title=" " alt="" coords="3166,304,3248,331"/>
+<area shape="poly" title=" " alt="" coords="3244,255,3223,293,3220,288,3239,258"/>
+<area shape="rect" title=" " alt="" coords="3045,304,3102,331"/>
+<area shape="poly" title=" " alt="" coords="3221,256,3117,301,3116,296,3215,257"/>
+<area shape="poly" title=" " alt="" coords="2740,180,2726,184,2603,195,2497,199,2317,199,2230,199,2137,203,2032,213,1908,232,1908,227,2031,208,2137,198,2230,194,2317,193,2497,194,2602,189,2725,179,2735,180"/>
+<area shape="poly" title=" " alt="" coords="2795,180,2763,222,2740,242,2713,258,2664,270,2579,281,2344,299,1909,317,1908,312,2344,293,2579,276,2663,265,2711,254,2737,238,2759,218,2790,183"/>
+<area shape="poly" title=" " alt="" coords="2740,180,2726,184,2624,193,2537,194,2388,190,2316,190,2241,195,2156,208,2057,232,2032,245,2007,258,1902,283,1812,296,1732,299,1657,297,1500,291,1409,295,1302,307,1296,308,1296,302,1301,301,1408,289,1500,286,1657,292,1732,294,1812,290,1901,278,2005,254,2030,240,2055,227,2155,203,2240,189,2316,185,2388,185,2537,189,2624,187,2725,179,2735,180"/>
+<area shape="poly" title=" " alt="" coords="2740,180,2726,184,2573,196,2443,201,2220,199,2112,198,1997,201,1866,212,1713,232,1712,227,1865,206,1996,196,2112,193,2220,193,2442,196,2573,191,2726,179,2735,180"/>
+<area shape="poly" title=" " alt="" coords="2804,180,2816,256,2822,290,2818,287,2811,256,2800,184"/>
+<area shape="poly" title=" " alt="" coords="2752,182,2575,228,2574,222,2747,182"/>
+<area shape="poly" title=" " alt="" coords="2863,177,3158,226,3152,226,2863,182"/>
+<area shape="poly" title=" " alt="" coords="2863,174,2965,192,3021,207,3076,227,3134,258,3183,295,3178,293,3132,263,3074,232,3020,212,2964,197,2863,179"/>
+<area shape="poly" title=" " alt="" coords="2863,175,2971,195,3018,209,3050,227,3061,241,3068,257,3075,290,3071,287,3063,258,3056,244,3047,231,3016,214,2969,200,2863,180"/>
+<area shape="rect" href="../../dc/d00/a00872.html" title=" " alt="" coords="2826,229,2903,256"/>
+<area shape="poly" title=" " alt="" coords="2813,179,2846,219,2841,217,2811,184"/>
+<area shape="rect" title=" " alt="" coords="2636,229,2701,256"/>
+<area shape="poly" title=" " alt="" coords="2780,181,2705,224,2704,219,2775,183"/>
+<area shape="rect" title=" " alt="" coords="2927,229,3037,256"/>
+<area shape="poly" title=" " alt="" coords="2833,179,2938,224,2933,223,2832,184"/>
+<area shape="poly" title=" " alt="" coords="2860,255,2841,293,2838,288,2855,258"/>
+<area shape="poly" title=" " alt="" coords="2828,252,2554,309,2553,304,2823,252"/>
+<area shape="poly" title=" " alt="" coords="2901,254,3033,301,3028,301,2900,259"/>
+<area shape="poly" title=" " alt="" coords="2552,179,2574,214,2580,236,2576,257,2562,279,2542,297,2540,292,2558,276,2571,255,2574,236,2569,217,2549,184"/>
+<area shape="poly" title=" " alt="" coords="2562,179,2635,222,2630,221,2561,184"/>
+<area shape="poly" title=" " alt="" coords="2921,105,3044,152,3208,223,3203,222,3042,157,2920,110"/>
+<area shape="poly" title=" " alt="" coords="3153,101,3202,119,3225,134,3244,153,3251,167,3255,183,3255,216,3251,212,3250,184,3246,169,3240,156,3222,138,3200,124,3152,106"/>
+<area shape="rect" href="../../d3/d00/a00761.html" title="Contains TCP/IP declarations used by the serial port emulator and lock&#45;step code." alt="" coords="3311,155,3375,181"/>
+<area shape="poly" title=" " alt="" coords="3291,105,3324,144,3319,142,3289,110"/>
 </map>
 </div>
 </div>
@@ -151,52 +281,72 @@ This graph shows which files directly or indirectly include this file:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Data Structures</h2></td></tr>
-<tr class="memitem:BXKeyEntry" id="r_BXKeyEntry"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d1/d00/a01709.html">BXKeyEntry</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structure of an element of the keymap table.  <a href="../../d1/d00/a01709.html#details">More...</a><br /></td></tr>
-<tr class="memitem:bx_5Fkeymap_5Fc" id="r_bx_5Fkeymap_5Fc"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../d2/d00/a01713.html">bx_keymap_c</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keymap, used to map host keys to scancodes.  <a href="../../d2/d00/a01713.html#details">More...</a><br /></td></tr>
+<tr class="memitem:sRegion" id="r_sRegion"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d5/d00/a01612.html">sRegion</a></td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:af9df788a41e0e7b2555362f7d2c29e51" id="r_af9df788a41e0e7b2555362f7d2c29e51"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#af9df788a41e0e7b2555362f7d2c29e51">BX_KEYMAP_UNKNOWN</a>&#160;&#160;&#160;0xFFFFFFFF</td></tr>
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a01e8d42103a7091a2c083051a7aa2467" id="r_a01e8d42103a7091a2c083051a7aa2467"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a01e8d42103a7091a2c083051a7aa2467">write_printable_s</a> (char *dest, const char *org)</td></tr>
+<tr class="memdesc:a01e8d42103a7091a2c083051a7aa2467"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a string to a new string that contains only printable characters.  <br /></td></tr>
+<tr class="memitem:a2f1580ff30219765551c6378caad2968" id="r_a2f1580ff30219765551c6378caad2968"><td class="memItemLeft"><a class="el" href="../../d5/d00/a00461.html#a1af9f95651e921615e75917a6dd1b574">u64</a>&#160;</td><td class="memItemRight"><a class="el" href="#a2f1580ff30219765551c6378caad2968">real_address</a> (<a class="el" href="../../d5/d00/a00461.html#a1af9f95651e921615e75917a6dd1b574">u64</a> address, <a class="el" href="../../d9/d00/a01332.html">CAlphaCPU</a> *c, bool bIBOX)</td></tr>
+<tr class="memdesc:a2f1580ff30219765551c6378caad2968"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the physical address that matches a given virtual address.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:a22fa2cedc0d2a8c49e35953f581847ab" id="r_a22fa2cedc0d2a8c49e35953f581847ab"><td class="memItemLeft"><a class="el" href="../../d2/d00/a01713.html">bx_keymap_c</a> *&#160;</td><td class="memItemRight"><a class="el" href="#a22fa2cedc0d2a8c49e35953f581847ab">bx_keymap</a></td></tr>
+<tr class="memitem:a68bf49d9a6ffe37d4e0ebb6a7d175d5c" id="r_a68bf49d9a6ffe37d4e0ebb6a7d175d5c"><td class="memItemLeft"><a class="el" href="../../dd/d00/a01628.html">CTraceEngine</a> *&#160;</td><td class="memItemRight"><a class="el" href="#a68bf49d9a6ffe37d4e0ebb6a7d175d5c">trc</a></td></tr>
+<tr class="memitem:aec440ea495e89a5b3c1c6020761c31d7" id="r_aec440ea495e89a5b3c1c6020761c31d7"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#aec440ea495e89a5b3c1c6020761c31d7">bTrace</a> = false</td></tr>
+<tr class="memitem:a9c3cfa2b0c665b04458d1d148bc10e17" id="r_a9c3cfa2b0c665b04458d1d148bc10e17"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a9c3cfa2b0c665b04458d1d148bc10e17">bDisassemble</a> = false</td></tr>
+<tr class="memitem:aab8239a91148ca640a60179bce466daf" id="r_aab8239a91148ca640a60179bce466daf"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#aab8239a91148ca640a60179bce466daf">bHashing</a> = false</td></tr>
+<tr class="memitem:a5783a67942e298401dd23cddf8f3448a" id="r_a5783a67942e298401dd23cddf8f3448a"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a5783a67942e298401dd23cddf8f3448a">bListing</a> = false</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Contains the definitions for the <a class="el" href="../../d2/d00/a01713.html" title="Keymap, used to map host keys to scancodes.">bx_keymap_c</a> class used for keyboard interfacing with SDL and other device interfaces. </p>
+<div class="textblock"><p>Contains the code for the CPU tracing engine. </p>
+<p>This will become the debugging engine (interactive debugger) soon.</p>
 <p>$Id$</p>
-<p>X-1.7 Camiel Vanderhoeven 26-MAR-2008 Fix compiler warnings.</p>
-<p>X-1.6 Camiel Vanderhoeven 14-MAR-2008 Formatting.</p>
-<p>X-1.4 Camiel Vanderhoeven 02-JAN-2008 Comments.</p>
-<p>X-1.3 Camiel Vanderhoeven 10-DEC-2007 Use Configurator.</p>
-<p>X-1.2 Camiel Vanderhoeven 7-DEC-2007 Code cleanup.</p>
-<p>X-1.1 Camiel Vanderhoeven 6-DEC-2007 Initial version for ES40 emulator. </p>
+<p>X-1.38 Camiel Vanderhoeven 12-JUN-2008 New BREAKPOINT READ, WRITE and ACCESS commands allow breakpoint to be set on data access.</p>
+<p>X-1.37 Camiel Vanderhoeven 26-MAR-2008 Fix compiler warnings.</p>
+<p>X-1.36 Camiel Vanderhoeven 25-MAR-2008 Comments.</p>
+<p>X-1.35 Camiel Vanderhoeven 14-MAR-2008</p><ol type="1">
+<li>More meaningful exceptions replace throwing (int) 1.</li>
+<li>U64 macro replaces X64 macro.</li>
+</ol>
+<p>X-1.34 Brian Wheeler 29-FEB-2008 Add BREAKPOINT INSTRUCTION command to IDB.</p>
+<p>X-1.33 Brian Wheeler 12-JAN-2008 End run when Ctrl-C is received.</p>
+<p>X-1.32 Camiel Vanderhoeven 02-JAN-2008 Avoid compiler warnings</p>
+<p>X-1.31 Camiel Vanderhoeven 10-DEC-2007 Changes to make the TraceEngine work again after recent changes.</p>
+<p>X-1.30 Brian Wheeler 6-DEC-2007 Bugfix in real_address.</p>
+<p>X-1.29 Camiel Vanderhoeven 2-DEC-2007 Changed the way translation buffers work.</p>
+<p>X-1.27 Camiel Vanderhoeven 1-DEC-2007 Moved inclusion of <a class="el" href="../../d3/d00/a00779.html" title="Standard includes.">StdAfx.h</a> outside conditional block; necessary for using precompiled headers in Visual C++.</p>
+<p>X-1.26 Brian Wheeler 22-NOV-2007 Added LOADREG and LOADFPREG debugger commands.</p>
+<p>X-1.25 Camiel Vanderhoeven 7-APR-2007 Added PCB to job context recognition.</p>
+<p>X-1.24 Camiel Vanderhoeven 30-MAR-2007 Added old changelog comments.</p>
+<p>X-1.23 Camiel Vanderhoeven 14-MAR-2007 a) bListing moved here from <a class="el" href="../../d9/d00/a01332.html" title="Emulated CPU.">CAlphaCPU</a>. b) Translation from virtual to physical address moved to an inline function (code to do this was duplicated many times...)</p>
+<p>X-1.22 Camiel Vanderhoeven 14-MAR-2007 Added list_all method.</p>
+<p>X-1.21 Camiel Vanderhoeven 12-MAR-2007 a) Added support for TranslationBuffer debugging. b) Changed format of calls to CTranslationBuffer::convert_address.</p>
+<p>X-1.20 Camiel Vanderhoeven 9-MAR-2007 Use procname from the structure rather than getting it from memory to print this to the trace files.</p>
+<p>X-1.19 Camiel Vanderhoeven 8-MAR-2007 a) get_fnc_name now requires CCPU * as an argument. b) When tracing, try to convert virtual addresses to physical ones through the translation buffers.</p>
+<p>X-1.18 Camiel Vanderhoeven 7-MAR-2007 a) Limit write_printable_s to 100 characters. b) When tracing to an unknown (not in CSV file) function, treat all arguments as if they were strings. c) When dsplaying string arguments, try to translate a virtual address to a physical one through the translation buffer.</p>
+<p>X-1.17 Camiel Vanderhoeven 7-MAR-2007 Fixed error in hiding functions (tracing).</p>
+<p>X-1.16 Camiel Vanderhoeven 1-MAR-2007 Made a couple of arguments const char *.</p>
+<p>X-1.15 Camiel Vanderhoeven 28-FEB-2007 Added support for lockstep-mechanism.</p>
+<p>X-1.14 Camiel Vanderhoeven 26-FEB-2007 Fixed some unsigned integer comparisons.</p>
+<p>X-1.13 Camiel Vanderhoeven 21-FEB-2007 Allow user to terminate execution from the serial port.</p>
+<p>X-1.12 Camiel Vanderhoeven 18-FEB-2007 Added HASHING and DUMPREGS commands to the IDB.</p>
+<p>X-1.11 Camiel Vanderhoeven 16-FEB-2007 a) Added the Interactive Debugger (IDB). b) Got rid of all #ifdef _WIN32's arount printf statements.</p>
+<p>X-1.10 Camiel Vanderhoeven 12-FEB-2007 Added comments.</p>
+<p>X-1.9 Camiel Vanderhoeven 9-FEB-2007 Debugging flqags (booleans) moved here from <a class="el" href="../../d9/d00/a01332.html" title="Emulated CPU.">CAlphaCPU</a>.</p>
+<p>X-1.8 Camiel Vanderhoeven 7-FEB-2007 Debugging functions are enabled only when compiling with -DIDB (Interactive Debugger, a future feature).</p>
+<p>X-1.7 Camiel Vanderhoeven 3-FEB-2007 Fixed error in trace_dev. String is no longer interpreted by printf.</p>
+<p>X-1.6 Camiel Vanderhoeven 3-FEB-2007 Printable function moved to <a class="el" href="../../d3/d00/a00779.html" title="Standard includes.">StdAfx.h</a>.</p>
+<p>X-1.5 Brian Wheeler 3-FEB-2007 Formatting.</p>
+<p>X-1.4 Brian Wheeler 3-FEB-2007 Add definition of _strdup for Linux' benefit.</p>
+<p>X-1.3 Brian Wheeler 3-FEB-2007 Scanf and printf statements made compatible with Linux/GCC/glibc.</p>
+<p>X-1.2 Brian Wheeler 3-FEB-2007 Includes are now case-correct (necessary on Linux)</p>
+<p>X-1.1 Camiel Vanderhoeven 19-JAN-2007 Initial version in CVS. </p>
 
-<p class="definition">Definition in file <a class="el" href="../../dd/d00/a00455_source.html">keymap.h</a>.</p>
-</div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
-<a id="af9df788a41e0e7b2555362f7d2c29e51" name="af9df788a41e0e7b2555362f7d2c29e51"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af9df788a41e0e7b2555362f7d2c29e51">&#9670;&#160;</a></span>BX_KEYMAP_UNKNOWN</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BX_KEYMAP_UNKNOWN&#160;&#160;&#160;0xFFFFFFFF</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00455_source.html#l00060">60</a> of file <a class="el" href="../../dd/d00/a00455_source.html">keymap.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d1/d00/a00452_source.html#l00348">bx_keymap_c::convertStringToBXKey()</a>, and <a class="el" href="../../d1/d00/a00452_source.html#l00270">bx_keymap_c::loadKeymap()</a>.</p>
-
-</div>
-</div>
-<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
-<a id="a22fa2cedc0d2a8c49e35953f581847ab" name="a22fa2cedc0d2a8c49e35953f581847ab"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a22fa2cedc0d2a8c49e35953f581847ab">&#9670;&#160;</a></span>bx_keymap</h2>
+<p class="definition">Definition in file <a class="el" href="../../dd/d00/a00455_source.html">TraceEngine.cpp</a>.</p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a2f1580ff30219765551c6378caad2968" name="a2f1580ff30219765551c6378caad2968"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f1580ff30219765551c6378caad2968">&#9670;&#160;</a></span>real_address()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -205,19 +355,240 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../d2/d00/a01713.html">bx_keymap_c</a>* bx_keymap</td>
+          <td class="memname"><a class="el" href="../../d5/d00/a00461.html#a1af9f95651e921615e75917a6dd1b574">u64</a> real_address </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="../../d5/d00/a00461.html#a1af9f95651e921615e75917a6dd1b574">u64</a></td>          <td class="paramname"><span class="paramname"><em>address</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="../../d9/d00/a01332.html">CAlphaCPU</a> *</td>          <td class="paramname"><span class="paramname"><em>c</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>bIBOX</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d1/d00/a00452_source.html#l00105">105</a> of file <a class="el" href="../../d1/d00/a00452_source.html">keymap.cpp</a>.</p>
+<p>Get the physical address that matches a given virtual address. </p>
+<p>This never generates a CPU exception. </p>
 
-<p class="reference">Referenced by <a class="el" href="../../d5/d00/a00518_source.html#l00239">CKeyboard::gen_scancode()</a>, <a class="el" href="../../d7/d00/a00467_source.html#l01557">bx_sdl_gui_c::handle_keyboard_event_impl()</a>, <a class="el" href="../../d7/d00/a00467_source.html#l00732">sdl_application::initialize_keymap()</a>, <a class="el" href="../../d7/d00/a00467_source.html#l00769">libsdl_LTX_plugin_init()</a>, and <a class="el" href="../../d7/d00/a00467_source.html#l00655">sdl_application::~sdl_application()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00455_source.html#l00197">197</a> of file <a class="el" href="../../dd/d00/a00455_source.html">TraceEngine.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d6/d00/a00293_source.html#l00817">ACCESS_READ</a>, <a class="el" href="../../d6/d00/a00293_source.html#l00823">FAKE</a>, <a class="el" href="../../d5/d00/a00206_source.html#l00301">CAlphaCPU::get_profile()</a>, <a class="el" href="../../d6/d00/a00293_source.html#l00821">NO_CHECK</a>, <a class="el" href="../../dd/d00/a00455_source.html#l00197">real_address()</a>, <a class="el" href="../../d3/d00/a00209_source.html#l00087">AlphaCPUProfile::trace_address_fallback</a>, <a class="el" href="../../d5/d00/a00461_source.html#l00119">U64</a>, and <a class="el" href="../../de/d00/a00203_source.html#l04321">CAlphaCPU::virt2phys()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dd/d00/a00455_source.html#l00558">CTraceEngine::get_fnc_name()</a>, <a class="el" href="../../dd/d00/a00455_source.html#l00197">real_address()</a>, <a class="el" href="../../dd/d00/a00455_source.html#l00252">CTraceEngine::trace()</a>, <a class="el" href="../../dd/d00/a00455_source.html#l00439">CTraceEngine::trace_br()</a>, and <a class="el" href="../../dd/d00/a00455_source.html#l00633">CTraceEngine::write_arglist()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../dd/d00/a00455_a2f1580ff30219765551c6378caad2968_cgraph.png" border="0" usemap="#add/d00/a00455_a2f1580ff30219765551c6378caad2968_cgraph" loading="lazy" alt=""/></div>
+<map name="add/d00/a00455_a2f1580ff30219765551c6378caad2968_cgraph" id="add/d00/a00455_a2f1580ff30219765551c6378caad2968_cgraph">
+<area shape="rect" title="Get the physical address that matches a given virtual address." alt="" coords="5,43,101,69"/>
+<area shape="poly" title=" " alt="" coords="22,43,17,34,21,24,33,18,53,16,74,19,87,27,82,28,73,24,53,21,35,23,25,28,23,33,28,42"/>
+<area shape="rect" href="../../d9/d00/a01332.html#aca7dc6d7d9fba6ad562c6735d2c2f486" title=" " alt="" coords="149,5,310,32"/>
+<area shape="poly" title=" " alt="" coords="100,43,151,34,147,37,102,48"/>
+<area shape="rect" href="../../d9/d00/a01332.html#a47a1f73ad8b22a9850caf2377c280ea0" title="Translate a virtual address to a physical address." alt="" coords="152,80,306,107"/>
+<area shape="poly" title=" " alt="" coords="101,63,151,75,146,77,101,69"/>
+<area shape="poly" title=" " alt="" coords="199,79,194,71,197,62,210,55,229,53,251,56,263,65,258,65,249,61,229,59,211,61,201,65,199,71,204,80"/>
+<area shape="rect" href="../../d9/d00/a01332.html#a81aec3cc66709a066f7c628f0721b810" title="Find translation&#45;buffer entry." alt="" coords="358,51,532,77"/>
+<area shape="poly" title=" " alt="" coords="307,80,345,77,340,78,307,85"/>
+<area shape="rect" href="../../d9/d00/a01332.html#a62a7ba974ca7c5c107dbd59a03c23ad3" title=" " alt="" coords="376,101,515,144"/>
+<area shape="poly" title=" " alt="" coords="307,101,363,111,357,111,307,107"/>
+<area shape="rect" href="../../d9/d00/a01332.html#a14073e3a0ee3e045653c4ddcd9d36a65" title=" " alt="" coords="580,51,745,77"/>
+<area shape="poly" title=" " alt="" coords="532,61,568,64,562,64,533,67"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../dd/d00/a00455_a2f1580ff30219765551c6378caad2968_icgraph.png" border="0" usemap="#add/d00/a00455_a2f1580ff30219765551c6378caad2968_icgraph" loading="lazy" alt=""/></div>
+<map name="add/d00/a00455_a2f1580ff30219765551c6378caad2968_icgraph" id="add/d00/a00455_a2f1580ff30219765551c6378caad2968_icgraph">
+<area shape="rect" title="Get the physical address that matches a given virtual address." alt="" coords="644,81,740,108"/>
+<area shape="poly" title=" " alt="" coords="723,66,713,62,692,60,672,62,661,67,659,72,664,82,659,80,653,73,657,63,671,57,692,55,715,57,729,66"/>
+<area shape="rect" href="../../dd/d00/a01628.html#a9399420be02465a4e5d268b481af71e1" title="See if a function name is known for a given address." alt="" coords="402,5,596,32"/>
+<area shape="poly" title=" " alt="" coords="647,74,595,53,546,35,546,30,597,48,652,74"/>
+<area shape="rect" href="../../dd/d00/a01628.html#a2b98838789e54afc35a8eaf3efc4e394" title="Trace function calling." alt="" coords="5,111,147,137"/>
+<area shape="poly" title=" " alt="" coords="626,91,435,88,315,91,195,101,133,113,132,108,194,96,315,85,435,82,632,90"/>
+<area shape="rect" href="../../dd/d00/a01628.html#a7aed0b81bfe05bb33966157e04b90c24" title="Trace a branch." alt="" coords="195,111,354,137"/>
+<area shape="poly" title=" " alt="" coords="626,100,355,121,354,116,631,98"/>
+<area shape="rect" href="../../dd/d00/a01628.html#a741cb474dbb4079e9b1a2f0815c5266f" title="Parse the argument list string a, get the necessary registers from CPU c, and print the formatted arg..." alt="" coords="429,157,569,200"/>
+<area shape="poly" title=" " alt="" coords="651,114,597,141,555,159,553,154,595,136,645,116"/>
+<area shape="poly" title=" " alt="" coords="177,125,147,127,146,121,182,123"/>
+<area shape="poly" title=" " alt="" coords="411,173,309,166,194,152,136,141,136,135,195,147,309,161,417,173"/>
+<area shape="poly" title=" " alt="" coords="411,158,332,141,333,135,417,158"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a01e8d42103a7091a2c083051a7aa2467" name="a01e8d42103a7091a2c083051a7aa2467"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01e8d42103a7091a2c083051a7aa2467">&#9670;&#160;</a></span>write_printable_s()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void write_printable_s </td>
+          <td>(</td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>dest</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>org</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Convert a string to a new string that contains only printable characters. </p>
+<p>The maximum length of the resulting string is 100 characters.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dest</td><td>Destination string </td></tr>
+    <tr><td class="paramname">org</td><td>Source string </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00455_source.html#l00181">181</a> of file <a class="el" href="../../dd/d00/a00455_source.html">TraceEngine.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d3/d00/a00779_source.html#l00272">printable()</a>, and <a class="el" href="../../dd/d00/a00455_source.html#l00181">write_printable_s()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dd/d00/a00455_source.html#l00633">CTraceEngine::write_arglist()</a>, and <a class="el" href="../../dd/d00/a00455_source.html#l00181">write_printable_s()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../dd/d00/a00455_a01e8d42103a7091a2c083051a7aa2467_cgraph.png" border="0" usemap="#add/d00/a00455_a01e8d42103a7091a2c083051a7aa2467_cgraph" loading="lazy" alt=""/></div>
+<map name="add/d00/a00455_a01e8d42103a7091a2c083051a7aa2467_cgraph" id="add/d00/a00455_a01e8d42103a7091a2c083051a7aa2467_cgraph">
+<area shape="rect" title="Convert a string to a new string that contains only printable characters." alt="" coords="5,29,125,56"/>
+<area shape="poly" title=" " alt="" coords="40,29,36,21,39,11,49,5,65,3,82,5,93,14,88,14,80,10,65,8,51,10,43,14,41,20,45,29"/>
+<area shape="rect" href="../../d3/d00/a00779.html#a544bb44560d2d6351ff2287ba35f4d99" title=" " alt="" coords="173,29,243,56"/>
+<area shape="poly" title=" " alt="" coords="125,40,160,42,154,43,125,45"/>
+<area shape="poly" title=" " alt="" coords="183,28,178,21,181,11,192,5,208,3,225,5,236,15,230,14,223,10,208,8,193,10,186,14,184,20,188,30"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../dd/d00/a00455_a01e8d42103a7091a2c083051a7aa2467_icgraph.png" border="0" usemap="#add/d00/a00455_a01e8d42103a7091a2c083051a7aa2467_icgraph" loading="lazy" alt=""/></div>
+<map name="add/d00/a00455_a01e8d42103a7091a2c083051a7aa2467_icgraph" id="add/d00/a00455_a01e8d42103a7091a2c083051a7aa2467_icgraph">
+<area shape="rect" title="Convert a string to a new string that contains only printable characters." alt="" coords="590,29,710,56"/>
+<area shape="poly" title=" " alt="" coords="679,14,670,10,650,8,632,10,622,15,619,20,624,30,619,28,614,21,618,11,630,5,650,3,671,5,684,15"/>
+<area shape="rect" href="../../dd/d00/a01628.html#a741cb474dbb4079e9b1a2f0815c5266f" title="Parse the argument list string a, get the necessary registers from CPU c, and print the formatted arg..." alt="" coords="402,21,542,64"/>
+<area shape="poly" title=" " alt="" coords="572,43,543,45,543,40,577,43"/>
+<area shape="rect" href="../../dd/d00/a01628.html#a2b98838789e54afc35a8eaf3efc4e394" title="Trace function calling." alt="" coords="5,29,147,56"/>
+<area shape="poly" title=" " alt="" coords="386,45,147,45,147,40,387,40"/>
+<area shape="rect" href="../../dd/d00/a01628.html#a7aed0b81bfe05bb33966157e04b90c24" title="Trace a branch." alt="" coords="195,55,354,81"/>
+<area shape="poly" title=" " alt="" coords="389,53,355,60,354,55,384,54"/>
+<area shape="poly" title=" " alt="" coords="177,56,147,54,147,49,182,56"/>
+</map>
+</div>
+
+</div>
+</div>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="a9c3cfa2b0c665b04458d1d148bc10e17" name="a9c3cfa2b0c665b04458d1d148bc10e17"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c3cfa2b0c665b04458d1d148bc10e17">&#9670;&#160;</a></span>bDisassemble</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool bDisassemble = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00455_source.html#l01854">1854</a> of file <a class="el" href="../../dd/d00/a00455_source.html">TraceEngine.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../de/d00/a00203_source.html#l04066">CAlphaCPU::listing()</a>, and <a class="el" href="../../dd/d00/a00455_source.html#l00884">CTraceEngine::parse()</a>.</p>
+
+</div>
+</div>
+<a id="aab8239a91148ca640a60179bce466daf" name="aab8239a91148ca640a60179bce466daf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab8239a91148ca640a60179bce466daf">&#9670;&#160;</a></span>bHashing</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool bHashing = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00455_source.html#l01855">1855</a> of file <a class="el" href="../../dd/d00/a00455_source.html">TraceEngine.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dd/d00/a00455_source.html#l00884">CTraceEngine::parse()</a>.</p>
+
+</div>
+</div>
+<a id="a5783a67942e298401dd23cddf8f3448a" name="a5783a67942e298401dd23cddf8f3448a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5783a67942e298401dd23cddf8f3448a">&#9670;&#160;</a></span>bListing</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool bListing = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00455_source.html#l01856">1856</a> of file <a class="el" href="../../dd/d00/a00455_source.html">TraceEngine.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../de/d00/a00203_source.html#l03229">CAlphaCPU::execute()</a>, <a class="el" href="../../de/d00/a00203_source.html#l01034">CAlphaCPU::init()</a>, <a class="el" href="../../de/d00/a00203_source.html#l04066">CAlphaCPU::listing()</a>, and <a class="el" href="../../de/d00/a00203_source.html#l04321">CAlphaCPU::virt2phys()</a>.</p>
+
+</div>
+</div>
+<a id="aec440ea495e89a5b3c1c6020761c31d7" name="aec440ea495e89a5b3c1c6020761c31d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec440ea495e89a5b3c1c6020761c31d7">&#9670;&#160;</a></span>bTrace</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool bTrace = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00455_source.html#l01853">1853</a> of file <a class="el" href="../../dd/d00/a00455_source.html">TraceEngine.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dd/d00/a00455_source.html#l00884">CTraceEngine::parse()</a>.</p>
+
+</div>
+</div>
+<a id="a68bf49d9a6ffe37d4e0ebb6a7d175d5c" name="a68bf49d9a6ffe37d4e0ebb6a7d175d5c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a68bf49d9a6ffe37d4e0ebb6a7d175d5c">&#9670;&#160;</a></span>trc</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../dd/d00/a01628.html">CTraceEngine</a>* trc</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../dd/d00/a00455_source.html#l00171">171</a> of file <a class="el" href="../../dd/d00/a00455_source.html">TraceEngine.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d7/d00/a00002_source.html#l00308">main()</a>, and <a class="el" href="../../d7/d00/a00002_source.html#l00585">run_emulator()</a>.</p>
 
 </div>
 </div>
@@ -234,7 +605,7 @@ Variables</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_11bc0974ce736ce9a6fadebbeb7a8314.html">gui</a></li><li class="navelem"><a href="../../dd/d00/a00455.html">keymap.h</a></li>
+    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../dd/d00/a00455.html">TraceEngine.cpp</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

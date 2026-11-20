@@ -1,6 +1,5 @@
 var a00398 =
 [
-    [ "CPowerStorm3xx", "d2/d00/a01489.html", "d2/d00/a01489" ],
-    [ "CPowerStorm3xx::PCIConfig", "d2/d00/a01493.html", "d2/d00/a01493" ],
-    [ "CPowerStorm3xx::OptionROM", "db/d00/a01497.html", "db/d00/a01497" ]
+    [ "Ev68InstructionFetch", "d3/d00/a01572.html", "d3/d00/a01572" ],
+    [ "kEv68InstructionFetchPolicy", "d9/d00/a00398.html#ae16a534d6bc0a50903d5852656a0bf39", null ]
 ];

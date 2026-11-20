@@ -1,19 +1,13 @@
 var searchData=
 [
-  ['mach8_5fdrawing_5fscan_0',['MACH8_DRAWING_SCAN',['../da/d00/a00383.html#a10eb306b8cbb4a0ed22f85eb22697425a7645daa586a81c7bb5bd51ee9fc60d62',1,'MACH8_DRAWING_SCAN:&#160;ibm8514a.cpp'],['../d3/d00/a00419.html#a4a42d741fdbd982c088814833e3af2afa7645daa586a81c7bb5bd51ee9fc60d62',1,'MACH8_DRAWING_SCAN:&#160;S3Trio64.cpp']]],
-  ['machinecheck_1',['MachineCheck',['../dc/d00/a00218.html#a5c9934e3a54f06127616037536160abda76a0985ad3414f385d1ac16e9c297b7f',1,'AlphaPAL.h']]],
-  ['main_5fif_5freg_2',['MAIN_IF_REG',['../db/d00/a01637.html#a253f53c585c86bf528477defc4a18bd4a875f232bee81b72211648f1222fb76c5',1,'vga_device']]],
-  ['mappedtargetreturned_3',['MappedTargetReturned',['../d7/d00/a01373.html#a99b7593d22606a58722e491bc59ff459aa7f581998a24da81f01b6fea811b2e98',1,'CSystemComponent']]],
-  ['media_5fpopup_5fcd_5flocked_4',['MEDIA_POPUP_CD_LOCKED',['../d9/d00/a00476.html#a04e9ea2ffaa15b3f2a5d0de8a6699681aa31cfe159508b5ac6594b8359b331df1',1,'sdl_media.cpp']]],
-  ['media_5fpopup_5fcdrom_5',['MEDIA_POPUP_CDROM',['../d9/d00/a00476.html#a04e9ea2ffaa15b3f2a5d0de8a6699681a87138536b6fb4c3afef322641b510d8d',1,'sdl_media.cpp']]],
-  ['media_5fpopup_5fclosed_6',['MEDIA_POPUP_CLOSED',['../d9/d00/a00476.html#a04e9ea2ffaa15b3f2a5d0de8a6699681aee46105fe09bff35ac8baa50947c504a',1,'sdl_media.cpp']]],
-  ['media_5fpopup_5fdevices_7',['MEDIA_POPUP_DEVICES',['../d9/d00/a00476.html#a04e9ea2ffaa15b3f2a5d0de8a6699681a08046caf2d0b93b538d6e5c9d8151597',1,'sdl_media.cpp']]],
-  ['media_5fpopup_5fdisk_5ffaults_8',['MEDIA_POPUP_DISK_FAULTS',['../d9/d00/a00476.html#a04e9ea2ffaa15b3f2a5d0de8a6699681a7dcf6ffbad17de8f4e419d37a05e9d0e',1,'sdl_media.cpp']]],
-  ['media_5fpopup_5ffloppy_9',['MEDIA_POPUP_FLOPPY',['../d9/d00/a00476.html#a04e9ea2ffaa15b3f2a5d0de8a6699681a7d39f763cbe86030d602ce13a8cd5d32',1,'sdl_media.cpp']]],
-  ['media_5fpopup_5ffloppy_5fsize_10',['MEDIA_POPUP_FLOPPY_SIZE',['../d9/d00/a00476.html#a04e9ea2ffaa15b3f2a5d0de8a6699681a5ea31dd0e3b89738e4a7309c5743f5a1',1,'sdl_media.cpp']]],
-  ['media_5fpopup_5fmessage_11',['MEDIA_POPUP_MESSAGE',['../d9/d00/a00476.html#a04e9ea2ffaa15b3f2a5d0de8a6699681a597cb860258f78e381d39681fd701278',1,'sdl_media.cpp']]],
-  ['memoryfaultstatus_12',['MemoryFaultStatus',['../dd/d00/a00212.html#ac4dcb3fde2c4af4411f1df03597b592da63491745a13b0f22cbb2d462ef2e752c',1,'AlphaIPR.h']]],
-  ['mono_5fmode_13',['MONO_MODE',['../db/d00/a01637.html#affcf02151ea3f86e6f560c4d1e33bde4a23842546bcd134abd2f10c3d74153b32',1,'vga_device']]],
-  ['monolayout_14',['MonoLayout',['../d9/d00/a01557.html#a36eb4b93667f05184f643bcd1264b114a74ec597d2eaf9a6bdf98f57a948c7eca',1,'CRealImage2100::StartOperation']]],
-  ['mtfpcr_15',['MtFpcr',['../dc/d00/a00218.html#a5c9934e3a54f06127616037536160abdab5f6dedecf0baa25a21be2ad1ea8b424',1,'AlphaPAL.h']]]
+  ['legacyio_0',['LegacyIO',['../dc/d00/a01764.html#a763fd2041038fc4797b0d182e398268aaecf60b80eee79261feea3704e1819c1a',1,'CGloriaSynergy::LegacyIO'],['../d2/d00/a01824.html#acc661549efb0bd4d458afd720a165ccaa5d4c1eaa996b4be1cb8d34d4c1334fa8',1,'CPowerStorm3xx::LegacyIO'],['../d4/d00/a01840.html#a8cba0090e16c0c33f33efdf90121f8c2a919bcf8d357aadcfa41c7fb8c928e113',1,'CRadeon7500::LegacyIO']]],
+  ['legacymemory_1',['LegacyMemory',['../dc/d00/a01764.html#a763fd2041038fc4797b0d182e398268aa17ff17fe48cbfc4d53d0dc26b40a8211',1,'CGloriaSynergy::LegacyMemory'],['../d2/d00/a01824.html#acc661549efb0bd4d458afd720a165ccaac88e3a76f046d48611fa38947ccc421a',1,'CPowerStorm3xx::LegacyMemory'],['../d4/d00/a01840.html#a8cba0090e16c0c33f33efdf90121f8c2ac6ac4ae8343c39f3fe9536b49166949b',1,'CRadeon7500::LegacyMemory']]],
+  ['lsi_5fdiag_5fbuffer_5fsize_2',['LSI_DIAG_BUFFER_SIZE',['../db/d00/a02388.html#a562dcc39e5653065c508dbc679dd1bc4a12e5d7b430a308c611691b97be1096a5',1,'CLSI53C1020']]],
+  ['lsi_5fhandshake_5fmax_5fdwords_3',['LSI_HANDSHAKE_MAX_DWORDS',['../db/d00/a02388.html#a562dcc39e5653065c508dbc679dd1bc4a4fb64c6e7a5d244c1e2bc5773c9d9695',1,'CLSI53C1020']]],
+  ['lsi_5fmax_5ftargets_4',['LSI_MAX_TARGETS',['../db/d00/a02388.html#a562dcc39e5653065c508dbc679dd1bc4a959a007ca7228f16422f065efbab07d7',1,'CLSI53C1020']]],
+  ['lsi_5fmemory0_5fsize_5',['LSI_MEMORY0_SIZE',['../db/d00/a02388.html#a562dcc39e5653065c508dbc679dd1bc4aea355bdf165dfa8efedd01093d292f79',1,'CLSI53C1020']]],
+  ['lsi_5freply_5ffifo_5fdepth_6',['LSI_REPLY_FIFO_DEPTH',['../db/d00/a02388.html#a562dcc39e5653065c508dbc679dd1bc4a6f7b39d21528128f7a17878410e8f767',1,'CLSI53C1020']]],
+  ['lsi_5freply_5fmax_5fwords_7',['LSI_REPLY_MAX_WORDS',['../db/d00/a02388.html#a562dcc39e5653065c508dbc679dd1bc4a416e35dc610b4cb69e809c91a884b745',1,'CLSI53C1020']]],
+  ['lsi_5fshared_5fram_5foffset_8',['LSI_SHARED_RAM_OFFSET',['../db/d00/a02388.html#a562dcc39e5653065c508dbc679dd1bc4aaea4c939a679d281e4cc9db9c96311fb',1,'CLSI53C1020']]],
+  ['lsi_5fshared_5fram_5fsize_9',['LSI_SHARED_RAM_SIZE',['../db/d00/a02388.html#a562dcc39e5653065c508dbc679dd1bc4ac6afb7f38d4a15aaf4a5d7b9ebbc38d7',1,'CLSI53C1020']]]
 ];

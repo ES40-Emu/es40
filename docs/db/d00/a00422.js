@@ -1,9 +1,9 @@
 var a00422 =
 [
-    [ "CS3Trio64", "d5/d00/a01605.html", "d5/d00/a01605" ],
-    [ "CS3Trio64::ScanPosition", "d3/d00/a01613.html", "d3/d00/a01613" ],
-    [ "CS3Trio64::ScanTiming", "d6/d00/a01617.html", "d6/d00/a01617" ],
-    [ "CS3Trio64::SS3_state", "dd/d00/a01621.html", "dd/d00/a01621" ],
-    [ "CRTC_MAX", "db/d00/a00422.html#a9ae3b205bdd7735006ad1ba5127471d5", null ],
-    [ "VIDEO_RAM_SIZE", "db/d00/a00422.html#a9f9112adf1ebe5eb60e5a73f7f2a954a", null ]
+    [ "Ev68MMU", "d7/d00/a01588.html", "d7/d00/a01588" ],
+    [ "kEv68DataFaultPolicy", "db/d00/a00422.html#a582f252f9161fb9458e735d68ddbcb26", null ],
+    [ "kEv68InstructionFaultPolicy", "db/d00/a00422.html#afbdbd93f0cf8c42b20aba808bd1a2eaf", null ],
+    [ "kEv68MMUAddressPolicy", "db/d00/a00422.html#af72d7608012fab6bf3716a3d9092570a", null ],
+    [ "kEv68TBFillPolicy", "db/d00/a00422.html#a46c3fb375cb12b1b0d03cf0995bb21ca", null ],
+    [ "kEv68TBMissPolicy", "db/d00/a00422.html#ab8c230271ca27779bf4eb094d1d7f658", null ]
 ];

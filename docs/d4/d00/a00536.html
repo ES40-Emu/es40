@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: io/SerialListenAddress.h File Reference</title>
+<title>ES40: graphics/Radeon7500.cpp File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.95</span>
    </div>
   </td>
  </tr>
@@ -109,63 +109,197 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d4/d00/a00536.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">SerialListenAddress.h File Reference</div></div>
+  <div class="headertitle"><div class="title">Radeon7500.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-
-<p>Serial listener address parsing.  
-<a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;algorithm&gt;</code><br />
-<code>#include &lt;string&gt;</code><br />
-<code>#include &lt;vector&gt;</code><br />
-<code>#include &lt;arpa/inet.h&gt;</code><br />
-<code>#include &lt;netdb.h&gt;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d3/d00/a00779_source.html">StdAfx.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d00/a00539_source.html">Radeon7500.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/d00/a00131_source.html">config/Configurator.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d5/d00/a00878_source.html">system/System.h</a>&quot;</code><br />
+<code>#include &lt;algorithm&gt;</code><br />
+<code>#include &lt;cerrno&gt;</code><br />
+<code>#include &lt;cstdio&gt;</code><br />
+<code>#include &lt;cstdlib&gt;</code><br />
+<code>#include &lt;filesystem&gt;</code><br />
+<code>#include &lt;fstream&gt;</code><br />
+<code>#include &lt;iomanip&gt;</code><br />
+<code>#include &lt;memory&gt;</code><br />
+<code>#include &lt;sstream&gt;</code><br />
+<code>#include &lt;stdexcept&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
-Include dependency graph for SerialListenAddress.h:</div>
+Include dependency graph for Radeon7500.cpp:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../d8/d00/a00537.png" border="0" usemap="#aio_2_serial_listen_address_8h" loading="lazy" alt=""/></div>
-<map name="aio_2_serial_listen_address_8h" id="aio_2_serial_listen_address_8h">
-<area shape="rect" title="Serial listener address parsing." alt="" coords="129,5,292,32"/>
-<area shape="rect" title=" " alt="" coords="5,80,80,107"/>
-<area shape="poly" title=" " alt="" coords="182,35,87,76,85,71,180,30"/>
-<area shape="rect" title=" " alt="" coords="104,80,157,107"/>
-<area shape="poly" title=" " alt="" coords="199,32,157,72,154,67,194,33"/>
-<area shape="rect" title=" " alt="" coords="182,80,239,107"/>
-<area shape="poly" title=" " alt="" coords="212,31,213,66,208,63,209,34"/>
-<area shape="rect" title=" " alt="" coords="263,80,345,107"/>
-<area shape="poly" title=" " alt="" coords="228,30,279,71,273,70,226,35"/>
-<area shape="rect" title=" " alt="" coords="369,80,433,107"/>
-<area shape="poly" title=" " alt="" coords="244,30,357,74,352,75,243,35"/>
-</map>
-</div>
-</div><div class="textblock"><div class="dynheader">
-This graph shows which files directly or indirectly include this file:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../dd/d00/a00538.png" border="0" usemap="#aio_2_serial_listen_address_8hdep" loading="lazy" alt=""/></div>
-<map name="aio_2_serial_listen_address_8hdep" id="aio_2_serial_listen_address_8hdep">
-<area shape="rect" title="Serial listener address parsing." alt="" coords="174,5,336,32"/>
-<area shape="rect" href="../../df/d00/a00107.html" title=" " alt="" coords="5,80,163,107"/>
-<area shape="poly" title=" " alt="" coords="213,39,115,82,113,77,208,38"/>
-<area shape="rect" href="../../d1/d00/a00128.html" title="Configuration file creator." alt="" coords="187,80,322,107"/>
-<area shape="poly" title=" " alt="" coords="257,46,257,81,252,78,253,50"/>
-<area shape="rect" href="../../da/d00/a00530.html" title="Contains the code for the emulated Serial Port devices." alt="" coords="347,80,440,107"/>
-<area shape="poly" title=" " alt="" coords="293,37,372,79,366,79,292,42"/>
+<div class="center"><img src="../../d8/d00/a00537.png" border="0" usemap="#agraphics_2_radeon7500_8cpp" loading="lazy" alt=""/></div>
+<map name="agraphics_2_radeon7500_8cpp" id="agraphics_2_radeon7500_8cpp">
+<area shape="rect" title=" " alt="" coords="2207,5,2380,32"/>
+<area shape="rect" href="../../d3/d00/a00779.html" title="Standard includes." alt="" coords="728,80,800,107"/>
+<area shape="poly" title=" " alt="" coords="2204,22,1648,41,1266,59,878,83,816,88,815,83,877,77,1266,53,1647,36,2209,21"/>
+<area shape="rect" title=" " alt="" coords="5,304,62,331"/>
+<area shape="poly" title=" " alt="" coords="2205,22,1192,42,631,60,426,71,304,83,182,99,158,105,134,116,109,133,84,156,62,187,48,223,40,258,37,289,32,288,35,257,43,221,57,185,79,153,106,129,131,112,156,100,181,94,304,77,425,65,631,55,1192,37,2209,20"/>
+<area shape="rect" title=" " alt="" coords="109,304,187,331"/>
+<area shape="poly" title=" " alt="" coords="2204,21,1745,30,1426,38,1088,50,759,67,469,90,348,104,247,120,171,137,123,157,95,177,75,200,67,225,69,239,75,255,90,276,112,295,107,296,86,280,70,257,64,240,62,225,70,197,91,173,120,152,169,132,246,114,347,99,469,84,759,61,1088,44,1426,32,1745,25,2209,20"/>
+<area shape="rect" title=" " alt="" coords="1139,304,1208,331"/>
+<area shape="poly" title=" " alt="" coords="2204,23,1918,37,1542,61,1360,79,1203,100,1086,126,1047,141,1025,157,1009,181,1005,204,1010,228,1025,254,1040,267,1064,279,1127,303,1122,303,1062,284,1037,271,1021,258,1006,230,1000,204,1004,179,1021,153,1045,136,1084,121,1202,95,1359,73,1541,56,1917,32,2210,22"/>
+<area shape="rect" title=" " alt="" coords="2561,304,2629,331"/>
+<area shape="poly" title=" " alt="" coords="2331,30,2424,65,2539,114,2595,142,2645,170,2684,199,2708,228,2712,241,2711,253,2697,274,2673,290,2644,303,2643,298,2670,286,2693,270,2706,251,2707,241,2703,231,2680,203,2642,175,2593,146,2537,119,2422,70,2330,35"/>
+<area shape="rect" href="../../d3/d00/a00539.html" title=" " alt="" coords="1433,155,1538,181"/>
+<area shape="poly" title=" " alt="" coords="2227,32,1554,157,1553,152,2221,33"/>
+<area shape="rect" title=" " alt="" coords="1238,229,1304,256"/>
+<area shape="poly" title=" " alt="" coords="2204,22,2056,34,1858,55,1749,72,1638,94,1528,122,1422,157,1357,189,1301,223,1300,218,1354,184,1421,152,1527,117,1637,89,1748,67,1857,50,2055,28,2210,22"/>
+<area shape="rect" href="../../d7/d00/a00131.html" title="Contains the definitions for the configuration file interpreter." alt="" coords="2328,229,2470,256"/>
+<area shape="poly" title=" " alt="" coords="2304,30,2342,83,2380,154,2397,216,2392,213,2375,156,2337,86,2302,35"/>
+<area shape="rect" href="../../d5/d00/a00878.html" title="Contains the definitions for the emulated Typhoon Chipset devices." alt="" coords="2071,80,2196,107"/>
+<area shape="poly" title=" " alt="" coords="2268,32,2176,76,2174,71,2263,33"/>
+<area shape="rect" title=" " alt="" coords="2542,80,2616,107"/>
+<area shape="poly" title=" " alt="" coords="2343,30,2529,79,2524,79,2343,35"/>
+<area shape="rect" title=" " alt="" coords="2640,80,2697,107"/>
+<area shape="poly" title=" " alt="" coords="2379,30,2493,49,2627,79,2622,79,2492,55,2379,35"/>
+<area shape="rect" title=" " alt="" coords="2721,80,2780,107"/>
+<area shape="poly" title=" " alt="" coords="2380,26,2529,46,2708,80,2703,79,2528,51,2380,32"/>
+<area shape="rect" title=" " alt="" coords="2805,80,2886,107"/>
+<area shape="poly" title=" " alt="" coords="2380,25,2564,45,2792,80,2786,80,2564,50,2380,30"/>
+<area shape="rect" title=" " alt="" coords="2910,80,2976,107"/>
+<area shape="poly" title=" " alt="" coords="2380,21,2609,39,2751,55,2897,80,2892,79,2750,60,2609,44,2380,27"/>
+<area shape="rect" href="../../d9/d00/a00191.html" title=" " alt="" coords="134,155,243,181"/>
+<area shape="poly" title=" " alt="" coords="725,99,529,123,262,157,259,158,257,153,261,152,528,118,730,98"/>
+<area shape="rect" href="../../d5/d00/a00461.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="1916,229,2005,256"/>
+<area shape="poly" title=" " alt="" coords="800,93,1172,110,1392,127,1483,139,1552,152,1581,165,1609,179,1688,199,1752,209,1816,215,1898,227,1903,230,1898,230,1897,232,1815,220,1751,214,1687,204,1607,184,1579,170,1550,157,1482,144,1391,133,1172,115,801,98"/>
+<area shape="rect" title=" " alt="" coords="2029,229,2096,256"/>
+<area shape="poly" title=" " alt="" coords="801,93,1129,110,1361,127,1599,152,1807,182,2017,229,2011,229,1806,188,1599,157,1361,133,1128,115,801,99"/>
+<area shape="rect" href="../../d3/d00/a00059.html" title=" " alt="" coords="1035,155,1157,181"/>
+<area shape="poly" title=" " alt="" coords="801,100,1026,151,1021,151,801,105"/>
+<area shape="rect" href="../../de/d00/a00065.html" title=" " alt="" coords="95,229,196,256"/>
+<area shape="poly" title=" " alt="" coords="725,96,650,101,544,110,425,128,364,141,307,157,183,224,180,219,304,152,363,136,424,122,543,104,649,95,730,94"/>
+<area shape="rect" href="../../d1/d00/a00077.html" title=" " alt="" coords="755,229,859,256"/>
+<area shape="poly" title=" " alt="" coords="769,105,801,215,797,213,766,109"/>
+<area shape="rect" href="../../da/d00/a00068.html" title=" " alt="" coords="1231,304,1318,331"/>
+<area shape="poly" title=" " alt="" coords="781,105,880,175,950,217,1024,254,1101,274,1219,303,1213,303,1100,279,1022,258,947,222,877,180,779,110"/>
+<area shape="rect" href="../../db/d00/a00074.html" title=" " alt="" coords="550,229,680,256"/>
+<area shape="poly" title=" " alt="" coords="725,98,667,106,597,117,535,134,512,144,497,156,492,166,491,175,503,193,527,208,558,224,553,223,524,213,499,196,486,176,486,165,493,153,509,140,533,129,596,112,667,101,730,97"/>
+<area shape="rect" href="../../d0/d00/a00071.html" title=" " alt="" coords="318,155,432,181"/>
+<area shape="poly" title=" " alt="" coords="725,103,448,156,447,151,730,100"/>
+<area shape="rect" href="../../de/d00/a00500.html" title="Contains macro&#39;s and prototypes for debugging." alt="" coords="506,155,609,181"/>
+<area shape="poly" title=" " alt="" coords="731,106,609,152,607,147,726,108"/>
+<area shape="rect" href="../../d4/d00/a00503.html" title="Contains byte&#45;order conversion helpers." alt="" coords="633,155,738,181"/>
+<area shape="poly" title=" " alt="" coords="753,106,712,146,709,142,748,108"/>
+<area shape="rect" title=" " alt="" coords="1035,229,1112,256"/>
+<area shape="poly" title=" " alt="" coords="1094,180,1084,216,1080,212,1090,184"/>
+<area shape="rect" title=" " alt="" coords="1611,304,1664,331"/>
+<area shape="poly" title=" " alt="" coords="1111,179,1161,217,1193,237,1228,254,1280,271,1325,281,1404,288,1485,289,1532,293,1587,301,1598,306,1593,306,1586,307,1532,299,1485,295,1404,293,1324,286,1278,276,1226,258,1191,242,1158,222,1109,184"/>
+<area shape="rect" title=" " alt="" coords="506,304,564,331"/>
+<area shape="poly" title=" " alt="" coords="195,251,207,253,348,275,493,303,488,304,347,280,206,259,196,257"/>
+<area shape="rect" title=" " alt="" coords="333,304,393,331"/>
+<area shape="poly" title=" " alt="" coords="184,254,320,300,315,302,183,259"/>
+<area shape="rect" title=" " alt="" coords="252,304,309,331"/>
+<area shape="poly" title=" " alt="" coords="170,254,246,296,240,297,168,259"/>
+<area shape="poly" title=" " alt="" coords="128,258,67,298,64,293,124,255"/>
+<area shape="poly" title=" " alt="" coords="148,255,150,290,145,287,144,259"/>
+<area shape="poly" title=" " alt="" coords="859,244,1227,268,1435,284,1587,301,1598,306,1593,305,1586,307,1435,290,1227,273,859,250"/>
+<area shape="poly" title=" " alt="" coords="759,256,579,306,578,301,754,257"/>
+<area shape="poly" title=" " alt="" coords="757,249,603,272,409,306,408,301,603,267,752,250"/>
+<area shape="poly" title=" " alt="" coords="757,250,527,279,324,307,324,301,527,274,751,250"/>
+<area shape="poly" title=" " alt="" coords="752,250,692,259,525,272,395,279,264,288,98,307,77,310,76,305,97,301,264,282,394,273,525,266,692,253,757,249"/>
+<area shape="poly" title=" " alt="" coords="755,252,240,307,203,311,203,306,240,301,754,247"/>
+<area shape="rect" title=" " alt="" coords="1342,304,1402,331"/>
+<area shape="poly" title=" " alt="" coords="859,244,1061,262,1192,278,1329,304,1324,303,1191,284,1061,267,859,250"/>
+<area shape="poly" title=" " alt="" coords="860,251,1127,304,1122,304,859,256"/>
+<area shape="rect" title=" " alt="" coords="588,304,714,331"/>
+<area shape="poly" title=" " alt="" coords="782,256,693,300,691,294,777,257"/>
+<area shape="poly" title=" " alt="" coords="860,245,1023,253,1406,268,1705,277,2003,286,2387,301,2548,313,2542,313,2387,307,2003,291,1705,282,1406,274,1023,259,860,250"/>
+<area shape="rect" title=" " alt="" coords="828,304,924,331"/>
+<area shape="poly" title=" " alt="" coords="820,254,856,293,851,292,818,259"/>
+<area shape="poly" title=" " alt="" coords="859,248,1016,269,1219,303,1213,303,1015,274,859,253"/>
+<area shape="rect" title=" " alt="" coords="948,304,1023,331"/>
+<area shape="poly" title=" " alt="" coords="838,254,943,298,938,297,837,259"/>
+<area shape="rect" title=" " alt="" coords="1048,304,1115,331"/>
+<area shape="poly" title=" " alt="" coords="855,254,1035,303,1030,303,854,259"/>
+<area shape="rect" title=" " alt="" coords="738,304,804,331"/>
+<area shape="poly" title=" " alt="" coords="803,255,785,292,782,288,798,258"/>
+<area shape="poly" title=" " alt="" coords="603,256,561,296,558,291,598,257"/>
+<area shape="poly" title=" " alt="" coords="574,256,409,306,408,300,568,257"/>
+<area shape="poly" title=" " alt="" coords="550,257,203,310,203,305,549,251"/>
+<area shape="poly" title=" " alt="" coords="622,254,640,291,635,289,620,259"/>
+<area shape="rect" title=" " alt="" coords="417,304,482,331"/>
+<area shape="poly" title=" " alt="" coords="589,256,493,300,492,295,583,257"/>
+<area shape="poly" title=" " alt="" coords="333,183,201,227,199,222,337,180"/>
+<area shape="poly" title=" " alt="" coords="393,179,410,195,426,213,434,234,432,257,417,279,398,297,396,292,413,276,427,255,429,235,421,216,407,198,392,184"/>
+<area shape="poly" title=" " alt="" coords="373,180,359,217,337,257,306,295,303,291,333,255,354,215,368,183"/>
+<area shape="poly" title=" " alt="" coords="315,176,180,196,116,212,91,221,74,231,62,244,53,259,41,290,36,288,48,256,58,241,71,227,89,216,115,207,179,191,319,173"/>
+<area shape="poly" title=" " alt="" coords="315,179,176,203,115,218,85,231,80,246,85,262,99,278,117,295,112,295,95,282,81,265,74,246,81,228,113,213,175,198,319,175"/>
+<area shape="poly" title=" " alt="" coords="433,173,628,195,871,227,1023,253,1175,274,1242,284,1330,304,1324,303,1241,289,1174,280,1022,259,870,232,627,200,433,178"/>
+<area shape="rect" title=" " alt="" coords="219,229,322,256"/>
+<area shape="poly" title=" " alt="" coords="359,181,303,223,300,218,354,183"/>
+<area shape="poly" title=" " alt="" coords="1500,179,1616,294,1611,292,1497,184"/>
+<area shape="poly" title=" " alt="" coords="1487,180,1480,218,1473,238,1462,258,1440,281,1414,299,1412,294,1436,277,1458,254,1468,236,1475,216,1483,183"/>
+<area shape="poly" title=" " alt="" coords="1457,181,1413,205,1368,232,1330,263,1297,295,1295,290,1326,259,1365,227,1411,200,1452,183"/>
+<area shape="rect" href="../../dc/d00/a00563.html" title=" " alt="" coords="1379,229,1448,256"/>
+<area shape="poly" title=" " alt="" coords="1475,181,1438,221,1435,216,1471,183"/>
+<area shape="rect" href="../../d9/d00/a00551.html" title=" " alt="" coords="1675,229,1746,256"/>
+<area shape="poly" title=" " alt="" coords="1525,179,1663,225,1658,225,1524,185"/>
+<area shape="rect" title=" " alt="" coords="1524,304,1575,331"/>
+<area shape="poly" title=" " alt="" coords="1492,180,1540,291,1536,289,1489,184"/>
+<area shape="rect" title=" " alt="" coords="2317,304,2374,331"/>
+<area shape="poly" title=" " alt="" coords="1539,176,1558,179,1641,189,1707,195,1772,205,1853,227,1879,240,1905,254,2015,281,2125,298,2225,308,2304,315,2298,315,2224,313,2125,303,2014,286,1903,258,1877,245,1851,232,1771,210,1706,201,1641,195,1557,184,1538,181"/>
+<area shape="rect" href="../../d9/d00/a00575.html" title="Contains the definitions for the bx_gui_c base class used for interfacing with SDL and other device i..." alt="" coords="1770,229,1841,256"/>
+<area shape="poly" title=" " alt="" coords="1539,178,1758,229,1752,228,1538,183"/>
+<area shape="poly" title=" " alt="" coords="1451,181,1319,228,1317,223,1445,182"/>
+<area shape="poly" title=" " alt="" coords="1701,256,1662,295,1660,290,1696,258"/>
+<area shape="poly" title=" " alt="" coords="1685,256,1590,301,1588,296,1680,257"/>
+<area shape="rect" title=" " alt="" coords="1773,304,1838,331"/>
+<area shape="poly" title=" " alt="" coords="1728,254,1780,295,1775,294,1726,259"/>
+<area shape="poly" title=" " alt="" coords="1747,251,1759,253,1915,276,2069,293,2304,314,2299,314,2069,299,1914,282,1758,259,1747,256"/>
+<area shape="poly" title=" " alt="" coords="1779,256,1679,301,1678,296,1774,257"/>
+<area shape="poly" title=" " alt="" coords="1841,246,1904,253,2272,288,2548,312,2542,312,2272,293,1904,259,1841,251"/>
+<area shape="poly" title=" " alt="" coords="1807,255,1807,290,1804,287,1804,258"/>
+<area shape="poly" title=" " alt="" coords="2330,251,1762,307,1680,315,1680,309,1761,301,2324,251"/>
+<area shape="poly" title=" " alt="" coords="2392,255,2365,294,2362,289,2387,258"/>
+<area shape="poly" title=" " alt="" coords="2074,101,1950,122,1881,138,1813,157,1730,182,1698,199,1665,231,1650,259,1642,290,1638,286,1645,257,1661,228,1695,195,1728,177,1811,152,1880,132,1949,117,2069,101"/>
+<area shape="poly" title=" " alt="" coords="2068,97,1547,118,1244,135,1118,146,1023,157,943,171,881,185,820,203,744,232,719,245,693,258,579,304,577,299,691,254,716,240,742,227,818,198,879,179,942,166,1022,152,1118,140,1244,130,1547,113,2073,96"/>
+<area shape="poly" title=" " alt="" coords="2068,94,1871,97,1576,104,1230,122,1052,137,878,157,538,232,462,265,397,299,396,294,460,260,537,227,877,152,1052,132,1230,117,1576,98,1871,92,2074,94"/>
+<area shape="poly" title=" " alt="" coords="2068,94,1950,99,1788,107,1605,125,1512,139,1422,157,1361,167,1311,174,1289,180,1268,191,1248,207,1229,231,1225,243,1229,254,1265,274,1330,301,1325,300,1263,278,1225,258,1219,243,1225,228,1245,203,1265,186,1287,175,1309,169,1360,162,1421,152,1511,134,1604,120,1787,102,1949,93,2073,94"/>
+<area shape="poly" title=" " alt="" coords="2196,97,2320,112,2469,137,2540,154,2604,175,2654,199,2673,213,2686,228,2691,238,2692,249,2682,268,2663,285,2640,299,2638,294,2660,281,2678,265,2687,248,2686,240,2682,231,2669,217,2651,204,2602,180,2539,159,2468,142,2320,117,2196,103"/>
+<area shape="poly" title=" " alt="" coords="2138,105,2142,137,2141,178,2133,220,2123,240,2110,258,2092,271,2065,282,1997,299,1920,309,1853,316,1853,310,1920,304,1996,293,2064,277,2089,266,2106,254,2119,238,2127,219,2136,177,2136,137,2134,109"/>
+<area shape="poly" title=" " alt="" coords="2196,101,2284,119,2332,134,2379,152,2433,187,2466,211,2484,228,2488,244,2485,259,2476,271,2463,282,2428,299,2390,310,2389,305,2426,294,2460,278,2472,268,2480,257,2483,244,2479,231,2463,215,2430,192,2376,157,2331,139,2283,125,2196,106"/>
+<area shape="rect" href="../../d6/d00/a00491.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="2221,155,2366,181"/>
+<area shape="poly" title=" " alt="" coords="2162,105,2254,148,2249,148,2161,110"/>
+<area shape="rect" title=" " alt="" coords="2171,229,2253,256"/>
+<area shape="poly" title=" " alt="" coords="2142,105,2201,217,2196,214,2139,109"/>
+<area shape="rect" href="../../da/d00/a00458.html" title="Contains the definitions for the CPU tracing engine." alt="" coords="1958,155,2096,181"/>
+<area shape="poly" title=" " alt="" coords="2117,106,2059,148,2057,143,2112,108"/>
+<area shape="rect" href="../../dc/d00/a00872.html" title=" " alt="" coords="2595,229,2672,256"/>
+<area shape="poly" title=" " alt="" coords="2196,102,2303,122,2422,152,2516,186,2596,223,2591,222,2514,191,2421,157,2302,127,2196,107"/>
+<area shape="rect" title=" " alt="" coords="1824,155,1934,181"/>
+<area shape="poly" title=" " alt="" coords="2092,107,1938,153,1937,147,2087,108"/>
+<area shape="poly" title=" " alt="" coords="2256,181,2112,229,2111,224,2251,182"/>
+<area shape="poly" title=" " alt="" coords="2218,175,2108,184,1869,192,1666,193,1321,188,1155,187,977,192,776,206,538,232,445,247,353,266,203,303,201,298,352,260,444,241,537,227,775,201,977,187,1155,182,1321,183,1666,188,1869,187,2108,179,2224,174"/>
+<area shape="poly" title=" " alt="" coords="2351,179,2415,199,2483,227,2532,259,2573,294,2568,293,2529,263,2480,232,2414,204,2350,185"/>
+<area shape="poly" title=" " alt="" coords="2298,180,2319,255,2334,291,2329,288,2314,257,2294,184"/>
+<area shape="poly" title=" " alt="" coords="2313,179,2371,221,2365,220,2311,184"/>
+<area shape="poly" title=" " alt="" coords="2282,181,2238,221,2236,217,2277,183"/>
+<area shape="poly" title=" " alt="" coords="2018,181,1983,220,1981,215,2013,183"/>
+<area shape="poly" title=" " alt="" coords="2629,255,2610,293,2607,288,2624,258"/>
+<area shape="poly" title=" " alt="" coords="2597,253,2390,308,2389,302,2592,254"/>
 </map>
 </div>
 </div>
 <p><a href="../../d4/d00/a00536_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Data Structures</h2></td></tr>
+<tr class="memitem:CRadeonDisplayLock" id="r_CRadeonDisplayLock"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../db/d00/a01836.html">CRadeonDisplayLock</a></td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a0a12845456a3657a5a5256bb48ef95aa" id="r_a0a12845456a3657a5a5256bb48ef95aa"><td class="memItemLeft">static bool&#160;</td><td class="memItemRight"><a class="el" href="#a0a12845456a3657a5a5256bb48ef95aa">serial_parse_listen_addresses</a> (const std::string &amp;value, std::vector&lt; std::string &gt; &amp;addresses, std::string &amp;error)</td></tr>
+<tr class="memitem:a8c0a38c0ffa14658a238e1f00c2974bb" id="r_a8c0a38c0ffa14658a238e1f00c2974bb"><td class="memItemLeft">static <a class="el" href="../../dc/d00/a00194.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#a8c0a38c0ffa14658a238e1f00c2974bb">radeon_setting</a> (<a class="el" href="../../d4/d00/a01272.html">CConfigurator</a> *cfg, const char *key, <a class="el" href="../../dc/d00/a00194.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a> def)</td></tr>
+<tr class="memitem:a88ab14e754389accbef7c84add69f83e" id="r_a88ab14e754389accbef7c84add69f83e"><td class="memItemLeft">static <a class="el" href="../../dc/d00/a00194.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#a88ab14e754389accbef7c84add69f83e">radeon_bounded_setting</a> (<a class="el" href="../../d4/d00/a01272.html">CConfigurator</a> *cfg, const char *key, <a class="el" href="../../dc/d00/a00194.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a> def, <a class="el" href="../../dc/d00/a00194.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a> max)</td></tr>
+<tr class="memitem:a65472b9d50fb63e699e807b448f1baa5" id="r_a65472b9d50fb63e699e807b448f1baa5"><td class="memItemLeft">static <a class="el" href="../../d1/d00/a01928.html">CRV200::Options</a>&#160;</td><td class="memItemRight"><a class="el" href="#a65472b9d50fb63e699e807b448f1baa5">radeon_options</a> (<a class="el" href="../../d4/d00/a01272.html">CConfigurator</a> *c)</td></tr>
+<tr class="memitem:ab150d7acc75099ca63f52623255cc718" id="r_ab150d7acc75099ca63f52623255cc718"><td class="memItemLeft">static void&#160;</td><td class="memItemRight"><a class="el" href="#ab150d7acc75099ca63f52623255cc718">radeon_write_u32</a> (FILE *f, <a class="el" href="../../dc/d00/a00194.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a> v)</td></tr>
+<tr class="memitem:a1ad08ced4f6bdf49fedacf43e16fed14" id="r_a1ad08ced4f6bdf49fedacf43e16fed14"><td class="memItemLeft">static <a class="el" href="../../dc/d00/a00194.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#a1ad08ced4f6bdf49fedacf43e16fed14">radeon_read_u32</a> (FILE *f)</td></tr>
+<tr class="memitem:ab3172be74d0bbdf1f1a30ff6368c7ca3" id="r_ab3172be74d0bbdf1f1a30ff6368c7ca3"><td class="memItemLeft">static bool&#160;</td><td class="memItemRight"><a class="el" href="#ab3172be74d0bbdf1f1a30ff6368c7ca3">radeon_vga_window_offset</a> (<a class="el" href="../../d5/d00/a00461.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> &amp;address, unsigned selection)</td></tr>
 </table>
-<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Serial listener address parsing. </p>
-
-<p class="definition">Definition in file <a class="el" href="../../d4/d00/a00536_source.html">SerialListenAddress.h</a>.</p>
-</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
-<a id="a0a12845456a3657a5a5256bb48ef95aa" name="a0a12845456a3657a5a5256bb48ef95aa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0a12845456a3657a5a5256bb48ef95aa">&#9670;&#160;</a></span>serial_parse_listen_addresses()</h2>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a88ab14e754389accbef7c84add69f83e" name="a88ab14e754389accbef7c84add69f83e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a88ab14e754389accbef7c84add69f83e">&#9670;&#160;</a></span>radeon_bounded_setting()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -174,49 +308,505 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool serial_parse_listen_addresses </td>
+          <td class="memname"><a class="el" href="../../dc/d00/a00194.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a> radeon_bounded_setting </td>
           <td>(</td>
-          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>value</em></span>, </td>
+          <td class="paramtype"><a class="el" href="../../d4/d00/a01272.html">CConfigurator</a> *</td>          <td class="paramname"><span class="paramname"><em>cfg</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::vector&lt; std::string &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>addresses</em></span>, </td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>key</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>error</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="../../dc/d00/a00194.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a></td>          <td class="paramname"><span class="paramname"><em>def</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="../../dc/d00/a00194.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a></td>          <td class="paramname"><span class="paramname"><em>max</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel static">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00536_source.html#l00053">53</a> of file <a class="el" href="../../d4/d00/a00536_source.html">SerialListenAddress.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00536_source.html#l00071">71</a> of file <a class="el" href="../../d4/d00/a00536_source.html">Radeon7500.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d00/a00536_source.html#l00053">serial_parse_listen_addresses()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d00/a00536_source.html#l00071">radeon_bounded_setting()</a>, and <a class="el" href="../../d4/d00/a00536_source.html#l00056">radeon_setting()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d4/d00/a00536_source.html#l00053">serial_parse_listen_addresses()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d4/d00/a00536_source.html#l00495">CRadeon7500::init()</a>, and <a class="el" href="../../d4/d00/a00536_source.html#l00071">radeon_bounded_setting()</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../d4/d00/a00536_a0a12845456a3657a5a5256bb48ef95aa_cgraph.png" border="0" usemap="#ad4/d00/a00536_a0a12845456a3657a5a5256bb48ef95aa_cgraph" loading="lazy" alt=""/></div>
-<map name="ad4/d00/a00536_a0a12845456a3657a5a5256bb48ef95aa_cgraph" id="ad4/d00/a00536_a0a12845456a3657a5a5256bb48ef95aa_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,135,72"/>
-<area shape="poly" title=" " alt="" coords="44,28,43,20,47,11,57,5,70,3,85,5,94,14,89,14,82,10,70,8,58,10,51,14,49,20,50,29"/>
+<div class="center"><img src="../../d4/d00/a00536_a88ab14e754389accbef7c84add69f83e_cgraph.png" border="0" usemap="#ad4/d00/a00536_a88ab14e754389accbef7c84add69f83e_cgraph" loading="lazy" alt=""/></div>
+<map name="ad4/d00/a00536_a88ab14e754389accbef7c84add69f83e_cgraph" id="ad4/d00/a00536_a88ab14e754389accbef7c84add69f83e_cgraph">
+<area shape="rect" title=" " alt="" coords="5,37,168,64"/>
+<area shape="poly" title=" " alt="" coords="55,37,50,29,54,19,66,13,87,11,108,13,121,22,116,22,107,18,86,16,68,18,57,23,55,28,60,37"/>
+<area shape="rect" href="../../d4/d00/a00536.html#a8c0a38c0ffa14658a238e1f00c2974bb" title=" " alt="" coords="216,37,322,64"/>
+<area shape="poly" title=" " alt="" coords="168,48,202,50,197,51,168,53"/>
+<area shape="poly" title=" " alt="" coords="240,36,235,29,239,19,250,13,269,11,289,13,301,23,295,22,287,18,269,16,252,18,243,23,241,28,245,38"/>
+<area shape="rect" href="../../d4/d00/a01272.html#a36498889497191fbc49ebf533c0d3d36" title=" " alt="" coords="370,29,498,72"/>
+<area shape="poly" title=" " alt="" coords="322,48,357,51,352,51,323,53"/>
+<area shape="poly" title=" " alt="" coords="403,27,401,19,406,11,417,5,434,3,452,5,464,14,459,13,451,10,434,8,419,10,410,14,406,20,407,30"/>
 </map>
 </div>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../d4/d00/a00536_a0a12845456a3657a5a5256bb48ef95aa_icgraph.png" border="0" usemap="#ad4/d00/a00536_a0a12845456a3657a5a5256bb48ef95aa_icgraph" loading="lazy" alt=""/></div>
-<map name="ad4/d00/a00536_a0a12845456a3657a5a5256bb48ef95aa_icgraph" id="ad4/d00/a00536_a0a12845456a3657a5a5256bb48ef95aa_icgraph">
-<area shape="rect" title=" " alt="" coords="5,29,135,72"/>
-<area shape="poly" title=" " alt="" coords="89,14,82,10,70,8,58,10,51,14,49,20,50,29,44,28,43,20,47,11,57,5,70,3,85,5,94,14"/>
+<div class="center"><img src="../../d4/d00/a00536_a88ab14e754389accbef7c84add69f83e_icgraph.png" border="0" usemap="#ad4/d00/a00536_a88ab14e754389accbef7c84add69f83e_icgraph" loading="lazy" alt=""/></div>
+<map name="ad4/d00/a00536_a88ab14e754389accbef7c84add69f83e_icgraph" id="ad4/d00/a00536_a88ab14e754389accbef7c84add69f83e_icgraph">
+<area shape="rect" title=" " alt="" coords="183,29,345,56"/>
+<area shape="poly" title=" " alt="" coords="295,14,285,10,264,8,244,10,233,15,230,20,235,30,231,28,225,21,229,11,242,5,264,3,287,5,301,14"/>
+<area shape="rect" href="../../d4/d00/a01840.html#a0129f7772637a6222911e8940f2ad5f3" title=" " alt="" coords="5,29,135,56"/>
+<area shape="poly" title=" " alt="" coords="165,43,135,45,135,40,170,42"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a65472b9d50fb63e699e807b448f1baa5" name="a65472b9d50fb63e699e807b448f1baa5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65472b9d50fb63e699e807b448f1baa5">&#9670;&#160;</a></span>radeon_options()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d1/d00/a01928.html">CRV200::Options</a> radeon_options </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="../../d4/d00/a01272.html">CConfigurator</a> *</td>          <td class="paramname"><span class="paramname"><em>c</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00536_source.html#l00081">81</a> of file <a class="el" href="../../d4/d00/a00536_source.html">Radeon7500.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d7/d00/a00131_source.html#l00163">CConfigurator::get_bool_value()</a>, <a class="el" href="../../d7/d00/a00131_source.html#l00166">CConfigurator::get_num_value()</a>, <a class="el" href="../../d4/d00/a00536_source.html#l00081">radeon_options()</a>, <a class="el" href="../../d9/d00/a00551_source.html#l00046">CRV200::Options::strict_mmio</a>, and <a class="el" href="../../d9/d00/a00551_source.html#l00044">CRV200::Options::vram_bytes</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d4/d00/a00536_source.html#l00469">CRadeon7500::CRadeon7500()</a>, and <a class="el" href="../../d4/d00/a00536_source.html#l00081">radeon_options()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d4/d00/a00536_a65472b9d50fb63e699e807b448f1baa5_cgraph.png" border="0" usemap="#ad4/d00/a00536_a65472b9d50fb63e699e807b448f1baa5_cgraph" loading="lazy" alt=""/></div>
+<map name="ad4/d00/a00536_a65472b9d50fb63e699e807b448f1baa5_cgraph" id="ad4/d00/a00536_a65472b9d50fb63e699e807b448f1baa5_cgraph">
+<area shape="rect" title=" " alt="" coords="5,83,115,109"/>
+<area shape="poly" title=" " alt="" coords="31,83,26,74,30,64,41,58,60,56,80,59,92,67,87,68,78,64,60,61,43,63,34,68,31,73,36,82"/>
+<area shape="rect" href="../../d4/d00/a01272.html#af9012af5270145f47ebdf88e857290db" title=" " alt="" coords="163,29,291,72"/>
+<area shape="poly" title=" " alt="" coords="111,80,150,71,145,74,113,84"/>
+<area shape="rect" href="../../d4/d00/a01272.html#a672e2f061245308cbd65d432a4d61674" title=" " alt="" coords="163,120,291,163"/>
+<area shape="poly" title=" " alt="" coords="112,107,150,119,145,120,112,113"/>
+<area shape="poly" title=" " alt="" coords="195,28,193,19,199,11,210,5,227,3,245,5,257,14,252,14,243,10,227,8,211,10,202,14,198,20,200,30"/>
+<area shape="poly" title=" " alt="" coords="195,118,193,110,199,101,210,95,227,93,245,96,257,105,252,104,243,101,227,99,211,100,202,105,198,111,199,121"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d4/d00/a00536_a65472b9d50fb63e699e807b448f1baa5_icgraph.png" border="0" usemap="#ad4/d00/a00536_a65472b9d50fb63e699e807b448f1baa5_icgraph" loading="lazy" alt=""/></div>
+<map name="ad4/d00/a00536_a65472b9d50fb63e699e807b448f1baa5_icgraph" id="ad4/d00/a00536_a65472b9d50fb63e699e807b448f1baa5_icgraph">
+<area shape="rect" title=" " alt="" coords="2014,1156,2123,1183"/>
+<area shape="poly" title=" " alt="" coords="2101,1141,2091,1137,2068,1135,2047,1137,2036,1142,2033,1147,2039,1157,2034,1155,2028,1148,2032,1138,2046,1132,2068,1130,2092,1132,2106,1141"/>
+<area shape="rect" href="../../d4/d00/a01840.html#adaae4180eb84c740f4df44e86605cc13" title=" " alt="" coords="1770,1156,1966,1183"/>
+<area shape="poly" title=" " alt="" coords="1996,1170,1967,1172,1966,1167,2001,1169"/>
+<area shape="rect" href="../../d4/d00/a01272.html#a92e6679588d861939dd3da4ebeadd4c7" title="Determine what device this configurator represents, and instantiate it; then call initialize for our ..." alt="" coords="1565,1156,1722,1183"/>
+<area shape="poly" title=" " alt="" coords="1752,1171,1724,1172,1722,1167,1757,1169"/>
+<area shape="poly" title=" " alt="" coords="1680,1141,1669,1137,1644,1135,1620,1137,1608,1142,1605,1147,1611,1156,1606,1156,1599,1148,1604,1138,1619,1132,1644,1130,1670,1132,1686,1141"/>
+<area shape="rect" href="../../d4/d00/a01272.html#afe0ca9e6f3009dcedfbf6eb256f77083" title="Constructor." alt="" coords="1326,714,1517,740"/>
+<area shape="poly" title=" " alt="" coords="1633,1140,1618,1082,1594,1003,1560,915,1515,831,1494,805,1471,780,1432,743,1432,738,1475,777,1498,801,1519,828,1564,913,1599,1001,1623,1081,1638,1142"/>
+<area shape="rect" href="../../d7/d00/a00002.html#a0ddf1224851353fc92bfbff6f499fa97" title="Entry point for the application." alt="" coords="1189,898,1238,924"/>
+<area shape="poly" title=" " alt="" coords="1604,1149,1238,928,1238,922,1609,1147"/>
+<area shape="poly" title=" " alt="" coords="1466,748,1495,774,1519,804,1547,853,1571,904,1608,1007,1632,1096,1643,1157,1638,1155,1626,1098,1603,1008,1566,906,1542,855,1515,807,1491,777,1466,753"/>
+<area shape="poly" title=" " alt="" coords="1455,699,1445,695,1421,692,1400,694,1388,699,1385,705,1391,714,1386,713,1380,705,1384,695,1398,689,1421,687,1446,690,1461,698"/>
+<area shape="rect" href="../../de/d00/a01228.html#a26ecafeaa3d13966301b1bd2d5c9bad0" title=" " alt="" coords="900,22,1101,48"/>
+<area shape="poly" title=" " alt="" coords="1416,698,1405,559,1381,362,1362,262,1339,171,1310,98,1294,70,1276,50,1251,34,1224,22,1194,15,1164,12,1104,15,1053,23,1050,19,1103,9,1164,7,1195,10,1225,17,1254,29,1279,46,1298,67,1315,95,1344,169,1368,260,1386,361,1410,559,1421,699"/>
+<area shape="rect" href="../../df/d00/a00122.html#abd420d0dae1fe4c263bea185f837c08c" title=" " alt="" coords="493,214,555,240"/>
+<area shape="poly" title=" " alt="" coords="1414,697,1401,630,1375,537,1357,487,1335,437,1308,390,1276,346,1236,306,1199,281,1156,264,1101,247,1023,228,943,217,863,211,786,209,650,215,557,225,554,221,649,210,786,204,864,205,944,211,1024,223,1102,242,1158,259,1201,276,1239,302,1280,343,1312,387,1339,435,1362,485,1380,536,1406,629,1419,699"/>
+<area shape="rect" href="../../df/d00/a00122.html#ae799ccf629887c5248e091c94325d297" title=" " alt="" coords="103,427,223,454"/>
+<area shape="poly" title=" " alt="" coords="1416,698,1407,619,1384,510,1366,451,1343,392,1313,336,1276,285,1214,221,1186,197,1156,180,1125,166,1090,158,1049,153,1002,151,523,151,489,152,463,156,438,164,409,180,367,208,328,241,259,313,207,381,175,428,170,426,202,378,255,310,324,237,364,204,406,176,436,159,462,150,489,147,523,146,1002,146,1050,147,1091,152,1126,161,1159,175,1189,193,1218,217,1280,281,1317,333,1347,390,1371,449,1390,509,1412,619,1421,699"/>
+<area shape="rect" href="../../df/d00/a00122.html#a55d5346931ade26cfe6e5bef1254ae5c" title="Floppy configuration." alt="" coords="728,263,812,290"/>
+<area shape="poly" title=" " alt="" coords="1409,698,1376,608,1349,548,1315,485,1273,422,1224,363,1166,314,1134,294,1100,278,1063,265,1024,258,945,254,872,259,815,269,812,264,871,254,945,248,1025,253,1064,260,1102,273,1137,289,1169,310,1228,360,1278,419,1320,482,1354,546,1381,606,1414,699"/>
+<area shape="rect" href="../../df/d00/a00122.html#a59382a0a174cca0696c0eef14e258db1" title=" " alt="" coords="718,338,822,364"/>
+<area shape="poly" title=" " alt="" coords="1406,699,1386,658,1358,607,1320,553,1276,505,1222,465,1163,433,1100,408,1037,389,917,365,824,355,822,351,917,360,1038,384,1102,403,1165,429,1225,461,1279,501,1325,550,1362,604,1391,656,1411,700"/>
+<area shape="rect" href="../../df/d00/a00122.html#abcfdd36790109e61c1a7080098d5a862" title=" " alt="" coords="1175,539,1252,566"/>
+<area shape="poly" title=" " alt="" coords="1390,704,1231,569,1231,563,1395,703"/>
+<area shape="rect" href="../../df/d00/a00122.html#a979c892a499880205897294745487a65" title=" " alt="" coords="1168,1228,1259,1255"/>
+<area shape="poly" title=" " alt="" coords="1411,753,1223,1230,1218,1227,1407,757"/>
+<area shape="rect" href="../../d4/d00/a01272.html#a98dfe1458af681edc6a37827cba8b76a" title=" " alt="" coords="1149,1636,1278,1679"/>
+<area shape="poly" title=" " alt="" coords="1416,754,1222,1637,1217,1635,1411,757"/>
+<area shape="rect" href="../../d4/d00/a01272.html#a6954ceeff88f33f7b0e38d9417b1eb26" title=" " alt="" coords="1149,1986,1278,2028"/>
+<area shape="poly" title=" " alt="" coords="1418,754,1368,1129,1327,1406,1280,1692,1222,1987,1217,1984,1275,1691,1321,1406,1363,1129,1415,758"/>
+<area shape="rect" href="../../d4/d00/a01272.html#a7549ee2149f9eb7544ffb49f9912235d" title=" " alt="" coords="1149,706,1278,748"/>
+<area shape="poly" title=" " alt="" coords="1308,728,1279,730,1277,725,1313,726"/>
+<area shape="rect" href="../../d4/d00/a01272.html#a7f98d08eef1422d0d182d0e255e79354" title=" " alt="" coords="937,788,1064,831"/>
+<area shape="poly" title=" " alt="" coords="1347,746,1278,763,1066,802,1063,797,1277,758,1351,743"/>
+<area shape="poly" title=" " alt="" coords="1392,753,1232,899,1229,895,1395,749"/>
+<area shape="rect" href="../../d4/d00/a00116.html#a50bc35add0aa5cc4e000ab7a199cd875" title=" " alt="" coords="1178,84,1249,111"/>
+<area shape="poly" title=" " alt="" coords="1414,698,1396,578,1366,409,1347,323,1325,243,1301,177,1276,131,1263,120,1250,111,1249,106,1266,116,1280,128,1306,175,1330,242,1352,322,1372,408,1402,578,1419,699"/>
+<area shape="rect" href="../../de/d00/a01228.html#afa6bf98b875aa490abb79fe7b6bb88e2" title=" " alt="" coords="695,22,846,48"/>
+<area shape="poly" title=" " alt="" coords="882,46,848,46,845,41,887,43"/>
+<area shape="rect" href="../../de/d00/a01228.html#a5375ce0de96e8d8ec261303ce8535b6c" title=" " alt="" coords="407,22,641,48"/>
+<area shape="poly" title=" " alt="" coords="915,20,852,12,770,8,689,12,601,23,598,19,688,7,770,3,852,7,920,17"/>
+<area shape="rect" href="../../de/d00/a01228.html#afc444beb413e66f184a28d11a72eb868" title=" " alt="" coords="689,72,852,99"/>
+<area shape="poly" title=" " alt="" coords="920,54,836,74,833,70,924,51"/>
+<area shape="poly" title=" " alt="" coords="860,24,902,25,897,28,863,29"/>
+<area shape="poly" title=" " alt="" coords="677,37,643,37,639,33,682,34"/>
+<area shape="poly" title=" " alt="" coords="685,70,594,51,591,47,689,67"/>
+<area shape="poly" title=" " alt="" coords="560,202,550,196,524,192,502,195,490,200,488,205,495,214,490,215,482,206,486,196,500,189,524,187,552,191,565,200"/>
+<area shape="rect" href="../../df/d00/a00122.html#adea02253cbd3cd163da5f5ba64144983" title="Main menu." alt="" coords="271,427,359,454"/>
+<area shape="poly" title=" " alt="" coords="476,235,443,247,409,267,375,306,349,351,332,395,322,427,317,426,327,393,344,349,370,303,406,262,440,242,480,231"/>
+<area shape="poly" title=" " alt="" coords="340,413,332,408,315,406,300,408,291,412,289,418,294,426,288,427,284,418,287,409,298,403,315,400,334,403,345,411"/>
+<area shape="poly" title=" " alt="" coords="253,442,225,443,222,438,257,439"/>
+<area shape="poly" title=" " alt="" coords="184,413,177,408,163,406,149,408,142,412,141,418,144,426,139,427,135,418,138,409,148,403,163,400,179,403,189,411"/>
+<area shape="rect" href="../../de/d00/a00134.html#a3c04138a5bfe5d72780bb7e82a18e627" title=" " alt="" coords="5,647,55,674"/>
+<area shape="poly" title=" " alt="" coords="145,470,42,648,37,646,146,465"/>
+<area shape="poly" title=" " alt="" coords="711,271,647,269,568,272,486,287,446,301,409,319,379,343,354,373,325,428,320,426,350,370,375,339,406,314,444,296,484,282,568,267,647,263,715,268"/>
+<area shape="poly" title=" " alt="" coords="809,249,797,244,770,242,746,244,733,249,730,254,736,262,731,263,725,254,729,245,745,239,770,236,798,239,814,247"/>
+<area shape="poly" title=" " alt="" coords="809,324,797,319,770,316,746,318,733,323,730,329,736,337,731,338,725,329,729,319,745,313,770,311,798,314,814,322"/>
+<area shape="rect" href="../../df/d00/a00122.html#a899af87cb69af3549f9f4f07ba7c1e9e" title=" " alt="" coords="491,352,557,379"/>
+<area shape="poly" title=" " alt="" coords="701,357,559,366,556,362,705,353"/>
+<area shape="poly" title=" " alt="" coords="474,375,408,394,371,411,340,428,336,425,369,406,406,389,478,371"/>
+<area shape="poly" title=" " alt="" coords="558,338,547,333,524,331,502,333,490,338,488,343,493,352,488,353,482,344,487,334,501,328,524,326,549,328,563,336"/>
+<area shape="poly" title=" " alt="" coords="1248,525,1237,520,1213,518,1192,520,1180,525,1177,530,1183,539,1178,539,1172,530,1176,521,1190,515,1214,512,1238,515,1253,523"/>
+<area shape="rect" href="../../df/d00/a00122.html#a30ce9217e2f73c216badd694b03bd399" title="Add disk &#39;disk_name&#39; to the controller &#39;parent&#39; of the configuration." alt="" coords="960,311,1041,338"/>
+<area shape="poly" title=" " alt="" coords="1192,526,1152,471,1099,409,1058,371,1022,341,1021,336,1061,366,1103,405,1156,468,1197,526"/>
+<area shape="rect" href="../../df/d00/a00122.html#abce3cdd7db8963ecaef147eca2204ceb" title=" " alt="" coords="478,427,570,454"/>
+<area shape="poly" title=" " alt="" coords="1157,538,1101,526,949,498,798,476,571,448,569,443,799,470,950,493,1102,521,1162,536"/>
+<area shape="rect" href="../../df/d00/a00122.html#aa9a9b4886a9f1d94c4b4989a6fc7a0ac" title=" " alt="" coords="491,502,557,528"/>
+<area shape="poly" title=" " alt="" coords="1157,551,559,519,557,514,1161,548"/>
+<area shape="rect" href="../../df/d00/a00122.html#ad7d4a4763a70510d229bfb24e580bc28" title=" " alt="" coords="941,639,1060,666"/>
+<area shape="poly" title=" " alt="" coords="1167,575,1033,641,1030,636,1171,571"/>
+<area shape="rect" href="../../df/d00/a00122.html#a1ebfc9484ddc1791c06d2addee49c461" title="IDE bus configuration." alt="" coords="711,412,830,439"/>
+<area shape="poly" title=" " alt="" coords="1188,528,1150,492,1126,474,1100,460,1030,438,958,427,889,423,832,423,829,419,889,418,958,422,1032,433,1102,455,1129,470,1154,488,1194,527"/>
+<area shape="rect" href="../../df/d00/a00122.html#ac79e6bd2f5868900aa7df9e208e9286e" title=" " alt="" coords="952,714,1050,740"/>
+<area shape="poly" title=" " alt="" coords="1192,581,1156,629,1103,680,1071,700,1040,715,1036,711,1069,696,1100,676,1152,626,1196,576"/>
+<area shape="rect" href="../../df/d00/a00122.html#a213c3fa26e0fcd8563b31094f0ce490e" title=" " alt="" coords="484,576,564,603"/>
+<area shape="poly" title=" " alt="" coords="1157,557,566,590,564,585,1161,553"/>
+<area shape="poly" title=" " alt="" coords="943,314,814,288,812,283,948,312"/>
+<area shape="poly" title=" " alt="" coords="943,332,825,347,822,343,947,329"/>
+<area shape="poly" title=" " alt="" coords="1036,297,1025,292,1001,290,978,292,966,297,963,302,970,310,964,311,958,302,963,293,977,287,1001,284,1026,287,1041,295"/>
+<area shape="poly" title=" " alt="" coords="461,442,361,443,358,438,465,439"/>
+<area shape="poly" title=" " alt="" coords="558,413,547,408,524,406,502,408,490,413,488,418,493,426,488,427,482,418,487,409,501,403,524,400,549,403,563,411"/>
+<area shape="poly" title=" " alt="" coords="474,500,356,457,354,452,478,497"/>
+<area shape="poly" title=" " alt="" coords="558,488,547,483,524,480,502,482,490,487,488,493,493,501,488,502,482,493,487,483,501,477,524,475,549,478,563,485"/>
+<area shape="poly" title=" " alt="" coords="1036,625,1025,620,1001,618,978,620,966,625,963,630,970,639,964,639,958,630,963,621,977,615,1001,612,1026,615,1041,623"/>
+<area shape="poly" title=" " alt="" coords="703,409,640,394,559,375,556,370,641,389,708,407"/>
+<area shape="poly" title=" " alt="" coords="809,399,797,394,770,391,746,393,733,398,730,403,736,412,731,412,725,404,729,394,745,388,770,386,798,388,814,397"/>
+<area shape="poly" title=" " alt="" coords="1036,699,1025,695,1001,692,978,694,966,699,963,705,970,713,964,713,958,705,963,695,977,689,1001,687,1026,690,1041,698"/>
+<area shape="poly" title=" " alt="" coords="467,574,436,561,406,543,380,521,357,498,327,457,325,452,361,494,384,517,409,538,439,556,472,571"/>
+<area shape="poly" title=" " alt="" coords="558,562,547,557,524,555,502,557,490,562,488,567,493,576,488,576,482,568,487,558,501,552,524,550,549,552,563,560"/>
+<area shape="poly" title=" " alt="" coords="1248,1214,1237,1209,1213,1207,1192,1209,1180,1214,1177,1219,1183,1228,1178,1228,1172,1220,1176,1210,1190,1204,1214,1202,1238,1204,1253,1213"/>
+<area shape="rect" href="../../df/d00/a00122.html#af3f9c87e32336fac25e8d4d3166adc50" title=" " alt="" coords="936,930,1065,956"/>
+<area shape="poly" title=" " alt="" coords="1206,1212,1197,1161,1178,1095,1146,1028,1125,997,1100,971,1083,960,1066,953,1065,947,1086,955,1103,966,1129,994,1151,1025,1183,1093,1202,1160,1212,1214"/>
+<area shape="rect" href="../../df/d00/a00122.html#aad38f2fbd8483d39374f0269b9fcb61b" title=" " alt="" coords="943,1004,1058,1031"/>
+<area shape="poly" title=" " alt="" coords="1202,1213,1188,1176,1167,1130,1138,1084,1100,1045,1080,1034,1059,1027,1058,1021,1082,1029,1103,1041,1142,1081,1172,1127,1193,1174,1207,1214"/>
+<area shape="rect" href="../../df/d00/a00122.html#a3076add7b7e4f616b7ff32081aeee7ea" title=" " alt="" coords="943,1079,1058,1106"/>
+<area shape="poly" title=" " alt="" coords="1193,1215,1155,1167,1129,1142,1100,1120,1059,1104,1058,1098,1103,1115,1132,1137,1158,1163,1198,1215"/>
+<area shape="rect" href="../../df/d00/a00122.html#a74717ea9e277a3f7541fb5bb340c2c3b" title=" " alt="" coords="933,1154,1068,1180"/>
+<area shape="poly" title=" " alt="" coords="1168,1222,1100,1195,1064,1184,1063,1178,1102,1190,1174,1221"/>
+<area shape="rect" href="../../df/d00/a00122.html#ad3c2b88bb747a34ea570c58cce47d8e8" title=" " alt="" coords="930,1228,1071,1255"/>
+<area shape="poly" title=" " alt="" coords="1150,1243,1072,1244,1070,1239,1155,1241"/>
+<area shape="rect" href="../../df/d00/a00122.html#ad3d03aac9923d7a032747695a3ced50a" title=" " alt="" coords="934,1303,1067,1330"/>
+<area shape="poly" title=" " alt="" coords="1156,1262,1042,1305,1040,1300,1161,1259"/>
+<area shape="rect" href="../../df/d00/a00122.html#a4748e001f770d590c70b0ce00b6a4a96" title=" " alt="" coords="934,1378,1067,1404"/>
+<area shape="poly" title=" " alt="" coords="1191,1265,1151,1306,1103,1344,1037,1380,1034,1375,1100,1340,1147,1302,1187,1268"/>
+<area shape="rect" href="../../df/d00/a00122.html#a9b8c722dda39ce2c593e32f75ba26469" title=" " alt="" coords="916,1452,1085,1479"/>
+<area shape="poly" title=" " alt="" coords="1202,1267,1165,1342,1137,1382,1103,1418,1074,1439,1043,1454,1040,1450,1071,1435,1100,1414,1132,1379,1160,1339,1199,1271"/>
+<area shape="rect" href="../../df/d00/a00122.html#a36cda04c32a2970353d4d7bbf4e13edb" title=" " alt="" coords="930,1527,1071,1554"/>
+<area shape="poly" title=" " alt="" coords="1208,1268,1196,1318,1175,1376,1145,1438,1125,1467,1103,1493,1076,1514,1047,1529,1044,1524,1073,1510,1099,1489,1121,1464,1140,1435,1170,1374,1191,1316,1205,1273"/>
+<area shape="rect" href="../../df/d00/a00122.html#ab536ff367389ee1e291b62747a151f02" title=" " alt="" coords="943,1602,1058,1628"/>
+<area shape="poly" title=" " alt="" coords="1211,1268,1203,1330,1185,1408,1153,1492,1130,1532,1103,1568,1078,1589,1049,1604,1046,1599,1075,1584,1099,1564,1126,1529,1148,1490,1180,1407,1198,1329,1208,1272"/>
+<area shape="poly" title=" " alt="" coords="1036,915,1025,911,1001,908,978,910,966,915,963,921,970,929,964,929,958,921,963,911,977,905,1001,903,1026,906,1041,914"/>
+<area shape="poly" title=" " alt="" coords="1036,990,1025,985,1001,983,978,985,966,990,963,995,970,1004,964,1004,958,996,963,986,977,980,1001,978,1026,980,1041,989"/>
+<area shape="poly" title=" " alt="" coords="1036,1064,1025,1060,1001,1058,978,1060,966,1065,963,1070,970,1079,964,1079,958,1070,963,1061,977,1055,1001,1052,1026,1055,1041,1063"/>
+<area shape="poly" title=" " alt="" coords="1036,1139,1025,1135,1001,1132,978,1134,966,1139,963,1145,970,1153,964,1153,958,1145,963,1135,977,1129,1001,1127,1026,1130,1041,1138"/>
+<area shape="poly" title=" " alt="" coords="1036,1214,1025,1209,1001,1207,978,1209,966,1214,963,1219,970,1228,964,1228,958,1220,963,1210,977,1204,1001,1202,1026,1204,1041,1213"/>
+<area shape="poly" title=" " alt="" coords="1036,1288,1025,1284,1001,1282,978,1284,966,1289,963,1294,970,1303,964,1302,958,1294,963,1285,977,1279,1001,1276,1026,1279,1041,1287"/>
+<area shape="poly" title=" " alt="" coords="1036,1363,1025,1359,1001,1356,978,1358,966,1363,963,1369,970,1378,964,1377,958,1369,963,1359,977,1353,1001,1351,1026,1354,1041,1362"/>
+<area shape="poly" title=" " alt="" coords="1036,1438,1025,1433,1001,1431,978,1433,966,1438,963,1443,969,1452,964,1452,958,1444,963,1434,977,1428,1001,1426,1026,1428,1041,1437"/>
+<area shape="poly" title=" " alt="" coords="1036,1512,1025,1508,1001,1506,978,1508,966,1513,963,1518,969,1527,964,1526,958,1518,963,1509,977,1503,1001,1500,1026,1503,1041,1512"/>
+<area shape="poly" title=" " alt="" coords="1036,1587,1025,1583,1001,1580,978,1582,966,1587,963,1593,969,1602,964,1601,958,1593,963,1583,977,1577,1001,1575,1026,1578,1041,1586"/>
+<area shape="rect" href="../../df/d00/a00912.html#ad752e1aa69e78c74e23eac68fb2431c0" title=" " alt="" coords="930,1652,1071,1679"/>
+<area shape="poly" title=" " alt="" coords="1131,1662,1073,1666,1071,1661,1136,1660"/>
+<area shape="rect" href="../../d7/d00/a00940.html#a70567b682af1d37687c68b38c8444d29" title=" " alt="" coords="930,1703,1071,1730"/>
+<area shape="poly" title=" " alt="" coords="1132,1683,1102,1694,1059,1705,1057,1700,1101,1689,1137,1681"/>
+<area shape="rect" href="../../d6/d00/a00988.html#ab1ea781b1ac08bddb30c3acf1f637280" title=" " alt="" coords="945,1754,1056,1780"/>
+<area shape="poly" title=" " alt="" coords="1180,1688,1144,1719,1102,1744,1058,1760,1056,1755,1100,1739,1141,1715,1176,1691"/>
+<area shape="poly" title=" " alt="" coords="1085,1645,1100,1638,1192,1584,1279,1521,1362,1453,1437,1385,1559,1261,1629,1185,1633,1182,1563,1265,1441,1389,1366,1458,1283,1525,1194,1588,1103,1643,1087,1650"/>
+<area shape="poly" title=" " alt="" coords="1086,1719,1180,1713,1230,1704,1277,1689,1357,1650,1413,1609,1461,1558,1515,1486,1541,1445,1564,1401,1600,1313,1624,1235,1638,1186,1641,1182,1629,1237,1605,1315,1568,1404,1545,1448,1519,1489,1465,1561,1417,1613,1359,1655,1279,1694,1231,1709,1181,1719,1087,1724"/>
+<area shape="poly" title=" " alt="" coords="1072,1774,1171,1779,1229,1777,1290,1770,1352,1758,1411,1738,1466,1710,1515,1672,1541,1634,1564,1576,1584,1506,1601,1429,1626,1281,1639,1186,1642,1181,1631,1281,1606,1430,1589,1507,1569,1578,1546,1636,1519,1676,1469,1714,1413,1743,1353,1763,1291,1776,1230,1782,1171,1784,1072,1779"/>
+<area shape="rect" href="../../da/d00/a02280.html#a7a88c28aecc8f32c65b3d70d8ceb1962" title="Constructor." alt="" coords="949,1906,1052,1932"/>
+<area shape="poly" title=" " alt="" coords="1163,1977,1100,1947,1053,1932,1053,1927,1102,1942,1169,1978"/>
+<area shape="rect" href="../../d6/d00/a02344.html#a1fabb1daaa09396904b199b72cec3c7c" title=" " alt="" coords="698,1855,843,1882"/>
+<area shape="poly" title=" " alt="" coords="1187,1972,1150,1932,1126,1912,1100,1896,1035,1874,967,1863,901,1860,844,1863,843,1857,901,1855,968,1858,1037,1869,1102,1891,1130,1908,1154,1928,1192,1974"/>
+<area shape="rect" href="../../d4/d00/a02040.html#a6c1f0bd61ae1bf62894d624754413eba" title=" " alt="" coords="912,1956,1089,1999"/>
+<area shape="poly" title=" " alt="" coords="1132,1996,1090,1993,1089,1987,1137,1996"/>
+<area shape="rect" href="../../d4/d00/a01116.html#acf39594b6b063bf03fe0b0f3ee61b697" title="Initialize the Ali device." alt="" coords="710,2052,830,2079"/>
+<area shape="poly" title=" " alt="" coords="1131,2018,832,2061,831,2055,1137,2017"/>
+<area shape="rect" href="../../d9/d00/a01332.html#aeb341e51ffe7c9fd2876dabca0f03170" title="Initialize the CPU." alt="" coords="942,2140,1060,2167"/>
+<area shape="poly" title=" " alt="" coords="1192,2040,1154,2089,1129,2112,1103,2131,1061,2147,1060,2142,1100,2126,1126,2107,1150,2085,1187,2043"/>
+<area shape="rect" href="../../d9/d00/a01332.html#a38da15d01931aa95eae064fb6c24244f" title=" " alt="" coords="900,2191,1101,2234"/>
+<area shape="poly" title=" " alt="" coords="1200,2041,1163,2113,1136,2150,1103,2181,1084,2193,1082,2188,1100,2177,1132,2146,1158,2110,1196,2044"/>
+<area shape="rect" href="../../d4/d00/a01116.html#a94525f8505d46ea6c46234da5be28f8f" title="Restore CMOS/TOY NVRAM contents from the file named by the &quot;rom.toy&quot; setting (default &quot;toy...." alt="" coords="929,2074,1072,2116"/>
+<area shape="poly" title=" " alt="" coords="1151,2034,1102,2058,1058,2076,1057,2071,1100,2053,1146,2036"/>
+<area shape="poly" title=" " alt="" coords="931,1905,834,1885,834,1880,937,1904"/>
+<area shape="poly" title=" " alt="" coords="857,1857,1250,1814,1430,1789,1489,1778,1515,1769,1531,1750,1546,1724,1571,1655,1592,1569,1609,1476,1630,1298,1640,1186,1643,1181,1635,1298,1614,1477,1597,1570,1576,1656,1551,1726,1535,1753,1519,1773,1490,1783,1431,1794,1250,1819,859,1863"/>
+<area shape="poly" title=" " alt="" coords="911,2084,831,2076,831,2071,916,2084"/>
+<area shape="poly" title=" " alt="" coords="1132,728,1051,730,1049,725,1136,726"/>
+<area shape="poly" title=" " alt="" coords="1140,756,1059,790,1056,786,1144,753"/>
+<area shape="poly" title=" " alt="" coords="1079,814,1176,829,1228,842,1279,859,1353,892,1407,924,1458,962,1519,1016,1555,1052,1589,1091,1636,1156,1630,1156,1585,1095,1552,1056,1515,1020,1455,966,1405,928,1350,897,1277,864,1227,847,1175,835,1081,819"/>
+<area shape="poly" title=" " alt="" coords="919,804,810,788,744,774,675,754,603,730,533,699,467,662,406,617,370,577,345,531,327,488,320,457,320,451,332,486,349,529,375,574,409,613,469,657,536,694,605,725,676,749,746,769,811,783,924,802"/>
+<area shape="poly" title=" " alt="" coords="1034,774,1022,769,1001,767,981,769,968,774,964,780,965,788,960,787,958,778,965,769,979,764,1001,762,1024,764,1039,772"/>
+<area shape="poly" title=" " alt="" coords="1171,905,1101,896,937,877,865,873,772,871,314,871,265,865,219,847,176,821,138,791,76,726,41,677,39,672,80,722,141,787,179,817,221,842,266,859,314,866,772,866,865,867,937,872,1102,891,1176,903"/>
+<area shape="poly" title=" " alt="" coords="1248,892,1250,887,1245,882,1233,878,1214,876,1189,879,1178,885,1178,891,1191,902,1186,903,1174,894,1174,882,1188,874,1213,871,1234,873,1248,877,1255,885,1253,894"/>
+<area shape="poly" title=" " alt="" coords="1161,84,1050,52,1048,47,1166,82"/>
+<area shape="poly" title=" " alt="" coords="1248,70,1237,65,1213,63,1192,65,1180,70,1177,75,1183,84,1178,84,1172,76,1176,66,1190,60,1214,58,1238,60,1253,68"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a1ad08ced4f6bdf49fedacf43e16fed14" name="a1ad08ced4f6bdf49fedacf43e16fed14"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ad08ced4f6bdf49fedacf43e16fed14">&#9670;&#160;</a></span>radeon_read_u32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../dc/d00/a00194.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a> radeon_read_u32 </td>
+          <td>(</td>
+          <td class="paramtype">FILE *</td>          <td class="paramname"><span class="paramname"><em>f</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00536_source.html#l00101">101</a> of file <a class="el" href="../../d4/d00/a00536_source.html">Radeon7500.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d4/d00/a00536_source.html#l00101">radeon_read_u32()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d4/d00/a00536_source.html#l00101">radeon_read_u32()</a>, and <a class="el" href="../../d4/d00/a00536_source.html#l01166">CRadeon7500::RestoreState()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d4/d00/a00536_a1ad08ced4f6bdf49fedacf43e16fed14_cgraph.png" border="0" usemap="#ad4/d00/a00536_a1ad08ced4f6bdf49fedacf43e16fed14_cgraph" loading="lazy" alt=""/></div>
+<map name="ad4/d00/a00536_a1ad08ced4f6bdf49fedacf43e16fed14_cgraph" id="ad4/d00/a00536_a1ad08ced4f6bdf49fedacf43e16fed14_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,126,56"/>
+<area shape="poly" title=" " alt="" coords="44,29,40,20,43,11,52,5,66,3,81,5,89,14,84,14,78,10,65,8,54,10,47,14,46,20,49,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d4/d00/a00536_a1ad08ced4f6bdf49fedacf43e16fed14_icgraph.png" border="0" usemap="#ad4/d00/a00536_a1ad08ced4f6bdf49fedacf43e16fed14_icgraph" loading="lazy" alt=""/></div>
+<map name="ad4/d00/a00536_a1ad08ced4f6bdf49fedacf43e16fed14_icgraph" id="ad4/d00/a00536_a1ad08ced4f6bdf49fedacf43e16fed14_icgraph">
+<area shape="rect" title=" " alt="" coords="243,29,363,56"/>
+<area shape="poly" title=" " alt="" coords="336,14,326,10,303,8,282,10,270,15,268,20,273,30,268,28,262,21,266,11,280,5,303,3,327,5,341,14"/>
+<area shape="rect" href="../../d4/d00/a01840.html#a5dd36b91fa9d3324a0f5837aee934261" title="Restore state from a Virtual Machine State file." alt="" coords="5,29,195,56"/>
+<area shape="poly" title=" " alt="" coords="225,43,195,45,195,40,230,43"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a8c0a38c0ffa14658a238e1f00c2974bb" name="a8c0a38c0ffa14658a238e1f00c2974bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c0a38c0ffa14658a238e1f00c2974bb">&#9670;&#160;</a></span>radeon_setting()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../dc/d00/a00194.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a> radeon_setting </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="../../d4/d00/a01272.html">CConfigurator</a> *</td>          <td class="paramname"><span class="paramname"><em>cfg</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>key</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="../../dc/d00/a00194.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a></td>          <td class="paramname"><span class="paramname"><em>def</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00536_source.html#l00056">56</a> of file <a class="el" href="../../d4/d00/a00536_source.html">Radeon7500.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d7/d00/a00131_source.html#l00160">CConfigurator::get_text_value()</a>, and <a class="el" href="../../d4/d00/a00536_source.html#l00056">radeon_setting()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d4/d00/a00536_source.html#l00495">CRadeon7500::init()</a>, <a class="el" href="../../d4/d00/a00536_source.html#l00071">radeon_bounded_setting()</a>, and <a class="el" href="../../d4/d00/a00536_source.html#l00056">radeon_setting()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d4/d00/a00536_a8c0a38c0ffa14658a238e1f00c2974bb_cgraph.png" border="0" usemap="#ad4/d00/a00536_a8c0a38c0ffa14658a238e1f00c2974bb_cgraph" loading="lazy" alt=""/></div>
+<map name="ad4/d00/a00536_a8c0a38c0ffa14658a238e1f00c2974bb_cgraph" id="ad4/d00/a00536_a8c0a38c0ffa14658a238e1f00c2974bb_cgraph">
+<area shape="rect" title=" " alt="" coords="5,37,112,64"/>
+<area shape="poly" title=" " alt="" coords="30,37,25,29,28,19,40,13,59,11,78,13,90,22,85,22,77,18,58,16,41,18,32,23,30,28,35,37"/>
+<area shape="rect" href="../../d4/d00/a01272.html#a36498889497191fbc49ebf533c0d3d36" title=" " alt="" coords="160,29,288,72"/>
+<area shape="poly" title=" " alt="" coords="112,48,147,50,142,51,112,53"/>
+<area shape="poly" title=" " alt="" coords="192,27,190,19,196,11,207,5,224,3,242,5,254,14,249,13,240,10,224,8,209,10,199,14,196,20,197,30"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d4/d00/a00536_a8c0a38c0ffa14658a238e1f00c2974bb_icgraph.png" border="0" usemap="#ad4/d00/a00536_a8c0a38c0ffa14658a238e1f00c2974bb_icgraph" loading="lazy" alt=""/></div>
+<map name="ad4/d00/a00536_a8c0a38c0ffa14658a238e1f00c2974bb_icgraph" id="ad4/d00/a00536_a8c0a38c0ffa14658a238e1f00c2974bb_icgraph">
+<area shape="rect" title=" " alt="" coords="393,29,499,56"/>
+<area shape="poly" title=" " alt="" coords="476,14,466,10,446,8,427,10,417,15,415,20,420,30,415,28,409,21,413,11,426,5,446,3,468,5,481,14"/>
+<area shape="rect" href="../../d4/d00/a01840.html#a0129f7772637a6222911e8940f2ad5f3" title=" " alt="" coords="5,29,135,56"/>
+<area shape="poly" title=" " alt="" coords="375,34,345,33,264,30,183,33,135,37,134,32,183,28,264,25,345,28,380,33"/>
+<area shape="rect" href="../../d4/d00/a00536.html#a88ab14e754389accbef7c84add69f83e" title=" " alt="" coords="183,67,345,93"/>
+<area shape="poly" title=" " alt="" coords="380,56,333,69,332,63,375,57"/>
+<area shape="poly" title=" " alt="" coords="174,64,135,58,135,52,179,63"/>
+<area shape="poly" title=" " alt="" coords="293,51,284,48,264,45,245,47,235,52,232,57,237,67,232,65,227,58,231,48,243,42,264,40,286,43,299,52"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="ab3172be74d0bbdf1f1a30ff6368c7ca3" name="ab3172be74d0bbdf1f1a30ff6368c7ca3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3172be74d0bbdf1f1a30ff6368c7ca3">&#9670;&#160;</a></span>radeon_vga_window_offset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool radeon_vga_window_offset </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="../../d5/d00/a00461.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>address</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned</td>          <td class="paramname"><span class="paramname"><em>selection</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00536_source.html#l00110">110</a> of file <a class="el" href="../../d4/d00/a00536_source.html">Radeon7500.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d4/d00/a00536_source.html#l00110">radeon_vga_window_offset()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d4/d00/a00536_source.html#l00201">CRadeon7500::mem_r()</a>, <a class="el" href="../../d4/d00/a00536_source.html#l00239">CRadeon7500::mem_w()</a>, and <a class="el" href="../../d4/d00/a00536_source.html#l00110">radeon_vga_window_offset()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d4/d00/a00536_ab3172be74d0bbdf1f1a30ff6368c7ca3_cgraph.png" border="0" usemap="#ad4/d00/a00536_ab3172be74d0bbdf1f1a30ff6368c7ca3_cgraph" loading="lazy" alt=""/></div>
+<map name="ad4/d00/a00536_ab3172be74d0bbdf1f1a30ff6368c7ca3_cgraph" id="ad4/d00/a00536_ab3172be74d0bbdf1f1a30ff6368c7ca3_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,184,56"/>
+<area shape="poly" title=" " alt="" coords="64,28,58,21,62,11,75,5,95,3,116,5,129,14,123,14,114,10,94,8,76,10,66,15,64,20,69,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d4/d00/a00536_ab3172be74d0bbdf1f1a30ff6368c7ca3_icgraph.png" border="0" usemap="#ad4/d00/a00536_ab3172be74d0bbdf1f1a30ff6368c7ca3_icgraph" loading="lazy" alt=""/></div>
+<map name="ad4/d00/a00536_ab3172be74d0bbdf1f1a30ff6368c7ca3_icgraph" id="ad4/d00/a00536_ab3172be74d0bbdf1f1a30ff6368c7ca3_icgraph">
+<area shape="rect" title=" " alt="" coords="432,47,610,73"/>
+<area shape="poly" title=" " alt="" coords="557,31,545,28,521,25,498,27,486,32,483,37,489,47,484,45,478,38,483,28,497,22,521,20,547,23,562,32"/>
+<area shape="rect" href="../../d4/d00/a01840.html#a6cfa9aa51431d49571b1c65d50c7a68c" title=" " alt="" coords="229,17,381,44"/>
+<area shape="poly" title=" " alt="" coords="414,46,382,44,381,38,419,46"/>
+<area shape="rect" href="../../d4/d00/a01840.html#a4750aae5fd19daf39738cdc815330569" title=" " alt="" coords="226,72,384,99"/>
+<area shape="poly" title=" " alt="" coords="419,72,385,79,384,73,414,73"/>
+<area shape="rect" href="../../d4/d00/a01840.html#a46d42e75d2e8d905059e85b25df7c6fd" title=" " alt="" coords="5,5,178,48"/>
+<area shape="poly" title=" " alt="" coords="210,30,179,31,178,26,216,28"/>
+<area shape="rect" href="../../d4/d00/a01840.html#a77fb345597199d7bb24eaf8378f969c4" title=" " alt="" coords="6,72,177,115"/>
+<area shape="poly" title=" " alt="" coords="207,89,178,93,178,87,213,89"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="ab150d7acc75099ca63f52623255cc718" name="ab150d7acc75099ca63f52623255cc718"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab150d7acc75099ca63f52623255cc718">&#9670;&#160;</a></span>radeon_write_u32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void radeon_write_u32 </td>
+          <td>(</td>
+          <td class="paramtype">FILE *</td>          <td class="paramname"><span class="paramname"><em>f</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="../../dc/d00/a00194.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a></td>          <td class="paramname"><span class="paramname"><em>v</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d4/d00/a00536_source.html#l00092">92</a> of file <a class="el" href="../../d4/d00/a00536_source.html">Radeon7500.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d4/d00/a00536_source.html#l00092">radeon_write_u32()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d4/d00/a00536_source.html#l00092">radeon_write_u32()</a>, and <a class="el" href="../../d4/d00/a00536_source.html#l01131">CRadeon7500::SaveState()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d4/d00/a00536_ab150d7acc75099ca63f52623255cc718_cgraph.png" border="0" usemap="#ad4/d00/a00536_ab150d7acc75099ca63f52623255cc718_cgraph" loading="lazy" alt=""/></div>
+<map name="ad4/d00/a00536_ab150d7acc75099ca63f52623255cc718_cgraph" id="ad4/d00/a00536_ab150d7acc75099ca63f52623255cc718_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,129,56"/>
+<area shape="poly" title=" " alt="" coords="45,29,41,20,44,11,53,5,67,3,82,5,91,14,86,14,80,10,67,8,55,10,48,14,47,20,50,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d4/d00/a00536_ab150d7acc75099ca63f52623255cc718_icgraph.png" border="0" usemap="#ad4/d00/a00536_ab150d7acc75099ca63f52623255cc718_icgraph" loading="lazy" alt=""/></div>
+<map name="ad4/d00/a00536_ab150d7acc75099ca63f52623255cc718_icgraph" id="ad4/d00/a00536_ab150d7acc75099ca63f52623255cc718_icgraph">
+<area shape="rect" title=" " alt="" coords="227,29,350,56"/>
+<area shape="poly" title=" " alt="" coords="320,14,310,10,288,8,268,10,257,15,254,20,260,30,255,28,249,21,253,11,267,5,288,3,312,5,326,14"/>
+<area shape="rect" href="../../d4/d00/a01840.html#a165b8fae36dce25fc9614788d6dabf0e" title="Save state to a Virtual Machine State file." alt="" coords="5,29,179,56"/>
+<area shape="poly" title=" " alt="" coords="208,43,179,45,179,40,214,43"/>
 </map>
 </div>
 
@@ -235,7 +825,7 @@ Here is the caller graph for this function:</div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_bc161955dc3a3d2485839eba21420d01.html">io</a></li><li class="navelem"><a href="../../d4/d00/a00536.html">SerialListenAddress.h</a></li>
+    <li class="navelem"><a href="../../dir_e79632891301b850df87e9c0030293fa.html">graphics</a></li><li class="navelem"><a href="../../d4/d00/a00536.html">Radeon7500.cpp</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

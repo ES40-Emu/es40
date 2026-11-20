@@ -1,4 +1,4 @@
 var a00062 =
 [
-    [ "CSemaphore", "d6/d00/a00941.html", "d6/d00/a00941" ]
+    [ "CHostWakeEvent", "d9/d00/a01080.html", "d9/d00/a01080" ]
 ];

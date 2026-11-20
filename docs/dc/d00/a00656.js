@@ -1,13 +1,9 @@
 var a00656 =
 [
-    [ "CueTrack", "db/d00/a01969.html", "db/d00/a01969" ],
-    [ "BINCUE_MAX_PATH", "dc/d00/a00656.html#a591b46b1ddf777ad4b96ee0f5af67844", null ],
-    [ "CueTrackMode", "dc/d00/a00656.html#a30508746728eeb6c8de7c2fd3374615a", [
-      [ "TRACK_MODE_UNKNOWN", "dc/d00/a00656.html#a30508746728eeb6c8de7c2fd3374615aaca49d144dd470dfaf0a9a205403e2f4e", null ],
-      [ "TRACK_MODE_AUDIO", "dc/d00/a00656.html#a30508746728eeb6c8de7c2fd3374615aa7e47fe04cfd0fa6a246212bda180f980", null ],
-      [ "TRACK_MODE1_2048", "dc/d00/a00656.html#a30508746728eeb6c8de7c2fd3374615aa6eae97ceec3df3fe173c0f58b1b22e24", null ],
-      [ "TRACK_MODE1_2352", "dc/d00/a00656.html#a30508746728eeb6c8de7c2fd3374615aaa26fc07e6f65e007f7c67e3986039f31", null ],
-      [ "TRACK_MODE2_2336", "dc/d00/a00656.html#a30508746728eeb6c8de7c2fd3374615aab9ebf0468f98cf6d3b16508438ef9bcd", null ],
-      [ "TRACK_MODE2_2352", "dc/d00/a00656.html#a30508746728eeb6c8de7c2fd3374615aa300ffe45d37866912e2441146b06fb15", null ]
-    ] ]
+    [ "x11_hotkey_key", "db/d00/a02124.html", "db/d00/a02124" ],
+    [ "x11_hotkey_binding", "d1/d00/a02128.html", "d1/d00/a02128" ],
+    [ "x11_hotkey_detail::modifier", "d3/d00/a00899.html#a78e0bc7aa984b413fe1c86344490bb35", null ],
+    [ "parse_x11_hotkey", "dc/d00/a00656.html#aec5e9235391220e895d9c97cd07a1d57", null ],
+    [ "x11_hotkey_detail::trim", "d3/d00/a00899.html#a27b652ad9012bd71f84c02fc375ad582", null ],
+    [ "x11_hotkey_equal", "dc/d00/a00656.html#ae3491f11dd7f69eb1b5bd9da686a37fb", null ]
 ];

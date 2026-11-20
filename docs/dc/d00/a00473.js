@@ -1,5 +1,8 @@
 var a00473 =
 [
-    [ "sdl_font8x16", "dc/d00/a00473.html#a5d4546200d20060296ce3250e8977138", null ],
-    [ "sdl_font8x8", "dc/d00/a00473.html#a21d0a369bf2d91d31776c803b888dd6f", null ]
+    [ "BIT", "d7/d00/a00890.html#ga92560fcd09692e2e3836b9bacdf6d956", null ],
+    [ "BIT", "d7/d00/a00890.html#gaa07fbe38c6e20e2040006c8945464b24", null ],
+    [ "bitswap", "d7/d00/a00890.html#ga1b8f1def956d0b8414880cc564dd9660", null ],
+    [ "bitswap", "d7/d00/a00890.html#ga4c9d87a69dc4875e8591d5cc1ac07bb9", null ],
+    [ "make_bitmask", "d7/d00/a00890.html#ga93f0204024d45c489281351a962c40fb", null ]
 ];

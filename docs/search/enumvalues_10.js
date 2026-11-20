@@ -1,7 +1,21 @@
 var searchData=
 [
-  ['u8_0',['u8',['../d1/d00/a00738.html#ac3486c8e7411e90c98ae3e18f38b90ada077393852be20e37026d6281827662f2',1,'host_audio']]],
-  ['unaligned_1',['Unaligned',['../dc/d00/a00218.html#a5c9934e3a54f06127616037536160abda9f19679888db198f8dd45606487e6cd6',1,'AlphaPAL.h']]],
-  ['unsupported_2',['Unsupported',['../dd/d00/a00212.html#ac4dcb3fde2c4af4411f1df03597b592dab4080bdf74febf04d578ff105cce9d3f',1,'AlphaIPR.h']]],
-  ['upload_3',['Upload',['../d9/d00/a01557.html#a9fe5de39b6d78220675531184cde0f5ca91412465ea9169dfd901dd5e7c96dd99',1,'CRealImage2100::StartOperation']]]
+  ['s16_5fle_0',['s16_le',['../de/d00/a00891.html#ac3486c8e7411e90c98ae3e18f38b90adacc3922e59cb74f25ab77d2ffc19cd013',1,'host_audio']]],
+  ['screen_5foff_1',['SCREEN_OFF',['../d5/d00/a01980.html#affcf02151ea3f86e6f560c4d1e33bde4af6a8000059d3493032bc0bf8c718cd50',1,'vga_device']]],
+  ['sdl_2',['sdl',['../de/d00/a00891.html#a130b7d861709f652e2af5134bf41d74aa5b2d8b4b242e067616c6cd98851b2306',1,'host_audio']]],
+  ['sdl_5fhotkey_5fmod_5falt_3',['SDL_HOTKEY_MOD_ALT',['../d0/d00/a00605.html#a75a97059a084dfd13ab4a49022541e3fa4131228788424821149d440be996368f',1,'sdl.cpp']]],
+  ['sdl_5fhotkey_5fmod_5fctrl_4',['SDL_HOTKEY_MOD_CTRL',['../d0/d00/a00605.html#a75a97059a084dfd13ab4a49022541e3fa436b12a1830ee1f6afab8b2210a3fb78',1,'sdl.cpp']]],
+  ['sdl_5fhotkey_5fmod_5fgui_5',['SDL_HOTKEY_MOD_GUI',['../d0/d00/a00605.html#a75a97059a084dfd13ab4a49022541e3fa96c4379484385baf2b361ae056839ad5',1,'sdl.cpp']]],
+  ['sdl_5fhotkey_5fmod_5fshift_6',['SDL_HOTKEY_MOD_SHIFT',['../d0/d00/a00605.html#a75a97059a084dfd13ab4a49022541e3fa1f731a18f99ec31d49e1229487785fe0',1,'sdl.cpp']]],
+  ['sdl_5fhotkey_5fmod_5funsupported_7',['SDL_HOTKEY_MOD_UNSUPPORTED',['../d0/d00/a00605.html#a75a97059a084dfd13ab4a49022541e3fa56a91339eceb27ad8fddb8eca6f32450',1,'sdl.cpp']]],
+  ['seq_5freg_8',['SEQ_REG',['../d5/d00/a01980.html#a253f53c585c86bf528477defc4a18bd4a52e7938f7620b824a08e01bf4ef7c6d8',1,'vga_device']]],
+  ['service_5fbusy_9',['SERVICE_BUSY',['../df/d00/a00912.html#a5db0826550234ecd06d217d928119c99a48ab743c524f065a9dbc681d211e3e2f',1,'CES1370::SERVICE_BUSY'],['../d7/d00/a00940.html#ae5d2acd4ddfd94fcc0107a10d7d1865eaf19bc3a2b39d89bf64a11a89bc2908af',1,'CES1371::SERVICE_BUSY']]],
+  ['service_5fidle_10',['SERVICE_IDLE',['../df/d00/a00912.html#a5db0826550234ecd06d217d928119c99abd3edd6676117f32fb8cf359faccfce3',1,'CES1370::SERVICE_IDLE'],['../d7/d00/a00940.html#ae5d2acd4ddfd94fcc0107a10d7d1865ea9617e1d373d27f30776c1e6f0efa5bdb',1,'CES1371::SERVICE_IDLE']]],
+  ['service_5fmore_11',['SERVICE_MORE',['../df/d00/a00912.html#a5db0826550234ecd06d217d928119c99aaeffe92313a060dfb15b56b0a9e811af',1,'CES1370::SERVICE_MORE'],['../d7/d00/a00940.html#ae5d2acd4ddfd94fcc0107a10d7d1865ea9e939241138b66bd6c3cf720e0d7633b',1,'CES1371::SERVICE_MORE']]],
+  ['setreadonly_12',['SetReadOnly',['../d0/d00/a00806.html#a3a5b88e93995fcb72b420a657325d117a9595c9bd5b34dfbf29595c73137df5af',1,'DiskFile.h']]],
+  ['signalingnan_13',['SignalingNaN',['../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6ae895e2f2464e7dc5bc8d6abf30b2d6f8',1,'AlphaIEEETrap.h']]],
+  ['softwarecompletion_14',['SoftwareCompletion',['../dd/d00/a00248.html#a30aba9db4a74bb9372479295f2787bf4a43bb415f6efa7bd91511ba0d6dd99361',1,'AlphaIEEETrap.h']]],
+  ['stop_15',['Stop',['../d6/d00/a02492.html#a4c99645e9406c389b794a1b7fad447c6a11a755d598c0c417f9a36758c3da7481',1,'CSystem']]],
+  ['stopped_16',['stopped',['../dc/d00/a02116.html#a86f805de7ba05bcf1e7394e0d98eac3ca81f1741a1012b664bcd4462705fdf82a',1,'x11_dispatcher']]],
+  ['subtractive_17',['Subtractive',['../dc/d00/a01200.html#aab992bcec6df24c070997cf534d4721da34d485a1469ebe369d365350a8c87e88',1,'CISABus']]]
 ];

@@ -1,9 +1,9 @@
 var a00149 =
 [
-    [ "index", "da/d00/a00149.html#a4da57af702c29650efdb4449c5266f8f", null ],
-    [ "strcasecmp", "da/d00/a00149.html#ac99ec3f1036620727a68aa8c25a8963c", null ],
-    [ "strncasecmp", "da/d00/a00149.html#aba00036f71bb67f8600b239a39cf5ec9", null ],
-    [ "asprintf", "da/d00/a00149.html#a1af9acc6b6efdca3576cb8223d95f401", null ],
-    [ "strsep", "da/d00/a00149.html#a098b232e1cfa2b0ce1d94b7ad0440cbb", null ],
-    [ "vasprintf", "da/d00/a00149.html#a5ec7fd90ebe6015636bce974c192c86a", null ]
+    [ "IsaIoPorts", "d4/d00/a01296.html", "d4/d00/a01296" ],
+    [ "isa_io_ports_overlap", "da/d00/a00149.html#a3e79d5fb7e760ca954e41994f1ba68fb", null ],
+    [ "parse_isa_io_port", "da/d00/a00149.html#a283284bef6260f9d2102d921a87a50ee", null ],
+    [ "parse_isa_slot", "da/d00/a00149.html#a4b0c3296c8cb59aac19fcf4cf1ecb1ab", null ],
+    [ "mpu401_io_ports", "da/d00/a00149.html#ada2b681c67b692f3e7637f5357010024", null ],
+    [ "wss_io_ports", "da/d00/a00149.html#affa55b572fa2a206b8c98398be0a0380", null ]
 ];

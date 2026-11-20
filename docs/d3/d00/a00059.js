@@ -1,8 +1,25 @@
 var a00059 =
 [
-    [ "CRWLock", "d0/d00/a00933.html", "d0/d00/a00933" ],
-    [ "CScopedRWLock", "de/d00/a00937.html", "de/d00/a00937" ],
-    [ "MUTEX_READ_UNLOCK", "d3/d00/a00059.html#a9f1411b926dd0b76c7eacdc897684c51", null ],
-    [ "SCOPED_READ_LOCK", "d3/d00/a00059.html#a374d5d29cb69433d7a6d755b1e929ca7", null ],
-    [ "SCOPED_WRITE_LOCK", "d3/d00/a00059.html#ae467b9ebcbb8b6b0a37429cec6263fc6", null ]
+    [ "CException", "d7/d00/a01000.html", "d7/d00/a01000" ],
+    [ "CLogicException", "df/d00/a01004.html", "df/d00/a01004" ],
+    [ "CAssertionViolationException", "dd/d00/a01008.html", "dd/d00/a01008" ],
+    [ "CNullPointerException", "d4/d00/a01012.html", "d4/d00/a01012" ],
+    [ "CBugcheckException", "de/d00/a01016.html", "de/d00/a01016" ],
+    [ "CInvalidArgumentException", "d0/d00/a01020.html", "d0/d00/a01020" ],
+    [ "CNotImplementedException", "d4/d00/a01024.html", "d4/d00/a01024" ],
+    [ "CIllegalStateException", "db/d00/a01028.html", "db/d00/a01028" ],
+    [ "CRuntimeException", "df/d00/a01032.html", "df/d00/a01032" ],
+    [ "CSystemException", "d8/d00/a01036.html", "d8/d00/a01036" ],
+    [ "COutOfMemoryException", "db/d00/a01040.html", "db/d00/a01040" ],
+    [ "CIOException", "d0/d00/a01044.html", "d0/d00/a01044" ],
+    [ "CFileException", "d5/d00/a01048.html", "d5/d00/a01048" ],
+    [ "CFileNotFoundException", "d9/d00/a01052.html", "d9/d00/a01052" ],
+    [ "CConfigurationException", "dc/d00/a01056.html", "dc/d00/a01056" ],
+    [ "CThreadException", "d5/d00/a01060.html", "d5/d00/a01060" ],
+    [ "CWin32Exception", "d9/d00/a01064.html", "d9/d00/a01064" ],
+    [ "CSDLException", "d1/d00/a01068.html", "d1/d00/a01068" ],
+    [ "CGracefulException", "d6/d00/a01072.html", "d6/d00/a01072" ],
+    [ "CAbortException", "d6/d00/a01076.html", "d6/d00/a01076" ],
+    [ "ES40_DECLARE_EXCEPTION", "d3/d00/a00059.html#ae075d449e84c3af1e2f73368ff4b28a8", null ],
+    [ "ES40_IMPLEMENT_EXCEPTION", "d3/d00/a00059.html#a371dfcc5322b2e178a025c1f8f98edd9", null ]
 ];

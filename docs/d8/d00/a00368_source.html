@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: es40_endian.h Source File</title>
+<title>ES40: CPU/Ev68FPCR.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.95</span>
    </div>
   </td>
  </tr>
@@ -109,181 +109,67 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d8/d00/a00368_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">es40_endian.h</div></div>
+  <div class="headertitle"><div class="title">Ev68FPCR.h</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../d8/d00/a00368.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 Emulator.</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2007-2008 by the ES40 Emulator Project</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright (C) 2026 by gdwnldsKSC</span></div>
+<a href="../../d8/d00/a00368.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator -- EV68 FPCR access</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2026 by gdwnldsKSC</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * All rights reserved.</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * SPDX-License-Identifier: BSD-1-Clause</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * This program is free software; you can redistribute it and/or</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * modify it under the terms of the GNU General Public License</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * as published by the Free Software Foundation; either version 2</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * of the License, or (at your option) any later version.</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * This program is distributed in the hope that it will be useful,</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * GNU General Public License for more details.</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * You should have received a copy of the GNU General Public License</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * along with this program; if not, write to the Free Software</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * Although this is not required, the author would appreciate being notified of,</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * and receiving any modifications you may make to the source code that might serve</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> * the general public.</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="preprocessor">#if !defined(INCLUDED_ENDIAN_H)</span></div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="preprocessor">#define INCLUDED_ENDIAN_H</span></div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">#if !defined(ES40_LITTLE_ENDIAN) &amp;&amp; !defined(ES40_BIG_ENDIAN)</span></div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="preprocessor">#if defined(_WIN32) || defined(__VMS)</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">#define ES40_LITTLE_ENDIAN</span></div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="preprocessor">#else </span><span class="comment">// defined (_WIN32) || defined(__VMS)</span></div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#include &lt;<a class="code" href="../../db/d00/a00164.html">sys/param.h</a>&gt;</span></div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#if !defined(__BYTE_ORDER) &amp;&amp; defined(BYTE_ORDER)</span></div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="preprocessor">#define __BYTE_ORDER  BYTE_ORDER</span></div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="preprocessor">#if !defined(__BIG_ENDIAN) &amp;&amp; defined(BIG_ENDIAN)</span></div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">#define __BIG_ENDIAN  BIG_ENDIAN</span></div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="preprocessor">#if !defined(__LITTLE_ENDIAN) &amp;&amp; defined(LITTLE_ENDIAN)</span></div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="preprocessor">#define __LITTLE_ENDIAN LITTLE_ENDIAN</span></div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="preprocessor">#if (defined(__BYTE_ORDER) &amp;&amp; (__BYTE_ORDER == __BIG_ENDIAN)) || defined(sparc)</span></div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="preprocessor">#define ES40_BIG_ENDIAN</span></div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="preprocessor">#else </span><span class="comment">// assume little endian</span></div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="../../d8/d00/a00368.html#aa8bba16650486a9abc2767345a902df5">   83</a></span><span class="preprocessor">#define ES40_LITTLE_ENDIAN</span></div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="preprocessor">#endif </span><span class="comment">// defined (_WIN32) || defined(__VMS)</span></div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="preprocessor">#endif </span><span class="comment">// !defined(ES40_LITTLE_ENDIAN) &amp;&amp; !defined(ES40_BIG_ENDIAN)</span></div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="comment">// Big-endian byte buffers; no host byte-order or alignment assumptions.</span></div>
-<div class="foldopen" id="foldopen00089" data-start="{" data-end="}">
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="../../d8/d00/a00368.html#a98fbd186160b3cf0c2ef4726d0f33255">   89</a></span><span class="keyword">inline</span> <a class="code hl_typedef" href="../../d8/d00/a00326.html#a6dbf9516e516c901604625282c174aa4">u16</a> <a class="code hl_function" href="../../d8/d00/a00368.html#a98fbd186160b3cf0c2ef4726d0f33255">get_be16</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a>* p)</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>{</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../d8/d00/a00326.html#a6dbf9516e516c901604625282c174aa4">u16</a>((<a class="code hl_typedef" href="../../d8/d00/a00326.html#a6dbf9516e516c901604625282c174aa4">u16</a>(p[0]) &lt;&lt; 8) | p[1]);</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>}</div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * Redistribution and use in source and binary forms, with or without</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * modification, are permitted provided that the following conditions are met:</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * 1. Redistributions of source code must retain the above copyright notice,</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> *    this list of conditions and the following disclaimer.</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> * POSSIBILITY OF SUCH DAMAGE.</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#if !defined(INCLUDED_EV68FPCR_H)</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#define INCLUDED_EV68FPCR_H</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;<a class="code" href="../../d6/d00/a00233.html">AlphaFPCR.h</a>&quot;</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="foldopen" id="foldopen00030" data-start="{" data-end="};">
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="../../de/d00/a01560.html">   30</a></span><span class="keyword">class </span><a class="code hl_class" href="../../de/d00/a01560.html">Ev68FPCR</a></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>{</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  <span class="keyword">static</span> std::uint64_t <a class="code hl_function" href="../../de/d00/a01560.html#ac815601fb57559d2c59bacf2e0c3c088">normalize</a>(std::uint64_t value);</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>  <span class="keyword">static</span> std::uint64_t <a class="code hl_function" href="../../de/d00/a01560.html#a3ad2e2916e75c78e75786d6bffd18a13">cvtql_overflow</a>(std::uint64_t stored);</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>};</div>
 </div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
-<div class="foldopen" id="foldopen00094" data-start="{" data-end="}">
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="../../d8/d00/a00368.html#a2ca864743a05158f3d2f17ee582cb5c7">   94</a></span><span class="keyword">inline</span> <a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> <a class="code hl_function" href="../../d8/d00/a00368.html#a2ca864743a05158f3d2f17ee582cb5c7">get_be32</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a>* p)</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>{</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  <span class="keywordflow">return</span> (<a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>(p[0]) &lt;&lt; 24) | (<a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>(p[1]) &lt;&lt; 16) |</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>      (<a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>(p[2]) &lt;&lt; 8) | p[3];</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>}</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="foldopen" id="foldopen00037" data-start="{" data-end="};">
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="../../d8/d00/a00368.html#adb8a34fd4393af309b660bf13306d9de">   37</a></span><span class="keyword">inline</span> <span class="keyword">constexpr</span> <a class="code hl_struct" href="../../dd/d00/a01380.html">AlphaFPCRPolicy</a> <a class="code hl_variable" href="../../d8/d00/a00368.html#adb8a34fd4393af309b660bf13306d9de">kEv68FPCRPolicy</a>{</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  &amp;<a class="code hl_function" href="../../de/d00/a01560.html#ac815601fb57559d2c59bacf2e0c3c088">Ev68FPCR::normalize</a>, &amp;<a class="code hl_function" href="../../de/d00/a01560.html#ac815601fb57559d2c59bacf2e0c3c088">Ev68FPCR::normalize</a>, &amp;<a class="code hl_function" href="../../de/d00/a01560.html#a3ad2e2916e75c78e75786d6bffd18a13">Ev68FPCR::cvtql_overflow</a></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>};</div>
 </div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
-<div class="foldopen" id="foldopen00100" data-start="{" data-end="}">
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="../../d8/d00/a00368.html#adb50a751c412a7ab386483a20d577ba8">  100</a></span><span class="keyword">inline</span> <a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> <a class="code hl_function" href="../../d8/d00/a00368.html#adb50a751c412a7ab386483a20d577ba8">get_be64</a>(<span class="keyword">const</span> <a class="code hl_typedef" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a>* p)</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>{</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>  <span class="keywordflow">return</span> (<a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a>(<a class="code hl_function" href="../../d8/d00/a00368.html#a2ca864743a05158f3d2f17ee582cb5c7">get_be32</a>(p)) &lt;&lt; 32) | <a class="code hl_function" href="../../d8/d00/a00368.html#a2ca864743a05158f3d2f17ee582cb5c7">get_be32</a>(p + 4);</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>}</div>
-</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
-<div class="foldopen" id="foldopen00105" data-start="{" data-end="}">
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno"><a class="line" href="../../d8/d00/a00368.html#a3fcae6fa902cd866f100e222c59ee90d">  105</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d8/d00/a00368.html#a3fcae6fa902cd866f100e222c59ee90d">put_be16</a>(<a class="code hl_typedef" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a>* p, <a class="code hl_typedef" href="../../d8/d00/a00326.html#a6dbf9516e516c901604625282c174aa4">u16</a> value)</div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>{</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>  p[0] = <a class="code hl_typedef" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a>(value &gt;&gt; 8);</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  p[1] = <a class="code hl_typedef" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a>(value);</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>}</div>
-</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
-<div class="foldopen" id="foldopen00111" data-start="{" data-end="}">
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno"><a class="line" href="../../d8/d00/a00368.html#a9b62b5c7f2bb5966cdcc05b7ef765295">  111</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d8/d00/a00368.html#a9b62b5c7f2bb5966cdcc05b7ef765295">put_be32</a>(<a class="code hl_typedef" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a>* p, <a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> value)</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>{</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  p[0] = <a class="code hl_typedef" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a>(value &gt;&gt; 24);</div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>  p[1] = <a class="code hl_typedef" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a>(value &gt;&gt; 16);</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>  p[2] = <a class="code hl_typedef" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a>(value &gt;&gt; 8);</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>  p[3] = <a class="code hl_typedef" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a>(value);</div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>}</div>
-</div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
-<div class="foldopen" id="foldopen00119" data-start="{" data-end="}">
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno"><a class="line" href="../../d8/d00/a00368.html#a0971e9e397ba42c7b56920165cc34e6f">  119</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d8/d00/a00368.html#a0971e9e397ba42c7b56920165cc34e6f">put_be64</a>(<a class="code hl_typedef" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a>* p, <a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> value)</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>{</div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>  <a class="code hl_function" href="../../d8/d00/a00368.html#a9b62b5c7f2bb5966cdcc05b7ef765295">put_be32</a>(p, <a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>(value &gt;&gt; 32));</div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>  <a class="code hl_function" href="../../d8/d00/a00368.html#a9b62b5c7f2bb5966cdcc05b7ef765295">put_be32</a>(p + 4, <a class="code hl_typedef" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>(value));</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>}</div>
-</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
-<div class="foldopen" id="foldopen00125" data-start="" data-end="">
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno"><a class="line" href="../../d8/d00/a00368.html#a95b2ddeb37caec6b711909814343cc9b">  125</a></span><span class="preprocessor">#define swap_64(x)                                          \</span></div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span><span class="preprocessor">    (                                                       \</span></div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><span class="preprocessor">      (((x) &amp; U64(0x00000000000000ff)) &lt;&lt; 56) |             \</span></div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span><span class="preprocessor">        (((x) &amp; U64(0x000000000000ff00)) &lt;&lt; 40) |           \</span></div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span><span class="preprocessor">          (((x) &amp; U64(0x0000000000ff0000)) &lt;&lt; 24) |         \</span></div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span><span class="preprocessor">            (((x) &amp; U64(0x00000000ff000000)) &lt;&lt; 8) |        \</span></div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><span class="preprocessor">              (((x) &amp; U64(0x000000ff00000000)) &gt;&gt; 8) |      \</span></div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span><span class="preprocessor">                (((x) &amp; U64(0x0000ff0000000000)) &gt;&gt; 24) |   \</span></div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span><span class="preprocessor">                  (((x) &amp; U64(0x00ff000000000000)) &gt;&gt; 40) | \</span></div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span><span class="preprocessor">                    (((x) &amp; U64(0xff00000000000000)) &gt;&gt; 56) \</span></div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span><span class="preprocessor">    )</span></div>
-</div>
-<div class="foldopen" id="foldopen00136" data-start="" data-end="">
-<div class="line"><a id="l00136" name="l00136"></a><span class="lineno"><a class="line" href="../../d8/d00/a00368.html#a27db9edfbbf64257d43d610d109cf3b9">  136</a></span><span class="preprocessor">#define swap_32(x)                                             \</span></div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span><span class="preprocessor">    (                                                          \</span></div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span><span class="preprocessor">      (((x) &amp; 0x000000ff) &lt;&lt; 24) | (((x) &amp; 0x0000ff00) &lt;&lt; 8) | \</span></div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span><span class="preprocessor">        (((x) &amp; 0x00ff0000) &gt;&gt; 8) | (((x) &amp; 0xff000000) &gt;&gt; 24) \</span></div>
-<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span><span class="preprocessor">    )</span></div>
-</div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno"><a class="line" href="../../d8/d00/a00368.html#ab2242ecb8ffd8b5fb6a1647a5b1c9f2a">  141</a></span><span class="preprocessor">#define swap_16(x)  ((((x) &amp; 0x00ff) &lt;&lt; 8) | (((x) &amp; 0xff00) &gt;&gt; 8))</span></div>
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno"><a class="line" href="../../d8/d00/a00368.html#acdddca9641fa0f7b677049e76411ae70">  142</a></span><span class="preprocessor">#define swap_8(x)   ((x) &amp; 0xff)</span></div>
-<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span><span class="preprocessor">#if defined(ES40_BIG_ENDIAN)</span></div>
-<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span><span class="preprocessor">#define endian_64(x)  swap_64(x)</span></div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span><span class="preprocessor">#define endian_32(x)  swap_32(x)</span></div>
-<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span><span class="preprocessor">#define endian_16(x)  swap_16(x)</span></div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span><span class="preprocessor">#define endian_8(x)   swap_8(x)</span></div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span><span class="preprocessor">#else </span><span class="comment">// defined(ES40_BIG_ENDIAN)</span></div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno"><a class="line" href="../../d8/d00/a00368.html#a29575aa850cc34cb06a727c9177aa31c">  149</a></span><span class="preprocessor">#define endian_64(x)  (x)</span></div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno"><a class="line" href="../../d8/d00/a00368.html#a9dbf60e4a321b6a070aa6be105d6a7b4">  150</a></span><span class="preprocessor">#define endian_32(x)  ((x) &amp; 0xffffffff)</span></div>
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno"><a class="line" href="../../d8/d00/a00368.html#a056a9c9215d6af557101d08125b6680b">  151</a></span><span class="preprocessor">#define endian_16(x)  ((x) &amp; 0xffff)</span></div>
-<div class="line"><a id="l00152" name="l00152"></a><span class="lineno"><a class="line" href="../../d8/d00/a00368.html#a72fb55d3c7b08fe2d8779c59b33cc880">  152</a></span><span class="preprocessor">#define endian_8(x)   ((x) &amp; 0xff)</span></div>
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span><span class="preprocessor">#endif </span><span class="comment">// defined(ES40_BIG_ENDIAN)</span></div>
-<div class="foldopen" id="foldopen00154" data-start="{" data-end="}">
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno"><a class="line" href="../../d8/d00/a00368.html#afb78eaf762a0da6c2255bb3429d95e7b">  154</a></span><span class="keyword">inline</span> <a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> <a class="code hl_function" href="../../d8/d00/a00368.html#afb78eaf762a0da6c2255bb3429d95e7b">endian_bits</a>(<a class="code hl_typedef" href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a> x, <span class="keywordtype">int</span> numbits)</div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>{</div>
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>  <span class="keywordflow">switch</span> (numbits)</div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>  {</div>
-<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>  <span class="keywordflow">case</span> 64:  <span class="keywordflow">return</span> <a class="code hl_define" href="../../d8/d00/a00368.html#a29575aa850cc34cb06a727c9177aa31c">endian_64</a>(x);</div>
-<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>  <span class="keywordflow">case</span> 32:  <span class="keywordflow">return</span> <a class="code hl_define" href="../../d8/d00/a00368.html#a9dbf60e4a321b6a070aa6be105d6a7b4">endian_32</a>(x);</div>
-<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>  <span class="keywordflow">case</span> 16:  <span class="keywordflow">return</span> <a class="code hl_define" href="../../d8/d00/a00368.html#a056a9c9215d6af557101d08125b6680b">endian_16</a>(x);</div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>  <span class="keywordflow">case</span> 8:   <span class="keywordflow">return</span> <a class="code hl_define" href="../../d8/d00/a00368.html#a72fb55d3c7b08fe2d8779c59b33cc880">endian_8</a>(x);</div>
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>  <span class="keywordflow">default</span>:  <a class="code hl_define" href="../../dd/d00/a00365.html#a5641b3e8b9f16e5ce6f4ba1f83943832">FAILURE</a>(InvalidArgument, <span class="stringliteral">&quot;Weird numbits in endian_bits&quot;</span>);</div>
-<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>  }</div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>}</div>
-</div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span><span class="preprocessor">#endif </span><span class="comment">//INCLUDED_ENDIAN_H</span></div>
-<div class="ttc" id="aa00164_html"><div class="ttname"><a href="../../db/d00/a00164.html">param.h</a></div></div>
-<div class="ttc" id="aa00326_html_a1af9f95651e921615e75917a6dd1b574"><div class="ttname"><a href="../../d8/d00/a00326.html#a1af9f95651e921615e75917a6dd1b574">u64</a></div><div class="ttdeci">uint64_t u64</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00126">datatypes.h:126</a></div></div>
-<div class="ttc" id="aa00326_html_a6dbf9516e516c901604625282c174aa4"><div class="ttname"><a href="../../d8/d00/a00326.html#a6dbf9516e516c901604625282c174aa4">u16</a></div><div class="ttdeci">uint16_t u16</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00124">datatypes.h:124</a></div></div>
-<div class="ttc" id="aa00326_html_a70c1fcc1a4e96af8f6580f708657cd41"><div class="ttname"><a href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a></div><div class="ttdeci">uint32_t u32</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00125">datatypes.h:125</a></div></div>
-<div class="ttc" id="aa00326_html_a987e4d6cf789cb59dbb390728271e4d6"><div class="ttname"><a href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a></div><div class="ttdeci">uint8_t u8</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00123">datatypes.h:123</a></div></div>
-<div class="ttc" id="aa00365_html_a5641b3e8b9f16e5ce6f4ba1f83943832"><div class="ttname"><a href="../../dd/d00/a00365.html#a5641b3e8b9f16e5ce6f4ba1f83943832">FAILURE</a></div><div class="ttdeci">#define FAILURE(cls, error_msg)</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d00/a00365_source.html#l00099">es40_debug.h:99</a></div></div>
-<div class="ttc" id="aa00368_html_a056a9c9215d6af557101d08125b6680b"><div class="ttname"><a href="../../d8/d00/a00368.html#a056a9c9215d6af557101d08125b6680b">endian_16</a></div><div class="ttdeci">#define endian_16(x)</div><div class="ttdef"><b>Definition</b> <a href="#l00151">es40_endian.h:151</a></div></div>
-<div class="ttc" id="aa00368_html_a0971e9e397ba42c7b56920165cc34e6f"><div class="ttname"><a href="../../d8/d00/a00368.html#a0971e9e397ba42c7b56920165cc34e6f">put_be64</a></div><div class="ttdeci">void put_be64(u8 *p, u64 value)</div><div class="ttdef"><b>Definition</b> <a href="#l00119">es40_endian.h:119</a></div></div>
-<div class="ttc" id="aa00368_html_a29575aa850cc34cb06a727c9177aa31c"><div class="ttname"><a href="../../d8/d00/a00368.html#a29575aa850cc34cb06a727c9177aa31c">endian_64</a></div><div class="ttdeci">#define endian_64(x)</div><div class="ttdef"><b>Definition</b> <a href="#l00149">es40_endian.h:149</a></div></div>
-<div class="ttc" id="aa00368_html_a2ca864743a05158f3d2f17ee582cb5c7"><div class="ttname"><a href="../../d8/d00/a00368.html#a2ca864743a05158f3d2f17ee582cb5c7">get_be32</a></div><div class="ttdeci">u32 get_be32(const u8 *p)</div><div class="ttdef"><b>Definition</b> <a href="#l00094">es40_endian.h:94</a></div></div>
-<div class="ttc" id="aa00368_html_a3fcae6fa902cd866f100e222c59ee90d"><div class="ttname"><a href="../../d8/d00/a00368.html#a3fcae6fa902cd866f100e222c59ee90d">put_be16</a></div><div class="ttdeci">void put_be16(u8 *p, u16 value)</div><div class="ttdef"><b>Definition</b> <a href="#l00105">es40_endian.h:105</a></div></div>
-<div class="ttc" id="aa00368_html_a72fb55d3c7b08fe2d8779c59b33cc880"><div class="ttname"><a href="../../d8/d00/a00368.html#a72fb55d3c7b08fe2d8779c59b33cc880">endian_8</a></div><div class="ttdeci">#define endian_8(x)</div><div class="ttdef"><b>Definition</b> <a href="#l00152">es40_endian.h:152</a></div></div>
-<div class="ttc" id="aa00368_html_a98fbd186160b3cf0c2ef4726d0f33255"><div class="ttname"><a href="../../d8/d00/a00368.html#a98fbd186160b3cf0c2ef4726d0f33255">get_be16</a></div><div class="ttdeci">u16 get_be16(const u8 *p)</div><div class="ttdef"><b>Definition</b> <a href="#l00089">es40_endian.h:89</a></div></div>
-<div class="ttc" id="aa00368_html_a9b62b5c7f2bb5966cdcc05b7ef765295"><div class="ttname"><a href="../../d8/d00/a00368.html#a9b62b5c7f2bb5966cdcc05b7ef765295">put_be32</a></div><div class="ttdeci">void put_be32(u8 *p, u32 value)</div><div class="ttdef"><b>Definition</b> <a href="#l00111">es40_endian.h:111</a></div></div>
-<div class="ttc" id="aa00368_html_a9dbf60e4a321b6a070aa6be105d6a7b4"><div class="ttname"><a href="../../d8/d00/a00368.html#a9dbf60e4a321b6a070aa6be105d6a7b4">endian_32</a></div><div class="ttdeci">#define endian_32(x)</div><div class="ttdef"><b>Definition</b> <a href="#l00150">es40_endian.h:150</a></div></div>
-<div class="ttc" id="aa00368_html_adb50a751c412a7ab386483a20d577ba8"><div class="ttname"><a href="../../d8/d00/a00368.html#adb50a751c412a7ab386483a20d577ba8">get_be64</a></div><div class="ttdeci">u64 get_be64(const u8 *p)</div><div class="ttdef"><b>Definition</b> <a href="#l00100">es40_endian.h:100</a></div></div>
-<div class="ttc" id="aa00368_html_afb78eaf762a0da6c2255bb3429d95e7b"><div class="ttname"><a href="../../d8/d00/a00368.html#afb78eaf762a0da6c2255bb3429d95e7b">endian_bits</a></div><div class="ttdeci">u64 endian_bits(u64 x, int numbits)</div><div class="ttdef"><b>Definition</b> <a href="#l00154">es40_endian.h:154</a></div></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aa00233_html"><div class="ttname"><a href="../../d6/d00/a00233.html">AlphaFPCR.h</a></div></div>
+<div class="ttc" id="aa00368_html_adb8a34fd4393af309b660bf13306d9de"><div class="ttname"><a href="../../d8/d00/a00368.html#adb8a34fd4393af309b660bf13306d9de">kEv68FPCRPolicy</a></div><div class="ttdeci">constexpr AlphaFPCRPolicy kEv68FPCRPolicy</div><div class="ttdef"><b>Definition</b> <a href="#l00037">Ev68FPCR.h:37</a></div></div>
+<div class="ttc" id="aa01380_html"><div class="ttname"><a href="../../dd/d00/a01380.html">AlphaFPCRPolicy</a></div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00233_source.html#l00031">AlphaFPCR.h:32</a></div></div>
+<div class="ttc" id="aa01560_html"><div class="ttname"><a href="../../de/d00/a01560.html">Ev68FPCR</a></div><div class="ttdef"><b>Definition</b> <a href="#l00030">Ev68FPCR.h:31</a></div></div>
+<div class="ttc" id="aa01560_html_a3ad2e2916e75c78e75786d6bffd18a13"><div class="ttname"><a href="../../de/d00/a01560.html#a3ad2e2916e75c78e75786d6bffd18a13">Ev68FPCR::cvtql_overflow</a></div><div class="ttdeci">static std::uint64_t cvtql_overflow(std::uint64_t stored)</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d00/a00365_source.html#l00075">Ev68FPCR.cpp:75</a></div></div>
+<div class="ttc" id="aa01560_html_ac815601fb57559d2c59bacf2e0c3c088"><div class="ttname"><a href="../../de/d00/a01560.html#ac815601fb57559d2c59bacf2e0c3c088">Ev68FPCR::normalize</a></div><div class="ttdeci">static std::uint64_t normalize(std::uint64_t value)</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d00/a00365_source.html#l00063">Ev68FPCR.cpp:63</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../d8/d00/a00368.html">es40_endian.h</a></li>
+    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d8/d00/a00368.html">Ev68FPCR.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

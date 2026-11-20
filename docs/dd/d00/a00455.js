@@ -1,7 +1,11 @@
 var a00455 =
 [
-    [ "BXKeyEntry", "d1/d00/a01709.html", "d1/d00/a01709" ],
-    [ "bx_keymap_c", "d2/d00/a01713.html", "d2/d00/a01713" ],
-    [ "BX_KEYMAP_UNKNOWN", "dd/d00/a00455.html#af9df788a41e0e7b2555362f7d2c29e51", null ],
-    [ "bx_keymap", "dd/d00/a00455.html#a22fa2cedc0d2a8c49e35953f581847ab", null ]
+    [ "sRegion", "d5/d00/a01612.html", "d5/d00/a01612" ],
+    [ "real_address", "dd/d00/a00455.html#a2f1580ff30219765551c6378caad2968", null ],
+    [ "write_printable_s", "dd/d00/a00455.html#a01e8d42103a7091a2c083051a7aa2467", null ],
+    [ "bDisassemble", "dd/d00/a00455.html#a9c3cfa2b0c665b04458d1d148bc10e17", null ],
+    [ "bHashing", "dd/d00/a00455.html#aab8239a91148ca640a60179bce466daf", null ],
+    [ "bListing", "dd/d00/a00455.html#a5783a67942e298401dd23cddf8f3448a", null ],
+    [ "bTrace", "dd/d00/a00455.html#aec440ea495e89a5b3c1c6020761c31d7", null ],
+    [ "trc", "dd/d00/a00455.html#a68bf49d9a6ffe37d4e0ebb6a7d175d5c", null ]
 ];

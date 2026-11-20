@@ -1,4 +1,4 @@
 var a00620 =
 [
-    [ "CSnapshotFile", "dd/d00/a01893.html", "dd/d00/a01893" ]
+    [ "CShmFramebuffer::Impl", "d8/d00/a02108.html", "d8/d00/a02108" ]
 ];

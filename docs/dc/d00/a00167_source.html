@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: config/tui_win32/regex_std.cpp Source File</title>
+<title>ES40: config/tui_win32/include/bsd_compat.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.95</span>
    </div>
   </td>
  </tr>
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('dc/d00/a00167_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">regex_std.cpp</div></div>
+  <div class="headertitle"><div class="title">bsd_compat.h</div></div>
 </div><!--header-->
 <div class="contents">
 <a href="../../dc/d00/a00167.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator.</span></div>
@@ -139,112 +139,48 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('dc/d00/a00167_
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> * POSSIBILITY OF SUCH DAMAGE.</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> */</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">// regcomp/regexec/regfree on std::regex for NetBSD libform on MSVC.</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment">// REG_NEWLINE is ignored: std::regex::multiline is ECMAScript-only, and form fields hold one line.</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;new&gt;</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;regex&gt;</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &quot;<a class="code" href="../../d6/d00/a00158.html">include/regex.h</a>&quot;</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
-<div class="foldopen" id="foldopen00035" data-start="{" data-end="}">
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="../../d6/d00/a00158.html#a38bbfba560a12468196f72aa88486406">   35</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="../../d6/d00/a00158.html#a38bbfba560a12468196f72aa88486406">regcomp</a>(<a class="code hl_struct" href="../../d9/d00/a01129.html">regex_t</a> *preg, <span class="keyword">const</span> <span class="keywordtype">char</span> *pattern, <span class="keywordtype">int</span> cflags)</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>{</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    std::regex::flag_type flags = (cflags &amp; <a class="code hl_define" href="../../d6/d00/a00158.html#a5fc31e6da9b77e09ea62b4544ac4767f">REG_EXTENDED</a>) ? std::regex::extended : std::regex::basic;</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keywordflow">if</span> (cflags &amp; <a class="code hl_define" href="../../d6/d00/a00158.html#a0c3e7b1d5bc9c2d278a544fe9b61b67a">REG_ICASE</a>)</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        flags |= std::regex::icase;</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keywordflow">if</span> (cflags &amp; <a class="code hl_define" href="../../d6/d00/a00158.html#abb835c7fe6f1673fc0efeff0064510ab">REG_NOSUB</a>)</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        flags |= std::regex::nosubs;</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    preg-&gt;<a class="code hl_variable" href="../../d9/d00/a01129.html#aeccb90a4fe3451c1b9053b235366f9bd">re_impl</a> = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    preg-&gt;<a class="code hl_variable" href="../../d9/d00/a01129.html#a4dfc1ce26c896695b77854da7d607ec8">re_nsub</a> = 0;</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keywordflow">try</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    {</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        std::regex *re = <span class="keyword">new</span> std::regex(pattern, flags);</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        preg-&gt;<a class="code hl_variable" href="../../d9/d00/a01129.html#aeccb90a4fe3451c1b9053b235366f9bd">re_impl</a> = re;</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        preg-&gt;<a class="code hl_variable" href="../../d9/d00/a01129.html#a4dfc1ce26c896695b77854da7d607ec8">re_nsub</a> = re-&gt;mark_count();</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    }</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::regex_error &amp;)</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    {</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="../../d6/d00/a00158.html#ad7e13616a54be821d6b686d8b2587401">REG_BADPAT</a>;</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    }</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::bad_alloc &amp;)</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    {</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="../../d6/d00/a00158.html#ae0ee85477e8756f1cf2d7fab21e56235">REG_ESPACE</a>;</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    }</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>}</div>
-</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
-<div class="foldopen" id="foldopen00062" data-start="{" data-end="}">
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="../../d6/d00/a00158.html#a5fda573156393bb7d89b4291ded6e26b">   62</a></span><span class="keywordtype">int</span> <a class="code hl_function" href="../../d6/d00/a00158.html#a5fda573156393bb7d89b4291ded6e26b">regexec</a>(<span class="keyword">const</span> <a class="code hl_struct" href="../../d9/d00/a01129.html">regex_t</a> *preg, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keywordtype">string</span>, <span class="keywordtype">size_t</span> nmatch, <a class="code hl_struct" href="../../db/d00/a01133.html">regmatch_t</a> pmatch[], <span class="keywordtype">int</span> eflags)</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>{</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keyword">const</span> std::regex *re = <span class="keyword">static_cast&lt;</span><span class="keyword">const </span>std::regex *<span class="keyword">&gt;</span>(preg-&gt;<a class="code hl_variable" href="../../d9/d00/a01129.html#aeccb90a4fe3451c1b9053b235366f9bd">re_impl</a>);</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keywordflow">if</span> (re == <span class="keyword">nullptr</span>)</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="../../d6/d00/a00158.html#ad7e13616a54be821d6b686d8b2587401">REG_BADPAT</a>;</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    std::regex_constants::match_flag_type mflags = std::regex_constants::match_default;</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="keywordflow">if</span> (eflags &amp; <a class="code hl_define" href="../../d6/d00/a00158.html#aa0ca15a79530976f6d4ef90326c46858">REG_NOTBOL</a>)</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        mflags |= std::regex_constants::match_not_bol;</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keywordflow">if</span> (eflags &amp; <a class="code hl_define" href="../../d6/d00/a00158.html#a9d97d85ef86123060a845723d28a92cb">REG_NOTEOL</a>)</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        mflags |= std::regex_constants::match_not_eol;</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <span class="keywordflow">try</span></div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    {</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        std::cmatch m;</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="keywordflow">if</span> (!std::regex_search(<span class="keywordtype">string</span>, m, *re, mflags))</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>            <span class="keywordflow">return</span> <a class="code hl_define" href="../../d6/d00/a00158.html#a183aab34192b1bdc18a56e84759aa210">REG_NOMATCH</a>;</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; nmatch; ++i)</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        {</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>            <span class="keywordflow">if</span> (i &lt; m.size() &amp;&amp; m[i].matched)</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>            {</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>                pmatch[i].<a class="code hl_variable" href="../../db/d00/a01133.html#a90ac8973d256eaffdbb20de676ff45a4">rm_so</a> = m.position(i);</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>                pmatch[i].<a class="code hl_variable" href="../../db/d00/a01133.html#a728c28b9b23fa28c4e0b90e3a1a29efc">rm_eo</a> = m.position(i) + m.length(i);</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>            }</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>            <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>                pmatch[i].<a class="code hl_variable" href="../../db/d00/a01133.html#a90ac8973d256eaffdbb20de676ff45a4">rm_so</a> = pmatch[i].<a class="code hl_variable" href="../../db/d00/a01133.html#a728c28b9b23fa28c4e0b90e3a1a29efc">rm_eo</a> = -1;</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        }</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    }</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::regex_error &amp;)</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    {</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="../../d6/d00/a00158.html#ae0ee85477e8756f1cf2d7fab21e56235">REG_ESPACE</a>;</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    }</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>}</div>
-</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
-<div class="foldopen" id="foldopen00098" data-start="{" data-end="}">
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="../../d6/d00/a00158.html#ad94d0de532eaa4fd959b8adde4d64898">   98</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="../../d6/d00/a00158.html#ad94d0de532eaa4fd959b8adde4d64898">regfree</a>(<a class="code hl_struct" href="../../d9/d00/a01129.html">regex_t</a> *preg)</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>{</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    <span class="keyword">delete</span> <span class="keyword">static_cast&lt;</span>std::regex *<span class="keyword">&gt;</span>(preg-&gt;<a class="code hl_variable" href="../../d9/d00/a01129.html#aeccb90a4fe3451c1b9053b235366f9bd">re_impl</a>);</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    preg-&gt;<a class="code hl_variable" href="../../d9/d00/a01129.html#aeccb90a4fe3451c1b9053b235366f9bd">re_impl</a> = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>}</div>
-</div>
-<div class="ttc" id="aa00158_html"><div class="ttname"><a href="../../d6/d00/a00158.html">regex.h</a></div></div>
-<div class="ttc" id="aa00158_html_a0c3e7b1d5bc9c2d278a544fe9b61b67a"><div class="ttname"><a href="../../d6/d00/a00158.html#a0c3e7b1d5bc9c2d278a544fe9b61b67a">REG_ICASE</a></div><div class="ttdeci">#define REG_ICASE</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00158_source.html#l00055">regex.h:55</a></div></div>
-<div class="ttc" id="aa00158_html_a183aab34192b1bdc18a56e84759aa210"><div class="ttname"><a href="../../d6/d00/a00158.html#a183aab34192b1bdc18a56e84759aa210">REG_NOMATCH</a></div><div class="ttdeci">#define REG_NOMATCH</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00158_source.html#l00064">regex.h:64</a></div></div>
-<div class="ttc" id="aa00158_html_a38bbfba560a12468196f72aa88486406"><div class="ttname"><a href="../../d6/d00/a00158.html#a38bbfba560a12468196f72aa88486406">regcomp</a></div><div class="ttdeci">int regcomp(regex_t *preg, const char *pattern, int cflags)</div><div class="ttdef"><b>Definition</b> <a href="#l00035">regex_std.cpp:35</a></div></div>
-<div class="ttc" id="aa00158_html_a5fc31e6da9b77e09ea62b4544ac4767f"><div class="ttname"><a href="../../d6/d00/a00158.html#a5fc31e6da9b77e09ea62b4544ac4767f">REG_EXTENDED</a></div><div class="ttdeci">#define REG_EXTENDED</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00158_source.html#l00054">regex.h:54</a></div></div>
-<div class="ttc" id="aa00158_html_a5fda573156393bb7d89b4291ded6e26b"><div class="ttname"><a href="../../d6/d00/a00158.html#a5fda573156393bb7d89b4291ded6e26b">regexec</a></div><div class="ttdeci">int regexec(const regex_t *preg, const char *string, size_t nmatch, regmatch_t pmatch[], int eflags)</div><div class="ttdef"><b>Definition</b> <a href="#l00062">regex_std.cpp:62</a></div></div>
-<div class="ttc" id="aa00158_html_a9d97d85ef86123060a845723d28a92cb"><div class="ttname"><a href="../../d6/d00/a00158.html#a9d97d85ef86123060a845723d28a92cb">REG_NOTEOL</a></div><div class="ttdeci">#define REG_NOTEOL</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00158_source.html#l00061">regex.h:61</a></div></div>
-<div class="ttc" id="aa00158_html_aa0ca15a79530976f6d4ef90326c46858"><div class="ttname"><a href="../../d6/d00/a00158.html#aa0ca15a79530976f6d4ef90326c46858">REG_NOTBOL</a></div><div class="ttdeci">#define REG_NOTBOL</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00158_source.html#l00060">regex.h:60</a></div></div>
-<div class="ttc" id="aa00158_html_abb835c7fe6f1673fc0efeff0064510ab"><div class="ttname"><a href="../../d6/d00/a00158.html#abb835c7fe6f1673fc0efeff0064510ab">REG_NOSUB</a></div><div class="ttdeci">#define REG_NOSUB</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00158_source.html#l00056">regex.h:56</a></div></div>
-<div class="ttc" id="aa00158_html_ad7e13616a54be821d6b686d8b2587401"><div class="ttname"><a href="../../d6/d00/a00158.html#ad7e13616a54be821d6b686d8b2587401">REG_BADPAT</a></div><div class="ttdeci">#define REG_BADPAT</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00158_source.html#l00065">regex.h:65</a></div></div>
-<div class="ttc" id="aa00158_html_ad94d0de532eaa4fd959b8adde4d64898"><div class="ttname"><a href="../../d6/d00/a00158.html#ad94d0de532eaa4fd959b8adde4d64898">regfree</a></div><div class="ttdeci">void regfree(regex_t *preg)</div><div class="ttdef"><b>Definition</b> <a href="#l00098">regex_std.cpp:98</a></div></div>
-<div class="ttc" id="aa00158_html_ae0ee85477e8756f1cf2d7fab21e56235"><div class="ttname"><a href="../../d6/d00/a00158.html#ae0ee85477e8756f1cf2d7fab21e56235">REG_ESPACE</a></div><div class="ttdeci">#define REG_ESPACE</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00158_source.html#l00066">regex.h:66</a></div></div>
-<div class="ttc" id="aa01129_html"><div class="ttname"><a href="../../d9/d00/a01129.html">regex_t</a></div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00158_source.html#l00039">regex.h:40</a></div></div>
-<div class="ttc" id="aa01129_html_a4dfc1ce26c896695b77854da7d607ec8"><div class="ttname"><a href="../../d9/d00/a01129.html#a4dfc1ce26c896695b77854da7d607ec8">regex_t::re_nsub</a></div><div class="ttdeci">size_t re_nsub</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00158_source.html#l00042">regex.h:42</a></div></div>
-<div class="ttc" id="aa01129_html_aeccb90a4fe3451c1b9053b235366f9bd"><div class="ttname"><a href="../../d9/d00/a01129.html#aeccb90a4fe3451c1b9053b235366f9bd">regex_t::re_impl</a></div><div class="ttdeci">void * re_impl</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00158_source.html#l00041">regex.h:41</a></div></div>
-<div class="ttc" id="aa01133_html"><div class="ttname"><a href="../../db/d00/a01133.html">regmatch_t</a></div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00158_source.html#l00047">regex.h:48</a></div></div>
-<div class="ttc" id="aa01133_html_a728c28b9b23fa28c4e0b90e3a1a29efc"><div class="ttname"><a href="../../db/d00/a01133.html#a728c28b9b23fa28c4e0b90e3a1a29efc">regmatch_t::rm_eo</a></div><div class="ttdeci">regoff_t rm_eo</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00158_source.html#l00050">regex.h:50</a></div></div>
-<div class="ttc" id="aa01133_html_a90ac8973d256eaffdbb20de676ff45a4"><div class="ttname"><a href="../../db/d00/a01133.html#a90ac8973d256eaffdbb20de676ff45a4">regmatch_t::rm_so</a></div><div class="ttdeci">regoff_t rm_so</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00158_source.html#l00049">regex.h:49</a></div></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">/* Force-included into the Windows curses build: BSD/POSIX helpers that MSVC lacks</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment"> * but NetBSD libform uses. Declared here rather than in &lt;strings.h&gt; because not every</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment"> * caller includes it, and an implicit int return would truncate pointers on x64. */</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#ifndef ES40_TUI_BSD_COMPAT_H</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#define ES40_TUI_BSD_COMPAT_H</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &lt;stdarg.h&gt;</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &lt;stddef.h&gt;</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#ifndef __cplusplus</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#include &lt;string.h&gt;</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment">/* C only: a function-like index() would collide with C++ library members named index(). */</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="../../dc/d00/a00167.html#a4da57af702c29650efdb4449c5266f8f">   42</a></span><span class="preprocessor">#define index(s, c) strchr((s), (c))</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="../../dc/d00/a00167.html#ac99ec3f1036620727a68aa8c25a8963c">   43</a></span><span class="preprocessor">#define strcasecmp _stricmp</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="../../dc/d00/a00167.html#aba00036f71bb67f8600b239a39cf5ec9">   44</a></span><span class="preprocessor">#define strncasecmp _strnicmp</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="keywordtype">int</span> <a class="code hl_function" href="../../db/d00/a00164.html#a5ec7fd90ebe6015636bce974c192c86a">vasprintf</a>(<span class="keywordtype">char</span> **strp, <span class="keyword">const</span> <span class="keywordtype">char</span> *fmt, va_list ap);</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="keywordtype">int</span> <a class="code hl_function" href="../../db/d00/a00164.html#a1af9acc6b6efdca3576cb8223d95f401">asprintf</a>(<span class="keywordtype">char</span> **strp, <span class="keyword">const</span> <span class="keywordtype">char</span> *fmt, ...);</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="keywordtype">char</span> *<a class="code hl_function" href="../../db/d00/a00164.html#a098b232e1cfa2b0ce1d94b7ad0440cbb">strsep</a>(<span class="keywordtype">char</span> **stringp, <span class="keyword">const</span> <span class="keywordtype">char</span> *delim);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>}</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aa00164_html_a098b232e1cfa2b0ce1d94b7ad0440cbb"><div class="ttname"><a href="../../db/d00/a00164.html#a098b232e1cfa2b0ce1d94b7ad0440cbb">strsep</a></div><div class="ttdeci">char * strsep(char **stringp, const char *delim)</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00064">bsd_compat.c:64</a></div></div>
+<div class="ttc" id="aa00164_html_a1af9acc6b6efdca3576cb8223d95f401"><div class="ttname"><a href="../../db/d00/a00164.html#a1af9acc6b6efdca3576cb8223d95f401">asprintf</a></div><div class="ttdeci">int asprintf(char **strp, const char *fmt,...)</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00053">bsd_compat.c:53</a></div></div>
+<div class="ttc" id="aa00164_html_a5ec7fd90ebe6015636bce974c192c86a"><div class="ttname"><a href="../../db/d00/a00164.html#a5ec7fd90ebe6015636bce974c192c86a">vasprintf</a></div><div class="ttdeci">int vasprintf(char **strp, const char *fmt, va_list ap)</div><div class="ttdef"><b>Definition</b> <a href="../../db/d00/a00164_source.html#l00035">bsd_compat.c:35</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_9f351d46ce3cc29445a41dc3a31e6919.html">config</a></li><li class="navelem"><a href="../../dir_6b7d1cab4fc1513651fc64c4a9a49cf4.html">tui_win32</a></li><li class="navelem"><a href="../../dc/d00/a00167.html">regex_std.cpp</a></li>
+    <li class="navelem"><a href="../../dir_9f351d46ce3cc29445a41dc3a31e6919.html">config</a></li><li class="navelem"><a href="../../dir_6b7d1cab4fc1513651fc64c4a9a49cf4.html">tui_win32</a></li><li class="navelem"><a href="../../dir_2c38ba4e84cb869759378366b3e67103.html">include</a></li><li class="navelem"><a href="../../dc/d00/a00167.html">bsd_compat.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

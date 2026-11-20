@@ -1,11 +1,14 @@
 var a00239 =
 [
-    [ "DO_FBEQ", "d0/d00/a00239.html#a9c8f6b0d938a7405cd833d7245454d03", null ],
-    [ "DO_FBGE", "d0/d00/a00239.html#a9e049daec1f76e1586c02baaa3094f9f", null ],
-    [ "DO_FBGT", "d0/d00/a00239.html#abd2eeb8d077703b57095d1b1033d41b0", null ],
-    [ "DO_FBLE", "d0/d00/a00239.html#a626450b6b526a8befc122d7a50ea98cc", null ],
-    [ "DO_FBLT", "d0/d00/a00239.html#ac7d7895e1e0e49d90b6e8b269e48c093", null ],
-    [ "DO_FBNE", "d0/d00/a00239.html#a13bddfdb496f68a5429ae23fd465237a", null ],
-    [ "FP_IS_NEGATIVE", "d0/d00/a00239.html#a6f52790b6d3c56191d155e4a701ffd39", null ],
-    [ "FP_IS_ZERO", "d0/d00/a00239.html#a35cbff736c397d624b27c6ba10d4b26e", null ]
+    [ "AlphaHWLoadDescriptor", "d0/d00/a01388.html", "d0/d00/a01388" ],
+    [ "AlphaHWLoadPolicy", "d1/d00/a01392.html", "d1/d00/a01392" ],
+    [ "AlphaHWLoadAddress", "d0/d00/a00239.html#aa3ad26f561afb9009c452480177375e7", [
+      [ "Invalid", "d0/d00/a00239.html#aa3ad26f561afb9009c452480177375e7a4bbb8f967da6d1a610596d7257179c2b", null ],
+      [ "Physical", "d0/d00/a00239.html#aa3ad26f561afb9009c452480177375e7ace898d62ed9ca7653a01fe0c781e97e9", null ],
+      [ "Virtual", "d0/d00/a00239.html#aa3ad26f561afb9009c452480177375e7a615e6f9baca5553d44683a098d342b70", null ]
+    ] ],
+    [ "alpha_decode_hw_load", "d0/d00/a00239.html#a39e6fb8b9481dd0277a58ffa8fddcbd9", null ],
+    [ "alpha_hw_load_compilable", "d0/d00/a00239.html#a7187fb36cd6b9bab1a96611f696057a2", null ],
+    [ "alpha_hw_load_helper_descriptor", "d0/d00/a00239.html#a49822d70c34b3143f691d658e1d66c28", null ],
+    [ "alpha_hw_load_valid", "d0/d00/a00239.html#a443860ab83551bf77dad9bf4efcaa6b7", null ]
 ];

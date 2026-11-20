@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: chipset/AliM1543C_pmu.cpp File Reference</title>
+<title>ES40: chipset/AliM1543C.cpp File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.95</span>
    </div>
   </td>
  </tr>
@@ -109,162 +109,419 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d2/d00/a00083.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">AliM1543C_pmu.cpp File Reference</div></div>
+  <div class="headertitle"><div class="title">AliM1543C.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>Stub PMU/ACPI device at PCI 0:17:0 for the ALi M1543C bridge.  
+<p>Contains the code for the emulated Ali M1543C chipset devices.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &quot;<a class="el" href="../../d6/d00/a00626_source.html">StdAfx.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../da/d00/a00086_source.html">AliM1543C_pmu.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../db/d00/a00074_source.html">AliM1543C.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d8/d00/a00725_source.html">system/System.h</a>&quot;</code><br />
-<code>#include &lt;chrono&gt;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d3/d00/a00779_source.html">StdAfx.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/d00/a00086_source.html">AliM1543C.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d1/d00/a00098_source.html">AliM1543C_pmu.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d5/d00/a00878_source.html">system/System.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dd/d00/a02636_source.html">graphics/VGA.h</a>&quot;</code><br />
+<code>#include &lt;cerrno&gt;</code><br />
+<code>#include &lt;limits&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
-Include dependency graph for AliM1543C_pmu.cpp:</div>
+Include dependency graph for AliM1543C.cpp:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../df/d00/a00084.png" border="0" usemap="#achipset_2_ali_m1543_c__pmu_8cpp" loading="lazy" alt=""/></div>
-<map name="achipset_2_ali_m1543_c__pmu_8cpp" id="achipset_2_ali_m1543_c__pmu_8cpp">
-<area shape="rect" title="Stub PMU/ACPI device at PCI 0:17:0 for the ALi M1543C bridge." alt="" coords="1126,5,1314,32"/>
-<area shape="rect" href="../../d6/d00/a00626.html" title="Standard includes." alt="" coords="1033,80,1106,107"/>
-<area shape="poly" title=" " alt="" coords="1196,32,1110,75,1109,70,1191,33"/>
-<area shape="rect" title=" " alt="" coords="535,304,596,331"/>
-<area shape="poly" title=" " alt="" coords="1123,24,1027,37,911,60,851,77,791,98,734,125,680,157,646,187,617,223,578,292,575,288,613,220,642,183,677,153,731,120,789,94,849,72,910,55,1026,32,1128,23"/>
-<area shape="rect" href="../../da/d00/a00086.html" title="Stub Power Management Unit (M7101) on the ALi M1543C bridge." alt="" coords="1941,80,2070,107"/>
-<area shape="poly" title=" " alt="" coords="1315,26,1928,84,1923,85,1315,31"/>
-<area shape="rect" href="../../db/d00/a00074.html" title="Contains the definitions for the ISA part of the emulated Ali M1543C chipset." alt="" coords="1172,80,1268,107"/>
-<area shape="poly" title=" " alt="" coords="1222,30,1222,66,1218,63,1219,35"/>
-<area shape="rect" href="../../d8/d00/a00725.html" title="Contains the definitions for the emulated Typhoon Chipset devices." alt="" coords="1707,155,1832,181"/>
-<area shape="poly" title=" " alt="" coords="1268,30,1710,150,1705,151,1267,35"/>
-<area shape="rect" href="../../d7/d00/a00173.html" title=" " alt="" coords="691,155,800,181"/>
-<area shape="poly" title=" " alt="" coords="1030,104,816,154,815,149,1036,102"/>
-<area shape="rect" href="../../d8/d00/a00326.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="1521,304,1610,331"/>
-<area shape="poly" title=" " alt="" coords="1106,98,1265,125,1341,140,1384,152,1419,176,1463,213,1545,294,1540,292,1459,217,1416,180,1382,157,1339,145,1264,130,1106,103"/>
-<area shape="rect" title=" " alt="" coords="2468,304,2535,331"/>
-<area shape="poly" title=" " alt="" coords="1106,97,1160,104,1285,112,1441,117,1804,127,1989,138,2161,156,2239,169,2310,185,2373,204,2425,227,2445,240,2462,256,2489,292,2484,290,2458,260,2442,244,2423,232,2371,209,2309,190,2238,174,2160,161,1988,143,1804,132,1441,122,1285,117,1160,109,1106,103"/>
-<area shape="rect" href="../../d6/d00/a00047.html" title=" " alt="" coords="1248,155,1371,181"/>
-<area shape="poly" title=" " alt="" coords="1106,103,1255,150,1250,150,1106,108"/>
-<area shape="rect" href="../../dc/d00/a00053.html" title=" " alt="" coords="274,229,374,256"/>
-<area shape="poly" title=" " alt="" coords="1030,95,901,100,719,108,540,126,467,140,413,157,392,170,373,185,343,219,339,215,370,181,389,165,411,152,465,135,539,121,719,103,900,95,1036,94"/>
-<area shape="rect" href="../../de/d00/a00065.html" title=" " alt="" coords="1041,229,1146,256"/>
-<area shape="poly" title=" " alt="" coords="1073,105,1091,215,1087,212,1070,109"/>
-<area shape="rect" href="../../d9/d00/a00056.html" title=" " alt="" coords="1246,304,1333,331"/>
-<area shape="poly" title=" " alt="" coords="1083,105,1269,294,1264,293,1081,110"/>
-<area shape="rect" href="../../df/d00/a00062.html" title=" " alt="" coords="68,229,199,256"/>
-<area shape="poly" title=" " alt="" coords="1030,95,920,99,755,106,563,124,465,139,369,157,315,172,263,189,175,225,173,220,261,184,314,166,368,152,464,133,562,119,755,101,920,93,1035,94"/>
-<area shape="rect" href="../../d3/d00/a00059.html" title=" " alt="" coords="424,155,539,181"/>
-<area shape="poly" title=" " alt="" coords="1031,101,555,160,554,155,1035,98"/>
-<area shape="rect" href="../../dd/d00/a00365.html" title="Contains macro&#39;s and prototypes for debugging." alt="" coords="824,155,926,181"/>
-<area shape="poly" title=" " alt="" coords="1038,106,924,151,922,146,1033,108"/>
-<area shape="rect" href="../../d8/d00/a00368.html" title="Contains byte&#45;order conversion helpers." alt="" coords="950,155,1056,181"/>
-<area shape="poly" title=" " alt="" coords="1060,106,1026,145,1023,141,1056,109"/>
-<area shape="rect" title=" " alt="" coords="1271,229,1348,256"/>
-<area shape="poly" title=" " alt="" coords="1311,180,1312,215,1307,212,1308,184"/>
-<area shape="rect" title=" " alt="" coords="1564,379,1618,405"/>
-<area shape="poly" title=" " alt="" coords="1325,179,1511,329,1564,370,1559,369,1508,333,1323,184"/>
-<area shape="rect" title=" " alt="" coords="620,304,677,331"/>
-<area shape="poly" title=" " alt="" coords="375,251,478,271,607,303,602,304,477,277,375,256"/>
-<area shape="poly" title=" " alt="" coords="366,254,523,302,518,303,366,259"/>
-<area shape="rect" title=" " alt="" coords="346,304,404,331"/>
-<area shape="poly" title=" " alt="" coords="334,254,360,292,355,291,332,259"/>
-<area shape="rect" title=" " alt="" coords="428,304,484,331"/>
-<area shape="poly" title=" " alt="" coords="348,254,423,296,417,296,347,259"/>
-<area shape="rect" title=" " alt="" coords="94,304,173,331"/>
-<area shape="poly" title=" " alt="" coords="289,258,182,301,180,296,293,255"/>
-<area shape="poly" title=" " alt="" coords="1112,254,1176,296,1235,328,1320,354,1407,371,1486,381,1552,389,1546,389,1486,386,1406,376,1319,359,1232,333,1174,300,1111,259"/>
-<area shape="poly" title=" " alt="" coords="1044,253,1023,259,859,279,786,289,693,306,692,301,785,284,858,274,1022,253,1038,253"/>
-<area shape="poly" title=" " alt="" coords="1038,250,826,276,611,307,611,301,825,271,1043,249"/>
-<area shape="poly" title=" " alt="" coords="1038,248,734,272,558,289,419,307,418,301,557,284,733,267,1043,247"/>
-<area shape="poly" title=" " alt="" coords="1038,249,816,272,523,307,500,310,499,305,522,301,815,266,1044,248"/>
-<area shape="poly" title=" " alt="" coords="1039,248,599,276,353,293,189,307,188,301,352,287,599,271,1044,246"/>
-<area shape="rect" title=" " alt="" coords="1357,304,1417,331"/>
-<area shape="poly" title=" " alt="" coords="1147,253,1344,303,1339,303,1146,258"/>
-<area shape="rect" title=" " alt="" coords="883,304,952,331"/>
-<area shape="poly" title=" " alt="" coords="1065,256,963,300,962,295,1060,257"/>
-<area shape="rect" title=" " alt="" coords="196,304,322,331"/>
-<area shape="poly" title=" " alt="" coords="1038,247,746,269,546,285,337,307,337,301,545,280,746,263,1044,246"/>
-<area shape="rect" title=" " alt="" coords="2023,304,2092,331"/>
-<area shape="poly" title=" " alt="" coords="1146,245,2010,311,2005,313,1146,251"/>
-<area shape="rect" title=" " alt="" coords="976,304,1072,331"/>
-<area shape="poly" title=" " alt="" coords="1084,255,1048,295,1046,290,1079,258"/>
-<area shape="poly" title=" " alt="" coords="1128,254,1243,298,1238,298,1127,259"/>
-<area shape="rect" title=" " alt="" coords="1096,304,1171,331"/>
-<area shape="poly" title=" " alt="" coords="1102,254,1122,291,1117,289,1099,259"/>
-<area shape="rect" title=" " alt="" coords="701,304,768,331"/>
-<area shape="poly" title=" " alt="" coords="1044,252,927,276,784,306,783,301,926,271,1039,253"/>
-<area shape="rect" title=" " alt="" coords="792,304,859,331"/>
-<area shape="poly" title=" " alt="" coords="1049,256,874,306,873,301,1044,257"/>
-<area shape="poly" title=" " alt="" coords="199,248,406,272,607,303,602,304,405,277,199,254"/>
-<area shape="poly" title=" " alt="" coords="199,252,497,301,523,308,517,308,496,307,199,257"/>
-<area shape="poly" title=" " alt="" coords="135,254,136,289,131,288,132,259"/>
-<area shape="poly" title=" " alt="" coords="156,254,227,295,221,297,155,259"/>
-<area shape="rect" title=" " alt="" coords="5,304,70,331"/>
-<area shape="poly" title=" " alt="" coords="115,259,68,296,64,292,118,254"/>
-<area shape="poly" title=" " alt="" coords="452,183,367,225,364,220,456,181"/>
-<area shape="poly" title=" " alt="" coords="512,179,543,199,557,212,568,228,576,259,574,290,570,287,570,259,563,230,553,216,540,203,511,184"/>
-<area shape="poly" title=" " alt="" coords="421,178,329,200,288,214,264,231,258,242,259,252,264,261,273,271,301,287,334,303,329,303,298,292,270,275,260,264,254,253,253,241,259,228,286,209,327,194,426,176"/>
-<area shape="poly" title=" " alt="" coords="471,180,454,204,440,230,438,260,446,291,441,289,433,261,435,229,449,201,467,183"/>
-<area shape="poly" title=" " alt="" coords="421,170,329,173,219,181,166,189,119,200,82,214,58,231,53,239,52,247,60,263,76,279,98,295,93,297,73,283,55,266,47,247,48,237,54,228,80,209,118,194,165,184,218,176,329,168,426,168"/>
-<area shape="poly" title=" " alt="" coords="539,171,883,198,1058,214,1158,227,1211,241,1262,259,1350,298,1345,297,1260,264,1209,246,1157,232,1057,219,883,203,539,176"/>
-<area shape="rect" title=" " alt="" coords="450,229,553,256"/>
-<area shape="poly" title=" " alt="" coords="486,180,496,216,492,213,484,184"/>
-<area shape="rect" title=" " alt="" coords="679,229,748,256"/>
-<area shape="poly" title=" " alt="" coords="849,181,756,225,755,220,844,183"/>
-<area shape="rect" href="../../db/d00/a00164.html" title=" " alt="" coords="772,229,866,256"/>
-<area shape="poly" title=" " alt="" coords="973,181,866,226,864,221,968,183"/>
-<area shape="rect" href="../../db/d00/a00350.html" title="Contains the definitions for the PCI Device base class." alt="" coords="2382,155,2507,181"/>
-<area shape="poly" title=" " alt="" coords="2070,103,2369,154,2364,154,2070,108"/>
-<area shape="rect" href="../../d6/d00/a00356.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="2268,229,2412,256"/>
-<area shape="poly" title=" " alt="" coords="2429,181,2372,223,2370,218,2424,183"/>
-<area shape="poly" title=" " alt="" coords="2369,254,2462,298,2457,297,2368,259"/>
-<area shape="rect" href="../../d4/d00/a00116.html" title="Contains the definitions for the configuration file interpreter." alt="" coords="2252,304,2394,331"/>
-<area shape="poly" title=" " alt="" coords="2339,255,2331,291,2328,287,2335,258"/>
-<area shape="poly" title=" " alt="" coords="2254,329,2240,333,1890,369,1633,390,1633,385,1890,364,2240,328,2249,330"/>
-<area shape="rect" title=" " alt="" coords="2294,379,2352,405"/>
-<area shape="poly" title=" " alt="" coords="2325,329,2325,365,2321,361,2321,333"/>
-<area shape="poly" title=" " alt="" coords="1204,106,1144,145,1069,184,1028,199,995,208,963,216,923,232,901,246,879,258,807,280,748,288,688,294,611,306,611,301,687,289,747,283,806,275,876,254,898,241,920,227,961,211,994,202,1027,194,1067,179,1142,140,1199,108"/>
-<area shape="poly" title=" " alt="" coords="1269,93,1717,108,2036,125,2363,152,2369,155,2364,155,2363,157,2036,131,1716,113,1269,98"/>
-<area shape="poly" title=" " alt="" coords="1762,181,1612,369,1609,364,1757,183"/>
-<area shape="poly" title=" " alt="" coords="1705,172,1358,193,1168,210,1089,220,1030,232,1002,245,973,259,897,278,835,286,772,293,693,306,692,301,772,287,835,281,896,272,971,253,1000,240,1029,227,1088,215,1167,204,1358,187,1710,171"/>
-<area shape="poly" title=" " alt="" coords="1704,171,1543,179,1330,189,1123,207,1037,218,973,232,948,245,922,258,838,280,770,288,700,293,612,306,611,301,699,288,769,283,837,275,921,254,945,240,971,227,1036,213,1122,201,1330,184,1543,173,1710,170"/>
-<area shape="poly" title=" " alt="" coords="1710,177,1614,198,1563,213,1513,232,1459,263,1413,296,1411,291,1456,258,1511,227,1561,208,1613,193,1704,178"/>
-<area shape="poly" title=" " alt="" coords="1832,171,1895,178,1961,189,2019,205,2040,215,2056,228,2064,242,2068,258,2066,291,2062,287,2062,258,2059,244,2051,231,2038,220,2017,210,1960,194,1894,183,1832,176"/>
-<area shape="poly" title=" " alt="" coords="1832,174,2256,229,2250,229,1832,179"/>
-<area shape="poly" title=" " alt="" coords="1832,166,1888,170,1952,180,2018,198,2079,227,2106,251,2119,277,2132,303,2157,329,2186,347,2218,361,2281,383,2276,382,2216,366,2184,351,2153,333,2128,306,2115,280,2101,255,2076,232,2016,203,1951,185,1887,175,1832,171"/>
-<area shape="rect" href="../../de/d00/a00323.html" title="Contains the definitions for the CPU tracing engine." alt="" coords="1524,229,1663,256"/>
-<area shape="poly" title=" " alt="" coords="1741,181,1639,225,1638,220,1736,183"/>
-<area shape="rect" href="../../dd/d00/a00719.html" title=" " alt="" coords="2167,229,2244,256"/>
-<area shape="poly" title=" " alt="" coords="1832,176,2149,227,2155,230,2149,230,2148,232,1832,181"/>
-<area shape="rect" title=" " alt="" coords="1737,229,1802,256"/>
-<area shape="poly" title=" " alt="" coords="1771,180,1772,215,1767,212,1768,184"/>
-<area shape="rect" title=" " alt="" coords="1826,229,1908,256"/>
-<area shape="poly" title=" " alt="" coords="1787,179,1841,221,1836,219,1786,184"/>
-<area shape="rect" title=" " alt="" coords="1932,229,2042,256"/>
-<area shape="poly" title=" " alt="" coords="1808,179,1937,224,1932,224,1807,185"/>
-<area shape="poly" title=" " alt="" coords="1591,255,1577,292,1574,287,1586,258"/>
-<area shape="poly" title=" " alt="" coords="2182,256,2098,299,2096,294,2177,257"/>
-<area shape="poly" title=" " alt="" coords="2245,252,2345,280,2407,302,2413,313,2414,323,2405,342,2387,359,2365,373,2363,368,2384,355,2400,339,2408,322,2408,314,2404,306,2344,285,2244,257"/>
-<area shape="rect" title=" " alt="" coords="2167,304,2228,331"/>
-<area shape="poly" title=" " alt="" coords="2206,255,2202,290,2199,286,2202,258"/>
+<div class="center"><img src="../../df/d00/a00084.png" border="0" usemap="#achipset_2_ali_m1543_c_8cpp" loading="lazy" alt=""/></div>
+<map name="achipset_2_ali_m1543_c_8cpp" id="achipset_2_ali_m1543_c_8cpp">
+<area shape="rect" title="Contains the code for the emulated Ali M1543C chipset devices." alt="" coords="1623,5,1780,32"/>
+<area shape="rect" href="../../d3/d00/a00779.html" title="Standard includes." alt="" coords="938,304,1011,331"/>
+<area shape="poly" title=" " alt="" coords="1651,33,1583,56,1504,83,1360,140,1221,201,1014,299,1012,294,1219,196,1358,135,1502,77,1581,51,1656,32"/>
+<area shape="rect" title=" " alt="" coords="5,453,59,480"/>
+<area shape="poly" title=" " alt="" coords="1621,23,1235,42,704,72,449,91,235,114,151,127,88,140,47,154,38,161,35,167,35,319,35,438,29,438,29,319,29,166,34,157,45,149,86,135,150,122,234,109,448,86,704,66,1235,36,1626,22"/>
+<area shape="rect" href="../../da/d00/a00086.html" title="Contains the definitions for the ISA part of the emulated Ali M1543C chipset." alt="" coords="1593,155,1690,181"/>
+<area shape="poly" title=" " alt="" coords="1698,31,1654,142,1650,138,1694,34"/>
+<area shape="rect" title=" " alt="" coords="1743,379,1796,405"/>
+<area shape="poly" title=" " alt="" coords="1664,32,1618,54,1573,82,1554,100,1538,120,1528,142,1524,167,1524,244,1526,291,1533,310,1549,329,1568,345,1590,358,1638,376,1686,385,1730,391,1725,391,1685,390,1636,381,1587,362,1565,349,1545,333,1528,312,1521,292,1519,244,1519,166,1523,140,1533,117,1550,96,1570,78,1616,49,1659,33"/>
+<area shape="rect" href="../../d1/d00/a00098.html" title="Stub Power Management Unit (M7101) on the ALi M1543C bridge." alt="" coords="1765,80,1894,107"/>
+<area shape="poly" title=" " alt="" coords="1724,30,1796,72,1791,72,1723,35"/>
+<area shape="rect" href="../../d5/d00/a00878.html" title="Contains the definitions for the emulated Typhoon Chipset devices." alt="" coords="1664,229,1789,256"/>
+<area shape="poly" title=" " alt="" coords="1704,30,1726,216,1721,213,1701,35"/>
+<area shape="rect" href="../../dd/d00/a02636.html" title=" " alt="" coords="1939,80,2053,107"/>
+<area shape="poly" title=" " alt="" coords="1753,30,1932,76,1927,76,1753,35"/>
+<area shape="rect" title=" " alt="" coords="2077,80,2134,107"/>
+<area shape="poly" title=" " alt="" coords="1780,27,1909,47,2064,79,2059,80,1908,52,1780,33"/>
+<area shape="rect" href="../../d9/d00/a00191.html" title=" " alt="" coords="599,379,708,405"/>
+<area shape="poly" title=" " alt="" coords="936,327,724,378,722,372,941,326"/>
+<area shape="rect" href="../../d5/d00/a00461.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="1202,379,1291,405"/>
+<area shape="poly" title=" " alt="" coords="1012,326,1189,375,1184,375,1011,331"/>
+<area shape="rect" title=" " alt="" coords="1316,379,1383,405"/>
+<area shape="poly" title=" " alt="" coords="1011,322,1136,343,1303,378,1298,378,1135,348,1011,327"/>
+<area shape="rect" href="../../d3/d00/a00059.html" title=" " alt="" coords="171,379,293,405"/>
+<area shape="poly" title=" " alt="" coords="935,322,684,347,331,381,309,384,308,379,330,376,684,341,941,321"/>
+<area shape="rect" href="../../de/d00/a00065.html" title=" " alt="" coords="1196,453,1297,480"/>
+<area shape="poly" title=" " alt="" coords="976,329,982,367,990,387,1002,403,1031,420,1077,434,1184,457,1179,457,1076,439,1029,425,998,407,985,389,977,369,973,333"/>
+<area shape="rect" href="../../d1/d00/a00077.html" title=" " alt="" coords="732,379,836,405"/>
+<area shape="poly" title=" " alt="" coords="944,330,832,375,831,370,939,332"/>
+<area shape="rect" href="../../da/d00/a00068.html" title=" " alt="" coords="882,453,969,480"/>
+<area shape="poly" title=" " alt="" coords="973,330,936,441,932,437,968,333"/>
+<area shape="rect" href="../../db/d00/a00074.html" title=" " alt="" coords="1507,453,1637,480"/>
+<area shape="poly" title=" " alt="" coords="1011,328,1140,376,1165,391,1190,403,1269,425,1349,440,1494,460,1489,460,1348,446,1267,430,1188,408,1162,395,1138,381,1011,333"/>
+<area shape="rect" href="../../d0/d00/a00071.html" title=" " alt="" coords="1012,379,1126,405"/>
+<area shape="poly" title=" " alt="" coords="992,329,1044,370,1038,369,990,334"/>
+<area shape="rect" href="../../de/d00/a00500.html" title="Contains macro&#39;s and prototypes for debugging." alt="" coords="342,379,444,405"/>
+<area shape="poly" title=" " alt="" coords="935,323,739,345,461,381,460,376,738,340,941,321"/>
+<area shape="rect" href="../../d4/d00/a00503.html" title="Contains byte&#45;order conversion helpers." alt="" coords="469,379,574,405"/>
+<area shape="poly" title=" " alt="" coords="936,325,590,381,589,376,941,323"/>
+<area shape="rect" title=" " alt="" coords="83,453,160,480"/>
+<area shape="poly" title=" " alt="" coords="211,407,155,447,152,442,215,404"/>
+<area shape="poly" title=" " alt="" coords="197,408,74,453,72,448,198,403"/>
+<area shape="rect" title=" " alt="" coords="1509,528,1566,555"/>
+<area shape="poly" title=" " alt="" coords="1298,478,1496,529,1491,529,1297,483"/>
+<area shape="rect" title=" " alt="" coords="1382,528,1442,555"/>
+<area shape="poly" title=" " alt="" coords="1276,478,1372,522,1366,521,1275,483"/>
+<area shape="rect" title=" " alt="" coords="1130,528,1187,555"/>
+<area shape="poly" title=" " alt="" coords="1234,480,1187,521,1184,516,1229,481"/>
+<area shape="rect" title=" " alt="" coords="978,528,1035,555"/>
+<area shape="poly" title=" " alt="" coords="1208,480,1050,530,1049,524,1202,481"/>
+<area shape="rect" title=" " alt="" coords="1686,528,1764,555"/>
+<area shape="poly" title=" " alt="" coords="1297,475,1308,477,1508,508,1673,533,1668,533,1508,513,1308,483,1297,481"/>
+<area shape="poly" title=" " alt="" coords="729,404,720,408,623,418,540,424,398,426,255,431,172,440,75,456,73,451,171,435,255,426,398,421,540,418,623,413,720,403,734,403"/>
+<area shape="poly" title=" " alt="" coords="837,403,1185,477,1496,533,1491,533,1183,483,836,408"/>
+<area shape="poly" title=" " alt="" coords="793,403,824,442,846,462,871,478,939,505,998,520,1053,525,1106,524,1217,517,1282,518,1356,525,1369,530,1364,530,1356,531,1281,523,1217,522,1106,529,1053,530,997,525,937,510,868,482,842,466,820,446,791,408"/>
+<area shape="poly" title=" " alt="" coords="729,404,720,408,600,416,438,424,364,431,307,442,288,450,278,458,275,467,282,478,298,488,327,497,413,510,526,518,653,522,899,524,1047,525,1118,535,1112,535,1047,531,899,529,653,527,526,523,412,515,326,502,296,493,278,482,270,468,273,455,286,445,306,437,363,426,438,418,600,410,720,403,734,403"/>
+<area shape="poly" title=" " alt="" coords="729,404,720,408,587,415,406,421,323,428,260,439,239,447,227,456,224,466,231,478,245,487,269,495,343,509,442,520,556,527,789,535,965,540,960,540,789,541,556,533,442,525,343,515,268,501,243,492,227,482,219,466,222,453,236,442,258,434,323,422,405,415,587,410,720,403,734,403"/>
+<area shape="poly" title=" " alt="" coords="836,394,1305,423,1541,439,1650,451,1670,464,1687,480,1714,516,1709,514,1684,483,1667,468,1648,456,1540,445,1305,428,836,399"/>
+<area shape="rect" title=" " alt="" coords="1320,453,1381,480"/>
+<area shape="poly" title=" " alt="" coords="837,394,1039,411,1170,428,1308,453,1302,453,1169,433,1039,417,837,399"/>
+<area shape="rect" title=" " alt="" coords="336,453,405,480"/>
+<area shape="poly" title=" " alt="" coords="729,404,720,408,572,430,421,456,420,450,571,425,720,403,734,403"/>
+<area shape="rect" title=" " alt="" coords="1219,528,1344,555"/>
+<area shape="poly" title=" " alt="" coords="729,404,720,408,629,412,511,412,452,415,399,422,355,435,339,444,326,455,321,467,326,478,345,490,377,499,476,513,605,521,750,524,1031,524,1199,525,1206,529,1201,528,1199,531,1031,529,750,530,605,526,475,519,376,505,343,495,322,482,315,467,322,452,336,440,353,430,398,417,452,410,511,407,629,407,720,403,734,403"/>
+<area shape="rect" title=" " alt="" coords="1850,453,1918,480"/>
+<area shape="poly" title=" " alt="" coords="837,394,1836,460,1833,464,837,399"/>
+<area shape="rect" title=" " alt="" coords="429,453,526,480"/>
+<area shape="poly" title=" " alt="" coords="734,405,541,453,540,448,729,406"/>
+<area shape="poly" title=" " alt="" coords="809,403,890,446,884,446,808,408"/>
+<area shape="rect" title=" " alt="" coords="549,453,624,480"/>
+<area shape="poly" title=" " alt="" coords="752,405,636,450,635,445,747,407"/>
+<area shape="rect" title=" " alt="" coords="649,453,716,480"/>
+<area shape="poly" title=" " alt="" coords="769,405,714,446,712,441,764,407"/>
+<area shape="rect" title=" " alt="" coords="740,453,806,480"/>
+<area shape="poly" title=" " alt="" coords="784,404,779,440,775,436,780,408"/>
+<area shape="poly" title=" " alt="" coords="1568,479,1551,516,1548,512,1564,482"/>
+<area shape="poly" title=" " alt="" coords="1547,480,1454,524,1453,519,1542,481"/>
+<area shape="poly" title=" " alt="" coords="1599,478,1687,521,1682,520,1598,483"/>
+<area shape="poly" title=" " alt="" coords="1524,480,1347,526,1346,521,1518,481"/>
+<area shape="poly" title=" " alt="" coords="1101,403,1204,447,1199,447,1100,409"/>
+<area shape="poly" title=" " alt="" coords="1127,401,1293,430,1395,451,1405,465,1412,481,1416,514,1411,511,1406,482,1401,468,1392,456,1292,435,1127,406"/>
+<area shape="poly" title=" " alt="" coords="1078,404,1146,516,1141,514,1076,408"/>
+<area shape="poly" title=" " alt="" coords="1066,404,1020,516,1016,512,1062,407"/>
+<area shape="poly" title=" " alt="" coords="1127,396,1189,403,1303,405,1450,405,1524,408,1593,416,1651,429,1675,439,1695,451,1707,464,1716,480,1725,514,1721,511,1711,482,1703,467,1692,455,1673,444,1650,435,1592,421,1524,414,1450,410,1303,410,1189,408,1127,402"/>
+<area shape="poly" title=" " alt="" coords="1123,403,1308,452,1303,452,1122,409"/>
+<area shape="poly" title=" " alt="" coords="1590,171,1439,182,1237,203,1137,221,1047,243,975,271,948,288,929,306,921,319,920,332,924,345,932,359,956,383,980,403,1010,421,1053,439,1160,475,1274,506,1370,530,1364,530,1273,511,1159,480,1051,444,1008,426,977,408,952,387,928,362,919,348,915,333,916,317,925,302,945,283,973,267,1045,238,1136,215,1236,198,1439,177,1595,170"/>
+<area shape="rect" href="../../d6/d00/a00485.html" title="Contains the definitions for the PCI Device base class." alt="" coords="1903,229,2028,256"/>
+<area shape="poly" title=" " alt="" coords="1690,177,1897,225,1891,226,1690,183"/>
+<area shape="rect" href="../../d4/d00/a00110.html" title="Contains the definitions for the emulated DMA controller." alt="" coords="1816,229,1878,256"/>
+<area shape="poly" title=" " alt="" coords="1677,179,1804,226,1799,225,1677,185"/>
+<area shape="rect" href="../../d3/d00/a00113.html" title=" " alt="" coords="1563,229,1640,256"/>
+<area shape="poly" title=" " alt="" coords="1637,180,1617,218,1614,213,1632,183"/>
+<area shape="rect" href="../../d6/d00/a00491.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="1894,304,2039,331"/>
+<area shape="poly" title=" " alt="" coords="1967,255,1968,290,1964,287,1964,259"/>
+<area shape="poly" title=" " alt="" coords="1896,329,1883,333,1398,388,1398,383,1882,328,1891,330"/>
+<area shape="poly" title=" " alt="" coords="1970,329,1971,361,1968,401,1956,444,1946,464,1933,482,1899,508,1859,526,1818,536,1780,541,1780,536,1817,531,1857,521,1896,504,1929,478,1942,461,1951,442,1962,400,1966,361,1966,333"/>
+<area shape="poly" title=" " alt="" coords="1962,330,1900,442,1897,437,1957,333"/>
+<area shape="poly" title=" " alt="" coords="1935,331,1811,378,1809,373,1930,332"/>
+<area shape="rect" title=" " alt="" coords="2275,379,2357,405"/>
+<area shape="poly" title=" " alt="" coords="2028,329,2262,379,2257,379,2028,334"/>
+<area shape="rect" title=" " alt="" coords="2047,379,2105,405"/>
+<area shape="poly" title=" " alt="" coords="1986,329,2047,371,2042,369,1985,334"/>
+<area shape="poly" title=" " alt="" coords="1868,254,1935,296,1930,295,1867,259"/>
+<area shape="poly" title=" " alt="" coords="1559,245,1480,250,1381,259,1290,277,1256,290,1234,306,1227,319,1226,333,1235,366,1230,363,1221,334,1222,317,1230,302,1253,285,1288,271,1380,253,1480,245,1565,244"/>
+<area shape="poly" title=" " alt="" coords="1834,105,1849,141,1873,180,1898,202,1926,222,1921,221,1894,206,1869,183,1844,144,1832,109"/>
+<area shape="poly" title=" " alt="" coords="1661,255,1652,259,1533,270,1424,276,1227,277,892,263,732,262,649,267,563,277,473,292,376,314,272,343,160,381,131,394,103,411,58,445,54,441,100,406,128,390,158,376,271,338,375,309,472,287,563,271,649,262,732,257,892,257,1228,272,1423,271,1533,265,1652,253,1667,254"/>
+<area shape="poly" title=" " alt="" coords="1728,254,1723,298,1711,357,1688,422,1672,453,1651,482,1618,510,1581,529,1580,523,1615,505,1647,478,1667,450,1683,420,1706,355,1718,297,1724,258"/>
+<area shape="poly" title=" " alt="" coords="1667,253,1605,274,1575,288,1548,306,1524,329,1502,356,1466,413,1439,469,1422,516,1418,511,1434,467,1461,411,1498,352,1520,326,1545,302,1573,283,1603,269,1662,254"/>
+<area shape="poly" title=" " alt="" coords="1667,254,1537,282,1482,296,1453,306,1432,328,1421,351,1412,377,1397,407,1371,443,1368,438,1392,404,1407,374,1416,349,1427,325,1451,302,1481,290,1535,277,1662,255"/>
+<area shape="poly" title=" " alt="" coords="1735,254,1784,329,1867,442,1862,440,1779,332,1733,259"/>
+<area shape="poly" title=" " alt="" coords="1769,254,1913,299,1907,299,1768,259"/>
+<area shape="poly" title=" " alt="" coords="1789,251,2078,301,2185,335,2276,373,2271,372,2183,340,2077,307,1789,257"/>
+<area shape="poly" title=" " alt="" coords="1790,251,1951,279,2019,292,2052,302,2063,315,2071,331,2077,365,2073,362,2066,333,2059,318,2049,306,2018,297,1950,284,1789,257"/>
+<area shape="rect" href="../../da/d00/a00458.html" title="Contains the definitions for the CPU tracing engine." alt="" coords="1244,304,1382,331"/>
+<area shape="poly" title=" " alt="" coords="1661,255,1398,304,1397,299,1667,254"/>
+<area shape="rect" href="../../dc/d00/a00872.html" title=" " alt="" coords="1793,304,1871,331"/>
+<area shape="poly" title=" " alt="" coords="1746,254,1804,295,1799,294,1744,259"/>
+<area shape="rect" title=" " alt="" coords="2214,304,2279,331"/>
+<area shape="poly" title=" " alt="" coords="1789,251,1804,253,2202,310,2196,310,1804,259,1789,256"/>
+<area shape="rect" title=" " alt="" coords="1558,304,1668,331"/>
+<area shape="poly" title=" " alt="" coords="1709,256,1647,298,1645,293,1704,257"/>
+<area shape="poly" title=" " alt="" coords="1304,330,1270,370,1267,365,1299,332"/>
+<area shape="poly" title=" " alt="" coords="1838,329,1877,440,1872,437,1835,333"/>
+<area shape="poly" title=" " alt="" coords="1872,328,2035,378,2030,378,1871,333"/>
+<area shape="poly" title=" " alt="" coords="1936,103,1906,109,1578,120,956,142,633,160,354,182,243,195,157,209,103,226,90,234,85,242,85,319,82,353,73,386,49,440,44,438,68,384,77,352,80,319,80,241,86,230,101,221,156,204,242,189,353,176,633,154,956,137,1578,115,1905,104,1942,102"/>
+<area shape="poly" title=" " alt="" coords="2003,105,2013,141,2014,162,2011,182,2002,202,1989,219,1986,215,1997,199,2005,181,2009,161,2007,142,2000,110"/>
+<area shape="rect" href="../../d9/d00/a00479.html" title=" " alt="" coords="2108,229,2247,256"/>
+<area shape="poly" title=" " alt="" coords="2012,105,2153,220,2147,219,2011,110"/>
+<area shape="rect" href="../../d7/d00/a00467.html" title=" " alt="" coords="2297,155,2436,181"/>
+<area shape="poly" title=" " alt="" coords="2053,103,2290,151,2284,151,2053,108"/>
+<area shape="rect" href="../../dc/d00/a00473.html" title=" " alt="" coords="2514,229,2625,256"/>
+<area shape="poly" title=" " alt="" coords="2053,102,2066,104,2174,113,2260,114,2302,116,2345,122,2393,133,2449,152,2503,182,2548,219,2543,218,2500,187,2447,157,2392,138,2344,127,2301,121,2260,119,2174,119,2065,109,2053,107"/>
+<area shape="rect" href="../../d7/d00/a00521.html" title=" " alt="" coords="2132,155,2220,181"/>
+<area shape="poly" title=" " alt="" coords="2028,105,2133,149,2128,148,2027,110"/>
+<area shape="rect" title=" " alt="" coords="1883,155,1922,181"/>
+<area shape="poly" title=" " alt="" coords="1982,106,1932,147,1930,143,1977,108"/>
+<area shape="rect" title=" " alt="" coords="1946,155,1995,181"/>
+<area shape="poly" title=" " alt="" coords="1994,105,1982,142,1978,138,1990,109"/>
+<area shape="poly" title=" " alt="" coords="2104,251,2040,259,1446,295,1027,316,1026,311,1445,290,2040,253,2110,250"/>
+<area shape="poly" title=" " alt="" coords="2219,254,2258,273,2277,286,2293,302,2309,332,2316,365,2311,361,2304,334,2289,306,2273,290,2255,278,2218,259"/>
+<area shape="poly" title=" " alt="" coords="2171,255,2095,368,2092,363,2166,258"/>
+<area shape="poly" title=" " alt="" coords="2190,254,2227,293,2222,292,2188,259"/>
+<area shape="poly" title=" " alt="" coords="2380,179,2398,201,2412,228,2425,282,2426,329,2420,351,2409,371,2393,390,2371,408,2336,424,2288,437,2167,455,2038,464,1934,468,1934,462,2038,459,2166,450,2287,432,2334,419,2368,403,2389,386,2405,368,2415,349,2421,328,2420,283,2407,230,2394,204,2378,184"/>
+<area shape="poly" title=" " alt="" coords="2374,179,2385,209,2395,247,2398,290,2395,311,2388,332,2373,354,2352,372,2350,367,2369,350,2383,329,2389,310,2392,290,2389,248,2380,210,2371,184"/>
+<area shape="poly" title=" " alt="" coords="2366,180,2360,213,2346,254,2324,296,2292,333,2251,359,2206,376,2160,386,2120,392,2120,386,2159,381,2204,371,2249,354,2289,329,2319,293,2341,251,2355,212,2362,184"/>
+<area shape="poly" title=" " alt="" coords="2336,181,2226,226,2224,221,2331,183"/>
+<area shape="poly" title=" " alt="" coords="2563,255,2539,289,2502,330,2457,372,2404,408,2321,445,2234,475,2145,498,2058,515,1898,535,1780,542,1780,537,1898,530,2057,510,2144,493,2232,470,2319,440,2401,403,2453,368,2499,326,2535,286,2558,258"/>
+<area shape="poly" title=" " alt="" coords="2554,256,2437,333,2358,374,2356,369,2435,328,2549,257"/>
+<area shape="poly" title=" " alt="" coords="2516,256,2295,308,2294,303,2510,257"/>
+<area shape="poly" title=" " alt="" coords="2178,180,2179,215,2175,212,2175,184"/>
 </map>
 </div>
 </div>
 <p><a href="../../d2/d00/a00083_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:a49bb41a48b16ae5318b5addc57942d6b" id="r_a49bb41a48b16ae5318b5addc57942d6b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a49bb41a48b16ae5318b5addc57942d6b">IPus</a>&#160;&#160;&#160;847</td></tr>
+<tr class="memitem:a21c547ea8cc089921cd4f1364b508441" id="r_a21c547ea8cc089921cd4f1364b508441"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a21c547ea8cc089921cd4f1364b508441">REFRESH_TOGGLE_NS</a>&#160;&#160;&#160;15085ULL</td></tr>
+<tr class="memitem:a77c695e57cd952ffd99b15a02e596eb0" id="r_a77c695e57cd952ffd99b15a02e596eb0"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a77c695e57cd952ffd99b15a02e596eb0">PIT_CLOCK_HZ</a>&#160;&#160;&#160;1193182ULL</td></tr>
+<tr class="memitem:aae8b59972fe48d12a92d807b99a324d1" id="r_aae8b59972fe48d12a92d807b99a324d1"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#aae8b59972fe48d12a92d807b99a324d1">PIT_LATCH_VALID</a>&#160;&#160;&#160;0x00010000U</td></tr>
+<tr class="memitem:a91b1a33e2ad0d32a8fbb01e37b447e4e" id="r_a91b1a33e2ad0d32a8fbb01e37b447e4e"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a91b1a33e2ad0d32a8fbb01e37b447e4e">PIT_LATCH_HIGH_NEXT</a>&#160;&#160;&#160;0x00020000U</td></tr>
+<tr class="memitem:ab53b2de683cfa5d3431e2c86c9d759c3" id="r_ab53b2de683cfa5d3431e2c86c9d759c3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab53b2de683cfa5d3431e2c86c9d759c3">MC_BASE_32_KHz</a>&#160;&#160;&#160;0x20</td></tr>
+<tr class="memitem:a9d9fa73fa39aa2500273df240594afe6" id="r_a9d9fa73fa39aa2500273df240594afe6"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9d9fa73fa39aa2500273df240594afe6">RTC_PF</a>&#160;&#160;&#160;0x40</td></tr>
+<tr class="memitem:a2d6edc251f9287ba1639303a4e21ffae" id="r_a2d6edc251f9287ba1639303a4e21ffae"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a2d6edc251f9287ba1639303a4e21ffae">DEBUG_EXPR</a>&#160;&#160;&#160;(<a class="el" href="../../dc/d00/a00167.html#a4da57af702c29650efdb4449c5266f8f">index</a> != 0 || (intno != 0 &amp;&amp; intno &gt; 4))</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ae3e90073bec7493345445872864e1fa7" id="r_ae3e90073bec7493345445872864e1fa7"><td class="memItemLeft">static int&#160;</td><td class="memItemRight"><a class="el" href="#ae3e90073bec7493345445872864e1fa7">pic_priority_of</a> (<a class="el" href="../../d5/d00/a00461.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> mask, <a class="el" href="../../d5/d00/a00461.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> priority_add)</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:a947aad96f1357f648d4a8769d2ee92b5" id="r_a947aad96f1357f648d4a8769d2ee92b5"><td class="memItemLeft">static <a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a947aad96f1357f648d4a8769d2ee92b5">pmu_cfg_data</a> [64]</td></tr>
-<tr class="memitem:a05ffcad1f7c2b8e738458e351f0753ee" id="r_a05ffcad1f7c2b8e738458e351f0753ee"><td class="memItemLeft">static <a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a05ffcad1f7c2b8e738458e351f0753ee">pmu_cfg_mask</a> [64]</td></tr>
-<tr class="memitem:a71740bf2d74d24e4f21f07cf79b2164e" id="r_a71740bf2d74d24e4f21f07cf79b2164e"><td class="memItemLeft">static <a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a71740bf2d74d24e4f21f07cf79b2164e">pmu_magic1</a> = 0x71011533</td></tr>
-<tr class="memitem:a4803d2a3526e18c39732d7da1c75d87e" id="r_a4803d2a3526e18c39732d7da1c75d87e"><td class="memItemLeft">static <a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a4803d2a3526e18c39732d7da1c75d87e">pmu_magic2</a> = 0x33151071</td></tr>
+<tr class="memitem:a059227e5a01b1f266b94f121b8813278" id="r_a059227e5a01b1f266b94f121b8813278"><td class="memItemLeft"><a class="el" href="../../d5/d00/a00461.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a059227e5a01b1f266b94f121b8813278">ali_cfg_data</a> [64]</td></tr>
+<tr class="memitem:a7f9dbd26ce402b327fbac26cfaabb8b7" id="r_a7f9dbd26ce402b327fbac26cfaabb8b7"><td class="memItemLeft"><a class="el" href="../../d5/d00/a00461.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a7f9dbd26ce402b327fbac26cfaabb8b7">ali_cfg_mask</a> [64]</td></tr>
+<tr class="memitem:a1825a7c8c4f2d0d6f1205ddbaafc05ce" id="r_a1825a7c8c4f2d0d6f1205ddbaafc05ce"><td class="memItemLeft">static <a class="el" href="../../d5/d00/a00461.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#a1825a7c8c4f2d0d6f1205ddbaafc05ce">ali_magic1</a> = 0xA111543C</td></tr>
+<tr class="memitem:af1634f4fd7f5947735b0b0c460e64b50" id="r_af1634f4fd7f5947735b0b0c460e64b50"><td class="memItemLeft">static <a class="el" href="../../d5/d00/a00461.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>&#160;</td><td class="memItemRight"><a class="el" href="#af1634f4fd7f5947735b0b0c460e64b50">ali_magic2</a> = 0xC345111A</td></tr>
+<tr class="memitem:aa1aa93f7a5c8e1cab89524199501f9d8" id="r_aa1aa93f7a5c8e1cab89524199501f9d8"><td class="memItemLeft"><a class="el" href="../../d4/d00/a01116.html">CAliM1543C</a> *&#160;</td><td class="memItemRight"><a class="el" href="#aa1aa93f7a5c8e1cab89524199501f9d8">theAli</a> = 0</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Stub PMU/ACPI device at PCI 0:17:0 for the ALi M1543C bridge. </p>
+<div class="textblock"><p>Contains the code for the emulated Ali M1543C chipset devices. </p>
+<p>$Id$</p>
+<p>X-1.66 Camiel Vanderhoeven 31-MAY-2008 Changes to include parts of Poco.</p>
+<p>X-1.65 Camiel Vanderhoeven 14-MAR-2008 Formatting.</p>
+<p>X-1.64 Camiel Vanderhoeven 14-MAR-2008</p><ol type="1">
+<li>More meaningful exceptions replace throwing (int) 1.</li>
+<li>U64 macro replaces X64 macro.</li>
+</ol>
+<p>X-1.63 Camiel Vanderhoeven 13-MAR-2008 Create init(), start_threads() and stop_threads() functions.</p>
+<p>X-1.62 Camiel Vanderhoeven 11-MAR-2008 Named, debuggable mutexes.</p>
+<p>X-1.61 Camiel Vanderhoeven 05-MAR-2008 Multi-threading version.</p>
+<p>X-1.60 Brian Wheeler 27-FEB-2008 Avoid compiler warnings.</p>
+<p>X-1.59 Camiel Vanderhoeven 26-FEB-2008 Moved DMA code into it's own class (<a class="el" href="../../d6/d00/a01172.html" title="Emulated DMA controller.">CDMA</a>)</p>
+<p>X-1.58 Camiel Vanderhoeven 12-FEB-2008 Moved keyboard code into it's own class (<a class="el" href="../../de/d00/a02140.html" title="Emulated keyboard controller, keyboard and mouse.">CKeyboard</a>)</p>
+<p>X-1.57 Camiel Vanderhoeven 08-FEB-2008 Add more keyboard debugging.</p>
+<p>X-1.56 Camiel Vanderhoeven 08-FEB-2008 Set default keyboard translation to scanset 3 (PS/2).</p>
+<p>X-1.55 Camiel Vanderhoeven 07-FEB-2008 Add more keyboard debugging.</p>
+<p>X-1.54 Camiel Vanderhoeven 07-FEB-2008 Don't define DEBUG_KBD by default.</p>
+<p>X-1.53 Camiel Vanderhoeven 07-FEB-2008 Comments.</p>
+<p>X-1.52 Brian Wheeler 02-FEB-2008 Completed LPT support so it works with FreeBSD as a guest OS.</p>
+<p>X-1.51 Brian wheeler 15-JAN-2008 When a keyboard self-test command is received, and the queue is not empty, the queue is cleared so the 0x55 that's sent back will be the first thing in line. Makes the keyboard initialize a little better with SRM.</p>
+<p>X-1.50 Camiel Vanderhoeven 08-JAN-2008 Comments.</p>
+<p>X-1.49 Camiel Vanderhoeven 02-JAN-2008 Comments; moved keyboard status register bits to a "status" struct.</p>
+<p>X-1.48 Camiel Vanderhoeven 30-DEC-2007 Print file id on initialization.</p>
+<p>X-1.47 Camiel Vanderhoeven 30-DEC-2007 Comments.</p>
+<p>X-1.46 Camiel Vanderhoeven 29-DEC-2007 Avoid referencing uninitialized data.</p>
+<p>X-1.45 Camiel Vanderhoeven 28-DEC-2007 Throw exceptions rather than just exiting when errors occur.</p>
+<p>X-1.44 Camiel Vanderhoeven 28-DEC-2007 Keep the compiler happy.</p>
+<p>X-1.43 Camiel Vanderhoeven 19-DEC-2007 Commented out message on PIC de-assertion.</p>
+<p>X-1.42 Brian wheeler 17-DEC-2007 Better DMA support.</p>
+<p>X-1.41 Camiel Vanderhoeven 17-DEC-2007 SaveState file format 2.1</p>
+<p>X-1.40 Brian Wheeler 11-DEC-2007 Improved timer logic (again).</p>
+<p>X-1.39 Brian Wheeler 10-DEC-2007 Improved timer logic.</p>
+<p>X-1.38 Camiel Vanderhoeven 10-DEC-2007 Added config item for vga_console.</p>
+<p>X-1.37 Camiel Vanderhoeven 10-DEC-2007 Use configurator; move IDE and USB to their own classes.</p>
+<p>X-1.36 Camiel Vanderhoeven 7-DEC-2007 Made keyboard messages conditional; add busmaster_status; add pic_edge_level.</p>
+<p>X-1.35 Camiel Vanderhoeven 7-DEC-2007 Generate keyboard interrupts when needed.</p>
+<p>X-1.34 Camiel Vanderhoeven 6-DEC-2007 Corrected bug regarding make/break key settings.</p>
+<p>X-1.33 Camiel Vanderhoeven 6-DEC-2007 Changed keyboard implementation (with thanks to the Bochs project!!)</p>
+<p>X-1.32 Brian Wheeler 2-DEC-2007 Timing / floppy tweak for Linux/BSD guests.</p>
+<p>X-1.31 Brian Wheeler 1-DEC-2007 Added console support (using SDL library), corrected timer behavior for Linux/BSD as a guest OS.</p>
+<p>X-1.30 Camiel Vanderhoeven 1-DEC-2007 Use correct interrupt for secondary IDE controller.</p>
+<p>X-1.29 Camiel Vanderhoeven 17-NOV-2007 Use CHECK_ALLOCATION.</p>
+<p>X-1.28 Eduardo Marcelo Serrat 31-OCT-2007 Corrected IDE interface revision level.</p>
+<p>X-1.27 Camiel Vanderhoeven 18-APR-2007 On a big-endian system, the LBA address for a read or write action was byte-swapped. Fixed this.</p>
+<p>X-1.26 Camiel Vanderhoeven 17-APR-2007 Removed debugging messages.</p>
+<p>X-1.25 Camiel Vanderhoeven 16-APR-2007 Added ResetPCI()</p>
+<p>X-1.24 Camiel Vanderhoeven 11-APR-2007 Moved all data that should be saved to a state file to a structure "state".</p>
+<p>X-1.23 Camiel Vanderhoeven 3-APR-2007 Fixed wrong IDE configuration mask (address ranges masked were too short, leading to overlapping memory regions.)</p>
+<p>X-1.22 Camiel Vanderhoeven 1-APR-2007 Uncommented the IDE debugging statements.</p>
+<p>X-1.21 Camiel Vanderhoeven 31-MAR-2007 Added old changelog comments.</p>
+<p>X-1.20 Camiel Vanderhoeven 30-MAR-2007 Unintentional CVS commit / version number increase.</p>
+<p>X-1.19 Camiel Vanderhoeven 27-MAR-2007 a) When DEBUG_PIC is defined, generate more debugging messages. b) When an interrupt originates from the cascaded interrupt controller, the interrupt vector from the cascaded controller is returned. c) When interrupts are ended on the cascaded controller, and no interrupts are left on that controller, the cascade interrupt (2) on the primary controller is ended as well. I'M NOT COMPLETELY SURE IF THIS IS CORRECT, but what goes on in OpenVMS seems to imply this. d) When the system state is saved to a vms file, and then restored, the ide_status may be 0xb9, this bug has not been found yet, but as a workaround, we detect the value 0xb9, and replace it with 0x40. e) Changed the values for cylinders/heads/sectors on the IDE identify command, because it looks like OpenVMS' DQDRIVER doesn't like it if the number of sectors is greater than 63. f) All IDE commands generate an interrupt upon completion. g) IDE command SET TRANSLATION (0x91) is recognized, but has no effect. This is allright, as long as OpenVMS NEVER DOES CHS-mode access to the disk.</p>
+<p>X-1.18 Camiel Vanderhoeven 26-MAR-2007 a) Specific-EOI's (end-of-interrupt) now only end the interrupt they are meant for. b) When DEBUG_PIC is defined, debugging messages for the interrupt controllers are output to the console, same with DEBUG_IDE and the IDE controller. c) If IDE registers for a non-existing drive are read, 0xff is returned. d) Generate an interrupt when a sector is read or written from a disk.</p>
+<p>X-1.17 Camiel Vanderhoeven 1-MAR-2007 a) Accesses to IDE-configuration space are byte-swapped on a big-endian architecture. This is done through the endian_bits macro. b) Access to the IDE databuffers (16-bit transfers) are byte-swapped on a big-endian architecture. This is done through the endian_16 macro.</p>
+<p>X-1.16 Camiel Vanderhoeven 20-FEB-2007 Write sectors to disk when the IDE WRITE command (0x30) is executed.</p>
+<p>X-1.15 Brian Wheeler 20-FEB-2007 Information about IDE disks is now kept in the ide_info structure.</p>
+<p>X-1.14 Camiel Vanderhoeven 16-FEB-2007 a) This is now a slow-clocked device. b) Removed ifdef _WIN32 from printf statements.</p>
+<p>X-1.13 Brian Wheeler 13-FEB-2007 Corrected some typecasts in printf statements.</p>
+<p>X-1.12 Camiel Vanderhoeven 12-FEB-2007 Added comments.</p>
+<p>X-1.11 Camiel Vanderhoeven 9-FEB-2007 Replaced f_ variables with ide_ members.</p>
+<p>X-1.10 Camiel Vanderhoeven 9-FEB-2007 Only open an IDE disk image, if there is a filename.</p>
+<p>X-1.9 Brian Wheeler 7-FEB-2007 Load disk images according to the configuration file.</p>
+<p>X-1.8 Camiel Vanderhoeven 7-FEB-2007 a) Removed a lot of pointless messages. b) Calls to trace_dev now use the TRC_DEVx macro's.</p>
+<p>X-1.7 Camiel Vanderhoeven 3-FEB-2007 Removed last conditional for supporting another system than an ES40 (ifdef DS15)</p>
+<p>X-1.6 Brian Wheeler 3-FEB-2007 Formatting.</p>
+<p>X-1.5 Brian Wheeler 3-FEB-2007 Fixed some problems with sprintf statements.</p>
+<p>X-1.4 Brian Wheeler 3-FEB-2007 Space for 4 disks in f_img.</p>
+<p>X-1.3 Brian Wheeler 3-FEB-2007 Scanf, printf and 64-bit literals made compatible with Linux/GCC/glibc.</p>
+<p>X-1.2 Brian Wheeler 3-FEB-2007 Includes are now case-correct (necessary on Linux)</p>
+<p>X-1.1 Camiel Vanderhoeven 19-JAN-2007 Initial version in CVS. </p>
 
-<p class="definition">Definition in file <a class="el" href="../../d2/d00/a00083_source.html">AliM1543C_pmu.cpp</a>.</p>
-</div><a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
-<a id="a947aad96f1357f648d4a8769d2ee92b5" name="a947aad96f1357f648d4a8769d2ee92b5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a947aad96f1357f648d4a8769d2ee92b5">&#9670;&#160;</a></span>pmu_cfg_data</h2>
+<p class="definition">Definition in file <a class="el" href="../../d2/d00/a00083_source.html">AliM1543C.cpp</a>.</p>
+</div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
+<a id="a2d6edc251f9287ba1639303a4e21ffae" name="a2d6edc251f9287ba1639303a4e21ffae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d6edc251f9287ba1639303a4e21ffae">&#9670;&#160;</a></span>DEBUG_EXPR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DEBUG_EXPR&#160;&#160;&#160;(<a class="el" href="../../dc/d00/a00167.html#a4da57af702c29650efdb4449c5266f8f">index</a> != 0 || (intno != 0 &amp;&amp; intno &gt; 4))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00083_source.html#l02514">2514</a> of file <a class="el" href="../../d2/d00/a00083_source.html">AliM1543C.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d2/d00/a00083_source.html#l02525">CAliM1543C::pic_interrupt_inner()</a>.</p>
+
+</div>
+</div>
+<a id="a49bb41a48b16ae5318b5addc57942d6b" name="a49bb41a48b16ae5318b5addc57942d6b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a49bb41a48b16ae5318b5addc57942d6b">&#9670;&#160;</a></span>IPus</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define IPus&#160;&#160;&#160;847</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00083_source.html#l00285">285</a> of file <a class="el" href="../../d2/d00/a00083_source.html">AliM1543C.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ab53b2de683cfa5d3431e2c86c9d759c3" name="ab53b2de683cfa5d3431e2c86c9d759c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab53b2de683cfa5d3431e2c86c9d759c3">&#9670;&#160;</a></span>MC_BASE_32_KHz</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MC_BASE_32_KHz&#160;&#160;&#160;0x20</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="reference">Referenced by <a class="el" href="../../d2/d00/a00083_source.html#l01535">CAliM1543C::toy_write()</a>.</p>
+
+</div>
+</div>
+<a id="a77c695e57cd952ffd99b15a02e596eb0" name="a77c695e57cd952ffd99b15a02e596eb0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77c695e57cd952ffd99b15a02e596eb0">&#9670;&#160;</a></span>PIT_CLOCK_HZ</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PIT_CLOCK_HZ&#160;&#160;&#160;1193182ULL</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00083_source.html#l00287">287</a> of file <a class="el" href="../../d2/d00/a00083_source.html">AliM1543C.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d2/d00/a00083_source.html#l01972">CAliM1543C::pit_clock()</a>, <a class="el" href="../../d2/d00/a00083_source.html#l01935">CAliM1543C::pit_out()</a>, and <a class="el" href="../../d2/d00/a00083_source.html#l01030">CAliM1543C::reg_61_write()</a>.</p>
+
+</div>
+</div>
+<a id="a91b1a33e2ad0d32a8fbb01e37b447e4e" name="a91b1a33e2ad0d32a8fbb01e37b447e4e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a91b1a33e2ad0d32a8fbb01e37b447e4e">&#9670;&#160;</a></span>PIT_LATCH_HIGH_NEXT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PIT_LATCH_HIGH_NEXT&#160;&#160;&#160;0x00020000U</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00083_source.html#l00289">289</a> of file <a class="el" href="../../d2/d00/a00083_source.html">AliM1543C.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d2/d00/a00083_source.html#l01815">CAliM1543C::pit_read()</a>.</p>
+
+</div>
+</div>
+<a id="aae8b59972fe48d12a92d807b99a324d1" name="aae8b59972fe48d12a92d807b99a324d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae8b59972fe48d12a92d807b99a324d1">&#9670;&#160;</a></span>PIT_LATCH_VALID</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PIT_LATCH_VALID&#160;&#160;&#160;0x00010000U</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00083_source.html#l00288">288</a> of file <a class="el" href="../../d2/d00/a00083_source.html">AliM1543C.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d2/d00/a00083_source.html#l01815">CAliM1543C::pit_read()</a>, and <a class="el" href="../../d2/d00/a00083_source.html#l01854">CAliM1543C::pit_write()</a>.</p>
+
+</div>
+</div>
+<a id="a21c547ea8cc089921cd4f1364b508441" name="a21c547ea8cc089921cd4f1364b508441"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a21c547ea8cc089921cd4f1364b508441">&#9670;&#160;</a></span>REFRESH_TOGGLE_NS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define REFRESH_TOGGLE_NS&#160;&#160;&#160;15085ULL</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00083_source.html#l00286">286</a> of file <a class="el" href="../../d2/d00/a00083_source.html">AliM1543C.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d2/d00/a00083_source.html#l01014">CAliM1543C::reg_61_read()</a>.</p>
+
+</div>
+</div>
+<a id="a9d9fa73fa39aa2500273df240594afe6" name="a9d9fa73fa39aa2500273df240594afe6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d9fa73fa39aa2500273df240594afe6">&#9670;&#160;</a></span>RTC_PF</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define RTC_PF&#160;&#160;&#160;0x40</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="reference">Referenced by <a class="el" href="../../d2/d00/a00083_source.html#l01535">CAliM1543C::toy_write()</a>.</p>
+
+</div>
+</div>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="ae3e90073bec7493345445872864e1fa7" name="ae3e90073bec7493345445872864e1fa7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae3e90073bec7493345445872864e1fa7">&#9670;&#160;</a></span>pic_priority_of()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -273,7 +530,14 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> pmu_cfg_data[64]</td>
+          <td class="memname">int pic_priority_of </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="../../d5/d00/a00461.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a></td>          <td class="paramname"><span class="paramname"><em>mask</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="../../d5/d00/a00461.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a></td>          <td class="paramname"><span class="paramname"><em>priority_add</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -282,36 +546,201 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">                        = {</div>
-<div class="line">          0x710110b9,</div>
-<div class="line">          0x02000000,</div>
-<div class="line">          0x06800000,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x00000001,</div>
-<div class="line">          0x00000001,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,</div>
-<div class="line">        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,</div>
-<div class="line">        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00083_source.html#l00045">45</a> of file <a class="el" href="../../d2/d00/a00083_source.html">AliM1543C_pmu.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d2/d00/a00083_source.html#l00105">CAliM1543C_pmu::CAliM1543C_pmu()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00083_source.html#l02161">2161</a> of file <a class="el" href="../../d2/d00/a00083_source.html">AliM1543C.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d2/d00/a00083_source.html#l02161">pic_priority_of()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d2/d00/a00083_source.html#l02176">CAliM1543C::pic_get_irq()</a>, <a class="el" href="../../d2/d00/a00083_source.html#l02161">pic_priority_of()</a>, and <a class="el" href="../../d2/d00/a00083_source.html#l02376">CAliM1543C::pic_write()</a>.</p>
+<div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d2/d00/a00083_ae3e90073bec7493345445872864e1fa7_cgraph.png" border="0" usemap="#ad2/d00/a00083_ae3e90073bec7493345445872864e1fa7_cgraph" loading="lazy" alt=""/></div>
+<map name="ad2/d00/a00083_ae3e90073bec7493345445872864e1fa7_cgraph" id="ad2/d00/a00083_ae3e90073bec7493345445872864e1fa7_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,108,56"/>
+<area shape="poly" title=" " alt="" coords="38,29,35,20,37,11,44,5,57,3,69,5,77,14,72,14,67,10,56,8,47,10,41,14,40,20,43,29"/>
+</map>
+</div>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d2/d00/a00083_ae3e90073bec7493345445872864e1fa7_icgraph.png" border="0" usemap="#ad2/d00/a00083_ae3e90073bec7493345445872864e1fa7_icgraph" loading="lazy" alt=""/></div>
+<map name="ad2/d00/a00083_ae3e90073bec7493345445872864e1fa7_icgraph" id="ad2/d00/a00083_ae3e90073bec7493345445872864e1fa7_icgraph">
+<area shape="rect" title=" " alt="" coords="1994,383,2097,409"/>
+<area shape="poly" title=" " alt="" coords="2075,367,2066,363,2045,361,2027,363,2016,368,2014,373,2019,383,2014,381,2009,374,2013,364,2025,358,2046,356,2067,358,2080,367"/>
+<area shape="rect" href="../../d4/d00/a01116.html#aaa05f64d19282a98f78ba79ccd161e0a" title="Determine which IRQ (if any) the controller wants to deliver right now." alt="" coords="1780,592,1946,619"/>
+<area shape="poly" title=" " alt="" coords="2025,419,1878,594,1874,590,2021,422"/>
+<area shape="rect" href="../../d4/d00/a01116.html#aec563745f864f3ea283ec93bc15a88e0" title="Write a byte to one of the programmable interrupt controller&#39;s registers." alt="" coords="1126,291,1281,317"/>
+<area shape="poly" title=" " alt="" coords="1976,385,1773,356,1517,324,1393,314,1282,309,1281,304,1393,309,1518,319,1774,350,1981,384"/>
+<area shape="rect" href="../../d4/d00/a01116.html#a5f01c96e5d1c7ad73a04ef8dbf677007" title="Read a byte from one of the programmable interrupt controller&#39;s registers." alt="" coords="1128,692,1280,719"/>
+<area shape="poly" title=" " alt="" coords="1795,624,1669,658,1518,686,1393,700,1281,706,1279,701,1392,695,1517,681,1668,652,1800,622"/>
+<area shape="rect" href="../../d4/d00/a01116.html#a25ef42283f6a2b4bd07594828064d4ed" title="Read the interrupt vector during a PCI IACK cycle." alt="" coords="1128,743,1280,785"/>
+<area shape="poly" title=" " alt="" coords="1833,626,1787,658,1733,682,1611,717,1488,741,1373,755,1281,763,1280,758,1373,750,1487,736,1610,712,1731,677,1784,653,1828,629"/>
+<area shape="rect" href="../../d4/d00/a01116.html#a723dd99b8312f63a669278da4ace4b7d" title="Recompute and drive the controller&#39;s output line." alt="" coords="1566,479,1732,521"/>
+<area shape="poly" title=" " alt="" coords="1818,585,1694,524,1694,519,1823,584"/>
+<area shape="rect" href="../../d4/d00/a01116.html#a30fd264bbb8a43c3f653d8691138b734" title="Read (byte,word,longword) from one of the legacy ranges." alt="" coords="894,960,1058,1003"/>
+<area shape="poly" title=" " alt="" coords="1120,726,1117,732,1099,758,1091,783,1090,808,1092,834,1094,860,1094,887,1086,915,1069,943,1047,962,1044,957,1065,939,1081,913,1088,886,1089,860,1086,834,1084,808,1086,782,1094,755,1113,729,1116,729"/>
+<area shape="poly" title=" " alt="" coords="1185,797,1137,871,1105,909,1069,943,1039,962,1036,957,1065,939,1101,906,1133,868,1181,801"/>
+<area shape="poly" title=" " alt="" coords="1682,463,1670,459,1649,457,1629,459,1616,464,1612,470,1613,479,1608,477,1606,468,1613,460,1627,454,1649,452,1672,454,1687,463"/>
+<area shape="rect" href="../../d4/d00/a01116.html#a273172e69680a898a025e52ae3db417d" title="De&#45;assert an interrupt — inner implementation, no lock." alt="" coords="1340,512,1518,555"/>
+<area shape="poly" title=" " alt="" coords="1548,516,1519,522,1517,517,1553,514"/>
+<area shape="rect" href="../../d4/d00/a01116.html#a1611cd157ab9fe019c5c46d024463884" title="Reset the PIC to its post&#45;ICW1 state." alt="" coords="1357,379,1501,421"/>
+<area shape="poly" title=" " alt="" coords="1592,471,1517,436,1491,424,1490,419,1519,431,1597,471"/>
+<area shape="poly" title=" " alt="" coords="1621,465,1577,415,1548,390,1516,369,1458,343,1396,326,1336,315,1283,309,1281,304,1337,310,1398,321,1460,338,1519,364,1551,386,1580,412,1626,466"/>
+<area shape="rect" href="../../d4/d00/a01116.html#a70cf715a66d5bc0567bedb211003af4f" title="Acknowledge an IRQ during the INTA cycle." alt="" coords="1348,579,1510,605"/>
+<area shape="poly" title=" " alt="" coords="1594,530,1519,569,1486,580,1483,575,1517,564,1599,528"/>
+<area shape="rect" href="../../d4/d00/a01116.html#a1ddfaf1368347a65ca8bfd18bd532d94" title="Assert an interrupt — inner implementation, no lock." alt="" coords="1342,445,1516,488"/>
+<area shape="poly" title=" " alt="" coords="1548,485,1517,482,1516,477,1553,484"/>
+<area shape="rect" href="../../d4/d00/a01116.html#abc6da40be2ad89ff5b6c980e60df7fb2" title="Drive a device IRQ input line to a level (active/inactive) — the model for sources whose &quot;interrupt&quot; ..." alt="" coords="1356,629,1502,672"/>
+<area shape="poly" title=" " alt="" coords="1620,531,1575,578,1519,619,1497,631,1495,626,1516,615,1571,574,1616,534"/>
+<area shape="rect" href="../../d4/d00/a01116.html#aa064997015f25c6b48b1a7c9ce74270d" title="Write a byte to the edge/level register of one of the programmable interrupt controllers." alt="" coords="1126,28,1281,71"/>
+<area shape="poly" title=" " alt="" coords="1623,465,1577,399,1516,323,1440,247,1360,176,1234,74,1234,68,1364,172,1443,243,1520,319,1581,395,1629,466"/>
+<area shape="rect" href="../../d4/d00/a01116.html#a2fd73e50654148e7ecf7bc2816070d50" title="De&#45;assert an interrupt on one of the programmable interrupt controllers." alt="" coords="1115,636,1292,663"/>
+<area shape="poly" title=" " alt="" coords="1350,562,1342,569,1278,605,1226,638,1224,633,1275,600,1339,564,1354,560"/>
+<area shape="rect" href="../../d1/d00/a02364.html#ab7cdb7901b81b068b3f64647270b429a" title=" " alt="" coords="909,741,1043,784"/>
+<area shape="poly" title=" " alt="" coords="1134,670,1116,682,1102,694,1093,706,1084,719,1068,731,1045,744,1042,739,1066,727,1080,715,1089,703,1098,690,1114,678,1138,667"/>
+<area shape="rect" href="../../d1/d00/a02364.html#a2309478d6c07c6ddfd127302ba16a95b" title=" " alt="" coords="465,736,599,779"/>
+<area shape="poly" title=" " alt="" coords="1130,669,1117,682,1105,696,1098,709,1093,738,1088,767,1081,782,1069,798,1015,844,965,870,908,885,837,900,785,912,742,920,700,918,651,900,632,885,623,869,615,852,602,832,556,782,556,776,606,829,619,849,627,867,636,882,654,895,701,913,742,915,784,907,836,895,907,880,963,865,1012,840,1065,794,1076,780,1083,765,1088,737,1093,708,1101,693,1113,678,1126,672"/>
+<area shape="rect" href="../../d0/d00/a01124.html#a80e67c1ca0aaaf7752399168941d1854" title=" " alt="" coords="656,507,833,549"/>
+<area shape="poly" title=" " alt="" coords="1133,632,829,552,828,547,1138,630"/>
+<area shape="rect" href="../../d1/d00/a02364.html#a7dee1f60cb438673fb1c926c259391d6" title=" " alt="" coords="677,843,812,885"/>
+<area shape="poly" title=" " alt="" coords="910,792,838,826,797,844,795,840,836,821,914,789"/>
+<area shape="rect" href="../../d1/d00/a02364.html#a7107909a5cae621a81ba6c5e798130e0" title=" " alt="" coords="465,843,599,885"/>
+<area shape="poly" title=" " alt="" coords="954,795,906,853,874,880,838,900,806,910,773,915,706,914,643,904,590,888,590,883,644,898,707,909,772,910,805,904,836,895,871,875,902,849,950,798"/>
+<area shape="poly" title=" " alt="" coords="891,763,600,761,599,755,895,760"/>
+<area shape="rect" href="../../d1/d00/a02364.html#aaaa0be26cbefdac768899d38c7dd5709" title=" " alt="" coords="677,675,812,717"/>
+<area shape="poly" title=" " alt="" coords="891,740,813,718,812,713,896,738"/>
+<area shape="poly" title=" " alt="" coords="659,865,601,866,599,861,664,863"/>
+<area shape="poly" title=" " alt="" coords="684,836,577,782,577,777,690,835"/>
+<area shape="poly" title=" " alt="" coords="565,721,554,717,532,715,512,716,500,721,495,727,497,736,492,735,490,726,497,717,511,711,532,709,555,712,570,720"/>
+<area shape="poly" title=" " alt="" coords="660,721,601,740,598,735,665,718"/>
+<area shape="rect" href="../../d0/d00/a01124.html#afb2b69882e71087b4e4251326b3fca83" title="Write to the IDE controller busmaster interface." alt="" coords="460,645,604,688"/>
+<area shape="poly" title=" " alt="" coords="671,558,654,570,629,589,606,611,563,647,559,643,603,607,626,585,651,566,675,555"/>
+<area shape="rect" href="../../d0/d00/a01124.html#af8b053629a1b5f65a9c4bd92a0c428d7" title=" " alt="" coords="460,555,604,597"/>
+<area shape="poly" title=" " alt="" coords="639,553,606,562,604,557,643,550"/>
+<area shape="rect" href="../../d0/d00/a01124.html#a97ddf889d7606f5922fec0705f73529d" title=" " alt="" coords="460,488,604,531"/>
+<area shape="poly" title=" " alt="" coords="638,520,606,518,604,513,643,518"/>
+<area shape="poly" title=" " alt="" coords="565,630,554,626,532,624,512,626,500,630,495,636,497,645,492,644,490,635,497,626,511,621,532,619,555,621,570,629"/>
+<area shape="rect" href="../../d0/d00/a01124.html#a2c913a3c565170d1ae9e4555c734add3" title=" " alt="" coords="199,521,412,548"/>
+<area shape="poly" title=" " alt="" coords="479,638,330,551,330,546,484,636"/>
+<area shape="rect" href="../../d0/d00/a01124.html#ace471b36956e5812d483d6f2288618f2" title=" " alt="" coords="212,621,398,664"/>
+<area shape="poly" title=" " alt="" coords="443,659,400,655,398,650,447,656"/>
+<area shape="poly" title=" " alt="" coords="443,520,414,525,411,520,447,517"/>
+<area shape="poly" title=" " alt="" coords="467,540,461,545,395,585,340,622,336,619,392,580,459,540,470,536"/>
+<area shape="rect" href="../../d4/d00/a01116.html#acf39594b6b063bf03fe0b0f3ee61b697" title="Initialize the Ali device." alt="" coords="1144,356,1264,383"/>
+<area shape="poly" title=" " alt="" coords="1339,389,1265,380,1264,375,1344,387"/>
+<area shape="poly" title=" " alt="" coords="1360,372,1238,320,1237,315,1366,371"/>
+<area shape="rect" href="../../d4/d00/a01116.html#a5cebe358b925131f3497d6aaadce5365" title="Write (byte,word,longword) to one of the legacy ranges." alt="" coords="663,57,826,100"/>
+<area shape="poly" title=" " alt="" coords="1186,276,1167,244,1140,205,1106,167,1066,136,1023,120,962,106,827,88,825,83,963,101,1025,114,1068,131,1110,163,1144,201,1172,241,1191,277"/>
+<area shape="poly" title=" " alt="" coords="1352,611,1342,619,1327,633,1318,647,1310,662,1294,677,1260,694,1258,689,1291,672,1305,658,1314,644,1323,629,1339,615,1347,613"/>
+<area shape="poly" title=" " alt="" coords="1347,612,1342,619,1330,632,1324,646,1318,674,1313,703,1306,718,1294,732,1278,744,1276,740,1290,729,1302,715,1308,701,1313,673,1319,644,1326,629,1338,615,1343,615"/>
+<area shape="rect" href="../../d4/d00/a01116.html#a7d0e7fc05e934ba95c0a4dc569bdc4c7" title="Assert an interrupt on one of the programmable interrupt controllers." alt="" coords="1116,407,1291,433"/>
+<area shape="poly" title=" " alt="" coords="1324,446,1272,436,1271,431,1329,445"/>
+<area shape="poly" title=" " alt="" coords="1150,441,857,556,654,638,638,653,629,668,620,684,606,702,566,737,562,733,602,698,616,681,625,665,634,650,651,634,855,551,1154,438"/>
+<area shape="rect" href="../../d1/d00/a02364.html#a06b1dbde07773ac97d0a8df066499896" title=" " alt="" coords="909,675,1043,717"/>
+<area shape="poly" title=" " alt="" coords="1187,444,1136,521,1069,607,1002,676,999,672,1065,603,1132,517,1183,448"/>
+<area shape="rect" href="../../d4/d00/a01116.html#a730fe7ea93ba14d8981512f8aa12edf9" title="Write a byte to one of the parallel port controller&#39;s registers." alt="" coords="900,145,1052,172"/>
+<area shape="poly" title=" " alt="" coords="1115,397,1113,396,1094,369,1086,342,1086,315,1088,289,1091,263,1091,237,1083,211,1065,186,1052,175,1052,170,1069,182,1088,209,1096,236,1097,263,1094,289,1091,316,1092,341,1099,367,1117,393,1121,397"/>
+<area shape="rect" href="../../d4/d00/a01116.html#acaff060906f3eb49c3c46f509901d4bc" title="Advance the PIT counters by elapsed wall&#45;clock time." alt="" coords="898,196,1054,223"/>
+<area shape="poly" title=" " alt="" coords="1116,398,1113,396,1098,377,1090,357,1088,319,1086,280,1079,262,1065,243,1040,226,1040,220,1069,239,1084,259,1091,279,1093,318,1096,356,1103,374,1117,393,1121,398"/>
+<area shape="rect" href="../../d0/d00/a01124.html#a07f3b9047e7ae3ced24a260b34610219" title=" " alt="" coords="898,373,1054,416"/>
+<area shape="poly" title=" " alt="" coords="1098,409,1055,406,1053,401,1103,408"/>
+<area shape="rect" href="../../d0/d00/a01124.html#a8ff656cfd7f91e3b48a52cb1dc140f90" title="Thread entry point." alt="" coords="5,273,151,300"/>
+<area shape="poly" title=" " alt="" coords="1128,401,1114,397,1090,380,1066,364,1004,337,954,321,836,300,741,287,643,278,451,272,280,276,153,283,149,278,280,270,451,267,644,273,742,282,837,295,956,316,1006,332,1068,359,1093,376,1116,392,1133,401"/>
+<area shape="poly" title=" " alt="" coords="897,720,887,731,870,754,863,777,856,801,839,826,812,844,809,840,835,822,851,799,858,775,865,751,883,727,893,723"/>
+<area shape="poly" title=" " alt="" coords="898,724,886,732,591,844,589,840,884,727,903,722"/>
+<area shape="poly" title=" " alt="" coords="895,670,842,659,780,651,715,652,684,657,654,665,562,737,558,734,651,660,683,651,715,647,780,646,843,654,900,669"/>
+<area shape="poly" title=" " alt="" coords="891,697,813,698,811,693,896,695"/>
+<area shape="poly" title=" " alt="" coords="918,141,809,103,808,98,923,139"/>
+<area shape="rect" href="../../d4/d00/a01116.html#a7902113c09bba1edb5be379c8252add4" title="Handle all events that need to be handled on a clock&#45;driven basis." alt="" coords="675,152,814,195"/>
+<area shape="poly" title=" " alt="" coords="880,196,815,186,813,181,885,194"/>
+<area shape="rect" href="../../d0/d00/a01124.html#a071a19e4c97482075acadeed2c776424" title=" " alt="" coords="666,373,823,416"/>
+<area shape="poly" title=" " alt="" coords="880,396,824,397,822,392,885,393"/>
+<area shape="rect" href="../../d0/d00/a01124.html#a0d3ebd161486f920473d5206a2e1fc6f" title=" " alt="" coords="462,320,603,363"/>
+<area shape="poly" title=" " alt="" coords="881,371,836,364,713,351,604,345,602,340,713,345,837,359,886,369"/>
+<area shape="rect" href="../../d0/d00/a01124.html#a9ce8efa98cb06e658f3f2131926d0a54" title=" " alt="" coords="219,328,392,355"/>
+<area shape="poly" title=" " alt="" coords="917,367,879,351,836,337,732,312,650,301,567,301,460,310,407,319,359,329,356,325,406,314,460,305,566,296,650,295,733,307,837,332,881,346,922,366"/>
+<area shape="rect" href="../../d0/d00/a01124.html#af8ef1d67f9db6babab61d6e461bdeadb" title=" " alt="" coords="652,440,837,483"/>
+<area shape="poly" title=" " alt="" coords="883,422,823,441,820,437,887,419"/>
+<area shape="poly" title=" " alt="" coords="654,427,654,430,643,444,636,457,630,485,625,514,618,529,606,544,592,556,588,552,602,541,613,526,620,512,625,484,631,455,638,441,650,426,657,423"/>
+<area shape="poly" title=" " alt="" coords="661,424,654,430,604,460,563,489,559,486,602,455,651,425,665,421"/>
+<area shape="poly" title=" " alt="" coords="649,372,604,361,602,356,654,370"/>
+<area shape="poly" title=" " alt="" coords="648,393,558,388,460,377,363,358,361,353,460,372,559,383,653,390"/>
+<area shape="poly" title=" " alt="" coords="444,343,394,343,391,339,448,340"/>
+<area shape="poly" title=" " alt="" coords="230,325,138,303,135,298,234,322"/>
+<area shape="poly" title=" " alt="" coords="635,487,606,495,603,491,639,484"/>
+<area shape="poly" title=" " alt="" coords="635,440,459,396,345,357,343,352,461,391,640,437"/>
+<area shape="rect" href="../../d4/d00/a01116.html#ac3551097bbb466c9fa55496cae3b5ca4" title="Drive a device IRQ input line — locked wrapper, see pic_set_line_inner." alt="" coords="1118,1112,1290,1139"/>
+<area shape="poly" title=" " alt="" coords="1414,684,1214,1113,1209,1110,1409,687"/>
+<area shape="rect" href="../../dd/d00/a02180.html#a52b49be8b3e20e6e7dffdcdf22756761" title=" " alt="" coords="897,1087,1054,1113"/>
+<area shape="poly" title=" " alt="" coords="1100,1114,1055,1111,1055,1106,1105,1114"/>
+<area shape="rect" href="../../de/d00/a02140.html#a7350015a788edf5c5de47576d53bf6a1" title="Drive the 8042&#39;s two IRQ lines (keyboard IRQ1, mouse IRQ12) to match the current output&#45;buffer state." alt="" coords="885,1255,1067,1281"/>
+<area shape="poly" title=" " alt="" coords="1170,1146,1000,1257,998,1252,1165,1148"/>
+<area shape="rect" href="../../d4/d00/a01116.html#a72c4a023b77161f25abb6845cf55e47b" title=" " alt="" coords="893,1137,1059,1164"/>
+<area shape="poly" title=" " alt="" coords="1100,1137,1060,1144,1059,1139,1105,1136"/>
+<area shape="rect" href="../../dd/d00/a02180.html#afb2e177b0f03e823d2b78e56f3b8b85a" title=" " alt="" coords="473,1036,591,1063"/>
+<area shape="poly" title=" " alt="" coords="879,1090,592,1059,591,1053,884,1088"/>
+<area shape="rect" href="../../dd/d00/a02180.html#af42b2a670571dd7cb3419f4505306720" title=" " alt="" coords="678,1112,811,1139"/>
+<area shape="poly" title=" " alt="" coords="879,1111,811,1121,810,1115,885,1110"/>
+<area shape="rect" href="../../dd/d00/a02180.html#ac3eb094c95cc9b8f71b410ec2a1528ca" title="receive — Push data into the FIFO." alt="" coords="687,1011,802,1037"/>
+<area shape="poly" title=" " alt="" coords="916,1081,788,1040,788,1035,921,1081"/>
+<area shape="rect" href="../../dd/d00/a02180.html#a81e2178071969d1fb925b94dae12f4f8" title=" " alt="" coords="679,1163,810,1189"/>
+<area shape="poly" title=" " alt="" coords="906,1117,886,1128,838,1153,804,1164,802,1159,836,1148,884,1123,901,1119"/>
+<area shape="poly" title=" " alt="" coords="669,1033,592,1045,591,1040,675,1032"/>
+<area shape="rect" href="../../de/d00/a02140.html#a16a30f6e33eac0e438226ffdb0970427" title="Move an exposed host scancode behind solicited responses at a guest command boundary." alt="" coords="653,1213,836,1256"/>
+<area shape="poly" title=" " alt="" coords="866,1252,837,1250,837,1245,872,1252"/>
+<area shape="rect" href="../../de/d00/a02140.html#a35aac7f42cfce54cde3e3789b6133e64" title="Discard asynchronous host movement so a guest command can use the shared controller path without a st..." alt="" coords="676,1280,813,1323"/>
+<area shape="poly" title=" " alt="" coords="872,1283,813,1294,813,1289,866,1284"/>
+<area shape="rect" href="../../de/d00/a02140.html#ae9488bb0278d143569b147c0df85854d" title="Pull the next queued byte into the single output buffer if it is free." alt="" coords="662,1347,827,1373"/>
+<area shape="poly" title=" " alt="" coords="939,1288,838,1337,803,1348,802,1343,836,1332,933,1289"/>
+<area shape="poly" title=" " alt="" coords="1110,25,1067,18,975,8,936,10,885,18,831,36,784,59,781,55,829,31,884,13,935,5,975,3,1067,13,1115,23"/>
+<area shape="rect" href="../../d4/d00/a01116.html#a72b34e54c31a427a360cdd5f4c248020" title=" " alt="" coords="893,28,1059,71"/>
+<area shape="poly" title=" " alt="" coords="1108,50,1061,52,1058,47,1113,48"/>
+<area shape="poly" title=" " alt="" coords="875,63,827,71,825,66,880,60"/>
+</map>
+</div>
 
 </div>
 </div>
-<a id="a05ffcad1f7c2b8e738458e351f0753ee" name="a05ffcad1f7c2b8e738458e351f0753ee"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a05ffcad1f7c2b8e738458e351f0753ee">&#9670;&#160;</a></span>pmu_cfg_mask</h2>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="a059227e5a01b1f266b94f121b8813278" name="a059227e5a01b1f266b94f121b8813278"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a059227e5a01b1f266b94f121b8813278">&#9670;&#160;</a></span>ali_cfg_data</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d5/d00/a00461.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> ali_cfg_data[64]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00083_source.html#l00291">291</a> of file <a class="el" href="../../d2/d00/a00083_source.html">AliM1543C.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d2/d00/a00083_source.html#l00376">CAliM1543C::init()</a>.</p>
+
+</div>
+</div>
+<a id="a7f9dbd26ce402b327fbac26cfaabb8b7" name="a7f9dbd26ce402b327fbac26cfaabb8b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f9dbd26ce402b327fbac26cfaabb8b7">&#9670;&#160;</a></span>ali_cfg_mask</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d5/d00/a00461.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> ali_cfg_mask[64]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00083_source.html#l00326">326</a> of file <a class="el" href="../../d2/d00/a00083_source.html">AliM1543C.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d2/d00/a00083_source.html#l00376">CAliM1543C::init()</a>.</p>
+
+</div>
+</div>
+<a id="a1825a7c8c4f2d0d6f1205ddbaafc05ce" name="a1825a7c8c4f2d0d6f1205ddbaafc05ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1825a7c8c4f2d0d6f1205ddbaafc05ce">&#9670;&#160;</a></span>ali_magic1</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -320,7 +749,7 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> pmu_cfg_mask[64]</td>
+          <td class="memname"><a class="el" href="../../d5/d00/a00461.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> ali_magic1 = 0xA111543C</td>
         </tr>
       </table>
   </td>
@@ -329,44 +758,15 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">                        = {</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x00000001,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x0000ff00,</div>
-<div class="line">          0xffffffc0,</div>
-<div class="line">          0xffffffe0,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0x00000000,</div>
-<div class="line">          0,0,0,0,0,0,0,0,</div>
-<div class="line">          0,0,</div>
-<div class="line">          0x00000001, </div>
-<div class="line">          0x0000fffc, </div>
-<div class="line">          0x000007ff, </div>
-<div class="line">          0,0,0,</div>
-<div class="line">          0,0,0,0,0,0,0,0,</div>
-<div class="line">          0,</div>
-<div class="line">          0x0000ffff, </div>
-<div class="line">          0,0,0,0,0,0,</div>
-<div class="line">          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</div>
-<div class="line">}</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00083_source.html#l00075">75</a> of file <a class="el" href="../../d2/d00/a00083_source.html">AliM1543C_pmu.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d2/d00/a00083_source.html#l00105">CAliM1543C_pmu::CAliM1543C_pmu()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00083_source.html#l02658">2658</a> of file <a class="el" href="../../d2/d00/a00083_source.html">AliM1543C.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d2/d00/a00083_source.html#l02683">CAliM1543C::RestoreState()</a>, and <a class="el" href="../../d2/d00/a00083_source.html#l02664">CAliM1543C::SaveState()</a>.</p>
 
 </div>
 </div>
-<a id="a71740bf2d74d24e4f21f07cf79b2164e" name="a71740bf2d74d24e4f21f07cf79b2164e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a71740bf2d74d24e4f21f07cf79b2164e">&#9670;&#160;</a></span>pmu_magic1</h2>
+<a id="af1634f4fd7f5947735b0b0c460e64b50" name="af1634f4fd7f5947735b0b0c460e64b50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1634f4fd7f5947735b0b0c460e64b50">&#9670;&#160;</a></span>ali_magic2</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -375,7 +775,7 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> pmu_magic1 = 0x71011533</td>
+          <td class="memname"><a class="el" href="../../d5/d00/a00461.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> ali_magic2 = 0xC345111A</td>
         </tr>
       </table>
   </td>
@@ -385,35 +785,27 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00083_source.html#l00283">283</a> of file <a class="el" href="../../d2/d00/a00083_source.html">AliM1543C_pmu.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00083_source.html#l02659">2659</a> of file <a class="el" href="../../d2/d00/a00083_source.html">AliM1543C.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d2/d00/a00083_source.html#l00302">CAliM1543C_pmu::RestoreState()</a>, and <a class="el" href="../../d2/d00/a00083_source.html#l00286">CAliM1543C_pmu::SaveState()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d2/d00/a00083_source.html#l02683">CAliM1543C::RestoreState()</a>, and <a class="el" href="../../d2/d00/a00083_source.html#l02664">CAliM1543C::SaveState()</a>.</p>
 
 </div>
 </div>
-<a id="a4803d2a3526e18c39732d7da1c75d87e" name="a4803d2a3526e18c39732d7da1c75d87e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4803d2a3526e18c39732d7da1c75d87e">&#9670;&#160;</a></span>pmu_magic2</h2>
+<a id="aa1aa93f7a5c8e1cab89524199501f9d8" name="aa1aa93f7a5c8e1cab89524199501f9d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa1aa93f7a5c8e1cab89524199501f9d8">&#9670;&#160;</a></span>theAli</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> pmu_magic2 = 0x33151071</td>
+          <td class="memname"><a class="el" href="../../d4/d00/a01116.html">CAliM1543C</a>* theAli = 0</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00083_source.html#l00284">284</a> of file <a class="el" href="../../d2/d00/a00083_source.html">AliM1543C_pmu.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d2/d00/a00083_source.html#l02990">2990</a> of file <a class="el" href="../../d2/d00/a00083_source.html">AliM1543C.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d2/d00/a00083_source.html#l00302">CAliM1543C_pmu::RestoreState()</a>, and <a class="el" href="../../d2/d00/a00083_source.html#l00286">CAliM1543C_pmu::SaveState()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d2/d00/a00083_source.html#l00366">CAliM1543C::CAliM1543C()</a>, <a class="el" href="../../d6/d00/a00821_source.html#l01416">CFloppyController::clear_interrupt()</a>, <a class="el" href="../../db/d00/a00089_source.html#l01317">CAliM1543C_ide::deassert_interrupt()</a>, <a class="el" href="../../d6/d00/a00821_source.html#l01410">CFloppyController::do_interrupt()</a>, <a class="el" href="../../d8/d00/a00674_source.html#l00776">CSerial::eval_interrupts()</a>, <a class="el" href="../../d6/d00/a00821_source.html#l01400">CFloppyController::init()</a>, <a class="el" href="../../dc/d00/a00662_source.html#l02301">CKeyboard::kbd_update_irq()</a>, <a class="el" href="../../db/d00/a00089_source.html#l01291">CAliM1543C_ide::raise_interrupt()</a>, <a class="el" href="../../db/d00/a00089_source.html#l02980">CAliM1543C_ide::run()</a>, <a class="el" href="../../d7/d00/a00002_source.html#l00585">run_emulator()</a>, <a class="el" href="../../de/d00/a00203_source.html#l00829">CAlphaCPU::service_interval_timer()</a>, and <a class="el" href="../../d6/d00/a00821_source.html#l00559">CFloppyController::WriteMem()</a>.</p>
 
 </div>
 </div>
@@ -430,7 +822,7 @@ Variables</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_88cc136c961c47108c264e4aa641465d.html">chipset</a></li><li class="navelem"><a href="../../d2/d00/a00083.html">AliM1543C_pmu.cpp</a></li>
+    <li class="navelem"><a href="../../dir_88cc136c961c47108c264e4aa641465d.html">chipset</a></li><li class="navelem"><a href="../../d2/d00/a00083.html">AliM1543C.cpp</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

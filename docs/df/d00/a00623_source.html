@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: StdAfx.cpp Source File</title>
+<title>ES40: gui/ShmFramebuffer.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.95</span>
    </div>
   </td>
  </tr>
@@ -109,46 +109,71 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('df/d00/a00623_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">StdAfx.cpp</div></div>
+  <div class="headertitle"><div class="title">ShmFramebuffer.h</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../df/d00/a00623.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 Emulator.</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2007 by Camiel Vanderhoeven</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * This program is free software; you can redistribute it and/or</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * modify it under the terms of the GNU General Public License</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * as published by the Free Software Foundation; either version 2</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * of the License, or (at your option) any later version.</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * This program is distributed in the hope that it will be useful,</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * GNU General Public License for more details.</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * You should have received a copy of the GNU General Public License</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * along with this program; if not, write to the Free Software</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * Although this is not required, the author would appreciate being notified of,</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * and receiving any modifications you may make to the source code that might serve</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * the general public.</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &quot;<a class="code" href="../../d6/d00/a00626.html">StdAfx.h</a>&quot;</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  <span class="comment">// TODO: reference any additional headers you need in STDAFX.H</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  <span class="comment">// and not in this file</span></div>
-<div class="ttc" id="aa00626_html"><div class="ttname"><a href="../../d6/d00/a00626.html">StdAfx.h</a></div><div class="ttdoc">Standard includes.</div></div>
+<a href="../../df/d00/a00623.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator.</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2026 by gdwnldsKSC</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * SPDX-License-Identifier: BSD-1-Clause</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * Redistribution and use in source and binary forms, with or without</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * modification, are permitted provided that the following conditions are met:</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * 1. Redistributions of source code must retain the above copyright notice,</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *    this list of conditions and the following disclaimer.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS AND CONTRIBUTORS BE</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * POSSIBILITY OF SUCH DAMAGE.</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#ifndef ES40_SHM_FRAMEBUFFER_H</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#define ES40_SHM_FRAMEBUFFER_H</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;cstdint&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">// IFB1 publisher; callers serialize writes with the display lock.</span></div>
+<div class="foldopen" id="foldopen00029" data-start="{" data-end="};">
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="../../d8/d00/a02112.html">   29</a></span><span class="keyword">class </span><a class="code hl_function" href="../../d8/d00/a02112.html#a8699254f738922ffdb3e1a6a7c9ed8ae">CShmFramebuffer</a></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>{</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <span class="keyword">explicit</span> <a class="code hl_function" href="../../d8/d00/a02112.html#a8699254f738922ffdb3e1a6a7c9ed8ae">CShmFramebuffer</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_variable" href="../../d7/d00/a00002.html#a83d75a4e93281605405f671dfb55a9d5">path</a>);</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="../../d8/d00/a02112.html#a98604824a67c62dc9c78cc1afd01c7bd">   33</a></span>    <a class="code hl_function" href="../../d8/d00/a02112.html#a98604824a67c62dc9c78cc1afd01c7bd">~CShmFramebuffer</a>();</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="../../d8/d00/a02112.html#ac36ed4e175bc692a09036fc282d2f6ea">   34</a></span>    <a class="code hl_function" href="../../d8/d00/a02112.html#ac36ed4e175bc692a09036fc282d2f6ea">CShmFramebuffer</a>(<span class="keyword">const</span> <a class="code hl_function" href="../../d8/d00/a02112.html#a8699254f738922ffdb3e1a6a7c9ed8ae">CShmFramebuffer</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="../../d8/d00/a02112.html#ae463f098436e29eb218982220e556245">   35</a></span>    <a class="code hl_function" href="../../d8/d00/a02112.html#a8699254f738922ffdb3e1a6a7c9ed8ae">CShmFramebuffer</a>&amp; <a class="code hl_function" href="../../d8/d00/a02112.html#ae463f098436e29eb218982220e556245">operator=</a>(<span class="keyword">const</span> <a class="code hl_function" href="../../d8/d00/a02112.html#a8699254f738922ffdb3e1a6a7c9ed8ae">CShmFramebuffer</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="comment">// Publish packed XRGB32 pixels; nullptr clears the frame.</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../d8/d00/a02112.html#ae145a91662f851a4e04d1734fe4230dd">publish</a>(<span class="keyword">const</span> std::uint32_t* pixels, <span class="keywordtype">unsigned</span> width, <span class="keywordtype">unsigned</span> height);</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keyword">struct </span><a class="code hl_struct" href="../../d8/d00/a02108.html">Impl</a>;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="../../d8/d00/a02112.html#a7eeb9a58921c25da971e1388b5caf51e">   42</a></span>    std::unique_ptr&lt;Impl&gt; <a class="code hl_variable" href="../../d8/d00/a02112.html#a7eeb9a58921c25da971e1388b5caf51e">m_impl</a>;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>};</div>
+</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aa00002_html_a83d75a4e93281605405f671dfb55a9d5"><div class="ttname"><a href="../../d7/d00/a00002.html#a83d75a4e93281605405f671dfb55a9d5">path</a></div><div class="ttdeci">const char * path[]</div><div class="ttdoc">&quot;standard&quot; locations for a configuration file. This will be port specific.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00002_source.html#l00223">AlphaSim.cpp:223</a></div></div>
+<div class="ttc" id="aa02108_html"><div class="ttname"><a href="../../d8/d00/a02108.html">CShmFramebuffer::Impl</a></div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00620_source.html#l00076">ShmFramebuffer.cpp:77</a></div></div>
+<div class="ttc" id="aa02112_html_a7eeb9a58921c25da971e1388b5caf51e"><div class="ttname"><a href="../../d8/d00/a02112.html#a7eeb9a58921c25da971e1388b5caf51e">CShmFramebuffer::m_impl</a></div><div class="ttdeci">std::unique_ptr&lt; Impl &gt; m_impl</div><div class="ttdef"><b>Definition</b> <a href="#l00042">ShmFramebuffer.h:42</a></div></div>
+<div class="ttc" id="aa02112_html_a8699254f738922ffdb3e1a6a7c9ed8ae"><div class="ttname"><a href="../../d8/d00/a02112.html#a8699254f738922ffdb3e1a6a7c9ed8ae">CShmFramebuffer::CShmFramebuffer</a></div><div class="ttdeci">CShmFramebuffer(const char *path)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00620_source.html#l00167">ShmFramebuffer.cpp:167</a></div></div>
+<div class="ttc" id="aa02112_html_a98604824a67c62dc9c78cc1afd01c7bd"><div class="ttname"><a href="../../d8/d00/a02112.html#a98604824a67c62dc9c78cc1afd01c7bd">CShmFramebuffer::~CShmFramebuffer</a></div><div class="ttdeci">~CShmFramebuffer()</div></div>
+<div class="ttc" id="aa02112_html_ac36ed4e175bc692a09036fc282d2f6ea"><div class="ttname"><a href="../../d8/d00/a02112.html#ac36ed4e175bc692a09036fc282d2f6ea">CShmFramebuffer::CShmFramebuffer</a></div><div class="ttdeci">CShmFramebuffer(const CShmFramebuffer &amp;)=delete</div></div>
+<div class="ttc" id="aa02112_html_ae145a91662f851a4e04d1734fe4230dd"><div class="ttname"><a href="../../d8/d00/a02112.html#ae145a91662f851a4e04d1734fe4230dd">CShmFramebuffer::publish</a></div><div class="ttdeci">void publish(const std::uint32_t *pixels, unsigned width, unsigned height)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00620_source.html#l00174">ShmFramebuffer.cpp:174</a></div></div>
+<div class="ttc" id="aa02112_html_ae463f098436e29eb218982220e556245"><div class="ttname"><a href="../../d8/d00/a02112.html#ae463f098436e29eb218982220e556245">CShmFramebuffer::operator=</a></div><div class="ttdeci">CShmFramebuffer &amp; operator=(const CShmFramebuffer &amp;)=delete</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../df/d00/a00623.html">StdAfx.cpp</a></li>
+    <li class="navelem"><a href="../../dir_11bc0974ce736ce9a6fadebbeb7a8314.html">gui</a></li><li class="navelem"><a href="../../df/d00/a00623.html">ShmFramebuffer.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

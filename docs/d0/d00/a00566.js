@@ -1,11 +1,10 @@
 var a00566 =
 [
-    [ "lockstep_compare", "d0/d00/a00566.html#a019bbfcd3f60ab4df0ad2578cd73f636", null ],
-    [ "lockstep_init", "d0/d00/a00566.html#aa72983489060743593655a52e3c05484", null ],
-    [ "lockstep_receive", "d0/d00/a00566.html#a12d841b7884a5b067928f9365cf4f659", null ],
-    [ "lockstep_send", "d0/d00/a00566.html#a1b33b32a1570638720de82e5f7b3cfed", null ],
-    [ "lockstep_sync_m2s", "d0/d00/a00566.html#a4c1259e01d22f15dad0840da4fe2f348", null ],
-    [ "lockstep_sync_s2m", "d0/d00/a00566.html#aa292ee0b71c185d28fbc01d97f2dd7bf", null ],
-    [ "ls_IP", "d0/d00/a00566.html#a21aaefc0affb27d517fd6f5db5775c35", null ],
-    [ "ls_Socket", "d0/d00/a00566.html#a420e694f3bd69046e6c5cd282519546a", null ]
+    [ "LOG_CRTC", "d0/d00/a00566.html#aaa1560fa6fd9d19d13d9adf8330b465a", null ],
+    [ "LOG_REGS", "d0/d00/a00566.html#ab6f1afff1865d07e48e001f0d6de4a0e", null ],
+    [ "LOGCRTC", "d0/d00/a00566.html#a1625be1043ade36861fc5bcd79dc670d", null ],
+    [ "LOGREGS", "d0/d00/a00566.html#a16b9885a0a5187eb71f85897e74f6ac6", null ],
+    [ "TEXT_COPY_9COLUMN", "d0/d00/a00566.html#a6f5306a88f272a1d7074289a18399eba", null ],
+    [ "VERBOSE", "d0/d00/a00566.html#a42f8c497a1968074f38bf5055c650dca", null ],
+    [ "vga_log_mask", "d0/d00/a00566.html#a73dd646b861997d862b1b07b954c1fa3", null ]
 ];

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: CPU/cpu_memory.h File Reference</title>
+<title>ES40: CPU/AlphaInstructionFetch.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.95</span>
    </div>
   </td>
  </tr>
@@ -109,318 +109,142 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d3/d00/a00251.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">cpu_memory.h File Reference</div></div>
+  <div class="headertitle"><div class="title">AlphaInstructionFetch.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-
-<p>Contains code macros for the processor memory load/store instructions.  
-<a href="#details">More...</a></p>
-<div class="textblock"><div class="dynheader">
+<div class="textblock"><code>#include &lt;cstdint&gt;</code><br />
+<code>#include &quot;<a class="el" href="../../d9/d00/a00257_source.html">AlphaInstructionSource.h</a>&quot;</code><br />
+</div><div class="textblock"><div class="dynheader">
+Include dependency graph for AlphaInstructionFetch.h:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../dc/d00/a00252.png" border="0" usemap="#a_c_p_u_2_alpha_instruction_fetch_8h" loading="lazy" alt=""/></div>
+<map name="a_c_p_u_2_alpha_instruction_fetch_8h" id="a_c_p_u_2_alpha_instruction_fetch_8h">
+<area shape="rect" title=" " alt="" coords="5,5,198,32"/>
+<area shape="rect" title=" " alt="" coords="29,155,89,181"/>
+<area shape="poly" title=" " alt="" coords="91,35,81,55,69,81,63,111,61,140,56,139,58,110,64,79,76,53,93,30"/>
+<area shape="rect" href="../../d9/d00/a00257.html" title=" " alt="" coords="79,80,246,107"/>
+<area shape="poly" title=" " alt="" coords="113,30,145,68,140,69,112,35"/>
+<area shape="poly" title=" " alt="" coords="147,107,91,148,88,143,142,108"/>
+<area shape="rect" title=" " alt="" coords="121,155,186,181"/>
+<area shape="poly" title=" " alt="" coords="163,105,159,141,155,138,159,109"/>
+<area shape="rect" title=" " alt="" coords="209,155,274,181"/>
+<area shape="poly" title=" " alt="" coords="177,105,219,144,214,144,176,110"/>
+</map>
+</div>
+</div><div class="textblock"><div class="dynheader">
 This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../d0/d00/a00253.png" border="0" usemap="#a_c_p_u_2cpu__memory_8hdep" loading="lazy" alt=""/></div>
-<map name="a_c_p_u_2cpu__memory_8hdep" id="a_c_p_u_2cpu__memory_8hdep">
-<area shape="rect" title="Contains code macros for the processor memory load/store instructions." alt="" coords="6,5,146,32"/>
-<area shape="rect" href="../../d7/d00/a00182.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="5,80,147,107"/>
-<area shape="poly" title=" " alt="" coords="78,46,79,80,73,79,74,50"/>
+<div class="center"><img src="../../d0/d00/a00253.png" border="0" usemap="#a_c_p_u_2_alpha_instruction_fetch_8hdep" loading="lazy" alt=""/></div>
+<map name="a_c_p_u_2_alpha_instruction_fetch_8hdep" id="a_c_p_u_2_alpha_instruction_fetch_8hdep">
+<area shape="rect" title=" " alt="" coords="3603,5,3796,32"/>
+<area shape="rect" href="../../d3/d00/a00209.html" title=" " alt="" coords="3517,80,3682,107"/>
+<area shape="poly" title=" " alt="" coords="3672,40,3618,82,3616,77,3667,42"/>
+<area shape="rect" href="../../d9/d00/a00398.html" title=" " alt="" coords="3706,80,3895,107"/>
+<area shape="poly" title=" " alt="" coords="3730,39,3785,80,3780,79,3729,44"/>
+<area shape="rect" href="../../d5/d00/a00206.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="1838,155,1966,181"/>
+<area shape="poly" title=" " alt="" coords="3499,99,1966,167,1966,161,3504,99"/>
+<area shape="rect" href="../../d6/d00/a00356.html" title=" " alt="" coords="3661,155,3823,181"/>
+<area shape="poly" title=" " alt="" coords="3638,111,3720,155,3714,153,3637,117"/>
+<area shape="rect" href="../../de/d00/a00203.html" title="Contains the code for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="2409,229,2550,256"/>
+<area shape="poly" title=" " alt="" coords="1981,176,2397,227,2411,231,2405,231,2396,232,1981,181"/>
+<area shape="rect" href="../../d3/d00/a00215.html" title="Contains IEEE floating point code for the Alpha CPU." alt="" coords="2574,229,2771,256"/>
+<area shape="poly" title=" " alt="" coords="1982,173,2562,227,2576,231,2571,230,2562,232,1981,179"/>
+<area shape="rect" href="../../dc/d00/a00218.html" title="Contains VAX floating point code for the Alpha CPU." alt="" coords="2796,229,2990,256"/>
+<area shape="poly" title=" " alt="" coords="1981,171,2330,192,2784,227,2798,231,2792,230,2783,232,2329,198,1981,176"/>
+<area shape="rect" href="../../dd/d00/a00221.html" title="Contains routines that replace parts of the VMS PALcode for the emulated DecChip 21264CB EV68 Alpha p..." alt="" coords="3014,229,3204,256"/>
+<area shape="poly" title=" " alt="" coords="1981,169,2416,189,2707,205,3002,227,3016,230,3011,230,3002,232,2707,211,2416,194,1981,175"/>
+<area shape="rect" href="../../d5/d00/a00224.html" title=" " alt="" coords="3228,229,3421,256"/>
+<area shape="poly" title=" " alt="" coords="1982,169,2500,186,2855,203,3216,227,3231,230,3225,230,3215,232,2854,208,2500,191,1982,174"/>
+<area shape="rect" href="../../db/d00/a00350.html" title=" " alt="" coords="3445,229,3639,256"/>
+<area shape="poly" title=" " alt="" coords="1982,168,2584,183,3004,201,3433,227,3447,230,3442,230,3432,232,3004,206,2584,188,1981,173"/>
+<area shape="rect" href="../../d4/d00/a00359.html" title=" " alt="" coords="5,229,175,256"/>
+<area shape="poly" title=" " alt="" coords="1820,170,1552,175,1149,184,673,202,427,215,186,232,176,233,175,228,186,227,427,210,673,196,1149,178,1552,170,1825,169"/>
+<area shape="rect" href="../../d6/d00/a00371.html" title=" " alt="" coords="198,229,352,256"/>
+<area shape="poly" title=" " alt="" coords="1820,170,1577,176,1217,185,795,203,365,232,353,233,353,228,364,227,795,197,1217,180,1577,170,1825,170"/>
+<area shape="rect" href="../../d8/d00/a00410.html" title=" " alt="" coords="377,229,510,256"/>
+<area shape="poly" title=" " alt="" coords="1820,170,1600,176,1278,185,904,203,522,232,510,233,510,228,522,227,903,197,1278,180,1599,170,1825,170"/>
+<area shape="rect" href="../../da/d00/a00383.html" title=" " alt="" coords="534,229,664,256"/>
+<area shape="poly" title=" " alt="" coords="1820,170,1622,177,1338,187,1010,205,677,232,665,233,665,228,676,227,1010,199,1338,182,1622,172,1826,170"/>
+<area shape="rect" href="../../db/d00/a00395.html" title=" " alt="" coords="3844,229,4048,256"/>
+<area shape="poly" title=" " alt="" coords="1981,167,2281,170,2737,179,3278,197,3833,227,3847,230,3841,230,3832,232,3278,202,2737,184,2281,175,1981,172"/>
+<area shape="rect" href="../../d9/d00/a00404.html" title=" " alt="" coords="689,229,846,256"/>
+<area shape="poly" title=" " alt="" coords="1820,172,1410,193,1136,210,858,232,847,233,846,228,858,227,1136,204,1409,187,1825,172"/>
+<area shape="rect" href="../../d3/d00/a00419.html" title=" " alt="" coords="870,229,1011,256"/>
+<area shape="poly" title=" " alt="" coords="1825,173,1476,195,1251,211,1024,232,1012,233,1012,228,1023,227,1250,206,1475,189,1820,173"/>
+<area shape="rect" href="../../dc/d00/a00425.html" title=" " alt="" coords="1035,229,1169,256"/>
+<area shape="poly" title=" " alt="" coords="1825,174,1539,197,1181,232,1170,233,1169,228,1180,227,1539,192,1820,174"/>
+<area shape="rect" href="../../df/d00/a00431.html" title=" " alt="" coords="1192,229,1337,256"/>
+<area shape="poly" title=" " alt="" coords="1825,177,1349,232,1338,233,1337,228,1348,227,1820,177"/>
+<area shape="rect" href="../../dd/d00/a00455.html" title="Contains the code for the CPU tracing engine." alt="" coords="1360,229,1513,256"/>
+<area shape="poly" title=" " alt="" coords="1825,181,1514,232,1513,227,1820,182"/>
+<area shape="rect" href="../../d1/d00/a00128.html" title="Contains the code for the configuration file interpreter." alt="" coords="3664,229,3820,256"/>
+<area shape="poly" title=" " alt="" coords="1981,167,2256,169,2668,177,3154,195,3405,209,3652,227,3666,231,3661,230,3651,232,3405,214,3154,200,2668,182,2256,174,1981,172"/>
+<area shape="rect" href="../../d0/d00/a00857.html" title="Contains the code for the emulated Dual Port Ram and RMC devices." alt="" coords="1537,229,1659,256"/>
+<area shape="poly" title=" " alt="" coords="1837,185,1652,231,1651,226,1831,186"/>
+<area shape="rect" href="../../d7/d00/a00863.html" title="Contains the code for the emulated Flash ROM devices." alt="" coords="1683,229,1809,256"/>
+<area shape="poly" title=" " alt="" coords="1864,188,1774,231,1773,226,1859,189"/>
+<area shape="rect" href="../../d1/d00/a00875.html" title="Contains the code for the emulated Typhoon Chipset devices." alt="" coords="1833,229,1971,256"/>
+<area shape="poly" title=" " alt="" coords="1904,195,1904,231,1900,227,1900,199"/>
+<area shape="rect" href="../../df/d00/a00881.html" title="ES40 (Clipper) board: TIGbus registers and DIMM topology." alt="" coords="1995,229,2169,256"/>
+<area shape="poly" title=" " alt="" coords="1948,185,2053,229,2048,228,1947,190"/>
+<area shape="rect" href="../../dd/d00/a00884.html" title="Tsunami/Typhoon chipset (Cchip, Dchip, Pchip) CSRs, interrupt delivery and PCI window translation." alt="" coords="2193,229,2384,256"/>
+<area shape="poly" title=" " alt="" coords="1982,181,2224,229,2218,229,1981,187"/>
+<area shape="poly" title=" " alt="" coords="3744,195,3744,231,3740,227,3740,199"/>
+<area shape="poly" title=" " alt="" coords="3825,116,3936,230,3931,228,3823,120"/>
+<area shape="poly" title=" " alt="" coords="3783,118,3753,157,3751,152,3778,120"/>
 </map>
 </div>
 </div>
 <p><a href="../../d3/d00/a00251_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:ad6c2ce1595743e99ecebf293ddd11762" id="r_ad6c2ce1595743e99ecebf293ddd11762"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad6c2ce1595743e99ecebf293ddd11762">DO_LDA</a>&#160;&#160;&#160;state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>] = state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>;</td></tr>
-<tr class="memitem:a1c14c5e964d75e960d4eaa31185ca85b" id="r_a1c14c5e964d75e960d4eaa31185ca85b"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a1c14c5e964d75e960d4eaa31185ca85b">DO_LDAH</a>&#160;&#160;&#160;state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>] = state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + (<a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a> &lt;&lt; 16);</td></tr>
-<tr class="memitem:a4b0286cdceae2046cedcbdcbac9c0ff3" id="r_a4b0286cdceae2046cedcbdcbac9c0ff3"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a4b0286cdceae2046cedcbdcbac9c0ff3">DO_LDBU</a>&#160;&#160;&#160;if ((<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 0x1f) != 31) { <a class="el" href="../../d7/d00/a00236.html#af63ed0483956d2d712445613a9c20576">READ_VIRT_F</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 8, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>], <a class="el" href="../../d8/d00/a00326.html#aa142d9c378e6248699768b725236eb35">zext_u64_8</a>); }</td></tr>
-<tr class="memitem:a230d81c25ea9ac2305daccfd7aa948a8" id="r_a230d81c25ea9ac2305daccfd7aa948a8"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a230d81c25ea9ac2305daccfd7aa948a8">DO_LDL</a>&#160;&#160;&#160;if ((<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 0x1f) != 31) { <a class="el" href="../../d7/d00/a00236.html#af63ed0483956d2d712445613a9c20576">READ_VIRT_F</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 32, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>], <a class="el" href="../../d8/d00/a00326.html#ab6397ea9cae4b1b067118eacffc71ab7">sext_u64_32</a>); }</td></tr>
-<tr class="memitem:ad1c950685502f9d91dd34eef28ac726c" id="r_ad1c950685502f9d91dd34eef28ac726c"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad1c950685502f9d91dd34eef28ac726c">DO_LDL_L</a>&#160;&#160;&#160;<a class="el" href="../../d7/d00/a00236.html#a11dbda9d142d9a68906fea06165580fb">READ_VIRT_LOCK_F</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 32, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>], <a class="el" href="../../d8/d00/a00326.html#ab6397ea9cae4b1b067118eacffc71ab7">sext_u64_32</a>);</td></tr>
-<tr class="memitem:a89cc147b8014c5389ea88f3a1201dec4" id="r_a89cc147b8014c5389ea88f3a1201dec4"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a89cc147b8014c5389ea88f3a1201dec4">DO_LDQ</a>&#160;&#160;&#160;if ((<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 0x1f) != 31) { <a class="el" href="../../d7/d00/a00236.html#a0e2381702b935e95f92ee1d29bc545f1">READ_VIRT</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 64, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]); }</td></tr>
-<tr class="memitem:afdc241bb54a7c6ceed68a9d6dc9ae7d7" id="r_afdc241bb54a7c6ceed68a9d6dc9ae7d7"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#afdc241bb54a7c6ceed68a9d6dc9ae7d7">DO_LDQ_L</a>&#160;&#160;&#160;<a class="el" href="../../d7/d00/a00236.html#af7302046b38024e935a19311116d900b">READ_VIRT_LOCK</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 64, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td></tr>
-<tr class="memitem:adf10d78636e0d0affd4cb838ce2077ac" id="r_adf10d78636e0d0affd4cb838ce2077ac"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#adf10d78636e0d0affd4cb838ce2077ac">DO_LDQ_U</a>&#160;&#160;&#160;if ((<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 0x1f) != 31) { <a class="el" href="../../d7/d00/a00236.html#a0e2381702b935e95f92ee1d29bc545f1">READ_VIRT</a>((state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>) &amp; ~<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x7), 64, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]); }</td></tr>
-<tr class="memitem:ae2e28af2ad1c5c1f7f8c3d4f57f758c4" id="r_ae2e28af2ad1c5c1f7f8c3d4f57f758c4"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ae2e28af2ad1c5c1f7f8c3d4f57f758c4">DO_LDWU</a>&#160;&#160;&#160;if ((<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 0x1f) != 31) { <a class="el" href="../../d7/d00/a00236.html#af63ed0483956d2d712445613a9c20576">READ_VIRT_F</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 16, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>], <a class="el" href="../../d8/d00/a00326.html#a1feefda40539b84aa622b208860dd577">zext_u64_16</a>); }</td></tr>
-<tr class="memitem:a1f7a4a70490bd9acb19456665018e618" id="r_a1f7a4a70490bd9acb19456665018e618"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a1f7a4a70490bd9acb19456665018e618">DO_STB</a>&#160;&#160;&#160;<a class="el" href="../../d7/d00/a00236.html#aa668936ea9668cedfc28051733f48306">WRITE_VIRT</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 8, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td></tr>
-<tr class="memitem:a5c397e695d26479299fdeaf59f6bf8a7" id="r_a5c397e695d26479299fdeaf59f6bf8a7"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a5c397e695d26479299fdeaf59f6bf8a7">DO_STL</a>&#160;&#160;&#160;<a class="el" href="../../d7/d00/a00236.html#aa668936ea9668cedfc28051733f48306">WRITE_VIRT</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 32, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td></tr>
-<tr class="memitem:a501cc9911d2b12cb106e22a1eb6685df" id="r_a501cc9911d2b12cb106e22a1eb6685df"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a501cc9911d2b12cb106e22a1eb6685df">DO_STL_C</a>&#160;&#160;&#160;<a class="el" href="../../d7/d00/a00236.html#aa1a7354a19afb77df318f492f2c6b906">WRITE_VIRT_COND</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 32, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>], state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td></tr>
-<tr class="memitem:a1515fceebf9204fd33f68584abf0af03" id="r_a1515fceebf9204fd33f68584abf0af03"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a1515fceebf9204fd33f68584abf0af03">DO_STQ</a>&#160;&#160;&#160;<a class="el" href="../../d7/d00/a00236.html#aa668936ea9668cedfc28051733f48306">WRITE_VIRT</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 64, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td></tr>
-<tr class="memitem:ab62d39e51141126f026ad0a11c28a03a" id="r_ab62d39e51141126f026ad0a11c28a03a"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ab62d39e51141126f026ad0a11c28a03a">DO_STQ_C</a>&#160;&#160;&#160;<a class="el" href="../../d7/d00/a00236.html#aa1a7354a19afb77df318f492f2c6b906">WRITE_VIRT_COND</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 64, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>], state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td></tr>
-<tr class="memitem:a1cedafe5a38adf67da48864060200da9" id="r_a1cedafe5a38adf67da48864060200da9"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a1cedafe5a38adf67da48864060200da9">DO_STQ_U</a>&#160;&#160;&#160;<a class="el" href="../../d7/d00/a00236.html#aa668936ea9668cedfc28051733f48306">WRITE_VIRT</a>((state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>) &amp; ~<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x07), 64, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td></tr>
-<tr class="memitem:a9da60541b4a571faa5c8f612999dde38" id="r_a9da60541b4a571faa5c8f612999dde38"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a9da60541b4a571faa5c8f612999dde38">DO_STW</a>&#160;&#160;&#160;<a class="el" href="../../d7/d00/a00236.html#aa668936ea9668cedfc28051733f48306">WRITE_VIRT</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 16, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td></tr>
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Data Structures</h2></td></tr>
+<tr class="memitem:AlphaInstructionMapping" id="r_AlphaInstructionMapping"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d2/d00/a01428.html">AlphaInstructionMapping</a></td></tr>
+<tr class="memitem:AlphaInstructionFetchPolicy" id="r_AlphaInstructionFetchPolicy"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../db/d00/a01432.html">AlphaInstructionFetchPolicy</a></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:a1123daf9f2954d1d71844b8cfc4ff2b6" id="r_a1123daf9f2954d1d71844b8cfc4ff2b6"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#a1123daf9f2954d1d71844b8cfc4ff2b6">AlphaInstructionFetchEvent</a> { <br />
+&#160;&#160;<a class="el" href="#a1123daf9f2954d1d71844b8cfc4ff2b6a223e06f5cb15fc701ea1e686f7934f4f">Initialize</a>
+, <a class="el" href="#a1123daf9f2954d1d71844b8cfc4ff2b6a5fd6fae5f17a5614ef6758a55c5e4ddb">AdvancePC</a>
+, <a class="el" href="#a1123daf9f2954d1d71844b8cfc4ff2b6a17059b25ccfc64981fdbf0384db2c1eb">RedirectPC</a>
+, <a class="el" href="#a1123daf9f2954d1d71844b8cfc4ff2b6a4d235eddc084146c21e0649dcea615ad">CompiledExit</a>
+, <br />
+&#160;&#160;<a class="el" href="#a1123daf9f2954d1d71844b8cfc4ff2b6a15b8a8f195f3e60bc15ffcf894ef84a7">TranslationChanged</a>
+, <a class="el" href="#a1123daf9f2954d1d71844b8cfc4ff2b6a2bd339d85ee3b33e513359ce781b60cc">Restore</a>
+<br />
+ }</td></tr>
 </table>
-<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Contains code macros for the processor memory load/store instructions. </p>
-<p>Based on ARM chapter 4.2.</p>
-<p>$Id$</p>
-<p>X-1.12 Camiel Vanderhoeven 12-JUN-2008 Support for last written and last read memory locations.</p>
-<p>X-1.10 Camiel Vanderhoeven 14-MAR-2008 Formatting.</p>
-<p>X-1.9 Camiel Vanderhoeven 14-MAR-2008</p><ol type="1">
-<li>More meaningful exceptions replace throwing (int) 1.</li>
-<li>U64 macro replaces X64 macro.</li>
-</ol>
-<p>X-1.8 Camiel Vanderhoeven 05-MAR-2008 Multi-threading version.</p>
-<p>X-1.7 Camiel Vanderhoeven 25-JAN-2008 Trap on unalogned memory access. The previous implementation where unaligned accesses were silently allowed could go wrong when page boundaries are crossed.</p>
-<p>X-1.6 Camiel Vanderhoeven 18-JAN-2008 Replaced sext_64 inlines with sext_u64_&lt;bits&gt; inlines for performance reasons (thanks to David Hittner for spotting this!);</p>
-<p>X-1.5 Camiel Vanderhoeven 2-DEC-2007 Changed the way translation buffers work.</p>
-<p>X-1.4 Camiel Vanderhoeven 11-APR-2007 Moved all data that should be saved to a state file to a structure "state".</p>
-<p>X-1.3 Camiel Vanderhoeven 30-MAR-2007 Added old changelog comments.</p>
-<p>X-1.2 Camiel Vanderhoeven 8-MAR-2007 LDL and LDQ where the destination is R31 do not cause exceptions.</p>
-<p>X-1.1 Camiel Vanderhoeven 18-FEB-2007 File created. Contains code previously found in <a class="el" href="../../de/d00/a00185.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor.">AlphaCPU.h</a> </p>
-
-<p class="definition">Definition in file <a class="el" href="../../d3/d00/a00251_source.html">cpu_memory.h</a>.</p>
-</div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
-<a id="ad6c2ce1595743e99ecebf293ddd11762" name="ad6c2ce1595743e99ecebf293ddd11762"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad6c2ce1595743e99ecebf293ddd11762">&#9670;&#160;</a></span>DO_LDA</h2>
+<a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
+<a id="a1123daf9f2954d1d71844b8cfc4ff2b6" name="a1123daf9f2954d1d71844b8cfc4ff2b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1123daf9f2954d1d71844b8cfc4ff2b6">&#9670;&#160;</a></span>AlphaInstructionFetchEvent</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">#define DO_LDA&#160;&#160;&#160;state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>] = state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>;</td>
+          <td class="memname">enum class <a class="el" href="#a1123daf9f2954d1d71844b8cfc4ff2b6">AlphaInstructionFetchEvent</a></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a1123daf9f2954d1d71844b8cfc4ff2b6a223e06f5cb15fc701ea1e686f7934f4f" name="a1123daf9f2954d1d71844b8cfc4ff2b6a223e06f5cb15fc701ea1e686f7934f4f"></a>Initialize&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a1123daf9f2954d1d71844b8cfc4ff2b6a5fd6fae5f17a5614ef6758a55c5e4ddb" name="a1123daf9f2954d1d71844b8cfc4ff2b6a5fd6fae5f17a5614ef6758a55c5e4ddb"></a>AdvancePC&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a1123daf9f2954d1d71844b8cfc4ff2b6a17059b25ccfc64981fdbf0384db2c1eb" name="a1123daf9f2954d1d71844b8cfc4ff2b6a17059b25ccfc64981fdbf0384db2c1eb"></a>RedirectPC&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a1123daf9f2954d1d71844b8cfc4ff2b6a4d235eddc084146c21e0649dcea615ad" name="a1123daf9f2954d1d71844b8cfc4ff2b6a4d235eddc084146c21e0649dcea615ad"></a>CompiledExit&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a1123daf9f2954d1d71844b8cfc4ff2b6a15b8a8f195f3e60bc15ffcf894ef84a7" name="a1123daf9f2954d1d71844b8cfc4ff2b6a15b8a8f195f3e60bc15ffcf894ef84a7"></a>TranslationChanged&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a1123daf9f2954d1d71844b8cfc4ff2b6a2bd339d85ee3b33e513359ce781b60cc" name="a1123daf9f2954d1d71844b8cfc4ff2b6a2bd339d85ee3b33e513359ce781b60cc"></a>Restore&#160;</td><td class="fielddoc"></td></tr>
+</table>
 
-<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00251_source.html#l00072">72</a> of file <a class="el" href="../../d3/d00/a00251_source.html">cpu_memory.h</a>.</p>
-
-</div>
-</div>
-<a id="a1c14c5e964d75e960d4eaa31185ca85b" name="a1c14c5e964d75e960d4eaa31185ca85b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1c14c5e964d75e960d4eaa31185ca85b">&#9670;&#160;</a></span>DO_LDAH</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define DO_LDAH&#160;&#160;&#160;state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>] = state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + (<a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a> &lt;&lt; 16);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00251_source.html#l00074">74</a> of file <a class="el" href="../../d3/d00/a00251_source.html">cpu_memory.h</a>.</p>
-
-</div>
-</div>
-<a id="a4b0286cdceae2046cedcbdcbac9c0ff3" name="a4b0286cdceae2046cedcbdcbac9c0ff3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4b0286cdceae2046cedcbdcbac9c0ff3">&#9670;&#160;</a></span>DO_LDBU</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define DO_LDBU&#160;&#160;&#160;if ((<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 0x1f) != 31) { <a class="el" href="../../d7/d00/a00236.html#af63ed0483956d2d712445613a9c20576">READ_VIRT_F</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 8, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>], <a class="el" href="../../d8/d00/a00326.html#aa142d9c378e6248699768b725236eb35">zext_u64_8</a>); }</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00251_source.html#l00076">76</a> of file <a class="el" href="../../d3/d00/a00251_source.html">cpu_memory.h</a>.</p>
-
-</div>
-</div>
-<a id="a230d81c25ea9ac2305daccfd7aa948a8" name="a230d81c25ea9ac2305daccfd7aa948a8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a230d81c25ea9ac2305daccfd7aa948a8">&#9670;&#160;</a></span>DO_LDL</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define DO_LDL&#160;&#160;&#160;if ((<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 0x1f) != 31) { <a class="el" href="../../d7/d00/a00236.html#af63ed0483956d2d712445613a9c20576">READ_VIRT_F</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 32, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>], <a class="el" href="../../d8/d00/a00326.html#ab6397ea9cae4b1b067118eacffc71ab7">sext_u64_32</a>); }</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00251_source.html#l00078">78</a> of file <a class="el" href="../../d3/d00/a00251_source.html">cpu_memory.h</a>.</p>
-
-</div>
-</div>
-<a id="ad1c950685502f9d91dd34eef28ac726c" name="ad1c950685502f9d91dd34eef28ac726c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad1c950685502f9d91dd34eef28ac726c">&#9670;&#160;</a></span>DO_LDL_L</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define DO_LDL_L&#160;&#160;&#160;<a class="el" href="../../d7/d00/a00236.html#a11dbda9d142d9a68906fea06165580fb">READ_VIRT_LOCK_F</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 32, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>], <a class="el" href="../../d8/d00/a00326.html#ab6397ea9cae4b1b067118eacffc71ab7">sext_u64_32</a>);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00251_source.html#l00084">84</a> of file <a class="el" href="../../d3/d00/a00251_source.html">cpu_memory.h</a>.</p>
-
-</div>
-</div>
-<a id="a89cc147b8014c5389ea88f3a1201dec4" name="a89cc147b8014c5389ea88f3a1201dec4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a89cc147b8014c5389ea88f3a1201dec4">&#9670;&#160;</a></span>DO_LDQ</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define DO_LDQ&#160;&#160;&#160;if ((<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 0x1f) != 31) { <a class="el" href="../../d7/d00/a00236.html#a0e2381702b935e95f92ee1d29bc545f1">READ_VIRT</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 64, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]); }</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00251_source.html#l00086">86</a> of file <a class="el" href="../../d3/d00/a00251_source.html">cpu_memory.h</a>.</p>
-
-</div>
-</div>
-<a id="afdc241bb54a7c6ceed68a9d6dc9ae7d7" name="afdc241bb54a7c6ceed68a9d6dc9ae7d7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afdc241bb54a7c6ceed68a9d6dc9ae7d7">&#9670;&#160;</a></span>DO_LDQ_L</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define DO_LDQ_L&#160;&#160;&#160;<a class="el" href="../../d7/d00/a00236.html#af7302046b38024e935a19311116d900b">READ_VIRT_LOCK</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 64, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00251_source.html#l00088">88</a> of file <a class="el" href="../../d3/d00/a00251_source.html">cpu_memory.h</a>.</p>
-
-</div>
-</div>
-<a id="adf10d78636e0d0affd4cb838ce2077ac" name="adf10d78636e0d0affd4cb838ce2077ac"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adf10d78636e0d0affd4cb838ce2077ac">&#9670;&#160;</a></span>DO_LDQ_U</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define DO_LDQ_U&#160;&#160;&#160;if ((<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 0x1f) != 31) { <a class="el" href="../../d7/d00/a00236.html#a0e2381702b935e95f92ee1d29bc545f1">READ_VIRT</a>((state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>) &amp; ~<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x7), 64, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]); }</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00251_source.html#l00090">90</a> of file <a class="el" href="../../d3/d00/a00251_source.html">cpu_memory.h</a>.</p>
-
-</div>
-</div>
-<a id="ae2e28af2ad1c5c1f7f8c3d4f57f758c4" name="ae2e28af2ad1c5c1f7f8c3d4f57f758c4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae2e28af2ad1c5c1f7f8c3d4f57f758c4">&#9670;&#160;</a></span>DO_LDWU</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define DO_LDWU&#160;&#160;&#160;if ((<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a> &amp; 0x1f) != 31) { <a class="el" href="../../d7/d00/a00236.html#af63ed0483956d2d712445613a9c20576">READ_VIRT_F</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 16, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>], <a class="el" href="../../d8/d00/a00326.html#a1feefda40539b84aa622b208860dd577">zext_u64_16</a>); }</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00251_source.html#l00092">92</a> of file <a class="el" href="../../d3/d00/a00251_source.html">cpu_memory.h</a>.</p>
-
-</div>
-</div>
-<a id="a1f7a4a70490bd9acb19456665018e618" name="a1f7a4a70490bd9acb19456665018e618"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1f7a4a70490bd9acb19456665018e618">&#9670;&#160;</a></span>DO_STB</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define DO_STB&#160;&#160;&#160;<a class="el" href="../../d7/d00/a00236.html#aa668936ea9668cedfc28051733f48306">WRITE_VIRT</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 8, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00251_source.html#l00094">94</a> of file <a class="el" href="../../d3/d00/a00251_source.html">cpu_memory.h</a>.</p>
-
-</div>
-</div>
-<a id="a5c397e695d26479299fdeaf59f6bf8a7" name="a5c397e695d26479299fdeaf59f6bf8a7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5c397e695d26479299fdeaf59f6bf8a7">&#9670;&#160;</a></span>DO_STL</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define DO_STL&#160;&#160;&#160;<a class="el" href="../../d7/d00/a00236.html#aa668936ea9668cedfc28051733f48306">WRITE_VIRT</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 32, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00251_source.html#l00096">96</a> of file <a class="el" href="../../d3/d00/a00251_source.html">cpu_memory.h</a>.</p>
-
-</div>
-</div>
-<a id="a501cc9911d2b12cb106e22a1eb6685df" name="a501cc9911d2b12cb106e22a1eb6685df"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a501cc9911d2b12cb106e22a1eb6685df">&#9670;&#160;</a></span>DO_STL_C</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define DO_STL_C&#160;&#160;&#160;<a class="el" href="../../d7/d00/a00236.html#aa1a7354a19afb77df318f492f2c6b906">WRITE_VIRT_COND</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 32, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>], state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00251_source.html#l00098">98</a> of file <a class="el" href="../../d3/d00/a00251_source.html">cpu_memory.h</a>.</p>
-
-</div>
-</div>
-<a id="a1515fceebf9204fd33f68584abf0af03" name="a1515fceebf9204fd33f68584abf0af03"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1515fceebf9204fd33f68584abf0af03">&#9670;&#160;</a></span>DO_STQ</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define DO_STQ&#160;&#160;&#160;<a class="el" href="../../d7/d00/a00236.html#aa668936ea9668cedfc28051733f48306">WRITE_VIRT</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 64, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00251_source.html#l00100">100</a> of file <a class="el" href="../../d3/d00/a00251_source.html">cpu_memory.h</a>.</p>
-
-</div>
-</div>
-<a id="ab62d39e51141126f026ad0a11c28a03a" name="ab62d39e51141126f026ad0a11c28a03a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab62d39e51141126f026ad0a11c28a03a">&#9670;&#160;</a></span>DO_STQ_C</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define DO_STQ_C&#160;&#160;&#160;<a class="el" href="../../d7/d00/a00236.html#aa1a7354a19afb77df318f492f2c6b906">WRITE_VIRT_COND</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 64, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>], state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00251_source.html#l00102">102</a> of file <a class="el" href="../../d3/d00/a00251_source.html">cpu_memory.h</a>.</p>
-
-</div>
-</div>
-<a id="a1cedafe5a38adf67da48864060200da9" name="a1cedafe5a38adf67da48864060200da9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1cedafe5a38adf67da48864060200da9">&#9670;&#160;</a></span>DO_STQ_U</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define DO_STQ_U&#160;&#160;&#160;<a class="el" href="../../d7/d00/a00236.html#aa668936ea9668cedfc28051733f48306">WRITE_VIRT</a>((state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>) &amp; ~<a class="el" href="../../d8/d00/a00326.html#a87a27db8f6877dc5bbc36ec833e88c58">U64</a>(0x07), 64, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00251_source.html#l00104">104</a> of file <a class="el" href="../../d3/d00/a00251_source.html">cpu_memory.h</a>.</p>
-
-</div>
-</div>
-<a id="a9da60541b4a571faa5c8f612999dde38" name="a9da60541b4a571faa5c8f612999dde38"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9da60541b4a571faa5c8f612999dde38">&#9670;&#160;</a></span>DO_STW</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define DO_STW&#160;&#160;&#160;<a class="el" href="../../d7/d00/a00236.html#aa668936ea9668cedfc28051733f48306">WRITE_VIRT</a>(state.r[<a class="el" href="../../d7/d00/a00236.html#afc0e94c6f29d79352470dfd56076e09f">REG_2</a>] + <a class="el" href="../../d7/d00/a00236.html#a1077f6bc8474ef39e14e42be631f6634">DISP_16</a>, 16, state.r[<a class="el" href="../../d7/d00/a00236.html#a3cc7326bd3140cc269e686fc46179a21">REG_1</a>]);</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00251_source.html#l00106">106</a> of file <a class="el" href="../../d3/d00/a00251_source.html">cpu_memory.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d3/d00/a00251_source.html#l00045">45</a> of file <a class="el" href="../../d3/d00/a00251_source.html">AlphaInstructionFetch.h</a>.</p>
 
 </div>
 </div>
@@ -437,7 +261,7 @@ Macros</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d3/d00/a00251.html">cpu_memory.h</a></li>
+    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../d3/d00/a00251.html">AlphaInstructionFetch.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

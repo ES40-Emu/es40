@@ -1,9 +1,8 @@
 var a00416 =
 [
-    [ "CRV200", "da/d00/a01581.html", "da/d00/a01581" ],
-    [ "CRV200::Options", "da/d00/a01585.html", "da/d00/a01585" ],
-    [ "CRV200::Frame", "d7/d00/a01589.html", "d7/d00/a01589" ],
-    [ "CRV200::Counters", "d9/d00/a01593.html", "d9/d00/a01593" ],
-    [ "CRV200::Pending", "d0/d00/a01597.html", "d0/d00/a01597" ],
-    [ "CRV200::CPPacket", "d7/d00/a01601.html", "d7/d00/a01601" ]
+    [ "ev68_llsc_matches", "df/d00/a00416.html#a790a362ed4f79fbe5b97718d065224d8", null ],
+    [ "ev68_llsc_unreserved_store", "df/d00/a00416.html#ac01fdbb67d908656063377d776f82fec", null ],
+    [ "kEv68LLSCIOMask", "df/d00/a00416.html#a0bd82f82509e720106183f0118a63232", null ],
+    [ "kEv68LLSCMatchMask", "df/d00/a00416.html#a0c2842212db66476f295ca5f86eb6945", null ],
+    [ "kEv68LLSCPolicy", "df/d00/a00416.html#a44f176ee0dc783cef47544ea58d6986b", null ]
 ];

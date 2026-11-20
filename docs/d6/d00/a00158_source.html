@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: config/tui_win32/include/regex.h Source File</title>
+<title>ES40: config/Question.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.95</span>
    </div>
   </td>
  </tr>
@@ -109,106 +109,112 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d6/d00/a00158_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">regex.h</div></div>
+  <div class="headertitle"><div class="title">Question.h</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../d6/d00/a00158.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator.</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2026 by gdwnldsKSC</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * All rights reserved.</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * SPDX-License-Identifier: BSD-1-Clause</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * Redistribution and use in source and binary forms, with or without</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * modification, are permitted provided that the following conditions are met:</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * 1. Redistributions of source code must retain the above copyright notice,</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> *    this list of conditions and the following disclaimer.</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS AND CONTRIBUTORS BE</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> * POSSIBILITY OF SUCH DAMAGE.</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">/* POSIX regex subset for NetBSD libform&#39;s TYPE_REGEXP, implemented on std::regex</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment"> * (regex_std.cpp) because MSVC has no &lt;regex.h&gt;. */</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#ifndef ES40_TUI_REGEX_H</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#define ES40_TUI_REGEX_H</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &lt;stddef.h&gt;</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#ifdef __cplusplus</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<a href="../../d6/d00/a00158.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 Emulator.</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2007-2008 by the ES40 Emulator Project</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * This program is free software; you can redistribute it and/or</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * modify it under the terms of the GNU General Public License</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * as published by the Free Software Foundation; either version 2</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * of the License, or (at your option) any later version.</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * This program is distributed in the hope that it will be useful,</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * GNU General Public License for more details.</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * You should have received a copy of the GNU General Public License</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * along with this program; if not, write to the Free Software</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * Although this is not required, the author would appreciate being notified of,</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * and receiving any modifications you may make to the source code that might serve</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * the general public.</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span></div>
 <div class="foldopen" id="foldopen00039" data-start="{" data-end="};">
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="../../d9/d00/a01129.html">   39</a></span><span class="keyword">typedef</span> <span class="keyword">struct</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="../../d7/d00/a01312.html">   39</a></span><span class="keyword">class </span><a class="code hl_class" href="../../d7/d00/a01312.html">Question</a></div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>{</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="../../d9/d00/a01129.html#aeccb90a4fe3451c1b9053b235366f9bd">   41</a></span>    <span class="keywordtype">void</span> *<a class="code hl_variable" href="../../d9/d00/a01129.html#aeccb90a4fe3451c1b9053b235366f9bd">re_impl</a>;</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="../../d9/d00/a01129.html#a4dfc1ce26c896695b77854da7d607ec8">   42</a></span>    <span class="keywordtype">size_t</span> <a class="code hl_variable" href="../../d9/d00/a01129.html#a4dfc1ce26c896695b77854da7d607ec8">re_nsub</a>;</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>} <a class="code hl_struct" href="../../d9/d00/a01129.html">regex_t</a>;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00045" data-start="{" data-end="}">
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="../../d7/d00/a01312.html#af3f8d8834e22610c573b8b8d79d906d4">   45</a></span>  <span class="keywordtype">string</span> <a class="code hl_function" href="../../d7/d00/a01312.html#af3f8d8834e22610c573b8b8d79d906d4">getAnswer</a>()</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  {</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d7/d00/a01312.html#a94d92e8cd36adb5f9130fa2aced4980f">mAnswer</a>;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  }</div>
 </div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="../../d6/d00/a00158.html#a4abd4d1fef6d236c8e12d2afce56c212">   45</a></span><span class="keyword">typedef</span> ptrdiff_t <a class="code hl_typedef" href="../../d6/d00/a00158.html#a4abd4d1fef6d236c8e12d2afce56c212">regoff_t</a>;</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
-<div class="foldopen" id="foldopen00047" data-start="{" data-end="};">
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="../../db/d00/a01133.html">   47</a></span><span class="keyword">typedef</span> <span class="keyword">struct</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>{</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="../../db/d00/a01133.html#a90ac8973d256eaffdbb20de676ff45a4">   49</a></span>    <a class="code hl_typedef" href="../../d6/d00/a00158.html#a4abd4d1fef6d236c8e12d2afce56c212">regoff_t</a> <a class="code hl_variable" href="../../db/d00/a01133.html#a90ac8973d256eaffdbb20de676ff45a4">rm_so</a>;</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="../../db/d00/a01133.html#a728c28b9b23fa28c4e0b90e3a1a29efc">   50</a></span>    <a class="code hl_typedef" href="../../d6/d00/a00158.html#a4abd4d1fef6d236c8e12d2afce56c212">regoff_t</a> <a class="code hl_variable" href="../../db/d00/a01133.html#a728c28b9b23fa28c4e0b90e3a1a29efc">rm_eo</a>;</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>} <a class="code hl_struct" href="../../db/d00/a01133.html">regmatch_t</a>;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span></div>
+<div class="foldopen" id="foldopen00053" data-start="{" data-end="}">
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="../../d7/d00/a01312.html#ab3ba7fba02239fbda45f38474b7f5a46">   53</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../d7/d00/a01312.html#ab3ba7fba02239fbda45f38474b7f5a46">setAnswer</a>(<span class="keywordtype">string</span> answer)</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  {</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <a class="code hl_variable" href="../../d7/d00/a01312.html#a94d92e8cd36adb5f9130fa2aced4980f">mAnswer</a> = answer;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  }</div>
 </div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="comment">/* regcomp() cflags */</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="../../d6/d00/a00158.html#a5fc31e6da9b77e09ea62b4544ac4767f">   54</a></span><span class="preprocessor">#define REG_EXTENDED 0x0001</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="../../d6/d00/a00158.html#a0c3e7b1d5bc9c2d278a544fe9b61b67a">   55</a></span><span class="preprocessor">#define REG_ICASE 0x0002</span></div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="../../d6/d00/a00158.html#abb835c7fe6f1673fc0efeff0064510ab">   56</a></span><span class="preprocessor">#define REG_NOSUB 0x0004</span></div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="../../d6/d00/a00158.html#ab678ef3b27bf7de2fb82c79cb2cd9d8a">   57</a></span><span class="preprocessor">#define REG_NEWLINE 0x0008</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment">/* regexec() eflags */</span></div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="../../d6/d00/a00158.html#aa0ca15a79530976f6d4ef90326c46858">   60</a></span><span class="preprocessor">#define REG_NOTBOL 0x0001</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="../../d6/d00/a00158.html#a9d97d85ef86123060a845723d28a92cb">   61</a></span><span class="preprocessor">#define REG_NOTEOL 0x0002</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="comment">/* error codes */</span></div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="../../d6/d00/a00158.html#a183aab34192b1bdc18a56e84759aa210">   64</a></span><span class="preprocessor">#define REG_NOMATCH 1</span></div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="../../d6/d00/a00158.html#ad7e13616a54be821d6b686d8b2587401">   65</a></span><span class="preprocessor">#define REG_BADPAT 2</span></div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="../../d6/d00/a00158.html#ae0ee85477e8756f1cf2d7fab21e56235">   66</a></span><span class="preprocessor">#define REG_ESPACE 12</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="keywordtype">int</span> <a class="code hl_function" href="../../d6/d00/a00158.html#a38bbfba560a12468196f72aa88486406">regcomp</a>(<a class="code hl_struct" href="../../d9/d00/a01129.html">regex_t</a> *preg, <span class="keyword">const</span> <span class="keywordtype">char</span> *pattern, <span class="keywordtype">int</span> cflags);</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="keywordtype">int</span> <a class="code hl_function" href="../../d6/d00/a00158.html#a5fda573156393bb7d89b4291ded6e26b">regexec</a>(<span class="keyword">const</span> <a class="code hl_struct" href="../../d9/d00/a01129.html">regex_t</a> *preg, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keywordtype">string</span>, <span class="keywordtype">size_t</span> nmatch, <a class="code hl_struct" href="../../db/d00/a01133.html">regmatch_t</a> pmatch[], <span class="keywordtype">int</span> eflags);</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../d6/d00/a00158.html#ad94d0de532eaa4fd959b8adde4d64898">regfree</a>(<a class="code hl_struct" href="../../d9/d00/a01129.html">regex_t</a> *preg);</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="preprocessor">#ifdef __cplusplus</span></div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>}</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="aa00158_html_a38bbfba560a12468196f72aa88486406"><div class="ttname"><a href="../../d6/d00/a00158.html#a38bbfba560a12468196f72aa88486406">regcomp</a></div><div class="ttdeci">int regcomp(regex_t *preg, const char *pattern, int cflags)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00167_source.html#l00035">regex_std.cpp:35</a></div></div>
-<div class="ttc" id="aa00158_html_a4abd4d1fef6d236c8e12d2afce56c212"><div class="ttname"><a href="../../d6/d00/a00158.html#a4abd4d1fef6d236c8e12d2afce56c212">regoff_t</a></div><div class="ttdeci">ptrdiff_t regoff_t</div><div class="ttdef"><b>Definition</b> <a href="#l00045">regex.h:45</a></div></div>
-<div class="ttc" id="aa00158_html_a5fda573156393bb7d89b4291ded6e26b"><div class="ttname"><a href="../../d6/d00/a00158.html#a5fda573156393bb7d89b4291ded6e26b">regexec</a></div><div class="ttdeci">int regexec(const regex_t *preg, const char *string, size_t nmatch, regmatch_t pmatch[], int eflags)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00167_source.html#l00062">regex_std.cpp:62</a></div></div>
-<div class="ttc" id="aa00158_html_ad94d0de532eaa4fd959b8adde4d64898"><div class="ttname"><a href="../../d6/d00/a00158.html#ad94d0de532eaa4fd959b8adde4d64898">regfree</a></div><div class="ttdeci">void regfree(regex_t *preg)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00167_source.html#l00098">regex_std.cpp:98</a></div></div>
-<div class="ttc" id="aa01129_html"><div class="ttname"><a href="../../d9/d00/a01129.html">regex_t</a></div><div class="ttdef"><b>Definition</b> <a href="#l00039">regex.h:40</a></div></div>
-<div class="ttc" id="aa01129_html_a4dfc1ce26c896695b77854da7d607ec8"><div class="ttname"><a href="../../d9/d00/a01129.html#a4dfc1ce26c896695b77854da7d607ec8">regex_t::re_nsub</a></div><div class="ttdeci">size_t re_nsub</div><div class="ttdef"><b>Definition</b> <a href="#l00042">regex.h:42</a></div></div>
-<div class="ttc" id="aa01129_html_aeccb90a4fe3451c1b9053b235366f9bd"><div class="ttname"><a href="../../d9/d00/a01129.html#aeccb90a4fe3451c1b9053b235366f9bd">regex_t::re_impl</a></div><div class="ttdeci">void * re_impl</div><div class="ttdef"><b>Definition</b> <a href="#l00041">regex.h:41</a></div></div>
-<div class="ttc" id="aa01133_html"><div class="ttname"><a href="../../db/d00/a01133.html">regmatch_t</a></div><div class="ttdef"><b>Definition</b> <a href="#l00047">regex.h:48</a></div></div>
-<div class="ttc" id="aa01133_html_a728c28b9b23fa28c4e0b90e3a1a29efc"><div class="ttname"><a href="../../db/d00/a01133.html#a728c28b9b23fa28c4e0b90e3a1a29efc">regmatch_t::rm_eo</a></div><div class="ttdeci">regoff_t rm_eo</div><div class="ttdef"><b>Definition</b> <a href="#l00050">regex.h:50</a></div></div>
-<div class="ttc" id="aa01133_html_a90ac8973d256eaffdbb20de676ff45a4"><div class="ttname"><a href="../../db/d00/a01133.html#a90ac8973d256eaffdbb20de676ff45a4">regmatch_t::rm_so</a></div><div class="ttdeci">regoff_t rm_so</div><div class="ttdef"><b>Definition</b> <a href="#l00049">regex.h:49</a></div></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span></div>
+<div class="foldopen" id="foldopen00062" data-start="{" data-end="}">
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="../../d7/d00/a01312.html#ab228fc4ead58d9dd06a047b5dd8d73d6">   62</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../d7/d00/a01312.html#ab228fc4ead58d9dd06a047b5dd8d73d6">setExplanation</a>(<span class="keywordtype">string</span> explanation)</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>  {</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <a class="code hl_variable" href="../../d7/d00/a01312.html#aa3561106eb05cd692259a11ea2895f17">mExplanation</a> = explanation;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>  }</div>
+</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span></div>
+<div class="foldopen" id="foldopen00070" data-start="{" data-end="}">
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="../../d7/d00/a01312.html#a4523526a84111bf252fa61aa56e13051">   70</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../d7/d00/a01312.html#a4523526a84111bf252fa61aa56e13051">setQuestion</a>(<span class="keywordtype">string</span> question)</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  {</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <a class="code hl_variable" href="../../d7/d00/a01312.html#aaec2881cf5942611924a8c7d0cef1eb8">mQuestion</a> = question;</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>  }</div>
+</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span></div>
+<div class="foldopen" id="foldopen00079" data-start="{" data-end="}">
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="../../d7/d00/a01312.html#a0ed619ad6e54a96912a7c2586f4c1e58">   79</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../d7/d00/a01312.html#a0ed619ad6e54a96912a7c2586f4c1e58">setDefault</a>(<span class="keywordtype">string</span> defval)</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  {</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <a class="code hl_variable" href="../../d7/d00/a01312.html#a3b2fd150d73603acab12797fcd04cd74">mDefault</a> = defval;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  }</div>
+</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="../../d7/d00/a01312.html#ac9dd9a81b58bfc3ed520436c3fd92b69">   87</a></span>  <span class="keyword">virtual</span> <span class="keywordtype">string</span> <a class="code hl_function" href="../../d7/d00/a01312.html#ac9dd9a81b58bfc3ed520436c3fd92b69">ask</a>() = 0;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span></div>
+<div class="foldopen" id="foldopen00092" data-start="{" data-end="}">
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="../../d7/d00/a01312.html#a22c5dcad982785f032635566f0829a05">   92</a></span>  <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d7/d00/a01312.html#a22c5dcad982785f032635566f0829a05">explain</a>()</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  {</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    cout &lt;&lt; <span class="stringliteral">&quot;\nEXPLANATION:\n&quot;</span> &lt;&lt; <a class="code hl_variable" href="../../d7/d00/a01312.html#aa3561106eb05cd692259a11ea2895f17">mExplanation</a> &lt;&lt; <span class="stringliteral">&quot;\n\n&quot;</span>;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  }</div>
+</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="keyword">protected</span>:</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno"><a class="line" href="../../d7/d00/a01312.html#a94d92e8cd36adb5f9130fa2aced4980f">   99</a></span>  <span class="keywordtype">string</span> <a class="code hl_variable" href="../../d7/d00/a01312.html#a94d92e8cd36adb5f9130fa2aced4980f">mAnswer</a>;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno"><a class="line" href="../../d7/d00/a01312.html#aa3561106eb05cd692259a11ea2895f17">  102</a></span>  <span class="keywordtype">string</span> <a class="code hl_variable" href="../../d7/d00/a01312.html#aa3561106eb05cd692259a11ea2895f17">mExplanation</a>;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span></div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno"><a class="line" href="../../d7/d00/a01312.html#aaec2881cf5942611924a8c7d0cef1eb8">  105</a></span>  <span class="keywordtype">string</span> <a class="code hl_variable" href="../../d7/d00/a01312.html#aaec2881cf5942611924a8c7d0cef1eb8">mQuestion</a>;</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno"><a class="line" href="../../d7/d00/a01312.html#a3b2fd150d73603acab12797fcd04cd74">  108</a></span>  <span class="keywordtype">string</span> <a class="code hl_variable" href="../../d7/d00/a01312.html#a3b2fd150d73603acab12797fcd04cd74">mDefault</a>;</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>};</div>
+</div>
+<div class="ttc" id="aa01312_html"><div class="ttname"><a href="../../d7/d00/a01312.html">Question</a></div><div class="ttdoc">Abstract Question base class.</div><div class="ttdef"><b>Definition</b> <a href="#l00039">Question.h:40</a></div></div>
+<div class="ttc" id="aa01312_html_a0ed619ad6e54a96912a7c2586f4c1e58"><div class="ttname"><a href="../../d7/d00/a01312.html#a0ed619ad6e54a96912a7c2586f4c1e58">Question::setDefault</a></div><div class="ttdeci">void setDefault(string defval)</div><div class="ttdoc">Define a default value to use when the question is answered with a &lt;return&gt;.</div><div class="ttdef"><b>Definition</b> <a href="#l00079">Question.h:79</a></div></div>
+<div class="ttc" id="aa01312_html_a22c5dcad982785f032635566f0829a05"><div class="ttname"><a href="../../d7/d00/a01312.html#a22c5dcad982785f032635566f0829a05">Question::explain</a></div><div class="ttdeci">virtual void explain()</div><div class="ttdoc">Display the explanation.</div><div class="ttdef"><b>Definition</b> <a href="#l00092">Question.h:92</a></div></div>
+<div class="ttc" id="aa01312_html_a3b2fd150d73603acab12797fcd04cd74"><div class="ttname"><a href="../../d7/d00/a01312.html#a3b2fd150d73603acab12797fcd04cd74">Question::mDefault</a></div><div class="ttdeci">string mDefault</div><div class="ttdoc">Default value.</div><div class="ttdef"><b>Definition</b> <a href="#l00108">Question.h:108</a></div></div>
+<div class="ttc" id="aa01312_html_a4523526a84111bf252fa61aa56e13051"><div class="ttname"><a href="../../d7/d00/a01312.html#a4523526a84111bf252fa61aa56e13051">Question::setQuestion</a></div><div class="ttdeci">void setQuestion(string question)</div><div class="ttdoc">Define the question to ask.</div><div class="ttdef"><b>Definition</b> <a href="#l00070">Question.h:70</a></div></div>
+<div class="ttc" id="aa01312_html_a94d92e8cd36adb5f9130fa2aced4980f"><div class="ttname"><a href="../../d7/d00/a01312.html#a94d92e8cd36adb5f9130fa2aced4980f">Question::mAnswer</a></div><div class="ttdeci">string mAnswer</div><div class="ttdoc">The stored answer.</div><div class="ttdef"><b>Definition</b> <a href="#l00099">Question.h:99</a></div></div>
+<div class="ttc" id="aa01312_html_aa3561106eb05cd692259a11ea2895f17"><div class="ttname"><a href="../../d7/d00/a01312.html#aa3561106eb05cd692259a11ea2895f17">Question::mExplanation</a></div><div class="ttdeci">string mExplanation</div><div class="ttdoc">An explanation for the question.</div><div class="ttdef"><b>Definition</b> <a href="#l00102">Question.h:102</a></div></div>
+<div class="ttc" id="aa01312_html_aaec2881cf5942611924a8c7d0cef1eb8"><div class="ttname"><a href="../../d7/d00/a01312.html#aaec2881cf5942611924a8c7d0cef1eb8">Question::mQuestion</a></div><div class="ttdeci">string mQuestion</div><div class="ttdoc">The question to ask.</div><div class="ttdef"><b>Definition</b> <a href="#l00105">Question.h:105</a></div></div>
+<div class="ttc" id="aa01312_html_ab228fc4ead58d9dd06a047b5dd8d73d6"><div class="ttname"><a href="../../d7/d00/a01312.html#ab228fc4ead58d9dd06a047b5dd8d73d6">Question::setExplanation</a></div><div class="ttdeci">void setExplanation(string explanation)</div><div class="ttdoc">Define an explanation for the question, that will be shown when the question is answered with &#39;?</div><div class="ttdef"><b>Definition</b> <a href="#l00062">Question.h:62</a></div></div>
+<div class="ttc" id="aa01312_html_ab3ba7fba02239fbda45f38474b7f5a46"><div class="ttname"><a href="../../d7/d00/a01312.html#ab3ba7fba02239fbda45f38474b7f5a46">Question::setAnswer</a></div><div class="ttdeci">void setAnswer(string answer)</div><div class="ttdoc">Set the answer.</div><div class="ttdef"><b>Definition</b> <a href="#l00053">Question.h:53</a></div></div>
+<div class="ttc" id="aa01312_html_ac9dd9a81b58bfc3ed520436c3fd92b69"><div class="ttname"><a href="../../d7/d00/a01312.html#ac9dd9a81b58bfc3ed520436c3fd92b69">Question::ask</a></div><div class="ttdeci">virtual string ask()=0</div><div class="ttdoc">Ask the question, and return the value given.</div></div>
+<div class="ttc" id="aa01312_html_af3f8d8834e22610c573b8b8d79d906d4"><div class="ttname"><a href="../../d7/d00/a01312.html#af3f8d8834e22610c573b8b8d79d906d4">Question::getAnswer</a></div><div class="ttdeci">string getAnswer()</div><div class="ttdoc">Return the answer previously given.</div><div class="ttdef"><b>Definition</b> <a href="#l00045">Question.h:45</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_9f351d46ce3cc29445a41dc3a31e6919.html">config</a></li><li class="navelem"><a href="../../dir_6b7d1cab4fc1513651fc64c4a9a49cf4.html">tui_win32</a></li><li class="navelem"><a href="../../dir_2c38ba4e84cb869759378366b3e67103.html">include</a></li><li class="navelem"><a href="../../d6/d00/a00158.html">regex.h</a></li>
+    <li class="navelem"><a href="../../dir_9f351d46ce3cc29445a41dc3a31e6919.html">config</a></li><li class="navelem"><a href="../../d6/d00/a00158.html">Question.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

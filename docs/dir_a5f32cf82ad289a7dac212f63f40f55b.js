@@ -11,5 +11,9 @@ var dir_a5f32cf82ad289a7dac212f63f40f55b =
     [ "HostAudioNull.cpp", "d5/d00/a00029.html", "d5/d00/a00029" ],
     [ "HostAudioSDL.cpp", "dc/d00/a00032.html", "dc/d00/a00032" ],
     [ "MPU401.cpp", "d4/d00/a00035.html", null ],
-    [ "MPU401.h", "d8/d00/a00038.html", null ]
+    [ "MPU401.h", "d8/d00/a00038.html", null ],
+    [ "WSS.cpp", "dd/d00/a00041.html", null ],
+    [ "WSS.h", "d5/d00/a00044.html", "d5/d00/a00044" ],
+    [ "WSSCodec.cpp", "d6/d00/a00047.html", null ],
+    [ "WSSCodec.h", "d5/d00/a00050.html", "d5/d00/a00050" ]
 ];

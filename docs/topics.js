@@ -1,5 +1,5 @@
 var topics =
 [
-    [ "ATTOTIME", "dc/d00/a00736.html", "dc/d00/a00736" ],
-    [ "Useful functions for bit shuffling", "dd/d00/a00737.html", "dd/d00/a00737" ]
+    [ "ATTOTIME", "de/d00/a00889.html", "de/d00/a00889" ],
+    [ "Useful functions for bit shuffling", "d7/d00/a00890.html", "d7/d00/a00890" ]
 ];

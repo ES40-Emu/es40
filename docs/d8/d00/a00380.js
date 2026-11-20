@@ -1,6 +1,5 @@
 var a00380 =
 [
-    [ "CGloriaSynergy", "d1/d00/a01429.html", "d1/d00/a01429" ],
-    [ "CGloriaSynergy::PCIConfig", "d2/d00/a01433.html", "d2/d00/a01433" ],
-    [ "CGloriaSynergy::OptionROM", "d9/d00/a01437.html", "d9/d00/a01437" ]
+    [ "ev68_decode_hw_store", "d8/d00/a00380.html#a3d0634bef734b040ab3f16b087e90837", null ],
+    [ "kEv68HWStorePolicy", "d8/d00/a00380.html#a0d8be7fe2edf0a9abd0e211520fced2f", null ]
 ];

@@ -1,4 +1,4 @@
 var a00050 =
 [
-    [ "CHostWakeEvent", "d9/d00/a00913.html", "d9/d00/a00913" ]
+    [ "WSSCodec", "d3/d00/a00996.html", "d3/d00/a00996" ]
 ];

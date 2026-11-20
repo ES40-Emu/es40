@@ -1,10 +1,10 @@
 var a00008 =
 [
-    [ "CES1370", "d3/d00/a00757.html", "d3/d00/a00757" ],
-    [ "CES1370::chan", "d3/d00/a00761.html", "d3/d00/a00761" ],
-    [ "CES1370::ES1370State", "dc/d00/a00765.html", "dc/d00/a00765" ],
-    [ "CES1370::ES1370SavedState", "dd/d00/a00769.html", "dd/d00/a00769" ],
-    [ "CES1370::chan_bits", "d2/d00/a00777.html", "d2/d00/a00777" ],
+    [ "CES1370", "df/d00/a00912.html", "df/d00/a00912" ],
+    [ "CES1370::chan", "d6/d00/a00916.html", "d6/d00/a00916" ],
+    [ "CES1370::ES1370State", "d6/d00/a00920.html", "d6/d00/a00920" ],
+    [ "CES1370::ES1370SavedState", "de/d00/a00924.html", "de/d00/a00924" ],
+    [ "CES1370::chan_bits", "d8/d00/a00932.html", "d8/d00/a00932" ],
     [ "ADC_CHANNEL", "d4/d00/a00008.html#a7fb9fde533f9b9bc8e4ae31524c9ea51", null ],
     [ "CTRL_ADC_EN", "d4/d00/a00008.html#a423fc7bb588d4bdf7d7fa74df32f9f6f", null ],
     [ "CTRL_ADC_STOP", "d4/d00/a00008.html#a6545b5d955abcaaa74625795e0b9281d", null ],

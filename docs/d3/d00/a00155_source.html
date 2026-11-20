@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: config/tui_win32/include/netbsd_sys/queue.h Source File</title>
+<title>ES40: config/NumberQuestion.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.95</span>
    </div>
   </td>
  </tr>
@@ -109,55 +109,148 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d3/d00/a00155_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">queue.h</div></div>
+  <div class="headertitle"><div class="title">NumberQuestion.h</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../d3/d00/a00155.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator.</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2026 by gdwnldsKSC</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * All rights reserved.</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * SPDX-License-Identifier: BSD-1-Clause</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * Redistribution and use in source and binary forms, with or without</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * modification, are permitted provided that the following conditions are met:</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * 1. Redistributions of source code must retain the above copyright notice,</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> *    this list of conditions and the following disclaimer.</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS AND CONTRIBUTORS BE</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> * POSSIBILITY OF SUCH DAMAGE.</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">/* Wraps netbsd-curses&#39; &lt;netbsd_sys/queue.h&gt; for MSVC: its __launder_type() helper holds a</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment"> * GCC inline-assembly statement, which these defines reduce to a no-op expression. */</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#ifndef ES40_TUI_NETBSD_SYS_QUEUE_H</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#define ES40_TUI_NETBSD_SYS_QUEUE_H</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="../../d3/d00/a00155.html#ad423525eaa4fdf67132c12334da80f13">   33</a></span><span class="preprocessor">#define __asm</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="../../d3/d00/a00155.html#aabb9daf94c24340baf461c21965630b4">   34</a></span><span class="preprocessor">#define __volatile(x) ((void)0)</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &quot;../../../../../third_party/netbsd-curses/netbsd_sys/queue.h&quot;</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#undef __volatile</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#undef __asm</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#endif</span></div>
+<a href="../../d3/d00/a00155.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 Emulator.</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2007-2008 by the ES40 Emulator Project</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * This program is free software; you can redistribute it and/or</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * modify it under the terms of the GNU General Public License</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * as published by the Free Software Foundation; either version 2</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * of the License, or (at your option) any later version.</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * This program is distributed in the hope that it will be useful,</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * GNU General Public License for more details.</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * You should have received a copy of the GNU General Public License</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * along with this program; if not, write to the Free Software</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * Although this is not required, the author would appreciate being notified of,</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * and receiving any modifications you may make to the source code that might serve</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * the general public.</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span></div>
+<div class="foldopen" id="foldopen00039" data-start="{" data-end="}">
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="../../d3/d00/a00155.html#af67e732258579f2e0c619014e718a75c">   39</a></span><span class="keyword">inline</span> <span class="keywordtype">string</span> <a class="code hl_function" href="../../df/d00/a00122.html#af67e732258579f2e0c619014e718a75c">i2s</a>(<span class="keywordtype">int</span> x)</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>{</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  ostringstream o;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  o &lt;&lt; x;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  <span class="keywordflow">return</span> o.str();</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>}</div>
+</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span></div>
+<div class="foldopen" id="foldopen00051" data-start="{" data-end="}">
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="../../d3/d00/a00155.html#aa70bc74cb9cef1fc1add36a16b97a694">   51</a></span><span class="keyword">inline</span> <span class="keywordtype">int</span> <a class="code hl_function" href="../../df/d00/a00122.html#aa70bc74cb9cef1fc1add36a16b97a694">s2i</a>(<span class="keyword">const</span> <span class="keywordtype">string</span> x)</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>{</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  istringstream i(x);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  <span class="keywordtype">int</span> x1;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>  <span class="keywordtype">char</span> c;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  <span class="keywordflow">if</span> (!(i &gt;&gt; x1) || i.get(c))</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <a class="code hl_define" href="../../de/d00/a00500.html#a5641b3e8b9f16e5ce6f4ba1f83943832">FAILURE</a>(Logic, <span class="stringliteral">&quot;invalid conversion&quot;</span>);;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>  <span class="keywordflow">return</span> x1;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>}</div>
+</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span></div>
+<div class="foldopen" id="foldopen00065" data-start="{" data-end="};">
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="../../d1/d00/a01308.html">   65</a></span><span class="keyword">class </span><a class="code hl_class" href="../../d1/d00/a01308.html">NumberQuestion</a> : <span class="keyword">public</span> <a class="code hl_class" href="../../d8/d00/a01292.html">FreeTextQuestion</a></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>{</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00071" data-start="{" data-end="}">
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="../../d1/d00/a01308.html#a136873986a087e3e3169db4d3d9002dc">   71</a></span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../d1/d00/a01308.html#a136873986a087e3e3169db4d3d9002dc">setRange</a>(<span class="keywordtype">int</span> low, <span class="keywordtype">int</span> high)</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>  {</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <a class="code hl_variable" href="../../d1/d00/a01308.html#ac4ac04ecfd46a487b37237729626d4b2">mLow</a> = low; <a class="code hl_variable" href="../../d1/d00/a01308.html#a482bc0350f01cae9701598189614e93b">mHigh</a> = high;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>  }</div>
+</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span></div>
+<div class="foldopen" id="foldopen00079" data-start="{" data-end="}">
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="../../d1/d00/a01308.html#a74d2383631056a781e1d0ede0cd39d4f">   79</a></span>  <span class="keywordtype">int</span> <a class="code hl_function" href="../../d1/d00/a01308.html#a74d2383631056a781e1d0ede0cd39d4f">getNum</a>()</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  {</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d3/d00/a00155.html#aa70bc74cb9cef1fc1add36a16b97a694">s2i</a>(<a class="code hl_variable" href="../../d7/d00/a01312.html#a94d92e8cd36adb5f9130fa2aced4980f">mAnswer</a>);</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  }</div>
+</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span></div>
+<div class="foldopen" id="foldopen00087" data-start="{" data-end="}">
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="../../d1/d00/a01308.html#adf24984c09bf926b3c13347aa8bd5112">   87</a></span>  <span class="keyword">virtual</span> <span class="keywordtype">string</span> <a class="code hl_function" href="../../d1/d00/a01308.html#adf24984c09bf926b3c13347aa8bd5112">ask</a>()</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  {</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="comment">/* Set the options list to (low-high).</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <a class="code hl_function" href="../../d8/d00/a01292.html#a4e1a1941a1ba2242a267f9ee21adb69e">setOptions</a>(<a class="code hl_function" href="../../d3/d00/a00155.html#af67e732258579f2e0c619014e718a75c">i2s</a>(<a class="code hl_variable" href="../../d1/d00/a01308.html#ac4ac04ecfd46a487b37237729626d4b2">mLow</a>) + <span class="stringliteral">&quot;-&quot;</span> + <a class="code hl_function" href="../../d3/d00/a00155.html#af67e732258579f2e0c619014e718a75c">i2s</a>(<a class="code hl_variable" href="../../d1/d00/a01308.html#a482bc0350f01cae9701598189614e93b">mHigh</a>));</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <span class="comment">/* Keep repeating the question until a valid</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="comment">     * answer is received.</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="comment">     */</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="keywordflow">for</span> (;;)</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    {</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>      <span class="keywordtype">int</span> value;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>      <span class="comment">/* Ask the question as a FreeTextQuestion. This</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="comment">       * takes care of the explanation and default</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="comment">       * value handling.</span></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="comment">       */</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>      <a class="code hl_function" href="../../d8/d00/a01292.html#a4e0ee1b8945023966643623f7d5fb2ef">FreeTextQuestion::ask</a>();</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>      <span class="keywordflow">try</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>      {</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>        <span class="comment">/* Convert the answer to an integer.</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="comment">         */</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>        value = <a class="code hl_function" href="../../d3/d00/a00155.html#aa70bc74cb9cef1fc1add36a16b97a694">s2i</a>(<a class="code hl_variable" href="../../d7/d00/a01312.html#a94d92e8cd36adb5f9130fa2aced4980f">mAnswer</a>);</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>        <span class="comment">/* If the answer is within the allowed range,</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="comment">         * return it.</span></div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="comment">         */</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>        <span class="keywordflow">if</span> (value &gt;= <a class="code hl_variable" href="../../d1/d00/a01308.html#ac4ac04ecfd46a487b37237729626d4b2">mLow</a> &amp;&amp; value &lt;= <a class="code hl_variable" href="../../d1/d00/a01308.html#a482bc0350f01cae9701598189614e93b">mHigh</a>)</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>          <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d7/d00/a01312.html#a94d92e8cd36adb5f9130fa2aced4980f">mAnswer</a>;</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>        <span class="comment">/* The answer is out of range.</span></div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="comment">         */</span></div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>        cout &lt;&lt; <span class="stringliteral">&quot;\nPlease enter a value that is within the indicated range, or &#39;?&#39; for help.\n\n&quot;</span>;</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>      }</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>      <span class="keywordflow">catch</span> (<a class="code hl_class" href="../../df/d00/a01004.html">CLogicException</a>)</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>      {</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>        <span class="comment">/* The answer is not a number.</span></div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><span class="comment">         */</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>        cout &lt;&lt; <span class="stringliteral">&quot;\nPlease enter an integer value.\n\n&quot;</span>;</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>      }</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    }</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>  }</div>
+</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span> </div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><span class="keyword">protected</span>:</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno"><a class="line" href="../../d1/d00/a01308.html#ac4ac04ecfd46a487b37237729626d4b2">  133</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="../../d1/d00/a01308.html#ac4ac04ecfd46a487b37237729626d4b2">mLow</a>;</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno"><a class="line" href="../../d1/d00/a01308.html#a482bc0350f01cae9701598189614e93b">  135</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="../../d1/d00/a01308.html#a482bc0350f01cae9701598189614e93b">mHigh</a>;</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>};</div>
+</div>
+<div class="ttc" id="aa00122_html_aa70bc74cb9cef1fc1add36a16b97a694"><div class="ttname"><a href="../../df/d00/a00122.html#aa70bc74cb9cef1fc1add36a16b97a694">s2i</a></div><div class="ttdeci">int s2i(const string x)</div><div class="ttdoc">Convert a string to an integer.</div><div class="ttdef"><b>Definition</b> <a href="../../df/d00/a00122_source.html#l00216">ConfigEditor.cpp:216</a></div></div>
+<div class="ttc" id="aa00122_html_af67e732258579f2e0c619014e718a75c"><div class="ttname"><a href="../../df/d00/a00122.html#af67e732258579f2e0c619014e718a75c">i2s</a></div><div class="ttdeci">string i2s(int x)</div><div class="ttdoc">Convert an integer to a string.</div><div class="ttdef"><b>Definition</b> <a href="../../df/d00/a00122_source.html#l00203">ConfigEditor.cpp:203</a></div></div>
+<div class="ttc" id="aa00155_html_aa70bc74cb9cef1fc1add36a16b97a694"><div class="ttname"><a href="../../d3/d00/a00155.html#aa70bc74cb9cef1fc1add36a16b97a694">s2i</a></div><div class="ttdeci">int s2i(const string x)</div><div class="ttdoc">Convert a string to an integer.</div><div class="ttdef"><b>Definition</b> <a href="#l00051">NumberQuestion.h:51</a></div></div>
+<div class="ttc" id="aa00155_html_af67e732258579f2e0c619014e718a75c"><div class="ttname"><a href="../../d3/d00/a00155.html#af67e732258579f2e0c619014e718a75c">i2s</a></div><div class="ttdeci">string i2s(int x)</div><div class="ttdoc">Convert an integer to a string.</div><div class="ttdef"><b>Definition</b> <a href="#l00039">NumberQuestion.h:39</a></div></div>
+<div class="ttc" id="aa00500_html_a5641b3e8b9f16e5ce6f4ba1f83943832"><div class="ttname"><a href="../../de/d00/a00500.html#a5641b3e8b9f16e5ce6f4ba1f83943832">FAILURE</a></div><div class="ttdeci">#define FAILURE(cls, error_msg)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d00/a00500_source.html#l00099">es40_debug.h:99</a></div></div>
+<div class="ttc" id="aa01004_html"><div class="ttname"><a href="../../df/d00/a01004.html">CLogicException</a></div><div class="ttdef"><b>Definition</b> <a href="../../d3/d00/a00059_source.html#l00071">Exception.h:71</a></div></div>
+<div class="ttc" id="aa01292_html"><div class="ttname"><a href="../../d8/d00/a01292.html">FreeTextQuestion</a></div><div class="ttdoc">Question class that allows free-format text input.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d00/a00146_source.html#l00039">FreeTextQuestion.h:40</a></div></div>
+<div class="ttc" id="aa01292_html_a4e0ee1b8945023966643623f7d5fb2ef"><div class="ttname"><a href="../../d8/d00/a01292.html#a4e0ee1b8945023966643623f7d5fb2ef">FreeTextQuestion::ask</a></div><div class="ttdeci">virtual string ask()</div><div class="ttdoc">Ask the question, and return the answer.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d00/a00146_source.html#l00054">FreeTextQuestion.h:54</a></div></div>
+<div class="ttc" id="aa01292_html_a4e1a1941a1ba2242a267f9ee21adb69e"><div class="ttname"><a href="../../d8/d00/a01292.html#a4e1a1941a1ba2242a267f9ee21adb69e">FreeTextQuestion::setOptions</a></div><div class="ttdeci">void setOptions(string options)</div><div class="ttdoc">Define a list of options to show following the question, to show the user what values are acceptable.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d00/a00146_source.html#l00046">FreeTextQuestion.h:46</a></div></div>
+<div class="ttc" id="aa01308_html"><div class="ttname"><a href="../../d1/d00/a01308.html">NumberQuestion</a></div><div class="ttdoc">Question class that accepts a numeric answer within a defined range.</div><div class="ttdef"><b>Definition</b> <a href="#l00065">NumberQuestion.h:66</a></div></div>
+<div class="ttc" id="aa01308_html_a136873986a087e3e3169db4d3d9002dc"><div class="ttname"><a href="../../d1/d00/a01308.html#a136873986a087e3e3169db4d3d9002dc">NumberQuestion::setRange</a></div><div class="ttdeci">void setRange(int low, int high)</div><div class="ttdoc">Define the allowable range for the answer.</div><div class="ttdef"><b>Definition</b> <a href="#l00071">NumberQuestion.h:71</a></div></div>
+<div class="ttc" id="aa01308_html_a482bc0350f01cae9701598189614e93b"><div class="ttname"><a href="../../d1/d00/a01308.html#a482bc0350f01cae9701598189614e93b">NumberQuestion::mHigh</a></div><div class="ttdeci">int mHigh</div><div class="ttdoc">High limit of the allowed range.</div><div class="ttdef"><b>Definition</b> <a href="#l00135">NumberQuestion.h:135</a></div></div>
+<div class="ttc" id="aa01308_html_a74d2383631056a781e1d0ede0cd39d4f"><div class="ttname"><a href="../../d1/d00/a01308.html#a74d2383631056a781e1d0ede0cd39d4f">NumberQuestion::getNum</a></div><div class="ttdeci">int getNum()</div><div class="ttdoc">Convert the answer to a number.</div><div class="ttdef"><b>Definition</b> <a href="#l00079">NumberQuestion.h:79</a></div></div>
+<div class="ttc" id="aa01308_html_ac4ac04ecfd46a487b37237729626d4b2"><div class="ttname"><a href="../../d1/d00/a01308.html#ac4ac04ecfd46a487b37237729626d4b2">NumberQuestion::mLow</a></div><div class="ttdeci">int mLow</div><div class="ttdoc">Low limit of the allowed range.</div><div class="ttdef"><b>Definition</b> <a href="#l00133">NumberQuestion.h:133</a></div></div>
+<div class="ttc" id="aa01308_html_adf24984c09bf926b3c13347aa8bd5112"><div class="ttname"><a href="../../d1/d00/a01308.html#adf24984c09bf926b3c13347aa8bd5112">NumberQuestion::ask</a></div><div class="ttdeci">virtual string ask()</div><div class="ttdoc">Ask the question and return the answer.</div><div class="ttdef"><b>Definition</b> <a href="#l00087">NumberQuestion.h:87</a></div></div>
+<div class="ttc" id="aa01312_html_a94d92e8cd36adb5f9130fa2aced4980f"><div class="ttname"><a href="../../d7/d00/a01312.html#a94d92e8cd36adb5f9130fa2aced4980f">Question::mAnswer</a></div><div class="ttdeci">string mAnswer</div><div class="ttdoc">The stored answer.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d00/a00158_source.html#l00099">Question.h:99</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_9f351d46ce3cc29445a41dc3a31e6919.html">config</a></li><li class="navelem"><a href="../../dir_6b7d1cab4fc1513651fc64c4a9a49cf4.html">tui_win32</a></li><li class="navelem"><a href="../../dir_2c38ba4e84cb869759378366b3e67103.html">include</a></li><li class="navelem"><a href="../../dir_304f3d4a4fa52d7296628dad24c900ff.html">netbsd_sys</a></li><li class="navelem"><a href="../../d3/d00/a00155.html">queue.h</a></li>
+    <li class="navelem"><a href="../../dir_9f351d46ce3cc29445a41dc3a31e6919.html">config</a></li><li class="navelem"><a href="../../d3/d00/a00155.html">NumberQuestion.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

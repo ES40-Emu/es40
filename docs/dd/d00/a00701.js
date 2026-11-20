@@ -1,7 +1,5 @@
 var a00701 =
 [
-    [ "CSym53C895", "d0/d00/a02053.html", "d0/d00/a02053" ],
-    [ "CSym53C895::SSym_state", "d2/d00/a02057.html", "d2/d00/a02057" ],
-    [ "CSym53C895::SSym_state::USym_regs", "d8/d00/a02061.html", "d8/d00/a02061" ],
-    [ "CSym53C895::SSym_state::SSym_alu", "d0/d00/a02065.html", "d0/d00/a02065" ]
+    [ "eth_crc32", "dd/d00/a00701.html#a3bfbc59c214962ad31300721fae81158", null ],
+    [ "crcTable", "dd/d00/a00701.html#a8cd963aa1510a06da50c808a7453f85f", null ]
 ];

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: emu/coretmpl.h Source File</title>
+<title>ES40: CPU/Ev4IEEETrap.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.95</span>
    </div>
   </td>
  </tr>
@@ -109,126 +109,109 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('dc/d00/a00338_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">coretmpl.h</div></div>
+  <div class="headertitle"><div class="title">Ev4IEEETrap.h</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../dc/d00/a00338.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator.</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2012-2014 Aaron Giles from MAME</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright (C) 2016-2025 Vas Crabb from MAME</span></div>
+<a href="../../dc/d00/a00338.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator -- EV4 IEEE exceptions</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2026 by gdwnldsKSC</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * All rights reserved.</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> * SPDX-License-Identifier: BSD-1-Clause</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * SPDX-License-Identifier: BSD-3-Clause</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * Redistribution and use in source and binary forms, with or without</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * modification, are permitted provided that the following conditions are met:</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> * 1. Redistributions of source code must retain the above copyright notice,</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> *   this list of conditions and the following disclaimer.</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * 2. Redistributions in binary form must reproduce the above copyright notice,</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> *   this list of conditions and the following disclaimer in the documentation</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> *   and/or other materials provided with the distribution.</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * 3. Neither the name of the copyright holder nor the names of its contributors</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> *   may be used to endorse or promote products derived from this software</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> *   without specific prior written permission.</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS AND CONTRIBUTORS BE</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment"> * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment"> * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment"> * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment"> * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment"> * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment"> * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="comment"> * POSSIBILITY OF SUCH DAMAGE.</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> * Redistribution and use in source and binary forms, with or without</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * modification, are permitted provided that the following conditions are met:</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * 1. Redistributions of source code must retain the above copyright notice,</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> *    this list of conditions and the following disclaimer.</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> * POSSIBILITY OF SUCH DAMAGE.</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#if !defined(INCLUDED_EV4IEEETRAP_H)</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#define INCLUDED_EV4IEEETRAP_H</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;<a class="code" href="../../dd/d00/a00248.html">AlphaIEEETrap.h</a>&quot;</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="foldopen" id="foldopen00030" data-start="{" data-end="}">
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="../../dc/d00/a00338.html#a382816d4d7436c556a67978646a99653">   30</a></span><span class="keyword">constexpr</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../dc/d00/a00338.html#a382816d4d7436c556a67978646a99653">ev4_ieee_divide</a>(std::uint32_t instruction)</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>{</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>  <span class="keyword">const</span> <span class="keyword">auto</span> function = (instruction &gt;&gt; 5) &amp; 0x3f;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>  <span class="keywordflow">return</span> (instruction &gt;&gt; 26) == 0x16 &amp;&amp; (function == 0x03 || function == 0x23);</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>}</div>
+</div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="comment">// license:BSD-3-Clause</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment">// copyright-holders:Aaron Giles, Vas Crabb</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="comment">/***************************************************************************</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="comment"></span> </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment">    coretmpl.h</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment"></span> </div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment">    Core templates for basic non-string types.</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment"></span> </div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment">***************************************************************************/</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="comment">// This file is part of the MAME project (https://www.mamedev.org/).</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="comment">// Cut down for adaptation directly to ES40</span></div>
+<div class="foldopen" id="foldopen00036" data-start="{" data-end="}">
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="../../dc/d00/a00338.html#aa501fc87afd38c1789e319244e93ebfe">   36</a></span><span class="keyword">constexpr</span> <a class="code hl_struct" href="../../d5/d00/a01416.html">AlphaIEEETrapResult</a> <a class="code hl_function" href="../../dc/d00/a00338.html#aa501fc87afd38c1789e319244e93ebfe">ev4_ieee_evaluate</a>(std::uint64_t fpcr, std::uint64_t trap,</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    std::uint32_t instruction_enable, <a class="code hl_enumeration" href="../../dd/d00/a00248.html#a30aba9db4a74bb9372479295f2787bf4">AlphaIEEETrapMasking</a>, std::uint32_t instruction)</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>{</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  <span class="keyword">const</span> <span class="keyword">auto</span> flags = trap &amp; 0x7e;</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  <span class="comment">// Original 21064 DIV never sets FPCR.INE (HRM 2.6/2.7).</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>  <span class="keyword">const</span> <span class="keyword">auto</span> sticky = <a class="code hl_function" href="../../dc/d00/a00338.html#a382816d4d7436c556a67978646a99653">ev4_ieee_divide</a>(instruction) ? flags &amp; ~std<a class="code hl_typedef" href="../../dc/d00/a00194.html#aec6fcb673ff035718c238c8c9d544c47">::uint64_t</a>(0x20) : flags;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  fpcr |= sticky &lt;&lt; 51;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  <span class="keywordflow">if</span> (instruction_enable &amp;&amp; flags)</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keywordflow">return</span> {<span class="keyword">true</span>, flags | ((instruction &amp; 0x8000) ? 1u : 0u), fpcr};</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  <span class="keywordflow">return</span> {<span class="keyword">false</span>, 0, fpcr};</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>}</div>
+</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#ifndef MAME_UTIL_CORETMPL_H</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#define MAME_UTIL_CORETMPL_H</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">#pragma once</span></div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="comment">//#include &quot;osdcomm.h&quot;</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="comment">//#include &quot;vecstream.h&quot;</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#include &lt;array&gt;</span></div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#include &lt;cstddef&gt;</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#include &lt;iterator&gt;</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="preprocessor">#include &lt;numeric&gt;</span></div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="preprocessor">#include &lt;stdexcept&gt;</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">#include &lt;string_view&gt;</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="preprocessor">#include &lt;type_traits&gt;</span></div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="preprocessor">#include &lt;utility&gt;</span></div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span></div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
-<div class="foldopen" id="foldopen00077" data-start="{" data-end="}">
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="../../dd/d00/a00737.html#ga93f0204024d45c489281351a962c40fb">   77</a></span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> U&gt; <span class="keyword">constexpr</span> T <a class="code hl_function" href="../../dd/d00/a00737.html#ga93f0204024d45c489281351a962c40fb">make_bitmask</a>(U n)</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>{</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  <span class="keywordflow">return</span> T((n &lt; (8 * <span class="keyword">sizeof</span>(T)) ? (std::make_unsigned_t&lt;T&gt;(1) &lt;&lt; n) : std::make_unsigned_t&lt;T&gt;(0)) - 1);</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>}</div>
+<div class="foldopen" id="foldopen00048" data-start="{" data-end="}">
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="../../dc/d00/a00338.html#a4a511b3aabc8c0864c96d0566d29d08e">   48</a></span><span class="keyword">constexpr</span> <a class="code hl_struct" href="../../d0/d00/a01420.html">AlphaIEEEInexactRule</a> <a class="code hl_function" href="../../dc/d00/a00338.html#a4a511b3aabc8c0864c96d0566d29d08e">ev4_ieee_describe_inexact</a>(std::uint32_t instruction)</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>{</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="../../dc/d00/a00338.html#a382816d4d7436c556a67978646a99653">ev4_ieee_divide</a>(instruction) ? <a class="code hl_struct" href="../../d0/d00/a01420.html">AlphaIEEEInexactRule</a>{<a class="code hl_enumvalue" href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9ca35721c181ec6a9cca6cdb99dd844d07b">AlphaIEEEInexactKind::Noop</a>, 0}</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    : <a class="code hl_struct" href="../../d0/d00/a01420.html">AlphaIEEEInexactRule</a>{<a class="code hl_enumvalue" href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9ca0f470b5c41655a73edd1e7b50102e251">AlphaIEEEInexactKind::FpcrBitSet</a>, 56};</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>}</div>
 </div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span></div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="../../dd/d00/a00737.html#ga92560fcd09692e2e3836b9bacdf6d956">   93</a></span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> U&gt; <span class="keyword">constexpr</span> T <a class="code hl_function" href="../../dd/d00/a00737.html#ga92560fcd09692e2e3836b9bacdf6d956">BIT</a>(T x, U n) <span class="keyword">noexcept</span> { <span class="keywordflow">return</span> (x &gt;&gt; n) &amp; T(1); }</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span></div>
-<div class="foldopen" id="foldopen00106" data-start="{" data-end="}">
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno"><a class="line" href="../../dd/d00/a00737.html#gaa07fbe38c6e20e2040006c8945464b24">  106</a></span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> U, <span class="keyword">typename</span> V&gt; <span class="keyword">constexpr</span> T <a class="code hl_function" href="../../dd/d00/a00737.html#ga92560fcd09692e2e3836b9bacdf6d956">BIT</a>(T x, U n, V w)</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>{</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  <span class="keywordflow">return</span> (x &gt;&gt; n) &amp; <a class="code hl_function" href="../../dd/d00/a00737.html#ga93f0204024d45c489281351a962c40fb">make_bitmask&lt;T&gt;</a>(w);</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>}</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="foldopen" id="foldopen00054" data-start="{" data-end="}">
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="../../dc/d00/a00338.html#a6bb3d7fed31a8c18045e3e95aaee9b5b">   54</a></span><span class="keyword">constexpr</span> std::uint64_t <a class="code hl_function" href="../../dc/d00/a00338.html#a6bb3d7fed31a8c18045e3e95aaee9b5b">ev4_ieee_underflow_result</a>(<span class="keywordtype">bool</span>)</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>{</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  <span class="keywordflow">return</span> 0; <span class="comment">// Underflow produces positive zero.</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>}</div>
 </div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span></div>
-<div class="foldopen" id="foldopen00127" data-start="{" data-end="}">
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno"><a class="line" href="../../dd/d00/a00737.html#ga1b8f1def956d0b8414880cc564dd9660">  127</a></span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> U, <span class="keyword">typename</span>... V&gt; <span class="keyword">constexpr</span> T <a class="code hl_function" href="../../dd/d00/a00737.html#ga1b8f1def956d0b8414880cc564dd9660">bitswap</a>(T val, U b, V... c) <span class="keyword">noexcept</span></div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>{</div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>  <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (<span class="keyword">sizeof</span>...(c) &gt; 0U)</div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="keywordflow">return</span> (<a class="code hl_function" href="../../dd/d00/a00737.html#ga92560fcd09692e2e3836b9bacdf6d956">BIT</a>(val, b) &lt;&lt; <span class="keyword">sizeof</span>...(c)) | <a class="code hl_function" href="../../dd/d00/a00737.html#ga1b8f1def956d0b8414880cc564dd9660">bitswap</a>(val, c...);</div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>  <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../dd/d00/a00737.html#ga92560fcd09692e2e3836b9bacdf6d956">BIT</a>(val, b);</div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>}</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="foldopen" id="foldopen00059" data-start="{" data-end="};">
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="../../dc/d00/a00338.html#a984dfa3abfd3fb13143bd5e98098ab5a">   59</a></span><span class="keyword">inline</span> <span class="keyword">constexpr</span> <a class="code hl_struct" href="../../d5/d00/a01424.html">AlphaIEEETrapPolicy</a> <a class="code hl_variable" href="../../dc/d00/a00338.html#a984dfa3abfd3fb13143bd5e98098ab5a">kEv4IEEETrapPolicy</a>{</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  &amp;<a class="code hl_function" href="../../dc/d00/a00338.html#aa501fc87afd38c1789e319244e93ebfe">ev4_ieee_evaluate</a>, &amp;<a class="code hl_function" href="../../dc/d00/a00338.html#a4a511b3aabc8c0864c96d0566d29d08e">ev4_ieee_describe_inexact</a>, &amp;<a class="code hl_function" href="../../dc/d00/a00338.html#a6bb3d7fed31a8c18045e3e95aaee9b5b">ev4_ieee_underflow_result</a>, <span class="keyword">nullptr</span>,</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  <span class="keyword">static_cast&lt;</span>std::uint32_t<span class="keyword">&gt;</span>(<a class="code hl_enumvalue" href="../../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6aeb2ac5b04180d8d6011a016aeb8f75b3">AlphaIEEENonfiniteInput::Infinity</a>)</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    | <span class="keyword">static_cast&lt;</span>std::uint32_t<span class="keyword">&gt;</span>(<a class="code hl_enumvalue" href="../../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6a9fb0a0af84dd973affb54be00c226af9">AlphaIEEENonfiniteInput::QuietNaN</a>)</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    | <span class="keyword">static_cast&lt;</span>std::uint32_t<span class="keyword">&gt;</span>(<a class="code hl_enumvalue" href="../../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6ae895e2f2464e7dc5bc8d6abf30b2d6f8">AlphaIEEENonfiniteInput::SignalingNaN</a>),</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>  <span class="keyword">false</span>, <span class="keyword">true</span>, <span class="keyword">true</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>};</div>
 </div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span></div>
-<div class="foldopen" id="foldopen00156" data-start="{" data-end="}">
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno"><a class="line" href="../../dd/d00/a00737.html#ga4c9d87a69dc4875e8591d5cc1ac07bb9">  156</a></span><span class="keyword">template</span> &lt;<span class="keywordtype">unsigned</span> B, <span class="keyword">typename</span> T, <span class="keyword">typename</span>... U&gt; <span class="keyword">constexpr</span> T <a class="code hl_function" href="../../dd/d00/a00737.html#ga1b8f1def956d0b8414880cc564dd9660">bitswap</a>(T val, U... b) <span class="keyword">noexcept</span></div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>{</div>
-<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>  <span class="keyword">static_assert</span>(<span class="keyword">sizeof</span>...(b) == B, <span class="stringliteral">&quot;wrong number of bits&quot;</span>);</div>
-<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>  <span class="keyword">static_assert</span>((<span class="keyword">sizeof</span>(std::remove_reference_t&lt;T&gt;) * 8) &gt;= B, <span class="stringliteral">&quot;return type too small for result&quot;</span>);</div>
-<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="../../dd/d00/a00737.html#ga1b8f1def956d0b8414880cc564dd9660">bitswap</a>(val, b...);</div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>}</div>
-</div>
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span></div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span> </div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="aa00737_html_ga1b8f1def956d0b8414880cc564dd9660"><div class="ttname"><a href="../../dd/d00/a00737.html#ga1b8f1def956d0b8414880cc564dd9660">bitswap</a></div><div class="ttdeci">constexpr T bitswap(T val, U b, V... c) noexcept</div><div class="ttdoc">Extract bits in arbitrary order.</div><div class="ttdef"><b>Definition</b> <a href="#l00127">coretmpl.h:127</a></div></div>
-<div class="ttc" id="aa00737_html_ga92560fcd09692e2e3836b9bacdf6d956"><div class="ttname"><a href="../../dd/d00/a00737.html#ga92560fcd09692e2e3836b9bacdf6d956">BIT</a></div><div class="ttdeci">constexpr T BIT(T x, U n) noexcept</div><div class="ttdoc">Extract a single bit from an integer.</div><div class="ttdef"><b>Definition</b> <a href="#l00093">coretmpl.h:93</a></div></div>
-<div class="ttc" id="aa00737_html_ga93f0204024d45c489281351a962c40fb"><div class="ttname"><a href="../../dd/d00/a00737.html#ga93f0204024d45c489281351a962c40fb">make_bitmask</a></div><div class="ttdeci">constexpr T make_bitmask(U n)</div><div class="ttdoc">Generate a right-aligned bit mask.</div><div class="ttdef"><b>Definition</b> <a href="#l00077">coretmpl.h:77</a></div></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aa00194_html_aec6fcb673ff035718c238c8c9d544c47"><div class="ttname"><a href="../../dc/d00/a00194.html#aec6fcb673ff035718c238c8c9d544c47">uint64_t</a></div><div class="ttdeci">unsigned __int64 uint64_t</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00194_source.html#l00337">config_vms.h:337</a></div></div>
+<div class="ttc" id="aa00248_html"><div class="ttname"><a href="../../dd/d00/a00248.html">AlphaIEEETrap.h</a></div></div>
+<div class="ttc" id="aa00248_html_a1724134c85a96c5499dc8d4152bf10a6a9fb0a0af84dd973affb54be00c226af9"><div class="ttname"><a href="../../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6a9fb0a0af84dd973affb54be00c226af9">AlphaIEEENonfiniteInput::QuietNaN</a></div><div class="ttdeci">@ QuietNaN</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d00/a00248_source.html#l00058">AlphaIEEETrap.h:58</a></div></div>
+<div class="ttc" id="aa00248_html_a1724134c85a96c5499dc8d4152bf10a6ae895e2f2464e7dc5bc8d6abf30b2d6f8"><div class="ttname"><a href="../../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6ae895e2f2464e7dc5bc8d6abf30b2d6f8">AlphaIEEENonfiniteInput::SignalingNaN</a></div><div class="ttdeci">@ SignalingNaN</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d00/a00248_source.html#l00059">AlphaIEEETrap.h:59</a></div></div>
+<div class="ttc" id="aa00248_html_a1724134c85a96c5499dc8d4152bf10a6aeb2ac5b04180d8d6011a016aeb8f75b3"><div class="ttname"><a href="../../dd/d00/a00248.html#a1724134c85a96c5499dc8d4152bf10a6aeb2ac5b04180d8d6011a016aeb8f75b3">AlphaIEEENonfiniteInput::Infinity</a></div><div class="ttdeci">@ Infinity</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d00/a00248_source.html#l00057">AlphaIEEETrap.h:57</a></div></div>
+<div class="ttc" id="aa00248_html_a30aba9db4a74bb9372479295f2787bf4"><div class="ttname"><a href="../../dd/d00/a00248.html#a30aba9db4a74bb9372479295f2787bf4">AlphaIEEETrapMasking</a></div><div class="ttdeci">AlphaIEEETrapMasking</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d00/a00248_source.html#l00063">AlphaIEEETrap.h:64</a></div></div>
+<div class="ttc" id="aa00248_html_a8ee8f1dc2a1d2eae7c5a63989dc55b9ca0f470b5c41655a73edd1e7b50102e251"><div class="ttname"><a href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9ca0f470b5c41655a73edd1e7b50102e251">AlphaIEEEInexactKind::FpcrBitSet</a></div><div class="ttdeci">@ FpcrBitSet</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d00/a00248_source.html#l00041">AlphaIEEETrap.h:41</a></div></div>
+<div class="ttc" id="aa00248_html_a8ee8f1dc2a1d2eae7c5a63989dc55b9ca35721c181ec6a9cca6cdb99dd844d07b"><div class="ttname"><a href="../../dd/d00/a00248.html#a8ee8f1dc2a1d2eae7c5a63989dc55b9ca35721c181ec6a9cca6cdb99dd844d07b">AlphaIEEEInexactKind::Noop</a></div><div class="ttdeci">@ Noop</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d00/a00248_source.html#l00040">AlphaIEEETrap.h:40</a></div></div>
+<div class="ttc" id="aa00338_html_a382816d4d7436c556a67978646a99653"><div class="ttname"><a href="../../dc/d00/a00338.html#a382816d4d7436c556a67978646a99653">ev4_ieee_divide</a></div><div class="ttdeci">constexpr bool ev4_ieee_divide(std::uint32_t instruction)</div><div class="ttdef"><b>Definition</b> <a href="#l00030">Ev4IEEETrap.h:30</a></div></div>
+<div class="ttc" id="aa00338_html_a4a511b3aabc8c0864c96d0566d29d08e"><div class="ttname"><a href="../../dc/d00/a00338.html#a4a511b3aabc8c0864c96d0566d29d08e">ev4_ieee_describe_inexact</a></div><div class="ttdeci">constexpr AlphaIEEEInexactRule ev4_ieee_describe_inexact(std::uint32_t instruction)</div><div class="ttdef"><b>Definition</b> <a href="#l00048">Ev4IEEETrap.h:48</a></div></div>
+<div class="ttc" id="aa00338_html_a6bb3d7fed31a8c18045e3e95aaee9b5b"><div class="ttname"><a href="../../dc/d00/a00338.html#a6bb3d7fed31a8c18045e3e95aaee9b5b">ev4_ieee_underflow_result</a></div><div class="ttdeci">constexpr std::uint64_t ev4_ieee_underflow_result(bool)</div><div class="ttdef"><b>Definition</b> <a href="#l00054">Ev4IEEETrap.h:54</a></div></div>
+<div class="ttc" id="aa00338_html_a984dfa3abfd3fb13143bd5e98098ab5a"><div class="ttname"><a href="../../dc/d00/a00338.html#a984dfa3abfd3fb13143bd5e98098ab5a">kEv4IEEETrapPolicy</a></div><div class="ttdeci">constexpr AlphaIEEETrapPolicy kEv4IEEETrapPolicy</div><div class="ttdef"><b>Definition</b> <a href="#l00059">Ev4IEEETrap.h:59</a></div></div>
+<div class="ttc" id="aa00338_html_aa501fc87afd38c1789e319244e93ebfe"><div class="ttname"><a href="../../dc/d00/a00338.html#aa501fc87afd38c1789e319244e93ebfe">ev4_ieee_evaluate</a></div><div class="ttdeci">constexpr AlphaIEEETrapResult ev4_ieee_evaluate(std::uint64_t fpcr, std::uint64_t trap, std::uint32_t instruction_enable, AlphaIEEETrapMasking, std::uint32_t instruction)</div><div class="ttdef"><b>Definition</b> <a href="#l00036">Ev4IEEETrap.h:36</a></div></div>
+<div class="ttc" id="aa01416_html"><div class="ttname"><a href="../../d5/d00/a01416.html">AlphaIEEETrapResult</a></div><div class="ttdef"><b>Definition</b> <a href="../../dd/d00/a00248_source.html#l00030">AlphaIEEETrap.h:31</a></div></div>
+<div class="ttc" id="aa01420_html"><div class="ttname"><a href="../../d0/d00/a01420.html">AlphaIEEEInexactRule</a></div><div class="ttdef"><b>Definition</b> <a href="../../dd/d00/a00248_source.html#l00044">AlphaIEEETrap.h:45</a></div></div>
+<div class="ttc" id="aa01424_html"><div class="ttname"><a href="../../d5/d00/a01424.html">AlphaIEEETrapPolicy</a></div><div class="ttdef"><b>Definition</b> <a href="../../dd/d00/a00248_source.html#l00069">AlphaIEEETrap.h:70</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_450cafc1c0b54ccdbdec0997809be7cf.html">emu</a></li><li class="navelem"><a href="../../dc/d00/a00338.html">coretmpl.h</a></li>
+    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../dc/d00/a00338.html">Ev4IEEETrap.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

@@ -1,12 +1,9 @@
 var a00821 =
 [
-    [ "SetupGuard", "d6/d00/a00821.html#aee1f71eafd169dbb2974f7645088546d", null ],
-    [ "~SetupGuard", "d6/d00/a00821.html#a663622e627278311f1f98b24b90b629a", null ],
-    [ "SetupGuard", "d6/d00/a00821.html#a35b549d8b802a719089ab6ad3e4fe159", null ],
-    [ "complete", "d6/d00/a00821.html#a560782e8b3426f107f21746fad7c3b0f", null ],
-    [ "operator=", "d6/d00/a00821.html#a544d6c3feb884c25077be38dbc04bc5f", null ],
-    [ "active_", "d6/d00/a00821.html#a84fd534373f49e5aabd6dcea250710bd", null ],
-    [ "backend_", "d6/d00/a00821.html#ab52b0b3d63f64e0876d0dde883df92c1", null ],
-    [ "devices_", "d6/d00/a00821.html#a103bddcfcaf9dc37fb660cadb91db7ff", null ],
-    [ "streams_", "d6/d00/a00821.html#a501ce8ebc8ab57d770c613d639f8ac30", null ]
+    [ "cmdinfo_t", "d3/d00/a02360.html", "d3/d00/a02360" ],
+    [ "FDC_DEBUG", "d6/d00/a00821.html#a387a53e350ddacd1d9d2d1c1c7cdf5e2", null ],
+    [ "cmdinfo", "d6/d00/a00821.html#a8103ccf2cbcb21f5fe21ef1cd4d66780", null ],
+    [ "datarate_name", "d6/d00/a00821.html#a1d4870032ce3e30f76f0a74aca0d7020", null ],
+    [ "fdc_magic1", "d6/d00/a00821.html#a9c715258efb93f0f4595adb90043c21c", null ],
+    [ "fdc_magic2", "d6/d00/a00821.html#ab663ab2daf3db712c79998070faec1a0", null ]
 ];

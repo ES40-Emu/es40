@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: network/NetworkVmnet.cpp Source File</title>
+<title>ES40: gui/keymap.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.95</span>
    </div>
   </td>
  </tr>
@@ -109,299 +109,109 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('d2/d00/a00593_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">NetworkVmnet.cpp</div></div>
+  <div class="headertitle"><div class="title">keymap.h</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../d2/d00/a00593.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 Emulator.</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2026 by Gary Palter</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright (C) 2026 by Antoni Sawicki</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Copyright (C) 2026 by gdwnldsKSC</span></div>
+<a href="../../d2/d00/a00593.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/* ES40 emulator.</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Copyright (C) 2007-2008 by the ES40 Emulator Project</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> * WWW    : https://github.com/ES40-Emu/es40</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> *  This file is based upon Bochs.</span></div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> * This program is free software; you can redistribute it and/or</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> * modify it under the terms of the GNU General Public License</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> * as published by the Free Software Foundation; either version 2</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> * of the License, or (at your option) any later version.</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> * This program is distributed in the hope that it will be useful,</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> * GNU General Public License for more details.</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> * You should have received a copy of the GNU General Public License</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> * along with this program; if not, write to the Free Software</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> * Although this is not required, the author would appreciate being notified of,</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> * and receiving any modifications you may make to the source code that might serve</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> * the general public.</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"> *  Copyright (C) 2002  MandrakeSoft S.A.</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"> *    MandrakeSoft S.A.</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment"> *    43, rue d&#39;Aboukir</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> *    75002 Paris - France</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> *    http://www.linux-mandrake.com/</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> *    http://www.mandrakesoft.com/</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> *  This library is free software; you can redistribute it and/or</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> *  modify it under the terms of the GNU Lesser General Public</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> *  License as published by the Free Software Foundation; either</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment"> *  version 2 of the License, or (at your option) any later version.</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment"> *  This library is distributed in the hope that it will be useful,</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment"> *  but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment"> *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment"> *  Lesser General Public License for more details.</span></div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> */</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;<a class="code" href="../../d6/d00/a00626.html">../StdAfx.h</a>&quot;</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#if defined(HAVE_VMNET)</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &quot;<a class="code" href="../../dc/d00/a00596.html">NetworkVmnet.h</a>&quot;</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &quot;<a class="code" href="../../d5/d00/a00602.html">NetworkVmnetIPC.h</a>&quot;</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &quot;<a class="code" href="../../d4/d00/a00116.html">config/Configurator.h</a>&quot;</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#include &lt;vmnet/vmnet.h&gt;</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#include &lt;xpc/xpc.h&gt;</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#include &lt;errno.h&gt;</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#include &lt;string.h&gt;</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>CNetworkVmnet::CNetworkVmnet():</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        ipc(nullptr),</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        max_packet_size(0),</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        rx_buf(nullptr),</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        dead(false),</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        devid_for_log(nullptr) {</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>}</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>CNetworkVmnet::~CNetworkVmnet() { close(); }</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="keyword">const</span> <span class="keywordtype">char</span> *strvmnetstatus (vmnet_return_t status) {</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        <span class="keywordflow">switch</span> (status) {</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        <span class="keywordflow">case</span> VMNET_SUCCESS:</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>                <span class="keywordflow">return</span> <span class="stringliteral">&quot;Successfully completed.&quot;</span>;</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        <span class="keywordflow">case</span> VMNET_FAILURE:</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>                <span class="keywordflow">return</span> <span class="stringliteral">&quot;General failure.&quot;</span>;</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        <span class="keywordflow">case</span> VMNET_MEM_FAILURE:</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>                <span class="keywordflow">return</span> <span class="stringliteral">&quot;Memory allocation failure.&quot;</span>;</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        <span class="keywordflow">case</span> VMNET_INVALID_ARGUMENT:</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>                <span class="keywordflow">return</span> <span class="stringliteral">&quot;Invalid argument specified.&quot;</span>;</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        <span class="keywordflow">case</span> VMNET_SETUP_INCOMPLETE:</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>                <span class="keywordflow">return</span> <span class="stringliteral">&quot;Interface setup is not complete.&quot;</span>;</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        <span class="keywordflow">case</span> VMNET_INVALID_ACCESS:</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>                <span class="keywordflow">return</span> <span class="stringliteral">&quot;Permission denied.&quot;</span>;</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <span class="keywordflow">case</span> VMNET_PACKET_TOO_BIG:</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>                <span class="keywordflow">return</span> <span class="stringliteral">&quot;Packet size larger than MTU.&quot;</span>;</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        <span class="keywordflow">case</span> VMNET_BUFFER_EXHAUSTED:</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>                <span class="keywordflow">return</span> <span class="stringliteral">&quot;Buffers exhausted in kernel.&quot;</span>;</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <span class="keywordflow">case</span> VMNET_TOO_MANY_PACKETS:</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>                <span class="keywordflow">return</span> <span class="stringliteral">&quot;Packet count exceeds limit.&quot;</span>;</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        <span class="keywordflow">case</span> VMNET_SHARING_SERVICE_BUSY:</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>                <span class="keywordflow">return</span> <span class="stringliteral">&quot;vmnet interface cannot be started as conflicting sharing service is in use.&quot;</span>;</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <span class="keywordflow">case</span> VMNET_NOT_AUTHORIZED:</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>                <span class="keywordflow">return</span> <span class="stringliteral">&quot;The operation could not be completed due to missing authorization.&quot;</span>;</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        <span class="keywordflow">default</span>:</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>                <span class="keywordflow">return</span> <span class="stringliteral">&quot;Unknown status code&quot;</span>;</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        }</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>}</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="keywordtype">bool</span> CNetworkVmnet::init(<span class="keyword">const</span> <span class="keywordtype">char</span> *devid_string, <a class="code hl_class" href="../../d2/d00/a01085.html">CConfigurator</a> *cfg)</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>{</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>        <span class="keywordtype">bool</span> success;</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        xpc_object_t interface_names = vmnet_copy_shared_interface_list ();</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        <span class="keywordtype">int</span> n_interfaces, i;</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        <span class="keywordtype">char</span> *adapter = cfg-&gt;<a class="code hl_function" href="../../d2/d00/a01085.html#a36498889497191fbc49ebf533c0d3d36">get_text_value</a> (<span class="stringliteral">&quot;adapter&quot;</span>);</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        <span class="keywordtype">char</span> *interface;</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        <span class="keywordtype">char</span> selected_adapter[IFNAMSIZ];</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        <span class="keyword">struct </span><a class="code hl_struct" href="../../d7/d00/a01885.html">es40_vmnet_open_reply</a> reply;</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        devid_for_log = devid_string;</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        dead = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        <span class="keywordflow">if</span> (interface_names == <span class="keyword">nullptr</span>) {</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>                printf (<span class="stringliteral">&quot;%s: Cannot get list of vmnet capable interfaces.\n&quot;</span>, devid_for_log);</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>        } <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>                n_interfaces = xpc_array_get_count (interface_names);</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>        <span class="keywordflow">if</span> (adapter &amp;&amp; adapter[0]) {</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>                <span class="comment">// Verify that vmnet can use this adapter</span></div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>                <span class="keywordflow">for</span> (i = 0; i &lt; n_interfaces; i++) {</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>                        <span class="keyword">interface </span>= (char *) xpc_array_get_string (interface_names, i);</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>                        <span class="keywordflow">if</span> (strncmp (adapter, interface, IFNAMSIZ) == 0)</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>                                <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>                }</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>                <span class="keywordflow">if</span> (n_interfaces == i) {</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>                        printf (<span class="stringliteral">&quot;%s: Adapter %s cannot serve as a bridge.\n&quot;</span>, devid_for_log, adapter);</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>                        xpc_release (interface_names);</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>                        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>                }</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>        }</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>        <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>                <span class="comment">// Use the first vmnet capable interface</span></div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>                <span class="keywordflow">if</span> (n_interfaces == 0) {</div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>                        xpc_release (interface_names);</div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>                        printf (<span class="stringliteral">&quot;%s: No network interfaces available to serve as a bridge.\n&quot;</span>, devid_for_log);</div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>                        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>                }</div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>                adapter = (<span class="keywordtype">char</span> *) xpc_array_get_string (interface_names, 0);</div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        }</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>        strlcpy (selected_adapter, adapter, <span class="keyword">sizeof</span>(selected_adapter));</div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>        xpc_release (interface_names);</div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>        ipc = <span class="keyword">new</span> <a class="code hl_function" href="../../de/d00/a01873.html#a640dc5d9d7b52c1769a2b9bebebfba0b">CNetworkVmnetIPC</a>();</div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>        memset(&amp;reply, 0, <span class="keyword">sizeof</span>(reply));</div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>        success = ipc-&gt;start(devid_string, selected_adapter, &amp;reply);</div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span> </div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>        <span class="comment">// Drop privileges if allowed</span></div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>        <span class="keywordflow">if</span> (cfg-&gt;<a class="code hl_function" href="../../d2/d00/a01085.html#af9012af5270145f47ebdf88e857290db">get_bool_value</a> (<span class="stringliteral">&quot;drop_privileges&quot;</span>, <span class="keyword">true</span>)) {</div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>                seteuid (getuid ());</div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>                setegid (getgid ());</div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>        }</div>
-<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>        <span class="keywordflow">if</span> (!success) {</div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>                close();</div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>        }</div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>        <span class="keywordflow">if</span> (reply.msg.type != <a class="code hl_enumvalue" href="../../d0/d00/a00605.html#a41001c1dee37072dcccb49e65462a74ca6b3a9051b75393b711746d5156c2259d">ES40_VMNET_MSG_OPEN_REPLY</a> ||</div>
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>                reply.magic != <a class="code hl_define" href="../../d0/d00/a00605.html#a48f9395342c895af883b0223cc6c1d26">ES40_VMNET_PROTO_MAGIC</a> ||</div>
-<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>                reply.version != <a class="code hl_define" href="../../d0/d00/a00605.html#ae040efee058d8ef9ecd36a6f5b650144">ES40_VMNET_PROTO_VERSION</a>) {</div>
-<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>                printf(<span class="stringliteral">&quot;%s: %s uses an incompatible vmnet protocol.\n&quot;</span>,</div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>                        devid_for_log, ipc-&gt;get_helper_path());</div>
-<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>                close();</div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>        }</div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>        <span class="keywordflow">if</span> (reply.status != <a class="code hl_define" href="../../d0/d00/a00605.html#af8538c2f718f983d2fd04f69952974bc">ES40_VMNET_STATUS_OK</a>) {</div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>                <span class="keywordflow">if</span> (reply.status == <a class="code hl_define" href="../../d0/d00/a00605.html#aff0436d89b3cfc41a04d24a51e2b24a9">ES40_VMNET_STATUS_HELPER_ERROR</a>) {</div>
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>                        printf(<span class="stringliteral">&quot;%s: vmnet helper failed: %s\n&quot;</span>, devid_for_log,</div>
-<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>                                strerror(reply.system_error));</div>
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>                } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>                        printf(<span class="stringliteral">&quot;%s: Unable to start vmnet on %s: %s\n&quot;</span>,</div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>                                devid_for_log, selected_adapter,</div>
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>                                strvmnetstatus((vmnet_return_t)reply.status));</div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>                }</div>
-<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>                <span class="keywordflow">if</span> (reply.helper_euid != 0) {</div>
-<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>                        printf(<span class="stringliteral">&quot;%s: %s must be installed setuid root.\n&quot;</span>,</div>
-<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>                                devid_for_log, ipc-&gt;get_helper_path());</div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>                }</div>
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>                close();</div>
-<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>        }</div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>        <span class="keywordflow">if</span> (reply.max_packet_size == 0 ||</div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>                reply.max_packet_size &gt; <a class="code hl_define" href="../../d0/d00/a00605.html#a20476203e3e7e79fa5ae5e217fae290b">ES40_VMNET_MAX_FRAME</a>) {</div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>                printf(<span class="stringliteral">&quot;%s: vmnet reported an invalid maximum packet size (%u).\n&quot;</span>,</div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>                        devid_for_log, reply.max_packet_size);</div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>                close();</div>
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>        }</div>
-<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span> </div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>        max_packet_size = reply.max_packet_size;</div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>        rx_buf = malloc(max_packet_size);</div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>        <span class="keywordflow">if</span> (rx_buf == <span class="keyword">nullptr</span>) {</div>
-<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>                printf(<span class="stringliteral">&quot;%s: Cannot allocate vmnet receive buffer.\n&quot;</span>,</div>
-<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>                        devid_for_log);</div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>                close();</div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>        }</div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span> </div>
-<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>}</div>
-<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span> </div>
-<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span><span class="keywordtype">void</span> CNetworkVmnet::report_dead(<span class="keyword">const</span> <span class="keywordtype">char</span> *why)</div>
-<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>{</div>
-<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>        <span class="keywordflow">if</span> (!dead)</div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>                printf(<span class="stringliteral">&quot;%s: vmnet helper connection lost: %s\n&quot;</span>,</div>
-<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>                        devid_for_log, why);</div>
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>        dead = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>}</div>
-<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span> </div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span><span class="keywordtype">int</span> CNetworkVmnet::send(<span class="keyword">const</span> <a class="code hl_typedef" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> *data, <span class="keywordtype">int</span> len)</div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>{</div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        <span class="keywordflow">if</span> (ipc == <span class="keyword">nullptr</span> || dead)</div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>                <span class="keywordflow">return</span> -1;</div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>        <span class="keywordflow">if</span> (len &lt;= 0 || (<a class="code hl_typedef" href="../../d5/d00/a00176.html#aec6fcb673ff035718c238c8c9d544c47">uint64_t</a>)len &gt; max_packet_size)</div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>                <span class="keywordflow">return</span> -1;</div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>        <span class="keywordflow">if</span> (ipc-&gt;send_packet(data, (<span class="keywordtype">size_t</span>)len) == 0)</div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>                <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>        report_dead(strerror(errno));</div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>        <span class="keywordflow">return</span> -1;</div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>}</div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span> </div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span><span class="keywordtype">int</span> CNetworkVmnet::receive(<span class="keyword">const</span> <a class="code hl_typedef" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> **data, <span class="keywordtype">int</span> *len)</div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>{</div>
-<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>        <span class="keywordflow">if</span> (ipc == <span class="keyword">nullptr</span> || dead)</div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>                <span class="keywordflow">return</span> -1;</div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span> </div>
-<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>        <span class="keywordflow">for</span> (;;) {</div>
-<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>                <span class="keyword">struct </span><a class="code hl_struct" href="../../d9/d00/a01889.html">es40_vmnet_status</a> <a class="code hl_variable" href="../../d9/d00/a01889.html#a65d0c7d893e6e196434765793e24fa48">status</a>;</div>
-<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>                <span class="keywordtype">int</span> result = ipc-&gt;receive(rx_buf, max_packet_size, len, &amp;<a class="code hl_variable" href="../../d9/d00/a01889.html#a65d0c7d893e6e196434765793e24fa48">status</a>);</div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>                <span class="keywordflow">if</span> (result == 1) {</div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>                        *data = (<span class="keyword">const</span> <a class="code hl_typedef" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> *)rx_buf;</div>
-<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>                        <span class="keywordflow">return</span> 1;</div>
-<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>                }</div>
-<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>                <span class="keywordflow">if</span> (result == 0)</div>
-<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>                        <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>                <span class="keywordflow">if</span> (result &lt; 0) {</div>
-<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>                        report_dead(strerror(errno));</div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>                        <span class="keywordflow">return</span> -1;</div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>                }</div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span> </div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>                <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code hl_variable" href="../../d9/d00/a01889.html#a729fca7339aab7cb7b7efc26df72d1eb">operation</a> = <a class="code hl_variable" href="../../d9/d00/a01889.html#a65d0c7d893e6e196434765793e24fa48">status</a>.<a class="code hl_variable" href="../../d9/d00/a01889.html#a729fca7339aab7cb7b7efc26df72d1eb">operation</a> == <a class="code hl_enumvalue" href="../../d0/d00/a00605.html#a55f3cfb317f6d99eecad86136ecff215aa8cb30a55efa0ae2450991c79c67e8f4">ES40_VMNET_OP_READ</a> ?</div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>                        <span class="stringliteral">&quot;receiving&quot;</span> : <span class="stringliteral">&quot;sending&quot;</span>;</div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>                printf(<span class="stringliteral">&quot;%s: Error %s packet: %s\n&quot;</span>, devid_for_log, <a class="code hl_variable" href="../../d9/d00/a01889.html#a729fca7339aab7cb7b7efc26df72d1eb">operation</a>,</div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>                        strvmnetstatus((vmnet_return_t)<a class="code hl_variable" href="../../d9/d00/a01889.html#a65d0c7d893e6e196434765793e24fa48">status</a>.status));</div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>        }</div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>}</div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span> </div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span><span class="keywordtype">void</span> CNetworkVmnet::set_filter (<a class="code hl_typedef" href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> mac_list[][6], <span class="keywordtype">int</span> num_macs,</div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>                                <span class="keywordtype">bool</span> promiscuous, <span class="keywordtype">bool</span> receive_all,</div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>                                <span class="keywordtype">bool</span> pass_multicast, <span class="keywordtype">bool</span> inverse)</div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>{</div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        <span class="comment">// The vmnet framework only delivers packets intended for this interface.</span></div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        <span class="comment">// The emulated NIC&#39;s own setup-frame handling still does perfect/hash</span></div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>        <span class="comment">// filtering in software for anything delivered here.</span></div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>        (void) mac_list;</div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>        (void) num_macs;</div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>        (void) promiscuous;</div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>        (void) receive_all;</div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>        (void) pass_multicast;</div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>        (void) inverse;</div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span> </div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>}</div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span> </div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span><span class="keywordtype">void</span> CNetworkVmnet::close()</div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>{</div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>        <span class="keywordflow">if</span> (ipc != <span class="keyword">nullptr</span>) {</div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>                <span class="keyword">delete</span> ipc;</div>
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>                ipc = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>        }</div>
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>        <span class="keywordflow">if</span> (rx_buf != <span class="keyword">nullptr</span>) {</div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>                free(rx_buf);</div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>                rx_buf = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>        }</div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>        max_packet_size = 0;</div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>        dead = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>}</div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span> </div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span><span class="preprocessor">#endif </span><span class="comment">/* defined(HAVE_VMNET)  */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aa00116_html"><div class="ttname"><a href="../../d4/d00/a00116.html">Configurator.h</a></div><div class="ttdoc">Contains the definitions for the configuration file interpreter.</div></div>
-<div class="ttc" id="aa00176_html_aec6fcb673ff035718c238c8c9d544c47"><div class="ttname"><a href="../../d5/d00/a00176.html#aec6fcb673ff035718c238c8c9d544c47">uint64_t</a></div><div class="ttdeci">unsigned __int64 uint64_t</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00176_source.html#l00337">config_vms.h:337</a></div></div>
-<div class="ttc" id="aa00326_html_a987e4d6cf789cb59dbb390728271e4d6"><div class="ttname"><a href="../../d8/d00/a00326.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a></div><div class="ttdeci">uint8_t u8</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d00/a00326_source.html#l00123">datatypes.h:123</a></div></div>
-<div class="ttc" id="aa00596_html"><div class="ttname"><a href="../../dc/d00/a00596.html">NetworkVmnet.h</a></div><div class="ttdoc">vmnet network backend</div></div>
-<div class="ttc" id="aa00602_html"><div class="ttname"><a href="../../d5/d00/a00602.html">NetworkVmnetIPC.h</a></div></div>
-<div class="ttc" id="aa00605_html_a20476203e3e7e79fa5ae5e217fae290b"><div class="ttname"><a href="../../d0/d00/a00605.html#a20476203e3e7e79fa5ae5e217fae290b">ES40_VMNET_MAX_FRAME</a></div><div class="ttdeci">#define ES40_VMNET_MAX_FRAME</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d00/a00605_source.html#l00042">NetworkVmnetProto.h:42</a></div></div>
-<div class="ttc" id="aa00605_html_a41001c1dee37072dcccb49e65462a74ca6b3a9051b75393b711746d5156c2259d"><div class="ttname"><a href="../../d0/d00/a00605.html#a41001c1dee37072dcccb49e65462a74ca6b3a9051b75393b711746d5156c2259d">ES40_VMNET_MSG_OPEN_REPLY</a></div><div class="ttdeci">@ ES40_VMNET_MSG_OPEN_REPLY</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d00/a00605_source.html#l00046">NetworkVmnetProto.h:46</a></div></div>
-<div class="ttc" id="aa00605_html_a48f9395342c895af883b0223cc6c1d26"><div class="ttname"><a href="../../d0/d00/a00605.html#a48f9395342c895af883b0223cc6c1d26">ES40_VMNET_PROTO_MAGIC</a></div><div class="ttdeci">#define ES40_VMNET_PROTO_MAGIC</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d00/a00605_source.html#l00040">NetworkVmnetProto.h:40</a></div></div>
-<div class="ttc" id="aa00605_html_a55f3cfb317f6d99eecad86136ecff215aa8cb30a55efa0ae2450991c79c67e8f4"><div class="ttname"><a href="../../d0/d00/a00605.html#a55f3cfb317f6d99eecad86136ecff215aa8cb30a55efa0ae2450991c79c67e8f4">ES40_VMNET_OP_READ</a></div><div class="ttdeci">@ ES40_VMNET_OP_READ</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d00/a00605_source.html#l00053">NetworkVmnetProto.h:53</a></div></div>
-<div class="ttc" id="aa00605_html_ae040efee058d8ef9ecd36a6f5b650144"><div class="ttname"><a href="../../d0/d00/a00605.html#ae040efee058d8ef9ecd36a6f5b650144">ES40_VMNET_PROTO_VERSION</a></div><div class="ttdeci">#define ES40_VMNET_PROTO_VERSION</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d00/a00605_source.html#l00041">NetworkVmnetProto.h:41</a></div></div>
-<div class="ttc" id="aa00605_html_af8538c2f718f983d2fd04f69952974bc"><div class="ttname"><a href="../../d0/d00/a00605.html#af8538c2f718f983d2fd04f69952974bc">ES40_VMNET_STATUS_OK</a></div><div class="ttdeci">#define ES40_VMNET_STATUS_OK</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d00/a00605_source.html#l00057">NetworkVmnetProto.h:57</a></div></div>
-<div class="ttc" id="aa00605_html_aff0436d89b3cfc41a04d24a51e2b24a9"><div class="ttname"><a href="../../d0/d00/a00605.html#aff0436d89b3cfc41a04d24a51e2b24a9">ES40_VMNET_STATUS_HELPER_ERROR</a></div><div class="ttdeci">#define ES40_VMNET_STATUS_HELPER_ERROR</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d00/a00605_source.html#l00058">NetworkVmnetProto.h:58</a></div></div>
-<div class="ttc" id="aa00626_html"><div class="ttname"><a href="../../d6/d00/a00626.html">StdAfx.h</a></div><div class="ttdoc">Standard includes.</div></div>
-<div class="ttc" id="aa01085_html"><div class="ttname"><a href="../../d2/d00/a01085.html">CConfigurator</a></div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00116_source.html#l00135">Configurator.h:136</a></div></div>
-<div class="ttc" id="aa01085_html_a36498889497191fbc49ebf533c0d3d36"><div class="ttname"><a href="../../d2/d00/a01085.html#a36498889497191fbc49ebf533c0d3d36">CConfigurator::get_text_value</a></div><div class="ttdeci">char * get_text_value(const char *n)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00116_source.html#l00156">Configurator.h:156</a></div></div>
-<div class="ttc" id="aa01085_html_af9012af5270145f47ebdf88e857290db"><div class="ttname"><a href="../../d2/d00/a01085.html#af9012af5270145f47ebdf88e857290db">CConfigurator::get_bool_value</a></div><div class="ttdeci">bool get_bool_value(const char *n)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d00/a00116_source.html#l00159">Configurator.h:159</a></div></div>
-<div class="ttc" id="aa01873_html_a640dc5d9d7b52c1769a2b9bebebfba0b"><div class="ttname"><a href="../../de/d00/a01873.html#a640dc5d9d7b52c1769a2b9bebebfba0b">CNetworkVmnetIPC::CNetworkVmnetIPC</a></div><div class="ttdeci">CNetworkVmnetIPC()</div></div>
-<div class="ttc" id="aa01885_html"><div class="ttname"><a href="../../d7/d00/a01885.html">es40_vmnet_open_reply</a></div><div class="ttdef"><b>Definition</b> <a href="../../d0/d00/a00605_source.html#l00071">NetworkVmnetProto.h:71</a></div></div>
-<div class="ttc" id="aa01889_html"><div class="ttname"><a href="../../d9/d00/a01889.html">es40_vmnet_status</a></div><div class="ttdef"><b>Definition</b> <a href="../../d0/d00/a00605_source.html#l00081">NetworkVmnetProto.h:81</a></div></div>
-<div class="ttc" id="aa01889_html_a65d0c7d893e6e196434765793e24fa48"><div class="ttname"><a href="../../d9/d00/a01889.html#a65d0c7d893e6e196434765793e24fa48">es40_vmnet_status::status</a></div><div class="ttdeci">uint32_t status</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d00/a00605_source.html#l00084">NetworkVmnetProto.h:84</a></div></div>
-<div class="ttc" id="aa01889_html_a729fca7339aab7cb7b7efc26df72d1eb"><div class="ttname"><a href="../../d9/d00/a01889.html#a729fca7339aab7cb7b7efc26df72d1eb">es40_vmnet_status::operation</a></div><div class="ttdeci">uint32_t operation</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d00/a00605_source.html#l00083">NetworkVmnetProto.h:83</a></div></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment"> *  You should have received a copy of the GNU Lesser General Public</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment"> *  License along with this library; if not, write to the Free Software</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment"> *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#include &quot;<a class="code" href="../../d7/d00/a00131.html">config/Configurator.h</a>&quot;</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>  <span class="comment">// In case of unknown symbol</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="../../d2/d00/a00593.html#af9df788a41e0e7b2555362f7d2c29e51">   60</a></span><span class="preprocessor">#define BX_KEYMAP_UNKNOWN 0xFFFFFFFF</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span></div>
+<div class="foldopen" id="foldopen00063" data-start="{" data-end="};">
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="../../d9/d00/a02056.html">   63</a></span><span class="keyword">typedef</span> <span class="keyword">struct</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>{</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="../../d9/d00/a02056.html#ab4ec2640a5adf80ee9799af608906612">   65</a></span>  <a class="code hl_typedef" href="../../d5/d00/a00461.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> <a class="code hl_variable" href="../../d9/d00/a02056.html#ab4ec2640a5adf80ee9799af608906612">baseKey</a>;  <span class="comment">// base key</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="../../d9/d00/a02056.html#ad3fea40a472a0c624b91689af21025c6">   66</a></span>  <a class="code hl_typedef" href="../../d5/d00/a00461.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> <a class="code hl_variable" href="../../d9/d00/a02056.html#ad3fea40a472a0c624b91689af21025c6">modKey</a>;   <span class="comment">// modifier key that must be held down</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="../../d9/d00/a02056.html#a69cbcfee0fb4bfacb23ceff7320a327d">   67</a></span>  <a class="code hl_typedef" href="../../d5/d00/a00461.html#ae5300ed9eabeae78ee9d0c704a9c412a">s32</a> <a class="code hl_variable" href="../../d9/d00/a02056.html#a69cbcfee0fb4bfacb23ceff7320a327d">ascii</a>;    <span class="comment">// ascii equivalent, if any</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="../../d9/d00/a02056.html#a06d132ce3a7636fd605b050fd3092752">   68</a></span>  <a class="code hl_typedef" href="../../d5/d00/a00461.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> <a class="code hl_variable" href="../../d9/d00/a02056.html#a06d132ce3a7636fd605b050fd3092752">hostKey</a>;  <span class="comment">// value that the host&#39;s OS or library recognizes</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>} <a class="code hl_struct" href="../../d9/d00/a02056.html">BXKeyEntry</a>;</div>
+</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span></div>
+<div class="foldopen" id="foldopen00074" data-start="{" data-end="};">
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno"><a class="line" href="../../d5/d00/a02060.html">   74</a></span><span class="keyword">class </span><a class="code hl_function" href="../../d5/d00/a02060.html#ae9d4ae6735f13dfc6247c825a6a52c8c">bx_keymap_c</a></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>{</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>  <a class="code hl_function" href="../../d5/d00/a02060.html#ae9d4ae6735f13dfc6247c825a6a52c8c">bx_keymap_c</a>(<a class="code hl_class" href="../../d4/d00/a01272.html">CConfigurator</a>* cfg);</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>  <a class="code hl_function" href="../../d5/d00/a02060.html#ae9d4ae6735f13dfc6247c825a6a52c8c">~bx_keymap_c</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  <span class="keywordtype">void</span>          <a class="code hl_function" href="../../d5/d00/a02060.html#af8224621a0f4e615d6c6dbca9d16c162">loadKeymap</a>(<a class="code hl_typedef" href="../../d5/d00/a00461.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> stringToSymbol(<span class="keyword">const</span> <span class="keywordtype">char</span>*));</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  <span class="keywordtype">void</span>          <a class="code hl_function" href="../../d5/d00/a02060.html#af8224621a0f4e615d6c6dbca9d16c162">loadKeymap</a>(<a class="code hl_typedef" href="../../d5/d00/a00461.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> stringToSymbol(<span class="keyword">const</span> <span class="keywordtype">char</span>*),</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <span class="keyword">const</span> <span class="keywordtype">char</span>* filename);</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>  <span class="keywordtype">bool</span>          <a class="code hl_function" href="../../d5/d00/a02060.html#a9ba17e2a601febdf4ca20270c18c7321">isKeymapLoaded</a>();</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  <a class="code hl_struct" href="../../d9/d00/a02056.html">BXKeyEntry</a>* <a class="code hl_function" href="../../d5/d00/a02060.html#aab7364d8ec50be3ea8170f8836f1d9d1">findHostKey</a>(<a class="code hl_typedef" href="../../d5/d00/a00461.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> hostkeynum);</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  <a class="code hl_struct" href="../../d9/d00/a02056.html">BXKeyEntry</a>* <a class="code hl_function" href="../../d5/d00/a02060.html#a208c80ae898f3abadbb8cf2d712770ac">findAsciiChar</a>(<a class="code hl_typedef" href="../../d5/d00/a00461.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a> ascii);</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_function" href="../../d5/d00/a02060.html#a11b6225705f56445a78ba2dee3af1c34">getBXKeyName</a>(<a class="code hl_typedef" href="../../d5/d00/a00461.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> key);</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  <a class="code hl_typedef" href="../../d5/d00/a00461.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a>             <a class="code hl_function" href="../../d5/d00/a02060.html#a0ce7901c7c0a41402827c3ea4f462e44">convertStringToBXKey</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>*);</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="../../d5/d00/a02060.html#ab336b407e4d779f7d7acaed87b270e6d">   90</a></span>  <a class="code hl_class" href="../../d4/d00/a01272.html">CConfigurator</a>* <a class="code hl_variable" href="../../d5/d00/a02060.html#ab336b407e4d779f7d7acaed87b270e6d">myCfg</a>;</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="../../d5/d00/a02060.html#a4681b86f1df1e35654e1f551b51b775f">   92</a></span>  <a class="code hl_struct" href="../../d9/d00/a02056.html">BXKeyEntry</a>* <a class="code hl_variable" href="../../d5/d00/a02060.html#a4681b86f1df1e35654e1f551b51b775f">keymapTable</a>;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="../../d5/d00/a02060.html#a38e2d3a0b4586a96c863010df7391451">   93</a></span>  <a class="code hl_typedef" href="../../d5/d00/a00461.html#a6dbf9516e516c901604625282c174aa4">u16</a>             <a class="code hl_variable" href="../../d5/d00/a02060.html#a38e2d3a0b4586a96c863010df7391451">keymapCount</a>;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>};</div>
+</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="keyword">extern</span> <a class="code hl_class" href="../../d5/d00/a02060.html">bx_keymap_c</a>* <a class="code hl_variable" href="../../d7/d00/a00590.html#a22fa2cedc0d2a8c49e35953f581847ab">bx_keymap</a>;</div>
+<div class="ttc" id="aa00131_html"><div class="ttname"><a href="../../d7/d00/a00131.html">Configurator.h</a></div><div class="ttdoc">Contains the definitions for the configuration file interpreter.</div></div>
+<div class="ttc" id="aa00461_html_a6dbf9516e516c901604625282c174aa4"><div class="ttname"><a href="../../d5/d00/a00461.html#a6dbf9516e516c901604625282c174aa4">u16</a></div><div class="ttdeci">uint16_t u16</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00461_source.html#l00124">datatypes.h:124</a></div></div>
+<div class="ttc" id="aa00461_html_a70c1fcc1a4e96af8f6580f708657cd41"><div class="ttname"><a href="../../d5/d00/a00461.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a></div><div class="ttdeci">uint32_t u32</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00461_source.html#l00125">datatypes.h:125</a></div></div>
+<div class="ttc" id="aa00461_html_a987e4d6cf789cb59dbb390728271e4d6"><div class="ttname"><a href="../../d5/d00/a00461.html#a987e4d6cf789cb59dbb390728271e4d6">u8</a></div><div class="ttdeci">uint8_t u8</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00461_source.html#l00123">datatypes.h:123</a></div></div>
+<div class="ttc" id="aa00461_html_ae5300ed9eabeae78ee9d0c704a9c412a"><div class="ttname"><a href="../../d5/d00/a00461.html#ae5300ed9eabeae78ee9d0c704a9c412a">s32</a></div><div class="ttdeci">int32_t s32</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d00/a00461_source.html#l00130">datatypes.h:130</a></div></div>
+<div class="ttc" id="aa00590_html_a22fa2cedc0d2a8c49e35953f581847ab"><div class="ttname"><a href="../../d7/d00/a00590.html#a22fa2cedc0d2a8c49e35953f581847ab">bx_keymap</a></div><div class="ttdeci">bx_keymap_c * bx_keymap</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00590_source.html#l00105">keymap.cpp:105</a></div></div>
+<div class="ttc" id="aa01272_html"><div class="ttname"><a href="../../d4/d00/a01272.html">CConfigurator</a></div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00131_source.html#l00139">Configurator.h:140</a></div></div>
+<div class="ttc" id="aa02056_html"><div class="ttname"><a href="../../d9/d00/a02056.html">BXKeyEntry</a></div><div class="ttdoc">Structure of an element of the keymap table.</div><div class="ttdef"><b>Definition</b> <a href="#l00063">keymap.h:64</a></div></div>
+<div class="ttc" id="aa02056_html_a06d132ce3a7636fd605b050fd3092752"><div class="ttname"><a href="../../d9/d00/a02056.html#a06d132ce3a7636fd605b050fd3092752">BXKeyEntry::hostKey</a></div><div class="ttdeci">u32 hostKey</div><div class="ttdef"><b>Definition</b> <a href="#l00068">keymap.h:68</a></div></div>
+<div class="ttc" id="aa02056_html_a69cbcfee0fb4bfacb23ceff7320a327d"><div class="ttname"><a href="../../d9/d00/a02056.html#a69cbcfee0fb4bfacb23ceff7320a327d">BXKeyEntry::ascii</a></div><div class="ttdeci">s32 ascii</div><div class="ttdef"><b>Definition</b> <a href="#l00067">keymap.h:67</a></div></div>
+<div class="ttc" id="aa02056_html_ab4ec2640a5adf80ee9799af608906612"><div class="ttname"><a href="../../d9/d00/a02056.html#ab4ec2640a5adf80ee9799af608906612">BXKeyEntry::baseKey</a></div><div class="ttdeci">u32 baseKey</div><div class="ttdef"><b>Definition</b> <a href="#l00065">keymap.h:65</a></div></div>
+<div class="ttc" id="aa02056_html_ad3fea40a472a0c624b91689af21025c6"><div class="ttname"><a href="../../d9/d00/a02056.html#ad3fea40a472a0c624b91689af21025c6">BXKeyEntry::modKey</a></div><div class="ttdeci">u32 modKey</div><div class="ttdef"><b>Definition</b> <a href="#l00066">keymap.h:66</a></div></div>
+<div class="ttc" id="aa02060_html"><div class="ttname"><a href="../../d5/d00/a02060.html">bx_keymap_c</a></div><div class="ttdoc">Keymap, used to map host keys to scancodes.</div><div class="ttdef"><b>Definition</b> <a href="#l00074">keymap.h:75</a></div></div>
+<div class="ttc" id="aa02060_html_a0ce7901c7c0a41402827c3ea4f462e44"><div class="ttname"><a href="../../d5/d00/a02060.html#a0ce7901c7c0a41402827c3ea4f462e44">bx_keymap_c::convertStringToBXKey</a></div><div class="ttdeci">u32 convertStringToBXKey(const char *)</div><div class="ttdoc">Convert a null-terminate string to a BX_KEY code.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00590_source.html#l00348">keymap.cpp:348</a></div></div>
+<div class="ttc" id="aa02060_html_a11b6225705f56445a78ba2dee3af1c34"><div class="ttname"><a href="../../d5/d00/a02060.html#a11b6225705f56445a78ba2dee3af1c34">bx_keymap_c::getBXKeyName</a></div><div class="ttdeci">const char * getBXKeyName(u32 key)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00590_source.html#l00411">keymap.cpp:411</a></div></div>
+<div class="ttc" id="aa02060_html_a208c80ae898f3abadbb8cf2d712770ac"><div class="ttname"><a href="../../d5/d00/a02060.html#a208c80ae898f3abadbb8cf2d712770ac">bx_keymap_c::findAsciiChar</a></div><div class="ttdeci">BXKeyEntry * findAsciiChar(u8 ascii)</div><div class="ttdoc">Finds an entry whose ASCII character matches the target value, and returns a pointer to the correspon...</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00590_source.html#l00391">keymap.cpp:391</a></div></div>
+<div class="ttc" id="aa02060_html_a38e2d3a0b4586a96c863010df7391451"><div class="ttname"><a href="../../d5/d00/a02060.html#a38e2d3a0b4586a96c863010df7391451">bx_keymap_c::keymapCount</a></div><div class="ttdeci">u16 keymapCount</div><div class="ttdef"><b>Definition</b> <a href="#l00093">keymap.h:93</a></div></div>
+<div class="ttc" id="aa02060_html_a4681b86f1df1e35654e1f551b51b775f"><div class="ttname"><a href="../../d5/d00/a02060.html#a4681b86f1df1e35654e1f551b51b775f">bx_keymap_c::keymapTable</a></div><div class="ttdeci">BXKeyEntry * keymapTable</div><div class="ttdef"><b>Definition</b> <a href="#l00092">keymap.h:92</a></div></div>
+<div class="ttc" id="aa02060_html_a9ba17e2a601febdf4ca20270c18c7321"><div class="ttname"><a href="../../d5/d00/a02060.html#a9ba17e2a601febdf4ca20270c18c7321">bx_keymap_c::isKeymapLoaded</a></div><div class="ttdeci">bool isKeymapLoaded()</div><div class="ttdoc">Returns true if the keymap contains any valid key entries.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00590_source.html#l00138">keymap.cpp:138</a></div></div>
+<div class="ttc" id="aa02060_html_aab7364d8ec50be3ea8170f8836f1d9d1"><div class="ttname"><a href="../../d5/d00/a02060.html#aab7364d8ec50be3ea8170f8836f1d9d1">bx_keymap_c::findHostKey</a></div><div class="ttdeci">BXKeyEntry * findHostKey(u32 hostkeynum)</div><div class="ttdoc">Finds an entry whose hostKey value matches the target value, and returns a pointer to the correspongi...</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00590_source.html#l00368">keymap.cpp:368</a></div></div>
+<div class="ttc" id="aa02060_html_ab336b407e4d779f7d7acaed87b270e6d"><div class="ttname"><a href="../../d5/d00/a02060.html#ab336b407e4d779f7d7acaed87b270e6d">bx_keymap_c::myCfg</a></div><div class="ttdeci">CConfigurator * myCfg</div><div class="ttdef"><b>Definition</b> <a href="#l00090">keymap.h:90</a></div></div>
+<div class="ttc" id="aa02060_html_ae9d4ae6735f13dfc6247c825a6a52c8c"><div class="ttname"><a href="../../d5/d00/a02060.html#ae9d4ae6735f13dfc6247c825a6a52c8c">bx_keymap_c::bx_keymap_c</a></div><div class="ttdeci">bx_keymap_c(CConfigurator *cfg)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00590_source.html#l00107">keymap.cpp:107</a></div></div>
+<div class="ttc" id="aa02060_html_af8224621a0f4e615d6c6dbca9d16c162"><div class="ttname"><a href="../../d5/d00/a02060.html#af8224621a0f4e615d6c6dbca9d16c162">bx_keymap_c::loadKeymap</a></div><div class="ttdeci">void loadKeymap(u32 stringToSymbol(const char *))</div><div class="ttdoc">Loads the configuration specified keymap file if keymapping is enabled using convertStringToSymbol to...</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d00/a00590_source.html#l00129">keymap.cpp:129</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_c901c14b65aa229498a52b725b3d4a2c.html">network</a></li><li class="navelem"><a href="../../d2/d00/a00593.html">NetworkVmnet.cpp</a></li>
+    <li class="navelem"><a href="../../dir_11bc0974ce736ce9a6fadebbeb7a8314.html">gui</a></li><li class="navelem"><a href="../../d2/d00/a00593.html">keymap.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

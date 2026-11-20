@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: SnapshotFile.h File Reference</title>
+<title>ES40: gui/ShmFramebuffer.cpp File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.95</span>
    </div>
   </td>
  </tr>
@@ -109,46 +109,31 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('dc/d00/a00620.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">SnapshotFile.h File Reference</div></div>
+  <div class="headertitle"><div class="title">ShmFramebuffer.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;atomic&gt;</code><br />
-<code>#include &lt;cerrno&gt;</code><br />
-<code>#include &lt;cstdio&gt;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../df/d00/a00623_source.html">ShmFramebuffer.h</a>&quot;</code><br />
+<code>#include &lt;cstring&gt;</code><br />
+<code>#include &lt;stdexcept&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
-<code>#include &lt;fcntl.h&gt;</code><br />
-<code>#include &lt;sys/stat.h&gt;</code><br />
-<code>#include &lt;unistd.h&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
-Include dependency graph for SnapshotFile.h:</div>
+Include dependency graph for ShmFramebuffer.cpp:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../dc/d00/a00621.png" border="0" usemap="#a_snapshot_file_8h" loading="lazy" alt=""/></div>
-<map name="a_snapshot_file_8h" id="a_snapshot_file_8h">
-<area shape="rect" title=" " alt="" coords="224,5,332,32"/>
-<area shape="rect" title=" " alt="" coords="5,80,66,107"/>
-<area shape="poly" title=" " alt="" coords="237,35,82,81,80,76,235,30"/>
-<area shape="rect" title=" " alt="" coords="90,80,147,107"/>
-<area shape="poly" title=" " alt="" coords="253,32,161,76,159,71,248,33"/>
-<area shape="rect" title=" " alt="" coords="171,80,228,107"/>
-<area shape="poly" title=" " alt="" coords="267,32,226,72,223,67,262,34"/>
-<area shape="rect" title=" " alt="" coords="252,80,305,107"/>
-<area shape="poly" title=" " alt="" coords="280,31,280,66,276,63,276,34"/>
-<area shape="rect" title=" " alt="" coords="330,80,387,107"/>
-<area shape="poly" title=" " alt="" coords="293,30,336,70,331,69,291,35"/>
-<area shape="rect" title=" " alt="" coords="410,80,490,107"/>
-<area shape="poly" title=" " alt="" coords="309,30,409,73,404,74,308,35"/>
-<area shape="rect" title=" " alt="" coords="514,80,581,107"/>
-<area shape="poly" title=" " alt="" coords="325,30,502,78,496,80,325,35"/>
-</map>
-</div>
-</div><div class="textblock"><div class="dynheader">
-This graph shows which files directly or indirectly include this file:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../d0/d00/a00622.png" border="0" usemap="#a_snapshot_file_8hdep" loading="lazy" alt=""/></div>
-<map name="a_snapshot_file_8hdep" id="a_snapshot_file_8hdep">
-<area shape="rect" title=" " alt="" coords="20,5,129,32"/>
-<area shape="rect" href="../../db/d00/a00722.html" title="Contains the code for the emulated Typhoon Chipset devices." alt="" coords="5,80,144,107"/>
-<area shape="poly" title=" " alt="" coords="76,46,77,80,72,79,73,50"/>
+<div class="center"><img src="../../dc/d00/a00621.png" border="0" usemap="#agui_2_shm_framebuffer_8cpp" loading="lazy" alt=""/></div>
+<map name="agui_2_shm_framebuffer_8cpp" id="agui_2_shm_framebuffer_8cpp">
+<area shape="rect" title=" " alt="" coords="163,5,326,32"/>
+<area shape="rect" href="../../df/d00/a00623.html" title=" " alt="" coords="15,80,144,107"/>
+<area shape="poly" title=" " alt="" coords="214,34,124,76,121,71,218,31"/>
+<area shape="rect" title=" " alt="" coords="168,80,228,107"/>
+<area shape="poly" title=" " alt="" coords="239,31,216,69,212,65,235,34"/>
+<area shape="rect" title=" " alt="" coords="252,80,331,107"/>
+<area shape="poly" title=" " alt="" coords="254,30,278,67,273,67,252,35"/>
+<area shape="rect" title=" " alt="" coords="354,80,408,107"/>
+<area shape="poly" title=" " alt="" coords="269,30,346,72,341,73,268,35"/>
+<area shape="rect" title=" " alt="" coords="5,155,66,181"/>
+<area shape="poly" title=" " alt="" coords="74,106,53,143,49,140,70,109"/>
+<area shape="rect" title=" " alt="" coords="89,155,158,181"/>
+<area shape="poly" title=" " alt="" coords="88,105,111,141,105,141,86,110"/>
 </map>
 </div>
 </div>
@@ -156,7 +141,7 @@ This graph shows which files directly or indirectly include this file:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Data Structures</h2></td></tr>
-<tr class="memitem:CSnapshotFile" id="r_CSnapshotFile"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../dd/d00/a01893.html">CSnapshotFile</a></td></tr>
+<tr class="memitem:CShmFramebuffer_3A_3AImpl" id="r_CShmFramebuffer_3A_3AImpl"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d8/d00/a02108.html">CShmFramebuffer::Impl</a></td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -171,7 +156,7 @@ Data Structures</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dc/d00/a00620.html">SnapshotFile.h</a></li>
+    <li class="navelem"><a href="../../dir_11bc0974ce736ce9a6fadebbeb7a8314.html">gui</a></li><li class="navelem"><a href="../../dc/d00/a00620.html">ShmFramebuffer.cpp</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

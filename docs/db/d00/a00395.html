@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: graphics/PowerStorm3xx.cpp File Reference</title>
+<title>ES40: CPU/Ev68InstructionFetch.cpp File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.95</span>
    </div>
   </td>
  </tr>
@@ -109,425 +109,163 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('db/d00/a00395.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">PowerStorm3xx.cpp File Reference</div></div>
+  <div class="headertitle"><div class="title">Ev68InstructionFetch.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../d6/d00/a00626_source.html">StdAfx.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d9/d00/a00398_source.html">PowerStorm3xx.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d4/d00/a00116_source.html">config/Configurator.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d8/d00/a00725_source.html">system/System.h</a>&quot;</code><br />
-<code>#include &lt;algorithm&gt;</code><br />
-<code>#include &lt;cerrno&gt;</code><br />
-<code>#include &lt;cstdio&gt;</code><br />
-<code>#include &lt;cstdlib&gt;</code><br />
-<code>#include &lt;cstring&gt;</code><br />
-<code>#include &lt;filesystem&gt;</code><br />
-<code>#include &lt;fstream&gt;</code><br />
-<code>#include &lt;iomanip&gt;</code><br />
-<code>#include &lt;memory&gt;</code><br />
-<code>#include &lt;sstream&gt;</code><br />
-<code>#include &lt;stdexcept&gt;</code><br />
-<code>#include &lt;utility&gt;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d3/d00/a00779_source.html">StdAfx.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d5/d00/a00206_source.html">AlphaCPU.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d9/d00/a00398_source.html">Ev68InstructionFetch.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
-Include dependency graph for PowerStorm3xx.cpp:</div>
+Include dependency graph for Ev68InstructionFetch.cpp:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../d9/d00/a00396.png" border="0" usemap="#agraphics_2_power_storm3xx_8cpp" loading="lazy" alt=""/></div>
-<map name="agraphics_2_power_storm3xx_8cpp" id="agraphics_2_power_storm3xx_8cpp">
-<area shape="rect" title=" " alt="" coords="2689,5,2882,32"/>
-<area shape="rect" href="../../d6/d00/a00626.html" title="Standard includes." alt="" coords="1213,80,1286,107"/>
-<area shape="poly" title=" " alt="" coords="2686,23,2135,44,1764,61,1386,83,1301,90,1301,84,1385,77,1763,56,2135,39,2691,22"/>
-<area shape="rect" title=" " alt="" coords="5,304,62,331"/>
-<area shape="poly" title=" " alt="" coords="2686,22,1506,43,849,60,608,71,466,83,388,93,327,104,269,122,200,157,155,188,114,225,54,293,50,290,111,221,152,184,197,152,267,117,326,99,387,88,465,77,608,65,849,55,1506,37,2691,20"/>
-<area shape="rect" title=" " alt="" coords="253,304,331,331"/>
-<area shape="poly" title=" " alt="" coords="2686,22,2123,35,1317,59,920,77,579,99,442,112,334,126,259,141,236,149,223,157,208,180,205,202,211,227,222,255,237,276,258,295,253,294,233,279,218,257,205,228,199,202,203,178,220,153,234,144,258,136,333,120,442,106,579,94,920,72,1316,54,2123,30,2692,21"/>
-<area shape="rect" title=" " alt="" coords="1277,229,1345,256"/>
-<area shape="poly" title=" " alt="" coords="2686,26,2423,45,2076,73,1899,91,1736,111,1596,133,1490,157,1411,189,1345,224,1343,219,1409,184,1489,152,1595,128,1735,106,1899,86,2076,68,2423,40,2691,25"/>
-<area shape="rect" title=" " alt="" coords="2566,229,2634,256"/>
-<area shape="poly" title=" " alt="" coords="2782,31,2746,101,2719,143,2686,183,2662,205,2636,223,2634,218,2659,201,2682,179,2714,140,2742,98,2778,34"/>
-<area shape="rect" href="../../d9/d00/a00398.html" title=" " alt="" coords="1790,155,1915,181"/>
-<area shape="poly" title=" " alt="" coords="2686,27,2474,49,2347,64,2221,83,2052,117,1912,153,1911,148,2051,112,2220,77,2346,58,2473,43,2692,26"/>
-<area shape="rect" title=" " alt="" coords="2889,304,2941,331"/>
-<area shape="poly" title=" " alt="" coords="2830,30,2878,49,2926,78,2962,110,2974,129,2984,154,2993,182,2996,206,2994,229,2984,257,2969,279,2950,297,2948,292,2965,276,2979,255,2989,228,2991,206,2988,183,2979,156,2969,131,2958,114,2923,82,2876,54,2829,35"/>
-<area shape="rect" title=" " alt="" coords="2374,229,2440,256"/>
-<area shape="poly" title=" " alt="" coords="2767,32,2442,224,2440,219,2761,33"/>
-<area shape="rect" href="../../d4/d00/a00116.html" title="Contains the definitions for the configuration file interpreter." alt="" coords="2801,229,2943,256"/>
-<area shape="poly" title=" " alt="" coords="2814,30,2849,49,2889,76,2927,111,2956,154,2959,175,2950,194,2934,210,2914,224,2912,219,2930,206,2946,191,2954,174,2951,156,2923,114,2886,80,2847,54,2813,35"/>
-<area shape="rect" href="../../d8/d00/a00725.html" title="Contains the definitions for the emulated Typhoon Chipset devices." alt="" coords="2233,80,2357,107"/>
-<area shape="poly" title=" " alt="" coords="2702,32,2373,83,2372,78,2697,33"/>
-<area shape="rect" title=" " alt="" coords="2983,80,3057,107"/>
-<area shape="poly" title=" " alt="" coords="2827,30,2971,76,2965,76,2826,35"/>
-<area shape="rect" title=" " alt="" coords="3081,80,3138,107"/>
-<area shape="poly" title=" " alt="" coords="2853,30,3068,79,3063,79,2853,35"/>
-<area shape="rect" title=" " alt="" coords="3162,80,3222,107"/>
-<area shape="poly" title=" " alt="" coords="2882,30,3005,49,3150,80,3144,79,3004,54,2882,35"/>
-<area shape="rect" title=" " alt="" coords="3246,80,3306,107"/>
-<area shape="poly" title=" " alt="" coords="2882,26,3042,45,3233,80,3228,80,3041,51,2882,32"/>
-<area shape="rect" title=" " alt="" coords="3330,80,3412,107"/>
-<area shape="poly" title=" " alt="" coords="2882,25,3079,44,3318,80,3313,80,3078,50,2882,30"/>
-<area shape="rect" title=" " alt="" coords="3435,80,3501,107"/>
-<area shape="poly" title=" " alt="" coords="2882,21,3123,38,3270,54,3423,80,3417,79,3270,60,3123,44,2882,27"/>
-<area shape="rect" href="../../d7/d00/a00173.html" title=" " alt="" coords="434,155,543,181"/>
-<area shape="poly" title=" " alt="" coords="1210,97,942,119,754,136,562,157,559,158,558,152,561,152,753,131,941,114,1215,96"/>
-<area shape="rect" href="../../d8/d00/a00326.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="2261,229,2350,256"/>
-<area shape="poly" title=" " alt="" coords="1286,93,1607,111,1793,128,1870,139,1928,152,1954,165,1979,179,2051,200,2109,209,2168,215,2243,227,2248,230,2243,230,2242,232,2167,221,2108,214,2050,205,1976,184,1951,170,1926,157,1869,145,1792,134,1607,116,1286,99"/>
-<area shape="rect" title=" " alt="" coords="2709,229,2776,256"/>
-<area shape="poly" title=" " alt="" coords="1286,93,2043,111,2470,128,2615,140,2661,146,2685,152,2702,165,2716,181,2735,216,2731,214,2712,184,2699,169,2683,157,2660,151,2615,145,2470,134,2043,116,1286,98"/>
-<area shape="rect" href="../../d6/d00/a00047.html" title=" " alt="" coords="1615,155,1737,181"/>
-<area shape="poly" title=" " alt="" coords="1286,98,1602,154,1597,154,1286,104"/>
-<area shape="rect" href="../../dc/d00/a00053.html" title=" " alt="" coords="241,229,341,256"/>
-<area shape="poly" title=" " alt="" coords="1210,95,1051,100,821,109,589,127,493,140,422,157,393,170,364,186,317,221,315,217,361,182,390,165,421,152,492,135,588,121,821,103,1051,95,1216,95"/>
-<area shape="rect" href="../../de/d00/a00065.html" title=" " alt="" coords="1005,155,1110,181"/>
-<area shape="poly" title=" " alt="" coords="1219,107,1106,151,1104,146,1213,108"/>
-<area shape="rect" href="../../d9/d00/a00056.html" title=" " alt="" coords="1452,229,1540,256"/>
-<area shape="poly" title=" " alt="" coords="1282,105,1329,126,1380,152,1430,185,1472,220,1467,219,1426,190,1377,157,1327,130,1281,110"/>
-<area shape="rect" href="../../df/d00/a00062.html" title=" " alt="" coords="518,229,648,256"/>
-<area shape="poly" title=" " alt="" coords="1215,103,656,228,655,223,1210,103"/>
-<area shape="rect" href="../../d3/d00/a00059.html" title=" " alt="" coords="234,155,348,181"/>
-<area shape="poly" title=" " alt="" coords="1210,97,869,117,623,134,371,157,364,158,363,153,371,152,623,129,869,111,1216,96"/>
-<area shape="rect" href="../../dd/d00/a00365.html" title="Contains macro&#39;s and prototypes for debugging." alt="" coords="1134,155,1237,181"/>
-<area shape="poly" title=" " alt="" coords="1241,106,1208,145,1205,141,1236,108"/>
-<area shape="rect" href="../../d8/d00/a00368.html" title="Contains byte&#45;order conversion helpers." alt="" coords="1261,155,1366,181"/>
-<area shape="poly" title=" " alt="" coords="1262,105,1295,144,1290,142,1260,110"/>
-<area shape="rect" title=" " alt="" coords="1615,229,1692,256"/>
-<area shape="poly" title=" " alt="" coords="1674,180,1664,217,1660,212,1670,184"/>
-<area shape="rect" title=" " alt="" coords="1970,304,2023,331"/>
-<area shape="poly" title=" " alt="" coords="1692,179,1742,216,1807,254,1885,284,1957,307,1952,306,1883,289,1804,258,1739,220,1691,184"/>
-<area shape="rect" title=" " alt="" coords="677,304,734,331"/>
-<area shape="poly" title=" " alt="" coords="342,250,664,307,659,310,341,255"/>
-<area shape="rect" title=" " alt="" coords="450,304,510,331"/>
-<area shape="poly" title=" " alt="" coords="324,254,438,299,432,299,323,259"/>
-<area shape="rect" title=" " alt="" coords="172,304,229,331"/>
-<area shape="poly" title=" " alt="" coords="278,256,229,297,226,292,273,257"/>
-<area shape="poly" title=" " alt="" coords="247,259,77,307,76,301,245,254"/>
-<area shape="poly" title=" " alt="" coords="293,255,294,290,289,287,289,258"/>
-<area shape="poly" title=" " alt="" coords="1081,179,1161,217,1212,237,1265,253,1354,273,1430,284,1497,290,1560,293,1693,293,1862,301,1957,312,1952,312,1861,307,1693,299,1560,298,1497,296,1429,290,1353,278,1263,259,1210,242,1159,222,1080,184"/>
-<area shape="poly" title=" " alt="" coords="1076,179,1096,196,1112,215,1121,236,1120,247,1114,258,1095,268,1060,278,960,294,750,315,749,310,959,289,1059,273,1093,263,1110,254,1115,246,1116,237,1108,218,1092,199,1075,184"/>
-<area shape="poly" title=" " alt="" coords="1003,174,870,193,790,210,712,232,686,244,661,258,590,285,525,306,524,301,589,280,659,254,684,240,710,227,789,204,870,188,1008,173"/>
-<area shape="poly" title=" " alt="" coords="1003,170,820,176,575,185,456,193,351,203,273,216,246,223,230,231,219,243,211,258,203,290,199,287,206,256,215,240,227,227,244,218,271,210,351,197,455,187,575,180,820,170,1008,169"/>
-<area shape="poly" title=" " alt="" coords="1002,171,833,178,601,188,371,205,276,217,205,232,166,245,129,262,66,298,63,293,126,258,164,240,203,227,275,212,371,200,601,183,833,172,1008,170"/>
-<area shape="poly" title=" " alt="" coords="1002,171,910,177,786,186,646,204,506,232,410,264,331,299,329,294,409,259,505,227,645,199,785,181,910,172,1008,170"/>
-<area shape="rect" title=" " alt="" coords="1369,229,1429,256"/>
-<area shape="poly" title=" " alt="" coords="1110,177,1356,229,1351,229,1110,182"/>
-<area shape="poly" title=" " alt="" coords="1102,179,1265,228,1259,227,1101,185"/>
-<area shape="rect" title=" " alt="" coords="882,304,1007,331"/>
-<area shape="poly" title=" " alt="" coords="1092,179,1122,193,1149,211,1164,233,1164,245,1158,258,1137,274,1104,287,1023,307,1022,301,1102,282,1135,269,1154,254,1159,244,1159,234,1145,215,1120,198,1092,185"/>
-<area shape="poly" title=" " alt="" coords="1110,177,1123,179,1325,198,1496,208,1646,213,1787,214,2078,214,2250,217,2452,227,2553,237,2548,237,2452,232,2250,223,2078,219,1787,219,1646,218,1495,214,1324,203,1123,184,1110,182"/>
-<area shape="rect" title=" " alt="" coords="723,229,819,256"/>
-<area shape="poly" title=" " alt="" coords="1010,181,835,228,834,223,1005,182"/>
-<area shape="poly" title=" " alt="" coords="1110,177,1123,179,1279,201,1440,229,1435,229,1279,207,1122,184,1110,182"/>
-<area shape="rect" title=" " alt="" coords="842,229,918,256"/>
-<area shape="poly" title=" " alt="" coords="1029,181,926,226,924,221,1024,182"/>
-<area shape="rect" title=" " alt="" coords="942,229,1010,256"/>
-<area shape="poly" title=" " alt="" coords="1046,181,1003,221,1000,217,1041,183"/>
-<area shape="rect" title=" " alt="" coords="1034,229,1100,256"/>
-<area shape="poly" title=" " alt="" coords="1061,180,1065,216,1061,212,1057,184"/>
-<area shape="poly" title=" " alt="" coords="605,254,673,296,668,295,603,259"/>
-<area shape="poly" title=" " alt="" coords="567,256,512,297,510,292,562,257"/>
-<area shape="poly" title=" " alt="" coords="535,256,347,305,346,300,529,257"/>
-<area shape="poly" title=" " alt="" coords="646,254,869,300,863,301,646,259"/>
-<area shape="poly" title=" " alt="" coords="292,180,293,215,288,212,289,184"/>
-<area shape="poly" title=" " alt="" coords="308,179,455,294,450,295,306,184"/>
-<area shape="poly" title=" " alt="" coords="272,181,245,204,222,231,210,260,204,290,200,287,205,258,218,228,242,200,267,183"/>
-<area shape="poly" title=" " alt="" coords="270,184,70,298,67,294,268,180"/>
-<area shape="poly" title=" " alt="" coords="273,180,255,198,238,215,229,235,231,255,244,276,262,295,257,294,240,279,226,257,224,234,234,212,251,194,269,183"/>
-<area shape="poly" title=" " alt="" coords="348,172,422,179,563,186,683,189,888,188,987,189,1093,195,1213,206,1356,229,1351,229,1213,211,1093,200,987,195,888,193,683,194,563,192,421,184,348,178"/>
-<area shape="poly" title=" " alt="" coords="1866,179,1976,294,1971,292,1863,184"/>
-<area shape="poly" title=" " alt="" coords="1792,177,1614,204,1445,231,1444,226,1613,199,1786,178"/>
-<area shape="poly" title=" " alt="" coords="1792,182,1556,232,1555,227,1787,182"/>
-<area shape="rect" href="../../d4/d00/a00428.html" title=" " alt="" coords="1818,229,1887,256"/>
-<area shape="poly" title=" " alt="" coords="1854,180,1854,215,1850,212,1850,184"/>
-<area shape="rect" href="../../d8/d00/a00410.html" title=" " alt="" coords="2055,229,2185,256"/>
-<area shape="poly" title=" " alt="" coords="1899,179,2061,225,2056,225,1899,185"/>
-<area shape="rect" title=" " alt="" coords="1799,304,1849,331"/>
-<area shape="poly" title=" " alt="" coords="1841,180,1822,204,1808,230,1805,245,1806,260,1813,291,1809,288,1801,261,1800,245,1803,228,1818,201,1836,183"/>
-<area shape="rect" title=" " alt="" coords="2644,304,2701,331"/>
-<area shape="poly" title=" " alt="" coords="1916,177,2082,204,2198,227,2225,240,2250,254,2355,280,2460,297,2555,307,2631,315,2625,314,2554,312,2459,302,2353,285,2249,258,2222,245,2197,232,2081,209,1915,182"/>
-<area shape="rect" href="../../de/d00/a00440.html" title="Contains the definitions for the bx_gui_c base class used for interfacing with SDL and other device i..." alt="" coords="1961,229,2031,256"/>
-<area shape="poly" title=" " alt="" coords="1878,179,1960,222,1955,221,1877,184"/>
-<area shape="poly" title=" " alt="" coords="1915,173,2140,197,2361,229,2356,229,2139,202,1915,178"/>
-<area shape="poly" title=" " alt="" coords="2101,256,2031,299,2030,293,2096,257"/>
-<area shape="poly" title=" " alt="" coords="2071,256,1865,309,1864,303,2066,257"/>
-<area shape="poly" title=" " alt="" coords="2186,247,2250,253,2876,312,2870,312,2249,259,2186,253"/>
-<area shape="poly" title=" " alt="" coords="2186,251,2205,253,2631,311,2625,310,2204,259,2186,256"/>
-<area shape="poly" title=" " alt="" coords="1998,255,1998,290,1994,287,1994,258"/>
-<area shape="rect" title=" " alt="" coords="2272,304,2336,331"/>
-<area shape="poly" title=" " alt="" coords="2032,251,2043,253,2259,306,2254,305,2042,259,2032,256"/>
-<area shape="poly" title=" " alt="" coords="2803,254,2788,259,2567,280,2351,297,2039,316,2038,311,2350,292,2567,275,2788,253,2798,255"/>
-<area shape="poly" title=" " alt="" coords="2840,256,2716,303,2715,298,2835,257"/>
-<area shape="poly" title=" " alt="" coords="2276,106,2254,124,2236,143,2227,162,2227,171,2232,180,2245,193,2262,202,2302,214,2347,217,2391,217,2429,217,2457,220,2465,225,2468,234,2454,258,2432,270,2392,280,2276,297,2039,316,2038,311,2275,291,2391,274,2430,265,2450,254,2462,233,2461,229,2455,225,2429,222,2391,222,2347,223,2301,219,2260,207,2242,197,2227,183,2222,172,2221,161,2232,139,2251,120,2271,108"/>
-<area shape="poly" title=" " alt="" coords="2230,97,2074,106,1877,117,1701,134,1639,145,1604,157,1592,168,1586,179,1580,206,1574,233,1567,246,1553,258,1508,273,1430,283,1216,296,870,307,750,315,749,310,869,301,1215,291,1429,278,1507,267,1551,254,1563,243,1569,231,1575,205,1581,178,1588,164,1601,152,1637,140,1700,129,1877,112,2073,100,2235,96"/>
-<area shape="poly" title=" " alt="" coords="2229,95,2026,101,1720,111,1361,128,994,157,917,161,848,158,729,149,675,151,622,162,566,188,507,231,497,244,490,258,483,290,479,287,485,256,493,241,504,227,564,183,620,157,675,145,730,143,849,152,917,156,993,152,1361,123,1720,105,2026,96,2235,95"/>
-<area shape="poly" title=" " alt="" coords="2229,97,2080,105,1885,116,1696,133,1618,144,1560,157,1523,171,1488,188,1429,223,1427,218,1486,183,1521,166,1558,152,1617,139,1695,128,1885,111,2079,100,2235,96"/>
-<area shape="poly" title=" " alt="" coords="2350,105,2415,124,2483,152,2534,184,2577,220,2572,218,2531,188,2480,157,2413,129,2349,110"/>
-<area shape="poly" title=" " alt="" coords="2357,93,2511,98,2699,108,2866,125,2924,137,2943,145,2955,153,2973,178,2979,205,2973,231,2957,258,2940,271,2916,282,2852,299,2780,310,2717,316,2716,311,2780,304,2851,294,2914,277,2938,266,2953,254,2968,229,2974,205,2968,181,2952,157,2941,149,2922,142,2865,130,2699,113,2511,103,2358,98"/>
-<area shape="poly" title=" " alt="" coords="2280,106,2261,125,2246,143,2238,162,2239,171,2244,180,2257,193,2272,203,2302,211,2335,209,2368,203,2402,196,2436,194,2468,203,2484,213,2498,228,2508,247,2504,264,2489,278,2467,289,2410,305,2352,314,2352,309,2409,300,2465,284,2486,274,2499,261,2502,248,2494,231,2480,217,2466,208,2435,200,2403,201,2369,208,2335,215,2302,216,2269,208,2254,198,2239,183,2234,173,2233,162,2241,140,2258,121,2275,108"/>
-<area shape="rect" href="../../d6/d00/a00356.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="2797,155,2942,181"/>
-<area shape="poly" title=" " alt="" coords="2358,100,2785,156,2779,156,2357,105"/>
-<area shape="rect" href="../../de/d00/a00323.html" title="Contains the definitions for the CPU tracing engine." alt="" coords="1990,155,2128,181"/>
-<area shape="poly" title=" " alt="" coords="2256,107,2115,152,2114,147,2251,108"/>
-<area shape="rect" href="../../dd/d00/a00719.html" title=" " alt="" coords="2595,155,2672,181"/>
-<area shape="poly" title=" " alt="" coords="2354,105,2582,155,2577,155,2354,110"/>
-<area shape="rect" title=" " alt="" coords="2254,155,2336,181"/>
-<area shape="poly" title=" " alt="" coords="2297,105,2297,141,2293,137,2293,109"/>
-<area shape="rect" title=" " alt="" coords="2360,155,2470,181"/>
-<area shape="poly" title=" " alt="" coords="2316,105,2383,147,2378,146,2315,110"/>
-<area shape="poly" title=" " alt="" coords="2850,181,2779,224,2777,219,2845,183"/>
-<area shape="poly" title=" " alt="" coords="2872,180,2873,215,2869,212,2868,184"/>
-<area shape="poly" title=" " alt="" coords="2102,179,2250,225,2245,224,2101,185"/>
-<area shape="poly" title=" " alt="" coords="2630,180,2614,217,2611,213,2625,183"/>
-<area shape="poly" title=" " alt="" coords="2638,180,2667,290,2663,287,2635,184"/>
+<div class="center"><img src="../../d9/d00/a00396.png" border="0" usemap="#a_c_p_u_2_ev68_instruction_fetch_8cpp" loading="lazy" alt=""/></div>
+<map name="a_c_p_u_2_ev68_instruction_fetch_8cpp" id="a_c_p_u_2_ev68_instruction_fetch_8cpp">
+<area shape="rect" title=" " alt="" coords="1849,5,2052,32"/>
+<area shape="rect" href="../../d3/d00/a00779.html" title="Standard includes." alt="" coords="854,80,927,107"/>
+<area shape="poly" title=" " alt="" coords="1847,29,942,91,942,86,1850,25"/>
+<area shape="rect" href="../../d5/d00/a00206.html" title="Contains the definitions for the emulated DecChip 21264CB EV68 Alpha processor." alt="" coords="1904,80,1998,107"/>
+<area shape="poly" title=" " alt="" coords="1952,31,1953,66,1949,63,1949,35"/>
+<area shape="rect" href="../../d9/d00/a00398.html" title=" " alt="" coords="2419,80,2576,107"/>
+<area shape="poly" title=" " alt="" coords="2047,30,2407,80,2401,80,2046,35"/>
+<area shape="rect" href="../../d9/d00/a00191.html" title=" " alt="" coords="5,155,115,181"/>
+<area shape="poly" title=" " alt="" coords="852,97,559,116,349,133,131,157,129,152,349,128,559,111,856,95"/>
+<area shape="rect" href="../../d5/d00/a00461.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="139,155,229,181"/>
+<area shape="poly" title=" " alt="" coords="852,97,603,117,427,134,245,157,243,152,427,128,602,111,857,96"/>
+<area shape="rect" title=" " alt="" coords="2114,304,2182,331"/>
+<area shape="poly" title=" " alt="" coords="927,92,1173,91,1536,96,1720,103,1883,114,2007,130,2050,141,2077,152,2107,182,2127,218,2140,256,2147,290,2142,287,2135,257,2122,220,2103,185,2075,157,2048,146,2006,136,1882,120,1720,109,1536,102,1173,96,928,97"/>
+<area shape="rect" href="../../d3/d00/a00059.html" title=" " alt="" coords="252,155,374,181"/>
+<area shape="poly" title=" " alt="" coords="853,101,394,157,391,158,389,153,393,152,856,96"/>
+<area shape="rect" href="../../de/d00/a00065.html" title=" " alt="" coords="908,229,1009,256"/>
+<area shape="poly" title=" " alt="" coords="898,105,949,216,944,214,895,109"/>
+<area shape="rect" href="../../d1/d00/a00077.html" title=" " alt="" coords="449,229,554,256"/>
+<area shape="poly" title=" " alt="" coords="860,106,550,226,548,221,855,108"/>
+<area shape="rect" href="../../da/d00/a00068.html" title=" " alt="" coords="192,304,280,331"/>
+<area shape="poly" title=" " alt="" coords="851,104,657,157,547,192,438,232,278,300,276,295,436,227,545,187,655,152,856,102"/>
+<area shape="rect" href="../../db/d00/a00074.html" title=" " alt="" coords="1548,229,1678,256"/>
+<area shape="poly" title=" " alt="" coords="927,97,1078,118,1273,152,1426,188,1558,225,1552,225,1425,193,1271,157,1078,123,927,102"/>
+<area shape="rect" href="../../d0/d00/a00071.html" title=" " alt="" coords="775,155,889,181"/>
+<area shape="poly" title=" " alt="" coords="883,106,853,145,850,140,878,109"/>
+<area shape="rect" href="../../de/d00/a00500.html" title="Contains macro&#39;s and prototypes for debugging." alt="" coords="1006,155,1108,181"/>
+<area shape="poly" title=" " alt="" coords="920,105,1017,148,1012,148,919,110"/>
+<area shape="rect" href="../../d4/d00/a00503.html" title="Contains byte&#45;order conversion helpers." alt="" coords="1154,155,1259,181"/>
+<area shape="poly" title=" " alt="" coords="927,100,1142,151,1136,152,927,106"/>
+<area shape="rect" title=" " alt="" coords="275,229,352,256"/>
+<area shape="poly" title=" " alt="" coords="315,180,316,215,311,213,312,184"/>
+<area shape="rect" title=" " alt="" coords="1319,379,1372,405"/>
+<area shape="poly" title=" " alt="" coords="287,184,245,212,199,249,181,269,171,290,171,310,182,329,198,336,232,342,344,354,680,372,1047,383,1306,390,1300,390,1047,388,679,378,343,360,231,348,196,341,178,333,166,311,166,289,177,266,195,245,242,207,291,180"/>
+<area shape="rect" title=" " alt="" coords="1754,304,1811,331"/>
+<area shape="poly" title=" " alt="" coords="1009,247,1072,253,1258,265,1405,268,1552,276,1638,286,1741,304,1736,304,1637,291,1551,281,1405,273,1258,270,1072,259,1009,252"/>
+<area shape="rect" title=" " alt="" coords="1430,304,1490,331"/>
+<area shape="poly" title=" " alt="" coords="1009,250,1028,253,1417,310,1412,310,1028,259,1009,256"/>
+<area shape="rect" title=" " alt="" coords="930,304,987,331"/>
+<area shape="poly" title=" " alt="" coords="960,255,961,290,957,287,957,259"/>
+<area shape="rect" title=" " alt="" coords="849,304,906,331"/>
+<area shape="poly" title=" " alt="" coords="947,255,904,296,901,291,942,258"/>
+<area shape="rect" title=" " alt="" coords="1096,304,1174,331"/>
+<area shape="poly" title=" " alt="" coords="990,254,1092,298,1087,297,989,259"/>
+<area shape="poly" title=" " alt="" coords="554,248,663,267,726,282,788,302,813,315,838,328,902,346,969,359,1100,377,1217,386,1306,391,1300,391,1216,391,1099,383,968,364,901,351,836,333,811,320,786,306,725,287,662,272,554,253"/>
+<area shape="poly" title=" " alt="" coords="554,246,667,253,829,260,967,262,1203,259,1317,260,1439,265,1577,278,1741,304,1736,304,1576,284,1438,271,1317,265,1203,264,967,267,829,266,667,259,554,251"/>
+<area shape="poly" title=" " alt="" coords="554,245,1415,310,1413,315,554,251"/>
+<area shape="poly" title=" " alt="" coords="554,247,712,266,917,304,912,304,711,271,554,252"/>
+<area shape="poly" title=" " alt="" coords="554,250,831,301,837,305,831,305,830,307,554,256"/>
+<area shape="poly" title=" " alt="" coords="554,246,816,270,1083,303,1077,304,815,275,554,251"/>
+<area shape="rect" title=" " alt="" coords="1011,304,1072,331"/>
+<area shape="poly" title=" " alt="" coords="554,245,746,263,869,279,999,304,993,304,868,284,745,268,554,250"/>
+<area shape="rect" title=" " alt="" coords="706,304,774,331"/>
+<area shape="poly" title=" " alt="" coords="543,254,694,301,688,301,543,259"/>
+<area shape="rect" title=" " alt="" coords="1604,304,1729,331"/>
+<area shape="poly" title=" " alt="" coords="554,245,667,253,925,265,1127,271,1330,279,1592,304,1586,304,1329,285,1127,276,925,271,667,259,554,251"/>
+<area shape="rect" title=" " alt="" coords="1915,304,1984,331"/>
+<area shape="poly" title=" " alt="" coords="554,246,667,253,992,268,1246,275,1499,283,1824,301,1902,311,1897,311,1824,307,1499,288,1245,280,992,274,667,259,554,251"/>
+<area shape="rect" title=" " alt="" coords="304,304,400,331"/>
+<area shape="poly" title=" " alt="" coords="478,256,393,299,391,294,473,257"/>
+<area shape="poly" title=" " alt="" coords="453,257,295,303,294,298,458,256"/>
+<area shape="rect" title=" " alt="" coords="424,304,499,331"/>
+<area shape="poly" title=" " alt="" coords="497,255,477,292,474,288,492,258"/>
+<area shape="rect" title=" " alt="" coords="524,304,591,331"/>
+<area shape="poly" title=" " alt="" coords="512,254,541,293,536,291,510,259"/>
+<area shape="rect" title=" " alt="" coords="615,304,681,331"/>
+<area shape="poly" title=" " alt="" coords="527,254,611,297,606,297,526,259"/>
+<area shape="poly" title=" " alt="" coords="1643,254,1742,298,1737,297,1642,259"/>
+<area shape="poly" title=" " alt="" coords="1589,256,1501,299,1500,294,1584,257"/>
+<area shape="poly" title=" " alt="" coords="1550,254,1190,310,1189,305,1545,254"/>
+<area shape="poly" title=" " alt="" coords="1624,254,1651,292,1646,290,1621,259"/>
+<area shape="rect" title=" " alt="" coords="1516,304,1580,331"/>
+<area shape="poly" title=" " alt="" coords="1604,255,1570,295,1568,290,1600,258"/>
+<area shape="poly" title=" " alt="" coords="855,179,926,222,921,221,854,184"/>
+<area shape="poly" title=" " alt="" coords="880,179,948,200,1022,227,1048,241,1073,254,1166,278,1261,295,1417,314,1412,314,1260,301,1165,284,1071,258,1045,246,1020,232,947,205,880,185"/>
+<area shape="poly" title=" " alt="" coords="772,179,728,192,686,208,671,218,663,229,661,241,669,254,694,279,720,293,746,300,774,301,838,297,874,297,917,304,912,304,874,302,838,302,774,306,745,305,718,298,691,283,665,258,656,242,658,227,668,214,684,203,726,187,777,177"/>
+<area shape="poly" title=" " alt="" coords="772,174,713,184,655,199,633,210,620,222,616,237,625,254,646,276,668,289,691,295,714,297,768,295,798,296,831,301,837,305,831,305,830,307,797,301,768,300,714,302,690,301,666,294,643,281,620,258,611,237,615,220,630,205,653,194,712,179,777,173"/>
+<area shape="poly" title=" " alt="" coords="839,179,862,217,878,237,897,254,1083,303,1078,303,895,258,874,241,857,220,836,184"/>
+<area shape="poly" title=" " alt="" coords="833,180,837,218,843,237,854,254,999,302,993,302,850,258,838,239,832,219,830,184"/>
+<area shape="rect" title=" " alt="" coords="679,229,782,256"/>
+<area shape="poly" title=" " alt="" coords="817,181,762,222,760,217,812,183"/>
+<area shape="rect" title=" " alt="" coords="1084,229,1153,256"/>
+<area shape="poly" title=" " alt="" coords="1069,179,1101,218,1096,217,1067,184"/>
+<area shape="rect" href="../../d7/d00/a00182.html" title=" " alt="" coords="1177,229,1271,256"/>
+<area shape="poly" title=" " alt="" coords="1211,180,1220,216,1215,213,1208,184"/>
+<area shape="poly" title=" " alt="" coords="1948,105,1916,186,1895,228,1877,258,1852,280,1824,299,1822,294,1849,276,1873,254,1891,226,1911,184,1944,109"/>
+<area shape="poly" title=" " alt="" coords="1900,97,1819,107,1712,128,1656,145,1600,168,1548,196,1501,231,1480,259,1467,291,1464,287,1475,256,1497,227,1545,192,1598,163,1654,140,1711,123,1818,102,1906,96"/>
+<area shape="poly" title=" " alt="" coords="1900,96,1822,102,1715,112,1597,129,1479,157,1435,173,1402,189,1328,232,1307,246,1284,258,1208,280,1146,288,1083,293,1003,306,1002,301,1082,288,1145,283,1207,275,1282,254,1304,242,1325,227,1399,184,1433,168,1478,152,1596,124,1715,107,1821,97,1906,95"/>
+<area shape="poly" title=" " alt="" coords="1900,99,1753,120,1660,136,1569,157,1472,189,1379,232,1354,246,1328,258,1263,277,1210,287,1156,294,1087,306,1086,301,1155,288,1209,281,1262,272,1326,254,1351,241,1376,227,1470,184,1567,152,1659,131,1752,115,1905,98"/>
+<area shape="rect" href="../../df/d00/a00062.html" title=" " alt="" coords="1703,229,1862,256"/>
+<area shape="poly" title=" " alt="" coords="1939,106,1883,157,1809,221,1807,216,1880,153,1934,108"/>
+<area shape="rect" href="../../d4/d00/a00437.html" title=" " alt="" coords="2503,155,2598,181"/>
+<area shape="poly" title=" " alt="" coords="1998,98,2490,159,2485,159,1998,103"/>
+<area shape="rect" href="../../d6/d00/a00491.html" title="Contains definitions for the base class for devices that connect to the chipset." alt="" coords="2191,229,2364,256"/>
+<area shape="poly" title=" " alt="" coords="1998,94,2070,99,2152,110,2225,127,2253,139,2273,153,2281,167,2286,183,2285,216,2281,212,2280,184,2276,169,2269,156,2251,143,2224,132,2151,115,2069,105,1998,99"/>
+<area shape="rect" href="../../d5/d00/a00878.html" title="Contains the definitions for the emulated Typhoon Chipset devices." alt="" coords="1939,155,2064,181"/>
+<area shape="poly" title=" " alt="" coords="1961,105,1987,143,1982,141,1958,110"/>
+<area shape="rect" href="../../d6/d00/a00293.html" title="Contains some macro definitions and some inline functions for the Alpha CPU." alt="" coords="2173,155,2259,181"/>
+<area shape="poly" title=" " alt="" coords="1997,105,2161,151,2156,151,1997,110"/>
+<area shape="rect" href="../../d3/d00/a00209.html" title=" " alt="" coords="2653,155,2784,181"/>
+<area shape="poly" title=" " alt="" coords="1998,96,2611,152,2640,157,2635,157,2610,157,1998,101"/>
+<area shape="poly" title=" " alt="" coords="1785,255,1785,290,1781,287,1781,258"/>
+<area shape="poly" title=" " alt="" coords="1722,256,1506,306,1505,301,1717,257"/>
+<area shape="poly" title=" " alt="" coords="1765,256,1701,298,1699,293,1760,257"/>
+<area shape="rect" title=" " alt="" coords="2664,304,2725,331"/>
+<area shape="poly" title=" " alt="" coords="1863,248,2651,312,2646,313,1863,253"/>
+<area shape="poly" title=" " alt="" coords="2564,179,2674,294,2669,292,2562,184"/>
+<area shape="rect" title=" " alt="" coords="2524,229,2577,256"/>
+<area shape="poly" title=" " alt="" coords="2552,180,2553,215,2549,212,2549,184"/>
+<area shape="rect" title=" " alt="" coords="2439,229,2500,256"/>
+<area shape="poly" title=" " alt="" coords="2539,181,2496,221,2493,217,2534,183"/>
+<area shape="rect" href="../../d6/d00/a00245.html" title=" " alt="" coords="2652,229,2738,256"/>
+<area shape="poly" title=" " alt="" coords="2576,179,2658,222,2653,221,2575,184"/>
+<area shape="poly" title=" " alt="" coords="2697,255,2697,290,2693,287,2693,258"/>
+<area shape="poly" title=" " alt="" coords="2257,256,2185,299,2183,293,2252,257"/>
+<area shape="poly" title=" " alt="" coords="2187,250,1190,315,1189,310,2193,249"/>
+<area shape="poly" title=" " alt="" coords="2217,256,1999,306,1998,301,2212,257"/>
+<area shape="rect" href="../../d7/d00/a00131.html" title="Contains the definitions for the configuration file interpreter." alt="" coords="2206,304,2348,331"/>
+<area shape="poly" title=" " alt="" coords="2279,255,2279,290,2275,287,2275,258"/>
+<area shape="rect" title=" " alt="" coords="2535,379,2593,405"/>
+<area shape="poly" title=" " alt="" coords="2365,252,2468,271,2511,285,2540,302,2551,316,2559,331,2565,365,2561,361,2553,333,2547,318,2537,306,2509,290,2466,277,2364,257"/>
+<area shape="rect" title=" " alt="" coords="2372,304,2449,331"/>
+<area shape="poly" title=" " alt="" coords="2301,254,2377,297,2372,296,2300,259"/>
+<area shape="rect" title=" " alt="" coords="2474,304,2526,331"/>
+<area shape="poly" title=" " alt="" coords="2317,254,2462,303,2456,302,2316,259"/>
+<area shape="rect" title=" " alt="" coords="2008,304,2090,331"/>
+<area shape="poly" title=" " alt="" coords="2240,256,2104,301,2103,296,2235,257"/>
+<area shape="poly" title=" " alt="" coords="2209,329,2194,333,1955,355,1722,372,1388,391,1388,386,1721,367,1955,350,2193,328,2203,329"/>
+<area shape="poly" title=" " alt="" coords="2328,329,2523,380,2517,379,2327,334"/>
+<area shape="poly" title=" " alt="" coords="1999,180,1982,219,1954,258,1923,287,1895,305,1865,319,1825,333,1765,351,1703,365,1580,383,1470,391,1388,394,1388,388,1470,386,1579,378,1702,359,1764,346,1823,328,1863,314,1893,301,1920,282,1950,254,1978,216,1994,183"/>
+<area shape="poly" title=" " alt="" coords="1995,180,1964,219,1920,258,1873,285,1827,304,1826,299,1871,280,1917,254,1960,216,1990,183"/>
+<area shape="poly" title=" " alt="" coords="1936,172,1839,181,1722,192,1613,208,1569,219,1537,232,1519,244,1502,260,1476,293,1473,288,1499,256,1516,240,1535,227,1568,214,1612,203,1721,186,1838,175,1941,172"/>
+<area shape="poly" title=" " alt="" coords="1936,175,1742,198,1499,232,1438,245,1378,259,1234,281,1169,290,1087,306,1086,301,1169,285,1233,276,1377,253,1437,240,1498,227,1742,193,1941,175"/>
+<area shape="poly" title=" " alt="" coords="2010,179,2025,215,2027,236,2022,257,2007,279,1986,297,1984,292,2003,276,2018,255,2022,236,2020,217,2007,184"/>
+<area shape="poly" title=" " alt="" coords="2050,179,2217,225,2212,225,2049,185"/>
+<area shape="poly" title=" " alt="" coords="2064,170,2209,188,2294,204,2377,227,2403,240,2428,254,2469,264,2505,267,2537,275,2553,286,2568,303,2575,317,2577,333,2574,366,2570,362,2572,333,2570,319,2563,305,2549,290,2535,280,2504,272,2468,270,2426,258,2400,244,2375,232,2293,209,2208,193,2064,176"/>
+<area shape="poly" title=" " alt="" coords="2025,179,2052,200,2073,228,2077,244,2077,261,2066,293,2063,288,2071,260,2072,245,2068,230,2048,204,2024,185"/>
+<area shape="poly" title=" " alt="" coords="2730,179,2750,214,2755,236,2752,257,2740,278,2724,296,2722,291,2736,275,2747,255,2749,236,2745,216,2727,184"/>
+<area shape="poly" title=" " alt="" coords="2717,180,2705,217,2702,212,2712,183"/>
+<area shape="rect" href="../../d3/d00/a00251.html" title=" " alt="" coords="2812,229,2972,256"/>
+<area shape="poly" title=" " alt="" coords="2749,179,2850,223,2845,223,2748,185"/>
+<area shape="poly" title=" " alt="" coords="2860,256,2740,302,2739,297,2855,257"/>
+<area shape="poly" title=" " alt="" coords="2576,96,2684,113,2742,130,2797,152,2841,182,2875,219,2870,217,2837,187,2795,157,2740,135,2683,119,2576,102"/>
 </map>
 </div>
 </div>
 <p><a href="../../db/d00/a00395_source.html">Go to the source code of this file.</a></p>
-<table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
-Data Structures</h2></td></tr>
-<tr class="memitem:CPowerStormDisplayLock" id="r_CPowerStormDisplayLock"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../d4/d00/a01485.html">CPowerStormDisplayLock</a></td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:a1b7f3442c604512f1a394975cb85128e" id="r_a1b7f3442c604512f1a394975cb85128e"><td class="memItemLeft">static <a class="el" href="../../d5/d00/a00176.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#a1b7f3442c604512f1a394975cb85128e">powerstorm_setting</a> (<a class="el" href="../../d2/d00/a01085.html">CConfigurator</a> *cfg, const char *key, <a class="el" href="../../d5/d00/a00176.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a> def, <a class="el" href="../../d5/d00/a00176.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a> max=0xffffffff)</td></tr>
-<tr class="memitem:abf7516a618c32209915a0b806a16e130" id="r_abf7516a618c32209915a0b806a16e130"><td class="memItemLeft">static void&#160;</td><td class="memItemRight"><a class="el" href="#abf7516a618c32209915a0b806a16e130">powerstorm_write_u32</a> (FILE *f, <a class="el" href="../../d5/d00/a00176.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a> v)</td></tr>
-<tr class="memitem:ab10e242e2a16e2fedbf938edbb488a81" id="r_ab10e242e2a16e2fedbf938edbb488a81"><td class="memItemLeft">static <a class="el" href="../../d5/d00/a00176.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a>&#160;</td><td class="memItemRight"><a class="el" href="#ab10e242e2a16e2fedbf938edbb488a81">powerstorm_read_u32</a> (FILE *f)</td></tr>
-<tr class="memitem:ad4f454f93828d009d1e259468507e925" id="r_ad4f454f93828d009d1e259468507e925"><td class="memItemLeft">static bool&#160;</td><td class="memItemRight"><a class="el" href="#ad4f454f93828d009d1e259468507e925">powerstorm_vga_window_offset</a> (<a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> &amp;address, unsigned selection)</td></tr>
-</table>
-<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
-<a id="ab10e242e2a16e2fedbf938edbb488a81" name="ab10e242e2a16e2fedbf938edbb488a81"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab10e242e2a16e2fedbf938edbb488a81">&#9670;&#160;</a></span>powerstorm_read_u32()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../d5/d00/a00176.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a> powerstorm_read_u32 </td>
-          <td>(</td>
-          <td class="paramtype">FILE *</td>          <td class="paramname"><span class="paramname"><em>f</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../db/d00/a00395_source.html#l00083">83</a> of file <a class="el" href="../../db/d00/a00395_source.html">PowerStorm3xx.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../db/d00/a00395_source.html#l00083">powerstorm_read_u32()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../db/d00/a00395_source.html#l00083">powerstorm_read_u32()</a>, and <a class="el" href="../../db/d00/a00395_source.html#l01231">CPowerStorm3xx::RestoreState()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../db/d00/a00395_ab10e242e2a16e2fedbf938edbb488a81_cgraph.png" border="0" usemap="#adb/d00/a00395_ab10e242e2a16e2fedbf938edbb488a81_cgraph" loading="lazy" alt=""/></div>
-<map name="adb/d00/a00395_ab10e242e2a16e2fedbf938edbb488a81_cgraph" id="adb/d00/a00395_ab10e242e2a16e2fedbf938edbb488a81_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,155,56"/>
-<area shape="poly" title=" " alt="" coords="54,28,49,21,53,11,63,5,80,3,98,5,109,14,104,14,96,10,80,8,65,10,57,14,55,20,59,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../db/d00/a00395_ab10e242e2a16e2fedbf938edbb488a81_icgraph.png" border="0" usemap="#adb/d00/a00395_ab10e242e2a16e2fedbf938edbb488a81_icgraph" loading="lazy" alt=""/></div>
-<map name="adb/d00/a00395_ab10e242e2a16e2fedbf938edbb488a81_icgraph" id="adb/d00/a00395_ab10e242e2a16e2fedbf938edbb488a81_icgraph">
-<area shape="rect" title=" " alt="" coords="263,29,412,56"/>
-<area shape="poly" title=" " alt="" coords="375,14,363,10,337,8,313,10,300,15,297,20,304,30,299,28,292,21,297,11,312,5,337,3,365,5,381,15"/>
-<area shape="rect" href="../../d2/d00/a01489.html#ae14e726644e554258ec7b3bb94fb51dd" title="Restore state from a Virtual Machine State file." alt="" coords="5,29,215,56"/>
-<area shape="poly" title=" " alt="" coords="245,43,215,45,215,40,250,43"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="a1b7f3442c604512f1a394975cb85128e" name="a1b7f3442c604512f1a394975cb85128e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1b7f3442c604512f1a394975cb85128e">&#9670;&#160;</a></span>powerstorm_setting()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="../../d5/d00/a00176.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a> powerstorm_setting </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="../../d2/d00/a01085.html">CConfigurator</a> *</td>          <td class="paramname"><span class="paramname"><em>cfg</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>key</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="../../d5/d00/a00176.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a></td>          <td class="paramname"><span class="paramname"><em>def</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="../../d5/d00/a00176.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a></td>          <td class="paramname"><span class="paramname"><em>max</em></span><span class="paramdefsep"> = </span><span class="paramdefval">0xffffffff</span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../db/d00/a00395_source.html#l00058">58</a> of file <a class="el" href="../../db/d00/a00395_source.html">PowerStorm3xx.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d4/d00/a00116_source.html#l00156">CConfigurator::get_text_value()</a>, and <a class="el" href="../../db/d00/a00395_source.html#l00058">powerstorm_setting()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../db/d00/a00395_source.html#l00523">CPowerStorm3xx::init()</a>, and <a class="el" href="../../db/d00/a00395_source.html#l00058">powerstorm_setting()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../db/d00/a00395_a1b7f3442c604512f1a394975cb85128e_cgraph.png" border="0" usemap="#adb/d00/a00395_a1b7f3442c604512f1a394975cb85128e_cgraph" loading="lazy" alt=""/></div>
-<map name="adb/d00/a00395_a1b7f3442c604512f1a394975cb85128e_cgraph" id="adb/d00/a00395_a1b7f3442c604512f1a394975cb85128e_cgraph">
-<area shape="rect" title=" " alt="" coords="5,37,141,64"/>
-<area shape="poly" title=" " alt="" coords="42,37,37,29,40,19,53,13,73,11,95,13,107,22,102,22,93,18,73,16,54,18,44,23,42,28,47,37"/>
-<area shape="rect" href="../../d2/d00/a01085.html#a36498889497191fbc49ebf533c0d3d36" title=" " alt="" coords="189,29,317,72"/>
-<area shape="poly" title=" " alt="" coords="141,48,176,50,171,51,141,53"/>
-<area shape="poly" title=" " alt="" coords="218,27,217,19,223,10,235,5,253,3,272,5,285,14,280,13,271,10,253,8,236,10,226,14,222,21,223,30"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../db/d00/a00395_a1b7f3442c604512f1a394975cb85128e_icgraph.png" border="0" usemap="#adb/d00/a00395_a1b7f3442c604512f1a394975cb85128e_icgraph" loading="lazy" alt=""/></div>
-<map name="adb/d00/a00395_a1b7f3442c604512f1a394975cb85128e_icgraph" id="adb/d00/a00395_a1b7f3442c604512f1a394975cb85128e_icgraph">
-<area shape="rect" title=" " alt="" coords="203,29,338,56"/>
-<area shape="poly" title=" " alt="" coords="301,14,292,10,270,8,251,10,240,15,237,20,243,30,238,28,232,21,236,11,249,5,270,3,293,5,307,14"/>
-<area shape="rect" href="../../d2/d00/a01489.html#a389c26aea26c0470a3c83e2060f09b56" title=" " alt="" coords="5,29,155,56"/>
-<area shape="poly" title=" " alt="" coords="185,43,155,45,155,40,190,43"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="ad4f454f93828d009d1e259468507e925" name="ad4f454f93828d009d1e259468507e925"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad4f454f93828d009d1e259468507e925">&#9670;&#160;</a></span>powerstorm_vga_window_offset()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool powerstorm_vga_window_offset </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="../../d8/d00/a00326.html#a70c1fcc1a4e96af8f6580f708657cd41">u32</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>address</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">unsigned</td>          <td class="paramname"><span class="paramname"><em>selection</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../db/d00/a00395_source.html#l00092">92</a> of file <a class="el" href="../../db/d00/a00395_source.html">PowerStorm3xx.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../db/d00/a00395_source.html#l00092">powerstorm_vga_window_offset()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../db/d00/a00395_source.html#l00198">CPowerStorm3xx::mem_r()</a>, <a class="el" href="../../db/d00/a00395_source.html#l00236">CPowerStorm3xx::mem_w()</a>, and <a class="el" href="../../db/d00/a00395_source.html#l00092">powerstorm_vga_window_offset()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../db/d00/a00395_ad4f454f93828d009d1e259468507e925_cgraph.png" border="0" usemap="#adb/d00/a00395_ad4f454f93828d009d1e259468507e925_cgraph" loading="lazy" alt=""/></div>
-<map name="adb/d00/a00395_ad4f454f93828d009d1e259468507e925_cgraph" id="adb/d00/a00395_ad4f454f93828d009d1e259468507e925_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,174,72"/>
-<area shape="poly" title=" " alt="" coords="57,28,56,19,61,11,72,5,90,3,108,5,120,14,115,14,106,10,89,8,74,10,65,14,61,20,62,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../db/d00/a00395_ad4f454f93828d009d1e259468507e925_icgraph.png" border="0" usemap="#adb/d00/a00395_ad4f454f93828d009d1e259468507e925_icgraph" loading="lazy" alt=""/></div>
-<map name="adb/d00/a00395_ad4f454f93828d009d1e259468507e925_icgraph" id="adb/d00/a00395_ad4f454f93828d009d1e259468507e925_icgraph">
-<area shape="rect" title=" " alt="" coords="472,39,640,81"/>
-<area shape="poly" title=" " alt="" coords="590,23,579,20,556,17,535,19,523,24,518,30,519,40,514,37,512,29,519,20,534,14,556,12,580,14,596,23"/>
-<area shape="rect" href="../../d2/d00/a01489.html#ac1ea7dc307798c29bd0bf5ecfc419617" title=" " alt="" coords="249,17,421,44"/>
-<area shape="poly" title=" " alt="" coords="454,47,421,45,421,39,459,47"/>
-<area shape="rect" href="../../d2/d00/a01489.html#ad257aebfa221c28adb16bad4409c57af" title=" " alt="" coords="246,72,424,99"/>
-<area shape="poly" title=" " alt="" coords="459,71,425,78,424,72,454,72"/>
-<area shape="rect" href="../../d2/d00/a01489.html#a800eeeee83b393a546eb5f9c58beb2a0" title=" " alt="" coords="5,5,198,48"/>
-<area shape="poly" title=" " alt="" coords="231,30,199,31,198,26,236,28"/>
-<area shape="rect" href="../../d2/d00/a01489.html#a8a95c9639563fe33ef77d8f17dbc9d67" title=" " alt="" coords="6,72,197,115"/>
-<area shape="poly" title=" " alt="" coords="228,89,198,93,198,87,233,89"/>
-</map>
-</div>
-
-</div>
-</div>
-<a id="abf7516a618c32209915a0b806a16e130" name="abf7516a618c32209915a0b806a16e130"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abf7516a618c32209915a0b806a16e130">&#9670;&#160;</a></span>powerstorm_write_u32()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void powerstorm_write_u32 </td>
-          <td>(</td>
-          <td class="paramtype">FILE *</td>          <td class="paramname"><span class="paramname"><em>f</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="../../d5/d00/a00176.html#a6eb1e68cc391dd753bc8ce896dbb8315">uint32_t</a></td>          <td class="paramname"><span class="paramname"><em>v</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../db/d00/a00395_source.html#l00074">74</a> of file <a class="el" href="../../db/d00/a00395_source.html">PowerStorm3xx.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../db/d00/a00395_source.html#l00074">powerstorm_write_u32()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../db/d00/a00395_source.html#l00074">powerstorm_write_u32()</a>, and <a class="el" href="../../db/d00/a00395_source.html#l01190">CPowerStorm3xx::SaveState()</a>.</p>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../db/d00/a00395_abf7516a618c32209915a0b806a16e130_cgraph.png" border="0" usemap="#adb/d00/a00395_abf7516a618c32209915a0b806a16e130_cgraph" loading="lazy" alt=""/></div>
-<map name="adb/d00/a00395_abf7516a618c32209915a0b806a16e130_cgraph" id="adb/d00/a00395_abf7516a618c32209915a0b806a16e130_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,158,56"/>
-<area shape="poly" title=" " alt="" coords="55,28,50,21,54,11,64,5,82,3,100,5,111,14,106,14,98,10,81,8,66,10,58,14,56,20,60,29"/>
-</map>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../db/d00/a00395_abf7516a618c32209915a0b806a16e130_icgraph.png" border="0" usemap="#adb/d00/a00395_abf7516a618c32209915a0b806a16e130_icgraph" loading="lazy" alt=""/></div>
-<map name="adb/d00/a00395_abf7516a618c32209915a0b806a16e130_icgraph" id="adb/d00/a00395_abf7516a618c32209915a0b806a16e130_icgraph">
-<area shape="rect" title=" " alt="" coords="247,29,399,56"/>
-<area shape="poly" title=" " alt="" coords="359,14,348,10,323,8,300,10,287,15,284,20,290,30,285,28,279,21,283,11,298,5,323,3,349,5,365,14"/>
-<area shape="rect" href="../../d2/d00/a01489.html#aba4aa2ef1635332e91874d6bd76f7b4c" title="Save state to a Virtual Machine State file." alt="" coords="5,29,199,56"/>
-<area shape="poly" title=" " alt="" coords="228,43,199,45,199,40,234,43"/>
-</map>
-</div>
-
-</div>
-</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
@@ -541,7 +279,7 @@ Here is the caller graph for this function:</div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_e79632891301b850df87e9c0030293fa.html">graphics</a></li><li class="navelem"><a href="../../db/d00/a00395.html">PowerStorm3xx.cpp</a></li>
+    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../db/d00/a00395.html">Ev68InstructionFetch.cpp</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

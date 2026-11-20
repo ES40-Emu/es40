@@ -1,6 +1,29 @@
 var a00137 =
 [
-    [ "NumberQuestion", "d6/d00/a01117.html", "d6/d00/a01117" ],
-    [ "i2s", "d2/d00/a00137.html#af67e732258579f2e0c619014e718a75c", null ],
-    [ "s2i", "d2/d00/a00137.html#aa70bc74cb9cef1fc1add36a16b97a694", null ]
+    [ "TuiUI", "dd/d00/a01284.html", "dd/d00/a01284" ],
+    [ "MENU_1ST_LEVEL", "d2/d00/a00137.html#aaa1469a5b9f1ba662375b25b6484561b", null ],
+    [ "MENU_2ND_LEVEL", "d2/d00/a00137.html#a1081da49f32002e9bebff41e34c49a19", null ],
+    [ "MENU_3RD_LEVEL", "d2/d00/a00137.html#a51da317b34b93d5933689b281046a9d7", null ],
+    [ "MENU_4TH_LEVEL", "d2/d00/a00137.html#ae3df331104b4ed92b6aaa7e9610fd8a8", null ],
+    [ "MYKEY_DEL", "d2/d00/a00137.html#a6e3ed80b2d9f407ac699480121300a4b", null ],
+    [ "MYKEY_EXIT", "d2/d00/a00137.html#a07d78c49abceb4c64b1fbf79f9368aec", null ],
+    [ "MYKEY_EXIT_STR", "d2/d00/a00137.html#a1591fb36e7b0d74c59a96ec3d5e213f7", null ],
+    [ "MYKEY_HELP", "d2/d00/a00137.html#acc2562e41ad69acae4243bb37d603719", null ],
+    [ "MYKEY_HELP_STR", "d2/d00/a00137.html#aa44879879443563dcfd2ddf03d99a1fc", null ],
+    [ "MYKEY_QUIT", "d2/d00/a00137.html#abea479fa978328755d9843b7cb47d98c", null ],
+    [ "MYKEY_QUIT_STR", "d2/d00/a00137.html#a023dcabfe1ab8bc812b9394e039d873c", null ],
+    [ "MYKEY_RETURN", "d2/d00/a00137.html#a1276c9bece1e9b4786490ca0204d30d4", null ],
+    [ "MYKEY_TAB", "d2/d00/a00137.html#a5883182e65fb007d8b63b59b431c9273", null ],
+    [ "WAITSEC", "d2/d00/a00137.html#a10d5fd5f4b15a7fec20bf28f78243a85", null ],
+    [ "create_window", "d2/d00/a00137.html#a71b598f658af3b041f7d3ee92e037b83", null ],
+    [ "es40_banner", "d2/d00/a00137.html#af656a1a567edb57d8a0d1abeac5512fe", null ],
+    [ "main", "d2/d00/a00137.html#a3c04138a5bfe5d72780bb7e82a18e627", null ],
+    [ "mvwprintw_center", "d2/d00/a00137.html#acb1fea10b65ac2c6c32952e3276a4110", null ],
+    [ "set_min_width", "d2/d00/a00137.html#ae14c8386ea3c62a86871c48b4b03c610", null ],
+    [ "show_text", "d2/d00/a00137.html#a60f946025a893c52cb1e4c236f6734bb", null ],
+    [ "tui_form", "d2/d00/a00137.html#a558a54f89d00f71bc42b361876103ca0", null ],
+    [ "tui_menu", "d2/d00/a00137.html#a6b0e04268d7289e9e7e00b944527a21f", null ],
+    [ "tui_text", "d2/d00/a00137.html#a8458ec5ffd657eef6d5d9274668a82cc", null ],
+    [ "scrh", "d2/d00/a00137.html#a2e9cb51790f9acde6aadcd48a3b66c86", null ],
+    [ "scrw", "d2/d00/a00137.html#a3396a316d98df733b5a5187860d92c2a", null ]
 ];

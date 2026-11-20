@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.18.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ES40: emu/address_map.h File Reference</title>
+<title>ES40: CPU/Ev4HWLoad.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../dynsections.js"></script>
 <script type="text/javascript" src="../../codefolding.js"></script>
@@ -26,7 +26,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">ES40<span id="projectnumber">&#160;0.94</span>
+   <div id="projectname">ES40<span id="projectnumber">&#160;0.95</span>
    </div>
   </td>
  </tr>
@@ -109,308 +109,105 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('dc/d00/a00332.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">address_map.h File Reference</div></div>
+  <div class="headertitle"><div class="title">Ev4HWLoad.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;functional&gt;</code><br />
-<code>#include &lt;memory&gt;</code><br />
-<code>#include &lt;cstdint&gt;</code><br />
-<code>#include &lt;type_traits&gt;</code><br />
-<code>#include &lt;utility&gt;</code><br />
-<code>#include &lt;vector&gt;</code><br />
-<code>#include &quot;<a class="el" href="../../d8/d00/a00344_source.html">mame_shims.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d0/d00/a00239_source.html">AlphaHWLoad.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
-Include dependency graph for address_map.h:</div>
+Include dependency graph for Ev4HWLoad.h:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../d2/d00/a00333.png" border="0" usemap="#aemu_2address__map_8h" loading="lazy" alt=""/></div>
-<map name="aemu_2address__map_8h" id="aemu_2address__map_8h">
-<area shape="rect" title=" " alt="" coords="473,5,612,32"/>
-<area shape="rect" title=" " alt="" coords="327,155,404,181"/>
-<area shape="poly" title=" " alt="" coords="530,31,394,147,390,143,526,34"/>
-<area shape="rect" title=" " alt="" coords="674,379,742,405"/>
-<area shape="poly" title=" " alt="" coords="492,34,423,58,352,92,325,112,308,133,304,156,308,167,317,180,338,200,359,213,381,221,403,225,450,221,497,210,546,197,596,191,621,193,646,199,672,210,697,227,709,241,718,258,726,294,724,332,718,366,714,362,719,331,720,295,713,259,705,244,693,231,669,215,645,204,620,198,596,197,547,203,499,215,450,227,403,230,380,226,357,218,335,204,313,183,303,170,299,156,303,131,321,108,349,87,421,54,497,31"/>
-<area shape="rect" title=" " alt="" coords="429,155,489,181"/>
-<area shape="poly" title=" " alt="" coords="538,31,475,143,471,140,534,34"/>
-<area shape="rect" title=" " alt="" coords="514,155,596,181"/>
-<area shape="poly" title=" " alt="" coords="545,30,555,140,550,138,542,35"/>
-<area shape="rect" title=" " alt="" coords="621,155,673,181"/>
-<area shape="poly" title=" " alt="" coords="553,30,632,142,626,142,551,35"/>
-<area shape="rect" title=" " alt="" coords="697,155,754,181"/>
-<area shape="poly" title=" " alt="" coords="559,30,701,144,695,145,558,35"/>
-<area shape="rect" href="../../d8/d00/a00344.html" title=" " alt="" coords="681,80,791,107"/>
-<area shape="poly" title=" " alt="" coords="577,30,691,74,685,75,577,35"/>
-<area shape="poly" title=" " alt="" coords="678,106,420,157,419,152,683,103"/>
-<area shape="poly" title=" " alt="" coords="683,108,505,157,503,152,688,106"/>
-<area shape="poly" title=" " alt="" coords="702,108,602,151,600,146,707,106"/>
-<area shape="poly" title=" " alt="" coords="723,106,675,147,673,142,718,109"/>
-<area shape="poly" title=" " alt="" coords="736,105,732,141,727,138,733,109"/>
-<area shape="rect" href="../../d6/d00/a00626.html" title="Standard includes." alt="" coords="1045,155,1118,181"/>
-<area shape="poly" title=" " alt="" coords="792,102,1033,154,1028,155,792,108"/>
-<area shape="rect" title=" " alt="" coords="1142,155,1202,181"/>
-<area shape="poly" title=" " alt="" coords="792,98,940,118,1130,154,1124,155,939,124,792,104"/>
-<area shape="rect" title=" " alt="" coords="778,155,852,181"/>
-<area shape="poly" title=" " alt="" coords="750,105,793,144,787,144,749,110"/>
-<area shape="rect" title=" " alt="" coords="876,155,933,181"/>
-<area shape="poly" title=" " alt="" coords="766,105,864,148,859,148,765,110"/>
-<area shape="rect" title=" " alt="" coords="957,155,1022,181"/>
-<area shape="poly" title=" " alt="" coords="780,105,945,153,939,153,780,110"/>
-<area shape="rect" href="../../d7/d00/a00173.html" title=" " alt="" coords="1287,229,1396,256"/>
-<area shape="poly" title=" " alt="" coords="1118,177,1284,225,1279,225,1118,182"/>
-<area shape="rect" href="../../d8/d00/a00326.html" title="Contains the datatype definitions for use with Microsoft Visual C++ and Linux." alt="" coords="313,229,402,256"/>
-<area shape="poly" title=" " alt="" coords="1042,180,1034,184,942,197,863,205,728,210,591,215,418,232,417,227,591,209,727,205,863,199,941,192,1033,179,1048,179"/>
-<area shape="rect" title=" " alt="" coords="426,229,494,256"/>
-<area shape="poly" title=" " alt="" coords="1042,180,1034,184,888,203,773,209,659,214,513,232,510,232,508,227,512,227,658,209,773,203,887,197,1033,179,1048,179"/>
-<area shape="rect" href="../../d6/d00/a00047.html" title=" " alt="" coords="1422,304,1544,331"/>
-<area shape="poly" title=" " alt="" coords="1118,176,1130,179,1173,186,1210,188,1274,189,1305,191,1336,197,1371,208,1410,227,1445,256,1471,292,1466,290,1441,260,1407,232,1369,213,1335,202,1304,196,1274,195,1209,194,1172,191,1129,184,1118,181"/>
-<area shape="rect" href="../../dc/d00/a00053.html" title=" " alt="" coords="326,304,426,331"/>
-<area shape="poly" title=" " alt="" coords="1042,180,1034,184,961,194,899,198,793,199,742,199,688,204,627,214,557,232,531,244,507,258,419,300,417,295,504,254,529,239,555,227,626,209,687,198,741,194,793,193,899,193,961,189,1033,179,1048,179"/>
-<area shape="rect" href="../../de/d00/a00065.html" title=" " alt="" coords="839,304,943,331"/>
-<area shape="poly" title=" " alt="" coords="1057,181,1017,205,976,231,941,263,912,295,909,290,938,259,973,227,1014,200,1052,183"/>
-<area shape="rect" href="../../d9/d00/a00056.html" title=" " alt="" coords="1344,379,1432,405"/>
-<area shape="poly" title=" " alt="" coords="1064,181,1040,204,1021,230,1018,255,1021,286,1029,314,1037,329,1058,342,1089,352,1168,364,1332,378,1326,378,1168,369,1088,357,1056,347,1033,332,1024,316,1016,287,1012,255,1016,228,1036,200,1059,183"/>
-<area shape="rect" href="../../df/d00/a00062.html" title=" " alt="" coords="171,304,301,331"/>
-<area shape="poly" title=" " alt="" coords="1042,180,1034,184,962,190,871,191,660,188,553,189,453,195,367,208,331,219,301,232,285,244,271,259,249,292,246,289,266,256,281,240,299,227,329,214,366,203,452,190,553,184,660,183,871,186,961,185,1033,179,1048,179"/>
-<area shape="rect" href="../../d3/d00/a00059.html" title=" " alt="" coords="568,229,683,256"/>
-<area shape="poly" title=" " alt="" coords="1042,179,1034,184,853,215,699,235,698,230,853,209,1033,179,1048,178"/>
-<area shape="rect" href="../../dd/d00/a00365.html" title="Contains macro&#39;s and prototypes for debugging." alt="" coords="1030,229,1133,256"/>
-<area shape="poly" title=" " alt="" coords="1083,180,1084,215,1079,212,1080,184"/>
-<area shape="rect" href="../../d8/d00/a00368.html" title="Contains byte&#45;order conversion helpers." alt="" coords="1157,229,1262,256"/>
-<area shape="poly" title=" " alt="" coords="1104,179,1177,222,1171,221,1103,184"/>
-<area shape="rect" title=" " alt="" coords="1534,379,1611,405"/>
-<area shape="poly" title=" " alt="" coords="1499,329,1547,369,1542,368,1498,334"/>
-<area shape="rect" title=" " alt="" coords="1456,379,1510,405"/>
-<area shape="poly" title=" " alt="" coords="1485,329,1485,365,1481,361,1481,333"/>
-<area shape="rect" title=" " alt="" coords="197,379,254,405"/>
-<area shape="poly" title=" " alt="" coords="353,331,266,374,265,369,347,332"/>
-<area shape="rect" title=" " alt="" coords="278,379,338,405"/>
-<area shape="poly" title=" " alt="" coords="367,330,332,370,329,365,362,332"/>
-<area shape="rect" title=" " alt="" coords="593,379,650,405"/>
-<area shape="poly" title=" " alt="" coords="419,329,581,378,575,378,418,334"/>
-<area shape="rect" title=" " alt="" coords="512,379,568,405"/>
-<area shape="poly" title=" " alt="" coords="405,329,500,372,495,372,404,334"/>
-<area shape="rect" title=" " alt="" coords="94,379,173,405"/>
-<area shape="poly" title=" " alt="" coords="337,331,188,377,187,372,331,331"/>
-<area shape="poly" title=" " alt="" coords="862,331,755,375,754,370,856,332"/>
-<area shape="poly" title=" " alt="" coords="943,320,1191,344,1330,359,1443,379,1438,378,1329,365,1191,349,943,326"/>
-<area shape="poly" title=" " alt="" coords="836,323,557,348,397,364,270,381,269,376,396,358,556,342,841,322"/>
-<area shape="poly" title=" " alt="" coords="841,323,597,350,462,366,354,381,353,376,461,360,597,345,836,324"/>
-<area shape="poly" title=" " alt="" coords="843,331,666,380,665,375,838,332"/>
-<area shape="poly" title=" " alt="" coords="841,327,726,351,584,381,583,376,725,345,836,328"/>
-<area shape="poly" title=" " alt="" coords="836,323,499,352,188,381,188,376,498,347,841,322"/>
-<area shape="rect" title=" " alt="" coords="766,379,826,405"/>
-<area shape="poly" title=" " alt="" coords="877,330,826,372,824,367,872,332"/>
-<area shape="rect" title=" " alt="" coords="1253,379,1321,405"/>
-<area shape="poly" title=" " alt="" coords="943,324,1073,344,1240,378,1235,378,1072,350,943,329"/>
-<area shape="rect" title=" " alt="" coords="363,379,488,405"/>
-<area shape="poly" title=" " alt="" coords="841,327,504,381,503,376,836,327"/>
-<area shape="rect" title=" " alt="" coords="851,379,947,405"/>
-<area shape="poly" title=" " alt="" coords="894,329,898,365,894,361,890,333"/>
-<area shape="poly" title=" " alt="" coords="943,324,975,328,1152,350,1332,378,1326,378,1151,355,974,333,943,329"/>
-<area shape="rect" title=" " alt="" coords="970,379,1046,405"/>
-<area shape="poly" title=" " alt="" coords="912,329,978,371,972,370,911,334"/>
-<area shape="rect" title=" " alt="" coords="1070,379,1138,405"/>
-<area shape="poly" title=" " alt="" coords="928,329,1058,375,1053,374,928,334"/>
-<area shape="rect" title=" " alt="" coords="1162,379,1228,405"/>
-<area shape="poly" title=" " alt="" coords="944,328,1149,378,1144,378,943,333"/>
-<area shape="poly" title=" " alt="" coords="236,329,232,365,227,362,232,333"/>
-<area shape="poly" title=" " alt="" coords="250,329,288,368,282,367,248,334"/>
-<area shape="poly" title=" " alt="" coords="221,330,165,372,163,367,216,332"/>
-<area shape="poly" title=" " alt="" coords="270,329,381,372,375,373,269,334"/>
-<area shape="rect" title=" " alt="" coords="5,379,70,405"/>
-<area shape="poly" title=" " alt="" coords="202,334,85,376,83,371,201,329"/>
-<area shape="poly" title=" " alt="" coords="585,256,435,302,434,297,579,257"/>
-<area shape="poly" title=" " alt="" coords="601,256,440,333,350,374,349,369,438,328,596,257"/>
-<area shape="poly" title=" " alt="" coords="618,255,604,279,593,305,592,320,594,336,607,367,602,364,589,337,586,320,588,303,600,277,613,258"/>
-<area shape="poly" title=" " alt="" coords="618,255,586,305,554,367,551,362,582,303,614,258"/>
-<area shape="poly" title=" " alt="" coords="565,251,324,279,213,294,160,306,150,318,143,333,136,365,132,362,138,331,146,315,157,302,212,289,323,274,570,248"/>
-<area shape="poly" title=" " alt="" coords="649,254,684,275,721,302,753,334,780,368,775,366,749,337,717,306,681,280,648,259"/>
-<area shape="rect" title=" " alt="" coords="603,304,706,331"/>
-<area shape="poly" title=" " alt="" coords="632,254,646,291,642,288,629,259"/>
-<area shape="rect" title=" " alt="" coords="1047,304,1116,331"/>
-<area shape="poly" title=" " alt="" coords="1083,255,1084,290,1079,287,1080,259"/>
-<area shape="rect" href="../../db/d00/a00164.html" title=" " alt="" coords="1163,304,1256,331"/>
-<area shape="poly" title=" " alt="" coords="1211,255,1212,290,1207,287,1208,258"/>
-</map>
-</div>
-</div><div class="textblock"><div class="dynheader">
-This graph shows which files directly or indirectly include this file:</div>
-<div class="dyncontent">
-<div class="center"><img src="../../da/d00/a00334.png" border="0" usemap="#aemu_2address__map_8hdep" loading="lazy" alt=""/></div>
-<map name="aemu_2address__map_8hdep" id="aemu_2address__map_8hdep">
-<area shape="rect" title=" " alt="" coords="825,5,964,32"/>
-<area shape="rect" href="../../d3/d00/a00341.html" title=" " alt="" coords="114,155,200,181"/>
-<area shape="poly" title=" " alt="" coords="807,22,714,28,598,38,473,55,349,83,300,99,253,119,180,156,177,152,251,114,298,94,347,77,472,50,598,33,714,23,812,20"/>
-<area shape="rect" href="../../d5/d00/a00374.html" title=" " alt="" coords="557,229,677,256"/>
-<area shape="poly" title=" " alt="" coords="807,31,697,50,571,76,512,93,461,112,420,133,394,156,389,168,394,180,414,190,455,203,559,229,554,229,454,208,412,195,390,183,384,168,390,153,417,129,459,107,511,88,570,71,696,45,812,29"/>
-<area shape="rect" href="../../d4/d00/a00392.html" title=" " alt="" coords="1061,80,1208,107"/>
-<area shape="poly" title=" " alt="" coords="951,34,1095,79,1090,79,951,40"/>
-<area shape="rect" href="../../d8/d00/a00410.html" title=" " alt="" coords="1298,80,1481,107"/>
-<area shape="poly" title=" " alt="" coords="980,30,1305,79,1300,80,980,35"/>
-<area shape="rect" href="../../db/d00/a00422.html" title=" " alt="" coords="702,229,839,256"/>
-<area shape="poly" title=" " alt="" coords="925,39,958,69,988,104,998,124,1004,144,1002,164,993,183,971,195,931,207,832,231,831,226,930,202,969,190,989,179,997,163,998,145,993,126,983,107,954,72,923,44"/>
-<area shape="rect" href="../../db/d00/a02253.html" title=" " alt="" coords="645,80,758,107"/>
-<area shape="poly" title=" " alt="" coords="849,37,736,82,734,77,844,39"/>
-<area shape="rect" href="../../d6/d00/a00371.html" title=" " alt="" coords="27,304,162,331"/>
-<area shape="poly" title=" " alt="" coords="97,180,51,198,30,212,13,231,9,241,9,250,21,270,43,287,69,302,64,305,40,292,17,273,4,252,3,240,8,228,26,208,49,193,100,175"/>
-<area shape="rect" href="../../d3/d00/a00419.html" title=" " alt="" coords="402,304,553,331"/>
-<area shape="poly" title=" " alt="" coords="106,190,82,204,61,220,51,237,51,245,57,254,79,271,113,284,155,295,204,302,307,311,404,317,398,317,307,317,203,308,154,300,111,289,76,275,53,258,46,247,45,236,57,216,79,199,110,186"/>
-<area shape="rect" href="../../dc/d00/a00425.html" title=" " alt="" coords="397,229,533,256"/>
-<area shape="poly" title=" " alt="" coords="216,180,413,227,409,230,215,186"/>
-<area shape="rect" href="../../df/d00/a00431.html" title=" " alt="" coords="67,229,194,256"/>
-<area shape="poly" title=" " alt="" coords="149,194,137,230,133,228,146,198"/>
-<area shape="rect" href="../../da/d00/a00383.html" title=" " alt="" coords="218,229,374,256"/>
-<area shape="poly" title=" " alt="" coords="195,186,274,228,269,229,195,192"/>
-<area shape="poly" title=" " alt="" coords="542,259,163,310,162,305,541,254"/>
-<area shape="rect" href="../../d3/d00/a00113.html" title="Contains the code for the configuration file interpreter." alt="" coords="684,304,841,331"/>
-<area shape="poly" title=" " alt="" coords="657,261,740,304,734,303,655,266"/>
-<area shape="rect" href="../../d8/d00/a00380.html" title=" " alt="" coords="1061,229,1227,256"/>
-<area shape="poly" title=" " alt="" coords="1184,111,1210,129,1230,153,1234,166,1233,178,1220,199,1198,217,1173,231,1172,226,1195,213,1216,196,1228,176,1229,166,1226,156,1207,133,1183,117"/>
-<area shape="rect" href="../../dc/d00/a00389.html" title=" " alt="" coords="1054,155,1215,181"/>
-<area shape="poly" title=" " alt="" coords="1136,120,1137,156,1133,153,1133,124"/>
-<area shape="poly" title=" " alt="" coords="1065,259,830,306,829,301,1060,260"/>
-<area shape="rect" href="../../d4/d00/a00377.html" title=" " alt="" coords="1060,304,1241,331"/>
-<area shape="poly" title=" " alt="" coords="1148,270,1151,305,1147,302,1145,274"/>
-<area shape="rect" href="../../d9/d00/a00398.html" title=" " alt="" coords="1261,229,1440,256"/>
-<area shape="poly" title=" " alt="" coords="1445,110,1473,123,1495,140,1507,160,1507,171,1502,183,1487,200,1469,213,1429,231,1427,226,1467,209,1484,196,1498,180,1502,170,1502,161,1491,143,1470,128,1444,115"/>
-<area shape="rect" href="../../d1/d00/a00407.html" title=" " alt="" coords="1291,155,1488,181"/>
-<area shape="poly" title=" " alt="" coords="1391,121,1391,156,1387,153,1387,124"/>
-<area shape="poly" title=" " alt="" coords="1249,256,852,307,841,308,841,303,852,301,1243,256"/>
-<area shape="rect" href="../../db/d00/a00395.html" title=" " alt="" coords="1265,304,1457,331"/>
-<area shape="poly" title=" " alt="" coords="1356,269,1362,305,1357,302,1353,273"/>
-<area shape="poly" title=" " alt="" coords="707,260,529,306,528,301,702,261"/>
-<area shape="poly" title=" " alt="" coords="770,270,766,305,762,302,766,273"/>
-<area shape="poly" title=" " alt="" coords="627,107,518,129,393,157,266,196,165,231,163,226,264,190,391,152,517,124,632,105"/>
-<area shape="rect" href="../../d0/d00/a00071.html" title="Contains the code for the emulated Ali M1543C chipset devices." alt="" coords="551,155,707,181"/>
-<area shape="poly" title=" " alt="" coords="680,117,643,157,640,152,676,119"/>
-<area shape="rect" href="../../d4/d00/a00428.html" title=" " alt="" coords="404,155,526,181"/>
-<area shape="poly" title=" " alt="" coords="643,112,508,157,506,151,648,111"/>
-<area shape="rect" href="../../d7/d00/a00467.html" title="Contains the code for the bx_sdl_gui_c class used for interfacing with SDL." alt="" coords="731,155,815,181"/>
-<area shape="poly" title=" " alt="" coords="725,115,763,155,758,154,724,120"/>
-<area shape="rect" href="../../db/d00/a00722.html" title="Contains the code for the emulated Typhoon Chipset devices." alt="" coords="840,155,978,181"/>
-<area shape="poly" title=" " alt="" coords="752,109,875,154,870,154,751,115"/>
-<area shape="poly" title=" " alt="" coords="467,195,467,230,463,227,464,199"/>
-<area shape="poly" title=" " alt="" coords="424,187,327,231,325,226,419,189"/>
-<area shape="poly" title=" " alt="" coords="506,186,593,229,588,229,505,191"/>
-<area shape="poly" title=" " alt="" coords="542,179,789,205,1034,227,1063,232,1058,232,1033,232,788,210,541,184"/>
-<area shape="poly" title=" " alt="" coords="542,179,738,197,892,206,1044,213,1239,227,1263,231,1258,231,1238,232,1044,218,891,211,738,203,542,184"/>
-<area shape="poly" title=" " alt="" coords="534,183,720,228,714,229,533,188"/>
-<area shape="rect" href="../../d9/d00/a00404.html" title=" " alt="" coords="863,229,1022,256"/>
-<area shape="poly" title=" " alt="" coords="542,179,865,229,860,231,542,184"/>
-<area shape="poly" title=" " alt="" coords="900,262,795,306,794,301,895,263"/>
-<area shape="rect" href="../../d7/d00/a00401.html" title=" " alt="" coords="864,304,1037,331"/>
-<area shape="poly" title=" " alt="" coords="947,269,951,305,947,302,944,273"/>
+<div class="center"><img src="../../d2/d00/a00333.png" border="0" usemap="#a_c_p_u_2_ev4_h_w_load_8h" loading="lazy" alt=""/></div>
+<map name="a_c_p_u_2_ev4_h_w_load_8h" id="a_c_p_u_2_ev4_h_w_load_8h">
+<area shape="rect" title=" " alt="" coords="5,5,145,32"/>
+<area shape="rect" href="../../d0/d00/a00239.html" title=" " alt="" coords="17,80,133,107"/>
+<area shape="poly" title=" " alt="" coords="76,30,78,65,72,64,74,35"/>
+<area shape="rect" title=" " alt="" coords="45,155,105,181"/>
+<area shape="poly" title=" " alt="" coords="77,105,78,140,72,138,73,109"/>
 </map>
 </div>
 </div>
 <p><a href="../../dc/d00/a00332_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
-Data Structures</h2></td></tr>
-<tr class="memitem:address_5Fmap_5Fentry" id="r_address_5Fmap_5Fentry"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../dc/d00/a01293.html">address_map_entry</a></td></tr>
-<tr class="memitem:address_5Fmap" id="r_address_5Fmap"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="../../dc/d00/a01297.html">address_map</a></td></tr>
-<tr class="memitem:address_5Fmap_3A_3ASlot" id="r_address_5Fmap_3A_3ASlot"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="../../d3/d00/a01301.html">address_map::Slot</a></td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:a14111ac8f43949172b152e50dc720aba" id="r_a14111ac8f43949172b152e50dc720aba"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#a14111ac8f43949172b152e50dc720aba">NAME</a>(x)</td></tr>
-<tr class="memitem:ad60e8ac79b1b33c0d3baac32e8de427d" id="r_ad60e8ac79b1b33c0d3baac32e8de427d"><td class="memItemLeft">#define&#160;</td><td class="memItemRight"><a class="el" href="#ad60e8ac79b1b33c0d3baac32e8de427d">FUNC</a>(x)</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a83818d64d5600350357564fb917bb1cd" id="r_a83818d64d5600350357564fb917bb1cd"><td class="memTemplParams" colspan="2">template&lt;typename Owner, typename Member&gt; </td></tr>
-<tr class="memitem:a83818d64d5600350357564fb917bb1cd template"><td class="memItemLeft">auto&#160;</td><td class="memItemRight"><a class="el" href="#a83818d64d5600350357564fb917bb1cd">bind_map_member</a> (Owner *owner, Member member)</td></tr>
+<tr class="memitem:aaeb19a95195abf2050655315bb9ebcec" id="r_aaeb19a95195abf2050655315bb9ebcec"><td class="memItemLeft">constexpr <a class="el" href="../../d0/d00/a01388.html">AlphaHWLoadDescriptor</a>&#160;</td><td class="memItemRight"><a class="el" href="#aaeb19a95195abf2050655315bb9ebcec">ev4_decode_hw_load</a> (<a class="el" href="../../dc/d00/a00194.html#a6eb1e68cc391dd753bc8ce896dbb8315">std::uint32_t</a> instruction)</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a00973906a0cd60246aba8347ab4cca03" id="r_a00973906a0cd60246aba8347ab4cca03"><td class="memItemLeft">constexpr <a class="el" href="../../d1/d00/a01392.html">AlphaHWLoadPolicy</a>&#160;</td><td class="memItemRight"><a class="el" href="#a00973906a0cd60246aba8347ab4cca03">kEv4HWLoadPolicy</a> {&amp;<a class="el" href="#aaeb19a95195abf2050655315bb9ebcec">ev4_decode_hw_load</a>}</td></tr>
 </table>
-<a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
-<a id="ad60e8ac79b1b33c0d3baac32e8de427d" name="ad60e8ac79b1b33c0d3baac32e8de427d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad60e8ac79b1b33c0d3baac32e8de427d">&#9670;&#160;</a></span>FUNC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define FUNC</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>x</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><a class="code hl_function" href="#a83818d64d5600350357564fb917bb1cd">::bind_map_member</a>(<span class="keyword">this</span>, &amp;x), #x</div>
-<div class="ttc" id="aa00332_html_a83818d64d5600350357564fb917bb1cd"><div class="ttname"><a href="#a83818d64d5600350357564fb917bb1cd">bind_map_member</a></div><div class="ttdeci">auto bind_map_member(Owner *owner, Member member)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d00/a00332_source.html#l00081">address_map.h:81</a></div></div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../dc/d00/a00332_source.html#l00093">93</a> of file <a class="el" href="../../dc/d00/a00332_source.html">address_map.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d4/d00/a00377_source.html#l00538">CGloriaSynergy::CGloriaSynergy()</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00131">cirrus_gd5428_vga_device::cirrus_gd5428_vga_device()</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00150">cirrus_gd5430_vga_device::cirrus_gd5430_vga_device()</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00169">cirrus_gd5446_vga_device::cirrus_gd5446_vga_device()</a>, <a class="el" href="../../db/d00/a00395_source.html#l00499">CPowerStorm3xx::CPowerStorm3xx()</a>, <a class="el" href="../../d7/d00/a00401_source.html#l00493">CRadeon7500::CRadeon7500()</a>, <a class="el" href="../../df/d00/a00431_source.html#l00327">vga_device::io_3bx_3dx_map()</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00178">cirrus_gd5428_vga_device::io_3cx_map()</a>, <a class="el" href="../../df/d00/a00431_source.html#l00352">vga_device::io_3cx_map()</a>, and <a class="el" href="../../df/d00/a00431_source.html#l00085">vga_device::vga_device()</a>.</p>
-
-</div>
-</div>
-<a id="a14111ac8f43949172b152e50dc720aba" name="a14111ac8f43949172b152e50dc720aba"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a14111ac8f43949172b152e50dc720aba">&#9670;&#160;</a></span>NAME</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define NAME</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>x</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">x, #x</div>
-</div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../dc/d00/a00332_source.html#l00074">74</a> of file <a class="el" href="../../dc/d00/a00332_source.html">address_map.h</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d4/d00/a00377_source.html#l00196">CGloriaSynergy::attribute_map()</a>, <a class="el" href="../../db/d00/a00395_source.html#l00163">CPowerStorm3xx::attribute_map()</a>, <a class="el" href="../../d7/d00/a00401_source.html#l00166">CRadeon7500::attribute_map()</a>, <a class="el" href="../../df/d00/a00431_source.html#l01206">vga_device::attribute_map()</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00280">cirrus_gd5428_vga_device::crtc_map()</a>, <a class="el" href="../../db/d00/a00395_source.html#l00116">CPowerStorm3xx::crtc_map()</a>, <a class="el" href="../../d3/d00/a00419_source.html#l00242">CS3Trio64::crtc_map()</a>, <a class="el" href="../../df/d00/a00431_source.html#l00655">vga_device::crtc_map()</a>, <a class="el" href="../../dc/d00/a00389_source.html#l00507">CPermedia2::dac_map()</a>, <a class="el" href="../../d1/d00/a00407_source.html#l00497">CRealImage2100::dac_port_map()</a>, <a class="el" href="../../d4/d00/a00377_source.html#l00178">CGloriaSynergy::gc_map()</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00343">cirrus_gd5428_vga_device::gc_map()</a>, <a class="el" href="../../df/d00/a00431_source.html#l01044">vga_device::gc_map()</a>, <a class="el" href="../../d6/d00/a00371_source.html#l01765">cirrus_gd5430_vga_device::mmio_w()</a>, <a class="el" href="../../d4/d00/a00377_source.html#l00150">CGloriaSynergy::sequencer_map()</a>, <a class="el" href="../../d6/d00/a00371_source.html#l00621">cirrus_gd5428_vga_device::sequencer_map()</a>, <a class="el" href="../../d6/d00/a00371_source.html#l01829">cirrus_gd5446_vga_device::sequencer_map()</a>, <a class="el" href="../../db/d00/a00395_source.html#l00139">CPowerStorm3xx::sequencer_map()</a>, <a class="el" href="../../d7/d00/a00401_source.html#l00142">CRadeon7500::sequencer_map()</a>, and <a class="el" href="../../d3/d00/a00419_source.html#l01102">CS3Trio64::sequencer_map()</a>.</p>
-
-</div>
-</div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
-<a id="a83818d64d5600350357564fb917bb1cd" name="a83818d64d5600350357564fb917bb1cd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a83818d64d5600350357564fb917bb1cd">&#9670;&#160;</a></span>bind_map_member()</h2>
+<a id="aaeb19a95195abf2050655315bb9ebcec" name="aaeb19a95195abf2050655315bb9ebcec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaeb19a95195abf2050655315bb9ebcec">&#9670;&#160;</a></span>ev4_decode_hw_load()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<div class="memtemplate">
-template&lt;typename Owner, typename Member&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">auto bind_map_member </td>
+          <td class="memname"><a class="el" href="../../d0/d00/a01388.html">AlphaHWLoadDescriptor</a> ev4_decode_hw_load </td>
           <td>(</td>
-          <td class="paramtype">Owner *</td>          <td class="paramname"><span class="paramname"><em>owner</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype"><a class="el" href="../../dc/d00/a00194.html#a6eb1e68cc391dd753bc8ce896dbb8315">std::uint32_t</a></td>          <td class="paramname"><span class="paramname"><em>instruction</em></span></td><td>)</td>
           <td></td>
-          <td class="paramtype">Member</td>          <td class="paramname"><span class="paramname"><em>member</em></span>&#160;)</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dc/d00/a00332_source.html#l00081">81</a> of file <a class="el" href="../../dc/d00/a00332_source.html">address_map.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dc/d00/a00332_source.html#l00030">30</a> of file <a class="el" href="../../dc/d00/a00332_source.html">Ev4HWLoad.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dc/d00/a00332_source.html#l00081">bind_map_member()</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/d00/a00239_source.html#l00043">AlphaHWLoadDescriptor::address</a>, <a class="el" href="../../d0/d00/a00239_source.html#l00047">AlphaHWLoadDescriptor::alternate</a>, <a class="el" href="../../d0/d00/a00239_source.html#l00050">AlphaHWLoadDescriptor::compilable</a>, <a class="el" href="../../d0/d00/a00239_source.html#l00045">AlphaHWLoadDescriptor::displacement</a>, <a class="el" href="../../dc/d00/a00332_source.html#l00030">ev4_decode_hw_load()</a>, <a class="el" href="../../d0/d00/a00239_source.html#l00049">AlphaHWLoadDescriptor::locked</a>, <a class="el" href="../../d0/d00/a00239_source.html#l00035">Physical</a>, <a class="el" href="../../d0/d00/a00239_source.html#l00044">AlphaHWLoadDescriptor::size_bits</a>, <a class="el" href="../../d0/d00/a00239_source.html#l00036">Virtual</a>, and <a class="el" href="../../d0/d00/a00239_source.html#l00048">AlphaHWLoadDescriptor::write_check</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00332_source.html#l00081">bind_map_member()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dc/d00/a00332_source.html#l00030">ev4_decode_hw_load()</a>.</p>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../dc/d00/a00332_a83818d64d5600350357564fb917bb1cd_cgraph.png" border="0" usemap="#adc/d00/a00332_a83818d64d5600350357564fb917bb1cd_cgraph" loading="lazy" alt=""/></div>
-<map name="adc/d00/a00332_a83818d64d5600350357564fb917bb1cd_cgraph" id="adc/d00/a00332_a83818d64d5600350357564fb917bb1cd_cgraph">
-<area shape="rect" title=" " alt="" coords="5,29,137,56"/>
-<area shape="poly" title=" " alt="" coords="47,28,44,21,47,11,56,5,71,3,87,5,97,14,92,14,85,10,71,8,58,10,51,14,49,20,53,29"/>
+<div class="center"><img src="../../dc/d00/a00332_aaeb19a95195abf2050655315bb9ebcec_cgraph.png" border="0" usemap="#adc/d00/a00332_aaeb19a95195abf2050655315bb9ebcec_cgraph" loading="lazy" alt=""/></div>
+<map name="adc/d00/a00332_aaeb19a95195abf2050655315bb9ebcec_cgraph" id="adc/d00/a00332_aaeb19a95195abf2050655315bb9ebcec_cgraph">
+<area shape="rect" title=" " alt="" coords="5,29,152,56"/>
+<area shape="poly" title=" " alt="" coords="53,28,48,21,52,11,62,5,79,3,96,5,107,14,102,14,94,10,78,8,64,10,56,14,54,20,58,29"/>
 </map>
 </div>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../dc/d00/a00332_a83818d64d5600350357564fb917bb1cd_icgraph.png" border="0" usemap="#adc/d00/a00332_a83818d64d5600350357564fb917bb1cd_icgraph" loading="lazy" alt=""/></div>
-<map name="adc/d00/a00332_a83818d64d5600350357564fb917bb1cd_icgraph" id="adc/d00/a00332_a83818d64d5600350357564fb917bb1cd_icgraph">
-<area shape="rect" title=" " alt="" coords="5,29,137,56"/>
-<area shape="poly" title=" " alt="" coords="92,14,85,10,71,8,58,10,51,14,49,20,53,29,47,28,44,21,47,11,56,5,71,3,87,5,97,14"/>
+<div class="center"><img src="../../dc/d00/a00332_aaeb19a95195abf2050655315bb9ebcec_icgraph.png" border="0" usemap="#adc/d00/a00332_aaeb19a95195abf2050655315bb9ebcec_icgraph" loading="lazy" alt=""/></div>
+<map name="adc/d00/a00332_aaeb19a95195abf2050655315bb9ebcec_icgraph" id="adc/d00/a00332_aaeb19a95195abf2050655315bb9ebcec_icgraph">
+<area shape="rect" title=" " alt="" coords="5,29,152,56"/>
+<area shape="poly" title=" " alt="" coords="102,14,94,10,78,8,64,10,56,14,54,20,58,29,53,28,48,21,52,11,62,5,79,3,96,5,107,14"/>
 </map>
 </div>
+
+</div>
+</div>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="a00973906a0cd60246aba8347ab4cca03" name="a00973906a0cd60246aba8347ab4cca03"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a00973906a0cd60246aba8347ab4cca03">&#9670;&#160;</a></span>kEv4HWLoadPolicy</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d1/d00/a01392.html">AlphaHWLoadPolicy</a> kEv4HWLoadPolicy {&amp;<a class="el" href="#aaeb19a95195abf2050655315bb9ebcec">ev4_decode_hw_load</a>}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../dc/d00/a00332_source.html#l00051">51</a> of file <a class="el" href="../../dc/d00/a00332_source.html">Ev4HWLoad.h</a>.</p>
 
 </div>
 </div>
@@ -427,7 +224,7 @@ Here is the caller graph for this function:</div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="../../dir_450cafc1c0b54ccdbdec0997809be7cf.html">emu</a></li><li class="navelem"><a href="../../dc/d00/a00332.html">address_map.h</a></li>
+    <li class="navelem"><a href="../../dir_3e504b0d3bcf24da5cd743a5b933950b.html">CPU</a></li><li class="navelem"><a href="../../dc/d00/a00332.html">Ev4HWLoad.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.18.0 </li>
   </ul>
 </div>

@@ -602,10 +602,9 @@ private:
 #endif
   JitFlatIndex<void*> m_active_links{8192};     // patched edges, bit 1 = PatchSite
   JitFlatIndex<void*> m_global_src_links;       // subset with global sources
-  // ITB matching ignores VA bits 63:48. Use the same mask for link lookup
-  // and TBIS, including sign-extended aliases.
-  static constexpr uint64_t translation_page_key(uint64_t address) {
-    return (address & UINT64_C(0x0000ffffffffe000)) >> 13;
+  // Group links to base-page aliases under the same translation tag.
+  uint64_t translation_page_key(uint64_t address) const {
+    return (address & m_profile.tb_fill.base_page_match_mask) >> 13;
   }
   // Target page -> patched edges: one chain per page through m_edges. A page clear marks its
   // entries dead and a re-patch revives them, so m_edges only grows with distinct (page, edge)

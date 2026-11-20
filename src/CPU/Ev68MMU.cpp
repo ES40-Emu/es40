@@ -103,7 +103,7 @@ AlphaTBFill Ev68MMU::decode_fill(const CAlphaCPU&, std::uint64_t virt,
   // EV68CB/EV68DC HRM 5.3.1/5.3.2: VA[47:13], PA[43:13], GH[1:0].
   // GH widens the granule by three bits per step (13/16/19/22 offset bits).
   static constexpr std::uint64_t match_masks[4] = {
-    U64(0x0000ffffffffe000), U64(0x0000ffffffff0000),
+    kEv68TBFillPolicy.base_page_match_mask, U64(0x0000ffffffff0000),
     U64(0x0000fffffff80000), U64(0x0000ffffffc00000)
   };
   static constexpr std::uint64_t phys_masks[4] = {

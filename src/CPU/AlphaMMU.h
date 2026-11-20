@@ -47,6 +47,7 @@ struct AlphaTBFill
 // Read-only family decoding. The caller owns ASN selection and fill side effects.
 struct AlphaTBFillPolicy
 {
+  std::uint64_t base_page_match_mask;  // VA bits compared for a base-page translation.
   AlphaTBFill (*decode)(const CAlphaCPU& cpu, std::uint64_t virt,
                         std::uint64_t pte_phys, std::uint64_t pte_flags,
                         int access_flags);

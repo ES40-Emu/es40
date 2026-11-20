@@ -4716,9 +4716,8 @@ void CAlphaCPU::tbis_d(u64 virt, int asn)
 	}
 
 	// If the TB entry was already evicted, an old base-page DPC line can still exist.
-	// Retire its direct slot using the mask recognized by the cache's fast path.
 	if (!found)
-		invalidate_data_page_cache(virt, U64(0x0000ffffffffe000));
+		invalidate_data_page_cache(virt, m_profile.tb_fill.base_page_match_mask);
 }
 
 //\}

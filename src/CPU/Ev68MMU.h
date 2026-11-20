@@ -58,7 +58,9 @@ public:
                          int access_flags, std::uint32_t instruction, int alignment_mask);
 };
 
-inline constexpr AlphaTBFillPolicy kEv68TBFillPolicy{&Ev68MMU::decode_fill};
+inline constexpr AlphaTBFillPolicy kEv68TBFillPolicy{
+  UINT64_C(0x0000ffffffffe000), &Ev68MMU::decode_fill
+};
 inline constexpr AlphaTBMissPolicy kEv68TBMissPolicy{&Ev68MMU::tb_miss};
 inline constexpr AlphaInstructionFaultPolicy kEv68InstructionFaultPolicy{
   &Ev68MMU::instruction_fault

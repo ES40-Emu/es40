@@ -703,10 +703,8 @@ private:
     memset(data_page_cache, 0xff, sizeof(data_page_cache));
   }
   inline void invalidate_data_page_cache(u64 virt, u64 match_mask) {
-    // The common GH=0 mapping occupies exactly one direct-mapped slot. Clearing only its
-    // read/write tags avoids a full cache sweep.
-    constexpr u64 gh0_match = U64(0x0000ffffffffe000);
-    if (match_mask == gh0_match) {
+    // If all cache index bits participate in the match, every alias shares one slot per bank.
+    if (dpc_index(match_mask) == kDpcMask) {
       const u64 i = dpc_index(virt);
       for (int bank = 0; bank < 4; ++bank) data_page_cache[0][(bank << kDpcBits) | i].virt_page = ~U64(0);
       for (int bank = 0; bank < 4; ++bank) data_page_cache[1][(bank << kDpcBits) | i].virt_page = ~U64(0);

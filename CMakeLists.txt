@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 
-project(ES40 VERSION 0.94 LANGUAGES C CXX)
+project(ES40 VERSION 0.95 LANGUAGES C CXX)
 
 # Single-config generators default to an empty build type. Fix that up. 
 get_property(ES40_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
@@ -518,7 +518,6 @@ list(APPEND ES40_SOURCES
     src/qmp/QmpKeymap.h
     third_party/picojson/picojson.h
     src/network/lockstep.cpp
-    src/audio/MPU401.cpp
     src/network/NetworkBackend.cpp
     src/network/NetworkPcap.cpp
     src/network/NetworkTap.cpp
@@ -552,6 +551,7 @@ list(APPEND ES40_SOURCES
     )
 
 if (WIN32)
+    list(APPEND ES40_SOURCES src/audio/MPU401.cpp)
     list(APPEND ES40_LIBRARIES ws2_32 dsound dxguid)
 endif()
 

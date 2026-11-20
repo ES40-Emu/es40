@@ -41,7 +41,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.71])
-AC_INIT([es40],[0.94],[https://github.com/ES40-Emu/es40/issues/new],[],[https://github.com/ES40-Emu/es40/issues])
+AC_INIT([es40],[0.95],[https://github.com/ES40-Emu/es40/issues/new],[],[https://github.com/ES40-Emu/es40/issues])
 AC_CONFIG_SRCDIR([src/system/Flash.cpp])
 AC_CONFIG_MACRO_DIRS([m4])
 AC_CONFIG_HEADERS([src/config.h])
@@ -321,8 +321,12 @@ AS_IF([test "x$enable_x11" != "xno"], [
 # Allow disabling SDL independently of native frontends.
 # Native Windows audio remains available when SDL is disabled.
 case "$host_os" in
-  mingw*|msys*) LIBS="$LIBS -ldsound -ldxguid" ;;
+  mingw*|msys*)
+    es40_windows=yes
+    LIBS="$LIBS -ldsound -ldxguid -lwinmm" ;;
+  *) es40_windows=no ;;
 esac
+AM_CONDITIONAL([ES40_WINDOWS], [test "x$es40_windows" = "xyes"])
 
 AC_ARG_ENABLE([sdl],
   [AS_HELP_STRING([--disable-sdl],[Disable SDL support])],

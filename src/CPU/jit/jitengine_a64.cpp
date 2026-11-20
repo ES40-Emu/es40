@@ -929,6 +929,8 @@ struct A64BlockPlan {
   static constexpr uint32_t kMaxOps = kA64MaxBlockOps;
 
   std::array<A64DecodedOp, kMaxOps> ops{};
+  std::array<uint32_t, kMaxOps> source_words{}; // includes the source dependencies of fused successors
+  uint32_t scan_words = 0;
   A64GprUsage gpr_usage{};
   uint32_t count = 0;
   uint32_t breaker_word = 0;
@@ -1199,7 +1201,7 @@ struct A64PendingPublication {
     return source_current && layout_complete
         && plan_count != 0 && plan_count <= A64BlockPlan::kMaxOps
         && prefix_len == plan_count
-        && hash_len == prefix_len
+        && hash_len >= prefix_len && hash_len <= A64BlockPlan::kMaxOps
         && code_size != 0 && (code_size & 3u) == 0
         && code_size <= UINT32_MAX
         && (body_off & 3u) == 0 && body_off < code_size
@@ -1547,11 +1549,10 @@ static A64BlockPlan plan_a64_block(const CJitEngine::JitBlock& block,
 
   const A64ScanLimit limit = a64_scan_limit(block.n_instr, source.word_count);
   plan.stop = limit.stop;
-  std::array<uint32_t, A64BlockPlan::kMaxOps> source_words{};
-  if (!source.copy_words(source_words.data(), limit.count)) return plan;
+  if (!source.copy_words(plan.source_words.data(), limit.count)) return plan;
   const bool pal_block = (block.tag & 1u) != 0;
   for (uint32_t i = 0; i < limit.count; ++i) {
-    const uint32_t word = source_words[i];
+    const uint32_t word = plan.source_words[i];
     const A64DecodedOp decoded = decode_a64_op(
         word, pal_block, ipr_read, ipr_write, pal, hw_load, hw_store, amask, decode);
     if (decoded.kind == A64OpKind::kUnsupported) {
@@ -1571,6 +1572,29 @@ static A64BlockPlan plan_a64_block(const CJitEngine::JitBlock& block,
   return plan;
 }
 
+#ifndef JIT_VERIFY
+// Extend the head snapshot with the words used by fused successors.
+static void plan_a64_string_scan(A64BlockPlan& plan, const CJitEngine::JitBlock& b,
+    const AlphaInstructionSourceView& source, const AlphaCPUProfile& profile)
+{
+  if (!profile.instruction_fetch.jit_fuse_nonpal_blocks
+      || !profile.instruction_fetch.jit_same_page_access || (b.tag & 1) || b.pal_shadow)
+    return;
+  const bool counted = plan.count == 6 && plan.source_words[0] == kJitCountedScanHead[0];
+  const bool word = plan.count == 5 && plan.source_words[0] == kJitWordScanLoop[0];
+  if (!counted && !word) return;
+  const uint32_t count = counted ? kJitCountedScanWords : kJitWordScanWords;
+  static_assert(kJitCountedScanWords <= A64BlockPlan::kMaxOps && kJitWordScanWords <= A64BlockPlan::kMaxOps);
+  if (!source.contains(count)) return;
+  for (uint32_t i = plan.count; i < count; ++i)
+    plan.source_words[i] = source.word(i);
+  const uint32_t* words = plan.source_words.data();
+  if ((counted ? jit_matches_counted_scan(words) : jit_matches_word_scan(words))
+      && jit_scan_span_supported(profile, b.pal_shadow, b.tag, words, count))
+    plan.scan_words = count;
+}
+#endif
+
 static A64PendingPublication prepare_a64_block_publication(
     const CJitEngine::JitBlock& block, const A64BlockPlan& plan,
     const A64BlockExit& exit, const A64BodyEmitReceipt& emission,
@@ -1583,7 +1607,7 @@ static A64PendingPublication prepare_a64_block_publication(
   pending.plan_count = plan.count;
   pending.prefix_len = plan.count;
   // Hash extent = every word the compiled code depends on.
-  pending.hash_len = plan.count;
+  pending.hash_len = plan.scan_words ? plan.scan_words : plan.count;
 
   const bool body_bound = code.is_label_bound(body);
   pending.layout_complete = emission.complete_for(plan)
@@ -1597,22 +1621,18 @@ static A64PendingPublication prepare_a64_block_publication(
       && code.label_entry_of(body).section_id() == 0;
   if (body_bound) pending.body_off = code.label_offset(body);
 
-  if (pending.prefix_len > plan.ops.size()
-      || pending.hash_len != pending.prefix_len)
+  if (pending.hash_len > plan.source_words.size() || pending.hash_len < pending.prefix_len)
     return pending;
 
-  std::array<uint32_t, A64BlockPlan::kMaxOps> current_words{};
-  for (uint32_t i = 0; i < pending.prefix_len; ++i)
-    current_words[i] = plan.ops[i].ins;
   if (!sources.matches(block.tag, block.phys, block.asm_global,
-                       current_words.data(), pending.hash_len)) {
+                       plan.source_words.data(), pending.hash_len)) {
     pending.source_raced = true;
     return pending;
   }
 
   // Hash reads that prove snapshot current
   pending.source_hash = src_hash(
-      reinterpret_cast<const uint8_t*>(current_words.data()), pending.hash_len);
+      reinterpret_cast<const uint8_t*>(plan.source_words.data()), pending.hash_len);
   pending.source_current = true;
   return pending;
 }
@@ -2053,7 +2073,8 @@ static_assert(A64PendingPublication{64, 16, 1, 0, 3, 3, 3, true, true}.ready()
               && !A64PendingPublication{64, 16, 1, 0, 3, 2, 3, true, true}.ready()
               && !A64PendingPublication{64, 16, 1, 0, 65, 65, 65, true, true}.ready()
               && !A64PendingPublication{64, 16, 1, 0, 3, 3, 2, true, true}.ready()
-              && !A64PendingPublication{64, 16, 1, 0, 3, 3, 4, true, true}.ready()
+              && A64PendingPublication{64, 16, 1, 0, 6, 6, 39, true, true}.ready()
+              && !A64PendingPublication{64, 16, 1, 0, 6, 6, 65, true, true}.ready()
               && !A64PendingPublication{0, 0, 1, 0, 3, 3, 3, true, true}.ready()
               && !A64PendingPublication{62, 16, 1, 0, 3, 3, 3, true, true}.ready()
               && !A64PendingPublication{64, 64, 1, 0, 3, 3, 3, true, true}.ready()
@@ -5939,6 +5960,207 @@ static asmjit::Error emit_a64_chain_gate(asmjit::a64::Assembler& a,
   return err != Error::kOk ? err : a.cbnz(RA::kScratch0.w(), bailout);
 }
 
+#ifndef JIT_VERIFY
+// Scans use x0-x8. Translation and event checks use x9-x15.
+static asmjit::Error emit_a64_scan_read_address(A64EmitContext& c,
+    const asmjit::a64::Gp& va, const asmjit::a64::Gp& host,
+    const asmjit::Label& ordinary)
+{
+  using RA = CJitEngine::RegAlloc;
+  auto& a = c.assembler;
+  ASMJIT_PROPAGATE(a.mov(RA::kScratch4, va));
+  ASMJIT_PROPAGATE(emit_a64_dpc_slot(c, false));
+  ASMJIT_PROPAGATE(emit_a64_dpc_tag_cmp(c, ~uint64_t(8191), false));
+  ASMJIT_PROPAGATE(a.b_ne(ordinary));
+  ASMJIT_PROPAGATE(emit_a64_dpc_bias(c, false));
+  return a.add(host, va, RA::kScratch3);
+}
+
+static asmjit::Error emit_a64_counted_scan(A64EmitContext& c,
+    const asmjit::Label& ordinary, const asmjit::Label& scan_exit)
+{
+  using RA = CJitEngine::RegAlloc;
+  auto& a = c.assembler;
+  const auto slot = [](unsigned reg) { return asmjit::a64::ptr(RA::kRegs, int(reg * 8)); };
+  const asmjit::a64::Gp needle = asmjit::a64::x(c.regs.host_of(1, false));
+  const asmjit::a64::Gp diff = asmjit::a64::x(c.regs.host_of(22, false));
+  const asmjit::a64::Gp first_byte = asmjit::a64::x(c.regs.host_of(23, false));
+  const asmjit::a64::Gp length = asmjit::a64::x0, remaining = asmjit::a64::x2, va_bias = asmjit::a64::x3;
+  const asmjit::a64::Gp needle_host = asmjit::a64::x4, cursor = asmjit::a64::x5, limit = asmjit::a64::x6, byte = asmjit::a64::x7;
+  const asmjit::Label loop = a.new_label(), head_stop = a.new_label();
+  const asmjit::Label inner_stop = a.new_label(), backedge = a.new_label();
+
+  // The backedge restores R0..R3 from R4..R7. Check that they match on entry.
+  ASMJIT_PROPAGATE(a.ldr(length, slot(0)));
+  ASMJIT_PROPAGATE(a.ldp(remaining, va_bias, slot(2)));
+  ASMJIT_PROPAGATE(a.ldp(asmjit::a64::x4, asmjit::a64::x5, slot(4)));
+  ASMJIT_PROPAGATE(a.ldp(asmjit::a64::x6, asmjit::a64::x7, slot(6)));
+  ASMJIT_PROPAGATE(a.cmp(length, asmjit::a64::x4));
+  ASMJIT_PROPAGATE(a.b_ne(ordinary));
+  ASMJIT_PROPAGATE(a.cmp(needle, asmjit::a64::x5));
+  ASMJIT_PROPAGATE(a.b_ne(ordinary));
+  ASMJIT_PROPAGATE(a.cmp(remaining, asmjit::a64::x6));
+  ASMJIT_PROPAGATE(a.b_ne(ordinary));
+  ASMJIT_PROPAGATE(a.cmp(va_bias, asmjit::a64::x7));
+  ASMJIT_PROPAGATE(a.b_ne(ordinary));
+  ASMJIT_PROPAGATE(a.cbz(length, ordinary));
+  ASMJIT_PROPAGATE(a.cmp(length, remaining));
+  ASMJIT_PROPAGATE(a.b_hi(ordinary));
+  // Every SUBL below stays in the nonnegative signed-long range.
+  ASMJIT_PROPAGATE(a.lsr(asmjit::a64::x9, remaining, asmjit::imm(31)));
+  ASMJIT_PROPAGATE(a.cbnz(asmjit::a64::x9, ordinary));
+  ASMJIT_PROPAGATE(emit_a64_scan_read_address(c, needle, needle_host, ordinary));
+  ASMJIT_PROPAGATE(emit_a64_scan_read_address(c, va_bias, cursor, ordinary));
+
+  // Stop at the page end or the last candidate that fits.
+  ASMJIT_PROPAGATE(a.sub(limit, remaining, length));
+  ASMJIT_PROPAGATE(a.add(limit, limit, asmjit::imm(1)));
+  ASMJIT_PROPAGATE(a.and_(asmjit::a64::x9, va_bias, asmjit::imm(8191)));
+  ASMJIT_PROPAGATE(a.mov(asmjit::a64::x10, asmjit::imm(8192)));
+  ASMJIT_PROPAGATE(a.sub(asmjit::a64::x9, asmjit::a64::x10, asmjit::a64::x9));
+  ASMJIT_PROPAGATE(a.cmp(limit, asmjit::a64::x9));
+  ASMJIT_PROPAGATE(a.csel(limit, limit, asmjit::a64::x9, asmjit::imm(static_cast<uint32_t>(asmjit::arm::CondCode::kLS))));
+  ASMJIT_PROPAGATE(a.add(limit, limit, cursor));
+  ASMJIT_PROPAGATE(a.sub(va_bias, va_bias, cursor));
+
+  ASMJIT_PROPAGATE(a.bind(loop));
+  ASMJIT_PROPAGATE(a.add(RA::kChainCount, RA::kChainCount, asmjit::imm(6)));
+  ASMJIT_PROPAGATE(emit_a64_chain_gate(a, c.offsets, A64ChainGate::kPollAll, head_stop));
+  // Acquire both bytes to preserve guest read order across iterations.
+  ASMJIT_PROPAGATE(a.ldarb(first_byte.w(), asmjit::a64::ptr(needle_host)));
+  ASMJIT_PROPAGATE(a.ldarb(byte.w(), asmjit::a64::ptr(cursor)));
+  ASMJIT_PROPAGATE(a.sub(diff, first_byte, byte));
+  ASMJIT_PROPAGATE(a.add(RA::kChainCount, RA::kChainCount, asmjit::imm(9)));
+  ASMJIT_PROPAGATE(a.cbz(diff, inner_stop));
+  ASMJIT_PROPAGATE(emit_a64_chain_gate(a, c.offsets, A64ChainGate::kPollAll, inner_stop));
+  ASMJIT_PROPAGATE(a.sub(remaining, remaining, asmjit::imm(1)));
+  ASMJIT_PROPAGATE(a.add(cursor, cursor, asmjit::imm(1)));
+  ASMJIT_PROPAGATE(a.add(RA::kChainCount, RA::kChainCount, asmjit::imm(7)));
+  ASMJIT_PROPAGATE(emit_a64_chain_gate(a, c.offsets, A64ChainGate::kPollAll, backedge));
+  ASMJIT_PROPAGATE(a.cmp(cursor, limit));
+  ASMJIT_PROPAGATE(a.b_ne(loop));
+
+  auto save_cursors = [&]() -> asmjit::Error {
+    ASMJIT_PROPAGATE(a.add(va_bias, va_bias, cursor));
+    ASMJIT_PROPAGATE(a.stp(remaining, va_bias, slot(6)));
+    return a.stp(remaining, va_bias, slot(2));
+  };
+  ASMJIT_PROPAGATE(a.bind(backedge));
+  ASMJIT_PROPAGATE(save_cursors());
+  ASMJIT_PROPAGATE(a.str(byte, slot(28)));
+  ASMJIT_PROPAGATE(emit_a64_mov_u64(a, RA::kNextPc, c.start_pc));
+  ASMJIT_PROPAGATE(a.b(scan_exit));
+
+  ASMJIT_PROPAGATE(a.bind(head_stop));
+  ASMJIT_PROPAGATE(save_cursors());
+  ASMJIT_PROPAGATE(a.subs(diff, length, remaining));
+  ASMJIT_PROPAGATE(a.cset(first_byte, asmjit::imm(static_cast<uint32_t>(asmjit::arm::CondCode::kLO))));
+  ASMJIT_PROPAGATE(a.mov(byte, asmjit::imm(1))); // length <= remaining throughout the batch
+  ASMJIT_PROPAGATE(a.str(byte, slot(28)));
+  ASMJIT_PROPAGATE(emit_a64_mov_u64(a, RA::kNextPc, c.start_pc + 6 * 4));
+  ASMJIT_PROPAGATE(a.b(scan_exit));
+
+  ASMJIT_PROPAGATE(a.bind(inner_stop));
+  ASMJIT_PROPAGATE(save_cursors());
+  ASMJIT_PROPAGATE(a.str(byte, slot(28)));
+  ASMJIT_PROPAGATE(a.sub(length, length, asmjit::imm(1)));
+  ASMJIT_PROPAGATE(a.str(length, slot(0)));
+  ASMJIT_PROPAGATE(a.add(needle, needle, asmjit::imm(1)));
+  ASMJIT_PROPAGATE(a.add(va_bias, va_bias, asmjit::imm(1)));
+  ASMJIT_PROPAGATE(a.str(va_bias, slot(3)));
+  ASMJIT_PROPAGATE(emit_a64_mov_u64(a, RA::kNextPc, c.start_pc + 15 * 4));
+  ASMJIT_PROPAGATE(emit_a64_mov_u64(a, asmjit::a64::x9, c.start_pc + 32 * 4));
+  ASMJIT_PROPAGATE(a.cmp(diff, asmjit::imm(0)));
+  ASMJIT_PROPAGATE(a.csel(RA::kNextPc, RA::kNextPc, asmjit::a64::x9, asmjit::imm(static_cast<uint32_t>(asmjit::arm::CondCode::kEQ))));
+  return a.b(scan_exit);
+}
+
+// Search eight lanes and publish the last word and both comparison masks on exit.
+static asmjit::Error emit_a64_word_scan(A64EmitContext& c, const asmjit::Label& ordinary,
+                                        const asmjit::Label& scan_exit)
+{
+  using RA = CJitEngine::RegAlloc;
+  asmjit::a64::Assembler& a = c.assembler;
+  const asmjit::a64::Gp address = asmjit::a64::x(c.regs.host_of(1, false));
+  const asmjit::a64::Gp equality = asmjit::a64::x(c.regs.host_of(22, false));
+  const asmjit::a64::Gp word = asmjit::a64::x(c.regs.host_of(23, false));
+  const asmjit::a64::Gp length = asmjit::a64::x0, host = asmjit::a64::x1, scratch = asmjit::a64::x2;
+  const auto slot = [&](uint32_t reg) {
+    return a64_guest_gpr_mem(reg, false, c.regs.register_bank);
+  };
+  const asmjit::Label next_word = a.new_label(), found = a.new_label(), head_stop = a.new_label();
+  const asmjit::Label update_stop = a.new_label(), repeat = a.new_label(), exhausted = a.new_label();
+  const asmjit::Label remainder = a.new_label(), publish = a.new_label();
+  const auto exit_at = [&](uint32_t offset) -> asmjit::Error {
+    ASMJIT_PROPAGATE(emit_a64_mov_u64(a, RA::kNextPc, c.start_pc + offset));
+    return a.b(publish);
+  };
+
+  ASMJIT_PROPAGATE(a.tst(address, asmjit::imm(7)));
+  ASMJIT_PROPAGATE(a.b_ne(ordinary));
+  ASMJIT_PROPAGATE(a.ldr(length, slot(0)));
+  ASMJIT_PROPAGATE(a.tbnz(length, asmjit::imm(63), ordinary));
+  ASMJIT_PROPAGATE(emit_a64_scan_read_address(c, address, host, ordinary));
+  ASMJIT_PROPAGATE(a.ldr(scratch, slot(28)));
+  ASMJIT_PROPAGATE(a.fmov(asmjit::a64::d17, scratch));
+
+  ASMJIT_PROPAGATE(a.bind(next_word));
+  ASMJIT_PROPAGATE(a.ldar(word, asmjit::a64::ptr(host)));
+  ASMJIT_PROPAGATE(a.fmov(asmjit::a64::d16, word));
+  ASMJIT_PROPAGATE(a.cmeq(asmjit::a64::v18.b8(), asmjit::a64::v16.b8(), asmjit::a64::v17.b8()));
+  ASMJIT_PROPAGATE(a.fmov(scratch, asmjit::a64::d18));
+  ASMJIT_PROPAGATE(a.add(RA::kChainCount, RA::kChainCount, asmjit::imm(5)));
+  ASMJIT_PROPAGATE(a.cbnz(scratch, found));
+  ASMJIT_PROPAGATE(emit_a64_chain_gate(a, c.offsets, A64ChainGate::kPollAll, head_stop));
+
+  // SUBL truncates before sign extension, even with a full-width R0 on entry.
+  ASMJIT_PROPAGATE(a.sub(length.w(), length.w(), asmjit::imm(8)));
+  ASMJIT_PROPAGATE(a.sxtw(length, length.w()));
+  ASMJIT_PROPAGATE(a.add(address, address, asmjit::imm(8)));
+  ASMJIT_PROPAGATE(a.add(host, host, asmjit::imm(8)));
+  ASMJIT_PROPAGATE(a.add(RA::kChainCount, RA::kChainCount, asmjit::imm(3)));
+  ASMJIT_PROPAGATE(emit_a64_chain_gate(a, c.offsets, A64ChainGate::kPollAll, update_stop));
+  ASMJIT_PROPAGATE(a.tbnz(length, asmjit::imm(63), exhausted));
+  // Stop at the next 64-byte boundary, which also caps the scan at the page end.
+  ASMJIT_PROPAGATE(a.tst(address, asmjit::imm(63)));
+  ASMJIT_PROPAGATE(a.b_ne(next_word));
+
+  ASMJIT_PROPAGATE(a.bind(repeat));
+  ASMJIT_PROPAGATE(exit_at(0));
+  ASMJIT_PROPAGATE(a.bind(update_stop));
+  ASMJIT_PROPAGATE(a.tbz(length, asmjit::imm(63), repeat));
+  ASMJIT_PROPAGATE(exit_at(0x20));
+
+  ASMJIT_PROPAGATE(a.bind(exhausted));
+  ASMJIT_PROPAGATE(a.add(length, length, asmjit::imm(8))); // ADDQ restores the remaining byte count.
+  ASMJIT_PROPAGATE(a.add(RA::kChainCount, RA::kChainCount, asmjit::imm(2)));
+  ASMJIT_PROPAGATE(a.cbnz(length, remainder));
+  ASMJIT_PROPAGATE(exit_at(0x44));
+  ASMJIT_PROPAGATE(a.bind(remainder));
+  ASMJIT_PROPAGATE(exit_at(0x28));
+  ASMJIT_PROPAGATE(a.bind(head_stop));
+  ASMJIT_PROPAGATE(exit_at(0x14));
+  ASMJIT_PROPAGATE(a.bind(found));
+  ASMJIT_PROPAGATE(emit_a64_mov_u64(a, RA::kNextPc, c.start_pc + 0xb4));
+
+  ASMJIT_PROPAGATE(a.bind(publish));
+  ASMJIT_PROPAGATE(a.str(length, slot(0)));
+  // Each true vector lane contributes its unique bit to the Alpha mask.
+  ASMJIT_PROPAGATE(emit_a64_mov_u64(a, scratch, UINT64_C(0x8040201008040201)));
+  ASMJIT_PROPAGATE(a.fmov(asmjit::a64::d19, scratch));
+  ASMJIT_PROPAGATE(a.cmhs(asmjit::a64::v16.b8(), asmjit::a64::v17.b8(), asmjit::a64::v16.b8()));
+  const auto pack_mask = [&](const asmjit::a64::Vec& lanes, const asmjit::a64::Gp& dst) -> asmjit::Error {
+    ASMJIT_PROPAGATE(a.and_(lanes.b8(), lanes.b8(), asmjit::a64::v19.b8()));
+    ASMJIT_PROPAGATE(a.addv(lanes.b(), lanes.b8()));
+    return a.umov(dst.w(), lanes.b(0));
+  };
+  ASMJIT_PROPAGATE(pack_mask(asmjit::a64::v18, equality));
+  ASMJIT_PROPAGATE(pack_mask(asmjit::a64::v16, scratch));
+  ASMJIT_PROPAGATE(a.str(scratch, slot(24)));
+  return a.b(scan_exit);
+}
+#endif
+
 static asmjit::Error emit_a64_source_pal_guard(asmjit::a64::Assembler& a,
     const CJitEngine::JitOffsets& offsets, bool enabled, bool expected_shadow,
     const asmjit::Label& bailout)
@@ -6039,7 +6261,7 @@ static asmjit::Error emit_a64_direct_chain_tail(asmjit::a64::Assembler& a,
     const A64DirectChainContract& contract, CJitEngine::LinkSlot* slots,
     uint64_t source_tag,
     const asmjit::Label& body, const asmjit::Label& done,
-    bool source_global = true)
+    bool source_global = true, const asmjit::Label& fully_counted = {})
 {
   using RA = CJitEngine::RegAlloc;
   using namespace asmjit;
@@ -6050,6 +6272,10 @@ static asmjit::Error emit_a64_direct_chain_tail(asmjit::a64::Assembler& a,
   Error err = a.add(RA::kChainCount, RA::kChainCount,
                     imm(contract.completed_delta));
   if (err != Error::kOk) return err;
+  if (fully_counted.is_valid()) {
+    err = a.bind(fully_counted);  // Fused paths already counted their dynamic work.
+    if (err != Error::kOk) return err;
+  }
   if (contract.publish_pc_before_probe) {
     err = emit_a64_store_cpu_u64(a, RA::kNextPc, offsets.state_pc);
     if (err != Error::kOk) return err;
@@ -6723,7 +6949,7 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
     b->compiled = false;
     return;
   }
-  const A64BlockPlan plan = plan_a64_block(
+  A64BlockPlan plan = plan_a64_block(
       *b, source, m_profile.ipr_read, m_profile.ipr_write, m_profile.pal,
       m_profile.hw_load, m_profile.hw_store, m_profile.amask, m_profile.instruction_decode);
 #ifdef JIT_STATS
@@ -6750,12 +6976,22 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
   }
 #endif
   if (!a64_plan_ready_for_emission(plan)) return;
+#ifndef JIT_VERIFY
+  if (m_off.dpc_stride == 32)
+    plan_a64_string_scan(plan, *b, source, m_profile);
+#endif
   const A64BlockExit exit = plan_a64_exit(b->tag, plan.count, plan.terminator);
   const bool pal_block = (b->tag & 1u) != 0;
   const uint32_t terminator_ins =
       plan.count != 0 ? plan.ops[plan.count - 1].ins : 0;
-  const A64DirectChainContract chain = plan_a64_direct_chain(
+  A64DirectChainContract chain = plan_a64_direct_chain(
       exit, terminator_ins, pal_block, b->pal_shadow);
+  if (plan.scan_words) {
+    // A fused exit may return to this head even when its original branch was forward.
+    chain.gate = A64ChainGate::kPollAll;
+    chain.gate_exit = true;
+    chain.self_loop_candidate = true;
+  }
   const A64IndirectChainContract indirect = plan_a64_indirect_chain(
       exit, terminator_ins, pal_block, b->pal_shadow);
   // Exactly one tail owns any supported block: direct-eligible XOR indirect-eligible.
@@ -6866,6 +7102,17 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
   std::vector<A64DirectExit> direct_exits;
   std::vector<A64ColdStub> cold_stubs;   // production memop slow paths (cold tail)
   emit_context.cold = &cold_stubs;
+  asmjit::Label scan_exit;
+#ifndef JIT_VERIFY
+  if (plan.scan_words) {
+    scan_exit = a.new_label();
+    const asmjit::Label ordinary = a.new_label();
+    const auto err = plan.scan_words == kJitCountedScanWords
+        ? emit_a64_counted_scan(emit_context, ordinary, scan_exit)
+        : emit_a64_word_scan(emit_context, ordinary, scan_exit);
+    if (err != asmjit::Error::kOk || a.bind(ordinary) != asmjit::Error::kOk) return;
+  }
+#endif
   const A64BodyEmitReceipt body_emission = emit_a64_block_body(
       plan, [&](const A64DecodedOp& op, uint32_t index) {
         emit_op(&a, nullptr, &done, helpers, pal_block, b, op.ins, index,
@@ -6880,7 +7127,7 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
       : chain.eligible()
       ? emit_a64_direct_chain_tail(a, m_off, chain, &b->link[0],
                                   b->tag, pal_block ? body : body_same_page,
-                                  done, b->asm_global)
+                                  done, b->asm_global, scan_exit)
       : emit_a64_indirect_chain_tail(a, m_off, helpers, regalloc, indirect,
                                     &b->link[0], done, b->asm_global,
                                     A64JumpCache{&m_jcache[0], &m_jc_gen,
@@ -6891,6 +7138,13 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
 #endif
                                     });
   if (tail_err != asmjit::Error::kOk) return;
+#ifndef JIT_VERIFY
+  // Declined scans keep their patched branches. Completed scans use the polled tail.
+  if (direct_patch && plan.scan_words &&
+      emit_a64_direct_chain_tail(a, m_off, chain, &b->link[0], b->tag,
+                                 body_same_page, done, b->asm_global, scan_exit)
+          != asmjit::Error::kOk) return;
+#endif
 
   if (a.bind(done) != asmjit::Error::kOk) return;
   if (a.mov(RegAlloc::kResultCount, RegAlloc::kChainCount.w())

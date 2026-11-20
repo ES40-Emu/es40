@@ -110,6 +110,11 @@ struct AlphaInstructionFetchPolicy
   // Optional bookkeeping after shared PC, translation, and state updates.
   void (*lifecycle)(CAlphaCPU& cpu, AlphaInstructionFetchEvent event) = nullptr;
 
+  // A native sequence may cross non-PAL block boundaries without dispatcher
+  // preparation or per-target chain admission while its source remains valid.
+  // Same-page execute permission is checked separately.
+  bool jit_fuse_nonpal_blocks = false;
+
   constexpr bool supports_jit() const
   {
     return jit_coherent && fetch && probe && matches_interpreted && can_chain && source;

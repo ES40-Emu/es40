@@ -2951,7 +2951,7 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
 
   // counted-substring outer loop. 
   // Most candidates fail on byte zero. If we're lucky. That's a good outcome.
-  // Recognize the instruction sequence and scan those first bytes 16 at a time. 
+  // Recognize the instruction sequence and scan those first bytes in guest read order.
   // Potential 22 guest instruction shortcut. 
   bool counted_scan_fused = false;
   // Full-word portion of OpenVMS byte-search routine.
@@ -2961,34 +2961,16 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
 #if defined(_WIN32) && !defined(JIT_VERIFY)
   // Check all fusion words, including lookahead.
   const auto span_supported = [&](uint32_t count) {
-    for (uint32_t i = 0; i < count; ++i)
-      if (!m_profile.supports_instruction(words[i])
-          || m_profile.retires_instruction_at_decode(words[i])
-          || m_profile.requires_fen_at_decode(words[i])
-          || m_profile.fen_rounding_modes(words[i])) return false;
-    return true;
+    return jit_scan_span_supported(m_profile, b->pal_shadow, b->tag, words, count);
   };
-  if (!pal_block && plen == 6 && snapshot_len >= 39) {
-    static const uint32_t head[15] = {
-      0x40020536, 0x47e0341c, 0x400203b7, 0x46df04dc, 0x4797041c, 0xe3800022,
-      0x2ffe0000, 0x2ffe0000, 0x2ae10000, 0x2b830000, 0x40003120, 0x20630001,
-      0x20210001, 0x42fc0536, 0xf6c00011
-    };
-    static const uint32_t mismatch[7] = {
-      0x40c03126, 0x47e40400, 0x47e50401, 0x20e70001,
-      0x47e60402, 0x47e70403, 0xc3ffffd9
-    };
-    counted_scan_fused = memcmp(words, head, sizeof(head)) == 0
-                      && memcmp(words + 32, mismatch, sizeof(mismatch)) == 0
-                      && span_supported(39);
+  if (!pal_block && plen == 6 && snapshot_len >= kJitCountedScanWords) {
+    counted_scan_fused = jit_matches_counted_scan(words)
+                      && span_supported(kJitCountedScanWords);
   }
-  if (!pal_block && plen == 5 && snapshot_len >= 10) {
-    static const uint32_t word_scan[10] = {
-      0xa6e10000, 0x42fc01f6, 0x439701f8, 0x46d80016, 0xf6c00028,
-      0x40011120, 0x40211401, 0xf81ffff8, 0x40011400, 0xe4000007
-    };
-    word_scan_fused = memcmp(words, word_scan, sizeof(word_scan)) == 0
-                   && span_supported(10);
+  if (!pal_block && m_off.dpc_stride == 32 && plen == 5
+      && snapshot_len >= kJitWordScanWords) {
+    word_scan_fused = jit_matches_word_scan(words)
+                   && span_supported(kJitWordScanWords);
   }
   // Inner byte-search loop.
   // R23 contains the aligned source word
@@ -3152,7 +3134,7 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
 #ifdef _WIN32
     Label normal = a.new_label(), scan = a.new_label(), found = a.new_label();
     Label exhausted = a.new_label(), capped = a.new_label(), masks = a.new_label();
-    Label remainder = a.new_label();
+    Label remainder = a.new_label(), head_stop = a.new_label(), update_stop = a.new_label();
 
     // Preserve the normal backward-edge delivery point if it would be cut short.
     a.mov(x86::eax, imm(kChainCeiling));
@@ -3168,7 +3150,7 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
     a.mov(x86::r10, x86::r12); a.and_(x86::r10, imm(~(uint64_t)0x1fff));
     if (host_has_bmi2()) a.rorx(x86::rax, x86::r12, imm(8));
     else { a.mov(x86::rax, x86::r12); a.shr(x86::rax, imm(8)); }
-    a.and_(x86::rax, imm(0x7e0));
+    a.and_(x86::rax, imm(uint64_t(m_off.dpc_mask) * m_off.dpc_stride));
     a.add(x86::eax, x86::dword_ptr(x86::rbp, (int32_t)m_off.dpc_bank[0]));
     a.cmp(x86::qword_ptr(x86::rbp, x86::rax, 0, m_off.dpc_virt_page), x86::r10);
     a.jne(normal);
@@ -3187,12 +3169,32 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
     a.movq(x86::xmm0, x86::r9); a.pcmpeqb(x86::xmm0, x86::xmm1);
     a.pmovmskb(x86::eax, x86::xmm0); a.and_(x86::eax, imm(255));
     a.test(x86::eax, x86::eax); a.jnz(found);
+    // The comparison head ends before SUBL/LDA/BGE, even on a cache hit.
+    a.lea(x86::rax, x86::ptr(x86::r13, 5));
+    a.cmp(x86::rax, imm(kChainCeiling)); a.jge(head_stop);
+    emit_pending_check(a, m_off, head_stop);
     a.add(x86::r12, imm(8));
     a.sub(x86::edi, imm(8)); a.movsxd(x86::rdi, x86::edi);
     a.add(x86::r13, imm(8));
+    // Preserve the update block's original exit before its successor executes.
+    a.cmp(x86::r13, imm(kChainCeiling)); a.jge(update_stop);
+    emit_pending_check(a, m_off, update_stop);
     a.test(x86::rdi, x86::rdi); a.js(exhausted);
     a.dec(x86::r11); a.jnz(scan);
     a.jmp(capped);
+
+    a.bind(head_stop);
+    a.add(x86::r13, imm(5)); // masks subtracts five before the common epilogue
+    a.xor_(x86::r8d, x86::r8d);
+    set_pc(b->tag + 0x14);
+    a.jmp(masks);
+
+    a.bind(update_stop);
+    a.xor_(x86::r8d, x86::r8d);
+    set_pc(b->tag);
+    a.test(x86::rdi, x86::rdi); a.jns(masks);
+    set_pc(b->tag + 0x20);
+    a.jmp(masks);
 
     a.bind(found);
     a.mov(x86::r8d, x86::eax);                              // R22 equality mask
@@ -3359,100 +3361,157 @@ void CJitEngine::compile_block(JitBlock* b, const AlphaInstructionSource& source
   }
   if (counted_scan_fused) {
 #ifdef _WIN32
-    Label normal = a.new_label(), scan = a.new_label(), scalar = a.new_label();
-    Label scalar_loop = a.new_label(), found = a.new_label(), commit = a.new_label();
+    Label counted_done = a.new_label();
+    // Reuse two checked RAM translations through successive mismatch iterations.
+    // Load each guest byte at its original iteration and limit the reuse to one
+    // translated page. A cold, noncanonical, or mixed-mode path uses the ordinary code.
+    if (m_off.dpc_stride == 32) {
+      Label ordinary = a.new_label(), loop = a.new_label(), flush = a.new_label();
+      Label inner = a.new_label(), backedge = a.new_label();
+      auto slot = [&](unsigned reg) { return x86::qword_ptr(x86::rbx, int(reg * 8)); };
+      // Resolve the needle (R5) and haystack (R7/R11) read-cache slots.
+      // The usual DPC tag check suffices. Miss? Go back to normal block.
+      auto ram_address = [&](const x86::Gp& va, const x86::Gp& host) {
+        a.mov(x86::rax, va);
+        a.shr(x86::rax, imm(8));  // stride=32: ((va>>13)&dpc_mask)<<5
+        a.and_(x86::eax, imm(uint32_t(m_off.dpc_mask) * 32));
+        a.add(x86::eax, x86::dword_ptr(x86::rbp, (int)m_off.dpc_bank[0]));
+        a.mov(host, va);
+        a.and_(host, imm(~uint64_t(8191)));
+        a.cmp(host, x86::qword_ptr(x86::rbp, x86::rax, 0, m_off.dpc_virt_page));
+        a.jne(ordinary);
+        a.mov(host, x86::qword_ptr(x86::rbp, x86::rax, 0, m_off.dpc_host_bias));
+        a.add(host, va);
+      };
+      // Reproduce N mismatch continuations: R6-=N R7+=N R0/R1/R2/R3=R4/R5/R6/R7.
+      auto save_cursors = [&] {
+        a.mov(x86::r15, x86::qword_ptr(x86::rsp, 48)); // restore the R16 pin
+        a.add(x86::r11, x86::rcx);                     // host cursor -> guest cursor
+        a.mov(slot(2), x86::r10);
+        a.mov(slot(6), x86::r10);
+        a.mov(slot(3), x86::r11);
+        a.mov(slot(7), x86::r11);
+      };
+      a.cmp(x86::rdi, slot(4));
+      a.jne(ordinary);
+      a.cmp(x86::r12, slot(5));
+      a.jne(ordinary);
+      a.mov(x86::r10, slot(2));
+      a.cmp(x86::r10, slot(6));
+      a.jne(ordinary);
+      a.mov(x86::r11, slot(3));
+      a.cmp(x86::r11, slot(7));
+      a.jne(ordinary);
+      // A positive needle and signed-long candidate count bound every SUBL.
+      // The ordinary region handles the full architectural input range.
+      a.test(x86::rdi, x86::rdi);
+      a.jz(ordinary);
+      a.cmp(x86::rdi, x86::r10);
+      a.ja(ordinary);
+      a.cmp(x86::r10, imm(0x7fffffff));
+      a.ja(ordinary);
+      ram_address(x86::r12, x86::rdx);
+      ram_address(x86::r11, x86::rcx);
 
-    // Require room for the maximum 16-candidate batch. 
-    a.mov(x86::eax, imm(kChainCeiling));
-    a.sub(x86::rax, x86::r13);
-    a.cmp(x86::rax, imm(16 * 22)); a.jb(normal);
-    emit_pending_check(a, m_off, normal);
+      // R15 holds the exclusive host limit while the region is helper-free.
+      // Stop at either the last candidate or the end of the checked mapping.
+      a.mov(x86::qword_ptr(x86::rsp, 48), x86::r15);
+      a.mov(x86::r15, x86::r10);
+      a.sub(x86::r15, x86::rdi);
+      a.inc(x86::r15);   // candidates = R6 - R4 + 1, capped below at the current 8 KB haystack page.
+      a.mov(x86::eax, x86::r11d);
+      a.and_(x86::eax, imm(8191));
+      a.neg(x86::eax);
+      a.add(x86::eax, imm(8192));
+      a.cmp(x86::r15, x86::rax);
+      a.cmova(x86::r15, x86::rax);
+      a.add(x86::r15, x86::rcx);
+      a.sub(x86::r11, x86::rcx);
 
-    // candidates = R6 - R4 + 1, capped at 16 and at the current 8 KB haystack page.
-    a.mov(x86::rdx, x86::qword_ptr(x86::rbx, 6 * 8));
-    a.sub(x86::rdx, x86::qword_ptr(x86::rbx, 4 * 8)); a.jb(normal);
-    a.inc(x86::rdx);
-    a.mov(x86::rax, imm(16));
-    a.cmp(x86::rdx, x86::rax); a.cmova(x86::rdx, x86::rax);
-    a.mov(x86::rcx, x86::qword_ptr(x86::rbx, 7 * 8));
-    a.mov(x86::rax, x86::rcx); a.and_(x86::eax, imm(0x1fff));
-    a.mov(x86::r10d, imm(0x2000)); a.sub(x86::r10, x86::rax);
-    a.cmp(x86::rdx, x86::r10); a.cmova(x86::rdx, x86::r10);
+      a.bind(loop);
+      // Require room for a full 22-instruction mismatch iteration. Near the ceiling the ordinary region
+      // observes its individual six-, fifteen-, and twenty-two-instruction exits.
+      a.cmp(x86::r13, imm(kChainCeiling - 22));
+      a.jge(flush);
+      emit_pending_check(a, m_off, flush);
+      // Read needle[0], then the haystack byte for this candidate.
+      a.movzx(x86::r9d, x86::byte_ptr(x86::rdx)); // R23 = needle byte
+      a.movzx(x86::eax, x86::byte_ptr(x86::rcx));
+      a.mov(x86::r8, x86::r9);
+      a.sub(x86::r8, x86::rax);                    // R22 = R23 - R28
+      a.jz(inner);
+      emit_pending_check(a, m_off, inner);
+      a.dec(x86::r10d);
+      a.inc(x86::rcx);
+      a.add(x86::r13, imm(22));
+      emit_pending_check(a, m_off, backedge);
+      // If no first byte matches before the limit, resume the outer-loop head.
+      a.cmp(x86::rcx, x86::r15);
+      a.jne(loop);
+      a.bind(flush);
+      save_cursors();
+      a.jmp(ordinary);
 
-    // Resolve the needle (R5) and haystack (R7/RCX) read-cache slots. 
-    // The usual DPC tag check suffices. Miss? Go back to normal block.
-    auto fused_bias = [&](const x86::Gp& va, const x86::Gp& bias) {
-      a.mov(x86::r10, va); a.and_(x86::r10, imm(~(uint64_t)0x1fff));
-      if (host_has_bmi2()) a.rorx(x86::rax, va, imm(8));  // stride=32: ((va>>13)&63)<<5
-      else { a.mov(x86::rax, va); a.shr(x86::rax, imm(8)); }
-      a.and_(x86::rax, imm(0x7e0));
-      a.add(x86::eax, x86::dword_ptr(x86::rbp, (int32_t)m_off.dpc_bank[0]));
-      a.cmp(x86::qword_ptr(x86::rbp, x86::rax, 0, m_off.dpc_virt_page), x86::r10);
-      a.jne(normal);
-      a.mov(bias, x86::qword_ptr(x86::rbp, x86::rax, 0, m_off.dpc_host_bias));
-    };
-    a.mov(x86::rax, x86::qword_ptr(x86::rbx, 5 * 8));
-    fused_bias(x86::rax, x86::r10);
-    a.mov(x86::qword_ptr(x86::rsp, 48), x86::r10);
-    fused_bias(x86::rcx, x86::r11);
-    a.mov(x86::r10, x86::qword_ptr(x86::rsp, 48));
+      a.bind(backedge);
+      a.mov(slot(28), x86::rax);                  // R28 = last mismatch
+      save_cursors();
+      a.sub(x86::r13, imm(6));
+      set_pc(b->tag);
+      a.jmp(counted_done);
 
-    // Broadcast needle[0], then locate the next equal byte. 
-    // If no vector matches, send the whole 16-byte groups and resume outer-loop head.
-    a.mov(x86::rax, x86::qword_ptr(x86::rbx, 5 * 8));
-    a.movzx(x86::eax, x86::byte_ptr(x86::r10, x86::rax));
-    a.imul(x86::eax, x86::eax, imm(0x01010101));
-    a.movd(x86::xmm0, x86::eax); a.pshufd(x86::xmm0, x86::xmm0, imm(0));
-    a.cmp(x86::rdx, imm(16)); a.jb(scalar);
-    a.bind(scan);
-    a.movdqu(x86::xmm1, x86::oword_ptr(x86::r11, x86::rcx));
-    a.pcmpeqb(x86::xmm1, x86::xmm0); a.pmovmskb(x86::eax, x86::xmm1);
-    a.test(x86::eax, x86::eax); a.jnz(found);
-    a.add(x86::rcx, imm(16)); a.sub(x86::rdx, imm(16));
-    a.cmp(x86::rdx, imm(16)); a.jae(scan);
-    a.bind(scalar);
-    a.movd(x86::eax, x86::xmm0);              // AL = needle[0]
-    a.test(x86::rdx, x86::rdx); a.jz(commit);
-    a.bind(scalar_loop);
-    a.cmp(x86::byte_ptr(x86::r11, x86::rcx), x86::al); a.je(found);
-    a.inc(x86::rcx); a.dec(x86::rdx); a.jnz(scalar_loop);
-    a.jmp(commit);
-    a.bind(found);
-    // Vector hits carry a nonzero mask. scalar hits arrive with EAX holding only needle[0].
-    // Distinguish by remaining>=16 (outer hasn't subbed yet).
-    { Label scalar_found = a.new_label();
-      a.cmp(x86::rdx, imm(16)); a.jb(scalar_found);
-      a.bsf(x86::eax, x86::eax); a.add(x86::rcx, x86::rax);
-      a.bind(scalar_found); }
-    a.cmp(x86::rcx, x86::qword_ptr(x86::rbx, 7 * 8)); a.je(normal);
+      a.bind(inner);
+      // Equal bytes resume the inner scan. A mismatch interrupted after the
+      // comparison resumes at the guest's mismatch restore.
+      a.mov(slot(28), x86::rax);
+      save_cursors();
+      a.dec(x86::edi);
+      a.movsxd(x86::rdi, x86::edi);
+      a.inc(x86::r12);
+      a.inc(x86::r11);
+      a.mov(slot(3), x86::r11);
+      a.add(x86::r13, imm(9));
+      set_pc(b->tag + 0x80);
+      a.test(x86::r8, x86::r8);
+      a.jnz(counted_done);
+      set_pc(b->tag + 0x3c);
+      a.jmp(counted_done);
+      a.bind(ordinary);
+    }
 
-    a.bind(commit);
-    // Reproduce N mismatch continuations: R6-=N R7+=N R0/R1/R2/R3=R4/R5/R6/R7.
-    a.mov(x86::rax, x86::qword_ptr(x86::rbx, 5 * 8));
-    a.movzx(x86::r9d, x86::byte_ptr(x86::r10, x86::rax));         // R23 = needle byte
-    a.movzx(x86::eax, x86::byte_ptr(x86::r11, x86::rcx, 0, -1)); // R28 = last mismatch
+    // Execute the exact outer head, first-byte comparison and mismatch restore.
+    // Original memory emitters retain both guest reads in order, including slow
+    // helpers and fault positions. No canonical entry-register values are assumed.
+    a.mov(x86::r8, x86::rdi);
+    a.sub(x86::r8, x86::qword_ptr(x86::rbx, 2 * 8));
+    a.setb(x86::r9b); a.movzx(x86::r9d, x86::r9b);
+    a.setbe(x86::al); a.movzx(x86::eax, x86::al);
     a.mov(x86::qword_ptr(x86::rbx, 28 * 8), x86::rax);
-    a.mov(x86::r8, x86::r9); a.sub(x86::r8, x86::rax);           // R22 = R23 - R28
-#ifdef JIT_STATS
-    a.mov(x86::r10, imm((uint64_t)&m_licm_same)); a.inc(x86::qword_ptr(x86::r10));
-#endif
-    a.mov(x86::rax, x86::rcx); a.sub(x86::rax, x86::qword_ptr(x86::rbx, 7 * 8));
-    a.mov(x86::r10, x86::qword_ptr(x86::rbx, 6 * 8)); a.sub(x86::r10, x86::rax);
-    a.mov(x86::qword_ptr(x86::rbx, 6 * 8), x86::r10);
-    a.mov(x86::qword_ptr(x86::rbx, 2 * 8), x86::r10);
-    a.mov(x86::qword_ptr(x86::rbx, 7 * 8), x86::rcx);
-    a.mov(x86::qword_ptr(x86::rbx, 3 * 8), x86::rcx);
-    a.mov(x86::rdi, x86::qword_ptr(x86::rbx, 4 * 8));
-    a.mov(x86::r12, x86::qword_ptr(x86::rbx, 5 * 8));
-    a.imul(x86::rax, x86::rax, imm(22)); a.sub(x86::rax, imm(6));
-    a.add(x86::r13, x86::rax);
-    set_pc(b->tag);
-    a.jmp(fused_done);
-
-    a.bind(normal);
+    set_pc(b->tag + 0xa0);
+    a.test(x86::eax, x86::eax); a.jz(counted_done);
+    set_pc(b->tag + 0x18);
+    // Retain the original head, comparison and backedge delivery points.
+    a.lea(x86::rax, x86::ptr(x86::r13, 6));
+    a.cmp(x86::rax, imm(kChainCeiling)); a.jge(counted_done);
+    emit_pending_check(a, m_off, counted_done);
+    ra.rax_holds = -1;
+    ra.dpc_live = false;
+    for (uint32_t inner = 6; inner < 15; ++inner)
+      emit_op(&a, gpa, &done, hs, pal_block, b, words[inner], inner, ra, &cold, true);
+    a.add(x86::r13, imm(9)); // shared epilogue adds the head's six
+    a.test(x86::r8, x86::r8); a.jz(counted_done);
+    a.lea(x86::rax, x86::ptr(x86::r13, 6));
+    a.cmp(x86::rax, imm(kChainCeiling)); a.jge(counted_done);
+    emit_pending_check(a, m_off, counted_done);
+    ra.rax_holds = -1;
+    for (uint32_t restore = 32; restore < 39; ++restore)
+      emit_op(&a, gpa, &done, hs, pal_block, b, words[restore], restore, ra, &cold, true);
+    a.add(x86::r13, imm(7));
+    // Existing fused epilogue checks the backedge before re-entering this head.
+    a.bind(counted_done);
 #endif
   }
-  for (uint32_t i = 0; i < plen; ++i) {
+  const uint32_t ordinary_len = counted_scan_fused ? 0 : plen;
+  for (uint32_t i = 0; i < ordinary_len; ++i) {
       emit_op(&a, gpa, &done, hs, pal_block, b, words[i], i, ra, &cold, true);
   }
   a.bind(fused_done);

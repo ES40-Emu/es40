@@ -56,7 +56,8 @@ inline constexpr AlphaInstructionFetchPolicy kEv68InstructionFetchPolicy{
   &Ev68InstructionFetch::source,
   true, // Coherent EV68 RAM/cache sources participate in JIT invalidation.
   true, // Execute permissions are uniform within an 8 KiB translation.
-  &Ev68InstructionFetch::invalidate, &Ev68InstructionFetch::lifecycle
+  &Ev68InstructionFetch::invalidate, &Ev68InstructionFetch::lifecycle,
+  true  // Non-PAL branch targets need no dispatcher preparation.
 };
 
 #endif

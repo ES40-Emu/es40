@@ -4090,20 +4090,25 @@ u64 CAlphaCPU::get_instruction_count()
 	return state.instruction_count;
 }
 #endif
-static u32  cpu_magic1 = 0x2126468C;
-static u32  cpu_magic2 = 0xC8646212;
 
 /**
  * Save state to a Virtual Machine State file.
  **/
 int CAlphaCPU::SaveState(FILE* f)
 {
-	long  ss = sizeof(state);
+	const auto& signature = m_profile.cpu_state.snapshot_signature;
+	if (!signature)
+	{
+		printf("%s: CPU profile has no snapshot signature.\n", devid_string);
+		return -1;
+	}
 
-	fwrite(&cpu_magic1, sizeof(u32), 1, f);
-	fwrite(&ss, sizeof(long), 1, f);
-	fwrite(&state, sizeof(state), 1, f);
-	fwrite(&cpu_magic2, sizeof(u32), 1, f);
+	const long ss = sizeof(state);
+	if (fwrite(&signature->begin, sizeof(signature->begin), 1, f) != 1 ||
+		fwrite(&ss, sizeof(ss), 1, f) != 1 ||
+		fwrite(&state, sizeof(state), 1, f) != 1 ||
+		fwrite(&signature->end, sizeof(signature->end), 1, f) != 1)
+		return -1;
 	printf("%s: %d bytes saved.\n", devid_string, (int)ss);
 	return 0;
 }
@@ -4113,6 +4118,13 @@ int CAlphaCPU::SaveState(FILE* f)
  **/
 int CAlphaCPU::RestoreState(FILE* f)
 {
+	const auto& signature = m_profile.cpu_state.snapshot_signature;
+	if (!signature)
+	{
+		printf("%s: CPU profile has no snapshot signature.\n", devid_string);
+		return -1;
+	}
+
 	long    ss;
 	u32     m1;
 	u32     m2;
@@ -4125,7 +4137,7 @@ int CAlphaCPU::RestoreState(FILE* f)
 		return -1;
 	}
 
-	if (m1 != cpu_magic1)
+	if (m1 != signature->begin)
 	{
 		printf("%s: MAGIC 1 does not match!\n", devid_string);
 		return -1;
@@ -4144,7 +4156,8 @@ int CAlphaCPU::RestoreState(FILE* f)
 		return -1;
 	}
 
-	r = fread(&state, sizeof(state), 1, f);
+	std::vector<u8> saved(sizeof(state));
+	r = fread(saved.data(), saved.size(), 1, f);
 	if (r != 1)
 	{
 		printf("%s: unexpected end of file!\n", devid_string);
@@ -4158,12 +4171,13 @@ int CAlphaCPU::RestoreState(FILE* f)
 		return -1;
 	}
 
-	if (m2 != cpu_magic2)
+	if (m2 != signature->end)
 	{
-		printf("%s: MAGIC 1 does not match!\n", devid_string);
+		printf("%s: MAGIC 2 does not match!\n", devid_string);
 		return -1;
 	}
 
+	memcpy(&state, saved.data(), saved.size());
 	reset_idle_detector();
 	printf("%s: %d bytes restored.\n", devid_string, (int)ss);
 	if (m_profile.cpu_state.replaced)

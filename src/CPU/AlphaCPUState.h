@@ -28,6 +28,7 @@
 #define INCLUDED_ALPHACPUSTATE_H
 
 #include <cstdint>
+#include <optional>
 
 class CAlphaCPU;
 
@@ -48,11 +49,18 @@ struct AlphaJitVerifyPolicy
   }
 };
 
+struct AlphaCPUSnapshotSignature
+{
+  std::uint32_t begin;
+  std::uint32_t end;
+};
+
 struct AlphaCPUStatePolicy
 {
   // Clear transient family state after init/reset clearing or successful restore.
   void (*replaced)(CAlphaCPU& cpu) = nullptr;
   AlphaJitVerifyPolicy verify{};
+  std::optional<AlphaCPUSnapshotSignature> snapshot_signature{};
 };
 
 #endif

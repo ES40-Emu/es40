@@ -42,7 +42,8 @@ public:
 inline constexpr AlphaCPUStatePolicy kEv68CPUStatePolicy{
   &Ev68CPUState::replaced,
   {28, &Ev68CPUState::capture, &Ev68CPUState::prepare_replay,
-   &Ev68CPUState::restore, &Ev68CPUState::differs}
+   &Ev68CPUState::restore, &Ev68CPUState::differs},
+  AlphaCPUSnapshotSignature{0x2126468C, 0xC8646212}
 };
 
 #endif

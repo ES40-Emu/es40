@@ -142,7 +142,7 @@ noinst_HEADERS = config/ConfigEditor.h config/ConfigDocument.h \
        CPU/jit/jitengine_internal.h
 
 noinst_HEADERS += audio/ES1370.h audio/ES1371.h audio/HostAudio.h \
-       audio/HostAudioBackend.h audio/MPU401.h
+       audio/HostAudioBackend.h audio/MPU401.h audio/WSS.h audio/WSSCodec.h
 
 noinst_HEADERS += storage/Disk.h \
        storage/DiskFault.h \
@@ -275,6 +275,8 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        audio/HostAudioDirectSound.cpp \
        audio/HostAudioNull.cpp \
        audio/HostAudioSDL.cpp \
+       audio/WSS.cpp \
+       audio/WSSCodec.cpp \
        network/Ethernet.cpp \
        system/Flash.cpp \
        storage/FloppyController.cpp \

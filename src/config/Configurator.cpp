@@ -165,6 +165,7 @@
 #include "audio/ES1370.h"
 #include "audio/ES1371.h"
 #include "audio/MPU401.h"
+#include "audio/WSS.h"
 
 #endif // !CONFIGURATION_ONLY
 
@@ -834,6 +835,7 @@ classinfo classes[] = {
   {"win32", c_win32, N_P | IS_GUI, kv_gui_win32},
   {"X11", c_x11, N_P | IS_GUI, kv_gui_x11},
   {"mpu401", c_mpu401, ON_CS, kv_mpu401},
+  {"wss", c_wss, ON_CS, kv_none},
   {"es1370", c_es1370, IS_PCI, kv_es1370},
   {"es1371", c_es1371, IS_PCI, kv_es1371},
   {0, c_none, 0, 0}
@@ -1177,6 +1179,9 @@ void CConfigurator::initialize()
 			"cirrus model must be GD5401, GD5428, GD5430, GD5446 or AVGA1 (got %s)", model);
 		break;
 	}
+	case c_wss:
+		myDevice = new CWSS(this, (CSystem*)pParent->get_device());
+		break;
 	case c_es1370:
 		myDevice = new CES1370(this, (CSystem*)pParent->get_device(), pcibus,
 			pcidev);

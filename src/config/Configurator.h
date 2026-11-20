@@ -102,6 +102,7 @@ typedef enum
   c_ev68cb,
   c_serial,
   c_floppy,
+  c_wss,
 
   // pci devices
   c_ali,

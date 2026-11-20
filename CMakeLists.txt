@@ -504,6 +504,8 @@ list(APPEND ES40_SOURCES
     src/audio/HostAudioDirectSound.cpp
     src/audio/HostAudioNull.cpp
     src/audio/HostAudioSDL.cpp
+    src/audio/WSS.cpp
+    src/audio/WSSCodec.cpp
     src/network/Ethernet.cpp
     src/system/Flash.cpp
     src/storage/FloppyController.cpp

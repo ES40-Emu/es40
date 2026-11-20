@@ -104,6 +104,7 @@ typedef enum
   c_floppy,
 
   // isa cards
+  c_mpu401,
   c_wss,
 
   // pci devices
@@ -120,7 +121,6 @@ typedef enum
   c_lsi53c1020,
   c_sym53c895,
   c_sym53c810,
-  c_mpu401,
   c_es1370,
   c_es1371,
 
@@ -203,7 +203,6 @@ public:
   void write_configuration(FILE *fp, int indent = 0);
 #endif
 private:
-  const char* wss_port_error(const CConfigurator* card, unsigned bus, const char* io_port) const;
   class CConfigurator* pParent;
   class CConfigurator* pChildren[CFG_MAX_CHILDREN];
   int                   iNumChildren;

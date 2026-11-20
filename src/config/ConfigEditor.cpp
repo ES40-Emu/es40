@@ -2519,12 +2519,29 @@ void edit_pci(const char *title)
     }
 }
 
-static void edit_wss(CConfigurator *card)
+struct IsaCardEditor
 {
+    classid id;
+    const char *type, *label, *default_port;
+};
+
+static const IsaCardEditor isa_card_editors[] = {
+    {c_wss, "wss", "Windows Sound System", "0x530"},
+#ifdef _WIN32
+    {c_mpu401, "mpu401", "MPU-401", "0x330"},
+#endif
+};
+
+static void edit_isa_card(CConfigurator *card, const IsaCardEditor& editor)
+{
+    const bool is_mpu = editor.id == c_mpu401;
     FormEntry_t entry[] = {
         {"ISA slot", nullptr, nullptr, "ISA bus and logical slot, for example 0.1.", nullptr},
-        {"I/O port", "0x530", "io_port", "First of the card's eight I/O ports, in decimal or 0x-prefixed hexadecimal.", nullptr}
+        {"I/O port", editor.default_port, "io_port", "Base I/O port in decimal or 0x-prefixed hexadecimal.", nullptr},
+        {"MIDI output", "0", "midi_out", "Host MIDI output device number (default 0).",
+         [](EditorField *field) { editor_number(field, EditorField::Type::Integer, 1, 0, SHRT_MAX); }}
     };
+    const int count = is_mpu ? 3 : 2;
     set<unsigned> used_slots;
     for (int i = 0; i < sys0->editor_child_count(); ++i)
     {
@@ -2537,47 +2554,55 @@ static void edit_wss(CConfigurator *card)
     unsigned bus, slot;
     string location = card && parse_isa_slot(card->get_myName(), bus, slot)
         ? card->get_myName() + 3 : "0." + to_string(next_slot);
-    const string original_port = card ? card->get_text_value("io_port", "0x530") : "0x530";
+    const string original_port = card ? card->get_text_value("io_port", editor.default_port) : editor.default_port;
+    const string original_midi = is_mpu && card ? card->get_text_value("midi_out", "0") : "0";
     string port = original_port;
+    string midi = original_midi;
 
     for (;;)
     {
-        char *preset[] = {(char *)location.c_str(), (char *)port.c_str()};
-        FormValues_t values = show_form("Windows Sound System", entry, preset, ARRAY_SIZE(entry), nullptr);
+        char *preset[] = {(char *)location.c_str(), (char *)port.c_str(), (char *)midi.c_str()};
+        FormValues_t values = show_form(editor.label, entry, preset, count, nullptr);
         if (!values) return;
         location = values[0];
         port = values[1];
-        free(values[0]);
-        free(values[1]);
+        if (is_mpu) midi = values[2];
+        for (int i = 0; i < count; ++i) free(values[i]);
         free(values);
 
         const string name = "isa" + location;
-        if (const char *error = sys0->isa_card_config_error(card, name.c_str(), c_wss, port.c_str()))
+        if (const char *error = sys0->isa_card_config_error(card, name.c_str(), editor.id, port.c_str()))
         {
             show_text("Error", error);
             continue;
         }
         const bool write_port = !card || port != original_port;
-        card = edit_node(sys0, card, name, "wss");
+        const bool write_midi = is_mpu && (!card || midi != original_midi);
+        card = edit_node(sys0, card, name, editor.type);
         if (write_port) card->set_value((char *)"io_port", strdup(port.c_str()));
+        if (write_midi) card->set_value((char *)"midi_out", strdup(midi.c_str()));
         return;
     }
 }
 
 static void edit_isa(const char *title)
 {
+    struct Choice { CConfigurator *card; const IsaCardEditor *editor; string label; };
     for (;;)
     {
-        const auto cards = sys0->find_children_myValue("wss");
-        vector<string> labels;
-        for (auto *card : cards)
-            labels.push_back(string(card->get_myName()) + ": WSS at " + card->get_text_value("io_port", "0x530"));
+        vector<Choice> choices;
+        for (const auto& editor : isa_card_editors)
+            for (auto *card : sys0->find_children_myValue(editor.type))
+                choices.push_back({card, &editor, string(card->get_myName()) + ": " + editor.label +
+                    " at " + card->get_text_value("io_port", editor.default_port)});
+        for (const auto& editor : isa_card_editors)
+            choices.push_back({nullptr, &editor, string("Add ") + editor.label + " card"});
         vector<MenuEntry_t> menu;
-        for (const auto& label : labels) menu.push_back({label.c_str(), "Edit the card's ISA slot and I/O port.", nullptr});
-        menu.push_back({"Add Windows Sound System card", "Attach a WSS sound card to an ISA slot.", nullptr});
+        for (const auto& choice : choices)
+            menu.push_back({choice.label.c_str(), choice.card ? "Edit the ISA card." : "Attach the card to an ISA slot.", nullptr});
         const int sel = show_menu(title, menu.data(), static_cast<int>(menu.size()), MENU_2ND_LEVEL);
         if (sel < 0) return;
-        edit_wss(sel == static_cast<int>(cards.size()) ? nullptr : cards[sel]);
+        edit_isa_card(choices[sel].card, *choices[sel].editor);
     }
 }
 
@@ -2965,59 +2990,6 @@ void edit_ide(const char *title)
 }
 
 /**
- * MPU-401 configuration (Windows only)
- **/
-
-#ifdef _WIN32
-void validation_mpu401_midiout(EditorField *field)
-{
-    editor_number(field, EditorField::Type::Integer, 1, 0, SHRT_MAX); // What is the maximum MIDI channel number?
-}
-
-// Form for MPU-401
-void edit_mpu401(const char *title)
-{
-    FormEntry_t entry[] = {
-        {"midi_out", "0", "midi_out",
-         "The host MIDI output device number to play on.\n"
-         "The default is 0 (the Windows default MIDI device).",
-         validation_mpu401_midiout}};
-    const int num_entries = ARRAY_SIZE(entry);
-    CConfigurator *c;
-    FormValues_t preset;
-    int idx;
-
-    c = sys0->find_child("mpu0");
-    preset = (FormValues_t)calloc(num_entries, sizeof(char *));
-
-    for (int i = 0; i < num_entries; ++i)
-    {
-        char *p;
-        if (entry[i].name != NULL && c != nullptr && (p = c->get_text_value(entry[i].name)) != NULL)
-            preset[i] = p;
-        else
-            preset[i] = (char *)entry[i].preset;
-    }
-
-    FormValues_t values = show_form(title, entry, preset, num_entries, NULL);
-
-    if (values != NULL)
-    {
-        c = edit_node(sys0, c, "mpu0", "mpu401");
-
-        idx = fentry_index(entry, num_entries, "midi_out");
-        set_form_value(c, idx, entry[idx].name, values[idx]);
-
-        // Clean up
-        for (int i = 0; i < num_entries; ++i)
-            free(values[i]);
-        free(values);
-    }
-    free(preset);
-}
-#endif
-
-/**
  * Menu to remove system components from the configuration
  */
 void remove_component_add_choice(
@@ -3090,12 +3062,7 @@ bool main_menu(void)
         {"Edit ISA devices", "", edit_isa},
         {"Edit Serial devices", "", edit_serial},
         {"Edit Floppy devices", "", edit_floppy},
-        {"Edit IDE devices", "", edit_ide}
-#ifdef _WIN32
-        ,
-        {"MPU-401 device", "", edit_mpu401}
-#endif
-        ,
+        {"Edit IDE devices", "", edit_ide},
         {"Remove components",
          "Remove system components from the configuration.\n"
          "You can not remove the entries for sys0 or cpu0.",

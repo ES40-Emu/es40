@@ -27,7 +27,7 @@ CWSS::CWSS(CConfigurator* cfg, CSystem* system, CISABus& bus, u16 io_port)
     if (!dma)
         FAILURE(Configuration, "WSS requires an ISA DMA controller");
     backend = host_audio::backend_for_gui(cfg->get_gui_name());
-    bus.register_isa_io(*this, 0, io_port, wss_io_port_count);
+    bus.register_isa_io(*this, 0, io_port, wss_io_ports.count);
 }
 
 CWSS::~CWSS()
@@ -72,13 +72,13 @@ const CSystemComponent* CWSS::memory_decode_owner() const noexcept
 
 bool CWSS::decodes_memory_access(int, u64 address, int, bool) const noexcept
 {
-    return address < wss_io_port_count &&
+    return address < wss_io_ports.count &&
         bus.isa_io_decode(io_port + (u32)address) != CISABus::IsaIoDecode::None;
 }
 
 bool CWSS::uses_subtractive_decode(int, u64 address, int, bool) const noexcept
 {
-    return address < wss_io_port_count &&
+    return address < wss_io_ports.count &&
         bus.isa_io_decode(io_port + (u32)address) == CISABus::IsaIoDecode::Subtractive;
 }
 

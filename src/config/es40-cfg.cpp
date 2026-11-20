@@ -187,6 +187,24 @@ static const GUIHotkeyPrompt gui_hotkey_prompts[] = {
 	{ "hotkey.scale_down", "Decrease runtime window scale", "Ctrl+PageDown" }
 };
 
+#ifdef _WIN32
+static string ask_midi_output()
+{
+	MultipleChoiceQuestion midi_q;
+	midi_q.setQuestion("Which MIDI output device should the MPU-401 use (? lists devices)?");
+	midi_q.addAnswer("default", "0", "Host MIDI output 0");
+	midi_q.setDefault("default");
+	const UINT count = midiOutGetNumDevs();
+	for (UINT i = 0; i < count; ++i)
+	{
+		MIDIOUTCAPSA caps{};
+		if (midiOutGetDevCapsA(i, &caps, sizeof(caps)) == MMSYSERR_NOERROR)
+			midi_q.addAnswer(to_string(i), to_string(i), caps.szPname);
+	}
+	return midi_q.ask();
+}
+#endif
+
 static void add_isa_cards(ostream& os)
 {
 	MultipleChoiceQuestion card_q;
@@ -194,11 +212,16 @@ static void add_isa_cards(ostream& os)
 	card_q.setDefault("none");
 	card_q.addAnswer("none", "", "Finish adding ISA cards");
 	card_q.addAnswer("wss", "wss", "Windows Sound System");
+#ifdef _WIN32
+	card_q.addAnswer("mpu401", "mpu401", "MPU-401 MIDI interface");
+#endif
 
 	set<unsigned> slots;
-	vector<uint16_t> ports;
+	vector<IsaIoPorts> ports;
 	while (!card_q.ask().empty())
 	{
+		const string type = card_q.getAnswer();
+		const IsaIoPorts defaults = type == "mpu401" ? mpu401_io_ports : wss_io_ports;
 		unsigned slot = 1, bus;
 		while (slots.count(slot)) ++slot;
 		FreeTextQuestion slot_q;
@@ -209,20 +232,24 @@ static void add_isa_cards(ostream& os)
 
 		FreeTextQuestion port_q;
 		port_q.setQuestion("Which base I/O port should the card use?");
-		port_q.setDefault("0x530");
+		port_q.setDefault(type == "mpu401" ? "0x330" : "0x530");
 		uint16_t port;
 		for (;;)
 		{
 			const string value = port_q.ask();
-			if (!parse_wss_io_port(value.c_str(), port))
-				cout << "Enter a decimal or 0x-prefixed address between 0 and 0xfff8.\n";
-			else if (any_of(ports.begin(), ports.end(), [port](uint16_t other) { return wss_io_ports_overlap(port, other); }))
-				cout << "Those ports overlap another WSS card's eight-port range.\n";
+			if (!parse_isa_io_port(value.c_str(), defaults, port))
+				cout << "Enter a decimal or 0x-prefixed address with room for " << defaults.count << " ports.\n";
+			else if (any_of(ports.begin(), ports.end(), [&](IsaIoPorts other) { return isa_io_ports_overlap({port, defaults.count}, other); }))
+				cout << "Those ports overlap another ISA card's I/O range.\n";
 			else break;
 		}
 		slots.insert(slot);
-		ports.push_back(port);
-		os << "  isa0." << slot << " = wss\n  {\n    io_port = " << port_q.getAnswer() << ";\n  }\n\n";
+		ports.push_back({port, defaults.count});
+		os << "  isa0." << slot << " = " << type << "\n  {\n    io_port = " << port_q.getAnswer() << ";\n";
+#ifdef _WIN32
+		if (type == "mpu401") os << "    midi_out = " << ask_midi_output() << ";\n";
+#endif
+		os << "  }\n\n";
 	}
 }
 
@@ -1562,36 +1589,6 @@ int main(int argc, char* argv[])
 		}
 		os << "  }\n\n";
 	}
-
-#ifdef _WIN32
-	MultipleChoiceQuestion mpu_q;
-	mpu_q.setQuestion("Would you like to emulate the MPU-401 MIDI device?");
-	mpu_q.addAnswer("no", "", "Disable the MPU-401");
-	mpu_q.addAnswer("yes", "yes", "Enable the MPU-401");
-	mpu_q.setDefault("no");
-	mpu_q.ask();
-
-	if (mpu_q.getAnswer() != "")
-	{
-		MultipleChoiceQuestion midi_q;
-		midi_q.setQuestion("What MIDI out device should we connect to (answer ? for a list)?");
-		midi_q.setExplanation("Choose 'list' to get a list at run-time.");
-		midi_q.addAnswer("list", "", "Get a list at run-time");
-		
-		MIDIOUTCAPSA caps;
-		for (UINT i = 0; i < midiOutGetNumDevs(); i++)
-		{
-			midiOutGetDevCapsA(i, &caps, sizeof(caps));
-			midi_q.addAnswer(i2s(i + 1), i2s(i), string(caps.szPname));
-		}
-
-		os << "  mpu = mpu401\n";
-		os << "  {\n";
-		os << "     midi_out = " << midi_q.ask() << ";\n";
-		os << "  }\n\n";
-	}
-
-#endif
 
 	MultipleChoiceQuestion vgacons_q;
 	vgacons_q.setQuestion("Where would you like console output to go?");

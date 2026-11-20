@@ -32,8 +32,13 @@
 #include <cstdint>
 #include <string_view>
 
-constexpr uint16_t wss_default_io_port = 0x530;
-constexpr unsigned wss_io_port_count = 8;
+struct IsaIoPorts {
+    uint16_t base;
+    unsigned count;
+};
+
+constexpr IsaIoPorts wss_io_ports{0x530, 8};
+constexpr IsaIoPorts mpu401_io_ports{0x330, 2};
 
 inline bool parse_isa_slot(std::string_view name, unsigned& bus, unsigned& slot)
 {
@@ -47,10 +52,10 @@ inline bool parse_isa_slot(std::string_view name, unsigned& bus, unsigned& slot)
     return second.ec == std::errc() && second.ptr == end;
 }
 
-inline bool parse_wss_io_port(const char* text, uint16_t& port)
+inline bool parse_isa_io_port(const char* text, IsaIoPorts defaults, uint16_t& port)
 {
     if (!text) {
-        port = wss_default_io_port;
+        port = defaults.base;
         return true;
     }
     std::string_view value(text);
@@ -58,12 +63,12 @@ inline bool parse_wss_io_port(const char* text, uint16_t& port)
     if (hex) value.remove_prefix(2);
     const char* end = value.data() + value.size();
     const auto result = std::from_chars(value.data(), end, port, hex ? 16 : 10);
-    return result.ec == std::errc() && result.ptr == end && port <= 0x10000 - wss_io_port_count;
+    return result.ec == std::errc() && result.ptr == end && port <= 0x10000 - defaults.count;
 }
 
-inline bool wss_io_ports_overlap(uint16_t a, uint16_t b)
+inline bool isa_io_ports_overlap(IsaIoPorts a, IsaIoPorts b)
 {
-    return a < b + wss_io_port_count && b < a + wss_io_port_count;
+    return a.base < b.base + b.count && b.base < a.base + a.count;
 }
 
 #endif

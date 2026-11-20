@@ -21,81 +21,87 @@
  */
 
 #include "MPU401.h"
-#include <vector>
 
 #ifdef _WIN32
-#include "chipset/AliM1543C.h"
+#include "chipset/ISABus.h"
+#include "config/ISASlot.h"
 #pragma comment(lib, "winmm.lib")
+
+CMPU401::CMPU401(CConfigurator* cfg, CSystem* system, CISABus& bus, u16 io_port)
+	: CSystemComponent(cfg, system), bus(bus), io_port(io_port)
+{
+	bus.register_isa_io(*this, 0, io_port, mpu401_io_ports.count);
+}
+
+CMPU401::~CMPU401()
+{
+	if (hmo) midiOutClose(hmo);
+}
+
+void CMPU401::init()
+{
+	const UINT device = static_cast<UINT>(myCfg->get_num_value("midi_out", true, 0));
+	if (midiOutOpen(&hmo, device, 0, 0, CALLBACK_NULL) != MMSYSERR_NOERROR)
+		FAILURE_1(Configuration, "MPU-401: Failed to open MIDI output device %u.", device);
+
+	UINT id;
+	MIDIOUTCAPSA caps;
+	if (midiOutGetID(hmo, &id) == MMSYSERR_NOERROR &&
+		midiOutGetDevCapsA(id, &caps, sizeof(caps)) == MMSYSERR_NOERROR)
+		printf("MPU-401: Opened MIDI device \"%s\".\n", caps.szPname);
+	else
+		printf("MPU-401: Opened MIDI device.\n");
+}
+
+std::string CMPU401::snapshot_identity() const
+{
+	return CSystemComponent::snapshot_identity() + ":" + std::to_string(io_port);
+}
 
 const CSystemComponent* CMPU401::memory_decode_owner() const noexcept
 {
-	return isa_bridge ? static_cast<const CSystemComponent*>(isa_bridge) : this;
+	return bus.isa_decode_owner();
 }
 
 bool CMPU401::decodes_memory_access(int index, u64 address, int, bool) const noexcept
 {
-	if (!((index == 0 || index == 1) && address == 0))
-		return false;
-	if (!isa_bridge)
-		return true;
-	const u32 port = 0x330u + (u32)index;
-	return isa_bridge->isa_io_decode(port) != CAliM1543C::IsaIoDecode::None;
+	return index == 0 && address < mpu401_io_ports.count &&
+		bus.isa_io_decode(io_port + (u32)address) != CISABus::IsaIoDecode::None;
 }
 
-bool CMPU401::uses_subtractive_decode(int index, u64 address, int dsize,
-	bool write) const noexcept
+bool CMPU401::uses_subtractive_decode(int index, u64 address, int, bool) const noexcept
 {
-	if (!isa_bridge || !decodes_memory_access(index, address, dsize, write))
-		return false;
-	const u32 port = 0x330u + (u32)index;
-	return isa_bridge->isa_io_decode(port) == CAliM1543C::IsaIoDecode::Subtractive;
+	return index == 0 && address < mpu401_io_ports.count &&
+		bus.isa_io_decode(io_port + (u32)address) == CISABus::IsaIoDecode::Subtractive;
 }
 
 u64 CMPU401::ReadMem(int index, u64 address, int dsize)
 {
-	//fprintf(stderr, "MPU401: ReadMem: index=%d, address=0x%llx, dsize=%d\n", index, address, dsize);
-	if (dsize == 16 && !(address & 1))
+	if (dsize == 16)
 	{
-		u64 res = 0;
-		res |= ReadMem(index, address, 8) << 0;
-		res |= ReadMem(index, address + 1, 16) << 0;
-		return res;
+		const u64 low = ReadMem(index, address, 8);
+		return low | (ReadMem(index, address + 1, 8) << 8);
 	}
-	if (dsize > 16)
-	{
-		return 0;
-	}
-	if (address & 1)
-	{
-		midi_mpu_status |= 0x80;
-		if (bReset) {
-			bReset = false;
-			return 0xfe;
-		}
-		return 0xfe; // Always return Active Sensing.
-	}
-	else
-	{
-		return midi_mpu_status;
-	}
+	if (dsize > 16) return 0;
+	if (!decodes_memory_access(index, address, 8, false)) return 0xff;
+	if (address == 1) return midi_mpu_status;
+	midi_mpu_status |= 0x80;
+	bReset = false;
+	return 0xfe; // Command acknowledgement or Active Sensing.
 }
 
 void CMPU401::WriteMem(int index, u64 address, int dsize, u64 data)
 {
-	//fprintf(stderr, "MPU401: WriteMem: index=%d, address=0x%llx, dsize=%d, data=0x%llX\n", index, address, dsize, data);
-	if (dsize == 16 && !(address & 1))
+	if (dsize == 16)
 	{
 		WriteMem(index, address, 8, (data >> 0) & 0xff);
 		WriteMem(index, address + 1, 8, (data >> 8) & 0xff);
 		return;
 	}
-	if (dsize > 16)
-	{
-		return;
-	}
+	if (dsize > 16 || !decodes_memory_access(index, address, 8, true)) return;
 	// Byte I/O ignores upper bits of the CPU register supplied by the caller.
 	const u8 byte = static_cast<u8>(data);
-	if (address & 1)
+	if (address == 1)
 	{
 		if (byte == 0x3f)
 		{

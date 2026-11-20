@@ -165,7 +165,9 @@
 #include "storage/Sym53C810.h"
 #include "audio/ES1370.h"
 #include "audio/ES1371.h"
+#ifdef _WIN32
 #include "audio/MPU401.h"
+#endif
 #include "audio/WSS.h"
 
 #endif // !CONFIGURATION_ONLY
@@ -810,7 +812,7 @@ static const char* const kv_gui_win32[] = {
   "mouse.invert_y", "mouse.absolute", "hotkey.mouse_capture", "hotkey.ctrl_alt_delete",
   "hotkey.reset_window", "video.scale_ratio", "video.scale_change_enable",
   "hotkey.scale_up", "hotkey.scale_down", "video.linear", "hotkey.media", "workstation", 0 };
-static const char* const kv_mpu401[] = { "midi_out", 0 };
+static const char* const kv_mpu401[] = { "io_port", "midi_out", 0 };
 static const char* const kv_wss[] = { "io_port", 0 };
 
 classinfo classes[] = {
@@ -838,7 +840,7 @@ classinfo classes[] = {
   {"sdl", c_sdl, N_P | IS_GUI, kv_gui_sdl},
   {"win32", c_win32, N_P | IS_GUI, kv_gui_win32},
   {"X11", c_x11, N_P | IS_GUI, kv_gui_x11},
-  {"mpu401", c_mpu401, ON_CS, kv_mpu401},
+  {"mpu401", c_mpu401, IS_ISA | ON_CS, kv_mpu401},
   {"wss", c_wss, IS_ISA | ON_CS, kv_wss},
   {"es1370", c_es1370, IS_PCI, kv_es1370},
   {"es1371", c_es1371, IS_PCI, kv_es1371},
@@ -852,6 +854,16 @@ static const classinfo& config_class(const char* name)
 	return classes[i];
 }
 
+static const IsaIoPorts* isa_card_ports(classid type)
+{
+	switch (type)
+	{
+	case c_wss:    return &wss_io_ports;
+	case c_mpu401: return &mpu401_io_ports;
+	default:       return nullptr;
+	}
+}
+
 const char* CConfigurator::isa_card_config_error(const CConfigurator* card, const char* name,
 	classid type, const char* io_port) const
 {
@@ -861,31 +873,23 @@ const char* CConfigurator::isa_card_config_error(const CConfigurator* card, cons
 	if (!parse_isa_slot(name, bus, slot))
 		return "Name an ISA card isa<bus>.<slot> using decimal bus and slot numbers";
 	if (board.id == c_tsunami && bus != 0) return "The ES40 ISA bridge provides bus isa0";
-	for (int i = 0; i < iNumChildren; ++i)
-	{
-		unsigned other_bus, other_slot;
-		if (pChildren[i] != card && parse_isa_slot(pChildren[i]->myName, other_bus, other_slot) &&
-			bus == other_bus && slot == other_slot)
-			return "Two ISA cards use the same slot";
-	}
-	return type == c_wss ? wss_port_error(card, bus, io_port) : nullptr;
-}
-
-const char* CConfigurator::wss_port_error(const CConfigurator* card, unsigned bus, const char* io_port) const
-{
-	u16 port;
-	if (!parse_wss_io_port(io_port, port))
-		return "WSS io_port must be a decimal or hexadecimal address from 0 through 0xfff8";
+	const auto* ports = isa_card_ports(type);
+	u16 port = 0;
+	if (ports && !parse_isa_io_port(io_port, *ports, port))
+		return type == c_wss ? "WSS io_port must be a decimal or hexadecimal address from 0 through 0xfff8" :
+			"MPU-401 io_port must be a decimal or hexadecimal address from 0 through 0xfffe";
 	for (int i = 0; i < iNumChildren; ++i)
 	{
 		CConfigurator* other = pChildren[i];
 		unsigned other_bus, other_slot;
-		if (other == card || config_class(other->myValue).id != c_wss ||
-			!parse_isa_slot(other->myName, other_bus, other_slot) || bus != other_bus)
+		if (other == card || !parse_isa_slot(other->myName, other_bus, other_slot) || bus != other_bus)
 			continue;
+		if (slot == other_slot) return "Two ISA cards use the same slot";
+		const auto* other_ports = isa_card_ports(config_class(other->myValue).id);
 		u16 other_port;
-		if (parse_wss_io_port(other->get_text_value("io_port"), other_port) && wss_io_ports_overlap(port, other_port))
-			return "WSS cards on the same ISA bus must have separate eight-port I/O ranges";
+		if (ports && other_ports && parse_isa_io_port(other->get_text_value("io_port"), *other_ports, other_port) &&
+			isa_io_ports_overlap({port, ports->count}, {other_port, other_ports->count}))
+			return "ISA card I/O port ranges overlap on the same bus";
 	}
 	return nullptr;
 }
@@ -1189,12 +1193,6 @@ void CConfigurator::initialize()
 			pcibus, pcidev);
 		break;
 
-#ifdef _WIN32
-	case c_mpu401:
-		myDevice = (void*)new CMPU401(this, (CSystem*)pParent->get_device());
-		break;
-#endif
-
 	case c_ali_pmu:
 		myDevice = new CAliM1543C_pmu(this, (CSystem*)pParent->get_device(),
 			pcibus, pcidev);
@@ -1247,15 +1245,26 @@ void CConfigurator::initialize()
 		break;
 	}
 	case c_wss:
+	case c_mpu401:
 	{
 		auto* system = static_cast<CSystem*>(pParent->myDevice);
 		unsigned bus, slot;
 		u16 port;
-		if (!parse_isa_slot(myName, bus, slot) || !parse_wss_io_port(get_text_value("io_port"), port))
+		if (!parse_isa_slot(myName, bus, slot) ||
+			!parse_isa_io_port(get_text_value("io_port"), *isa_card_ports(myClassId), port))
 			FAILURE_1(Configuration, "Invalid ISA slot or io_port for %s", myName);
 		auto* owner = system->isa_bus(bus);
 		if (!owner) FAILURE_1(Configuration, "No ISA bridge provides bus isa%u", bus);
-		myDevice = new CWSS(this, system, *owner, port);
+		if (myClassId == c_wss)
+			myDevice = new CWSS(this, system, *owner, port);
+		else
+		{
+#ifdef _WIN32
+			myDevice = new CMPU401(this, system, *owner, port);
+#else
+			FAILURE(Configuration, "MPU-401 MIDI output requires a Windows host");
+#endif
+		}
 		break;
 	}
 	case c_es1370:

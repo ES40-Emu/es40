@@ -54,6 +54,16 @@
 
 class CAliM1543C;
 
+// Called under the device-bus lock with controller-generated addresses and byte counts.
+class CDMAHost
+{
+public:
+  virtual ~CDMAHost() = default;
+  virtual bool dma_transfer_enabled() = 0;
+  virtual void dma_read_memory(u32 address, void* dest, size_t bytes) = 0;
+  virtual void dma_write_memory(u32 address, const void* source, size_t bytes) = 0;
+};
+
   /**
    * \brief Emulated DMA controller.
    **/
@@ -62,7 +72,8 @@ class CAliM1543C;
 class CDMA : public CSystemComponent
 {
 public:
-  // The owning bridge selects ALi M1543C register and decode behavior.
+  CDMA(CConfigurator* cfg, CSystem* c, CDMAHost& host);
+  // Also installs the ES40's ALi DMA port mappings.
   CDMA(CConfigurator* cfg, CSystem* c, CAliM1543C& bridge);
   virtual       ~CDMA();
 
@@ -161,8 +172,8 @@ public:
   size_t        get_transfer_size(int channel);
 
 private:
-  // Borrowed bridge for configuration, decode and DMA; never accessed during destruction.
-  CAliM1543C& isa_bridge;
+  CDMAHost& dma_host;
+  CAliM1543C* ali_bridge = nullptr;
 
   // Derived transfer geometry; not guest registers or saved state.
   struct SDMA_transfer_properties
@@ -176,7 +187,7 @@ private:
 
   static void   validate_device_channel(int channel);
   SDMA_transfer_properties transfer_properties(int channel) const;
-  u64           dma_address(u16 pagebase, u32 current,
+  static u32    dma_address(u16 pagebase, u32 current,
                   const SDMA_transfer_properties& properties);
   static u32    step_address(u32 current, size_t units, bool decrement,
                   const SDMA_transfer_properties& properties);

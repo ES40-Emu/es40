@@ -271,7 +271,6 @@
 #include "StdAfx.h"
 #include "AliM1543C.h"
 #include "AliM1543C_pmu.h"
-#include "DMA.h"
 #include "system/System.h"
 #include "graphics/VGA.h"
 #include <cerrno>
@@ -650,6 +649,27 @@ bool CAliM1543C::uses_subtractive_decode(int index, u64, int, bool write) const 
 bool CAliM1543C::is_docking_mode() const noexcept
 {
 	return (endian_32(pci_state.config_data[0][0x5c / 4]) & 1) != 0;
+}
+
+bool CAliM1543C::dma_transfer_enabled()
+{
+	return pci_bus_master_enabled();
+}
+
+u32 CAliM1543C::dma_bus_address(u32 address)
+{
+	// Register 42h bit 6 enables the high DMA page byte.
+	return (config_read(0, 0x42, 8) & 0x40) ? address : (address & 0x00ffffff);
+}
+
+void CAliM1543C::dma_read_memory(u32 address, void* dest, size_t bytes)
+{
+	do_pci_read(dma_bus_address(address), dest, 1, bytes);
+}
+
+void CAliM1543C::dma_write_memory(u32 address, const void* source, size_t bytes)
+{
+	do_pci_write(dma_bus_address(address), source, 1, bytes);
 }
 
 bool CAliM1543C::is_pmu_hidden() const noexcept

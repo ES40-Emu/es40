@@ -64,14 +64,21 @@
 #include "system/System.h"
 #include "DMA.h"
 #include "AliM1543C.h"
-#include "emu/PCIDevice.h"
 
 /**
  * Constructor.
  **/
-CDMA::CDMA(CConfigurator* cfg, CSystem* c, CAliM1543C& bridge) :
-	CSystemComponent(cfg, c), isa_bridge(bridge)
+CDMA::CDMA(CConfigurator* cfg, CSystem* c, CDMAHost& host) :
+	CSystemComponent(cfg, c), dma_host(host)
 {
+	ResetPCI();
+	printf("dma: $Id$\n");
+}
+
+CDMA::CDMA(CConfigurator* cfg, CSystem* c, CAliM1543C& bridge) :
+	CDMA(cfg, c, static_cast<CDMAHost&>(bridge))
+{
+	ali_bridge = &bridge;
 	// DMA Setup
 #define LEGACY_IO(id,port,size) c->RegisterMemory(this, id, U64(0x00000801fc000000) + port, size)
 	LEGACY_IO(DMA0_IO_CHANNEL, 0x00, 8);
@@ -83,10 +90,7 @@ CDMA::CDMA(CConfigurator* cfg, CSystem* c, CAliM1543C& bridge) :
 	LEGACY_IO(DMA0_IO_EXT, 0x040b, 1);
 	LEGACY_IO(DMA1_IO_EXT, 0x04D6, 1);
 
-	ResetPCI();
-
-	isa_bridge.bind_dma(*this);
-	printf("dma: $Id$\n");
+	bridge.bind_dma(*this);
 }
 
 /**
@@ -115,13 +119,15 @@ void CDMA::ResetPCI()
 bool CDMA::uses_subtractive_decode(int index, u64, int, bool) const noexcept
 {
 	// M1543C 3.5: DMA ignores 44h<6>; docking mode makes internal decode positive.
-	return index >= DMA_IO_BASE && index <= DMA1_IO_EXT &&
-		!isa_bridge.is_docking_mode();
+	return ali_bridge && index >= DMA_IO_BASE && index <= DMA1_IO_EXT &&
+		!ali_bridge->is_docking_mode();
 }
 
 const CSystemComponent* CDMA::memory_decode_owner() const noexcept
 {
-	return &isa_bridge;
+	if (ali_bridge)
+		return ali_bridge;
+	return this;
 }
 
 int CDMA::DoClock()
@@ -200,16 +206,13 @@ CDMA::SDMA_transfer_properties CDMA::transfer_properties(int channel) const
 	return { 2, 2, 1, 1, 0xffff };
 }
 
-u64 CDMA::dma_address(u16 pagebase, u32 current,
+u32 CDMA::dma_address(u16 pagebase, u32 current,
 	const SDMA_transfer_properties& properties)
 {
-	if (!(isa_bridge.config_read(0, 0x42, 8) & 0x40))
-		pagebase &= 0x00ff;
-
 	// Shifted addressing drives A16 from current, not low-page bit 0.
 	pagebase &= (u16)(0xffffU << properties.address_shift);
 
-	return ((u64)pagebase << 16) | ((u64)current << properties.address_shift);
+	return ((u32)pagebase << 16) | (current << properties.address_shift);
 }
 
 u32 CDMA::step_address(u32 current, size_t units, bool decrement,
@@ -769,8 +772,7 @@ bool CDMA::service_selected(int channel) const
 
 bool CDMA::service_ready(int channel, u8 transfer_type) const
 {
-	if (!service_selected(channel) ||
-		!(isa_bridge.config_read(0, 0x04, 16) & 0x04))
+	if (!service_selected(channel) || !dma_host.dma_transfer_enabled())
 		return false;
 
 	// Direction does not affect arbitration against other pending channels.
@@ -973,8 +975,7 @@ CDMA::SDMA_result CDMA::send_data(int channel, void* data, size_t length, bool e
 		return result;
 	}
 
-	// The PCI helpers otherwise silently skip DMA when bus mastering is disabled.
-	if (!(isa_bridge.config_read(0, 0x04, 16) & 0x04))
+	if (!dma_host.dma_transfer_enabled())
 		return result;
 
 	if ((state.controller[ctrlr].command & 0x04) == 0)
@@ -1008,11 +1009,11 @@ CDMA::SDMA_result CDMA::send_data(int channel, void* data, size_t length, bool e
 				return result;
 			}
 
-			u64 addr = dma_address(state.channel[channel].pagebase,
+			u32 addr = dma_address(state.channel[channel].pagebase,
 				state.channel[channel].current, properties);
 			if (DMA_TRACE_CHANNEL(channel))
 			{
-				printf("DMA send_data:  %zx @ %16" PRIx64 "\n  ", count, addr);
+				printf("DMA send_data:  %zx @ controller address %08" PRIx32 "\n  ", count, addr);
 				for (size_t i = 0; i < count; i++)
 				{
 					printf("%02x ", *((char*)data + i) & 0xff);
@@ -1030,7 +1031,7 @@ CDMA::SDMA_result CDMA::send_data(int channel, void* data, size_t length, bool e
 				for (size_t offset = 0; offset < count; offset += properties.data_width)
 				{
 					addr = dma_address(state.channel[channel].pagebase, current, properties);
-					isa_bridge.do_pci_write((u32)addr, (u8*)data + offset, 1, properties.data_width);
+					dma_host.dma_write_memory(addr, (u8*)data + offset, properties.data_width);
 					current = step_address(current, 1, true, properties);
 				}
 			}
@@ -1038,12 +1039,12 @@ CDMA::SDMA_result CDMA::send_data(int channel, void* data, size_t length, bool e
 			{
 				size_t first_count = increment_chunk_size(state.channel[channel].current,
 					count, properties);
-				isa_bridge.do_pci_write((u32)addr, data, 1, first_count);
+				dma_host.dma_write_memory(addr, data, first_count);
 				// A programmed transfer contains at most 65536 units, so only one wrap is possible.
 				if (first_count < count)
 				{
-					u64 wrap_addr = dma_address(state.channel[channel].pagebase, 0, properties);
-					isa_bridge.do_pci_write((u32)wrap_addr, (u8*)data + first_count, 1,
+					u32 wrap_addr = dma_address(state.channel[channel].pagebase, 0, properties);
+					dma_host.dma_write_memory(wrap_addr, (u8*)data + first_count,
 						count - first_count);
 				}
 			}
@@ -1086,8 +1087,7 @@ CDMA::SDMA_result CDMA::recv_data(int channel, void* data, size_t length, bool e
 		return result;
 	}
 
-	// Avoid zero-filling the device buffer and advancing a blocked transfer.
-	if (!(isa_bridge.config_read(0, 0x04, 16) & 0x04))
+	if (!dma_host.dma_transfer_enabled())
 		return result;
 
 	if ((state.controller[ctrlr].command & 0x04) == 0)
@@ -1121,17 +1121,17 @@ CDMA::SDMA_result CDMA::recv_data(int channel, void* data, size_t length, bool e
 				return result;
 			}
 
-			u64 addr = dma_address(state.channel[channel].pagebase,
+			u32 addr = dma_address(state.channel[channel].pagebase,
 				state.channel[channel].current, properties);
 			if (DMA_TRACE_CHANNEL(channel))
-				printf("DMA recv_data:  %zx @ %16" PRIx64 "\n", count, addr);
+				printf("DMA recv_data:  %zx @ controller address %08" PRIx32 "\n", count, addr);
 			if (state.channel[channel].mode & 0x20)
 			{
 				u32 current = state.channel[channel].current;
 				for (size_t offset = 0; offset < count; offset += properties.data_width)
 				{
 					addr = dma_address(state.channel[channel].pagebase, current, properties);
-					isa_bridge.do_pci_read((u32)addr, (u8*)data + offset, 1, properties.data_width);
+					dma_host.dma_read_memory(addr, (u8*)data + offset, properties.data_width);
 					current = step_address(current, 1, true, properties);
 				}
 			}
@@ -1139,11 +1139,11 @@ CDMA::SDMA_result CDMA::recv_data(int channel, void* data, size_t length, bool e
 			{
 				size_t first_count = increment_chunk_size(state.channel[channel].current,
 					count, properties);
-				isa_bridge.do_pci_read((u32)addr, data, 1, first_count);
+				dma_host.dma_read_memory(addr, data, first_count);
 				if (first_count < count)
 				{
-					u64 wrap_addr = dma_address(state.channel[channel].pagebase, 0, properties);
-					isa_bridge.do_pci_read((u32)wrap_addr, (u8*)data + first_count, 1,
+					u32 wrap_addr = dma_address(state.channel[channel].pagebase, 0, properties);
+					dma_host.dma_read_memory(wrap_addr, (u8*)data + first_count,
 						count - first_count);
 				}
 			}

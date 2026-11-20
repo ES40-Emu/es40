@@ -140,11 +140,11 @@
 #define INCLUDED_ALIM1543C_H_
 
 #include "emu/PCIDevice.h"
+#include "DMA.h"
 
 #include <chrono>
 
 class CAliM1543C_pmu;
-class CDMA;
 
   /**
    * \brief Emulated ISA part of the ALi M1543C chipset.
@@ -157,7 +157,7 @@ class CDMA;
    *  - Keyboard Scancodes, by Andries Brouwer (http://www.win.tue.nl/~aeb/linux/kbd/scancodes.html)
    *  .
    **/
-class CAliM1543C : public CPCIDevice, public CRunnable
+class CAliM1543C : public CPCIDevice, public CRunnable, public CDMAHost
 {
 public:
   virtual int   SaveState(FILE* f);
@@ -185,6 +185,9 @@ public:
   void bind_pmu(CAliM1543C_pmu* pmu) { docking_pmu = pmu; }
   void bind_dma(CDMA& dma) { isa_dma = &dma; }
   CDMA* dma_controller() noexcept { return isa_dma; }
+  bool dma_transfer_enabled() override;
+  void dma_read_memory(u32 address, void* dest, size_t bytes) override;
+  void dma_write_memory(u32 address, const void* source, size_t bytes) override;
   u32 config_read_custom(int func, u32 address, int dsize, u32 data) override;
   void config_write_custom(int func, u32 address, int dsize,
     u32 old_data, u32 new_data, u32 data) override;
@@ -207,6 +210,7 @@ public:
   void          save_toy_nvram(bool verbose = false);
   void          restore_toy_nvram();
 private:
+  u32 dma_bus_address(u32 address);
   // Host wiring; the PMU's selector bytes already live in saved PCI state.
   CAliM1543C_pmu* docking_pmu = nullptr;
   CDMA* isa_dma = nullptr;

@@ -805,7 +805,7 @@ void CPCIDevice::do_pci_read(u32 address, void* dest, size_t element_size,
 
 	// PCI Command.BME gates all device-initiated DMA. 
 	// SRM early probe writes Command=0 to every device
-	if (!(config_read(0, 0x04, 16) & 0x4))
+	if (!pci_bus_master_enabled())
 	{
 		memset(dest, 0, element_size * element_count);
 		return;
@@ -924,17 +924,17 @@ void CPCIDevice::do_pci_read(u32 address, void* dest, size_t element_size,
  * 32-bit address put on the PCI bus. element_count elements of element_size
  * bytes each will be written in an endian-aware manner.
  **/
-void CPCIDevice::do_pci_write(u32 address, void* source, size_t element_size,
+void CPCIDevice::do_pci_write(u32 address, const void* source, size_t element_size,
 	size_t element_count)
 {
 	size_t  el;
-	char* src = (char*)source;
+	const u8* src = (const u8*)source;
 
 	if (element_count == 0)
 		return;
 
 	// PCI Command.BME gates all device-initiated DMA (see do_pci_read).
-	if (!(config_read(0, 0x04, 16) & 0x4))
+	if (!pci_bus_master_enabled())
 		return;
 
 	// get the 64-bit system wide address
@@ -945,9 +945,9 @@ void CPCIDevice::do_pci_write(u32 address, void* source, size_t element_size,
 	{
 		switch (element_size)
 		{
-		case 1:   cSystem->WriteMem(phys_addr, 8, *(u8*)source, this); break;
-		case 2:   cSystem->WriteMem(phys_addr, 16, *(u16*)source, this); break;
-		case 4:   cSystem->WriteMem(phys_addr, 32, *(u32*)source, this); break;
+		case 1:   cSystem->WriteMem(phys_addr, 8, *src, this); break;
+		case 2:   cSystem->WriteMem(phys_addr, 16, *(const u16*)source, this); break;
+		case 4:   cSystem->WriteMem(phys_addr, 32, *(const u32*)source, this); break;
 		default:  FAILURE(InvalidArgument, "Strange element size");
 		}
 
@@ -984,7 +984,7 @@ void CPCIDevice::do_pci_write(u32 address, void* source, size_t element_size,
 			else
 			{
 				for (el = 0; el < chunk; el++)
-					cSystem->WriteMem(cur_phys + el, 8, (u8)src[el], this);
+					cSystem->WriteMem(cur_phys + el, 8, src[el], this);
 			}
 
 			src += chunk;
@@ -1004,7 +1004,7 @@ void CPCIDevice::do_pci_write(u32 address, void* source, size_t element_size,
 	{
 		for (el = 0; el < element_count; el++)
 		{
-			cSystem->WriteMem(phys_addr, 8, *(u8*)src, this);
+			cSystem->WriteMem(phys_addr, 8, *src, this);
 			src++;
 			phys_addr++;
 		}
@@ -1013,7 +1013,7 @@ void CPCIDevice::do_pci_write(u32 address, void* source, size_t element_size,
 
 	case 2:
 	{
-		cSystem->WriteMem(phys_addr, 16, endian_16(*(u16*)src), this);
+		cSystem->WriteMem(phys_addr, 16, endian_16(*(const u16*)src), this);
 		src += 2;
 		phys_addr += 2;
 		break;
@@ -1021,7 +1021,7 @@ void CPCIDevice::do_pci_write(u32 address, void* source, size_t element_size,
 
 	case 4:
 	{
-		cSystem->WriteMem(phys_addr, 32, endian_32(*(u32*)src), this);
+		cSystem->WriteMem(phys_addr, 32, endian_32(*(const u32*)src), this);
 		src += 4;
 		phys_addr += 4;
 		break;

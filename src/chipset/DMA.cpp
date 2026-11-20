@@ -152,23 +152,36 @@ static int dma_page_channel(u64 address)
 	return channelmap[address];
 }
 
-// Wide accesses can cross from the channel bank into the control bank.
-static bool dma_decode_controller_byte(int& index, u64& address)
+static bool dma_mapped_legacy_port(int index, u64 offset, u16& port)
 {
-	if (index == DMA1_IO_CHANNEL || index == DMA1_IO_MAIN)
-		address >>= 1;
-
-	if (index == DMA0_IO_CHANNEL || index == DMA1_IO_CHANNEL)
+	switch (index)
 	{
-		if (address < 8)
-			return true;
-		index = (index == DMA0_IO_CHANNEL) ? DMA0_IO_MAIN : DMA1_IO_MAIN;
-		address -= 8;
+	case DMA0_IO_CHANNEL: port = 0x00; break;
+	case DMA0_IO_MAIN:    port = 0x08; break;
+	case DMA1_IO_CHANNEL: port = 0xc0; break;
+	case DMA1_IO_MAIN:    port = 0xd0; break;
+	default: return false;
 	}
-
-	if (index == DMA0_IO_MAIN || index == DMA1_IO_MAIN)
-		return address < 8;
+	// Keep an out-of-bank offset from wrapping into a valid port.
+	port = offset < 0x20 ? (u16)(port + offset) : 0xffff;
 	return true;
+}
+
+static bool dma_legacy_register(u16 port, int& ctrlr, int& reg)
+{
+	if (port <= 0x0f)
+	{
+		ctrlr = 0;
+		reg = port;
+		return true;
+	}
+	if (port >= 0xc0 && port <= 0xdf)
+	{
+		ctrlr = 1;
+		reg = (port - 0xc0) >> 1;
+		return true;
+	}
+	return false;
 }
 
 void CDMA::validate_device_channel(int channel)
@@ -258,14 +271,163 @@ u8 CDMA::read_ali_shadow(u8 selector) const
 	return (u8)((offset & 1) ? value >> 8 : value);
 }
 
+u8 CDMA::read_legacy_port(u16 port)
+{
+	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
+	int ctrlr, reg;
+	if (!dma_legacy_register(port, ctrlr, reg))
+		return 0xff;
+
+	auto& controller = state.controller[ctrlr];
+	u8 data = 0;
+	if (reg < 8)
+	{
+		const auto& channel = state.channel[ctrlr * 4 + reg / 2];
+		const u16 value = (reg & 1) ? channel.count : channel.current;
+		data = (u8)(value >> (controller.lobyte ? 0 : 8));
+		controller.lobyte = !controller.lobyte;
+	}
+	else if (reg == 0x08)
+	{
+		data = controller.status | (get_requests(ctrlr) << 4);
+		controller.status = 0;
+	}
+	else if (reg == 0x0f)
+		data = controller.mask & 0x0f;
+
+#if defined(DEBUG_DMA)
+	printf("dma: read port %04x: %02x\n", (unsigned)port, (unsigned)data);
+#endif
+	return data;
+}
+
+void CDMA::write_legacy_port(u16 port, u8 data)
+{
+	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
+	int ctrlr, reg;
+	if (!dma_legacy_register(port, ctrlr, reg))
+		return;
+
+	auto& controller = state.controller[ctrlr];
+	if (reg < 8)
+	{
+		const int num = ctrlr * 4 + reg / 2;
+		release_service(num);
+		auto& channel = state.channel[num];
+		u16& base = (reg & 1) ? channel.base_count : channel.base;
+		if (controller.lobyte)
+			base = (base & 0xff00) | data;
+		else
+			base = (base & 0x00ff) | (data << 8);
+		if (reg & 1)
+			channel.count = base;
+		else
+			channel.current = base;
+		controller.lobyte = !controller.lobyte;
+#if defined(DEBUG_DMA)
+		printf("dma channel %d %s: %04x\n", num, (reg & 1) ? "count" : "base", (unsigned)base);
+#endif
+		return;
+	}
+
+	const int local_channel = data & 0x03;
+	const int selected_channel = ctrlr * 4 + local_channel;
+	switch (reg)
+	{
+	case 0x08: // command
+		if (DMA_TRACE_CONTROLLER(ctrlr))
+			printf("dma: command register %d written with %x\n", ctrlr, (unsigned)data);
+		if (data & 0x04)
+		{
+			// Release under the old priority mode before changing command.
+			for (int channel = 0; channel < 4; channel++)
+				release_service(ctrlr * 4 + channel);
+		}
+		controller.command = data;
+		break;
+
+	case 0x09: // request
+		set_request(ctrlr, local_channel, (data & 0x04) >> 2);
+		break;
+
+	case 0x0a: // single mask
+		if (DMA_TRACE_CHANNEL(selected_channel))
+			printf("dma: mask single on %d : %d %s\n", ctrlr, local_channel, data & 0x4 ? "Masked" : "Unmasked");
+		if (data & 0x04)
+		{
+			controller.mask |= 1 << local_channel;
+			release_service(selected_channel);
+		}
+		else
+			controller.mask &= ~(1 << local_channel);
+		if (DMA_TRACE_CHANNEL(selected_channel))
+			printf("     Mask status: %x\n", (unsigned)controller.mask);
+		do_dma();
+		break;
+
+	case 0x0b: // mode register
+		if (DMA_TRACE_CHANNEL(selected_channel))
+		{
+			printf("dma: mode register %d for channel %d written with %x\n", ctrlr, selected_channel, (unsigned)data);
+			printf("    Mode: %s, Address %s, Autoinit %s, Command: %s\n",
+				(data & 0x80 ? (data & 0x40 ? "Cascade" : "Block") : (data & 0x40 ? "Single" : "Demand")),
+				(data & 0x20 ? "Decrement" : "Increment"),
+				(data & 0x10 ? "Enable" : "Disable"),
+				(data & 0x08 ? (data & 0x04 ? "Illegal" : "Read") : (data & 0x04 ? "Write" : "Verify")));
+		}
+
+		release_service(selected_channel);
+		state.channel[selected_channel].mode = data;
+		break;
+
+	case 0x0c: // clear flipflop(s)
+		if (DMA_TRACE_CONTROLLER(ctrlr))
+			printf("dma: flipflops cleared for dma %d\n", ctrlr);
+		controller.lobyte = true;
+		break;
+
+	case 0x0d: // master reset
+#if defined(DEBUG_DMA)
+		printf("DMA-I-RESET: DMA %d reset.", ctrlr);
+#endif
+		for (int channel = 0; channel < 4; channel++)
+			release_service(ctrlr * 4 + channel);
+		controller.lobyte = true;
+		controller.command = 0;
+		controller.status = 0;
+		controller.request = 0;
+		controller.next_priority = 0;
+		// External DRQ lines survive a master clear.
+		controller.mask = 0x0f;
+		break;
+
+	case 0x0e: // master enable
+		controller.mask = 0x00;
+		do_dma();
+		break;
+
+	case 0x0f: // master mask
+		controller.mask = data & 0x0f;
+		for (int channel = 0; channel < 4; channel++)
+		{
+			if (data & (1 << channel))
+				release_service(ctrlr * 4 + channel);
+		}
+		do_dma();
+		break;
+	}
+}
+
 u64 CDMA::ReadMem(int index, u64 address, int dsize)
 {
+	u16 port;
+	if (dsize == 8 && dma_mapped_legacy_port(index, address, port))
+		return read_legacy_port(port);
+
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
 	u64 ret;
 	u8  data = 0;
-	int ctrlr;
 	int num;
-	//printf("dma: Readmem %s, %" PRIx64 ", %x\n",DMA_INDEX(index),address, dsize);
 	switch (dsize)
 	{
 	case 32:
@@ -281,46 +443,8 @@ u64 CDMA::ReadMem(int index, u64 address, int dsize)
 		return ret;
 
 	case 8:
-		if (!dma_decode_controller_byte(index, address))
-			return 0xff;
-
 		switch (index)
 		{
-		case DMA0_IO_CHANNEL:
-		case DMA1_IO_CHANNEL:
-			ctrlr = (index == DMA1_IO_CHANNEL) ? 1 : 0;
-			num = ((address & 0x0e) >> 1) + (ctrlr * 4);
-			if (address & 1)
-			{
-				// word count registers
-				data = (state.channel[num].count >>
-					(state.controller[ctrlr].lobyte ? 0 : 8)) & 0xff;
-			}
-			else
-			{
-				// current address
-				data = (state.channel[num].current >>
-					(state.controller[ctrlr].lobyte ? 0 : 8)) & 0xff;
-			}
-			state.controller[ctrlr].lobyte =
-				!state.controller[ctrlr].lobyte;
-			break;
-
-		case DMA0_IO_MAIN:
-		case DMA1_IO_MAIN:
-			ctrlr = (index == DMA1_IO_MAIN) ? 1 : 0;
-			if (address == 0)
-			{
-				// Pending requests are visible even when masked or disabled.
-				data = state.controller[ctrlr].status | (get_requests(ctrlr) << 4);
-				state.controller[ctrlr].status = 0;
-			}
-			else if (address == 7)
-			{
-				data = state.controller[ctrlr].mask & 0x0f;
-			}
-			break;
-
 		case DMA_IO_LPAGE:
 		case DMA_IO_HPAGE:
 			num = dma_page_channel(address);
@@ -355,6 +479,13 @@ u64 CDMA::ReadMem(int index, u64 address, int dsize)
 
 void CDMA::WriteMem(int index, u64 address, int dsize, u64 data)
 {
+	u16 port;
+	if (dsize == 8 && dma_mapped_legacy_port(index, address, port))
+	{
+		write_legacy_port(port, (u8)data);
+		return;
+	}
+
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
 	int num = 0;
 	switch (dsize)
@@ -372,140 +503,9 @@ void CDMA::WriteMem(int index, u64 address, int dsize, u64 data)
 		return;
 
 	case 8:
-		if (!dma_decode_controller_byte(index, address))
-			return;
 		data &= 0xff;
-
-#if defined(DEBUG_DMA)
-		//printf("dma: write %s, %02x: %02x.   \n", DMA_INDEX(index), (u32)address, data);
-#endif
 		switch (index)
 		{
-		case DMA0_IO_CHANNEL:
-		case DMA1_IO_CHANNEL:
-		{
-			int ctrlr = (index == DMA1_IO_CHANNEL) ? 1 : 0;
-			num = ((address & 0x0e) >> 1) + (ctrlr * 4);
-			// Reprogramming a channel releases any held service.
-			release_service(num);
-			if (address & 1)
-			{
-				if (state.controller[ctrlr].lobyte)
-					state.channel[num].base_count =
-						(state.channel[num].base_count & 0xff00) | data;
-				else
-					state.channel[num].base_count =
-						(state.channel[num].base_count & 0x00ff) | (data << 8);
-				state.channel[num].count = state.channel[num].base_count;
-#if defined(DEBUG_DMA)
-				printf("dma channel %d count: %04x\n", num, state.channel[num].count);
-#endif	
-			}
-			else {
-				if (state.controller[ctrlr].lobyte)
-					state.channel[num].base = (state.channel[num].base & 0xff00) | data;
-				else
-					state.channel[num].base = (state.channel[num].base & 0x00ff) | (data << 8);
-				state.channel[num].current = state.channel[num].base;
-#if defined(DEBUG_DMA)
-				printf("dma channel %d base: %04x\n", num, state.channel[num].base);
-#endif	
-			}
-			state.controller[ctrlr].lobyte =
-				!state.controller[ctrlr].lobyte;
-			break;
-		}
-
-		case DMA1_IO_MAIN:
-		case DMA0_IO_MAIN:
-		{
-			int ctrlr = (index == DMA1_IO_MAIN) ? 1 : 0;
-			num = ctrlr;
-			switch (address) {
-			case 0: // command
-				if (DMA_TRACE_CONTROLLER(num))
-					printf("dma: command register %d written with %" PRIx64 "\n", num, data);
-				if (data & 0x04)
-				{
-					// Release under the old priority mode before changing command.
-					for (int channel = 0; channel < 4; channel++)
-						release_service(num * 4 + channel);
-				}
-				state.controller[num].command = data;
-				break;
-
-			case 1: // request
-				set_request(num, data & 0x03, (data & 0x04) >> 2);
-				break;
-
-			case 2: // single mask
-				if (DMA_TRACE_CHANNEL((num * 4) + (data & 0x03)))
-					printf("dma: mask single on %d : %" PRId64 " %s\n", num, data & 0x03, data & 0x4 ? "Masked" : "Unmasked");
-				state.controller[num].mask = (state.controller[num].mask & ~(1 << (data & 0x03))) | (((data & 0x04) >> 2) << (data & 0x03));
-				// Explicit mask-set writes cancel accepted service between calls.
-				if (data & 0x04)
-					release_service(num * 4 + (data & 0x03));
-				if (DMA_TRACE_CHANNEL((num * 4) + (data & 0x03)))
-					printf("     Mask status: %x\n", state.controller[num].mask);
-				do_dma();
-				break;
-
-			case 3: // mode register
-				if (DMA_TRACE_CHANNEL((num * 4) + (data & 0x03)))
-				{
-					printf("dma: mode register %d for channel %" PRId64 " written with %" PRIx64 "\n", num, (num * 4) + (data & 0x03), data);
-					printf("    Mode: %s, Address %s, Autoinit %s, Command: %s\n",
-						(data & 0x80 ? (data & 0x40 ? "Cascade" : "Block") : (data & 0x40 ? "Single" : "Demand")),
-						(data & 0x20 ? "Decrement" : "Increment"),
-						(data & 0x10 ? "Enable" : "Disable"),
-						(data & 0x08 ? (data & 0x04 ? "Illegal" : "Read") : (data & 0x04 ? "Write" : "Verify")));
-				}
-
-
-				release_service(num * 4 + (data & 0x03));
-				state.channel[(num * 4) + (data & 0x03)].mode = data;
-				break;
-
-			case 4: // clear flipflop(s)
-				if (DMA_TRACE_CONTROLLER(num))
-					printf("dma: flipflops cleared for dma %d\n", num);
-				state.controller[num].lobyte = true;
-				break;
-
-			case 5: // master reset
-#if defined(DEBUG_DMA)
-				printf("DMA-I-RESET: DMA %d reset.", index - DMA_IO_BASE);
-#endif
-				for (int channel = 0; channel < 4; channel++)
-					release_service(num * 4 + channel);
-				state.controller[num].lobyte = true;
-				state.controller[num].command = 0;
-				state.controller[num].status = 0;
-				state.controller[num].request = 0;
-				state.controller[num].next_priority = 0;
-				// Reset the controller, not the request lines driven by devices.
-				state.controller[num].mask = 0x0f;
-				break;
-
-			case 6: // master enable
-				state.controller[num].mask = 0x00;
-				do_dma();
-				break;
-
-
-			case 7: // master mask
-				state.controller[num].mask = data & 0x0f;
-				for (int channel = 0; channel < 4; channel++)
-				{
-					if (data & (1 << channel))
-						release_service(num * 4 + channel);
-				}
-				do_dma();
-				break;
-			}
-			break;
-		}
-
 		case DMA_IO_LPAGE:
 		case DMA_IO_HPAGE:
 			num = dma_page_channel(address);

@@ -75,6 +75,9 @@ public:
   virtual int   DoClock();
   virtual void  WriteMem(int index, u64 address, int dsize, u64 data);
   virtual u64   ReadMem(int index, u64 address, int dsize);
+  // Ports outside 0x00-0x0f and 0xc0-0xdf read 0xff and ignore writes.
+  u8            read_legacy_port(u16 port);
+  void          write_legacy_port(u16 port, u8 data);
   u8            read_ali_shadow(u8 selector) const;
   virtual int   SaveState(FILE* f);
   virtual int   RestoreState(FILE* f);

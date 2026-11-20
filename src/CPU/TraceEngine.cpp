@@ -961,53 +961,47 @@ int CTraceEngine::parse(char command[100][100])
 
 		if (!strncasecmp(command[0], "DUMPREGS", strlen(command[0])))
 		{
+			auto* cpu = theSystem->get_cpu(0);
 			printf("\n==================== SYSTEM STATE =======================\n");
-			printf("PC: %" PRIx64 "\n", theSystem->get_cpu(0)->get_pc());
+			printf("PC: %" PRIx64 "\n", cpu->get_pc());
 			printf("Physical PC: %" PRIx64 "\n",
-				theSystem->get_cpu(0)->get_current_pc_physical());
+				cpu->get_current_pc_physical());
 			printf("Instruction count: %" PRId64 "\n",
-				theSystem->get_cpu(0)->get_instruction_count());
+				cpu->get_instruction_count());
 			printf("\n==================== REGISTER VALUES ====================\n");
 			for (i = 0; i < 32; i++)
 			{
 				if (i < 10)
 					printf("R");
-				printf("%d:%016" PRIx64, i, theSystem->get_cpu(0)->get_r(i, false));
+				printf("%d:%016" PRIx64, i, cpu->get_r(i, false));
 				if (i % 4 == 3)
 					printf("\n");
 				else
 					printf(" ");
 			}
 
-			printf("\n");
-			for (i = 4; i < 8; i++)
+			const auto& bank = cpu->get_profile().register_bank;
+			int shadows = 0;
+			for (i = 0; i < 32; i++)
 			{
+				const int slot = bank.slot(i, true);
+				if (slot == i)
+					continue;
+				putchar(shadows % 4 == 0 ? '\n' : ' ');
 				if (i < 10)
 					printf("S");
-				printf("%d:%016" PRIx64, i, theSystem->get_cpu(0)->get_r(i + 32, false));
-				if (i % 4 == 3)
-					printf("\n");
-				else
-					printf(" ");
+				printf("%d:%016" PRIx64, i, cpu->get_r(slot, false));
+				shadows++;
 			}
-
-			for (i = 20; i < 24; i++)
-			{
-				if (i < 10)
-					printf("S");
-				printf("%d:%016" PRIx64, i, theSystem->get_cpu(0)->get_r(i + 32, false));
-				if (i % 4 == 3)
-					printf("\n");
-				else
-					printf(" ");
-			}
+			if (shadows)
+				printf("\n");
 
 			printf("\n");
 			for (i = 0; i < 32; i++)
 			{
 				if (i < 10)
 					printf("F");
-				printf("%d:%016" PRIx64, i, theSystem->get_cpu(0)->get_f(i));
+				printf("%d:%016" PRIx64, i, cpu->get_f(i));
 				if (i % 4 == 3)
 					printf("\n");
 				else

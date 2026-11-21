@@ -72,7 +72,8 @@ public:
 class CDMA : public CSystemComponent
 {
 public:
-  CDMA(CConfigurator* cfg, CSystem* c, CDMAHost& host);
+  enum class Model { AliM1543C, Intel82357 };
+  CDMA(CConfigurator* cfg, CSystem* c, CDMAHost& host, Model model = Model::AliM1543C);
   virtual       ~CDMA();
 
   virtual void  ResetPCI() override;
@@ -174,24 +175,26 @@ public:
 
 private:
   CDMAHost& dma_host;
+  const Model model;
 
   // Derived transfer geometry; not guest registers or saved state.
   struct SDMA_transfer_properties
   {
     size_t data_width;     // Bytes moved by one device transfer.
     size_t count_unit;     // Bytes represented by one count-register unit.
-    u32 address_step;     // Current-register increments per device transfer.
+    u32 address_step;     // Byte address increment per device transfer.
     unsigned address_shift; // Shift from programmed address to byte address.
-    u32 address_mask;     // Current-register wrap, without carrying into page.
+    u32 address_mask;     // Byte address bits that can carry or borrow.
   };
 
   static void   validate_device_channel(int channel);
+  void          select_compatible_address(int channel);
   SDMA_transfer_properties transfer_properties(int channel) const;
   static u32    dma_address(u16 pagebase, u32 current,
                   const SDMA_transfer_properties& properties);
-  static u32    step_address(u32 current, size_t units, bool decrement,
+  static u32    step_address(u32 address, size_t units, bool decrement,
                   const SDMA_transfer_properties& properties);
-  static size_t increment_chunk_size(u32 current, size_t length,
+  static size_t increment_chunk_size(u32 address, size_t length,
                   const SDMA_transfer_properties& properties);
   u8            get_requests(int ctrlr);
   bool          cascade_enabled() const;
@@ -216,9 +219,11 @@ private:
       u16   current;
       u16   base;
       u16   pagebase;
+      u16   current_page;
       u16   count;
       u16   base_count;
       u8    mode;
+      bool  extended_address; // 82357 high page was written last.
     } channel[8];
 
     /// DMA controller state

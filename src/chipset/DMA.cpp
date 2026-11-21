@@ -70,8 +70,8 @@ static constexpr u16 dma_high_page_base = 0x481;
 /**
  * Constructor.
  **/
-CDMA::CDMA(CConfigurator* cfg, CSystem* c, CDMAHost& host) :
-	CSystemComponent(cfg, c), dma_host(host)
+CDMA::CDMA(CConfigurator* cfg, CSystem* c, CDMAHost& host, Model model) :
+	CSystemComponent(cfg, c), dma_host(host), model(model)
 {
 	ResetPCI();
 	printf("dma: $Id$\n");
@@ -184,14 +184,25 @@ void CDMA::validate_device_channel(int channel)
 		FAILURE(InvalidArgument, "dma: invalid device channel (channel 4 is cascade)");
 }
 
+void CDMA::select_compatible_address(int channel)
+{
+	if (model != Model::Intel82357)
+		return;
+	auto& ch = state.channel[channel];
+	ch.extended_address = false;
+	ch.pagebase &= 0xff;
+	ch.current_page &= 0xff;
+}
+
 CDMA::SDMA_transfer_properties CDMA::transfer_properties(int channel) const
 {
 	validate_device_channel(channel);
+	const bool extended = model == Model::Intel82357 && state.channel[channel].extended_address;
 	// ALi's ISA channels count bytes or shifted words. Timing selection does
 	// not change data width, count units or addressing on this controller.
 	if (channel < 4)
-		return { 1, 1, 1, 0, 0xffff };
-	return { 2, 2, 1, 1, 0xffff };
+		return { 1, 1, 1, 0, extended ? 0xffffffffU : 0xffffU };
+	return { 2, 2, 2, 1, extended ? 0xffffffffU : 0x1ffffU };
 }
 
 u32 CDMA::dma_address(u16 pagebase, u32 current,
@@ -203,21 +214,19 @@ u32 CDMA::dma_address(u16 pagebase, u32 current,
 	return ((u32)pagebase << 16) | (current << properties.address_shift);
 }
 
-u32 CDMA::step_address(u32 current, size_t units, bool decrement,
+u32 CDMA::step_address(u32 address, size_t units, bool decrement,
 	const SDMA_transfer_properties& properties)
 {
 	u32 delta = (u32)(units * properties.address_step);
-	return (decrement ? current - delta : current + delta) & properties.address_mask;
+	u32 next = decrement ? address - delta : address + delta;
+	return (address & ~properties.address_mask) | (next & properties.address_mask);
 }
 
-size_t CDMA::increment_chunk_size(u32 current, size_t length,
+size_t CDMA::increment_chunk_size(u32 address, size_t length,
 	const SDMA_transfer_properties& properties)
 {
-	// Current ISA geometry is contiguous and wraps only the current register.
-	size_t units_to_wrap = ((size_t)properties.address_mask + 1 - current) /
-		properties.address_step;
-	size_t bytes_to_wrap = units_to_wrap * properties.data_width;
-	return length < bytes_to_wrap ? length : bytes_to_wrap;
+	const u64 bytes_to_wrap = (u64)properties.address_mask + 1 - (address & properties.address_mask);
+	return length < bytes_to_wrap ? length : (size_t)bytes_to_wrap;
 }
 
 #define DMA_INDEX(n) dma_index_names[n - DMA_IO_BASE].c_str()
@@ -269,7 +278,7 @@ u8 CDMA::read_legacy_port(u16 port)
 	if (!dma_legacy_register(port, ctrlr, reg))
 	{
 		const int num = dma_page_channel(port, dma_low_page_base);
-		const u8 data = num < 0 ? 0xff : (u8)state.channel[num].pagebase;
+		const u8 data = num < 0 ? 0xff : (u8)state.channel[num].current_page;
 #if defined(DEBUG_DMA)
 		printf("dma: read port %04x: %02x\n", (unsigned)port, (unsigned)data);
 #endif
@@ -308,8 +317,10 @@ void CDMA::write_legacy_port(u16 port, u8 data)
 		const int num = dma_page_channel(port, dma_low_page_base);
 		if (num < 0) return;
 		release_service(num);
+		select_compatible_address(num);
 		u16& page = state.channel[num].pagebase;
 		page = (page & 0xff00) | data;
+		state.channel[num].current_page = page;
 #if defined(DEBUG_DMA)
 		printf("dma channel %d pagebase: %04x\n", num, (unsigned)page);
 #endif
@@ -323,14 +334,16 @@ void CDMA::write_legacy_port(u16 port, u8 data)
 		release_service(num);
 		auto& channel = state.channel[num];
 		u16& base = (reg & 1) ? channel.base_count : channel.base;
-		if (controller.lobyte)
-			base = (base & 0xff00) | data;
-		else
-			base = (base & 0x00ff) | (data << 8);
+		const u16 keep = controller.lobyte ? 0xff00 : 0x00ff;
+		const u16 bits = controller.lobyte ? data : (u16)(data << 8);
+		base = (base & keep) | bits;
 		if (reg & 1)
 			channel.count = base;
 		else
-			channel.current = base;
+		{
+			select_compatible_address(num);
+			channel.current = model == Model::Intel82357 ? (channel.current & keep) | bits : base;
+		}
 		controller.lobyte = !controller.lobyte;
 #if defined(DEBUG_DMA)
 		printf("dma channel %d %s: %04x\n", num, (reg & 1) ? "count" : "base", (unsigned)base);
@@ -399,7 +412,10 @@ void CDMA::write_legacy_port(u16 port, u8 data)
 		printf("DMA-I-RESET: DMA %d reset.", ctrlr);
 #endif
 		for (int channel = 0; channel < 4; channel++)
+		{
 			release_service(ctrlr * 4 + channel);
+			select_compatible_address(ctrlr * 4 + channel);
+		}
 		controller.lobyte = true;
 		controller.command = 0;
 		controller.status = 0;
@@ -430,7 +446,7 @@ u8 CDMA::read_high_page_port(u16 port) const
 {
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
 	const int num = dma_page_channel(port, dma_high_page_base);
-	const u8 data = num < 0 ? 0xff : (u8)(state.channel[num].pagebase >> 8);
+	const u8 data = num < 0 ? 0xff : (u8)(state.channel[num].current_page >> 8);
 #if defined(DEBUG_DMA)
 	printf("dma: read port %04x: %02x\n", (unsigned)port, (unsigned)data);
 #endif
@@ -444,10 +460,12 @@ void CDMA::write_high_page_port(u16 port, u8 data)
 	if (num < 0)
 		return;
 	release_service(num);
-	u16& page = state.channel[num].pagebase;
-	page = (page & 0x00ff) | (data << 8);
+	auto& channel = state.channel[num];
+	channel.pagebase = (channel.pagebase & 0x00ff) | (data << 8);
+	channel.current_page = (channel.current_page & 0x00ff) | (data << 8);
+	channel.extended_address = model == Model::Intel82357;
 #if defined(DEBUG_DMA)
-	printf("dma channel %d pagebase: %04x\n", num, (unsigned)page);
+	printf("dma channel %d pagebase: %04x\n", num, (unsigned)channel.pagebase);
 #endif
 }
 
@@ -920,9 +938,17 @@ bool CDMA::advance_transfer(int channel, size_t length,
 	// Check before narrowing: a full transfer can contain 65536 units.
 	bool terminal_count = count_units == (size_t)state.channel[channel].count + 1;
 
-	state.channel[channel].current = (u16)step_address(state.channel[channel].current,
-		units, (state.channel[channel].mode & 0x20) != 0, properties);
-	state.channel[channel].count -= (u16)count_units;
+	auto& ch = state.channel[channel];
+	u32 address = dma_address(ch.current_page, ch.current, properties);
+	address = step_address(address, units, (ch.mode & 0x20) != 0, properties);
+	ch.current = (u16)(address >> properties.address_shift);
+	if (model == Model::Intel82357 && ch.extended_address)
+	{
+		// Shifted word addressing leaves programmed low-page bit 0 undriven.
+		const u16 page_mask = (u16)(0xffffU << properties.address_shift);
+		ch.current_page = (ch.current_page & ~page_mask) | ((address >> 16) & page_mask);
+	}
+	ch.count -= (u16)count_units;
 
 	if (terminal_count || eop)
 		complete_transfer(channel);
@@ -943,6 +969,7 @@ void CDMA::complete_transfer(int channel)
 	if (state.channel[channel].mode & 0x10)
 	{
 		state.channel[channel].current = state.channel[channel].base;
+		state.channel[channel].current_page = state.channel[channel].pagebase;
 		state.channel[channel].count = state.channel[channel].base_count;
 	}
 	else
@@ -1009,7 +1036,7 @@ CDMA::SDMA_result CDMA::send_data(int channel, void* data, size_t length, bool e
 				return result;
 			}
 
-			u32 addr = dma_address(state.channel[channel].pagebase,
+			u32 addr = dma_address(state.channel[channel].current_page,
 				state.channel[channel].current, properties);
 			if (DMA_TRACE_CHANNEL(channel))
 			{
@@ -1026,24 +1053,21 @@ CDMA::SDMA_result CDMA::send_data(int channel, void* data, size_t length, bool e
 			// Device buffers are byte streams, even for word channels.
 			if (state.channel[channel].mode & 0x20)
 			{
-				u32 current = state.channel[channel].current;
 				// Decrement by units, preserving the byte order within each word.
 				for (size_t offset = 0; offset < count; offset += properties.data_width)
 				{
-					addr = dma_address(state.channel[channel].pagebase, current, properties);
 					dma_host.dma_write_memory(addr, (u8*)data + offset, properties.data_width);
-					current = step_address(current, 1, true, properties);
+					addr = step_address(addr, 1, true, properties);
 				}
 			}
 			else
 			{
-				size_t first_count = increment_chunk_size(state.channel[channel].current,
-					count, properties);
+				size_t first_count = increment_chunk_size(addr, count, properties);
 				dma_host.dma_write_memory(addr, data, first_count);
 				// A programmed transfer contains at most 65536 units, so only one wrap is possible.
 				if (first_count < count)
 				{
-					u32 wrap_addr = dma_address(state.channel[channel].pagebase, 0, properties);
+					u32 wrap_addr = addr & ~properties.address_mask;
 					dma_host.dma_write_memory(wrap_addr, (u8*)data + first_count,
 						count - first_count);
 				}
@@ -1121,28 +1145,25 @@ CDMA::SDMA_result CDMA::recv_data(int channel, void* data, size_t length, bool e
 				return result;
 			}
 
-			u32 addr = dma_address(state.channel[channel].pagebase,
+			u32 addr = dma_address(state.channel[channel].current_page,
 				state.channel[channel].current, properties);
 			if (DMA_TRACE_CHANNEL(channel))
 				printf("DMA recv_data:  %zx @ controller address %08" PRIx32 "\n", count, addr);
 			if (state.channel[channel].mode & 0x20)
 			{
-				u32 current = state.channel[channel].current;
 				for (size_t offset = 0; offset < count; offset += properties.data_width)
 				{
-					addr = dma_address(state.channel[channel].pagebase, current, properties);
 					dma_host.dma_read_memory(addr, (u8*)data + offset, properties.data_width);
-					current = step_address(current, 1, true, properties);
+					addr = step_address(addr, 1, true, properties);
 				}
 			}
 			else
 			{
-				size_t first_count = increment_chunk_size(state.channel[channel].current,
-					count, properties);
+				size_t first_count = increment_chunk_size(addr, count, properties);
 				dma_host.dma_read_memory(addr, data, first_count);
 				if (first_count < count)
 				{
-					u32 wrap_addr = dma_address(state.channel[channel].pagebase, 0, properties);
+					u32 wrap_addr = addr & ~properties.address_mask;
 					dma_host.dma_read_memory(wrap_addr, (u8*)data + first_count,
 						count - first_count);
 				}

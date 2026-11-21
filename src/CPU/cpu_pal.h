@@ -88,15 +88,19 @@
 
 #define DO_HW_MFPR do {                                                       \
   const auto describe = m_profile.ipr_read.describe;                          \
-  if (!describe || describe(ins, (state.current_pc & 1) != 0).kind             \
-      != AlphaIPRReadKind::Noop)                                             \
-    state.r[REG_1] = read_ipr(ins);                                           \
+  const auto kind = describe ? describe(ins, (state.current_pc & 1) != 0).kind \
+                             : AlphaIPRReadKind::Unsupported;                 \
+  if (kind != AlphaIPRReadKind::Noop)                                         \
+    state.r[REG_1] = read_ipr(ins, kind);                                     \
 } while (0)
 
 #define DO_HW_MTPR do {                                                       \
   const auto describe = m_profile.ipr_write.describe;                         \
-  if (!describe || describe(ins, (state.current_pc & 1) != 0)                  \
-      != AlphaIPRWriteKind::Noop)                                            \
+  const auto kind = describe ? describe(ins, (state.current_pc & 1) != 0)     \
+                             : AlphaIPRWriteKind::Interpreter;                \
+  if (kind == AlphaIPRWriteKind::ExceptionAddress)                            \
+    state.exc_addr = state.r[REG_2] & kAlphaIPRExceptionAddressMask;          \
+  else if (kind != AlphaIPRWriteKind::Noop)                                   \
     write_ipr(ins, state.r[REG_2], AlphaIPRWriteContext::Interpreter);          \
 } while (0)
 

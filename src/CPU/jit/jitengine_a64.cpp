@@ -1258,6 +1258,7 @@ static constexpr A64OpClass classify_a64_op(uint32_t ins, bool pal_block,
           || !alpha_pal_instruction_compilable(pal.hardware_instruction_access(ins)))
         break;
       switch (ipr_write.describe(ins, pal_block)) {
+        case AlphaIPRWriteKind::ExceptionAddress:
         case AlphaIPRWriteKind::Helper:
         case AlphaIPRWriteKind::Noop:
           return {A64OpKind::kHwMtpr, A64TerminatorKind::kNone, 0, 0};
@@ -2640,6 +2641,23 @@ static asmjit::Error emit_a64_parallel_arg_moves(asmjit::a64::Assembler& a,
   return Error::kOk;
 }
 
+static asmjit::Error emit_a64_read_guest_gpr(asmjit::a64::Assembler& a,
+    const asmjit::a64::Gp& dst, const A64GprRoute& route)
+{
+  using namespace asmjit;
+  switch (route.kind) {
+    case A64GprRouteKind::kMemory:
+      return a.ldr(dst, a64::ptr(CJitEngine::RegAlloc::kRegs,
+          static_cast<int32_t>(route.slot * sizeof(uint64_t))));
+    case A64GprRouteKind::kPinned:
+      return a.mov(dst, a64::x(static_cast<uint32_t>(route.host)));
+    case A64GprRouteKind::kZero:
+      return a.mov(dst, a64::xzr);
+    default:
+      return Error::kInvalidArgument;
+  }
+}
+
 static asmjit::Error emit_a64_call_arg(asmjit::a64::Assembler& a,
     const CJitEngine::RegAlloc& regs, bool pal_shadow, uint32_t index,
     const A64CallArg& arg)
@@ -2653,17 +2671,7 @@ static asmjit::Error emit_a64_call_arg(asmjit::a64::Assembler& a,
     case A64CallArgKind::kGuestOrZero: {
       const A64GprRoute route = a64_guest_gpr_read_route(
           regs, static_cast<uint32_t>(arg.value), pal_shadow);
-      switch (route.kind) {
-        case A64GprRouteKind::kMemory:
-          return a.ldr(dst, a64::ptr(CJitEngine::RegAlloc::kRegs,
-              static_cast<int32_t>(route.slot * sizeof(uint64_t))));
-        case A64GprRouteKind::kPinned:
-          return a.mov(dst, a64::x(static_cast<uint32_t>(route.host)));
-        case A64GprRouteKind::kZero:
-          return a.mov(dst, a64::xzr);
-        default:
-          return Error::kInvalidArgument;
-      }
+      return emit_a64_read_guest_gpr(a, dst, route);
     }
     case A64CallArgKind::kHost:
       // Sources in x0-x7 were resolved as a parallel copy above.
@@ -4571,13 +4579,24 @@ static A64OpEmitReceipt emit_a64_call_pal(A64EmitContext& context,
   return a64_completed_op_receipt(op, err);
 }
 
-// HW_MTPR: jit_hw_mtpr(cpu, instruction, Rb)
+// HW_MTPR
 static A64OpEmitReceipt emit_a64_hw_mtpr(A64EmitContext& context,
                                          const A64DecodedOp& op)
 {
   using namespace asmjit;
-  if (context.profile.ipr_write.describe(op.ins, context.pal_block) == AlphaIPRWriteKind::Noop)
+  const auto kind = context.profile.ipr_write.describe(op.ins, context.pal_block);
+  if (kind == AlphaIPRWriteKind::Noop)
     return a64_completed_op_receipt(op);   // no-op IPRs
+
+  if (kind == AlphaIPRWriteKind::ExceptionAddress) {
+    auto& a = context.assembler;
+    const auto value = CJitEngine::RegAlloc::kScratch0;
+    const auto rb = a64_guest_gpr_read_route(context.regs, op.rb, context.pal_shadow);
+    Error err = emit_a64_read_guest_gpr(a, value, rb);
+    if (err == Error::kOk) err = a.and_(value, value, imm(kAlphaIPRExceptionAddressMask));
+    if (err == Error::kOk) err = emit_a64_store_cpu_u64(a, value, context.offsets.exc_addr);
+    return a64_completed_op_receipt(op, err);
+  }
 
   const Error err = emit_a64_helper_call(context.assembler, context.offsets,
       context.helpers, context.regs, context.pal_shadow,

@@ -66,8 +66,11 @@ enum class AlphaIPRWriteKind
   Interpreter,
   Helper,
   HelperTerminator,
+  ExceptionAddress, // Write PC[63:2] and PAL[0].
   Noop // No write callback; privilege checks still apply.
 };
+
+inline constexpr std::uint64_t kAlphaIPRExceptionAddressMask = ~std::uint64_t(2);
 
 // Compiled execution may retain caches that the interpreter normally flushes.
 enum class AlphaIPRWriteContext

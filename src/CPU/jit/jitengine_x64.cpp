@@ -111,6 +111,7 @@ enum SafeOp {
   OP_HW_LDL, OP_HW_LDQ,          // HW_LD (0x1b): normalized physical longword/quadword loads
   OP_HW_LD_VIRT,                 // HW_LD: normalized virtual loads with family-selected access flags
   OP_HW_MTPR,                    // HW_MTPR (0x1d): family-approved helper writes, PALmode only
+  OP_HW_MTPR_EXC_ADDR,
   OP_HW_MTPR_TERM,               // HW_MTPR: a family write changes compiled assumptions -> redispatch
   OP_HW_STL, OP_HW_STQ,          // HW_ST (0x1f): normalized physical longword/quadword stores
   OP_JMP,                        // JMP/JSR/RET (0x1a): Ra = PC+4; PC = Rb & ~3 (computed target)
@@ -340,6 +341,7 @@ SafeOp classify(uint32_t ins, bool pal_block, const AlphaIPRReadPolicy& ipr_read
           || !alpha_pal_instruction_compilable(pal.hardware_instruction_access(ins)))
         return OP_NONE;
       switch (ipr_write.describe(ins, pal_block)) {
+        case AlphaIPRWriteKind::ExceptionAddress: return OP_HW_MTPR_EXC_ADDR;
         case AlphaIPRWriteKind::Helper: return OP_HW_MTPR;
         case AlphaIPRWriteKind::HelperTerminator: return OP_HW_MTPR_TERM;
         case AlphaIPRWriteKind::Noop: return OP_NOP;
@@ -1650,6 +1652,16 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             a.bind(ok);
             a.mov(x86::rax, x86::qword_ptr(x86::rsp, 32));           // *out already sign-extended by the helper
             mov_to_reg(ra, x86::rax);
+            continue;
+        }
+
+        if (op == OP_HW_MTPR_EXC_ADDR) {
+            if (rb == 31) a.xor_(x86::eax, x86::eax);
+            else {
+                mov_from_reg(x86::rax, rb);
+                a.and_(x86::rax, imm(kAlphaIPRExceptionAddressMask));
+            }
+            a.mov(x86::qword_ptr(x86::rbp, m_off.exc_addr), x86::rax);
             continue;
         }
 

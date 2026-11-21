@@ -345,7 +345,7 @@ public:
   virtual void  stop_threads();
   void ResetForSystemReset();
 private:
-  u64 read_ipr(u32 instruction);
+  u64 read_ipr(u32 instruction, AlphaIPRReadKind kind);
   void write_ipr(u32 instruction, u64 value, AlphaIPRWriteContext context);
   void set_current_mode(u32 mode, AlphaIPRWriteContext context);
   void set_cycle_counter(u32 counter, bool enabled);

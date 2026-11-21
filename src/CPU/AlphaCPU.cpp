@@ -900,8 +900,10 @@ CAlphaCPU::TickHold CAlphaCPU::tick_hold(u64 period_ns)
 	}
 }
 
-u64 CAlphaCPU::read_ipr(u32 instruction)
+u64 CAlphaCPU::read_ipr(u32 instruction, AlphaIPRReadKind kind)
 {
+	if (kind == AlphaIPRReadKind::ExceptionAddress)
+		return state.exc_addr;
 	return m_profile.ipr_read.read(*this, instruction);
 }
 
@@ -3037,12 +3039,13 @@ void CAlphaCPU::jit_opcdec(CAlphaCPU* cpu, u64 cpc)
 u64 CAlphaCPU::jit_hw_mfpr(CAlphaCPU* cpu, u32 ins, bool pal_mode)
 {
 	// Replay reads of asynchronous state from the interpreter reference pass.
-	if (cpu->m_jit_vreplay && cpu->m_profile.ipr_read.describe(ins, pal_mode).replay)
+	const auto descriptor = cpu->m_profile.ipr_read.describe(ins, pal_mode);
+	if (cpu->m_jit_vreplay && descriptor.replay)
 	{
 		u32 i;
 		return cpu->jit_verify_load_slot(i) ? cpu->m_jit_vlog[i] : 0;
 	}
-	return cpu->read_ipr(ins);
+	return cpu->read_ipr(ins, descriptor.kind);
 }
 
 // The family policy owns the write; its descriptor controls compiled eligibility.

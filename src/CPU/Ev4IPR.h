@@ -80,6 +80,8 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
     return AlphaIPRWriteKind::Noop;
   if (selector.banks == 0x80) // PAL_TEMP only.
     return AlphaIPRWriteKind::Helper;
+  if (selector.banks == 0x20 && selector.index == 4) // EXC_ADDR.
+    return AlphaIPRWriteKind::ExceptionAddress;
   if (selector.banks == 0x20 && selector.index == 9) // PS.
     return AlphaIPRWriteKind::Helper;
   if (selector.banks == 0x20 && selector.index == 10) // EXC_SUM.

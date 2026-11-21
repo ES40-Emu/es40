@@ -3179,7 +3179,7 @@ int run_config_editor(int argc, char **argv, EditorUI& ui)
 
     if (argc >= 2 && argv[1][0] != '\0')
     {
-        if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "-?"))
+        if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "-?") || !strcmp(argv[1], "--help"))
         {
             printf("Usage: %s [input-filename] [output-filename]\n"
                    "Without input-filename, es40.cfg in the current directory is read if present.\n"

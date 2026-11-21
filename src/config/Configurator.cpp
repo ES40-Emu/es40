@@ -1166,7 +1166,8 @@ void CConfigurator::initialize()
 		myDevice = bridge;
 		new CPort80(this, system);
 		new CKeyboard(this, system);
-		new CDMA(this, system, *bridge);
+		auto* dma = new CDMA(this, system, *bridge);
+		bridge->bind_dma(*dma);
 		system->register_isa_bus(0, *bridge);
 		break;
 	}

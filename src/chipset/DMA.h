@@ -52,14 +52,14 @@
 
 #include "emu/SystemComponent.h"
 
-class CAliM1543C;
-
-// Called under the device-bus lock with controller-generated addresses and byte counts.
 class CDMAHost
 {
 public:
   virtual ~CDMAHost() = default;
+  // A bridge that maps DMA ports supplies their decode policy.
+  virtual const CSystemComponent* isa_decode_owner() const noexcept { return nullptr; }
   virtual bool dma_transfer_enabled() = 0;
+  // Called under the device-bus lock with controller-generated addresses and byte counts.
   virtual void dma_read_memory(u32 address, void* dest, size_t bytes) = 0;
   virtual void dma_write_memory(u32 address, const void* source, size_t bytes) = 0;
 };
@@ -73,8 +73,6 @@ class CDMA : public CSystemComponent
 {
 public:
   CDMA(CConfigurator* cfg, CSystem* c, CDMAHost& host);
-  // Also installs the ES40's ALi DMA port mappings.
-  CDMA(CConfigurator* cfg, CSystem* c, CAliM1543C& bridge);
   virtual       ~CDMA();
 
   virtual void  ResetPCI() override;
@@ -173,7 +171,6 @@ public:
 
 private:
   CDMAHost& dma_host;
-  CAliM1543C* ali_bridge = nullptr;
 
   // Derived transfer geometry; not guest registers or saved state.
   struct SDMA_transfer_properties

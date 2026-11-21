@@ -186,7 +186,8 @@ public:
   bool programmable_io_is_subtractive() const noexcept;
   bool superio_claims_port(u32 port, bool write) const noexcept;
   void bind_pmu(CAliM1543C_pmu* pmu) { docking_pmu = pmu; }
-  void bind_dma(CDMA& dma) { isa_dma = &dma; }
+  // Also installs the ES40's ALi DMA port mappings.
+  void bind_dma(CDMA& dma);
   CDMA* dma_controller() noexcept override { return isa_dma; }
   bool dma_transfer_enabled() override;
   void dma_read_memory(u32 address, void* dest, size_t bytes) override;

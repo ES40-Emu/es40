@@ -63,7 +63,6 @@
 #include "StdAfx.h"
 #include "system/System.h"
 #include "DMA.h"
-#include "AliM1543C.h"
 
 static constexpr u16 dma_low_page_base = 0x81;
 
@@ -75,22 +74,6 @@ CDMA::CDMA(CConfigurator* cfg, CSystem* c, CDMAHost& host) :
 {
 	ResetPCI();
 	printf("dma: $Id$\n");
-}
-
-CDMA::CDMA(CConfigurator* cfg, CSystem* c, CAliM1543C& bridge) :
-	CDMA(cfg, c, static_cast<CDMAHost&>(bridge))
-{
-	ali_bridge = &bridge;
-	bridge.register_isa_io(*this, DMA0_IO_CHANNEL, 0x00, 8);
-	bridge.register_isa_io(*this, DMA0_IO_MAIN, 0x08, 8);
-	bridge.register_isa_io(*this, DMA_IO_LPAGE, dma_low_page_base, 11);
-	bridge.register_isa_io(*this, DMA1_IO_CHANNEL, 0xc0, 16);
-	bridge.register_isa_io(*this, DMA1_IO_MAIN, 0xd0, 16);
-	bridge.register_isa_io(*this, DMA_IO_HPAGE, 0x481, 11);
-	bridge.register_isa_io(*this, DMA0_IO_EXT, 0x040b, 1);
-	bridge.register_isa_io(*this, DMA1_IO_EXT, 0x04d6, 1);
-
-	bridge.bind_dma(*this);
 }
 
 /**
@@ -116,18 +99,17 @@ void CDMA::ResetPCI()
 	}
 }
 
-bool CDMA::uses_subtractive_decode(int index, u64, int, bool) const noexcept
+bool CDMA::uses_subtractive_decode(int index, u64 address, int dsize, bool write) const noexcept
 {
-	// M1543C 3.5: DMA ignores 44h<6>; docking mode makes internal decode positive.
-	return ali_bridge && index >= DMA_IO_BASE && index <= DMA1_IO_EXT &&
-		!ali_bridge->is_docking_mode();
+	const auto* owner = dma_host.isa_decode_owner();
+	return owner && index >= DMA_IO_BASE && index <= DMA1_IO_EXT &&
+		owner->uses_subtractive_decode(index, address, dsize, write);
 }
 
 const CSystemComponent* CDMA::memory_decode_owner() const noexcept
 {
-	if (ali_bridge)
-		return ali_bridge;
-	return this;
+	const auto* owner = dma_host.isa_decode_owner();
+	return owner ? owner : this;
 }
 
 int CDMA::DoClock()

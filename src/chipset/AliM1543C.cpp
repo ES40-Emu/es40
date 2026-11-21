@@ -631,6 +631,10 @@ CAliM1543C::~CAliM1543C()
 
 bool CAliM1543C::uses_subtractive_decode(int index, u64, int, bool write) const noexcept
 {
+	// M1543C 3.5: DMA ignores 44h<6>; docking mode makes internal decode positive.
+	if (index >= DMA_IO_BASE && index <= DMA1_IO_EXT)
+		return !is_docking_mode();
+
 	// M1543C 3.5(g/h): NMI/RTC and external ISA are normally subtractive.
 	switch (index)
 	{
@@ -659,6 +663,19 @@ void CAliM1543C::register_isa_io(CSystemComponent& device, int index, u16 port, 
 void CAliM1543C::set_isa_irq(int irq, bool asserted)
 {
 	pic_set_line(irq >> 3, irq & 7, asserted);
+}
+
+void CAliM1543C::bind_dma(CDMA& dma)
+{
+	register_isa_io(dma, DMA0_IO_CHANNEL, 0x00, 8);
+	register_isa_io(dma, DMA0_IO_MAIN, 0x08, 8);
+	register_isa_io(dma, DMA_IO_LPAGE, 0x81, 11);
+	register_isa_io(dma, DMA1_IO_CHANNEL, 0xc0, 16);
+	register_isa_io(dma, DMA1_IO_MAIN, 0xd0, 16);
+	register_isa_io(dma, DMA_IO_HPAGE, 0x481, 11);
+	register_isa_io(dma, DMA0_IO_EXT, 0x40b, 1);
+	register_isa_io(dma, DMA1_IO_EXT, 0x4d6, 1);
+	isa_dma = &dma;
 }
 
 bool CAliM1543C::dma_transfer_enabled()

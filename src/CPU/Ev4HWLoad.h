@@ -41,6 +41,7 @@ constexpr AlphaHWLoadDescriptor ev4_decode_hw_load(std::uint32_t instruction)
   if (load.displacement & 0x800)
     load.displacement -= 0x1000;
   load.address = physical ? AlphaHWLoadAddress::Physical : AlphaHWLoadAddress::Virtual;
+  load.align_before_translation = !physical; // EV4 HRM 4.8.2 aligns the effective address.
   load.alternate = !physical && (form & 4) != 0;
   load.write_check = !physical && (form & 2) != 0;
   load.locked = physical && (form & 4) != 0;

@@ -36,8 +36,7 @@ enum class AlphaHWLoadAddress
   Virtual
 };
 
-// Decoded hardware load, outside saved CPU state. Virtual accesses translate the
-// original address before rounding down the physical read; longwords sign-extend.
+// Decoded hardware load, outside saved CPU state. Physical reads are aligned and longwords sign-extend.
 struct AlphaHWLoadDescriptor
 {
   AlphaHWLoadAddress address = AlphaHWLoadAddress::Invalid;
@@ -49,6 +48,7 @@ struct AlphaHWLoadDescriptor
   bool locked = false;
   bool compilable = false;
   bool discard_safe = false; // Compiled physical loads may omit a discarded read.
+  bool align_before_translation = false;
 };
 
 constexpr bool alpha_hw_load_valid(const AlphaHWLoadDescriptor& load)
@@ -63,11 +63,20 @@ constexpr bool alpha_hw_load_compilable(const AlphaHWLoadDescriptor& load)
   return alpha_hw_load_valid(load) && load.compilable && !load.locked;
 }
 
+constexpr std::uint64_t alpha_hw_load_translation_address(const AlphaHWLoadDescriptor& load,
+                                                          std::uint64_t va)
+{
+  return load.align_before_translation ? va & ~std::uint64_t(load.size_bits / 8 - 1) : va;
+}
+
 // Shared virtual-load helper ABI; these bits are independent of guest encoding.
+inline constexpr std::uint32_t kAlphaHWLoadAlignBeforeTranslation = 0x800u;
+
 constexpr std::uint32_t alpha_hw_load_helper_descriptor(const AlphaHWLoadDescriptor& load)
 {
   return load.size_bits | (load.vpte ? 0x100u : 0)
-    | (load.alternate ? 0x200u : 0) | (load.write_check ? 0x400u : 0);
+    | (load.alternate ? 0x200u : 0) | (load.write_check ? 0x400u : 0)
+    | (load.align_before_translation ? kAlphaHWLoadAlignBeforeTranslation : 0);
 }
 
 struct AlphaHWLoadPolicy

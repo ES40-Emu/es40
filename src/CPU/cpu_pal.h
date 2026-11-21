@@ -116,17 +116,18 @@
   if (!alpha_hw_load_valid(hw_load)) { UNKNOWN2; }                             \
   const u64 hw_address = state.r[REG_2] + (u64)hw_load.displacement;           \
   if (hw_load.address == AlphaHWLoadAddress::Virtual) {                        \
+    const u64 va = alpha_hw_load_translation_address(hw_load, hw_address);     \
     const int hw_flags = ACCESS_READ | (hw_load.vpte ? VPTE : 0)               \
       | (hw_load.alternate ? ALT : 0) | (hw_load.write_check ? WRCHK : 0);     \
     if (hw_flags == ACCESS_READ) {                                             \
-      DATA_PHYS_NT(hw_address, ACCESS_READ);                                   \
-    } else if (virt2phys(hw_address, &phys_address, hw_flags, nullptr, ins)) { \
+      DATA_PHYS_NT(va, ACCESS_READ);                                           \
+    } else if (virt2phys(va, &phys_address, hw_flags, nullptr, ins)) {         \
       ES40_EXECUTE_END();                                                      \
     }                                                                          \
   } else {                                                                     \
     phys_address = hw_address;                                                 \
   }                                                                            \
-  /* Translate before alignment; reserve the address actually read. */         \
+  /* Reserve the aligned physical address actually read. */                    \
   if (hw_load.locked) {                                                        \
     state.r[REG_1] = cSystem->cpu_read_locked(state.iProcNum,                  \
       ALIGN_PHYS(hw_load.size_bits / 8), hw_load.size_bits, this);            \

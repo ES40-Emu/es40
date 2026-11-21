@@ -1858,7 +1858,7 @@ void CAlphaCPU::jit_run(int budget)
 					&& !m_profile.requires_fen_at_decode(ins)
 					&& !m_profile.requires_fen_for_fpcr(ins, state.fpcr);
 				const int lra = (ins >> 21) & 0x1F;
-				// Replay the family-selected compiled loads using their original address.
+				// Log the translation VA for virtual HW_LD and the helper's input PA for physical HW_LD.
 				const auto hw_load = (executes && opc == 0x1b)
 					? alpha_decode_hw_load(m_profile.hw_load, ins) : AlphaHWLoadDescriptor{};
 				const bool is_hwld = (opc == 0x1b) && alpha_hw_load_compilable(hw_load);
@@ -1887,6 +1887,8 @@ void CAlphaCPU::jit_run(int budget)
 					const int ldisp = is_hwld ? hw_load.displacement
 						: (int)(int16_t)(ins & 0xFFFF);        // LDx:   16-bit
 					eva = (lrb == 31 ? (u64)0 : state.r[RREG(lrb)]) + (u64)ldisp;
+					if (is_hwld && hw_load.address == AlphaHWLoadAddress::Virtual)
+						eva = alpha_hw_load_translation_address(hw_load, eva);
 					if (opc == 0x0b) eva &= ~U64(7);   // LDQ_U: address forced to 8-byte alignment
 				}
 				// Stores touch memory, not GPRs, so record (addr,value) for the compiled-pass
@@ -2711,7 +2713,7 @@ int CAlphaCPU::jit_read_locked(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 	return 0;
 }
 
-// Virtual HW_LD helper. "descr" carries the instruction plus transfer size/VPTE/ALT/WrChk flags.
+// Virtual HW_LD helper. "descr" carries the instruction, transfer size, access flags and VA alignment.
 // normal build will deliver translation faults directly; verify retains a side-effect-free replay probe.
 int CAlphaCPU::jit_read_vpte(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 {
@@ -2721,8 +2723,8 @@ int CAlphaCPU::jit_read_vpte(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 	const bool wchk = (descr & 0x400) != 0;
 	const u32 ins = (u32)(descr >> 32);
 	const u64 amask = (u64)(size_bits / 8) - 1;
-	// HW_LD translates the original VA, then its no-trap physical access rounds the
-	// resulting physical address down.
+	if (descr & kAlphaHWLoadAlignBeforeTranslation)
+		va &= ~amask;
 
 	u64 phys;
 	const int flags = ACCESS_READ | (vpte ? VPTE : 0) | (alt ? ALT : 0) | (wchk ? WRCHK : 0);

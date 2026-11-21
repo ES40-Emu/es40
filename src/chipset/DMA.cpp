@@ -65,6 +65,8 @@
 #include "DMA.h"
 #include "AliM1543C.h"
 
+static constexpr u16 dma_low_page_base = 0x81;
+
 /**
  * Constructor.
  **/
@@ -81,7 +83,7 @@ CDMA::CDMA(CConfigurator* cfg, CSystem* c, CAliM1543C& bridge) :
 	ali_bridge = &bridge;
 	bridge.register_isa_io(*this, DMA0_IO_CHANNEL, 0x00, 8);
 	bridge.register_isa_io(*this, DMA0_IO_MAIN, 0x08, 8);
-	bridge.register_isa_io(*this, DMA_IO_LPAGE, 0x81, 11);
+	bridge.register_isa_io(*this, DMA_IO_LPAGE, dma_low_page_base, 11);
 	bridge.register_isa_io(*this, DMA1_IO_CHANNEL, 0xc0, 16);
 	bridge.register_isa_io(*this, DMA1_IO_MAIN, 0xd0, 16);
 	bridge.register_isa_io(*this, DMA_IO_HPAGE, 0x481, 11);
@@ -156,12 +158,18 @@ static int dma_page_channel(u64 address)
 	return channelmap[address];
 }
 
+static int dma_low_page_channel(u16 port)
+{
+	return port >= dma_low_page_base ? dma_page_channel(port - dma_low_page_base) : -1;
+}
+
 static bool dma_mapped_legacy_port(int index, u64 offset, u16& port)
 {
 	switch (index)
 	{
 	case DMA0_IO_CHANNEL: port = 0x00; break;
 	case DMA0_IO_MAIN:    port = 0x08; break;
+	case DMA_IO_LPAGE:    port = dma_low_page_base; break;
 	case DMA1_IO_CHANNEL: port = 0xc0; break;
 	case DMA1_IO_MAIN:    port = 0xd0; break;
 	default: return false;
@@ -277,7 +285,14 @@ u8 CDMA::read_legacy_port(u16 port)
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
 	int ctrlr, reg;
 	if (!dma_legacy_register(port, ctrlr, reg))
-		return 0xff;
+	{
+		const int num = dma_low_page_channel(port);
+		const u8 data = num < 0 ? 0xff : (u8)state.channel[num].pagebase;
+#if defined(DEBUG_DMA)
+		printf("dma: read port %04x: %02x\n", (unsigned)port, (unsigned)data);
+#endif
+		return data;
+	}
 
 	auto& controller = state.controller[ctrlr];
 	u8 data = 0;
@@ -307,7 +322,17 @@ void CDMA::write_legacy_port(u16 port, u8 data)
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
 	int ctrlr, reg;
 	if (!dma_legacy_register(port, ctrlr, reg))
+	{
+		const int num = dma_low_page_channel(port);
+		if (num < 0) return;
+		release_service(num);
+		u16& page = state.channel[num].pagebase;
+		page = (page & 0xff00) | data;
+#if defined(DEBUG_DMA)
+		printf("dma channel %d pagebase: %04x\n", num, (unsigned)page);
+#endif
 		return;
+	}
 
 	auto& controller = state.controller[ctrlr];
 	if (reg < 8)
@@ -446,7 +471,6 @@ u64 CDMA::ReadMem(int index, u64 address, int dsize)
 	case 8:
 		switch (index)
 		{
-		case DMA_IO_LPAGE:
 		case DMA_IO_HPAGE:
 			num = dma_page_channel(address);
 			if (num < 0)
@@ -454,10 +478,7 @@ u64 CDMA::ReadMem(int index, u64 address, int dsize)
 				data = 0xff;
 				break;
 			}
-			if (index == DMA_IO_LPAGE)
-				data = state.channel[num].pagebase & 0xff;
-			else
-				data = (state.channel[num].pagebase >> 8) & 0xff;
+			data = (state.channel[num].pagebase >> 8) & 0xff;
 			break;
 
 		case DMA0_IO_EXT:
@@ -507,16 +528,12 @@ void CDMA::WriteMem(int index, u64 address, int dsize, u64 data)
 		data &= 0xff;
 		switch (index)
 		{
-		case DMA_IO_LPAGE:
 		case DMA_IO_HPAGE:
 			num = dma_page_channel(address);
 			if (num < 0)
 				return;
 			release_service(num);
-			if (index == DMA_IO_LPAGE)
-				state.channel[num].pagebase = (state.channel[num].pagebase & 0xff00) | data;
-			else
-				state.channel[num].pagebase = (state.channel[num].pagebase & 0xff) | (data << 8);
+			state.channel[num].pagebase = (state.channel[num].pagebase & 0xff) | (data << 8);
 
 #if defined(DEBUG_DMA)
 			printf("dma channel %d pagebase: %04x\n", num, state.channel[num].pagebase);

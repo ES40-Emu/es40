@@ -41,6 +41,7 @@ constexpr AlphaHWStoreDescriptor ev4_decode_hw_store(std::uint32_t instruction)
   if (store.displacement & 0x800)
     store.displacement -= 0x1000;
   store.address = physical ? AlphaHWStoreAddress::Physical : AlphaHWStoreAddress::Virtual;
+  store.align_before_translation = !physical; // EV4 HRM 4.8.2 aligns the effective address.
   store.alternate = !physical && (form & 4) != 0;
   store.conditional = physical && (form & 4) != 0;
   store.compilable = physical && !store.conditional;

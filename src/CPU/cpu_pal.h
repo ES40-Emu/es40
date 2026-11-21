@@ -146,10 +146,12 @@
   if (!alpha_hw_store_valid(hw_store)) { UNKNOWN2; }                           \
   const u64 hw_address = state.r[REG_2] + (u64)hw_store.displacement;          \
   if (hw_store.address == AlphaHWStoreAddress::Virtual) {                      \
+    const u64 mask = hw_store.align_before_translation ? hw_store.size_bits / 8 - 1 : 0; \
+    const u64 va = hw_address & ~mask;                                         \
     if (hw_store.alternate) {                                                  \
-      DATA_PHYS_NT(hw_address, ACCESS_WRITE | ALT);                            \
+      DATA_PHYS_NT(va, ACCESS_WRITE | ALT);                                    \
     } else {                                                                   \
-      DATA_PHYS_NT(hw_address, ACCESS_WRITE);                                  \
+      DATA_PHYS_NT(va, ACCESS_WRITE);                                          \
     }                                                                          \
   } else {                                                                     \
     phys_address = hw_address;                                                 \

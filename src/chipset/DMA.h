@@ -87,6 +87,9 @@ public:
   // Logical byte ports for the two 8237 banks and the ISA low-page registers.
   u8            read_legacy_port(u16 port);
   void          write_legacy_port(u16 port, u8 data);
+  // High-page byte ports for bridges that map the 0x481-0x48b bank.
+  u8            read_high_page_port(u16 port) const;
+  void          write_high_page_port(u16 port, u8 data);
   u8            read_ali_shadow(u8 selector) const;
   virtual int   SaveState(FILE* f);
   virtual int   RestoreState(FILE* f);

@@ -65,6 +65,7 @@
 #include "DMA.h"
 
 static constexpr u16 dma_low_page_base = 0x81;
+static constexpr u16 dma_high_page_base = 0x481;
 
 /**
  * Constructor.
@@ -128,11 +129,14 @@ std::string dma_index_names[] = {
 	"DMA1_IO_EXT"
 };
 
-static int dma_page_channel(u64 address)
+static int dma_page_channel(u16 port, u16 base)
 {
 	static const int channelmap[] = { 2, 3, 1, 0xff, 0xff, 0xff, 0,
 				 0xff, 6, 7, 5 };
 
+	if (port < base)
+		return -1;
+	const unsigned address = port - base;
 	if (address >= (sizeof(channelmap) / sizeof(channelmap[0])) ||
 		channelmap[address] == 0xff)
 		return -1;
@@ -140,18 +144,14 @@ static int dma_page_channel(u64 address)
 	return channelmap[address];
 }
 
-static int dma_low_page_channel(u16 port)
-{
-	return port >= dma_low_page_base ? dma_page_channel(port - dma_low_page_base) : -1;
-}
-
-static bool dma_mapped_legacy_port(int index, u64 offset, u16& port)
+static bool dma_mapped_port(int index, u64 offset, u16& port)
 {
 	switch (index)
 	{
 	case DMA0_IO_CHANNEL: port = 0x00; break;
 	case DMA0_IO_MAIN:    port = 0x08; break;
 	case DMA_IO_LPAGE:    port = dma_low_page_base; break;
+	case DMA_IO_HPAGE:    port = dma_high_page_base; break;
 	case DMA1_IO_CHANNEL: port = 0xc0; break;
 	case DMA1_IO_MAIN:    port = 0xd0; break;
 	default: return false;
@@ -268,7 +268,7 @@ u8 CDMA::read_legacy_port(u16 port)
 	int ctrlr, reg;
 	if (!dma_legacy_register(port, ctrlr, reg))
 	{
-		const int num = dma_low_page_channel(port);
+		const int num = dma_page_channel(port, dma_low_page_base);
 		const u8 data = num < 0 ? 0xff : (u8)state.channel[num].pagebase;
 #if defined(DEBUG_DMA)
 		printf("dma: read port %04x: %02x\n", (unsigned)port, (unsigned)data);
@@ -305,7 +305,7 @@ void CDMA::write_legacy_port(u16 port, u8 data)
 	int ctrlr, reg;
 	if (!dma_legacy_register(port, ctrlr, reg))
 	{
-		const int num = dma_low_page_channel(port);
+		const int num = dma_page_channel(port, dma_low_page_base);
 		if (num < 0) return;
 		release_service(num);
 		u16& page = state.channel[num].pagebase;
@@ -426,16 +426,40 @@ void CDMA::write_legacy_port(u16 port, u8 data)
 	}
 }
 
+u8 CDMA::read_high_page_port(u16 port) const
+{
+	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
+	const int num = dma_page_channel(port, dma_high_page_base);
+	const u8 data = num < 0 ? 0xff : (u8)(state.channel[num].pagebase >> 8);
+#if defined(DEBUG_DMA)
+	printf("dma: read port %04x: %02x\n", (unsigned)port, (unsigned)data);
+#endif
+	return data;
+}
+
+void CDMA::write_high_page_port(u16 port, u8 data)
+{
+	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
+	const int num = dma_page_channel(port, dma_high_page_base);
+	if (num < 0)
+		return;
+	release_service(num);
+	u16& page = state.channel[num].pagebase;
+	page = (page & 0x00ff) | (data << 8);
+#if defined(DEBUG_DMA)
+	printf("dma channel %d pagebase: %04x\n", num, (unsigned)page);
+#endif
+}
+
 u64 CDMA::ReadMem(int index, u64 address, int dsize)
 {
 	u16 port;
-	if (dsize == 8 && dma_mapped_legacy_port(index, address, port))
-		return read_legacy_port(port);
+	if (dsize == 8 && dma_mapped_port(index, address, port))
+		return index == DMA_IO_HPAGE ? read_high_page_port(port) : read_legacy_port(port);
 
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
 	u64 ret;
 	u8  data = 0;
-	int num;
 	switch (dsize)
 	{
 	case 32:
@@ -453,16 +477,6 @@ u64 CDMA::ReadMem(int index, u64 address, int dsize)
 	case 8:
 		switch (index)
 		{
-		case DMA_IO_HPAGE:
-			num = dma_page_channel(address);
-			if (num < 0)
-			{
-				data = 0xff;
-				break;
-			}
-			data = (state.channel[num].pagebase >> 8) & 0xff;
-			break;
-
 		case DMA0_IO_EXT:
 		case DMA1_IO_EXT:
 			// M1543C extended-mode ports are write-only. Use the same all-ones
@@ -484,9 +498,12 @@ u64 CDMA::ReadMem(int index, u64 address, int dsize)
 void CDMA::WriteMem(int index, u64 address, int dsize, u64 data)
 {
 	u16 port;
-	if (dsize == 8 && dma_mapped_legacy_port(index, address, port))
+	if (dsize == 8 && dma_mapped_port(index, address, port))
 	{
-		write_legacy_port(port, (u8)data);
+		if (index == DMA_IO_HPAGE)
+			write_high_page_port(port, (u8)data);
+		else
+			write_legacy_port(port, (u8)data);
 		return;
 	}
 
@@ -510,20 +527,6 @@ void CDMA::WriteMem(int index, u64 address, int dsize, u64 data)
 		data &= 0xff;
 		switch (index)
 		{
-		case DMA_IO_HPAGE:
-			num = dma_page_channel(address);
-			if (num < 0)
-				return;
-			release_service(num);
-			state.channel[num].pagebase = (state.channel[num].pagebase & 0xff) | (data << 8);
-
-#if defined(DEBUG_DMA)
-			printf("dma channel %d pagebase: %04x\n", num, state.channel[num].pagebase);
-#endif      
-
-			break;
-
-
 		case DMA0_IO_EXT:
 		case DMA1_IO_EXT:
 			// Each extended register occupies one byte; wider accesses are split

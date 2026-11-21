@@ -112,6 +112,7 @@ enum SafeOp {
   OP_HW_LD_VIRT,                 // HW_LD: normalized virtual loads with family-selected access flags
   OP_HW_MTPR,                    // HW_MTPR (0x1d): family-approved helper writes, PALmode only
   OP_HW_MTPR_EXC_ADDR,
+  OP_HW_MTPR_PAL_TEMP,
   OP_HW_MTPR_TERM,               // HW_MTPR: a family write changes compiled assumptions -> redispatch
   OP_HW_STL, OP_HW_STQ,          // HW_ST (0x1f): normalized physical longword/quadword stores
   OP_JMP,                        // JMP/JSR/RET (0x1a): Ra = PC+4; PC = Rb & ~3 (computed target)
@@ -342,6 +343,7 @@ SafeOp classify(uint32_t ins, bool pal_block, const AlphaIPRReadPolicy& ipr_read
         return OP_NONE;
       switch (ipr_write.describe(ins, pal_block)) {
         case AlphaIPRWriteKind::ExceptionAddress: return OP_HW_MTPR_EXC_ADDR;
+        case AlphaIPRWriteKind::PalTemp: return OP_HW_MTPR_PAL_TEMP;
         case AlphaIPRWriteKind::Helper: return OP_HW_MTPR;
         case AlphaIPRWriteKind::HelperTerminator: return OP_HW_MTPR_TERM;
         case AlphaIPRWriteKind::Noop: return OP_NOP;
@@ -861,6 +863,10 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
     auto set_pc = [&](uint64_t pc_val) {
         a.mov(x86::r10, imm(pc_val));
         a.mov(x86::qword_ptr(x86::rbp, m_off.state_pc), x86::r10);
+        };
+    auto pal_temp_issue = [&](int ahead) {
+        a.mov(x86::rcx, x86::qword_ptr(x86::rbp, m_off.issue_base));
+        a.lea(x86::rcx, x86::ptr(x86::rcx, x86::r13, 0, static_cast<int32_t>(i) + 1 + ahead));
         };
     auto pin_id = [&](int r) -> int {        // r -> its bound host reg id, or -1 = the state.r[] memory slot
         if (b->pal_shadow && m_profile.register_bank.shadowable(r)) return -1;
@@ -1665,6 +1671,25 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             continue;
         }
 
+        if (op == OP_HW_MTPR_PAL_TEMP) {
+            unsigned slot = 0;
+            m_profile.ipr_write.describe(ins, pal_block, &slot);
+            const auto temp = x86::qword_ptr(x86::rbx, slot * 8);
+            a.mov(x86::rax, temp);
+            a.mov(x86::qword_ptr(x86::rbp, m_off.pal_temp_old), x86::rax);
+            if (rb == 31) a.mov(temp, imm(0));
+            else {
+                mov_from_reg(x86::rax, rb);
+                a.mov(temp, x86::rax);
+            }
+            a.mov(x86::qword_ptr(x86::rbp, m_off.pal_temp_slot), imm(slot));
+            a.mov(x86::rax, imm(b->tag + 4 * (uint64_t)(i + 1)));
+            a.mov(x86::qword_ptr(x86::rbp, m_off.pal_temp_next_pc), x86::rax);
+            pal_temp_issue(1);
+            a.mov(x86::qword_ptr(x86::rbp, m_off.pal_temp_next_issue), x86::rcx);
+            continue;
+        }
+
         // HW_MTPR: the family has approved this write for a compiled helper call.
         if (op == OP_HW_MTPR) {
             emit_call(hw_mtpr_helper, { {JA_CPU, 0}, {JA_I32, (uint64_t)ins}, {JA_GPZ, (uint64_t)rb} });  // jit_hw_mtpr(cpu, instruction, value)
@@ -1748,11 +1773,10 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
         }
 
         // HW_MFPR (0x19, PALmode): the family selects the IPR from the full instruction.
-        // Plain fault-reporting fields read inline; derived/asynchronous registers
-        // and verification retain the helper. Destination routing honors PALshadow.
+        // PAL_TEMP reads use the active register file, including during verifier replay.
         if (op == OP_HW_MFPR) {
-#ifndef JIT_VERIFY
             const auto descriptor = m_profile.ipr_read.describe(ins, pal_block);
+#ifndef JIT_VERIFY
             uint32_t field_offset = 0;
             bool direct_field = ra != 31 && descriptor.discard_safe;
             switch (descriptor.kind) {
@@ -1767,6 +1791,20 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                 a.mov(x86::rax, x86::qword_ptr(x86::rbp, field_offset));
             else
 #endif
+            if (descriptor.kind == AlphaIPRReadKind::PalTemp) {
+                const auto slot = descriptor.pal_temp_slot();
+                const Label ready = a.new_label();
+                a.mov(x86::rax, x86::qword_ptr(x86::rbx, slot * 8));
+                a.cmp(x86::qword_ptr(x86::rbp, m_off.pal_temp_slot), imm(slot));
+                a.jne(ready);
+                a.mov(x86::rcx, imm(b->tag + 4 * (uint64_t)i));
+                a.cmp(x86::rcx, x86::qword_ptr(x86::rbp, m_off.pal_temp_next_pc));
+                a.jne(ready);
+                pal_temp_issue(0);
+                a.cmp(x86::rcx, x86::qword_ptr(x86::rbp, m_off.pal_temp_next_issue));
+                a.cmovz(x86::rax, x86::qword_ptr(x86::rbp, m_off.pal_temp_old));
+                a.bind(ready);
+            } else
                 emit_call(hw_mfpr_helper, { {JA_CPU, 0}, {JA_I32, (uint64_t)ins}, {JA_I32, (uint64_t)pal_block} });  // -> RAX = IPR value
             if (ra != 31)
                 mov_to_reg(ra, x86::rax);                      // Ra = value (reg() applies the PALshadow remap)

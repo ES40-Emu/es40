@@ -414,6 +414,10 @@ void CAlphaCPU::run()
 		tick_last_fire = start_time;
 		cc_last_sync = start_time;
 		cc_large = 0;
+		if (m_pal_temp_write.next_issue == state.instruction_count + 1)
+			m_pal_temp_write.next_issue = 1;
+		else
+			m_pal_temp_write = {};
 		state.instruction_count = 0;
 		reset_idle_detector();
 		prev_icount = 0;
@@ -900,11 +904,25 @@ CAlphaCPU::TickHold CAlphaCPU::tick_hold(u64 period_ns)
 	}
 }
 
-u64 CAlphaCPU::read_ipr(u32 instruction, AlphaIPRReadKind kind)
+u64 CAlphaCPU::read_ipr(u32 instruction, AlphaIPRReadDescriptor descriptor, u64 issue)
 {
-	if (kind == AlphaIPRReadKind::ExceptionAddress)
+	if (descriptor.kind == AlphaIPRReadKind::PalTemp)
+	{
+		const unsigned slot = descriptor.pal_temp_slot();
+		if (slot == m_pal_temp_write.slot && issue == m_pal_temp_write.next_issue
+		    && state.current_pc == m_pal_temp_write.next_pc)
+			return m_pal_temp_write.old_value;
+		return state.r[slot];
+	}
+	if (descriptor.kind == AlphaIPRReadKind::ExceptionAddress)
 		return state.exc_addr;
 	return m_profile.ipr_read.read(*this, instruction);
+}
+
+void CAlphaCPU::write_pal_temp(unsigned slot, u64 value, u64 issue)
+{
+	m_pal_temp_write = {issue + 1, state.current_pc + 4, slot, state.r[slot]};
+	state.r[slot] = value;
 }
 
 void CAlphaCPU::write_ipr(u32 instruction, u64 value, AlphaIPRWriteContext context)
@@ -1040,6 +1058,7 @@ void CAlphaCPU::init()
 		FAILURE(Configuration, "Incomplete CPU verifier policy");
 #endif
 	memset(&state, 0, sizeof(state));
+	m_pal_temp_write = {};
 	reset_idle_detector();
 	if (m_profile.cpu_state.replaced)
 		m_profile.cpu_state.replaced(*this);
@@ -1104,6 +1123,15 @@ void CAlphaCPU::init()
 		o.f_from_r = (uint32_t)(offsetof(decltype(state), f) - offsetof(decltype(state), r));
 		o.fpcr = (uint32_t)((char*)&state.fpcr - (char*)this);
 		o.exc_addr = (uint32_t)((char*)&state.exc_addr - (char*)this);
+#ifdef JIT_VERIFY
+		o.issue_base = (uint32_t)((char*)&m_verify_issue_base - (char*)this);
+#else
+		o.issue_base = (uint32_t)((char*)&state.instruction_count - (char*)this);
+#endif
+		o.pal_temp_next_issue = (uint32_t)((char*)&m_pal_temp_write.next_issue - (char*)this);
+		o.pal_temp_next_pc = (uint32_t)((char*)&m_pal_temp_write.next_pc - (char*)this);
+		o.pal_temp_slot = (uint32_t)((char*)&m_pal_temp_write.slot - (char*)this);
+		o.pal_temp_old = (uint32_t)((char*)&m_pal_temp_write.old_value - (char*)this);
 		o.pal_base = (uint32_t)((char*)&state.pal_base - (char*)this);
 		o.pal_shadow_enabled = (uint32_t)((char*)&m_pal_shadow_enabled - (char*)this);
 		o.mm_stat = (uint32_t)((char*)&state.mm_stat - (char*)this);
@@ -1189,6 +1217,7 @@ void CAlphaCPU::ResetForSystemReset()
 		cSystem->idle_watch_disarm(savedProcNum);   // the memset clears iProcNum
 	m_idle_armed = false;
 	memset(&state, 0, sizeof(state));
+	m_pal_temp_write = {};
 	reset_idle_detector();
 	if (m_profile.cpu_state.replaced)
 		m_profile.cpu_state.replaced(*this);
@@ -1785,21 +1814,26 @@ void CAlphaCPU::jit_run(int budget)
 			// Interpret the prefix (authoritative), recording each loaded value so the
 			// compiled pass can replay it instead of re-reading memory. Skip the compare
 			// if an interrupt/trap diverts us mid-prefix.
-			u64 snap[64];   // 64: capture the PALshadow bank (r32..r63) for PALmode blocks
+			u64 snap[64];   // Capture both integer register banks.
 			memcpy(snap, state.r, sizeof(snap));
 			u64 f_pre[64];  // FP file before the interp pass -- restored before the compiled pass below
 			memcpy(f_pre, state.f, sizeof(f_pre));   // so the compiled FP ops read the same f[] the interp did
+			m_verify_issue_base = state.instruction_count;
 			const auto& verify = m_profile.cpu_state.verify;
-			const int ipr_count = verify.word_count;
+			const size_t swap_bytes = m_profile.ipr_write.indexed ? sizeof(m_pal_temp_write) : 0;
+			const int ipr_count = verify.word_count + (int)(swap_bytes / sizeof(u64));
 			auto cap_iprs = [&](u64* d) {
-				if (ipr_count) verify.capture(*this, d);
+				if (verify.word_count) verify.capture(*this, d);
+				if (swap_bytes) memcpy(d + verify.word_count, &m_pal_temp_write, swap_bytes);
 			};
-			auto put_iprs = [&](const u64* s) {
-				if (ipr_count) verify.restore(*this, s);
-				sync_register_bank();
+			auto put_iprs = [&](const u64* s, bool replay) {
+				if (verify.word_count)
+					(replay ? verify.prepare_replay : verify.restore)(*this, s);
+				if (swap_bytes) memcpy(&m_pal_temp_write, s + verify.word_count, swap_bytes);
+				if (!replay) sync_register_bank();
 			};
 			auto ipr_ne = [&](int ii, u64 x, u64 y, bool side_exit = false) {
-				return verify.differs(ii, x, y, side_exit);
+				return ii < verify.word_count ? verify.differs(ii, x, y, side_exit) : x != y;
 			};
 			// Capture family inputs before the authoritative interpreter pass.
 			std::vector<u64> ipr_pre(ipr_count);
@@ -1813,7 +1847,7 @@ void CAlphaCPU::jit_run(int budget)
 			u32 bnd_vn[CJitEngine::kMaxTraceSegs];        // interp load-log cursor at boundary
 			u32 bnd_sn[CJitEngine::kMaxTraceSegs];        // interp store-log cursor at boundary
 			u64 bnd_pc[CJitEngine::kMaxTraceSegs];        // interp pc at boundary (the resume PC)
-			u64 bnd_r[CJitEngine::kMaxTraceSegs][64];     // GPRs incl. PALshadow bank
+			u64 bnd_r[CJitEngine::kMaxTraceSegs][64];     // Both integer register banks
 			u64 bnd_f[CJitEngine::kMaxTraceSegs][64];     // FP file
 			std::vector<u64> bnd_ipr((size_t)CJitEngine::kMaxTraceSegs * ipr_count);   // cap_iprs set
 			u32 source_words[16] = {};   // observed backing words, copied before execution
@@ -2005,10 +2039,10 @@ void CAlphaCPU::jit_run(int budget)
 				// interp pass's result, compare after the compiled pass, then restore.
 				u64 f_interp[64];
 				memcpy(f_interp, state.f, sizeof(f_interp));
-				u64 jr[64];   // 64: a compiled PALmode block may touch the shadow bank
+				u64 jr[64];   // Replay uses its own copy of both banks.
 				memcpy(jr, snap, sizeof(jr));
 				memcpy(state.f, f_pre, sizeof(f_pre));   // restore the FP file like the GPRs: the compiled pass reads pre-interp f
-				if (ipr_count) verify.prepare_replay(*this, ipr_pre.data());
+				put_iprs(ipr_pre.data(), true);
 				const u64 interp_pc = state.pc;   // interpreter is authoritative for the PC
 					const u32 n_stores_interp = sn;   // interp's RECORDED store count (sn), NOT the replay cursor m_jit_slog_i; a compiled pass must consume exactly this many (catches a missing/extra store)
 				m_jit_vreplay = true;
@@ -2083,9 +2117,7 @@ void CAlphaCPU::jit_run(int budget)
 					if (tr && m_jit->trace_ok(tr, start_phys, sources)
 							&& trace_segs_live(tr)) {
 						memcpy(state.f, f_pre, sizeof(f_pre));
-						if (ipr_count) verify.prepare_replay(*this, ipr_pre.data()); // else the trace inherits the
-						                                                      // interp's FINAL values -> false
-						                                                      // mismatch at interior boundaries
+						put_iprs(ipr_pre.data(), true); // Replay the trace from the same inputs as the block.
 						u64 jr_t[64];
 						memcpy(jr_t, snap, sizeof(jr_t));
 						m_jit_vreplay = true; m_jit_vmismatch = false; m_jit_vlog_i = 0; m_jit_slog_i = 0;
@@ -2181,7 +2213,7 @@ void CAlphaCPU::jit_run(int budget)
 					}
 				}
 				state.pc = interp_pc;   // restore; the block's PC write was only for the check
-				put_iprs(ipr_interp.data());   // roll back the compiled pass's live IPR writes (verify-only)
+				put_iprs(ipr_interp.data(), false);   // roll back the compiled pass's live IPR writes (verify-only)
 				memcpy(state.f, f_interp, sizeof(f_interp));   // ...and its FP writes
 				instruction_fetch_event(AlphaInstructionFetchEvent::CompiledExit);     // compiled pass + raw pc restore bypassed set_pc
 			}
@@ -3045,7 +3077,7 @@ u64 CAlphaCPU::jit_hw_mfpr(CAlphaCPU* cpu, u32 ins, bool pal_mode)
 		u32 i;
 		return cpu->jit_verify_load_slot(i) ? cpu->m_jit_vlog[i] : 0;
 	}
-	return cpu->read_ipr(ins, descriptor.kind);
+	return cpu->read_ipr(ins, descriptor, cpu->state.instruction_count);
 }
 
 // The family policy owns the write; its descriptor controls compiled eligibility.
@@ -3259,6 +3291,7 @@ void CAlphaCPU::execute()
 	int _icount_accum = 0;  // accumulated instruction count
 	const u64 _cc_per_ins = cc_per_instruction;  // cache in register
 #else
+	constexpr int _icount_accum = 0;
 	const u64 _cc_per_ins = cc_per_instruction;
 #endif
 
@@ -4138,10 +4171,12 @@ int CAlphaCPU::SaveState(FILE* f)
 		return -1;
 	}
 
-	const long ss = sizeof(state);
+	const bool save_swap = m_profile.ipr_write.indexed != nullptr;
+	const long ss = sizeof(state) + (save_swap ? sizeof(m_pal_temp_write) : 0);
 	if (fwrite(&signature->begin, sizeof(signature->begin), 1, f) != 1 ||
 		fwrite(&ss, sizeof(ss), 1, f) != 1 ||
 		fwrite(&state, sizeof(state), 1, f) != 1 ||
+		(save_swap && fwrite(&m_pal_temp_write, sizeof(m_pal_temp_write), 1, f) != 1) ||
 		fwrite(&signature->end, sizeof(signature->end), 1, f) != 1)
 		return -1;
 	printf("%s: %d bytes saved.\n", devid_string, (int)ss);
@@ -4185,13 +4220,15 @@ int CAlphaCPU::RestoreState(FILE* f)
 		return -1;
 	}
 
-	if (ss != sizeof(state))
+	const bool has_swap = m_profile.ipr_write.indexed
+		&& ss == sizeof(state) + sizeof(m_pal_temp_write);
+	if (ss != sizeof(state) && !has_swap)
 	{
 		printf("%s: STRUCT SIZE does not match!\n", devid_string);
 		return -1;
 	}
 
-	std::vector<u8> saved(sizeof(state));
+	std::vector<u8> saved(ss);
 	r = fread(saved.data(), saved.size(), 1, f);
 	if (r != 1)
 	{
@@ -4212,7 +4249,11 @@ int CAlphaCPU::RestoreState(FILE* f)
 		return -1;
 	}
 
-	memcpy(&state, saved.data(), saved.size());
+	memcpy(&state, saved.data(), sizeof(state));
+	if (has_swap)
+		memcpy(&m_pal_temp_write, saved.data() + sizeof(state), sizeof(m_pal_temp_write));
+	else
+		m_pal_temp_write = {};
 	reset_idle_detector();
 	printf("%s: %d bytes restored.\n", devid_string, (int)ss);
 	if (m_profile.cpu_state.replaced)

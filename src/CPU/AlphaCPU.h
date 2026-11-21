@@ -345,7 +345,8 @@ public:
   virtual void  stop_threads();
   void ResetForSystemReset();
 private:
-  u64 read_ipr(u32 instruction, AlphaIPRReadKind kind);
+  u64 read_ipr(u32 instruction, AlphaIPRReadDescriptor descriptor, u64 issue);
+  void write_pal_temp(unsigned slot, u64 value, u64 issue);
   void write_ipr(u32 instruction, u64 value, AlphaIPRWriteContext context);
   void set_current_mode(u32 mode, AlphaIPRWriteContext context);
   void set_cycle_counter(u32 counter, bool enabled);
@@ -793,6 +794,9 @@ private:
   static constexpr u32 kJitVlogCap = 1024;
   bool m_jit_vreplay = false;  // compiled pass: replay recorded loads, don't re-read
   bool m_jit_vmismatch = false; // any checked output differed in the current replay
+#ifdef JIT_VERIFY
+  u64 m_verify_issue_base = 0;
+#endif
   u32  m_jit_vlog_i  = 0;      // replay cursor
   u32  m_jit_vlog_n  = 0;      // reference loads available to this replay
   bool jit_verify_load_slot(u32& slot);
@@ -825,7 +829,7 @@ private:
     int   asn;          /**< IPR PCTX: asn (address space number) [HRM p 5-21..22] */
     u64   exc_addr;     /**< IPR EXC_ADDR: address of last exception [HRM p 5-8] */
 
-    u64   r[64];          /**< Integer registers (0-31 normal, 32-63 shadow) */
+    u64   r[64];          /**< Integer registers (0-31 GPRs, 32-63 EV68 shadows or EV4 PAL_TEMP) */
 
     u64   f[64];    /**< Floating point registers (0-31 normal, 32-63 shadow) */
 
@@ -914,6 +918,11 @@ private:
     bool  pal_vms;            /**< Family-selected VMS PAL replacements enabled. */
     int   irq_h_timer[6];     /**< Delayed IRQ_H[0:5] timers; guarded by m_irq_lock while running */
   } state;  /**< Determines CPU state that needs to be saved to the state file */
+
+  // An unstalled EV4 read on the next issue sees the pre-write value (HRM 4.6).
+  struct {
+    u64 next_issue, next_pc, slot, old_value;
+  } m_pal_temp_write{};
 
   // Serialize timer expiry and line cancellation as one transition. Keep this
   // outside (and after) state to preserve its saved layout and JIT offsets.

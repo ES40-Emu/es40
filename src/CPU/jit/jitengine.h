@@ -326,6 +326,7 @@ public:
     // checks before jumping on; link_from is where the epilogue records a link-patch request.
     uint32_t jit_budget, check_int, check_timers, link_from;
     uint32_t exc_addr, pal_base, pal_shadow_enabled;   // CALL_PAL: exc_addr save, PAL entry base, PALshadow enable
+    uint32_t issue_base, pal_temp_next_issue, pal_temp_next_pc, pal_temp_slot, pal_temp_old;
     uint32_t helpers;   // CPU-resident helper fn table 
     uint32_t jit_exit;  // CPU-resident pointer to the shared epilogue (blocks `jmp [cpu+jit_exit]`)
     uint32_t mm_stat, fault_va;   // pure HW_MFPR fault-reporting fields

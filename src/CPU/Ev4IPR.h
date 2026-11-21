@@ -58,7 +58,7 @@ constexpr AlphaIPRReadDescriptor ev4_describe_ipr_read(std::uint32_t instruction
   if (ev4_ipr_ignored(selector, pal_mode))
     return {AlphaIPRReadKind::Noop, false, true};
   if (selector.banks == 0x80) // PAL_TEMP only.
-    return {AlphaIPRReadKind::Helper, false, true};
+    return {AlphaIPRReadKind::PalTemp, false, true, static_cast<std::uint8_t>(selector.index)};
   if (selector.banks == 0x20 && selector.index == 4) // EXC_ADDR.
     return {AlphaIPRReadKind::ExceptionAddress, false, true};
   if (selector.banks == 0x20 && selector.index == 9) // PS.
@@ -71,15 +71,17 @@ constexpr AlphaIPRReadDescriptor ev4_describe_ipr_read(std::uint32_t instruction
 }
 
 constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
-                                                 bool pal_mode)
+                                                  bool pal_mode, unsigned* slot = nullptr)
 {
   if ((instruction >> 26) != 0x1d)
     return AlphaIPRWriteKind::Interpreter;
   const auto selector = ev4_ipr_selector(instruction);
   if (ev4_ipr_ignored(selector, pal_mode))
     return AlphaIPRWriteKind::Noop;
-  if (selector.banks == 0x80) // PAL_TEMP only.
-    return AlphaIPRWriteKind::Helper;
+  if (selector.banks == 0x80) { // PAL_TEMP only.
+    if (slot) *slot = 32u + selector.index;
+    return AlphaIPRWriteKind::PalTemp;
+  }
   if (selector.banks == 0x20 && selector.index == 4) // EXC_ADDR.
     return AlphaIPRWriteKind::ExceptionAddress;
   if (selector.banks == 0x20 && selector.index == 9) // PS.

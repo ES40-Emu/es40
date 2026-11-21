@@ -807,7 +807,7 @@ uint64_t CJitEngine::verify_compare(uint64_t blk_virt, const uint64_t* interp, c
                                     const uint32_t* words, uint32_t nwords, bool other_mismatch)
 {
   bool mismatch = other_mismatch;
-  for (int r = 0; r < 63; ++r) {   // r0..r30 main bank + r32..r62 PALshadow bank
+  for (int r = 0; r < 64; ++r) {   // Slot 63 holds PAL_TEMP31 on EV4.
     if (r == 31) continue;         // zero register
     if (interp[r] != jit[r]) {
       mismatch = true;

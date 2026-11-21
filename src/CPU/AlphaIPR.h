@@ -27,6 +27,7 @@
 #if !defined(INCLUDED_ALPHAIPR_H)
 #define INCLUDED_ALPHAIPR_H
 
+#include <cstddef>
 #include <cstdint>
 
 class CAlphaCPU;
@@ -37,6 +38,7 @@ enum class AlphaIPRReadKind
   Unsupported,
   Helper,
   ExceptionAddress,
+  PalTemp,
   ExceptionSummary,
   PalBase,
   MemoryFaultStatus,
@@ -49,6 +51,9 @@ struct AlphaIPRReadDescriptor
   AlphaIPRReadKind kind;
   bool replay;       // Verification replays an asynchronous value from the interpreter.
   bool discard_safe; // A read whose destination is R31 can be omitted.
+  std::uint8_t pal_temp_index = 0;
+
+  constexpr unsigned pal_temp_slot() const { return 32u + (pal_temp_index & 31u); }
 };
 
 // Family read behavior, copied with the immutable CPU profile. Every callback
@@ -67,6 +72,7 @@ enum class AlphaIPRWriteKind
   Helper,
   HelperTerminator,
   ExceptionAddress, // Write PC[63:2] and PAL[0].
+  PalTemp,
   Noop // No write callback; privilege checks still apply.
 };
 
@@ -83,9 +89,23 @@ enum class AlphaIPRWriteContext
 // family-specific register-bank and qualifier bits.
 struct AlphaIPRWritePolicy
 {
-  void (*write)(CAlphaCPU& cpu, std::uint32_t instruction, std::uint64_t value,
-                AlphaIPRWriteContext context);
-  AlphaIPRWriteKind (*describe)(std::uint32_t instruction, bool pal_mode);
+  using Write = void (*)(CAlphaCPU&, std::uint32_t, std::uint64_t, AlphaIPRWriteContext);
+  using Describe = AlphaIPRWriteKind (*)(std::uint32_t, bool);
+  using DescribeWithSlot = AlphaIPRWriteKind (*)(std::uint32_t, bool, unsigned*);
+
+  Write write = nullptr;
+  Describe plain = nullptr;
+  DescribeWithSlot indexed = nullptr; // Supplies the register-file slot for PAL_TEMP writes.
+
+  constexpr AlphaIPRWritePolicy(Write fn = nullptr, std::nullptr_t = nullptr) : write(fn) {}
+  constexpr AlphaIPRWritePolicy(Write fn, Describe decode) : write(fn), plain(decode) {}
+  constexpr AlphaIPRWritePolicy(Write fn, DescribeWithSlot decode) : write(fn), indexed(decode) {}
+
+  constexpr AlphaIPRWriteKind describe(std::uint32_t ins, bool pal, unsigned* slot = nullptr) const
+  {
+    if (indexed) return indexed(ins, pal, slot);
+    return plain ? plain(ins, pal) : AlphaIPRWriteKind::Interpreter;
+  }
 };
 
 #endif

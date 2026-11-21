@@ -88,18 +88,21 @@
 
 #define DO_HW_MFPR do {                                                       \
   const auto describe = m_profile.ipr_read.describe;                          \
-  const auto kind = describe ? describe(ins, (state.current_pc & 1) != 0).kind \
-                             : AlphaIPRReadKind::Unsupported;                 \
-  if (kind != AlphaIPRReadKind::Noop)                                         \
-    state.r[REG_1] = read_ipr(ins, kind);                                     \
+  const auto ipr = describe ? describe(ins, (state.current_pc & 1) != 0)      \
+                            : AlphaIPRReadDescriptor{};                       \
+  if (ipr.kind != AlphaIPRReadKind::Noop) {                                   \
+    const u64 value = read_ipr(ins, ipr, state.instruction_count + _icount_accum); \
+    if (I_GETRA(ins) != 31) state.r[REG_1] = value;                           \
+  }                                                                           \
 } while (0)
 
 #define DO_HW_MTPR do {                                                       \
-  const auto describe = m_profile.ipr_write.describe;                         \
-  const auto kind = describe ? describe(ins, (state.current_pc & 1) != 0)     \
-                             : AlphaIPRWriteKind::Interpreter;                \
+  unsigned slot = 0;                                                          \
+  const auto kind = m_profile.ipr_write.describe(ins, (state.current_pc & 1) != 0, &slot); \
   if (kind == AlphaIPRWriteKind::ExceptionAddress)                            \
     state.exc_addr = state.r[REG_2] & kAlphaIPRExceptionAddressMask;          \
+  else if (kind == AlphaIPRWriteKind::PalTemp)                                \
+    write_pal_temp(slot, state.r[REG_2], state.instruction_count + _icount_accum); \
   else if (kind != AlphaIPRWriteKind::Noop)                                   \
     write_ipr(ins, state.r[REG_2], AlphaIPRWriteContext::Interpreter);          \
 } while (0)

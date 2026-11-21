@@ -1259,6 +1259,7 @@ static constexpr A64OpClass classify_a64_op(uint32_t ins, bool pal_block,
         break;
       switch (ipr_write.describe(ins, pal_block)) {
         case AlphaIPRWriteKind::ExceptionAddress:
+        case AlphaIPRWriteKind::PalTemp:
         case AlphaIPRWriteKind::Helper:
         case AlphaIPRWriteKind::Noop:
           return {A64OpKind::kHwMtpr, A64TerminatorKind::kNone, 0, 0};
@@ -4579,14 +4580,47 @@ static A64OpEmitReceipt emit_a64_call_pal(A64EmitContext& context,
   return a64_completed_op_receipt(op, err);
 }
 
+static asmjit::Error emit_a64_pal_temp_issue(A64EmitContext& context,
+    const asmjit::a64::Gp& issue, uint32_t offset)
+{
+  auto& a = context.assembler;
+  ASMJIT_PROPAGATE(emit_a64_load_cpu_u64(a, issue, context.offsets.issue_base));
+  ASMJIT_PROPAGATE(a.add(issue, issue, CJitEngine::RegAlloc::kChainCount));
+  return a.add(issue, issue, asmjit::imm(offset));
+}
+
+static asmjit::Error emit_a64_pal_temp_write(A64EmitContext& context,
+    const A64DecodedOp& op, uint32_t index, unsigned slot)
+{
+  using RA = CJitEngine::RegAlloc;
+  using namespace asmjit;
+  auto& a = context.assembler;
+  const auto temp = a64::ptr(RA::kRegs, slot * 8);
+  const auto value = RA::kScratch4;
+  ASMJIT_PROPAGATE(a.ldr(value, temp));
+  ASMJIT_PROPAGATE(emit_a64_store_cpu_u64(a, value, context.offsets.pal_temp_old));
+  const auto rb = a64_guest_gpr_read_route(context.regs, op.rb, context.pal_shadow);
+  ASMJIT_PROPAGATE(emit_a64_read_guest_gpr(a, value, rb));
+  ASMJIT_PROPAGATE(a.str(value, temp));
+  ASMJIT_PROPAGATE(emit_a64_mov_u64(a, value, slot));
+  ASMJIT_PROPAGATE(emit_a64_store_cpu_u64(a, value, context.offsets.pal_temp_slot));
+  ASMJIT_PROPAGATE(emit_a64_mov_u64(a, value, a64_advance_pc(context.start_pc, index + 1)));
+  ASMJIT_PROPAGATE(emit_a64_store_cpu_u64(a, value, context.offsets.pal_temp_next_pc));
+  ASMJIT_PROPAGATE(emit_a64_pal_temp_issue(context, value, index + 2));
+  return emit_a64_store_cpu_u64(a, value, context.offsets.pal_temp_next_issue);
+}
+
 // HW_MTPR
 static A64OpEmitReceipt emit_a64_hw_mtpr(A64EmitContext& context,
-                                         const A64DecodedOp& op)
+                                         const A64DecodedOp& op, uint32_t index)
 {
   using namespace asmjit;
-  const auto kind = context.profile.ipr_write.describe(op.ins, context.pal_block);
+  unsigned slot = 0;
+  const auto kind = context.profile.ipr_write.describe(op.ins, context.pal_block, &slot);
   if (kind == AlphaIPRWriteKind::Noop)
     return a64_completed_op_receipt(op);   // no-op IPRs
+  if (kind == AlphaIPRWriteKind::PalTemp)
+    return a64_completed_op_receipt(op, emit_a64_pal_temp_write(context, op, index, slot));
 
   if (kind == AlphaIPRWriteKind::ExceptionAddress) {
     auto& a = context.assembler;
@@ -5605,9 +5639,33 @@ static A64OpEmitReceipt emit_a64_fsqrt(A64EmitContext& context,
   return a64_completed_op_receipt(op, err);
 }
 
-// HW_MFPR: live plain fields inline; derived/asynchronous IPRs and verify use helper.
+static asmjit::Error emit_a64_pal_temp_read(A64EmitContext& context,
+    const asmjit::a64::Gp& value, uint32_t slot, uint32_t index)
+{
+  using RA = CJitEngine::RegAlloc;
+  using namespace asmjit;
+  auto& a = context.assembler;
+  const auto actual = RA::kScratch4, expected = RA::kScratch5;
+  const Label done = a.new_label();
+  ASMJIT_PROPAGATE(a.ldr(value, a64::ptr(RA::kRegs, slot * 8)));
+  ASMJIT_PROPAGATE(emit_a64_load_cpu_u64(a, actual, context.offsets.pal_temp_slot));
+  ASMJIT_PROPAGATE(a.cmp(actual, imm(slot)));
+  ASMJIT_PROPAGATE(a.b_ne(done));
+  ASMJIT_PROPAGATE(emit_a64_pal_temp_issue(context, actual, index + 1));
+  ASMJIT_PROPAGATE(emit_a64_load_cpu_u64(a, expected, context.offsets.pal_temp_next_issue));
+  ASMJIT_PROPAGATE(a.cmp(actual, expected));
+  ASMJIT_PROPAGATE(a.b_ne(done));
+  ASMJIT_PROPAGATE(emit_a64_load_cpu_u64(a, actual, context.offsets.pal_temp_next_pc));
+  ASMJIT_PROPAGATE(emit_a64_mov_u64(a, expected, a64_advance_pc(context.start_pc, index)));
+  ASMJIT_PROPAGATE(a.cmp(actual, expected));
+  ASMJIT_PROPAGATE(a.b_ne(done));
+  ASMJIT_PROPAGATE(emit_a64_load_cpu_u64(a, value, context.offsets.pal_temp_old));
+  return a.bind(done);
+}
+
+// HW_MFPR: PAL_TEMP reads use the active register file during verifier replay.
 static A64OpEmitReceipt emit_a64_hw_mfpr(A64EmitContext& context,
-                                         const A64DecodedOp& op)
+                                         const A64DecodedOp& op, uint32_t index)
 {
   using RA = CJitEngine::RegAlloc;
   using namespace asmjit;
@@ -5623,6 +5681,8 @@ static A64OpEmitReceipt emit_a64_hw_mfpr(A64EmitContext& context,
     return a64_completed_op_receipt(op);
 
   a64::Assembler& a = context.assembler;
+  a64::Gp value = RA::kScratch2;
+  Error err;
 #ifndef JIT_VERIFY
   uint32_t field_offset = 0;
   bool direct_field = wa.kind != A64GprRouteKind::kDiscard && descriptor.discard_safe;
@@ -5634,29 +5694,26 @@ static A64OpEmitReceipt emit_a64_hw_mfpr(A64EmitContext& context,
     case AlphaIPRReadKind::FaultAddress: field_offset = context.offsets.fault_va; break;
     default: direct_field = false; break;
   }
-  if (direct_field) {
-    Error err = emit_a64_load_cpu_u64(a, RA::kScratch2, field_offset);
-    if (err == Error::kOk) {
-      if (wa.kind == A64GprRouteKind::kPinned)
-        err = a.mov(a64::x(static_cast<uint32_t>(wa.host)), RA::kScratch2);
-      else
-        err = a.str(RA::kScratch2, a64::ptr(RA::kRegs,
-                    static_cast<int32_t>(wa.slot * sizeof(uint64_t))));
-    }
-    return a64_completed_op_receipt(op, err);
-  }
+  if (direct_field)
+    err = emit_a64_load_cpu_u64(a, value, field_offset);
+  else
 #endif
-  Error err = emit_a64_helper_call(a, context.offsets, context.helpers,
-      context.regs, context.pal_shadow, context.helpers.hw_mfpr_helper,
-      {{A64CallArgKind::kCpu, 0},
-       {A64CallArgKind::kImm32, op.ins},
-       {A64CallArgKind::kImm32, context.pal_block}});
+  if (descriptor.kind == AlphaIPRReadKind::PalTemp) {
+    err = emit_a64_pal_temp_read(context, value, descriptor.pal_temp_slot(), index);
+  } else {
+    value = a64::x0;
+    err = emit_a64_helper_call(a, context.offsets, context.helpers,
+        context.regs, context.pal_shadow, context.helpers.hw_mfpr_helper,
+        {{A64CallArgKind::kCpu, 0},
+         {A64CallArgKind::kImm32, op.ins},
+         {A64CallArgKind::kImm32, context.pal_block}});
+  }
   if (err != Error::kOk) return a64_completed_op_receipt(op, err);
 
   if (wa.kind == A64GprRouteKind::kPinned)
-    err = a.mov(a64::x(static_cast<uint32_t>(wa.host)), a64::x0);
+    err = a.mov(a64::x(static_cast<uint32_t>(wa.host)), value);
   else if (wa.kind == A64GprRouteKind::kMemory)
-    err = a.str(a64::x0, a64::ptr(RA::kRegs,
+    err = a.str(value, a64::ptr(RA::kRegs,
                 static_cast<int32_t>(wa.slot * sizeof(uint64_t))));
   return a64_completed_op_receipt(op, err);
 }
@@ -5684,7 +5741,7 @@ static A64OpEmitReceipt emit_a64_dispatch_op(A64EmitContext& context,
     case A64OpKind::kBranchInt:
       return emit_a64_branch_int(context, op, index);
     case A64OpKind::kHwMfpr:
-      return emit_a64_hw_mfpr(context, op);
+      return emit_a64_hw_mfpr(context, op, index);
     case A64OpKind::kIntsShift:
       return emit_a64_ints_shift(context, op);
     case A64OpKind::kLoadAddress:
@@ -5718,7 +5775,7 @@ static A64OpEmitReceipt emit_a64_dispatch_op(A64EmitContext& context,
     case A64OpKind::kCallPal:
       return emit_a64_call_pal(context, op, index);
     case A64OpKind::kHwMtpr:
-      return emit_a64_hw_mtpr(context, op);
+      return emit_a64_hw_mtpr(context, op, index);
     case A64OpKind::kHwLd:
       return emit_a64_hw_ld(context, op, index);
     case A64OpKind::kHwSt:

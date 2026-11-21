@@ -91,6 +91,11 @@ public:
   // High-page byte ports for bridges that map the 0x481-0x48b bank.
   u8            read_high_page_port(u16 port) const;
   void          write_high_page_port(u16 port, u8 data);
+  // The 82357 exposes count bits 23:16 at a separate byte port per channel.
+  u8            read_high_count_port(u16 port) const;
+  void          write_high_count_port(u16 port, u8 data);
+  u8            read_extended_mode_port(u16 port) const;
+  void          write_extended_mode_port(u16 port, u8 data);
   u8            read_ali_shadow(u8 selector) const;
   virtual int   SaveState(FILE* f);
   virtual int   RestoreState(FILE* f);
@@ -117,7 +122,7 @@ public:
 
   // Buffers and lengths are in bytes.
   // length 0 uses the current count.
-  // Transfers on channels 5-7 must cover whole words.
+  // Shifted word transfers must cover whole words.
   // send: device to memory; recv: memory to device.
   // Calls remain device-paced and do not require an explicit set_drq().
   // A software request or retained block bypasses only that channel's mask;
@@ -138,12 +143,13 @@ public:
                   bool eop = false);
   SDMA_result   recv_data(int channel, void* data, size_t length = 0,
                   bool eop = false);
-  // One byte on channels 0-3, one little-endian word on channels 5-7.
-  // Byte sends use the low 8 bits; byte receives are zero-extended.
+  // One bus cycle. Active bytes are packed into the low bits in little-endian order.
+  // A 16-bit destination blocks a cycle that needs more than two bytes.
   // A blocked or verify receive leaves data unchanged.
-  SDMA_result   send_unit(int channel, u16 data, bool eop = false);
+  SDMA_result   send_unit(int channel, u32 data, bool eop = false);
+  SDMA_result   recv_unit(int channel, u32& data, bool eop = false);
   SDMA_result   recv_unit(int channel, u16& data, bool eop = false);
-  // Explicit-request service, at most one byte/word per call.
+  // Explicit-request service, at most one bus cycle per call.
   // Demand requires unmasked hardware DRQ; single also accepts a software request.
   // Block starts from either request and, after successful service, retains it
   // until TC/EOP even if DRQ or the software request drops. Auto-init releases it.
@@ -157,7 +163,8 @@ public:
   // for lower-controller service. Ongoing demand/block service is not preempted.
   // Demand releases on DRQ withdrawal; single re-arbitrates for every unit.
   // Failed calls and idle register writes do not rotate. Bus timing is not modeled.
-  SDMA_result   service_send_unit(int channel, u16 data, bool eop = false);
+  SDMA_result   service_send_unit(int channel, u32 data, bool eop = false);
+  SDMA_result   service_recv_unit(int channel, u32& data, bool eop = false);
   SDMA_result   service_recv_unit(int channel, u16& data, bool eop = false);
   // End an accepted demand/block service without consuming another unit.
   SDMA_result   service_eop(int channel);
@@ -180,7 +187,7 @@ private:
   // Derived transfer geometry; not guest registers or saved state.
   struct SDMA_transfer_properties
   {
-    size_t data_width;     // Bytes moved by one device transfer.
+    size_t data_width;     // Maximum bytes per device transfer.
     size_t count_unit;     // Bytes represented by one count-register unit.
     u32 address_step;     // Byte address increment per device transfer.
     unsigned address_shift; // Shift from programmed address to byte address.
@@ -189,13 +196,19 @@ private:
 
   static void   validate_device_channel(int channel);
   void          select_compatible_address(int channel);
+  u32           count_mask() const;
   SDMA_transfer_properties transfer_properties(int channel) const;
   static u32    dma_address(u16 pagebase, u32 current,
                   const SDMA_transfer_properties& properties);
-  static u32    step_address(u32 address, size_t units, bool decrement,
-                  const SDMA_transfer_properties& properties);
+  static u32    advance_address(u32 address, size_t bytes, bool decrement,
+                  bool finish_cycle, const SDMA_transfer_properties& properties);
   static size_t increment_chunk_size(u32 address, size_t length,
                   const SDMA_transfer_properties& properties);
+  size_t        unit_size(int channel) const;
+  template<typename T>
+  SDMA_result   receive_unit(int channel, T& data, bool eop, bool arbitrate);
+  void          transfer_memory(u32 address, u8* buffer, size_t length, bool decrement,
+                  bool write, const SDMA_transfer_properties& properties);
   u8            get_requests(int ctrlr);
   bool          cascade_enabled() const;
   bool          service_requested(int channel) const;
@@ -220,8 +233,8 @@ private:
       u16   base;
       u16   pagebase;
       u16   current_page;
-      u16   count;
-      u16   base_count;
+      u32   count;
+      u32   base_count;
       u8    mode;
       bool  extended_address; // 82357 high page was written last.
     } channel[8];
@@ -248,6 +261,10 @@ private:
       // System reset clears these; guest master clear preserves them.
       u8 cycle_timing[8];
     } ali;
+    struct SDMA_82357
+    {
+      u8 extended_mode[8]; // Bits 7:2 of each channel's extended-mode register.
+    } isp;
   }
   state;
 };

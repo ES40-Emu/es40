@@ -474,6 +474,7 @@ list(APPEND ES40_SOURCES
     src/CPU/AlphaDataFault.h
     src/CPU/Ev68InstructionSet.h
     src/CPU/Ev4CPUProfile.h
+    src/CPU/Ev4Bcache.h
     src/CPU/Ev4InstructionFetch.h
     src/CPU/Ev4Reset.h
     src/CPU/Ev68InstructionFetch.h

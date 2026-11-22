@@ -229,6 +229,7 @@
 #include "system/System.h"
 #include "cpu_defs.h"
 #include "AlphaCPUProfile.h"
+#include "Ev4Bcache.h"
 class CJitEngine;   // JIT block-cache engine (ES40_JIT builds)
 
   /// Number of entries in the Instruction Cache
@@ -627,6 +628,27 @@ private:
   // DRAM fast-path cache
   char* dram_ptr;    // cSystem->PtrToMem(0) - host pointer to base es40 ram array thingy
   u64    dram_size;   // 1ULL << cSystem->get_memory_bits() — size of DRAM in bytes
+  u64    direct_ram_size = 0;
+  Ev4Bcache m_ev4_bcache;
+  void configure_ev4_bcache(u64 value);
+  // Locked accesses go to the system directly (21064 HRM 6.4.10).
+  u64 bus_address(u64 phys)
+  {
+    return direct_ram_size ? phys : m_ev4_bcache.probe(phys, dram_size);
+  }
+  u64 read_physical(u64 phys, int size)
+  {
+    phys = bus_address(phys);
+    return phys < dram_size ? dram_read(dram_ptr, phys, size) : cSystem->ReadMem(phys, size, this);
+  }
+  void write_physical(u64 phys, int size, u64 value)
+  {
+    phys = bus_address(phys);
+    if (phys < dram_size)
+      cSystem->cpu_write_ram(phys, size, value);
+    else
+      cSystem->WriteMem(phys, size, value, this);
+  }
 
   // Sequential icache fast path
   // Tracks position within current icache line for back-to-back sequential fetches.

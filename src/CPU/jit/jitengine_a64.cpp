@@ -1263,6 +1263,7 @@ static constexpr A64OpClass classify_a64_op(uint32_t ins, bool pal_block,
         case AlphaIPRWriteKind::Helper:
         case AlphaIPRWriteKind::Noop:
           return {A64OpKind::kHwMtpr, A64TerminatorKind::kNone, 0, 0};
+        case AlphaIPRWriteKind::BcacheControl:
         case AlphaIPRWriteKind::HelperTerminator:
           return {A64OpKind::kHwMtpr, A64TerminatorKind::kRedispatch, 0, 0};
         case AlphaIPRWriteKind::Interpreter: break;
@@ -4632,12 +4633,14 @@ static A64OpEmitReceipt emit_a64_hw_mtpr(A64EmitContext& context,
     return a64_completed_op_receipt(op, err);
   }
 
-  const Error err = emit_a64_helper_call(context.assembler, context.offsets,
+  Error err = emit_a64_helper_call(context.assembler, context.offsets,
       context.helpers, context.regs, context.pal_shadow,
       context.helpers.hw_mtpr_helper,
       {{A64CallArgKind::kCpu, 0},
        {A64CallArgKind::kImm32, op.ins},
        {A64CallArgKind::kGuestOrZero, op.rb}});
+  if (err == Error::kOk && slot)
+    err = emit_a64_pal_temp_write(context, op, index, slot);
   return a64_completed_op_receipt(op, err);
 }
 
@@ -4674,7 +4677,7 @@ static A64OpEmitReceipt emit_a64_hw_ld(A64EmitContext& context,
     physical_done = a.new_label();
     // Check the original PA unsigned before rounding down. Page-aligned DRAM
     // contains the whole aligned access; MMIO keeps its original helper input.
-    err = emit_a64_load_cpu_u64(a, RA::kScratch0, context.offsets.dram_size);
+    err = emit_a64_load_cpu_u64(a, RA::kScratch0, context.offsets.direct_ram_size);
     if (err == Error::kOk) err = a.cmp(RA::kScratch4, RA::kScratch0);
     if (err == Error::kOk) err = a.b_hs(physical_slow);
     if (err == Error::kOk)
@@ -4774,7 +4777,7 @@ static A64OpEmitReceipt emit_a64_hw_st(A64EmitContext& context,
 
 #ifndef JIT_VERIFY
   const Label physical_slow = a.new_label(), physical_done = a.new_label();
-  if (err == Error::kOk) err = emit_a64_load_cpu_u64(a, RA::kScratch0, context.offsets.dram_size);
+  if (err == Error::kOk) err = emit_a64_load_cpu_u64(a, RA::kScratch0, context.offsets.direct_ram_size);
   if (err == Error::kOk) err = a.cmp(RA::kScratch4, RA::kScratch0);
   if (err == Error::kOk) err = a.b_hs(physical_slow);
   if (err == Error::kOk)

@@ -921,12 +921,18 @@ u64 CAlphaCPU::read_ipr(u32 instruction, AlphaIPRReadDescriptor descriptor, u64 
 
 void CAlphaCPU::write_pal_temp(unsigned slot, u64 value, u64 issue)
 {
+	// 21064 HRM 4.6, restriction 1: a next-cycle HW_MFPR can read the old PAL_TEMP.
 	m_pal_temp_write = {issue + 1, state.current_pc + 4, slot, state.r[slot]};
 	state.r[slot] = value;
 }
 
 void CAlphaCPU::write_ipr(u32 instruction, u64 value, AlphaIPRWriteContext context)
 {
+	if (m_profile.ipr_write.indexed &&
+	    m_profile.ipr_write.describe(instruction, (state.current_pc & 1) != 0) == AlphaIPRWriteKind::BcacheControl) {
+		configure_ev4_bcache(value);
+		return;
+	}
 	m_profile.ipr_write.write(*this, instruction, value, context);
 }
 
@@ -1109,7 +1115,7 @@ void CAlphaCPU::init()
 		o.jit_mode_bit = (uint32_t)((char*)&m_jit_mode_bit - (char*)this);
 		o.jit_asn = (uint32_t)((char*)&m_jit_asn - (char*)this);
 		o.dram_ptr = (uint32_t)((char*)&dram_ptr - (char*)this);
-		o.dram_size = (uint32_t)((char*)&dram_size - (char*)this);
+		o.direct_ram_size = (uint32_t)((char*)&direct_ram_size - (char*)this);
 		o.state_pc = (uint32_t)((char*)&state.pc - (char*)this);
 		o.state_current_pc = (uint32_t)((char*)&state.current_pc - (char*)this);
 		o.jit_budget = (uint32_t)((char*)&m_jit_budget - (char*)this);
@@ -1192,6 +1198,7 @@ void CAlphaCPU::init()
 
 	dram_ptr = cSystem->PtrToMem(0);
 	dram_size = U64(1) << cSystem->get_memory_bits();
+	direct_ram_size = dram_size;
 
 	flush_data_page_cache();
 
@@ -1209,9 +1216,21 @@ void CAlphaCPU::init()
 	}
 }
 
+void CAlphaCPU::configure_ev4_bcache(u64 value)
+{
+	m_ev4_bcache.control = value & Ev4Bcache::control_mask;
+	const u64 limit = (m_ev4_bcache.control & 1) ? 0 : dram_size;
+	if (direct_ram_size != limit)
+	{
+		direct_ram_size = limit;
+		flush_data_page_cache();
+	}
+}
+
 void CAlphaCPU::ResetForSystemReset()
 {
 	const int savedProcNum = state.iProcNum;
+	m_ev4_bcache = {};
 
 	if (m_idle_armed)
 		cSystem->idle_watch_disarm(savedProcNum);   // the memset clears iProcNum
@@ -1268,6 +1287,7 @@ void CAlphaCPU::ResetForSystemReset()
 
 	dram_ptr = cSystem->PtrToMem(0);
 	dram_size = U64(1) << cSystem->get_memory_bits();
+	direct_ram_size = dram_size;
 
 	flush_data_page_cache();
 
@@ -1821,15 +1841,19 @@ void CAlphaCPU::jit_run(int budget)
 			m_verify_issue_base = state.instruction_count;
 			const auto& verify = m_profile.cpu_state.verify;
 			const size_t swap_bytes = m_profile.ipr_write.indexed ? sizeof(m_pal_temp_write) : 0;
-			const int ipr_count = verify.word_count + (int)(swap_bytes / sizeof(u64));
+			const int biu_index = verify.word_count + (int)(swap_bytes / sizeof(u64));
+			const bool verify_biu = m_profile.ipr_write.indexed != nullptr;
+			const int ipr_count = biu_index + verify_biu;
 			auto cap_iprs = [&](u64* d) {
 				if (verify.word_count) verify.capture(*this, d);
 				if (swap_bytes) memcpy(d + verify.word_count, &m_pal_temp_write, swap_bytes);
+				if (verify_biu) d[biu_index] = m_ev4_bcache.control;
 			};
 			auto put_iprs = [&](const u64* s, bool replay) {
 				if (verify.word_count)
 					(replay ? verify.prepare_replay : verify.restore)(*this, s);
 				if (swap_bytes) memcpy(&m_pal_temp_write, s + verify.word_count, swap_bytes);
+				if (verify_biu) configure_ev4_bcache(s[biu_index]);
 				if (!replay) sync_register_bank();
 			};
 			auto ipr_ne = [&](int ii, u64 x, u64 y, bool side_exit = false) {
@@ -2389,7 +2413,7 @@ int CAlphaCPU::jit_unaligned_rw(CAlphaCPU* cpu, u64 va, int size_bits, u32 ins, 
 		{
 			if (cpu->virt2phys(a, &phys[k], rw ? ACCESS_WRITE : ACCESS_READ, nullptr, ins)) return 2;
 			dpc.phys_base = phys[k] & ~U64(0x1FFF);
-			dpc.host_bias = ((phys[k] | U64(0x1FFF)) < cpu->dram_size)
+			dpc.host_bias = ((phys[k] | U64(0x1FFF)) < cpu->direct_ram_size)
 				? ((u64)cpu->dram_ptr + (phys[k] & ~U64(0x1FFF)) - vp) : 0;
 			dpc.virt_page = dpc.host_bias
 				? (rw ? cpu->write_dpc_tag(vp, phys[k]) : vp) : ~U64(0);
@@ -2399,13 +2423,12 @@ int CAlphaCPU::jit_unaligned_rw(CAlphaCPU* cpu, u64 va, int size_bits, u32 ins, 
 		}
 	}
 	if (phys[0] >= cpu->dram_size || phys[1] >= cpu->dram_size) return 1;   // MMIO: interpreter
-	u8* p = (u8*)cpu->dram_ptr;
 	u64 v = rw ? *data : 0;
 	for (int k = 0; k < n; ++k)
 	{
 		const u64 pa = (k < n1) ? phys[0] + k : phys[1] - (n - 1 - k);
-		if (rw) cpu->cSystem->cpu_write_ram(pa, 8, (u8)(v >> (k * 8)));
-		else    v |= (u64)p[pa] << (k * 8);
+		if (rw) cpu->write_physical(pa, 8, (u8)(v >> (k * 8)));
+		else    v |= cpu->read_physical(pa, 8) << (k * 8);
 	}
 	if (!rw) *data = v;
 	return 0;
@@ -2453,7 +2476,7 @@ int CAlphaCPU::jit_read(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 			phys = e.phys | (va & e.keep_mask);
 		}
 		dpc.phys_base = phys & ~U64(0x1FFF);
-		dpc.host_bias = ((phys | U64(0x1FFF)) < cpu->dram_size)
+		dpc.host_bias = ((phys | U64(0x1FFF)) < cpu->direct_ram_size)
 			? ((u64)cpu->dram_ptr + (phys & ~U64(0x1FFF)) - vp) : 0;
 		dpc.virt_page = dpc.host_bias ? vp : ~U64(0);
 		dpc.cm = (u8)access.mode;
@@ -2487,7 +2510,7 @@ int CAlphaCPU::jit_read(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 		return 0;
 	}
 
-	*out = dram_read(cpu->dram_ptr, phys, size_bits);
+	*out = cpu->read_physical(phys, size_bits);
 	return 0;
 }
 
@@ -2711,7 +2734,7 @@ int CAlphaCPU::jit_read_locked(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 			phys = e.phys | (va & e.keep_mask);
 		}
 		dpc.phys_base = phys & ~U64(0x1FFF);
-		dpc.host_bias = ((phys | U64(0x1FFF)) < cpu->dram_size)
+		dpc.host_bias = ((phys | U64(0x1FFF)) < cpu->direct_ram_size)
 			? ((u64)cpu->dram_ptr + (phys & ~U64(0x1FFF)) - vp) : 0;
 		dpc.virt_page = dpc.host_bias ? vp : ~U64(0);
 		dpc.cm = (u8)access.mode;
@@ -2809,7 +2832,7 @@ int CAlphaCPU::jit_read_vpte(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 		return 0;
 	}
 
-	*out = dram_read(cpu->dram_ptr, phys, size_bits);
+	*out = cpu->read_physical(phys, size_bits);
 	return 0;
 }
 
@@ -2852,7 +2875,7 @@ int CAlphaCPU::jit_read_wchk(CAlphaCPU* cpu, u64 va, int size_bits, u64* out)
 		return 0;
 	}
 
-	*out = dram_read(cpu->dram_ptr, phys, size_bits);
+	*out = cpu->read_physical(phys, size_bits);
 	return 0;
 }
 
@@ -2885,7 +2908,7 @@ int CAlphaCPU::jit_read_phys(CAlphaCPU* cpu, u64 phys, int size_bits, u64* out)
 	}
 
 	phys &= ~((u64)(size_bits / 8) - 1);     // align like READ_PHYS_NT (ALIGN_PHYS)
-	*out = dram_read(cpu->dram_ptr, phys, size_bits);
+	*out = cpu->read_physical(phys, size_bits);
 	return 0;
 }
 
@@ -2945,7 +2968,7 @@ int CAlphaCPU::jit_write(CAlphaCPU* cpu, u64 va, u64 descr, u64 value)
 			phys = e.phys | (va & e.keep_mask);
 		}
 		dpc.phys_base = phys & ~U64(0x1FFF);
-		dpc.host_bias = ((phys | U64(0x1FFF)) < cpu->dram_size)
+		dpc.host_bias = ((phys | U64(0x1FFF)) < cpu->direct_ram_size)
 			? ((u64)cpu->dram_ptr + (phys & ~U64(0x1FFF)) - vp) : 0;
 		dpc.virt_page = dpc.host_bias ? cpu->write_dpc_tag(vp, phys) : ~U64(0);
 		dpc.cm = (u8)access.mode;
@@ -2953,10 +2976,7 @@ int CAlphaCPU::jit_write(CAlphaCPU* cpu, u64 va, u64 descr, u64 value)
 		dpc.valid = dpc.host_bias != 0;
 	}
 
-	if (phys < cpu->dram_size)
-		cpu->cSystem->cpu_write_ram(phys, size_bits, value);
-	else
-		cpu->cSystem->WriteMem(phys, size_bits, value, cpu);
+	cpu->write_physical(phys, size_bits, value);
 	return 0;
 }
 
@@ -2985,7 +3005,7 @@ int CAlphaCPU::jit_write_phys(CAlphaCPU* cpu, u64 phys, int size_bits, u64 value
 	phys &= ~((u64)(size_bits / 8) - 1);     // align like WRITE_PHYS_NT (ALIGN_PHYS)
 	if (phys >= cpu->dram_size)
 		return 1;                              // MMIO: let the interpreter do the ordered write
-	cpu->cSystem->cpu_write_ram(phys, size_bits, value);
+	cpu->write_physical(phys, size_bits, value);
 	return 0;
 }
 
@@ -3045,7 +3065,7 @@ u64 CAlphaCPU::jit_stc(CAlphaCPU* cpu, u64 va, u64 descr, u64 value)
 			phys = e.phys | (va & e.keep_mask);
 		}
 		dpc.phys_base = phys & ~U64(0x1FFF);
-		dpc.host_bias = ((phys | U64(0x1FFF)) < cpu->dram_size)
+		dpc.host_bias = ((phys | U64(0x1FFF)) < cpu->direct_ram_size)
 			? ((u64)cpu->dram_ptr + (phys & ~U64(0x1FFF)) - vp) : 0;
 		dpc.virt_page = dpc.host_bias ? cpu->write_dpc_tag(vp, phys) : ~U64(0);
 		dpc.cm = (u8)access.mode;
@@ -4172,11 +4192,17 @@ int CAlphaCPU::SaveState(FILE* f)
 	}
 
 	const bool save_swap = m_profile.ipr_write.indexed != nullptr;
-	const long ss = sizeof(state) + (save_swap ? sizeof(m_pal_temp_write) : 0);
+	const auto& cache = m_ev4_bcache;
+	const bool save_cache = save_swap && (cache.control || !cache.tags.empty());
+	const long ss = static_cast<long>(sizeof(state) + (save_swap ? sizeof(m_pal_temp_write) : 0)
+		+ (save_cache ? sizeof(cache.control) + cache.tags.size() * sizeof(u64) : 0));
 	if (fwrite(&signature->begin, sizeof(signature->begin), 1, f) != 1 ||
 		fwrite(&ss, sizeof(ss), 1, f) != 1 ||
 		fwrite(&state, sizeof(state), 1, f) != 1 ||
 		(save_swap && fwrite(&m_pal_temp_write, sizeof(m_pal_temp_write), 1, f) != 1) ||
+		(save_cache && fwrite(&cache.control, sizeof(cache.control), 1, f) != 1) ||
+		(save_cache && !cache.tags.empty() &&
+			fwrite(cache.tags.data(), sizeof(u64), cache.tags.size(), f) != cache.tags.size()) ||
 		fwrite(&signature->end, sizeof(signature->end), 1, f) != 1)
 		return -1;
 	printf("%s: %d bytes saved.\n", devid_string, (int)ss);
@@ -4220,17 +4246,34 @@ int CAlphaCPU::RestoreState(FILE* f)
 		return -1;
 	}
 
-	const bool has_swap = m_profile.ipr_write.indexed
-		&& ss == sizeof(state) + sizeof(m_pal_temp_write);
+	const bool indexed = m_profile.ipr_write.indexed != nullptr;
+	const long swap_size = sizeof(state) + sizeof(m_pal_temp_write);
+	const long cache_header = swap_size + sizeof(u64);
+	const bool has_cache = indexed && ss >= cache_header;
+	const bool has_swap = indexed && (ss == swap_size || has_cache);
 	if (ss != sizeof(state) && !has_swap)
 	{
 		printf("%s: STRUCT SIZE does not match!\n", devid_string);
 		return -1;
 	}
 
-	std::vector<u8> saved(ss);
-	r = fread(saved.data(), saved.size(), 1, f);
-	if (r != 1)
+	Ev4Bcache cache;
+	if (has_cache)
+	{
+		const long bytes = ss - cache_header;
+		const long min_bytes = Ev4Bcache::line_count(0) * sizeof(u64);
+		const long max_bytes = Ev4Bcache::line_count(U64(7) << 28) * sizeof(u64);
+		if (bytes && (bytes < min_bytes || bytes > max_bytes || (bytes & (bytes - 1))))
+		{
+			printf("%s: invalid EV4 Bcache size!\n", devid_string);
+			return -1;
+		}
+		cache.tags.resize(bytes / sizeof(u64));
+	}
+	std::vector<u8> saved(has_swap ? swap_size : sizeof(state));
+	if (fread(saved.data(), saved.size(), 1, f) != 1 ||
+		(has_cache && fread(&cache.control, sizeof(cache.control), 1, f) != 1) ||
+		(!cache.tags.empty() && fread(cache.tags.data(), sizeof(u64), cache.tags.size(), f) != cache.tags.size()))
 	{
 		printf("%s: unexpected end of file!\n", devid_string);
 		return -1;
@@ -4249,11 +4292,31 @@ int CAlphaCPU::RestoreState(FILE* f)
 		return -1;
 	}
 
+	if (cache.control & ~Ev4Bcache::control_mask)
+	{
+		printf("%s: invalid EV4 Bcache control!\n", devid_string);
+		return -1;
+	}
+	for (size_t i = 0; i < cache.tags.size(); ++i)
+	{
+		const u64 tag = cache.tags[i];
+		if (tag != UINT64_MAX && (tag >= dram_size || tag >> 34 || (tag & 31) ||
+			((tag >> 5) & (cache.tags.size() - 1)) != i))
+		{
+			printf("%s: invalid EV4 Bcache tag!\n", devid_string);
+			return -1;
+		}
+	}
 	memcpy(&state, saved.data(), sizeof(state));
 	if (has_swap)
 		memcpy(&m_pal_temp_write, saved.data() + sizeof(state), sizeof(m_pal_temp_write));
 	else
 		m_pal_temp_write = {};
+	if (indexed)
+	{
+		configure_ev4_bcache(cache.control);
+		m_ev4_bcache.tags.swap(cache.tags);
+	}
 	reset_idle_detector();
 	printf("%s: %d bytes restored.\n", devid_string, (int)ss);
 	if (m_profile.cpu_state.replaced)

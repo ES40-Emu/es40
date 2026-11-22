@@ -604,7 +604,7 @@ inline u64 fsqrt64(u64 asig, s32 exp)
         if (virt2phys(_dpc_va, &phys_address, flags, NULL, ins))                \
           ES40_EXECUTE_END();                                                   \
         _dpc.phys_base = phys_address & ~U64(0x1FFF);                           \
-        _dpc.host_bias = ((phys_address | U64(0x1FFF)) < dram_size)                 \
+        _dpc.host_bias = ((phys_address | U64(0x1FFF)) < direct_ram_size)           \
                          ? ((u64) dram_ptr + (phys_address & ~U64(0x1FFF))           \
                             - _dpc_vp) : 0;                                         \
         _dpc.virt_page = _dpc.host_bias                                         \
@@ -663,9 +663,7 @@ inline u64 fsqrt64(u64 asig, s32 exp)
 #endif
 
 #define READ_PHYS(size)                                 \
-  (phys_address < dram_size                             \
-    ? dram_read(dram_ptr, phys_address, size)           \
-    : cSystem->ReadMem(phys_address, size, this));      \
+  read_physical(phys_address, size);                    \
   LLR
 
 #define READ_VIRT(va, size, dest)                       \
@@ -677,10 +675,10 @@ inline u64 fsqrt64(u64 asig, s32 exp)
     dest = 0;                                           \
     for (int ii=0; ii<(size/8); ii++) {                 \
       DATA_PHYS(_ua_va+ii, ACCESS_READ,0);             \
-      dest |= (cSystem->ReadMem(phys_address, 8, this) << (ii*8));  \
+      dest |= read_physical(phys_address, 8) << (ii*8); \
     }                                                   \
   } else {                                              \
-    dest = (phys_address < dram_size ? dram_read(dram_ptr, phys_address, size) : cSystem->ReadMem(phys_address, size, this));  \
+    dest = read_physical(phys_address, size);           \
   }
 
 #define READ_VIRT_LOCK(va, size, dest)                  \
@@ -697,11 +695,11 @@ inline u64 fsqrt64(u64 asig, s32 exp)
     u64 aa = 0;                                           \
     for (int ii=0; ii<(size/8); ii++) {                   \
       DATA_PHYS(va+ii, ACCESS_READ,0);                    \
-      aa |= (cSystem->ReadMem(phys_address, 8, this) << (ii*8));  \
+      aa |= read_physical(phys_address, 8) << (ii*8);     \
     }                                                     \
     dest = f(aa);                                         \
   } else {                                                \
-    dest = f((phys_address < dram_size ? dram_read(dram_ptr, phys_address, size) : cSystem->ReadMem(phys_address, size, this))); \
+    dest = f(read_physical(phys_address, size));          \
   }                                                       \
 
 #define READ_VIRT_LOCK_F(va, size, dest, f)               \
@@ -716,12 +714,7 @@ inline u64 fsqrt64(u64 asig, s32 exp)
   * operating system decides whether to emulate the faulting instruction.
   **/
 #define WRITE_PHYS(data, size)                         \
-  if (phys_address < dram_size)                        \
-  {                                                     \
-    cSystem->cpu_write_ram(phys_address, size, data);  \
-  }                                                     \
-  else                                                 \
-    cSystem->WriteMem(phys_address, size, data, this); \
+  write_physical(phys_address, size, data);            \
   LWR
 
 #define WRITE_VIRT(va, size, src)                           \
@@ -732,21 +725,11 @@ inline u64 fsqrt64(u64 asig, s32 exp)
     u64 aa = src;                                           \
     for (int ii=0; ii<(size/8); ii++) {                     \
       DATA_PHYS(va+ii, ACCESS_WRITE, 0);                    \
-      if (phys_address < dram_size)                         \
-      {                                                     \
-        cSystem->cpu_write_ram(phys_address, 8, aa);        \
-      }                                                     \
-      else                                                  \
-        cSystem->WriteMem(phys_address, 8, aa, this);       \
+      write_physical(phys_address, 8, aa);                  \
       aa >>= 8;                                             \
     }                                                       \
   } else {                                                  \
-    if (phys_address < dram_size)                           \
-    {                                                       \
-      cSystem->cpu_write_ram(phys_address, size, src);      \
-    }                                                       \
-    else                                                    \
-      cSystem->WriteMem(phys_address, size, src, this);     \
+    write_physical(phys_address, size, src);                \
   }
 
 #define WRITE_VIRT_COND(va, size, src, dest)                \
@@ -776,9 +759,7 @@ inline u64 fsqrt64(u64 asig, s32 exp)
    * address.
    **/
 #define READ_PHYS_NT(size)                                         \
-  (ALIGN_PHYS((size) / 8) < dram_size                              \
-    ? dram_read(dram_ptr, ALIGN_PHYS((size) / 8), size)            \
-    : cSystem->ReadMem(ALIGN_PHYS((size) / 8), size, this));       \
+  read_physical(ALIGN_PHYS((size) / 8), size);                     \
   LLR;
 
    /**
@@ -787,18 +768,9 @@ inline u64 fsqrt64(u64 asig, s32 exp)
     * inhibited. We'll align the adress and write using the aligned
     * address.
     **/
-#if defined(IDB)
 #define WRITE_PHYS_NT(data, size)                                          \
-  { u64 _pa = ALIGN_PHYS((size) / 8);                                     \
-    if (_pa < dram_size) { cSystem->cpu_write_ram(_pa, size, data); } \
-    else cSystem->WriteMem(_pa, size, data, this); }                       \
+  write_physical(ALIGN_PHYS((size) / 8), size, data);                     \
   LWR
-#else
-#define WRITE_PHYS_NT(data, size)                                          \
-  { u64 _pa = ALIGN_PHYS((size) / 8);                                     \
-    if (_pa < dram_size) { cSystem->cpu_write_ram(_pa, size, data); } \
-    else cSystem->WriteMem(_pa, size, data, this); }
-#endif
 
 #define REG_1         RREG(I_GETRA(ins))
 #define REG_2         RREG(I_GETRB(ins))

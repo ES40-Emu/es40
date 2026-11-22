@@ -345,6 +345,7 @@ SafeOp classify(uint32_t ins, bool pal_block, const AlphaIPRReadPolicy& ipr_read
         case AlphaIPRWriteKind::ExceptionAddress: return OP_HW_MTPR_EXC_ADDR;
         case AlphaIPRWriteKind::PalTemp: return OP_HW_MTPR_PAL_TEMP;
         case AlphaIPRWriteKind::Helper: return OP_HW_MTPR;
+        case AlphaIPRWriteKind::BcacheControl:
         case AlphaIPRWriteKind::HelperTerminator: return OP_HW_MTPR_TERM;
         case AlphaIPRWriteKind::Noop: return OP_NOP;
         case AlphaIPRWriteKind::Interpreter: return OP_NONE;
@@ -1581,7 +1582,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
                 physical_done = a.new_label();
                 // DRAM is page-aligned. Test the original address so MMIO reaches
                 // the helper unchanged; HW_LD rounds down without alignment faults.
-                a.cmp(x86::rdx, x86::qword_ptr(x86::rbp, m_off.dram_size));
+                a.cmp(x86::rdx, x86::qword_ptr(x86::rbp, m_off.direct_ram_size));
                 a.jae(physical_slow);
                 a.and_(x86::rdx, imm(-(size_bits / 8)));
                 a.mov(x86::r10, x86::qword_ptr(x86::rbp, m_off.dram_ptr));
@@ -1671,9 +1672,16 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             continue;
         }
 
-        if (op == OP_HW_MTPR_PAL_TEMP) {
+        if (op == OP_HW_MTPR_PAL_TEMP || op == OP_HW_MTPR_TERM) {
             unsigned slot = 0;
             m_profile.ipr_write.describe(ins, pal_block, &slot);
+            // The family marks writes that change compiled assumptions as terminators.
+            // Run the helper, publish the next PC and redispatch under the new state.
+            if (op == OP_HW_MTPR_TERM) {
+                emit_call(hw_mtpr_helper, { {JA_CPU, 0}, {JA_I32, (uint64_t)ins}, {JA_GPZ, (uint64_t)rb} });
+                set_pc(b->tag + 4 * (uint64_t)(i + 1));                // next PC -> R10 + state.pc (PALmode bit preserved)
+                if (!slot) continue;
+            }
             const auto temp = x86::qword_ptr(x86::rbx, slot * 8);
             a.mov(x86::rax, temp);
             a.mov(x86::qword_ptr(x86::rbp, m_off.pal_temp_old), x86::rax);
@@ -1696,14 +1704,6 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             continue;
         }
 
-        // The family marks writes that change compiled assumptions as terminators.
-        // Run the helper, publish the next PC and redispatch under the new state.
-        if (op == OP_HW_MTPR_TERM) {
-            emit_call(hw_mtpr_helper, { {JA_CPU, 0}, {JA_I32, (uint64_t)ins}, {JA_GPZ, (uint64_t)rb} });
-            set_pc(b->tag + 4 * (uint64_t)(i + 1));                // next PC -> R10 + state.pc (PALmode bit preserved)
-            continue;
-        }
-
         // HW_ST physical: the family selects the width and displacement; the source is Ra.
         // DRAM writes inline; the helper retains verification replay and MMIO retry.
         if (op == OP_HW_STL || op == OP_HW_STQ) {
@@ -1712,7 +1712,7 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             emit_address(store.displacement);                         // phys addr -> RDX
 #ifndef JIT_VERIFY
             const Label physical_slow = a.new_label(), physical_done = a.new_label();
-            a.cmp(x86::rdx, x86::qword_ptr(x86::rbp, m_off.dram_size));
+            a.cmp(x86::rdx, x86::qword_ptr(x86::rbp, m_off.direct_ram_size));
             a.jae(physical_slow);
             a.and_(x86::rdx, imm(-(size_bits / 8)));
             a.mov(x86::r10, x86::qword_ptr(x86::rbp, m_off.dram_ptr));

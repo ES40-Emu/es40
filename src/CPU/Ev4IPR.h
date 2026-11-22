@@ -78,6 +78,11 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
   const auto selector = ev4_ipr_selector(instruction);
   if (ev4_ipr_ignored(selector, pal_mode))
     return AlphaIPRWriteKind::Noop;
+  // 21064 HRM 4.8.1, Table 4-7: ABX[18] writes BIU_CTL; PAL also selects PAL_TEMP18.
+  if (selector.index == 18 && (selector.banks == 0x40 || selector.banks == 0xc0)) {
+    if (slot) *slot = (selector.banks & 0x80) ? 32u + selector.index : 0;
+    return AlphaIPRWriteKind::BcacheControl;
+  }
   if (selector.banks == 0x80) { // PAL_TEMP only.
     if (slot) *slot = 32u + selector.index;
     return AlphaIPRWriteKind::PalTemp;

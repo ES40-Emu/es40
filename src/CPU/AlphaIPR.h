@@ -71,6 +71,7 @@ enum class AlphaIPRWriteKind
   Interpreter,
   Helper,
   HelperTerminator,
+  BcacheControl, // Ends the block after switching the physical memory path.
   ExceptionAddress, // Write PC[63:2] and PAL[0].
   PalTemp,
   Noop // No write callback; privilege checks still apply.
@@ -95,7 +96,7 @@ struct AlphaIPRWritePolicy
 
   Write write = nullptr;
   Describe plain = nullptr;
-  DescribeWithSlot indexed = nullptr; // Supplies the register-file slot for PAL_TEMP writes.
+  DescribeWithSlot indexed = nullptr; // PAL_TEMP destination, including a parallel helper write.
 
   constexpr AlphaIPRWritePolicy(Write fn = nullptr, std::nullptr_t = nullptr) : write(fn) {}
   constexpr AlphaIPRWritePolicy(Write fn, Describe decode) : write(fn), plain(decode) {}

@@ -101,10 +101,12 @@
   const auto kind = m_profile.ipr_write.describe(ins, (state.current_pc & 1) != 0, &slot); \
   if (kind == AlphaIPRWriteKind::ExceptionAddress)                            \
     state.exc_addr = state.r[REG_2] & kAlphaIPRExceptionAddressMask;          \
-  else if (kind == AlphaIPRWriteKind::PalTemp)                                \
-    write_pal_temp(slot, state.r[REG_2], state.instruction_count + _icount_accum); \
-  else if (kind != AlphaIPRWriteKind::Noop)                                   \
-    write_ipr(ins, state.r[REG_2], AlphaIPRWriteContext::Interpreter);          \
+  else if (kind != AlphaIPRWriteKind::Noop) {                                 \
+    const u64 value = state.r[REG_2];                                         \
+    if (kind != AlphaIPRWriteKind::PalTemp)                                   \
+      write_ipr(ins, value, AlphaIPRWriteContext::Interpreter);                \
+    if (slot) write_pal_temp(slot, value, state.instruction_count + _icount_accum); \
+  }                                                                           \
 } while (0)
 
 // Family return rules feed the shared executor after the hardware-access check.

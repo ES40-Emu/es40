@@ -116,7 +116,7 @@ int Ev4InstructionFetch::fetch(CAlphaCPU& cpu, u32* instruction)
   if (!cache_hit(cpu, physical)) {
     u32 words[line_words];
     for (unsigned i = 0; i < line_words; ++i) {
-      const u32 word = static_cast<u32>(cpu.cSystem->ReadMem(base + 4 * i, 32, &cpu));
+      const u32 word = static_cast<u32>(cpu.cSystem->ReadMem(cpu.bus_address(base + 4 * i), 32, &cpu));
       words[i] = endian_32(word);
     }
 #ifdef ES40_JIT

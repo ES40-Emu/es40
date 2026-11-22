@@ -66,6 +66,9 @@ constexpr AlphaIPRReadDescriptor ev4_describe_ipr_read(std::uint32_t instruction
   // Reading VA unlocks VA and MM_CSR even to R31 (21064 HRM Table 4-7, 5.3.4, 5.3.5).
   if (selector.banks == 0x40 && selector.index == 5)
     return {AlphaIPRReadKind::LatchedFaultAddress, false, false};
+  // DC_ADDR unlocks DC_STAT even to R31 (21064-AA data sheet, Table 3-2 and 3.10.2).
+  if (selector.banks == 0x40 && selector.index == 11)
+    return {AlphaIPRReadKind::UnlockDcacheStatus, false, false};
   if (selector.banks == 0x20 && selector.index == 9) // PS.
     return {AlphaIPRReadKind::Helper, false, true};
   if (selector.banks == 0x20 && selector.index == 10) // EXC_SUM shifts MSK, even to R31.

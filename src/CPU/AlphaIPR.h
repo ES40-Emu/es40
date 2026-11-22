@@ -45,6 +45,7 @@ enum class AlphaIPRReadKind
   MemoryFaultStatus,
   FaultAddress,
   LatchedFaultAddress,
+  UnlockDcacheStatus,
   Noop // No read or destination write; privilege checks still apply.
 };
 

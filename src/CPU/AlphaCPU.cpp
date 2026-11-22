@@ -923,6 +923,10 @@ u64 CAlphaCPU::read_ipr(u32 instruction, AlphaIPRReadDescriptor descriptor, u64 
 		state.ev4_va_locked = 0;
 		return state.fault_va;
 	}
+	if (descriptor.kind == AlphaIPRReadKind::UnlockDcacheStatus) {
+		state.ev4_dc_stat_unlocked = 1;
+		return 0; // The 21064-AA data sheet (3.10.2) specifies only the unlock.
+	}
 	return m_profile.ipr_read.read(*this, instruction);
 }
 
@@ -1921,7 +1925,7 @@ void CAlphaCPU::jit_run(int budget)
 			const size_t swap_bytes = m_profile.ipr_write.indexed ? sizeof(m_pal_temp_write) : 0;
 			const int biu_index = verify.word_count + (int)(swap_bytes / sizeof(u64));
 			const bool verify_indexed_iprs = m_profile.ipr_write.indexed != nullptr;
-			const int ipr_count = biu_index + (verify_indexed_iprs ? 20 : 0);
+			const int ipr_count = biu_index + (verify_indexed_iprs ? 22 : 0);
 			auto cap_iprs = [&](u64* d) {
 				if (verify.word_count) verify.capture(*this, d);
 				if (swap_bytes) memcpy(d + verify.word_count, &m_pal_temp_write, swap_bytes);
@@ -1946,6 +1950,8 @@ void CAlphaCPU::jit_run(int budget)
 					d[biu_index + 17] = state.fault_va;
 					d[biu_index + 18] = state.mm_stat;
 					d[biu_index + 19] = state.ev4_va_locked;
+					d[biu_index + 20] = state.dc_stat;
+					d[biu_index + 21] = state.ev4_dc_stat_unlocked;
 				}
 			};
 			auto put_iprs = [&](const u64* s, bool replay) {
@@ -1973,6 +1979,8 @@ void CAlphaCPU::jit_run(int budget)
 					state.fault_va = s[biu_index + 17];
 					state.mm_stat = s[biu_index + 18];
 					state.ev4_va_locked = static_cast<u8>(s[biu_index + 19]);
+					state.dc_stat = s[biu_index + 20];
+					state.ev4_dc_stat_unlocked = static_cast<u8>(s[biu_index + 21]);
 				}
 				if (!replay) sync_register_bank();
 			};

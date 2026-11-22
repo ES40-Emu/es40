@@ -885,6 +885,7 @@ private:
     int   smc;            /**< IPR M_CTL: smc (speculative miss control) [HRM p 5-29..30] */
     bool  sde;            /**< IPR I_CTL: sde[1] (PALshadow enable) [HRM p 5-15..18] */
     u8    ev4_va_locked;  // VA and MM_CSR share a lock (21064 HRM 5.3.5). Uses saved-state padding.
+    u8    ev4_dc_stat_unlocked; // Model the potentially locked reset state as locked (21064-AA data sheet, Table 3-8).
     u64   fault_va;       /**< IPR VA: virtual address of last Dstream miss or fault [HRM p 5-4] */
     u64   va_form_va;     /**< Address used for VA_FORM computation (may differ from VA for VPTE) */
     u64   exc_sum;        /**< IPR EXC_SUM: exception summary [HRM p 5-13..15] */

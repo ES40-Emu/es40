@@ -35,6 +35,14 @@ struct Ev4IPRSelector
   std::uint32_t banks;
 };
 
+// The two BIU error groups can power up locked and survive reset (21064 HRM 5.3.18, Table 5-20).
+struct Ev4BIUDiagnostics
+{
+  std::uint64_t bus_address = 0, fill_address = 0;
+  std::uint16_t status = 0, fill_syndrome = 0;
+  std::uint16_t bus_unlocked = 0, fill_unlocked = 0;
+};
+
 // PAL[7], ABX[6], IBX[5], INDEX[4:0] (HRM Table 4-6).
 constexpr Ev4IPRSelector ev4_ipr_selector(std::uint32_t instruction)
 {
@@ -63,12 +71,21 @@ constexpr AlphaIPRReadDescriptor ev4_describe_ipr_read(std::uint32_t instruction
     return {AlphaIPRReadKind::PalTemp, false, true, static_cast<std::uint8_t>(selector.index)};
   if (selector.banks == 0x20 && selector.index == 4) // EXC_ADDR.
     return {AlphaIPRReadKind::ExceptionAddress, false, true};
-  // Reading VA unlocks VA and MM_CSR even to R31 (21064 HRM Table 4-7, 5.3.4, 5.3.5).
-  if (selector.banks == 0x40 && selector.index == 5)
-    return {AlphaIPRReadKind::Helper, false, false};
-  // DC_ADDR unlocks DC_STAT even to R31 (21064-AA data sheet, Table 3-2 and 3.10.2).
-  if (selector.banks == 0x40 && selector.index == 11)
-    return {AlphaIPRReadKind::Helper, false, false};
+  if (selector.banks == 0x40) {
+    switch (selector.index) {
+    // Reading VA unlocks VA and MM_CSR even to R31 (21064 HRM Table 4-7, 5.3.4, 5.3.5).
+    case 5:
+    // BIU_ADDR and FILL_ADDR unlock their groups even to R31 (21064 HRM 5.3.19-20).
+    case 9:
+    case 13:
+    // DC_ADDR unlocks DC_STAT even to R31 (21064-AA data sheet, Table 3-2 and 3.10.2).
+    case 11:
+      return {AlphaIPRReadKind::Helper, false, false};
+    case 10: // BIU_STAT
+    case 19: // FILL_SYNDROME
+      return {AlphaIPRReadKind::Helper, false, true};
+    }
+  }
   if (selector.banks == 0x20 && selector.index == 9) // PS.
     return {AlphaIPRReadKind::Helper, false, true};
   if (selector.banks == 0x20 && selector.index == 10) // EXC_SUM shifts MSK, even to R31.

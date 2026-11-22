@@ -32,6 +32,7 @@
 u64 ev4_read_ipr(CAlphaCPU& cpu, u32 instruction)
 {
   auto& state = cpu.state;
+  auto& biu = cpu.m_ev4_biu;
   switch (instruction & 0xff) {
   case 0x29: return ev4_read_processor_status(state.cm);
   case 0x2a: return ev4_read_exception_summary(cpu.ev4_arithmetic_state());
@@ -39,9 +40,19 @@ u64 ev4_read_ipr(CAlphaCPU& cpu, u32 instruction)
   case 0x45: // VA (21064 HRM 5.3.5).
     state.ev4_va_locked = 0;
     return state.fault_va;
+  case 0x49: // BIU_ADDR: PA[33:5]; model the unpredictable read-block/LDx_L bits as zero (HRM 5.3.19).
+    biu.bus_unlocked = true;
+    return biu.bus_address & U64(0x3ffffffe0);
+  case 0x4a: // BIU_STAT (21064 HRM Fig. 5-29).
+    return biu.status & 0x7fff;
   case 0x4b: // DC_ADDR (21064-AA data sheet, 3.10.2).
     state.ev4_dc_stat_unlocked = 1;
     return 0; // The data sheet specifies only the unlock.
+  case 0x4d: // FILL_ADDR: the low PA[4:2] are defined for D-stream fills (21064 HRM 5.3.20).
+    biu.fill_unlocked = true;
+    return biu.fill_address & ((biu.status & (1u << 11)) ? U64(0x3ffffffe0) : U64(0x3fffffffc));
+  case 0x53: // FILL_SYNDROME: BIU_CTL.ECC selects two syndromes or two parity bits (21064 HRM 5.3.15, 5.3.21).
+    return biu.fill_syndrome & ((cpu.m_ev4_bcache.control & 2) ? 0x3fff : 0x81);
   default:
     FAILURE_2(NotImplemented, "Unsupported EV4 HW_MFPR %08" PRIx32 " at PC %016" PRIx64,
               instruction, state.current_pc);

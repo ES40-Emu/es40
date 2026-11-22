@@ -30,8 +30,8 @@
 #include "AlphaCPU.h"
 #include <type_traits>
 
-template<typename State, typename Visit>
-inline void ev4_visit_ipr_state(State& state, Visit visit)
+template<typename State, typename BIU, typename Visit>
+inline void ev4_visit_ipr_state(State& state, BIU& biu, Visit visit)
 {
   visit(state.fault_va);
   visit(state.mm_stat);
@@ -45,22 +45,28 @@ inline void ev4_visit_ipr_state(State& state, Visit visit)
   visit(state.alt_cm);
   visit(state.pal_base);
   visit(state.cc_offset);
+  visit(biu.bus_address);
+  visit(biu.fill_address);
+  visit(biu.status);
+  visit(biu.fill_syndrome);
+  visit(biu.bus_unlocked);
+  visit(biu.fill_unlocked);
 }
 
 inline void ev4_capture_ipr_state(const CAlphaCPU& cpu, u64* words)
 {
-  ev4_visit_ipr_state(cpu.state, [&](const auto& field) { *words++ = field; });
+  ev4_visit_ipr_state(cpu.state, cpu.m_ev4_biu, [&](const auto& field) { *words++ = field; });
 }
 
 inline void ev4_restore_ipr_state(CAlphaCPU& cpu, const u64* words)
 {
-  ev4_visit_ipr_state(cpu.state, [&](auto& field) {
+  ev4_visit_ipr_state(cpu.state, cpu.m_ev4_biu, [&](auto& field) {
     field = static_cast<std::remove_reference_t<decltype(field)>>(*words++);
   });
 }
 
 inline constexpr AlphaJitVerifyPolicy kEv4JitVerifyPolicy{
-  12, &ev4_capture_ipr_state, &ev4_restore_ipr_state, &ev4_restore_ipr_state,
+  18, &ev4_capture_ipr_state, &ev4_restore_ipr_state, &ev4_restore_ipr_state,
   [](int, u64 left, u64 right, bool) { return left != right; }
 };
 

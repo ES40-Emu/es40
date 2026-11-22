@@ -232,6 +232,7 @@
 #include "Ev4ArithmeticTrap.h"
 #include "Ev4Bcache.h"
 #include "Ev4Dcache.h"
+#include "Ev4IPR.h"
 class CJitEngine;   // JIT block-cache engine (ES40_JIT builds)
 
   /// Number of entries in the Instruction Cache
@@ -640,6 +641,7 @@ private:
   u64    direct_ram_size = 0;
   Ev4Bcache m_ev4_bcache;
   Ev4Dcache m_ev4_dcache;
+  Ev4BIUDiagnostics m_ev4_biu;
   void configure_ev4_bcache(u64 value);
   void configure_ev4_dcache(u64 value, bool flush = true);
   void update_ev4_cache_limit();

@@ -1122,6 +1122,7 @@ void CAlphaCPU::init()
 #endif
 	memset(&state, 0, sizeof(state));
 	m_pal_temp_write = {};
+	m_ev4_biu = {};
 	reset_idle_detector();
 	if (m_profile.cpu_state.replaced)
 		m_profile.cpu_state.replaced(*this);
@@ -4293,14 +4294,16 @@ void CAlphaCPU::dump_registers() const
 	putchar('\n');
 }
 
-// Older indexed snapshots put BIU_CTL here. Its reserved bits leave this marker free.
+// Older indexed snapshots put BIU_CTL here. Its reserved bits leave these markers free.
 static constexpr u64 kEv4CacheSnapshotMarker = UINT64_MAX;
+static constexpr u64 kEv4BiuSnapshotMarker = UINT64_MAX - 1;
 struct Ev4CacheSnapshotHeader
 {
 	u64 biu_control;
 	u64 abox_control;
 	u64 dcache_lines;
 };
+static_assert(sizeof(Ev4BIUDiagnostics) == 24);
 
 /**
  * Save state to a Virtual Machine State file.
@@ -4317,20 +4320,24 @@ int CAlphaCPU::SaveState(FILE* f)
 	const bool save_swap = m_profile.ipr_write.indexed != nullptr;
 	const auto& cache = m_ev4_bcache;
 	const auto& dcache = m_ev4_dcache;
-	const bool save_dcache = save_swap && (dcache.control || !dcache.lines.empty());
+	const auto& biu = m_ev4_biu;
+	const bool save_biu = save_swap && (biu.bus_address || biu.fill_address || biu.status ||
+		biu.fill_syndrome || biu.bus_unlocked || biu.fill_unlocked);
+	const bool save_dcache = save_swap && (save_biu || dcache.control || !dcache.lines.empty());
 	const bool save_cache = save_swap && (save_dcache || cache.control || !cache.tags.empty());
-	const u64 cache_word = save_dcache ? kEv4CacheSnapshotMarker : cache.control;
+	const u64 cache_word = save_biu ? kEv4BiuSnapshotMarker : save_dcache ? kEv4CacheSnapshotMarker : cache.control;
 	const Ev4CacheSnapshotHeader header{cache.control, dcache.control, dcache.lines.size()};
 	const size_t dcache_bytes = dcache.lines.size() * sizeof(Ev4Dcache::Line);
 	const long ss = static_cast<long>(sizeof(state) + (save_swap ? sizeof(m_pal_temp_write) : 0)
 		+ (save_cache ? sizeof(cache_word) + cache.tags.size() * sizeof(u64) : 0)
-		+ (save_dcache ? sizeof(header) + dcache_bytes : 0));
+		+ (save_dcache ? sizeof(header) + dcache_bytes : 0) + (save_biu ? sizeof(biu) : 0));
 	if (fwrite(&signature->begin, sizeof(signature->begin), 1, f) != 1 ||
 		fwrite(&ss, sizeof(ss), 1, f) != 1 ||
 		fwrite(&state, sizeof(state), 1, f) != 1 ||
 		(save_swap && fwrite(&m_pal_temp_write, sizeof(m_pal_temp_write), 1, f) != 1) ||
 		(save_cache && fwrite(&cache_word, sizeof(cache_word), 1, f) != 1) ||
 		(save_dcache && fwrite(&header, sizeof(header), 1, f) != 1) ||
+		(save_biu && fwrite(&biu, sizeof(biu), 1, f) != 1) ||
 		(save_cache && !cache.tags.empty() &&
 			fwrite(cache.tags.data(), sizeof(u64), cache.tags.size(), f) != cache.tags.size()) ||
 		(save_dcache && dcache_bytes && fwrite(dcache.lines.data(), dcache_bytes, 1, f) != 1) ||
@@ -4390,6 +4397,7 @@ int CAlphaCPU::RestoreState(FILE* f)
 
 	Ev4Bcache cache;
 	Ev4Dcache dcache;
+	Ev4BIUDiagnostics diagnostics{};
 	std::vector<u8> saved(has_swap ? swap_size : sizeof(state));
 	if (fread(saved.data(), saved.size(), 1, f) != 1 ||
 		(has_cache && fread(&cache.control, sizeof(cache.control), 1, f) != 1))
@@ -4400,7 +4408,8 @@ int CAlphaCPU::RestoreState(FILE* f)
 	if (has_cache)
 	{
 		long bytes = ss - cache_header;
-		if (cache.control == kEv4CacheSnapshotMarker)
+		const bool has_biu = cache.control == kEv4BiuSnapshotMarker;
+		if (has_biu || cache.control == kEv4CacheSnapshotMarker)
 		{
 			Ev4CacheSnapshotHeader header;
 			if (bytes < static_cast<long>(sizeof(header)) || fread(&header, sizeof(header), 1, f) != 1 ||
@@ -4414,6 +4423,16 @@ int CAlphaCPU::RestoreState(FILE* f)
 			cache.control = header.biu_control;
 			dcache.control = header.abox_control;
 			dcache.lines.resize(static_cast<size_t>(header.dcache_lines));
+		}
+		if (has_biu)
+		{
+			if (bytes < static_cast<long>(sizeof(diagnostics)) || fread(&diagnostics, sizeof(diagnostics), 1, f) != 1 ||
+				diagnostics.bus_unlocked > 1 || diagnostics.fill_unlocked > 1)
+			{
+				printf("%s: invalid EV4 BIU diagnostics!\n", devid_string);
+				return -1;
+			}
+			bytes -= static_cast<long>(sizeof(diagnostics));
 		}
 		const long min_bytes = Ev4Bcache::line_count(0) * sizeof(u64);
 		const long max_bytes = Ev4Bcache::line_count(U64(7) << 28) * sizeof(u64);
@@ -4471,6 +4490,7 @@ int CAlphaCPU::RestoreState(FILE* f)
 		m_pal_temp_write = {};
 	if (indexed)
 	{
+		m_ev4_biu = diagnostics;
 		configure_ev4_bcache(cache.control);
 		m_ev4_bcache.tags.swap(cache.tags);
 		configure_ev4_dcache(dcache.control, false);

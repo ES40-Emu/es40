@@ -82,6 +82,15 @@ u64 ev4_read_ipr(CAlphaCPU& cpu, u32 instruction)
 void ev4_write_ipr(CAlphaCPU& cpu, u32 instruction, u64 value, AlphaIPRWriteContext context)
 {
   const auto selector = ev4_ipr_selector(instruction);
+  if (selector.index == 0) {
+    // TB_CTL.GH[6:5] selects the page size for ITB/DTB PTE reads and writes (21064 HRM 5.3.1, Fig. 5-18).
+    if (selector.banks & 0x40) cpu.state.ev4_tb_gh = (value >> 5) & 3;
+    // TB_TAG stages VA[42:13] for either PTE write, in PALmode only (21064 HRM 5.2.1).
+    const bool pal_mode = context == AlphaIPRWriteContext::Compiled || (cpu.state.current_pc & 1);
+    if ((selector.banks & 0x20) && pal_mode)
+      cpu.state.last_tb_virt = value & cpu.get_profile().tb_fill.base_page_match_mask;
+    return;
+  }
   if (ev4_selects_icache_flush(selector)) {
     const bool non_global = selector.index == 23; // FLUSH_IC_ASM keeps ASM lines (21064 HRM 5.3.9-10).
 #if defined(ES40_JIT) && defined(JIT_VERIFY)

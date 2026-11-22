@@ -945,6 +945,7 @@ private:
     u64   ibox_ctl;     /**< EV4 ICCSR read image or remaining EV68 I_CTL fields. */
     u64   mm_stat;      /**< Memory fault status: EV68 MM_STAT or EV4 MM_CSR. */
     bool  hwe;          /**< IPR I_CLT: hwe (allow palmode ins in kernel mode) [HRM p 5-15..17] */
+    u8    ev4_tb_gh;    // TB_CTL granularity hint (21064 HRM 5.3.1).
     int   m_ctl_spe;    /**< IPR M_CTL: spe (Super Page mode enabled) [HRM p 5-29..30] */
     int   i_ctl_spe;    /**< IPR I_CTL: spe (Super Page mode enabled) [HRM p 5-15..18] */
     u64   pmpc;
@@ -991,7 +992,7 @@ private:
     int   last_found_tb[2][2];  /**< Number of last translation buffer entry found */
     u32   rem_ins_in_page;      /**< Number of instructions remaining in current page */
     int   iProcNum; /**< number of the current processor (0 in a 1-processor system) */
-    u64   last_tb_virt;       /**< ITB_TAG staging register for ITB_PTE writes */
+    u64   last_tb_virt;       /**< EV68 ITB_TAG or EV4 TB_TAG for the next PTE write. */
     bool  pal_vms;            /**< Family-selected VMS PAL replacements enabled. */
     int   irq_h_timer[6];     /**< Delayed IRQ_H[0:5] timers; guarded by m_irq_lock while running */
   } state;  /**< Determines CPU state that needs to be saved to the state file */

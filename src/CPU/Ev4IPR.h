@@ -125,6 +125,13 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
   const auto selector = ev4_ipr_selector(instruction);
   if (ev4_ipr_ignored(selector, pal_mode))
     return AlphaIPRWriteKind::Noop;
+  if (selector.index == 0) { // TB_CTL, PALmode TB_TAG and PAL_TEMP0 (21064 HRM 4.6, Table 4-7).
+    const bool pal_temp = (selector.banks & 0x80) != 0;
+    if (slot) *slot = pal_temp ? 32u : 0;
+    if ((selector.banks & 0x40) || (pal_mode && (selector.banks & 0x20)))
+      return AlphaIPRWriteKind::Helper;
+    return pal_temp ? AlphaIPRWriteKind::PalTemp : AlphaIPRWriteKind::Noop;
+  }
   if (ev4_selects_icache_flush(selector)) { // PAL also selects PAL_TEMP21/23 (21064 HRM 4.8.1, Table 4-7).
     if (slot) *slot = (selector.banks & 0x80) ? 32u + selector.index : 0;
     return AlphaIPRWriteKind::HelperTerminator;

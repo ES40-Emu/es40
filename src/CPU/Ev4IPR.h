@@ -80,6 +80,16 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
   const auto selector = ev4_ipr_selector(instruction);
   if (ev4_ipr_ignored(selector, pal_mode))
     return AlphaIPRWriteKind::Noop;
+  // Index 6 clears every entry and resets replacement in each selected TB (21064 HRM 4.8.1, 5.2.8, 5.3.6).
+  if (selector.index == 6) {
+    const bool itb = pal_mode && (selector.banks & 0x20); // ITBZAP is PAL-only.
+    const bool dtb = (selector.banks & 0x40) != 0;
+    const bool pal_temp = (selector.banks & 0x80) != 0;
+    if (slot) *slot = pal_temp ? 32u + selector.index : 0;
+    if (itb) return dtb ? AlphaIPRWriteKind::InvalidateBothTbs : AlphaIPRWriteKind::InvalidateInstructionTb;
+    if (dtb) return AlphaIPRWriteKind::InvalidateDataTb;
+    return pal_temp ? AlphaIPRWriteKind::PalTemp : AlphaIPRWriteKind::Noop;
+  }
   // 21064 HRM 4.8.1, Table 4-7: ABX selects ABOX_CTL (14) or BIU_CTL (18), PAL writes the same-index PAL_TEMP.
   if ((selector.banks == 0x40 || selector.banks == 0xc0) &&
       (selector.index == 14 || selector.index == 18)) {

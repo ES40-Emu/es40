@@ -932,7 +932,16 @@ void CAlphaCPU::write_pal_temp(unsigned slot, u64 value, u64 issue)
 void CAlphaCPU::write_ipr(u32 instruction, u64 value, AlphaIPRWriteContext context)
 {
 	if (m_profile.ipr_write.indexed) {
-		switch (m_profile.ipr_write.describe(instruction, (state.current_pc & 1) != 0)) {
+		// The JIT emits HW_MTPR only in PAL blocks and may defer publishing current_pc.
+		const bool pal_mode = context == AlphaIPRWriteContext::Compiled || (state.current_pc & 1);
+		const auto kind = m_profile.ipr_write.describe(instruction, pal_mode);
+		switch (kind) {
+		case AlphaIPRWriteKind::InvalidateInstructionTb:
+		case AlphaIPRWriteKind::InvalidateDataTb:
+		case AlphaIPRWriteKind::InvalidateBothTbs:
+			if (kind != AlphaIPRWriteKind::InvalidateDataTb) tbia(ACCESS_EXEC);
+			if (kind != AlphaIPRWriteKind::InvalidateInstructionTb) tbia(ACCESS_READ);
+			return;
 		case AlphaIPRWriteKind::InterruptClear:
 			ev4_write_sl_clr(value, state.slr, state.pcr, state.crr);
 			return;
@@ -1908,7 +1917,7 @@ void CAlphaCPU::jit_run(int budget)
 			const size_t swap_bytes = m_profile.ipr_write.indexed ? sizeof(m_pal_temp_write) : 0;
 			const int biu_index = verify.word_count + (int)(swap_bytes / sizeof(u64));
 			const bool verify_indexed_iprs = m_profile.ipr_write.indexed != nullptr;
-			const int ipr_count = biu_index + (verify_indexed_iprs ? 15 : 0);
+			const int ipr_count = biu_index + (verify_indexed_iprs ? 17 : 0);
 			auto cap_iprs = [&](u64* d) {
 				if (verify.word_count) verify.capture(*this, d);
 				if (swap_bytes) memcpy(d + verify.word_count, &m_pal_temp_write, swap_bytes);
@@ -1928,6 +1937,8 @@ void CAlphaCPU::jit_run(int budget)
 					d[biu_index + 12] = state.aster;
 					d[biu_index + 13] = state.sir;
 					d[biu_index + 14] = state.astrr;
+					d[biu_index + 15] = m_verify_tbia[TB_INDEX_ITB];
+					d[biu_index + 16] = m_verify_tbia[TB_INDEX_DATA];
 				}
 			};
 			auto put_iprs = [&](const u64* s, bool replay) {
@@ -1950,6 +1961,8 @@ void CAlphaCPU::jit_run(int budget)
 					state.aster = static_cast<int>(s[biu_index + 12]);
 					state.sir = static_cast<int>(s[biu_index + 13]);
 					state.astrr = static_cast<int>(s[biu_index + 14]);
+					m_verify_tbia[TB_INDEX_ITB] = s[biu_index + 15];
+					m_verify_tbia[TB_INDEX_DATA] = s[biu_index + 16];
 				}
 				if (!replay) sync_register_bank();
 			};
@@ -4899,6 +4912,12 @@ void CAlphaCPU::add_tb(u64 virt, u64 pte_phys, u64 pte_flags, int flags, int asn
 void CAlphaCPU::tbia(int flags)
 {
 	int t = (flags & ACCESS_EXEC) ? TB_INDEX_ITB : TB_INDEX_DATA;
+#if defined(ES40_JIT) && defined(JIT_VERIFY)
+	if (m_profile.ipr_write.indexed) {
+		++m_verify_tbia[t];
+		if (m_jit_vreplay) return; // Compare the bank cleared. The interpreter already invalidated its mappings.
+	}
+#endif
 	int i;
 	for (i = 0; i < TB_ENTRIES; i++)
 		state.tb[t][i].valid = false;

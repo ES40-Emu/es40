@@ -834,6 +834,7 @@ private:
   bool m_jit_vmismatch = false; // any checked output differed in the current replay
 #ifdef JIT_VERIFY
   u64 m_verify_issue_base = 0;
+  u64 m_verify_tbia[2] = {};
 #endif
   u32  m_jit_vlog_i  = 0;      // replay cursor
   u32  m_jit_vlog_n  = 0;      // reference loads available to this replay

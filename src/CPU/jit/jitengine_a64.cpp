@@ -1272,6 +1272,9 @@ static constexpr A64OpClass classify_a64_op(uint32_t ins, bool pal_block,
         case AlphaIPRWriteKind::AboxControl:
         case AlphaIPRWriteKind::IboxControl:
         case AlphaIPRWriteKind::BcacheControl:
+        case AlphaIPRWriteKind::InvalidateInstructionTb:
+        case AlphaIPRWriteKind::InvalidateDataTb:
+        case AlphaIPRWriteKind::InvalidateBothTbs:
         case AlphaIPRWriteKind::HelperTerminator:
           return {A64OpKind::kHwMtpr, A64TerminatorKind::kRedispatch, 0, 0};
         case AlphaIPRWriteKind::Interpreter: break;

@@ -354,6 +354,9 @@ SafeOp classify(uint32_t ins, bool pal_block, const AlphaIPRReadPolicy& ipr_read
         case AlphaIPRWriteKind::AboxControl:
         case AlphaIPRWriteKind::IboxControl:
         case AlphaIPRWriteKind::BcacheControl:
+        case AlphaIPRWriteKind::InvalidateInstructionTb:
+        case AlphaIPRWriteKind::InvalidateDataTb:
+        case AlphaIPRWriteKind::InvalidateBothTbs:
         case AlphaIPRWriteKind::HelperTerminator: return OP_HW_MTPR_TERM;
         case AlphaIPRWriteKind::Noop: return OP_NOP;
         case AlphaIPRWriteKind::Interpreter: return OP_NONE;

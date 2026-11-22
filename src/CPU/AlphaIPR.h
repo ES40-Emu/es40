@@ -75,6 +75,9 @@ enum class AlphaIPRWriteKind
   BcacheControl, // Ends the block after switching the physical memory path.
   AboxControl,
   IboxControl,
+  InvalidateInstructionTb,
+  InvalidateDataTb,
+  InvalidateBothTbs,
   InterruptClear,
   SoftwareInterruptRequest,
   AstInterruptRequest,

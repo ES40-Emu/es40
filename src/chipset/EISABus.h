@@ -29,6 +29,7 @@
 #define ES40_EISA_BUS_H
 
 #include "ISABus.h"
+#include <array>
 #include <vector>
 
 class CDMAHost;
@@ -43,6 +44,8 @@ public:
   void register_isa_io(CSystemComponent& device, int index, u16 port, u32 length) override;
   // Register the maximum native I/O width in bits.
   void register_eisa_io(CSystemComponent& device, int index, u16 port, u32 length, int max_dsize);
+  // Product ID bytes are in ascending port order.
+  void register_slot_id(unsigned slot, const std::array<u8, 4>& product_id);
   IsaIoDecode isa_io_decode(u32 port) const noexcept override;
   void set_isa_irq(int irq, bool asserted) override;
 
@@ -55,11 +58,12 @@ public:
 
 private:
   struct IoRange {
-    CSystemComponent* device;
+    CSystemComponent* device; // Null for a read-only slot product ID.
     int index;
     u16 base;
     u32 length;
     int max_dsize;
+    u32 product_id = 0;
   };
 
   const IoRange* find_io(u32 port) const noexcept;

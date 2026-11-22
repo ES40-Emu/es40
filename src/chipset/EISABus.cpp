@@ -29,6 +29,13 @@
 #include "EISABus.h"
 #include "DMA.h"
 
+static constexpr unsigned last_expansion_slot = 15;
+
+static constexpr u16 slot_id_port(unsigned slot)
+{
+  return (u16)((slot << 12) | 0xc80);
+}
+
 static bool valid_io_width(int dsize)
 {
   return dsize == 8 || dsize == 16 || dsize == 32;
@@ -45,10 +52,28 @@ void EISABus::register_eisa_io(CSystemComponent& device, int index, u16 port, u3
     FAILURE(Configuration, "Invalid EISA I/O width");
   if (!length || length > 0x10000U - port)
     FAILURE(Configuration, "Invalid EISA I/O port range");
+  for (unsigned slot = 1; slot <= last_expansion_slot; ++slot) {
+    const u32 base = slot_id_port(slot);
+    if (port < base + 4 && base < port + length)
+      FAILURE(Configuration, "EISA I/O range overlaps reserved slot product ID ports");
+  }
   for (const auto& range : io_ranges)
     if (port < range.base + range.length && range.base < port + length)
       FAILURE(Configuration, "Overlapping EISA I/O port ranges");
   io_ranges.push_back({&device, index, port, length, max_dsize});
+}
+
+void EISABus::register_slot_id(unsigned slot, const std::array<u8, 4>& product_id)
+{
+  if (!slot || slot > last_expansion_slot)
+    FAILURE(Configuration, "EISA expansion slot must be in the range 1-15");
+  const u16 base = slot_id_port(slot);
+  if (find_io(base))
+    FAILURE(Configuration, "EISA slot product ID already registered");
+  u32 value = 0;
+  for (unsigned i = 0; i < product_id.size(); ++i)
+    value |= (u32)product_id[i] << (i * 8);
+  io_ranges.push_back({nullptr, 0, base, 4, 32, value});
 }
 
 const EISABus::IoRange* EISABus::find_io(u32 port) const noexcept
@@ -82,8 +107,9 @@ const EISABus::IoRange* EISABus::decode_io(u16 port, int dsize, bool write) cons
   if (!range || dsize > range->max_dsize)
     return nullptr;
   const u32 offset = port - range->base;
-  if (offset + dsize / 8 > range->length ||
-      !range->device->decodes_memory_access(range->index, offset, dsize, write))
+  if (offset + dsize / 8 > range->length)
+    return nullptr;
+  if (range->device && !range->device->decodes_memory_access(range->index, offset, dsize, write))
     return nullptr;
   return range;
 }
@@ -111,7 +137,9 @@ bool EISABus::read_port(u16 port, int dsize, u32& data)
   const auto* range = decode_io(port, dsize, false);
   if (!range)
     return false;
-  const u64 value = range->device->ReadMem(range->index, port - range->base, dsize);
+  const u32 offset = port - range->base;
+  const u64 value = range->device ? range->device->ReadMem(range->index, offset, dsize) :
+    range->product_id >> (offset * 8);
   data = (u32)value & (0xffffffffU >> (32 - dsize));
   return true;
 }
@@ -121,6 +149,7 @@ bool EISABus::write_port(u16 port, int dsize, u32 data)
   const auto* range = decode_io(port, dsize, true);
   if (!range)
     return false;
-  range->device->WriteMem(range->index, port - range->base, dsize, data & (0xffffffffU >> (32 - dsize)));
+  if (range->device)
+    range->device->WriteMem(range->index, port - range->base, dsize, data & (0xffffffffU >> (32 - dsize)));
   return true;
 }

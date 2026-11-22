@@ -40,10 +40,11 @@ public:
   bool read_port(u16 port, u8& data);
   bool write_port(u16 port, u8 data) { return write_port(port, 8, data); }
   bool read_port(u16 port, int dsize, u16& data);
-  bool write_port(u16 port, int dsize, u16 data);
+  bool read_port(u16 port, int dsize, u32& data);
+  bool write_port(u16 port, int dsize, u32 data);
 
 private:
-  bool slot_word_port(u16 port, bool write) const;
+  bool slot_io_cycle(u16 port, int dsize, bool write) const;
   Intel82357& isp;
   EISABus bus;
 };

@@ -50,7 +50,8 @@ public:
   bool read_port(u16 port, u8& data);
   bool write_port(u16 port, u8 data) { return write_port(port, 8, data); }
   bool read_port(u16 port, int dsize, u16& data);
-  bool write_port(u16 port, int dsize, u16 data);
+  bool read_port(u16 port, int dsize, u32& data);
+  bool write_port(u16 port, int dsize, u32 data);
 
 private:
   struct IoRange {

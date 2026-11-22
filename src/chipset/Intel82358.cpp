@@ -36,19 +36,36 @@ Intel82358::Intel82358(Intel82357& isp) : isp(isp), bus(isp)
 
 bool Intel82358::read_port(u16 port, u8& data)
 {
-  u16 value;
+  u32 value;
   if (!read_port(port, 8, value))
     return false;
   data = (u8)value;
   return true;
 }
 
-bool Intel82358::slot_word_port(u16 port, bool write) const
+bool Intel82358::slot_io_cycle(u16 port, int dsize, bool write) const
 {
-  return port != 0xffff && !isp.decodes_port(port, write) && !isp.decodes_port(port + 1, write);
+  if (dsize != 16 && dsize != 32)
+    return false;
+  const u32 end = (u32)port + dsize / 8;
+  if (end > 0x10000)
+    return false;
+  for (u32 byte_port = port; byte_port < end; ++byte_port)
+    if (isp.decodes_port((u16)byte_port, write))
+      return false;
+  return true;
 }
 
 bool Intel82358::read_port(u16 port, int dsize, u16& data)
+{
+  u32 value;
+  if (dsize > 16 || !read_port(port, dsize, value))
+    return false;
+  data = (u16)value;
+  return true;
+}
+
+bool Intel82358::read_port(u16 port, int dsize, u32& data)
 {
   if (dsize == 8) {
     u8 byte;
@@ -56,18 +73,18 @@ bool Intel82358::read_port(u16 port, int dsize, u16& data)
       data = byte;
       return true;
     }
-  } else if (dsize != 16 || !slot_word_port(port, false)) {
+  } else if (!slot_io_cycle(port, dsize, false)) {
     return false;
   }
   return bus.read_port(port, dsize, data);
 }
 
-bool Intel82358::write_port(u16 port, int dsize, u16 data)
+bool Intel82358::write_port(u16 port, int dsize, u32 data)
 {
   if (dsize == 8) {
     if (isp.write_port(port, (u8)data))
       return true;
-  } else if (dsize != 16 || !slot_word_port(port, true)) {
+  } else if (!slot_io_cycle(port, dsize, true)) {
     return false;
   }
   return bus.write_port(port, dsize, data);

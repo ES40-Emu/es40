@@ -473,7 +473,11 @@ list(APPEND ES40_SOURCES
     src/CPU/AlphaRegisterBank.h
     src/CPU/AlphaDataFault.h
     src/CPU/Ev68InstructionSet.h
+    src/CPU/Ev4CPUProfile.h
+    src/CPU/Ev4InstructionFetch.h
+    src/CPU/Ev4Reset.h
     src/CPU/Ev68InstructionFetch.h
+    src/CPU/Ev4InstructionFetch.cpp
     src/CPU/Ev68InstructionFetch.cpp
     src/CPU/AlphaMMU.h
     src/CPU/Ev68MMU.h

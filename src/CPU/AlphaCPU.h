@@ -273,6 +273,7 @@ class CAlphaCPU : public CSystemComponent, public CRunnable
   friend class Ev68Reset;
   friend class Ev68CPUState;
   friend class Ev68InstructionFetch;
+  friend class Ev4InstructionFetch;
 public:
   void          flush_icache_asm();
   virtual int   SaveState(FILE* f);

@@ -1809,6 +1809,9 @@ static bool srm_decomp_chunk(CSystem* sys, CAlphaCPU* cpu)
  **/
 int CSystem::LoadROM()
 {
+	if (iNumCPUs && acCPUs[0]->get_profile().reset.external_reset_vector)
+		return 0;
+
 	FILE* f;
 	char* buffer;
 	int     i;

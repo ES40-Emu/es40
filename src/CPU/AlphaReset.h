@@ -36,6 +36,7 @@ struct AlphaResetPolicy
   // CPU-ID assignment. Host lifecycle and firmware loading remain with the caller.
   // An absent callback leaves the cleared state without family bootstrap defaults.
   void (*initialize)(CAlphaCPU& cpu) = nullptr;
+  bool external_reset_vector = false; // Fetch board memory directly on reset.
 };
 
 #endif

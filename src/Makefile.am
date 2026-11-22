@@ -108,6 +108,9 @@ noinst_HEADERS = config/ConfigEditor.h config/ConfigDocument.h \
        CPU/AlphaRegisterBank.h \
        CPU/AlphaDataFault.h \
        CPU/Ev68InstructionSet.h \
+       CPU/Ev4CPUProfile.h \
+       CPU/Ev4InstructionFetch.h \
+       CPU/Ev4Reset.h \
        CPU/Ev68InstructionFetch.h \
        CPU/idle_detect.h \
        CPU/AlphaPAL.h \
@@ -252,6 +255,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        CPU/Ev68Idle.cpp \
        CPU/Ev68ArithmeticTrap.cpp \
        CPU/Ev68IEEETrap.cpp \
+       CPU/Ev4InstructionFetch.cpp \
        CPU/Ev68InstructionFetch.cpp \
        CPU/AlphaCPU_ieeefloat.cpp \
        CPU/AlphaCPU_vaxfloat.cpp \

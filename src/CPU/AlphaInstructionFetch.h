@@ -90,7 +90,7 @@ struct AlphaInstructionFetchPolicy
 
   // Explicit source-coherence promise, separate from the model's execution support.
   // probe validates the selected EXEC mode/ASN, including PAL targets. Cache
-  // word/span/availability changes require source invalidation (jit_flush_blocks);
+  // changes to previously available words or spans require source invalidation (jit_flush_blocks);
   // an ITB/link epoch bump alone cannot reject changed words at the same identity.
   // Mapping/global/permission/chain-eligibility changes must retire incoming links
   // and access proofs, with fresh probes rejecting obsolete mappings or access.

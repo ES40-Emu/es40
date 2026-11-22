@@ -933,6 +933,9 @@ void CAlphaCPU::write_ipr(u32 instruction, u64 value, AlphaIPRWriteContext conte
 {
 	if (m_profile.ipr_write.indexed) {
 		switch (m_profile.ipr_write.describe(instruction, (state.current_pc & 1) != 0)) {
+		case AlphaIPRWriteKind::InterruptClear:
+			ev4_write_sl_clr(value, state.slr, state.pcr, state.crr);
+			return;
 		case AlphaIPRWriteKind::IboxControl: {
 			const u64 iccsr = ev4_iccsr_from_write(value);
 #ifdef ES40_JIT
@@ -1884,25 +1887,31 @@ void CAlphaCPU::jit_run(int budget)
 			const auto& verify = m_profile.cpu_state.verify;
 			const size_t swap_bytes = m_profile.ipr_write.indexed ? sizeof(m_pal_temp_write) : 0;
 			const int biu_index = verify.word_count + (int)(swap_bytes / sizeof(u64));
-			const bool verify_cache_controls = m_profile.ipr_write.indexed != nullptr;
-			const int ipr_count = biu_index + (verify_cache_controls ? 3 : 0);
+			const bool verify_indexed_iprs = m_profile.ipr_write.indexed != nullptr;
+			const int ipr_count = biu_index + (verify_indexed_iprs ? 6 : 0);
 			auto cap_iprs = [&](u64* d) {
 				if (verify.word_count) verify.capture(*this, d);
 				if (swap_bytes) memcpy(d + verify.word_count, &m_pal_temp_write, swap_bytes);
-				if (verify_cache_controls) {
+				if (verify_indexed_iprs) {
 					d[biu_index] = m_ev4_bcache.control;
 					d[biu_index + 1] = m_ev4_dcache.control;
 					d[biu_index + 2] = state.ibox_ctl;
+					d[biu_index + 3] = state.slr;
+					d[biu_index + 4] = state.pcr;
+					d[biu_index + 5] = state.crr;
 				}
 			};
 			auto put_iprs = [&](const u64* s, bool replay) {
 				if (verify.word_count)
 					(replay ? verify.prepare_replay : verify.restore)(*this, s);
 				if (swap_bytes) memcpy(&m_pal_temp_write, s + verify.word_count, swap_bytes);
-				if (verify_cache_controls) {
+				if (verify_indexed_iprs) {
 					configure_ev4_bcache(s[biu_index]);
 					configure_ev4_dcache(s[biu_index + 1], false);
 					state.ibox_ctl = s[biu_index + 2];
+					state.slr = static_cast<int>(s[biu_index + 3]);
+					state.pcr = static_cast<int>(s[biu_index + 4]);
+					state.crr = static_cast<int>(s[biu_index + 5]);
 				}
 				if (!replay) sync_register_bank();
 			};

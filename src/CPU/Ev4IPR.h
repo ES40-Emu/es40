@@ -80,10 +80,11 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
   const auto selector = ev4_ipr_selector(instruction);
   if (ev4_ipr_ignored(selector, pal_mode))
     return AlphaIPRWriteKind::Noop;
-  // 21064 HRM 4.8.1, Table 4-7: IBX index 2 writes ICCSR, PAL adds PAL_TEMP2.
-  if (selector.index == 2 && (selector.banks == 0x20 || selector.banks == 0xa0)) {
+  // 21064 HRM 4.8.1, Table 4-7: IBX selects ICCSR (2) or SL_CLR (19), PAL writes the same-index PAL_TEMP.
+  if ((selector.banks == 0x20 || selector.banks == 0xa0) &&
+      (selector.index == 2 || selector.index == 19)) {
     if (slot) *slot = (selector.banks & 0x80) ? 32u + selector.index : 0;
-    return AlphaIPRWriteKind::IboxControl;
+    return selector.index == 2 ? AlphaIPRWriteKind::IboxControl : AlphaIPRWriteKind::InterruptClear;
   }
   // 21064 HRM 4.8.1, Table 4-7: ABX selects ABOX_CTL (14) or BIU_CTL (18), PAL writes the same-index PAL_TEMP.
   if ((selector.banks == 0x40 || selector.banks == 0xc0) &&
@@ -108,6 +109,15 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
   if (selector.banks == 0x40 && selector.index == 16) // CC.
     return AlphaIPRWriteKind::Helper;
   return AlphaIPRWriteKind::Interpreter;
+}
+
+// 21064 HRM 5.2.6, Fig. 5-6 and Table 5-5: SLC, PC1, PC0 and CRD are write-zero-to-clear.
+inline void ev4_write_sl_clr(std::uint64_t value, int& slr, int& pcr, int& crr)
+{
+  if (!(value & (UINT64_C(1) << 32))) slr = 0;
+  if (!(value & (UINT64_C(1) << 15))) pcr &= ~2;
+  if (!(value & (UINT64_C(1) << 8)))  pcr &= ~1;
+  if (!(value & (UINT64_C(1) << 2)))  crr = 0;
 }
 
 // 21064 HRM 5.2.3, Fig. 5-3: ICCSR has distinct HW_MTPR and HW_MFPR layouts.

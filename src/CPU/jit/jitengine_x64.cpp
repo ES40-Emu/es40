@@ -344,6 +344,7 @@ SafeOp classify(uint32_t ins, bool pal_block, const AlphaIPRReadPolicy& ipr_read
       switch (ipr_write.describe(ins, pal_block)) {
         case AlphaIPRWriteKind::ExceptionAddress: return OP_HW_MTPR_EXC_ADDR;
         case AlphaIPRWriteKind::PalTemp: return OP_HW_MTPR_PAL_TEMP;
+        case AlphaIPRWriteKind::InterruptClear:
         case AlphaIPRWriteKind::Helper: return OP_HW_MTPR;
         case AlphaIPRWriteKind::AboxControl:
         case AlphaIPRWriteKind::IboxControl:
@@ -1674,16 +1675,16 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             continue;
         }
 
-        if (op == OP_HW_MTPR_PAL_TEMP || op == OP_HW_MTPR_TERM) {
+        if (op == OP_HW_MTPR || op == OP_HW_MTPR_TERM || op == OP_HW_MTPR_PAL_TEMP) {
             unsigned slot = 0;
             m_profile.ipr_write.describe(ins, pal_block, &slot);
-            // The family marks writes that change compiled assumptions as terminators.
-            // Run the helper, publish the next PC and redispatch under the new state.
-            if (op == OP_HW_MTPR_TERM) {
+            // HW_MTPR: the family has approved this write for a compiled helper call.
+            if (op != OP_HW_MTPR_PAL_TEMP)
                 emit_call(hw_mtpr_helper, { {JA_CPU, 0}, {JA_I32, (uint64_t)ins}, {JA_GPZ, (uint64_t)rb} });
+            // The family marks writes that change compiled assumptions as terminators.
+            if (op == OP_HW_MTPR_TERM)
                 set_pc(b->tag + 4 * (uint64_t)(i + 1));                // next PC -> R10 + state.pc (PALmode bit preserved)
-                if (!slot) continue;
-            }
+            if (!slot) continue;
             const auto temp = x86::qword_ptr(x86::rbx, slot * 8);
             a.mov(x86::rax, temp);
             a.mov(x86::qword_ptr(x86::rbp, m_off.pal_temp_old), x86::rax);
@@ -1697,12 +1698,6 @@ void CJitEngine::emit_op(void* a_ptr, const uint8_t* gpa, void* done_ptr, const 
             a.mov(x86::qword_ptr(x86::rbp, m_off.pal_temp_next_pc), x86::rax);
             pal_temp_issue(1);
             a.mov(x86::qword_ptr(x86::rbp, m_off.pal_temp_next_issue), x86::rcx);
-            continue;
-        }
-
-        // HW_MTPR: the family has approved this write for a compiled helper call.
-        if (op == OP_HW_MTPR) {
-            emit_call(hw_mtpr_helper, { {JA_CPU, 0}, {JA_I32, (uint64_t)ins}, {JA_GPZ, (uint64_t)rb} });  // jit_hw_mtpr(cpu, instruction, value)
             continue;
         }
 

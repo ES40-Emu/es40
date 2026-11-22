@@ -46,6 +46,13 @@ class Intel82357::Dma final : public CDMA
 {
 public:
   Dma(CConfigurator* cfg, CSystem* system, Intel82357& isp);
+  enum class Register { None, Legacy, HighPage, HighCount, Stop, Chaining, Expiration, ExtendedMode };
+  struct DecodedPort {
+    Register reg;
+    int channel = 0;
+    unsigned shift = 0;
+  };
+  static DecodedPort decode_port(u16 port, bool write);
   bool access_port(u16 port, u8& data, bool write);
   void ResetPCI() override;
   int SaveState(FILE* f) override;
@@ -98,6 +105,11 @@ void Intel82357::create_dma(CConfigurator* cfg, CSystem* system)
 CDMA& Intel82357::dma_controller() const
 {
   return *dma;
+}
+
+bool Intel82357::decodes_dma_port(u16 port, bool write)
+{
+  return Dma::decode_port(port, write).reg != Dma::Register::None;
 }
 
 bool Intel82357::access_dma_port(u16 port, u8& data, bool write)
@@ -190,56 +202,72 @@ bool Intel82357::Dma::decodes_legacy_port(u16 port, bool write)
   return write || reg <= 0x08 || reg == 0x0f;
 }
 
+Intel82357::Dma::DecodedPort Intel82357::Dma::decode_port(u16 port, bool write)
+{
+  if (decodes_legacy_port(port, write))
+    return {Register::Legacy};
+  if (page_channel(port, dma_high_page_base) >= 0)
+    return {Register::HighPage};
+  int num = high_count_channel(port);
+  if (num >= 0)
+    return {Register::HighCount, num};
+  unsigned shift;
+  if (stop_register(port, num, shift))
+    return {Register::Stop, num, shift};
+  switch (port) {
+  case dma0_chaining_mode_port:
+  case dma1_chaining_mode_port:
+    return {Register::Chaining};
+  case dma_chain_expiration_control_port:
+    return {write ? Register::None : Register::Expiration};
+  case dma0_extended_mode_port:
+  case dma1_extended_mode_port:
+    return {write ? Register::ExtendedMode : Register::None};
+  default:
+    return {Register::None};
+  }
+}
+
 bool Intel82357::Dma::access_port(u16 port, u8& data, bool write)
 {
-  if (decodes_legacy_port(port, write)) {
+  const auto decoded = decode_port(port, write);
+  switch (decoded.reg) {
+  case Register::Legacy:
     if (write)
       write_legacy_port(port, data);
     else
       data = read_legacy_port(port);
     return true;
-  }
-  if (page_channel(port, dma_high_page_base) >= 0) {
+  case Register::HighPage:
     if (write)
       write_high_page_port(port, data);
     else
       data = read_high_page_port(port);
     return true;
-  }
-  int num = high_count_channel(port);
-  if (num >= 0) {
+  case Register::HighCount:
     if (write)
-      program_count(num, 0xffff, (u32)data << 16);
+      program_count(decoded.channel, 0xffff, (u32)data << 16);
     else
-      data = (u8)(channel(num).count >> 16);
+      data = (u8)(channel(decoded.channel).count >> 16);
+    return true;
+  case Register::Stop: {
+    auto& stop = state.stop_address[decoded.channel];
+    if (write)
+      stop = (stop & ~(0xffU << decoded.shift)) | (((u32)data << decoded.shift) & 0x00fffffcU);
+    else
+      data = (u8)(stop >> decoded.shift);
     return true;
   }
-  unsigned shift;
-  if (stop_register(port, num, shift)) {
-    auto& stop = state.stop_address[num];
-    if (write)
-      stop = (stop & ~(0xffU << shift)) | (((u32)data << shift) & 0x00fffffcU);
-    else
-      data = (u8)(stop >> shift);
-    return true;
-  }
-  switch (port) {
-  case dma0_chaining_mode_port:
-  case dma1_chaining_mode_port:
+  case Register::Chaining:
     if (write)
       write_chaining_mode((port == dma1_chaining_mode_port ? 4 : 0) + (data & 3), data);
     else
       data = port == dma0_chaining_mode_port ? pending_chaining_irqs() : chaining_channels(dma_chain_enable);
     return true;
-  case dma_chain_expiration_control_port:
-    if (write)
-      return false;
+  case Register::Expiration:
     data = chaining_channels(dma_chain_master_tc);
     return true;
-  case dma0_extended_mode_port:
-  case dma1_extended_mode_port:
-    if (!write)
-      return false;
+  case Register::ExtendedMode:
     write_extended_mode((port == dma1_extended_mode_port ? 4 : 0) + (data & 3), data);
     return true;
   default:

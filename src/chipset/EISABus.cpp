@@ -31,12 +31,19 @@
 
 void EISABus::register_isa_io(CSystemComponent& device, int index, u16 port, u32 length)
 {
+  register_eisa_io(device, index, port, length, 8);
+}
+
+void EISABus::register_eisa_io(CSystemComponent& device, int index, u16 port, u32 length, int max_dsize)
+{
+  if (max_dsize != 8 && max_dsize != 16)
+    FAILURE(Configuration, "Invalid EISA I/O width");
   if (!length || length > 0x10000U - port)
     FAILURE(Configuration, "Invalid EISA I/O port range");
   for (const auto& range : io_ranges)
     if (port < range.base + range.length && range.base < port + length)
       FAILURE(Configuration, "Overlapping EISA I/O port ranges");
-  io_ranges.push_back({&device, index, port, length});
+  io_ranges.push_back({&device, index, port, length, max_dsize});
 }
 
 const EISABus::IoRange* EISABus::find_io(u32 port) const noexcept
@@ -62,20 +69,44 @@ void EISABus::set_isa_irq(int irq, bool asserted)
   host.set_isa_irq(irq, asserted);
 }
 
+const EISABus::IoRange* EISABus::decode_io(u16 port, int dsize, bool write) const noexcept
+{
+  if (dsize != 8 && dsize != 16)
+    return nullptr;
+  const auto* range = find_io(port);
+  if (!range || dsize > range->max_dsize)
+    return nullptr;
+  const u32 offset = port - range->base;
+  if (offset + dsize / 8 > range->length ||
+      !range->device->decodes_memory_access(range->index, offset, dsize, write))
+    return nullptr;
+  return range;
+}
+
 bool EISABus::read_port(u16 port, u8& data)
 {
-  const auto* range = find_io(port);
-  if (!range || !range->device->decodes_memory_access(range->index, port - range->base, 8, false))
+  u16 value;
+  if (!read_port(port, 8, value))
     return false;
-  data = (u8)range->device->ReadMem(range->index, port - range->base, 8);
+  data = (u8)value;
   return true;
 }
 
-bool EISABus::write_port(u16 port, u8 data)
+bool EISABus::read_port(u16 port, int dsize, u16& data)
 {
-  const auto* range = find_io(port);
-  if (!range || !range->device->decodes_memory_access(range->index, port - range->base, 8, true))
+  const auto* range = decode_io(port, dsize, false);
+  if (!range)
     return false;
-  range->device->WriteMem(range->index, port - range->base, 8, data);
+  const u64 value = range->device->ReadMem(range->index, port - range->base, dsize);
+  data = dsize == 8 ? (u8)value : (u16)value;
+  return true;
+}
+
+bool EISABus::write_port(u16 port, int dsize, u16 data)
+{
+  const auto* range = decode_io(port, dsize, true);
+  if (!range)
+    return false;
+  range->device->WriteMem(range->index, port - range->base, dsize, dsize == 8 ? (u8)data : data);
   return true;
 }

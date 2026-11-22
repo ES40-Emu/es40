@@ -41,12 +41,16 @@ public:
   CDMA* dma_controller() noexcept override { return dma; }
   const CSystemComponent* isa_decode_owner() const noexcept override;
   void register_isa_io(CSystemComponent& device, int index, u16 port, u32 length) override;
+  // Register the maximum native I/O width in bits.
+  void register_eisa_io(CSystemComponent& device, int index, u16 port, u32 length, int max_dsize);
   IsaIoDecode isa_io_decode(u32 port) const noexcept override;
   void set_isa_irq(int irq, bool asserted) override;
 
-  // Logical byte ports. Unclaimed reads leave data untouched.
+  // Unclaimed logical port reads leave data untouched.
   bool read_port(u16 port, u8& data);
-  bool write_port(u16 port, u8 data);
+  bool write_port(u16 port, u8 data) { return write_port(port, 8, data); }
+  bool read_port(u16 port, int dsize, u16& data);
+  bool write_port(u16 port, int dsize, u16 data);
 
 private:
   struct IoRange {
@@ -54,9 +58,11 @@ private:
     int index;
     u16 base;
     u32 length;
+    int max_dsize;
   };
 
   const IoRange* find_io(u32 port) const noexcept;
+  const IoRange* decode_io(u16 port, int dsize, bool write) const noexcept;
   std::vector<IoRange> io_ranges;
   CDMAHost& host;
   CDMA* dma = nullptr;

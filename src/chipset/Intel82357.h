@@ -37,6 +37,7 @@ public:
   Intel82357(CConfigurator* cfg, CSystem* system, CDMAHost& memory_host,
     std::function<void(bool)> interrupt_output);
   CDMA& dma_controller() const;
+  bool decodes_port(u16 port, bool write) const;
   bool read_port(u16 port, u8& data);
   bool write_port(u16 port, u8 data);
   u8 interrupt_acknowledge();
@@ -57,6 +58,7 @@ public:
 private:
   class Dma;
   void create_dma(CConfigurator* cfg, CSystem* system);
+  static bool decodes_dma_port(u16 port, bool write);
   bool access_dma_port(u16 port, u8& data, bool write);
   void set_dma_chaining_irq(bool asserted);
 

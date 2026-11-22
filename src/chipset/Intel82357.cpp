@@ -75,14 +75,33 @@ void Intel82357::finalize_restore() noexcept
   pic.sync_output();
 }
 
+enum class PicPort { None, Controller, EdgeLevel };
+
+static PicPort decode_pic_port(u16 port)
+{
+  switch (port) {
+  case 0x20: case 0x21: case 0xa0: case 0xa1:
+    return PicPort::Controller;
+  case 0x4d0: case 0x4d1:
+    return PicPort::EdgeLevel;
+  default:
+    return PicPort::None;
+  }
+}
+
+bool Intel82357::decodes_port(u16 port, bool write) const
+{
+  return decode_pic_port(port) != PicPort::None || decodes_dma_port(port, write);
+}
+
 bool Intel82357::read_port(u16 port, u8& data)
 {
   std::lock_guard<std::recursive_mutex> lock(cSystem->get_device_bus_mutex());
-  switch (port) {
-  case 0x20: case 0x21: case 0xa0: case 0xa1:
+  switch (decode_pic_port(port)) {
+  case PicPort::Controller:
     data = pic.read(port >> 7, port & 1);
     return true;
-  case 0x4d0: case 0x4d1:
+  case PicPort::EdgeLevel:
     data = pic.read_edge_level(port & 1);
     return true;
   default:
@@ -93,13 +112,13 @@ bool Intel82357::read_port(u16 port, u8& data)
 bool Intel82357::write_port(u16 port, u8 data)
 {
   std::lock_guard<std::recursive_mutex> lock(cSystem->get_device_bus_mutex());
-  switch (port) {
-  case 0x20: case 0x21: case 0xa0: case 0xa1:
+  switch (decode_pic_port(port)) {
+  case PicPort::Controller:
     if (!(port & 1) && (data & 0x10))
       data &= ~0x0a; // ICW1: fixed cascade, trigger modes selected by ELCR.
     pic.write(port >> 7, port & 1, data);
     return true;
-  case 0x4d0: case 0x4d1:
+  case PicPort::EdgeLevel:
     pic.write_edge_level(port & 1, data & ((port & 1) ? 0xde : 0xf8));
     return true;
   default:

@@ -38,9 +38,12 @@ public:
   explicit Intel82358(Intel82357& isp);
   EISABus& eisa_bus() noexcept { return bus; }
   bool read_port(u16 port, u8& data);
-  bool write_port(u16 port, u8 data);
+  bool write_port(u16 port, u8 data) { return write_port(port, 8, data); }
+  bool read_port(u16 port, int dsize, u16& data);
+  bool write_port(u16 port, int dsize, u16 data);
 
 private:
+  bool slot_word_port(u16 port, bool write) const;
   Intel82357& isp;
   EISABus bus;
 };

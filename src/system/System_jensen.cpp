@@ -34,6 +34,18 @@
 
 namespace {
 enum { SparseIO, HostAddressExtension, InterruptAcknowledge };
+constexpr u64 sparse_io_size = U64(0x10000) << 7;
+
+int sparse_io_width(u64 address)
+{
+  if (address >= sparse_io_size)
+    return 0;
+  switch (address & 0x7f) {
+  case 0x00: return 8;
+  case 0x20: return ((address >> 7) & 3) == 3 ? 0 : 16;
+  default: return 0;
+  }
+}
 
 class JensenHostBus : public CSystemComponent, public CDMAHost
 {
@@ -61,7 +73,7 @@ JensenHostBus::JensenHostBus(CConfigurator* cfg, CSystem* system)
     })),
     ebc(*isp)
 {
-  system->RegisterMemory(this, SparseIO, U64(0x300000000), U64(0x10000) << 7);
+  system->RegisterMemory(this, SparseIO, U64(0x300000000), sparse_io_size);
   system->RegisterMemory(this, HostAddressExtension, U64(0x1d0000000), 4);
   system->RegisterMemory(this, InterruptAcknowledge, U64(0x100000000), 8);
   save_item(hae, "hae");
@@ -74,13 +86,13 @@ u64 JensenHostBus::ReadMem(int index, u64 address, int dsize)
   // Each aligned H_BUS read supplies one INTA pulse; the vector is in the low byte.
   if (index == InterruptAcknowledge && !address && (dsize == 32 || dsize == 64))
     return isp->interrupt_acknowledge();
-  // Jensen byte I/O uses a longword at port << 7, with the port selecting the lane.
-  if (index != SparseIO || dsize != 32 || (address & 0x7f) || hae)
+  // Sparse I/O uses a CPU longword, with the port selecting the first byte lane.
+  if (index != SparseIO || dsize != 32 || hae)
     return dsize == 64 ? ~U64(0) : (U64(1) << dsize) - 1;
 
   const u16 port = (u16)(address >> 7);
-  u8 data;
-  if (!ebc.read_port(port, data))
+  u16 data;
+  if (!ebc.read_port(port, sparse_io_width(address), data))
     return 0xffffffffU;
   return (u32)data << ((port & 3) * 8);
 }
@@ -91,12 +103,12 @@ void JensenHostBus::WriteMem(int index, u64 address, int dsize, u64 data)
     hae = (u8)(data & 0x7f);
     return;
   }
-  if (index != SparseIO || dsize != 32 || (address & 0x7f) || hae)
+  if (index != SparseIO || dsize != 32 || hae)
     return;
 
   const u16 port = (u16)(address >> 7);
-  const u8 value = (u8)(data >> ((port & 3) * 8));
-  ebc.write_port(port, value);
+  const u16 value = (u16)(data >> ((port & 3) * 8));
+  ebc.write_port(port, sparse_io_width(address), value);
 }
 
 // Split at installed RAM and the EISA memory hole in the upper half of the first MiB.

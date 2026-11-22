@@ -36,14 +36,39 @@ Intel82358::Intel82358(Intel82357& isp) : isp(isp), bus(isp)
 
 bool Intel82358::read_port(u16 port, u8& data)
 {
-  if (isp.read_port(port, data))
-    return true;
-  return bus.read_port(port, data);
+  u16 value;
+  if (!read_port(port, 8, value))
+    return false;
+  data = (u8)value;
+  return true;
 }
 
-bool Intel82358::write_port(u16 port, u8 data)
+bool Intel82358::slot_word_port(u16 port, bool write) const
 {
-  if (isp.write_port(port, data))
-    return true;
-  return bus.write_port(port, data);
+  return port != 0xffff && !isp.decodes_port(port, write) && !isp.decodes_port(port + 1, write);
+}
+
+bool Intel82358::read_port(u16 port, int dsize, u16& data)
+{
+  if (dsize == 8) {
+    u8 byte;
+    if (isp.read_port(port, byte)) {
+      data = byte;
+      return true;
+    }
+  } else if (dsize != 16 || !slot_word_port(port, false)) {
+    return false;
+  }
+  return bus.read_port(port, dsize, data);
+}
+
+bool Intel82358::write_port(u16 port, int dsize, u16 data)
+{
+  if (dsize == 8) {
+    if (isp.write_port(port, (u8)data))
+      return true;
+  } else if (dsize != 16 || !slot_word_port(port, true)) {
+    return false;
+  }
+  return bus.write_port(port, dsize, data);
 }

@@ -74,6 +74,7 @@ static constexpr u8 dma_programming_complete = 0x08;
 static constexpr u8 dma_chain_master_tc = 0x10;
 static constexpr u16 dma0_extended_mode_port = 0x40b;
 static constexpr u16 dma1_extended_mode_port = 0x4d6;
+static constexpr u8 dma_cascade_mode = 0xc0;
 
 /**
  * Constructor.
@@ -103,6 +104,7 @@ void CDMA::ResetPCI()
 	memset(&state, 0, sizeof(state));
 	if (model == Model::Intel82357)
 	{
+		state.channel[4].mode = dma_cascade_mode;
 		for (int channel = 4; channel < 8; channel++)
 			state.isp.extended_mode[channel] = 0x04;
 		update_chaining_irq();
@@ -487,6 +489,8 @@ void CDMA::write_legacy_port(u16 port, u8 data)
 		break;
 
 	case 0x0b: // mode register
+		if (model == Model::Intel82357 && selected_channel == 4 && (data & 0xc0) != dma_cascade_mode)
+			break;
 		if (DMA_TRACE_CHANNEL(selected_channel))
 		{
 			printf("dma: mode register %d for channel %d written with %x\n", ctrlr, selected_channel, (unsigned)data);
@@ -518,6 +522,8 @@ void CDMA::write_legacy_port(u16 port, u8 data)
 			release_service(num);
 			select_compatible_address(num, true);
 			reset_chaining_mode(num);
+			if (model == Model::Intel82357)
+				state.channel[num].mode = num == 4 ? dma_cascade_mode : 0;
 		}
 		controller.lobyte = true;
 		controller.command = 0;
@@ -889,6 +895,7 @@ int CDMA::RestoreState(FILE* f)
 	state = restored;
 	if (model == Model::Intel82357)
 	{
+		state.channel[4].mode |= dma_cascade_mode;
 		state.isp.chaining_pending &= chaining_channels(dma_chain_enable);
 		update_chaining_irq(true);
 	}
@@ -951,7 +958,7 @@ bool CDMA::cascade_enabled() const
 	// These gate the grant, not the request input seen in controller 1's status.
 	return !(state.controller[1].command & 0x04) &&
 		!(state.controller[1].mask & 0x01) &&
-		(state.channel[4].mode & 0xc0) == 0xc0;
+		(state.channel[4].mode & 0xc0) == dma_cascade_mode;
 }
 
 /**

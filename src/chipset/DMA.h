@@ -132,6 +132,7 @@ public:
   // Cascade mode, a wrong direction or an illegal transfer type is blocked.
   // Verify services the count without accessing memory or the buffer:
   // blocked is false, transferred is zero, and terminal_count reports exhaustion.
+  // The 82357 accepts device EOP only when extended-mode bit 6 selects input.
   // eop ends the transfer after the last unit serviced by this call, including
   // when length is capped by the current count. It is not a latched pin level.
   // Blocked calls do not apply EOP, including calls on cascade-mode channels.
@@ -197,6 +198,7 @@ private:
   static void   validate_device_channel(int channel);
   void          select_compatible_address(int channel);
   u32           count_mask() const;
+  bool          accepts_external_eop(int channel) const;
   SDMA_transfer_properties transfer_properties(int channel) const;
   static u32    dma_address(u16 pagebase, u32 current,
                   const SDMA_transfer_properties& properties);

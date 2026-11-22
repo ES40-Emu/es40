@@ -219,6 +219,11 @@ u32 CDMA::count_mask() const
 	return model == Model::Intel82357 ? 0xffffffU : 0xffffU;
 }
 
+bool CDMA::accepts_external_eop(int channel) const
+{
+	return model != Model::Intel82357 || (state.isp.extended_mode[channel] & 0x40) != 0;
+}
+
 CDMA::SDMA_transfer_properties CDMA::transfer_properties(int channel) const
 {
 	validate_device_channel(channel);
@@ -1113,6 +1118,7 @@ CDMA::SDMA_result CDMA::send_data(int channel, void* data, size_t length, bool e
 {
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
 	const SDMA_transfer_properties properties = transfer_properties(channel);
+	eop = eop && accepts_external_eop(channel);
 	int ctrlr = channel < 4 ? 0 : 1;
 	int local_channel = channel & 0x03;
 	SDMA_result result = { 0, true, false, false };
@@ -1203,6 +1209,7 @@ CDMA::SDMA_result CDMA::recv_data(int channel, void* data, size_t length, bool e
 {
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
 	const SDMA_transfer_properties properties = transfer_properties(channel);
+	eop = eop && accepts_external_eop(channel);
 	int ctrlr = channel < 4 ? 0 : 1;
 	int local_channel = channel & 0x03;
 	SDMA_result result = { 0, true, false, false };
@@ -1343,7 +1350,7 @@ CDMA::SDMA_result CDMA::service_eop(int channel)
 	u8 bit = 1 << (channel & 0x03);
 	u8 mode = state.channel[channel].mode & 0xc0;
 	// EOP cannot acquire service or terminate a channel while it is idle.
-	if (state.controller[ctrlr].command & 0x04)
+	if ((state.controller[ctrlr].command & 0x04) || !accepts_external_eop(channel))
 		return result;
 	if (!((mode == 0x00 && (state.controller[ctrlr].demand_active & bit)) ||
 		(mode == 0x80 && (state.controller[ctrlr].block_active & bit))))

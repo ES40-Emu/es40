@@ -831,14 +831,22 @@ int CDMA::select_service_channel(int ctrlr) const
 	return -1;
 }
 
-bool CDMA::service_selected(int channel) const
+bool CDMA::block_allows_requester(int channel, u32 requester) const
 {
-	return service_requested(channel) && select_service_channel(1) == channel;
+	const u8 bit = 1 << (channel & 3);
+	return !(state.controller[channel / 4].block_active & bit) ||
+		state.channel[channel].block_owner == requester;
 }
 
-bool CDMA::service_ready(int channel, u8 transfer_type) const
+bool CDMA::service_selected(int channel, u32 requester) const
 {
-	if (!service_selected(channel) || !dma_host.dma_transfer_enabled())
+	return service_requested(channel) && block_allows_requester(channel, requester) &&
+		select_service_channel(1) == channel;
+}
+
+bool CDMA::service_ready(int channel, u8 transfer_type, u32 requester) const
+{
+	if (!service_selected(channel, requester) || !dma_host.dma_transfer_enabled())
 		return false;
 
 	// Direction does not affect arbitration against other pending channels.
@@ -867,6 +875,7 @@ void CDMA::release_service(int channel)
 	bool held = ((state.controller[ctrlr].block_active |
 		state.controller[ctrlr].demand_active) & bit) != 0;
 	state.controller[ctrlr].block_active &= ~bit;
+	state.channel[channel].block_owner = 0;
 	state.controller[ctrlr].demand_active &= ~bit;
 	if (channel == 4)
 	{
@@ -886,7 +895,7 @@ void CDMA::release_service(int channel)
 /**
  * Retain ongoing demand/block service, or rotate after a successful release.
  **/
-void CDMA::finish_service(int channel, const SDMA_result& result)
+void CDMA::finish_service(int channel, const SDMA_result& result, u32 requester)
 {
 	// Verify services a unit despite transferring zero bytes.
 	if (result.blocked)
@@ -908,7 +917,10 @@ void CDMA::finish_service(int channel, const SDMA_result& result)
 		return;
 	}
 	if (mode == 0x80)
+	{
 		state.controller[ctrlr].block_active |= bit;
+		state.channel[channel].block_owner = requester;
+	}
 	else if (mode == 0x00)
 		state.controller[ctrlr].demand_active |= bit;
 	if (channel < 4)
@@ -951,16 +963,16 @@ u8 CDMA::get_mode(int channel)
 	return state.channel[channel].mode;
 }
 
-bool CDMA::can_service_send(int channel)
+bool CDMA::can_service_send(int channel, u32 requester)
 {
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
-	return service_ready(channel, 0x04); // Device to memory (8237 Write).
+	return service_ready(channel, 0x04, requester); // Device to memory (8237 Write).
 }
 
-bool CDMA::can_service_recv(int channel)
+bool CDMA::can_service_recv(int channel, u32 requester)
 {
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
-	return service_ready(channel, 0x08); // Memory to device (8237 Read).
+	return service_ready(channel, 0x08, requester); // Memory to device (8237 Read).
 }
 
 int CDMA::get_count(int channel)
@@ -1241,55 +1253,55 @@ CDMA::SDMA_result CDMA::send_unit(int channel, u32 data, bool eop)
 }
 
 template<typename T>
-CDMA::SDMA_result CDMA::receive_unit(int channel, T& data, bool eop, bool arbitrate)
+CDMA::SDMA_result CDMA::receive_unit(int channel, T& data, bool eop, bool arbitrate, u32 requester)
 {
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
 	const size_t bytes = unit_size(channel);
 	const bool needs_data = (state.channel[channel].mode & 0x0c) == 0x08;
-	if ((needs_data && bytes > sizeof(T)) || (arbitrate && !service_selected(channel)))
+	if ((needs_data && bytes > sizeof(T)) || (arbitrate && !service_selected(channel, requester)))
 		return {};
 	u32 buffer = 0;
 	SDMA_result result = recv_data(channel, &buffer, bytes, eop);
 	if (result.transferred)
 		data = (T)endian_32(buffer);
 	if (arbitrate)
-		finish_service(channel, result);
+		finish_service(channel, result, requester);
 	return result;
 }
 
 CDMA::SDMA_result CDMA::recv_unit(int channel, u16& data, bool eop)
 {
-	return receive_unit(channel, data, eop, false);
+	return receive_unit(channel, data, eop, false, 0);
 }
 
 CDMA::SDMA_result CDMA::recv_unit(int channel, u32& data, bool eop)
 {
-	return receive_unit(channel, data, eop, false);
+	return receive_unit(channel, data, eop, false, 0);
 }
 
-CDMA::SDMA_result CDMA::service_send_unit(int channel, u32 data, bool eop)
+CDMA::SDMA_result CDMA::service_send_unit(int channel, u32 data, bool eop, u32 requester)
 {
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
 	SDMA_result result;
-	if (service_selected(channel))
+	if (service_selected(channel, requester))
 	{
 		result = send_unit(channel, data, eop);
-		finish_service(channel, result);
+		finish_service(channel, result, requester);
 	}
 	return result;
 }
 
-CDMA::SDMA_result CDMA::service_recv_unit(int channel, u16& data, bool eop)
+CDMA::SDMA_result CDMA::service_recv_unit(int channel, u16& data, bool eop, u32 requester)
 {
-	return receive_unit(channel, data, eop, true);
+	return receive_unit(channel, data, eop, true, requester);
 }
 
-CDMA::SDMA_result CDMA::service_recv_unit(int channel, u32& data, bool eop)
+CDMA::SDMA_result CDMA::service_recv_unit(int channel, u32& data, bool eop, u32 requester)
 {
-	return receive_unit(channel, data, eop, true);
+	return receive_unit(channel, data, eop, true, requester);
 }
 
-CDMA::SDMA_result CDMA::service_eop(int channel)
+CDMA::SDMA_result CDMA::service_eop(int channel, u32 requester)
 {
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
 	validate_device_channel(channel);
@@ -1298,7 +1310,8 @@ CDMA::SDMA_result CDMA::service_eop(int channel)
 	u8 bit = 1 << (channel & 0x03);
 	u8 mode = state.channel[channel].mode & 0xc0;
 	// EOP cannot acquire service or terminate a channel while it is idle.
-	if ((state.controller[ctrlr].command & 0x04) || !accepts_external_eop(channel))
+	if ((state.controller[ctrlr].command & 0x04) || !accepts_external_eop(channel) ||
+		!block_allows_requester(channel, requester))
 		return result;
 	if (!((mode == 0x00 && (state.controller[ctrlr].demand_active & bit)) ||
 		(mode == 0x80 && (state.controller[ctrlr].block_active & bit))))

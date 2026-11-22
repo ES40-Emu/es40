@@ -224,40 +224,40 @@ bool EISABus::slot_allows_dma(unsigned slot, int channel) const noexcept
 
 bool EISABus::slot_dma_can_send(unsigned slot, int channel) const
 {
-  return slot_allows_dma(slot, channel) && dma->can_service_send(channel);
+  return slot_allows_dma(slot, channel) && dma->can_service_send(channel, slot);
 }
 
 bool EISABus::slot_dma_can_recv(unsigned slot, int channel) const
 {
-  return slot_allows_dma(slot, channel) && dma->can_service_recv(channel);
+  return slot_allows_dma(slot, channel) && dma->can_service_recv(channel, slot);
 }
 
 CDMA::SDMA_result EISABus::slot_dma_send_unit(unsigned slot, int channel, u32 data, bool eop)
 {
   if (!slot_allows_dma(slot, channel))
     return {};
-  return dma->service_send_unit(channel, data, eop);
+  return dma->service_send_unit(channel, data, eop, slot);
 }
 
 CDMA::SDMA_result EISABus::slot_dma_recv_unit(unsigned slot, int channel, u16& data, bool eop)
 {
   if (!slot_allows_dma(slot, channel))
     return {};
-  return dma->service_recv_unit(channel, data, eop);
+  return dma->service_recv_unit(channel, data, eop, slot);
 }
 
 CDMA::SDMA_result EISABus::slot_dma_recv_unit(unsigned slot, int channel, u32& data, bool eop)
 {
   if (!slot_allows_dma(slot, channel))
     return {};
-  return dma->service_recv_unit(channel, data, eop);
+  return dma->service_recv_unit(channel, data, eop, slot);
 }
 
 CDMA::SDMA_result EISABus::slot_dma_eop(unsigned slot, int channel)
 {
   if (!slot_allows_dma(slot, channel))
     return {};
-  return dma->service_eop(channel);
+  return dma->service_eop(channel, slot);
 }
 
 void EISABus::reset()

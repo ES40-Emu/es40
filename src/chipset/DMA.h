@@ -170,18 +170,19 @@ public:
   // for lower-controller service. Ongoing demand/block service is not preempted.
   // Demand releases on DRQ withdrawal; single re-arbitrates for every unit.
   // Failed calls and idle register writes do not rotate. Bus timing is not modeled.
-  SDMA_result   service_send_unit(int channel, u32 data, bool eop = false);
-  SDMA_result   service_recv_unit(int channel, u32& data, bool eop = false);
-  SDMA_result   service_recv_unit(int channel, u16& data, bool eop = false);
+  // A retained block belongs to its requester. Legacy clients use requester 0.
+  SDMA_result   service_send_unit(int channel, u32 data, bool eop = false, u32 requester = 0);
+  SDMA_result   service_recv_unit(int channel, u32& data, bool eop = false, u32 requester = 0);
+  SDMA_result   service_recv_unit(int channel, u16& data, bool eop = false, u32 requester = 0);
   // Apply EOP to an accepted demand/block service without consuming another unit.
-  SDMA_result   service_eop(int channel);
+  SDMA_result   service_eop(int channel, u32 requester = 0);
   // Device queries use global channels 0-3 or 5-7; invalid channels throw.
   // Raw programmed 8237 mode byte, including the local channel-select bits.
   u8            get_mode(int channel);
   // Readiness for service_send_unit/service_recv_unit, including explicit
   // requests and arbitration. 
-  bool          can_service_send(int channel);
-  bool          can_service_recv(int channel);
+  bool          can_service_send(int channel, u32 requester = 0);
+  bool          can_service_recv(int channel, u32 requester = 0);
   // Raw byte/word count register (number of DMA units minus one).
   int           get_count(int channel);
   // Current count plus one in bytes; independent of mask/enable state.
@@ -200,6 +201,7 @@ protected:
     u32 count;
     u32 base_count;
     u8 mode;
+    u32 block_owner;
   };
 
   // Derived transfer geometry; not guest registers or saved state.
@@ -249,7 +251,7 @@ private:
   size_t        prepare_transfer(int channel, size_t length, const SDMA_transfer_properties& properties,
                   bool eop, SDMA_result& result) const;
   template<typename T>
-  SDMA_result   receive_unit(int channel, T& data, bool eop, bool arbitrate);
+  SDMA_result   receive_unit(int channel, T& data, bool eop, bool arbitrate, u32 requester);
   void          transfer_memory(u32 address, u8* buffer, size_t length, bool decrement,
                   bool write, const SDMA_transfer_properties& properties);
   u8            software_requests(int ctrlr) const;
@@ -257,10 +259,11 @@ private:
   bool          cascade_enabled() const;
   bool          service_requested(int channel) const;
   int           select_service_channel(int ctrlr) const;
-  bool          service_selected(int channel) const;
-  bool          service_ready(int channel, u8 transfer_type) const;
+  bool          block_allows_requester(int channel, u32 requester) const;
+  bool          service_selected(int channel, u32 requester) const;
+  bool          service_ready(int channel, u8 transfer_type, u32 requester) const;
   void          rotate_priority(int channel);
-  void          finish_service(int channel, const SDMA_result& result);
+  void          finish_service(int channel, const SDMA_result& result, u32 requester);
   void          do_dma();
   void          advance_transfer(int channel, size_t length,
                   const SDMA_transfer_properties& properties, SDMA_result& result);

@@ -279,8 +279,8 @@ class CAlphaCPU : public CSystemComponent, public CRunnable
   friend class Ev68CPUState;
   friend void ev4_capture_ipr_state(const CAlphaCPU&, u64*);
   friend void ev4_restore_ipr_state(CAlphaCPU&, const u64*);
-  friend u32 ev4_capture_bc_tag(const CAlphaCPU&);
-  friend void ev4_replay_bc_tag(CAlphaCPU&, u32);
+  friend u32 ev4_capture_memory_state(const CAlphaCPU&);
+  friend void ev4_replay_memory_state(CAlphaCPU&, u32);
   friend class Ev68InstructionFetch;
   friend class Ev4InstructionFetch;
   friend constexpr AlphaCPUProfile ev4_cpu_profile();
@@ -647,7 +647,25 @@ private:
   void configure_ev4_bcache(u64 value);
   void configure_ev4_dcache(u64 value, bool flush = true);
   void update_ev4_cache_limit();
-  // Locked accesses go to the system directly (21064 HRM 6.4.10).
+  void note_ev4_dcache_access(bool hit)
+  {
+    if (!state.ev4_dc_stat_unlocked) return;
+    const u64 sample = hit ? Ev4Dcache::dc_hit : 0;
+    if ((state.dc_stat & Ev4Dcache::dc_hit) == sample) return;
+    state.dc_stat = (state.dc_stat & ~u64(Ev4Dcache::dc_hit)) | sample;
+    if (!m_ev4_dcache.active()) update_ev4_cache_limit();
+  }
+  // Locked accesses sample the primary tag and go to the system bus (21064 HRM 5.3.16, 6.4.10).
+  u64 read_locked_physical(u64 phys, int size)
+  {
+    if (state.ev4_dc_stat_unlocked) note_ev4_dcache_access(m_ev4_dcache.hits(phys));
+    return cSystem->cpu_read_locked(state.iProcNum, phys, size, this);
+  }
+  u64 store_conditional_physical(u64 phys, int size, u64 value)
+  {
+    if (state.ev4_dc_stat_unlocked) note_ev4_dcache_access(m_ev4_dcache.hits(phys));
+    return cSystem->cpu_stx_c(state.iProcNum, phys, size, value, dram_ptr, dram_size, this);
+  }
   u64 bus_address(u64 phys, bool write = false)
   {
     return direct_ram_size ? phys : m_ev4_bcache.probe(phys, dram_size, write,
@@ -658,7 +676,9 @@ private:
     if (phys < direct_ram_size) return dram_read(dram_ptr, phys, size);
     const auto read_ram = [&](u64 address) { return dram_read(dram_ptr, address, size); };
     std::uint64_t value;
-    if (m_ev4_dcache.active() && m_ev4_dcache.read_hit(phys, size, read_ram, value)) return value;
+    const bool hit = m_ev4_dcache.read_hit(phys, size, read_ram, value);
+    note_ev4_dcache_access(hit);
+    if (hit) return value;
     const u64 backing = bus_address(phys);
     if (m_ev4_dcache.active()) m_ev4_dcache.fill(phys, backing, dram_size);
     return backing < dram_size ? read_ram(backing) : cSystem->ReadMem(backing, size, this);
@@ -670,7 +690,7 @@ private:
       return;
     }
     const u64 backing = bus_address(phys, true);
-    if (m_ev4_dcache.active()) m_ev4_dcache.store(phys, backing, size, value);
+    note_ev4_dcache_access(m_ev4_dcache.store(phys, backing, size, value));
     if (backing < dram_size)
       cSystem->cpu_write_ram(backing, size, value);
     else

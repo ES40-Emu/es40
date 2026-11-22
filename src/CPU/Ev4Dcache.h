@@ -15,6 +15,7 @@ struct Ev4Dcache
   static constexpr unsigned spe_1 = 1u << 4, spe_2 = 1u << 5;
   static constexpr unsigned enable = 1u << 10, force_hit = 1u << 11;
   static constexpr unsigned ncache_ndisturb = 1u << 8;
+  static constexpr unsigned dc_hit = 1u << 3; // DC_STAT (21064 HRM Table 5-15).
   // HRM 2.8.2.1: 8 KiB, physically direct-mapped, 32-byte lines, read-allocate and write-through.
   static constexpr unsigned line_bytes = 32, line_count = 256;
   struct Line
@@ -32,6 +33,12 @@ struct Ev4Dcache
   static unsigned index(std::uint64_t phys) { return (phys >> 5) & (line_count - 1); }
   static std::uint64_t base(std::uint64_t phys) { return phys & ~std::uint64_t(line_bytes - 1); }
 
+  bool hits(std::uint64_t phys) const
+  {
+    return (control & force_hit) ||
+           ((control & enable) && !lines.empty() && lines[index(phys)].tag == base(phys));
+  }
+
   void invalidate()
   {
     for (auto& line : lines) line.tag = UINT64_MAX;
@@ -40,12 +47,12 @@ struct Ev4Dcache
   template<typename ReadRam>
   bool read_hit(std::uint64_t phys, int bits, ReadRam read_ram, std::uint64_t& value) const
   {
+    if (!hits(phys)) return false;
     if (lines.empty()) {
       value = 0; // Deterministic cold SRAM for a forced hit.
-      return (control & force_hit) != 0;
+      return true;
     }
     const auto& line = lines[index(phys)];
-    if (line.tag != base(phys) && !(control & force_hit)) return false;
     const unsigned offset = phys & (line_bytes - 1);
     value = line.backing != UINT64_MAX ? read_ram(line.backing + offset) : 0;
     if (!line.overlay) return true;
@@ -69,14 +76,11 @@ struct Ev4Dcache
     lines[index(phys)] = {base(phys), base(backing)};
   }
 
-  void store(std::uint64_t phys, std::uint64_t backing, int bits, std::uint64_t value)
+  bool store(std::uint64_t phys, std::uint64_t backing, int bits, std::uint64_t value)
   {
-    if (lines.empty()) {
-      if (!(control & force_hit)) return;
-      lines.resize(line_count);
-    }
+    if (!hits(phys)) return false;
+    if (lines.empty()) lines.resize(line_count);
     auto& line = lines[index(phys)];
-    if (line.tag != base(phys) && !(control & force_hit)) return;
     // Normal hits share coherent RAM; a forced alias changes SRAM and writes through separately.
     const unsigned offset = phys & (line_bytes - 1);
     const unsigned count = bits / 8;
@@ -88,6 +92,7 @@ struct Ev4Dcache
       for (unsigned i = 0; i < count; ++i)
         line.data[offset + i] = static_cast<std::uint8_t>(value >> (i * 8));
     }
+    return true;
   }
 
   bool valid_lines(std::uint64_t ram_size) const

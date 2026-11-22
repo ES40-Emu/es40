@@ -58,6 +58,8 @@ u64 ev4_read_ipr(CAlphaCPU& cpu, u32 instruction)
   case 0x4b: // DC_ADDR (21064-AA data sheet, 3.10.2).
     state.ev4_dc_stat_unlocked = 1;
     return 0; // The data sheet specifies only the unlock.
+  case 0x4c: // DC_STAT: DC_HIT[3] and CHIP_ID[2:0] (21064 HRM 5.3.16, Table 5-15).
+    return (state.dc_stat & Ev4Dcache::dc_hit) | (cpu.get_profile().chip_id & 7);
   case 0x4d: // FILL_ADDR: the low PA[4:2] are defined for D-stream fills (21064 HRM 5.3.20).
     biu.fill_unlocked = true;
     return biu.fill_address & ((biu.status & (1u << 11)) ? U64(0x3ffffffe0) : U64(0x3fffffffc));

@@ -67,20 +67,22 @@ inline void ev4_restore_ipr_state(CAlphaCPU& cpu, const u64* words)
   });
 }
 
-inline u32 ev4_capture_bc_tag(const CAlphaCPU& cpu)
+inline u32 ev4_capture_memory_state(const CAlphaCPU& cpu)
 {
-  return cpu.m_ev4_biu.bc_tag;
+  // Pack the 23-bit BC_TAG (21064 HRM Fig. 5-33) above the DC_HIT sample.
+  return (cpu.m_ev4_biu.bc_tag << 1) | ((cpu.state.dc_stat & Ev4Dcache::dc_hit) != 0);
 }
 
-inline void ev4_replay_bc_tag(CAlphaCPU& cpu, u32 value)
+inline void ev4_replay_memory_state(CAlphaCPU& cpu, u32 value)
 {
-  if (cpu.m_ev4_biu.bc_tag_unlocked) cpu.m_ev4_biu.bc_tag = value;
+  if (cpu.m_ev4_biu.bc_tag_unlocked) cpu.m_ev4_biu.bc_tag = value >> 1;
+  cpu.note_ev4_dcache_access((value & 1) != 0);
 }
 
 inline constexpr AlphaJitVerifyPolicy kEv4JitVerifyPolicy{
   20, &ev4_capture_ipr_state, &ev4_restore_ipr_state, &ev4_restore_ipr_state,
   [](int, u64 left, u64 right, bool) { return left != right; },
-  &ev4_capture_bc_tag, &ev4_replay_bc_tag
+  &ev4_capture_memory_state, &ev4_replay_memory_state
 };
 
 #endif

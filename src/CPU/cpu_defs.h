@@ -685,7 +685,7 @@ inline u64 fsqrt64(u64 asig, s32 exp)
   pbc = false;                                          \
   DATA_PHYS_TRAP(va, ACCESS_READ, (size/8)-1);          \
   LLR;                         \
-  dest = cSystem->cpu_read_locked(state.iProcNum, phys_address, size, this);
+  dest = read_locked_physical(phys_address, size);
 
 #define READ_VIRT_F(va, size, dest, f)                    \
   pbc = false;                                            \
@@ -706,7 +706,7 @@ inline u64 fsqrt64(u64 asig, s32 exp)
   pbc = false;                                            \
   DATA_PHYS_TRAP(va, ACCESS_READ, (size/8)-1);            \
   LLR;                           \
-  dest = f(cSystem->cpu_read_locked(state.iProcNum, phys_address, size, this));
+  dest = f(read_locked_physical(phys_address, size));
 
  /**
   * Normal variant of write action
@@ -748,7 +748,7 @@ inline u64 fsqrt64(u64 asig, s32 exp)
     else                                                    \
     {                                                       \
       LWR;                                                  \
-      dest = cSystem->cpu_stx_c(state.iProcNum, phys_address, size, _stc_data, dram_ptr, dram_size, this); \
+      dest = store_conditional_physical(phys_address, size, _stc_data); \
     }                                                       \
   }
 

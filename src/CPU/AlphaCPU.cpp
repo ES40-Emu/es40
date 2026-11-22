@@ -1292,7 +1292,9 @@ void CAlphaCPU::configure_ev4_dcache(u64 value, bool flush)
 
 void CAlphaCPU::update_ev4_cache_limit()
 {
-	const u64 limit = ((m_ev4_bcache.control & 1) || m_ev4_dcache.active()) ? 0 : dram_size;
+	// After disabling the Dcache, the next data access must still clear DC_HIT.
+	const u64 limit = ((m_ev4_bcache.control & 1) || m_ev4_dcache.active() ||
+	                   (state.dc_stat & Ev4Dcache::dc_hit)) ? 0 : dram_size;
 	if (direct_ram_size != limit)
 	{
 		direct_ram_size = limit;
@@ -2607,16 +2609,7 @@ int CAlphaCPU::jit_read(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 			// A nonzero result means virt2phys has already selected native-PAL fault.
 			if (cpu->virt2phys(va, &phys, ACCESS_READ, nullptr, ins)) return 2;
 		}
-		else
-		{
-			// Verify/legacy callers do not carry an instruction word and retain the old
-			// side-effect-free retry contract.
-			const int i = cpu->FindTBEntry(va, ACCESS_READ, access.asn);
-			if (i < 0) return 1;
-			const auto& e = cpu->state.tb[TB_INDEX_DATA][i];
-			if (!e.access[0][access.mode] || e.fault[0]) return 1;
-			phys = e.phys | (va & e.keep_mask);
-		}
+		else if (cpu->virt2phys(va, &phys, ACCESS_READ | FAKE, nullptr, ins)) return 1;
 		dpc.phys_base = phys & ~U64(0x1FFF);
 		dpc.host_bias = ((phys | U64(0x1FFF)) < cpu->direct_ram_size)
 			? ((u64)cpu->dram_ptr + (phys & ~U64(0x1FFF)) - vp) : 0;
@@ -2865,16 +2858,7 @@ int CAlphaCPU::jit_read_locked(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 			// The emitter installed current_pc. Translation faults enter native PAL here.
 			if (cpu->virt2phys(va, &phys, ACCESS_READ, nullptr, ins)) return 2;
 		}
-		else
-		{
-			// Differential replay retains the side-effect-free lookup used by the
-			// interpreter.
-			const int i = cpu->FindTBEntry(va, ACCESS_READ, access.asn);
-			if (i < 0) return 1;
-			const auto& e = cpu->state.tb[TB_INDEX_DATA][i];
-			if (!e.access[0][access.mode] || e.fault[0]) return 1;
-			phys = e.phys | (va & e.keep_mask);
-		}
+		else if (cpu->virt2phys(va, &phys, ACCESS_READ | FAKE, nullptr, ins)) return 1;
 		dpc.phys_base = phys & ~U64(0x1FFF);
 		dpc.host_bias = ((phys | U64(0x1FFF)) < cpu->direct_ram_size)
 			? ((u64)cpu->dram_ptr + (phys & ~U64(0x1FFF)) - vp) : 0;
@@ -2906,7 +2890,7 @@ int CAlphaCPU::jit_read_locked(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 	}
 	else
 	{
-		const u64 raw = cpu->cSystem->cpu_read_locked(cpu->state.iProcNum, phys, size_bits, cpu);
+		const u64 raw = cpu->read_locked_physical(phys, size_bits);
 		*out = (size_bits == 32) ? sext_u64_32(raw) : raw;   // LDL_L sign-extends; LDQ_L is the full quad
 	}
 	return 0;
@@ -2933,18 +2917,7 @@ int CAlphaCPU::jit_read_vpte(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 		// native-PAL DTB/access-fault entry.
 		if (cpu->virt2phys(va, &phys, flags, nullptr, ins)) return 2;
 	}
-	else
-	{
-		// The reference interpreter already completed this instruction before verify replay.
-		const auto access = cpu->m_profile.mmu_address.access(*cpu, flags);
-		const int i = cpu->FindTBEntry(va, flags, access.asn);
-		if (i < 0) return 1;
-		const auto& e = cpu->state.tb[TB_INDEX_DATA][i];
-		const int cm = access.mode;
-		if (!e.access[0][cm] || e.fault[0]) return 1;
-		if (wchk && (!e.access[1][cm] || e.fault[1])) return 1;
-		phys = e.phys | (va & e.keep_mask);
-	}
+	else if (cpu->virt2phys(va, &phys, flags | FAKE, nullptr, ins)) return 1;
 
 	phys &= ~amask;
 
@@ -3215,8 +3188,7 @@ u64 CAlphaCPU::jit_stc(CAlphaCPU* cpu, u64 va, u64 descr, u64 value)
 
 	// Shared LL/SC path: consumes the monitor, applies the ABA sequence guard,
 	// CASes RAM or performs the MMIO conditional store.
-	return cpu->cSystem->cpu_stx_c(cpu->state.iProcNum, phys, size_bits, value,
-		cpu->dram_ptr, cpu->dram_size, cpu);
+	return cpu->store_conditional_physical(phys, size_bits, value);
 }
 
 /* CALL_PAL OPCDEC trap: a privileged function (< 0x40) attempted in user mode. Mirrors

@@ -99,6 +99,7 @@ constexpr AlphaIPRReadDescriptor ev4_describe_ipr_read(std::uint32_t instruction
     case 20: // BC_TAG shifts even to R31 (21064 HRM 5.3.22).
       return {AlphaIPRReadKind::Helper, false, false};
     case 10: // BIU_STAT
+    case 12: // DC_STAT
     case 19: // FILL_SYNDROME
       return {AlphaIPRReadKind::Helper, false, true};
     case 16: // CC reads the running counter and offset (21064 HRM 5.3.13).

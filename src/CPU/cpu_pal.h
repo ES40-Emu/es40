@@ -138,8 +138,8 @@
   }                                                                            \
   /* Reserve the aligned physical address actually read. */                    \
   if (hw_load.locked) {                                                        \
-    state.r[REG_1] = cSystem->cpu_read_locked(state.iProcNum,                  \
-      ALIGN_PHYS(hw_load.size_bits / 8), hw_load.size_bits, this);            \
+    state.r[REG_1] = read_locked_physical(ALIGN_PHYS(hw_load.size_bits / 8),   \
+      hw_load.size_bits);                                                      \
     LLR;                                                                       \
   } else {                                                                     \
     state.r[REG_1] = READ_PHYS_NT(hw_load.size_bits);                          \
@@ -168,9 +168,8 @@
   }                                                                            \
   /* Evaluate the source after translation, before any conditional result. */  \
   if (hw_store.conditional) {                                                  \
-    state.r[REG_1] = cSystem->cpu_stx_c(state.iProcNum,                       \
-      ALIGN_PHYS(hw_store.size_bits / 8),                                    \
-      hw_store.size_bits, state.r[REG_1], dram_ptr, dram_size, this);          \
+    state.r[REG_1] = store_conditional_physical(ALIGN_PHYS(hw_store.size_bits / 8), \
+      hw_store.size_bits, state.r[REG_1]);                                     \
   } else {                                                                     \
     WRITE_PHYS_NT(state.r[REG_1], hw_store.size_bits);                         \
   }                                                                            \

@@ -846,6 +846,7 @@ private:
   bool m_jit_vmismatch = false; // any checked output differed in the current replay
 #ifdef JIT_VERIFY
   u64 m_verify_issue_base = 0;
+  u64 m_verify_cc_control = UINT64_MAX;
   u64 m_verify_tbia[2] = {};
   u32 m_verify_load_state[kJitVlogCap], m_verify_store_state[kJitVlogCap];
 #endif

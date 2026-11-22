@@ -51,6 +51,9 @@ u64 ev4_read_ipr(CAlphaCPU& cpu, u32 instruction)
   case 0x4d: // FILL_ADDR: the low PA[4:2] are defined for D-stream fills (21064 HRM 5.3.20).
     biu.fill_unlocked = true;
     return biu.fill_address & ((biu.status & (1u << 11)) ? U64(0x3ffffffe0) : U64(0x3fffffffc));
+  case 0x50: // HW_MFPR CC returns offset[63:32] and counter[31:0] (21064 HRM Fig. 5-24).
+    cpu.sync_cc_wallclock();
+    return alpha_read_cycle_counter(cpu);
   case 0x53: // FILL_SYNDROME: BIU_CTL.ECC selects two syndromes or two parity bits (21064 HRM 5.3.15, 5.3.21).
     return biu.fill_syndrome & ((cpu.m_ev4_bcache.control & 2) ? 0x3fff : 0x81);
   case 0x54: { // 21064 HRM 5.3.22: read the LSB, then shift; PALcode spaces reads by a null cycle.
@@ -66,8 +69,28 @@ u64 ev4_read_ipr(CAlphaCPU& cpu, u32 instruction)
 
 void ev4_write_ipr(CAlphaCPU& cpu, u32 instruction, u64 value, AlphaIPRWriteContext context)
 {
-  if (ev4_selects_bc_tag(ev4_ipr_selector(instruction))) {
+  const auto selector = ev4_ipr_selector(instruction);
+  if (ev4_selects_bc_tag(selector)) {
     cpu.m_ev4_biu.bc_tag_unlocked = 1; // Write data is ignored (21064 HRM 5.3.22).
+    return;
+  }
+  if (ev4_cycle_counter_index(selector.index) && (selector.banks & 0x60)) {
+    auto& state = cpu.state;
+    if (selector.banks & 0x40) {
+      if (selector.index == 16) {
+        state.cc_offset = ev4_decode_cycle_counter_offset(value);
+      } else {
+        const auto control = ev4_decode_cycle_counter_control(value); // 21064 HRM 5.3.14, Fig. 5-25.
+        cpu.set_cycle_counter(control.counter, control.enabled);
+      }
+    }
+    if (selector.banks & 0x20) { // IBX also selects HIER or SIER (21064 HRM 4.8.1, Table 4-7).
+      if (selector.index == 16)
+        ev4_write_hier(value, state.eien, state.pcen, state.slen, state.cren);
+      else
+        ev4_write_sier(value, state.sien, state.asten);
+      cpu.kick_int_if_pending();
+    }
     return;
   }
   switch (instruction & 0xff) {
@@ -75,7 +98,6 @@ void ev4_write_ipr(CAlphaCPU& cpu, u32 instruction, u64 value, AlphaIPRWriteCont
   case 0x2a: ev4_write_exception_summary(cpu.ev4_arithmetic_state(), value); return;
   case 0x2b: cpu.set_PAL_BASE(ev4_normalize_pal_base(value)); return;
   case 0x4f: cpu.state.alt_cm = ev4_decode_alternate_mode(value); return;
-  case 0x50: cpu.state.cc_offset = ev4_decode_cycle_counter_offset(value); return;
   default:
     FAILURE_2(NotImplemented, "Unsupported EV4 HW_MTPR %08" PRIx32 " at PC %016" PRIx64,
               instruction, cpu.state.current_pc);

@@ -55,6 +55,11 @@ constexpr bool ev4_selects_bc_tag(Ev4IPRSelector selector)
   return selector.index == 20 && (selector.banks & 0x40);
 }
 
+constexpr bool ev4_cycle_counter_index(std::uint32_t index)
+{
+  return index == 16 || index == 17;
+}
+
 constexpr bool ev4_ipr_ignored(Ev4IPRSelector selector, bool pal_mode)
 {
   // HRM 4.6(10); mixed-bank accesses stay with their handlers.
@@ -91,6 +96,8 @@ constexpr AlphaIPRReadDescriptor ev4_describe_ipr_read(std::uint32_t instruction
     case 10: // BIU_STAT
     case 19: // FILL_SYNDROME
       return {AlphaIPRReadKind::Helper, false, true};
+    case 16: // CC reads the running counter and offset (21064 HRM 5.3.13).
+      return {AlphaIPRReadKind::Helper, true, true};
     }
   }
   if (selector.banks == 0x20 && selector.index == 9) // PS.
@@ -110,8 +117,8 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
   const auto selector = ev4_ipr_selector(instruction);
   if (ev4_ipr_ignored(selector, pal_mode))
     return AlphaIPRWriteKind::Noop;
-  // BC_TAG unlocks on write; PAL can also select PAL_TEMP20 (21064 HRM 4.8.1, 5.3.22).
-  if (ev4_selects_bc_tag(selector)) {
+  // PAL can write the same-index PAL_TEMP along with the Abox IPR (21064 HRM 4.8.1).
+  if (ev4_selects_bc_tag(selector) || ((selector.banks & 0x40) && ev4_cycle_counter_index(selector.index))) {
     if (slot) *slot = (selector.banks & 0x80) ? 32u + selector.index : 0;
     return AlphaIPRWriteKind::Helper;
   }
@@ -160,8 +167,6 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
     return kind;
   }
   if (selector.banks == 0x40 && selector.index == 15) // ALT_MODE.
-    return AlphaIPRWriteKind::Helper;
-  if (selector.banks == 0x40 && selector.index == 16) // CC.
     return AlphaIPRWriteKind::Helper;
   return AlphaIPRWriteKind::Interpreter;
 }

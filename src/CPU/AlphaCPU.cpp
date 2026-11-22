@@ -953,14 +953,6 @@ void CAlphaCPU::write_ipr(u32 instruction, u64 value, AlphaIPRWriteContext conte
 			state.astrr = ev4_ast_mask_from_write(value);
 			kick_int_if_pending();
 			return;
-		case AlphaIPRWriteKind::HardwareInterruptEnable:
-			ev4_write_hier(value, state.eien, state.pcen, state.slen, state.cren);
-			kick_int_if_pending();
-			return;
-		case AlphaIPRWriteKind::SoftwareInterruptEnable:
-			ev4_write_sier(value, state.sien, state.asten);
-			kick_int_if_pending();
-			return;
 		case AlphaIPRWriteKind::AstInterruptEnable:
 			state.aster = ev4_ast_mask_from_write(value);
 			kick_int_if_pending();
@@ -1009,6 +1001,11 @@ void CAlphaCPU::set_current_mode(u32 mode, AlphaIPRWriteContext context)
 
 void CAlphaCPU::set_cycle_counter(u32 counter, bool enabled)
 {
+#if defined(ES40_JIT) && defined(JIT_VERIFY)
+	m_verify_cc_control = (static_cast<u64>(enabled) << 32) | counter;
+	if (m_jit_vreplay) return; // Replay checks the write without restarting the reference clock.
+#endif
+	cc_last_sync = std::chrono::steady_clock::now();
 	state.cc_ena = enabled;
 	state.cc = counter;
 	cc_last_read = state.cc;  /* counter rewritten: rebase the rpcc_read floor
@@ -1918,12 +1915,15 @@ void CAlphaCPU::jit_run(int budget)
 			u64 f_pre[64];  // FP file before the interp pass -- restored before the compiled pass below
 			memcpy(f_pre, state.f, sizeof(f_pre));   // so the compiled FP ops read the same f[] the interp did
 			m_verify_issue_base = state.instruction_count;
+			m_verify_cc_control = UINT64_MAX; // Distinguish no write from any programmed CC_CTL value.
 			const auto& verify = m_profile.cpu_state.verify;
 			const size_t swap_bytes = m_profile.ipr_write.indexed ? sizeof(m_pal_temp_write) : 0;
 			const int biu_index = verify.word_count + (int)(swap_bytes / sizeof(u64));
 			const bool verify_indexed_iprs = m_profile.ipr_write.indexed != nullptr;
-			const int ipr_count = biu_index + (verify_indexed_iprs ? 17 : 0);
+			const int cc_ctl_index = biu_index + (verify_indexed_iprs ? 17 : 0);
+			const int ipr_count = cc_ctl_index + 1;
 			auto cap_iprs = [&](u64* d) {
+				d[cc_ctl_index] = m_verify_cc_control;
 				if (verify.word_count) verify.capture(*this, d);
 				if (swap_bytes) memcpy(d + verify.word_count, &m_pal_temp_write, swap_bytes);
 				if (verify_indexed_iprs) {
@@ -1947,6 +1947,7 @@ void CAlphaCPU::jit_run(int budget)
 				}
 			};
 			auto put_iprs = [&](const u64* s, bool replay) {
+				m_verify_cc_control = s[cc_ctl_index];
 				if (verify.word_count)
 					(replay ? verify.prepare_replay : verify.restore)(*this, s);
 				if (swap_bytes) memcpy(&m_pal_temp_write, s + verify.word_count, swap_bytes);

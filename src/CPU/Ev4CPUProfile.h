@@ -135,9 +135,7 @@ constexpr AlphaCPUProfile ev4_cpu_profile()
   // 21064 HRM 2.3.3 and 5.2.14-19: only enabled requests interrupt native mode.
   profile.interrupt.pending = [](CAlphaCPU& cpu) {
     const auto& state = cpu.state;
-    return (state.eien & state.eir) || (state.pcen & state.pcr) || (state.slen & state.slr) ||
-           (state.cren & state.crr) || (state.sien & state.sir) ||
-           (state.asten && (state.aster & state.astrr & ((1 << (state.cm + 1)) - 1)));
+    return ev4_interrupt_summary(state, state.eir.load()) != 0;
   };
   profile.interrupt.service = [](CAlphaCPU& cpu) {
     return cpu.get_profile().interrupt.pending(cpu) ? AlphaInterruptResult::EnterPAL : AlphaInterruptResult::Continue;

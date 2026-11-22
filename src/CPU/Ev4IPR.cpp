@@ -37,6 +37,16 @@ u64 ev4_read_ipr(CAlphaCPU& cpu, u32 instruction)
   case 0x29: return ev4_read_processor_status(state.cm);
   case 0x2a: return ev4_read_exception_summary(cpu.ev4_arithmetic_state());
   case 0x2b: return state.pal_base;
+  case 0x2c: // HIRR, SIRR and ASTRR share the read format (21064 HRM 5.2.14-16, Fig. 5-11).
+  case 0x2d:
+  case 0x2e: {
+    const unsigned irq = state.eir.load(); // HWR must agree with the IRQ pins from this read.
+    return (u64(state.astrr & 0xf) << 29) | (u64(state.sir & 0xfffe) << 13)
+         | ((state.slr & 1) << 13) | ((irq & 7) << 10)
+         | ((state.pcr & 1) << 9) | ((state.pcr & 2) << 7)
+         | ((irq & 0x38) << 2) | ((state.crr & 1) << 4)
+         | ev4_interrupt_summary(state, irq);
+  }
   case 0x45: // VA (21064 HRM 5.3.5).
     state.ev4_va_locked = 0;
     return state.fault_va;

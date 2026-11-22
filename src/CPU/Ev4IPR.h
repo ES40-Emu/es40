@@ -106,6 +106,8 @@ constexpr AlphaIPRReadDescriptor ev4_describe_ipr_read(std::uint32_t instruction
     return {AlphaIPRReadKind::Helper, false, false};
   if (selector.banks == 0x20 && selector.index == 11) // PAL_BASE.
     return {AlphaIPRReadKind::PalBase, false, true};
+  if (selector.banks == 0x20 && selector.index >= 12 && selector.index <= 14) // HIRR, SIRR, ASTRR.
+    return {AlphaIPRReadKind::Helper, true, true};
   return {AlphaIPRReadKind::Unsupported, false, false};
 }
 
@@ -169,6 +171,17 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
   if (selector.banks == 0x40 && selector.index == 15) // ALT_MODE.
     return AlphaIPRWriteKind::Helper;
   return AlphaIPRWriteKind::Interpreter;
+}
+
+// HWR, SWR and ATR reflect enabled requests; ASTs also depend on mode and SIER[2] (21064 HRM 2.3.3, Table 5-7).
+template<typename State>
+inline unsigned ev4_interrupt_summary(const State& state, unsigned irq)
+{
+  const bool hwr = (state.eien & irq) || (state.pcen & state.pcr) ||
+                   (state.slen & state.slr) || (state.cren & state.crr);
+  const bool swr = (state.sien & state.sir) != 0;
+  const bool atr = state.asten && (state.aster & state.astrr & ((1 << (state.cm + 1)) - 1));
+  return (hwr << 1) | (swr << 2) | (atr << 3);
 }
 
 // 21064 HRM 5.2.6, Fig. 5-6 and Table 5-5: SLC, PC1, PC0 and CRD are write-zero-to-clear.

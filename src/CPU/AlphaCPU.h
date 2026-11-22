@@ -848,6 +848,7 @@ private:
   u64 m_verify_issue_base = 0;
   u64 m_verify_cc_control = UINT64_MAX;
   u64 m_verify_tbia[2] = {};
+  u64 m_verify_icache_flush[2] = {}; // Full and ASM-selective flushes.
   u32 m_verify_load_state[kJitVlogCap], m_verify_store_state[kJitVlogCap];
 #endif
   u32  m_jit_vlog_i  = 0;      // replay cursor

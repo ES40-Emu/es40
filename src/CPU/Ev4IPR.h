@@ -55,6 +55,11 @@ constexpr bool ev4_selects_bc_tag(Ev4IPRSelector selector)
   return selector.index == 20 && (selector.banks & 0x40);
 }
 
+constexpr bool ev4_selects_icache_flush(Ev4IPRSelector selector)
+{
+  return (selector.banks & 0x40) && (selector.index == 21 || selector.index == 23);
+}
+
 constexpr bool ev4_cycle_counter_index(std::uint32_t index)
 {
   return index == 16 || index == 17;
@@ -119,6 +124,10 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
   const auto selector = ev4_ipr_selector(instruction);
   if (ev4_ipr_ignored(selector, pal_mode))
     return AlphaIPRWriteKind::Noop;
+  if (ev4_selects_icache_flush(selector)) { // PAL also selects PAL_TEMP21/23 (21064 HRM 4.8.1, Table 4-7).
+    if (slot) *slot = (selector.banks & 0x80) ? 32u + selector.index : 0;
+    return AlphaIPRWriteKind::HelperTerminator;
+  }
   // PAL can write the same-index PAL_TEMP along with the Abox IPR (21064 HRM 4.8.1).
   if (ev4_selects_bc_tag(selector) || ((selector.banks & 0x40) && ev4_cycle_counter_index(selector.index))) {
     if (slot) *slot = (selector.banks & 0x80) ? 32u + selector.index : 0;

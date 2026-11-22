@@ -1920,7 +1920,7 @@ void CAlphaCPU::jit_run(int budget)
 			const size_t swap_bytes = m_profile.ipr_write.indexed ? sizeof(m_pal_temp_write) : 0;
 			const int biu_index = verify.word_count + (int)(swap_bytes / sizeof(u64));
 			const bool verify_indexed_iprs = m_profile.ipr_write.indexed != nullptr;
-			const int cc_ctl_index = biu_index + (verify_indexed_iprs ? 17 : 0);
+			const int cc_ctl_index = biu_index + (verify_indexed_iprs ? 19 : 0);
 			const int ipr_count = cc_ctl_index + 1;
 			auto cap_iprs = [&](u64* d) {
 				d[cc_ctl_index] = m_verify_cc_control;
@@ -1944,6 +1944,8 @@ void CAlphaCPU::jit_run(int budget)
 					d[biu_index + 14] = state.astrr;
 					d[biu_index + 15] = m_verify_tbia[TB_INDEX_ITB];
 					d[biu_index + 16] = m_verify_tbia[TB_INDEX_DATA];
+					d[biu_index + 17] = m_verify_icache_flush[0];
+					d[biu_index + 18] = m_verify_icache_flush[1];
 				}
 			};
 			auto put_iprs = [&](const u64* s, bool replay) {
@@ -1969,6 +1971,8 @@ void CAlphaCPU::jit_run(int budget)
 					state.astrr = static_cast<int>(s[biu_index + 14]);
 					m_verify_tbia[TB_INDEX_ITB] = s[biu_index + 15];
 					m_verify_tbia[TB_INDEX_DATA] = s[biu_index + 16];
+					m_verify_icache_flush[0] = s[biu_index + 17];
+					m_verify_icache_flush[1] = s[biu_index + 18];
 				}
 				if (!replay) sync_register_bank();
 			};

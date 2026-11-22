@@ -80,6 +80,16 @@ u64 ev4_read_ipr(CAlphaCPU& cpu, u32 instruction)
 void ev4_write_ipr(CAlphaCPU& cpu, u32 instruction, u64 value, AlphaIPRWriteContext context)
 {
   const auto selector = ev4_ipr_selector(instruction);
+  if (ev4_selects_icache_flush(selector)) {
+    const bool non_global = selector.index == 23; // FLUSH_IC_ASM keeps ASM lines (21064 HRM 5.3.9-10).
+#if defined(ES40_JIT) && defined(JIT_VERIFY)
+    ++cpu.m_verify_icache_flush[non_global];
+    if (cpu.m_jit_vreplay) return; // The reference pass already flushed the cache.
+#endif
+    if (non_global) cpu.flush_icache_asm();
+    else cpu.flush_icache();
+    return;
+  }
   if (ev4_selects_bc_tag(selector)) {
     cpu.m_ev4_biu.bc_tag_unlocked = 1; // Write data is ignored (21064 HRM 5.3.22).
     return;

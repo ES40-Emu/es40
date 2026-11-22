@@ -506,6 +506,7 @@ list(APPEND ES40_SOURCES
     src/chipset/Intel82357.cpp
     src/chipset/Intel82357_dma.cpp
     src/chipset/Intel82358.cpp
+    src/chipset/VL82C106.cpp
     src/chipset/Pic8259.cpp
     src/dox.cpp
     src/system/DPR.cpp

@@ -137,14 +137,35 @@ public:
   virtual void  init();
   virtual void  start_threads();
   virtual void  stop_threads();
+protected:
+  CFastMutex kbdLock{ "kbd" };
+  virtual void map_ports();
+  virtual void set_irq_lines(bool keyboard, bool mouse);
+  void reset_controller();
+  virtual void reset_controller_state() {}
+  virtual u8 default_scancode_set() const { return 3; }
+  u8 mode_byte() const;
+  void set_mode_byte(u8 value);
+  virtual bool handle_controller_command(u8 command) { return false; }
+  // Command zero denotes a direct keyboard byte (PB22H-KB, p. 23-10).
+  virtual bool handle_controller_parameter(u8 command, u8 data) { return false; }
+  virtual u8 status_byte(u8 normal) const { return normal; }
+  virtual bool input_locked() const { return false; }
+  virtual void password_scancodes(const u8* bytes, bool released) {}
+
+  void controller_enQ(u8 data, unsigned source);
+  void discard_device_input();
+  void discard_input_type(InputEvent::Type type);
+  void discard_mouse_stream();
+  void kbd_update_irq();
+  void kbd_service();
+
 private:
   // Borrowed routing owner; not part of the saved device state.
   const CAliM1543C* isa_bridge = nullptr;
 
   CThread* myThread = nullptr;
   std::atomic<bool> StopThread{true};
-
-  CFastMutex kbdLock{ "kbd" };
 
   std::array<InputEvent, INPUT_CAPACITY> input_queue{};
   std::array<size_t, INPUT_CAPACITY> input_batch_tags{};
@@ -166,7 +187,6 @@ private:
   void finish_input_event(size_t index, bool cancelled);
   void discard_input_locked();
   void release_input_locked(size_t source);
-  void discard_input_type(InputEvent::Type type);
   void service_input();
   void service_input_release();
   bool apply_input_key(u32 key, size_t source = INPUT_SOURCES);
@@ -179,10 +199,8 @@ private:
   void      resetinternals(bool powerup);
   void      enQ(u8 scancode);
   void      kbd_response_enQ(u8 data);
-  void      controller_enQ(u8 data, unsigned source);
   bool      controller_deQ();
   bool      input_transaction_active() const;
-  void      discard_mouse_stream();
   void      defer_keyboard_input();
   void      prepare_command_response();
   void      set_kbd_clock_enable(u8 value);
@@ -191,12 +209,11 @@ private:
   void      ctrl_to_mouse(u8 value);
   bool      mouse_enQ_packet(u8 b1, u8 b2, u8 b3, u8 b4);
   void      mouse_enQ(u8 mouse_data);
-  void      kbd_update_irq();
-  void      kbd_service();
 
   //  void kbd_clock();
   void      create_mouse_packet(bool force_enq);
 
+protected:
   /// The state structure contains all elements that need to be saved to the statefile.
   struct SKb_state
   {
@@ -313,7 +330,7 @@ private:
     u8        kbd_controller_Q[BX_KBD_CONTROLLER_QSIZE];
     unsigned  kbd_controller_Qsize;
     unsigned  kbd_controller_Qsource; /**< Per-entry source bitmask: 0=keyboard, 1=mouse. */
-  } state;
+  } state{};
 };
 
 extern CKeyboard* theKeyboard;

@@ -1,0 +1,79 @@
+/* ES40 emulator -- VL82C106 keyboard and mouse controller
+ * Copyright (C) 2026 by gdwnldsKSC
+ * All rights reserved.
+ *
+ * WWW    : https://github.com/ES40-Emu/es40
+ *
+ * SPDX-License-Identifier: BSD-1-Clause
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS AND CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#ifndef ES40_VL82C106_H
+#define ES40_VL82C106_H
+
+#include "io/Keyboard.h"
+#include <chrono>
+#include <functional>
+#include <optional>
+
+class VL82C106 final : public CKeyboard
+{
+public:
+  VL82C106(CConfigurator* cfg, CSystem* system, u64 local_base,
+    std::function<void(bool)> irq_output);
+  ~VL82C106() override { stop_threads(); }
+  bool decodes_memory_access(int index, u64 address, int dsize, bool write) const noexcept override;
+  void WriteMem(int index, u64 address, int dsize, u64 data) override;
+  void ResetPCI() override { reset_controller(); }
+  int SaveState(FILE* f) override;
+  int RestoreState(FILE* f) override;
+  void finalize_restore() noexcept override;
+
+private:
+  void map_ports() override;
+  void set_irq_lines(bool keyboard, bool mouse) override;
+  void reset_controller_state() override;
+  u8 default_scancode_set() const override { return 2; }
+  bool handle_controller_command(u8 command) override;
+  bool handle_controller_parameter(u8 command, u8 data) override;
+  u8 status_byte(u8 normal) const override;
+  bool input_locked() const override { return locked; }
+  void password_scancodes(const u8* bytes, bool released) override;
+  u8 output_port() const;
+
+  const u64 local_base;
+  const std::function<void(bool)> irq_output;
+  std::optional<bool> irq_level;
+  u8 rtc_index = 0;
+  bool at_mode = true;
+  u8 at_inhibit_override = 0;
+  u8 ram[31]{};
+  u8 output_latch = 1;
+  u8 pulse_mask = 0;
+  std::chrono::steady_clock::time_point pulse_end{};
+  u64 pulse_remaining_ns = 0;
+  u8 password[8]{};
+  u8 password_length = 0;
+  u8 recent_keys[8]{};
+  unsigned recent_count = 0;
+  bool locked = false;
+};
+
+#endif

@@ -115,8 +115,22 @@ bool CKeyboard::uses_subtractive_decode(int index, u64 address, int dsize,
  **/
 void CKeyboard::init()
 {
+	map_ports();
+	reset_controller();
+	printf("kbc: $Id$\n");
+}
+
+void CKeyboard::map_ports()
+{
+	cSystem->RegisterMemory(this, 0, U64(0x00000801fc000060), 1);
+	cSystem->RegisterMemory(this, 1, U64(0x00000801fc000064), 1);
+}
+
+void CKeyboard::reset_controller()
+{
 	CFastMutex::ScopedLock guard(kbdLock);
 	int i;
+	state = {};
 	discard_input_locked();
 	local_keys.fill(false);
 	for (auto& keys : external_keys)
@@ -124,9 +138,6 @@ void CKeyboard::init()
 	local_buttons = 0;
 	external_buttons.fill(0);
 	input_release_pending.fill(false);
-
-	cSystem->RegisterMemory(this, 0, U64(0x00000801fc000060), 1);
-	cSystem->RegisterMemory(this, 1, U64(0x00000801fc000064), 1);
 
 	resetinternals(1);
 
@@ -184,9 +195,7 @@ void CKeyboard::init()
 	state.kbd_controller_Qsize = 0;
 	state.kbd_controller_Qsource = 0;
 
-	myThread = 0;
-
-	printf("kbc: $Id$\n");
+	reset_controller_state();
 }
 
 void CKeyboard::start_threads()
@@ -448,12 +457,14 @@ bool CKeyboard::input_available(const InputEvent& event) const
 {
 	if (event.type == InputEvent::Type::Key)
 		return state.kbd_clock_enabled && state.kbd_internal_buffer.scanning_enabled;
-	return state.mouse.enable && state.mouse.mode == MOUSE_MODE_STREAM
+	return !input_locked() && state.mouse.enable && state.mouse.mode == MOUSE_MODE_STREAM
 		&& state.aux_clock_enabled && (!event.dz || state.mouse.im_mode);
 }
 
 bool CKeyboard::input_busy() const
 {
+	if (input_locked())
+		return false;
 	return input_transaction_active() || state.status.outb || state.kbd_controller_Qsize
 		|| state.deferred_scancode_valid || state.kbd_internal_buffer.num_elements
 		|| state.mouse_internal_buffer.num_elements || state.mouse.data_pending
@@ -481,7 +492,7 @@ void CKeyboard::service_input_release()
 		if (external_buttons[source])
 		{
 			const unsigned remaining = combined_buttons(source);
-			bool released = (external_buttons[source] | remaining) == remaining;
+			bool released = input_locked() || (external_buttons[source] | remaining) == remaining;
 			if (!released)
 			{
 				InputEvent event;
@@ -679,6 +690,11 @@ bool CKeyboard::gen_scancode_locked(u32 key)
 		scancode = (unsigned char*)scancodes[(key & 0xFF)][state.current_scancodes_set].brek;
 	else
 		scancode = (unsigned char*)scancodes[(key & 0xFF)][state.current_scancodes_set].make;
+	if (input_locked())
+	{
+		password_scancodes(scancode, (key & BX_KEY_RELEASED) != 0);
+		return true;
+	}
 	unsigned bytes = 0;
 	for (const unsigned char* p = scancode; *p; ++p)
 		if (!state.scancodes_translate || *p != 0xf0)
@@ -770,10 +786,9 @@ void CKeyboard::resetinternals(bool powerup)
 	state.kbd_internal_buffer.expecting_typematic = 0;
 	state.kbd_internal_buffer.expecting_make_break = 0;
 
-	// Default scancode set is mf2 (translation is controlled by the 8042)
+	// Translation is controlled by the 8042; the scancode table uses zero-based sets.
 	state.expecting_scancodes_set = 0;
-
-	state.current_scancodes_set = 2; // startup in set 2
+	state.current_scancodes_set = default_scancode_set() - 1;
 
 	if (powerup)
 	{
@@ -908,7 +923,8 @@ u8 CKeyboard::read_60()
  *    1: Last write to input buffer was a command (written via port 0x64). (This bit is also referred to as Address Line A2.)
  *
  * Bit 2: System flag
- *    Set to 0 after power on reset. Set to 1 after successful completion of the keyboard controller self-test (Basic Assurance Test, BAT). Can also be set by command (see below).
+ *    Set to 0 after power on reset. The ALi self-test or a mode write can set it.
+ *    On Jensen SYS mirrors the written mode bit (PB22H-KB, Table 23-3).
  *
  * Bit 1: Input buffer status
  *    0: Input buffer empty, can be written.
@@ -931,7 +947,92 @@ u8 CKeyboard::read_64()
 #ifdef DEBUG_KBD_NOISY
 	BX_DEBUG(("read from 0x64 returns 0x%02x", val));
 #endif
-	return val;
+	return status_byte(val);
+}
+
+u8 CKeyboard::mode_byte() const
+{
+	return (state.scancodes_translate << 6) |
+		((!state.aux_clock_enabled) << 5) | ((!state.kbd_clock_enabled) << 4) |
+		(0 << 3) | (state.status.sysf << 2) | (state.allow_irq12 << 1) |
+		(state.allow_irq1 << 0);
+}
+
+void CKeyboard::set_mode_byte(u8 value)
+{
+	// The keyboard controller is provided with some RAM, for example
+	// 32 bytes, that can be accessed by the CPU. The most important
+	// part of this RAM is byte 0, the Controller Command Byte (CCB).
+	// It can be read/written by writing 0x20/0x60 to port 0x64 and
+	// then reading/writing a data byte from/to port 0x60.
+	//
+	// This byte has the following layout.
+	//
+	// +---+-------+----+----+---+------+-----+-----+
+	// | 0 | XLATE | ME | KE | 0 | SYSF | MIE | KIE |
+	// +---+-------+----+----+---+------+-----+-----+
+	//
+	// Bit 6: Translate
+	//    0: No translation.
+	//    1: Translate keyboard scancodes, using the translation table
+	//       given above. MCA type 2 controllers cannot set this bit
+	//       to 1. In this case scan code conversion is set using
+	//       keyboard command 0xf0 to port 0x60.
+	//
+	// Bit 5: Mouse enable
+	//    0: Enable mouse.
+	//    1: Disable mouse by driving the clock line low.
+	//
+	// Bit 4: Keyboard enable
+	//    0: Enable keyboard.
+	//    1: Disable keyboard by driving the clock line low.
+	//
+	// Bit 2: System flag
+	//    This bit is shown in bit 2 of the status register. A
+	//    "cold reboot" is one with this bit set to zero. A
+	//    "warm reboot" is one with this bit set to one (BAT
+	//    already completed). This will influence the tests and
+	//    initializations done by the POST.
+	//
+	// Bit 1: Mouse interrupt enable
+	//    0: Do not use mouse interrupts.
+	//    1: Send interrupt request IRQ12 when the mouse output
+	//       buffer is full.
+	//
+	// Bit 0: Keyboard interrupt enable
+	//    0: Do not use keyboard interrupts.
+	//    1: Send interrupt request IRQ1 when the keyboard output
+	//       buffer is full.
+	//
+	//    When no interrupts are used, the CPU has to poll bits 0
+	//    (and 5) of the status register.
+	bool  scan_convert;
+
+	bool  disable_keyboard;
+
+	bool  disable_aux;
+
+	scan_convert = (value >> 6) & 0x01;
+	disable_aux = (value >> 5) & 0x01;
+	disable_keyboard = (value >> 4) & 0x01;
+	state.status.sysf = (value >> 2) & 0x01;
+	state.allow_irq1 = (value >> 0) & 0x01;
+	state.allow_irq12 = (value >> 1) & 0x01;
+	set_kbd_clock_enable(!disable_keyboard);
+	set_aux_clock_enable(!disable_aux);
+	if (state.allow_irq12 && state.status.auxb)
+		state.irq12_requested = 1;
+	else if (state.allow_irq1 && state.status.outb)
+		state.irq1_requested = 1;
+
+#ifdef DEBUG_KBD
+	BX_DEBUG((" allow_irq12 set to %u", (unsigned)state.allow_irq12));
+	if (!scan_convert)
+		BX_INFO(("keyboard: scan convert turned off"));
+#endif
+
+	// (mch) NT needs this
+	state.scancodes_translate = scan_convert;
 }
 
 /**
@@ -939,6 +1040,8 @@ u8 CKeyboard::read_64()
  **/
 void CKeyboard::write_60(u8 value)
 {
+	if (input_locked())
+		return;
 #ifdef DEBUG_KBD
 	printf("kbd: port 60 write: %02x.   \n", value);
 #endif
@@ -950,10 +1053,16 @@ void CKeyboard::write_60(u8 value)
 	// data byte written last to 0x60
 	state.status.c_d = 0;
 
-	// if expecting data byte from command last sent to port 64h
-	if (state.expecting_port60h)
+	const bool expecting_parameter = state.expecting_port60h != 0;
+	state.expecting_port60h = 0;
+	if (handle_controller_parameter(expecting_parameter ? state.last_comm : 0, value))
 	{
-		state.expecting_port60h = 0;
+		kbd_service();
+		return;
+	}
+	// if expecting data byte from command last sent to port 64h
+	if (expecting_parameter)
+	{
 #ifdef DEBUG_KBD
 		if (state.status.inpb)
 			printf("write to port 60h, not ready for write   \n");
@@ -961,85 +1070,8 @@ void CKeyboard::write_60(u8 value)
 		switch (state.last_comm)
 		{
 		case 0x60:  // write command byte
-		{
-
-			//The keyboard controller is provided with some RAM, for example
-			// 32 bytes, that can be accessed by the CPU. The most important
-			// part of this RAM is byte 0, the Controller Command Byte (CCB).
-			// It can be read/written by writing 0x20/0x60 to port 0x64 and
-			// then reading/writing a data byte from/to port 0x60.
-			//
-			// This byte has the following layout.
-			//
-			// +---+-------+----+----+---+------+-----+-----+
-			// | 0 | XLATE | ME | KE | 0 | SYSF | MIE | KIE |
-			// +---+-------+----+----+---+------+-----+-----+
-			//
-			// Bit 6: Translate
-			//    0: No translation.
-			//    1: Translate keyboard scancodes, using the translation table
-			//       given above. MCA type 2 controllers cannot set this bit
-			//       to 1. In this case scan code conversion is set using
-			//       keyboard command 0xf0 to port 0x60.
-			//
-			// Bit 5: Mouse enable
-			//    0: Enable mouse.
-			//    1: Disable mouse by driving the clock line low.
-			//
-			// Bit 4: Keyboard enable
-			//    0: Enable keyboard.
-			//    1: Disable keyboard by driving the clock line low.
-			//
-			// Bit 2: System flag
-			//    This bit is shown in bit 2 of the status register. A
-			//    "cold reboot" is one with this bit set to zero. A
-			//    "warm reboot" is one with this bit set to one (BAT
-			//    already completed). This will influence the tests and
-			//    initializations done by the POST.
-			//
-			// Bit 1: Mouse interrupt enable
-			//    0: Do not use mouse interrupts.
-			//    1: Send interrupt request IRQ12 when the mouse output
-			//       buffer is full.
-			//
-			// Bit 0: Keyboard interrupt enable
-			//    0: Do not use keyboard interrupts.
-			//    1: Send interrupt request IRQ1 when the keyboard output
-			//       buffer is full.
-			//
-			//    When no interrupts are used, the CPU has to poll bits 0
-			//    (and 5) of the status register.
-			bool  scan_convert;
-
-			//The keyboard controller is provided with some RAM, for example
-			bool  disable_keyboard;
-
-			//The keyboard controller is provided with some RAM, for example
-			bool  disable_aux;
-
-			scan_convert = (value >> 6) & 0x01;
-			disable_aux = (value >> 5) & 0x01;
-			disable_keyboard = (value >> 4) & 0x01;
-			state.status.sysf = (value >> 2) & 0x01;
-			state.allow_irq1 = (value >> 0) & 0x01;
-			state.allow_irq12 = (value >> 1) & 0x01;
-			set_kbd_clock_enable(!disable_keyboard);
-			set_aux_clock_enable(!disable_aux);
-			if (state.allow_irq12 && state.status.auxb)
-				state.irq12_requested = 1;
-			else if (state.allow_irq1 && state.status.outb)
-				state.irq1_requested = 1;
-
-#ifdef DEBUG_KBD
-			BX_DEBUG((" allow_irq12 set to %u", (unsigned)state.allow_irq12));
-			if (!scan_convert)
-				BX_INFO(("keyboard: scan convert turned off"));
-#endif
-
-			// (mch) NT needs this
-			state.scancodes_translate = scan_convert;
-		}
-		break;
+			set_mode_byte(value);
+			break;
 
 		case 0xd1:  // write output port
 #ifdef DEBUG_KBD
@@ -1074,10 +1106,6 @@ void CKeyboard::write_60(u8 value)
 	else
 	{
 
-		// data byte written last to 0x60
-		state.status.c_d = 0;
-		state.expecting_port60h = 0;
-
 		/* pass byte to keyboard */
 
 		/* ??? should conditionally pass to mouse device here ??? */
@@ -1097,15 +1125,13 @@ void CKeyboard::write_60(u8 value)
  **/
 void CKeyboard::write_64(u8 value)
 {
+	if (input_locked())
+		return;
 #ifdef DEBUG_KBD
 	printf("kbd: port 64 write: %02x.   \n", value);
 #endif
 
 	static int  kbd_initialized = 0;
-	u8          command_byte;
-
-	// Controller commands take priority over asynchronous host input.
-	prepare_command_response();
 
 	// command byte written last to 0x64
 	state.status.c_d = 1;
@@ -1114,6 +1140,14 @@ void CKeyboard::write_64(u8 value)
 	// most commands NOT expecting port60 write next
 	state.expecting_port60h = 0;
 
+	if (handle_controller_command(value))
+	{
+		kbd_service();
+		return;
+	}
+
+	// Controller commands take priority over asynchronous host input.
+	prepare_command_response();
 	switch (value)
 	{
 	case 0x20:  // get keyboard command byte
@@ -1121,13 +1155,9 @@ void CKeyboard::write_64(u8 value)
 		BX_DEBUG(("get keyboard command byte"));
 #endif
 
-		command_byte = (state.scancodes_translate << 6) |
-			((!state.aux_clock_enabled) << 5) | ((!state.kbd_clock_enabled) << 4) |
-			(0 << 3) | (state.status.sysf << 2) | (state.allow_irq12 << 1) |
-			(state.allow_irq1 << 0);
 		// A controller response waits behind an occupied OBF; it must not be
 		// silently lost just because device data arrived first.
-		controller_enQ(command_byte, 0);
+		controller_enQ(mode_byte(), 0);
 		break;
 
 	case 0x60:  // write command byte
@@ -1528,6 +1558,15 @@ void CKeyboard::prepare_command_response()
 {
 	discard_mouse_stream();
 	defer_keyboard_input();
+}
+
+void CKeyboard::discard_device_input()
+{
+	discard_input_locked();
+	prepare_command_response();
+	state.deferred_scancode_valid = false;
+	state.kbd_internal_buffer.num_elements = 0;
+	state.kbd_internal_buffer.head = 0;
 }
 
 /**
@@ -2096,6 +2135,8 @@ void CKeyboard::ctrl_to_mouse(u8 value)
  **/
 bool CKeyboard::mouse_enQ_packet(u8 b1, u8 b2, u8 b3, u8 b4)
 {
+	if (input_locked())
+		return true;
 	int bytes = 3;
 	if (state.mouse.im_mode)
 		bytes = 4;
@@ -2155,6 +2196,8 @@ void CKeyboard::mouse_motion(int delta_x, int delta_y, int delta_z, unsigned but
 {
 	CFastMutex::ScopedLock guard(kbdLock);
 
+	if (input_locked())
+		return;
 	// Host motion produces unsolicited packets only while stream reporting is
 	// active and the controller can clock the AUX device.
 	if (!state.mouse.captured || !state.mouse.enable
@@ -2293,17 +2336,22 @@ void CKeyboard::create_mouse_packet(bool force_enq)
 }
 
 /**
- * Drive the 8042's two IRQ lines (keyboard IRQ1, mouse IRQ12) to match the
+ * Drive the 8042's two IRQ lines (ES40 keyboard IRQ1, mouse IRQ12) to match the
  * current output-buffer state.  OBF is a level held until the guest reads
  * port 0x60; pic_set_line() turns each 0->1 transition into one 8259 edge and
- * holds the request until it is serviced.
+ * holds the request until it is serviced on ES40.
+ * Jensen wires both lines to CPU IRQ3 (PB22H-KB, Figure 6-2).
  **/
 void CKeyboard::kbd_update_irq()
 {
-	theAli->pic_set_line(0, 1,
-		state.status.outb && !state.status.auxb && state.allow_irq1);
-	theAli->pic_set_line(1, 4,
-		state.status.outb &&  state.status.auxb && state.allow_irq12);
+	set_irq_lines(state.status.outb && !state.status.auxb && state.allow_irq1,
+		state.status.outb && state.status.auxb && state.allow_irq12);
+}
+
+void CKeyboard::set_irq_lines(bool keyboard, bool mouse)
+{
+	theAli->pic_set_line(0, 1, keyboard);
+	theAli->pic_set_line(1, 4, mouse);
 }
 
 /**

@@ -30,6 +30,7 @@
 #include "CPU/AlphaCPU.h"
 #include "chipset/Intel82357.h"
 #include "chipset/Intel82358.h"
+#include "chipset/VL82C106.h"
 #include <algorithm>
 #include <fstream>
 #include <string>
@@ -213,4 +214,9 @@ void Jensen::attach_board_devices(CConfigurator* cfg)
 {
   auto* host = new JensenHostBus(cfg, this);
   register_isa_bus(0, host->ebc.eisa_bus());
+  // IRQK and IRQM share CPU IRQ3 on Jensen (PB22H-KB, Table 6-4).
+  new VL82C106(cfg, this, U64(0x1c0000000), [this](bool asserted) {
+    if (get_cpu_num())
+      get_cpu(0)->irq_h(3, asserted, 0);
+  });
 }

@@ -217,9 +217,11 @@ void EISABus::set_isa_drq(int channel, bool asserted)
     set_request(state.drq_requests[0], channel, asserted);
 }
 
-bool EISABus::slot_allows_dma(unsigned slot, int channel) const noexcept
+bool EISABus::slot_allows_dma(unsigned slot, int channel) const
 {
-  return dma && valid_drq_channel(channel) && slot_enabled(slot) && slot_registered(slot);
+  if (!dma || !valid_drq_channel(channel) || !slot_enabled(slot) || !slot_registered(slot))
+    return false;
+  return (state.drq_requests[slot] & (1U << channel)) || dma->has_request_without_drq(channel);
 }
 
 bool EISABus::slot_dma_can_send(unsigned slot, int channel) const

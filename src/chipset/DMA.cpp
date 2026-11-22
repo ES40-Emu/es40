@@ -765,7 +765,7 @@ bool CDMA::cascade_enabled() const
 /**
  * Check explicit or retained requests without consuming a unit.
  **/
-bool CDMA::service_requested(int channel) const
+bool CDMA::service_requested(int channel, bool allow_drq) const
 {
 	validate_device_channel(channel);
 	int ctrlr = channel < 4 ? 0 : 1;
@@ -780,7 +780,13 @@ bool CDMA::service_requested(int channel) const
 	if (mode == 0xc0) // Cascade does not service device data.
 		return false;
 	// Demand follows hardware DRQ; a software request cannot keep it running.
-	return (state.controller[ctrlr].drq & ~state.controller[ctrlr].mask & bit) != 0;
+	return allow_drq && (state.controller[ctrlr].drq & ~state.controller[ctrlr].mask & bit) != 0;
+}
+
+bool CDMA::has_request_without_drq(int channel) const
+{
+	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
+	return service_requested(channel, false);
 }
 
 /**

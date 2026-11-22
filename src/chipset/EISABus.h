@@ -101,7 +101,7 @@ private:
   void register_io(unsigned owner_slot, CSystemComponent& device, int index,
     u16 port, u32 length, int max_dsize);
   bool slot_registered(unsigned slot) const noexcept;
-  bool slot_allows_dma(unsigned slot, int channel) const noexcept;
+  bool slot_allows_dma(unsigned slot, int channel) const;
   RequestLines active_requests() const noexcept;
   void update_request_lines(RequestLines previous);
   template <typename Mask>

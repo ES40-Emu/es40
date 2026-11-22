@@ -179,6 +179,8 @@ public:
   // Device queries use global channels 0-3 or 5-7; invalid channels throw.
   // Raw programmed 8237 mode byte, including the local channel-select bits.
   u8            get_mode(int channel);
+  // A software request or retained block can supply service without DRQ.
+  bool          has_request_without_drq(int channel) const;
   // Readiness for service_send_unit/service_recv_unit, including explicit
   // requests and arbitration. 
   bool          can_service_send(int channel, u32 requester = 0);
@@ -257,7 +259,7 @@ private:
   u8            software_requests(int ctrlr) const;
   u8            get_requests(int ctrlr);
   bool          cascade_enabled() const;
-  bool          service_requested(int channel) const;
+  bool          service_requested(int channel, bool allow_drq = true) const;
   int           select_service_channel(int ctrlr) const;
   bool          block_allows_requester(int channel, u32 requester) const;
   bool          service_selected(int channel, u32 requester) const;

@@ -1089,7 +1089,7 @@ inline int CAlphaCPU::get_cpuid()
 // CPU-local mode.
 inline void CAlphaCPU::kick_int_if_pending()
 {
-  if (m_profile.interrupt.pending(*this))
+  if (m_profile.interrupt.pending && m_profile.interrupt.pending(*this))
     state.check_int = true;
 }
 

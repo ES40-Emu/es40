@@ -80,10 +80,11 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
   const auto selector = ev4_ipr_selector(instruction);
   if (ev4_ipr_ignored(selector, pal_mode))
     return AlphaIPRWriteKind::Noop;
-  // 21064 HRM 4.8.1, Table 4-7: IBX selects ICCSR (2) or SL_CLR (19), PAL writes the same-index PAL_TEMP.
+  // IBX selects ICCSR (2), HIER (16) or SL_CLR (19) with an optional PAL_TEMP write (21064 HRM 4.8.1, Table 4-7).
   if ((selector.banks == 0x20 || selector.banks == 0xa0) &&
-      (selector.index == 2 || selector.index == 19)) {
+      (selector.index == 2 || selector.index == 16 || selector.index == 19)) {
     if (slot) *slot = (selector.banks & 0x80) ? 32u + selector.index : 0;
+    if (selector.index == 16) return AlphaIPRWriteKind::HardwareInterruptEnable;
     return selector.index == 2 ? AlphaIPRWriteKind::IboxControl : AlphaIPRWriteKind::InterruptClear;
   }
   // 21064 HRM 4.8.1, Table 4-7: ABX selects ABOX_CTL (14) or BIU_CTL (18), PAL writes the same-index PAL_TEMP.
@@ -118,6 +119,15 @@ inline void ev4_write_sl_clr(std::uint64_t value, int& slr, int& pcr, int& crr)
   if (!(value & (UINT64_C(1) << 15))) pcr &= ~2;
   if (!(value & (UINT64_C(1) << 8)))  pcr &= ~1;
   if (!(value & (UINT64_C(1) << 2)))  crr = 0;
+}
+
+// HIER replaces the IRQ, PC1/0, SLE and CRE enables (21064 HRM 5.2.17, Fig. 5-14 and Table 5-8).
+inline void ev4_write_hier(std::uint64_t value, int& eien, int& pcen, int& slen, int& cren)
+{
+  eien = (value >> 9) & 0x3f;
+  pcen = (((value >> 15) & 1) << 1) | ((value >> 8) & 1);
+  slen = (value >> 32) & 1;
+  cren = (value >> 2) & 1;
 }
 
 // 21064 HRM 5.2.3, Fig. 5-3: ICCSR has distinct HW_MTPR and HW_MFPR layouts.

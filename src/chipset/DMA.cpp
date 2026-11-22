@@ -903,16 +903,34 @@ int CDMA::RestoreState(FILE* f)
 	return 0;
 }
 
+bool CDMA::accepts_software_request(int channel) const
+{
+	return model != Model::Intel82357 || (state.channel[channel].mode & 0xc0) == 0x80;
+}
+
+u8 CDMA::software_requests(int ctrlr) const
+{
+	// A mode write can leave a block request latched but inactive.
+	u8 requests = state.controller[ctrlr].request;
+	if (model == Model::Intel82357 && requests)
+	{
+		for (int channel = 0; channel < 4; channel++)
+			if (!accepts_software_request(ctrlr * 4 + channel))
+				requests &= ~(1 << channel);
+	}
+	return requests;
+}
+
 /**
  * Set the software request bit for a channel, and initiate DMA
  **/
 void CDMA::set_request(int num, int channel, int data) {
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
 	channel &= 0x03;
-	if (data)
-		state.controller[num].request |= (1 << channel);
-	else
+	if (!data)
 		state.controller[num].request &= ~(1 << channel);
+	else if (accepts_software_request(num * 4 + channel))
+		state.controller[num].request |= (1 << channel);
 	do_dma();
 }
 
@@ -943,11 +961,11 @@ void CDMA::set_drq(int channel, bool asserted)
  **/
 u8 CDMA::get_requests(int ctrlr)
 {
-	u8 requests = state.controller[ctrlr].request | state.controller[ctrlr].drq;
+	u8 requests = software_requests(ctrlr) | state.controller[ctrlr].drq;
 	// Controller 0's HRQ drives controller 1's channel-4 request input.
 	// Software and retained block requests bypass the mask; incoming DRQ does not.
 	if (ctrlr == 1 && !(state.controller[0].command & 0x04) &&
-		((state.controller[0].request | state.controller[0].block_active |
+		((software_requests(0) | state.controller[0].block_active |
 		(state.controller[0].drq & ~state.controller[0].mask)) & 0x0f))
 		requests |= 0x01;
 	return requests & 0x0f;
@@ -973,8 +991,8 @@ bool CDMA::service_requested(int channel) const
 	// A block keeps its accepted request after either request source drops.
 	if (mode == 0x80 && (state.controller[ctrlr].block_active & bit))
 		return true;
-	// Single and block service accept software requests even while masked.
-	if ((mode == 0x40 || mode == 0x80) && (state.controller[ctrlr].request & bit))
+	// Eligible software requests bypass the channel mask.
+	if ((mode == 0x40 || mode == 0x80) && (software_requests(ctrlr) & bit))
 		return true;
 	if (mode == 0xc0) // Cascade does not service device data.
 		return false;
@@ -1130,7 +1148,7 @@ void CDMA::do_dma()
 			for (int chnl = 0; chnl < 4; chnl++)
 			{
 				if ((state.controller[ctrlr].mask & (1 << chnl)) == 0 ||
-					((state.controller[ctrlr].request | state.controller[ctrlr].block_active) &
+					((software_requests(ctrlr) | state.controller[ctrlr].block_active) &
 					(1 << chnl)))
 				{
 					if ((get_requests(ctrlr) | state.controller[ctrlr].block_active) & (1 << chnl))
@@ -1376,7 +1394,7 @@ CDMA::SDMA_result CDMA::send_data(int channel, void* data, size_t length, bool e
 	{
 		// The mask inhibits incoming DRQ, not software or retained block requests.
 		if ((state.controller[ctrlr].mask & (1 << local_channel)) == 0 ||
-			((state.controller[ctrlr].request | state.controller[ctrlr].block_active) &
+			((software_requests(ctrlr) | state.controller[ctrlr].block_active) &
 			(1 << local_channel)))
 		{
 			u8 transfer_type = state.channel[channel].mode & 0x0c;
@@ -1458,7 +1476,7 @@ CDMA::SDMA_result CDMA::recv_data(int channel, void* data, size_t length, bool e
 	{
 		// The mask inhibits incoming DRQ, not software or retained block requests.
 		if ((state.controller[ctrlr].mask & (1 << local_channel)) == 0 ||
-			((state.controller[ctrlr].request | state.controller[ctrlr].block_active) &
+			((software_requests(ctrlr) | state.controller[ctrlr].block_active) &
 			(1 << local_channel)))
 		{
 			u8 transfer_type = state.channel[channel].mode & 0x0c;

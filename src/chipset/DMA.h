@@ -136,7 +136,7 @@ public:
   // Shifted word transfers must cover whole words.
   // send: device to memory; recv: memory to device.
   // Calls remain device-paced and do not require an explicit set_drq().
-  // A software request or retained block bypasses only that channel's mask;
+  // An eligible software request or retained block bypasses only that channel's mask;
   // incoming hardware DRQ does not. Enable and cascade requirements still apply.
   // Channels 0-3 also require controller 1 enabled and channel 4 unmasked
   // and programmed for cascade. Channel 4's address/count are not serviced.
@@ -163,7 +163,7 @@ public:
   SDMA_result   recv_unit(int channel, u32& data, bool eop = false);
   SDMA_result   recv_unit(int channel, u16& data, bool eop = false);
   // Explicit-request service, at most one bus cycle per call.
-  // Demand requires unmasked hardware DRQ; single also accepts a software request.
+  // Demand and single use unmasked DRQ. ALi also accepts software requests in single mode.
   // Block starts from either request and, after successful service, retains it
   // across a chained reload even if DRQ or the software request drops.
   // Final TC/EOP, auto-init or a stop match releases the block.
@@ -235,6 +235,8 @@ private:
   SDMA_result   receive_unit(int channel, T& data, bool eop, bool arbitrate);
   void          transfer_memory(u32 address, u8* buffer, size_t length, bool decrement,
                   bool write, const SDMA_transfer_properties& properties);
+  bool          accepts_software_request(int channel) const;
+  u8            software_requests(int ctrlr) const;
   u8            get_requests(int ctrlr);
   bool          cascade_enabled() const;
   bool          service_requested(int channel) const;

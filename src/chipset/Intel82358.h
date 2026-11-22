@@ -30,15 +30,18 @@
 
 #include "EISABus.h"
 
+class Intel82357;
+
 class Intel82358
 {
 public:
-  explicit Intel82358(CDMAHost& host) : bus(host) {}
+  explicit Intel82358(Intel82357& isp);
   EISABus& eisa_bus() noexcept { return bus; }
   bool read_port(u16 port, u8& data);
   bool write_port(u16 port, u8 data);
 
 private:
+  Intel82357& isp;
   EISABus bus;
 };
 

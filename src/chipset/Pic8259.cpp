@@ -42,6 +42,7 @@ void Pic8259::reset()
 {
 	CFastMutex::ScopedLock guard(picLock);
 	state = {};
+	level_requests[0] = level_requests[1] = 0;
 	update_output(0);
 }
 
@@ -87,7 +88,7 @@ static int pic_priority_of(u8 mask, u8 priority_add)
  **/
 int Pic8259::get_irq(int index) const
 {
-	int mask = state.irr[index] & ~state.imr[index];
+	int mask = (state.irr[index] | level_requests[index]) & ~state.imr[index];
 	int priority = pic_priority_of((u8)mask, state.priority_add[index]);
 	if (priority == 8)
 		return -1;
@@ -115,29 +116,33 @@ void Pic8259::update_output(int index)
 		output(high);
 }
 
-/**
- * Acknowledge an IRQ during the INTA cycle.  Sets ISR (unless AEOI), clears
- * IRR for edge-triggered lines, and re-evaluates the output.
- * Caller must hold picLock.
- **/
-void Pic8259::intack(int index, int irq)
+void Pic8259::sync_output()
 {
-	if (state.auto_eoi[index])
+	CFastMutex::ScopedLock guard(picLock);
+	update_output(0);
+}
+
+void Pic8259::intack(int index, int irq, Acknowledge* cycle)
+{
+	const u8 mask = (u8)(1 << irq);
+	if (state.auto_eoi[index] && !cycle)
 	{
 		if (state.rotate_on_aeoi[index])
 			state.priority_add[index] = (irq + 1) & 7;
 	}
 	else
 	{
-		state.isr[index] |= (1 << irq);
+		state.isr[index] |= mask;
+		if (state.auto_eoi[index])
+			cycle->auto_eoi[index] = mask;
 	}
 
 	// Level-sensitive lines keep their IRR bit set as long as the source
 	// holds the line high; only edge-sensitive bits clear at INTA.
 	const bool is_level =
-		(state.elcr[index] & (1 << irq)) || state.ltim[index];
+		(state.elcr[index] & mask) || state.ltim[index];
 	if (!is_level)
-		state.irr[index] &= ~(1 << irq);
+		state.irr[index] &= ~mask;
 
 	update_output(index);
 }
@@ -155,7 +160,7 @@ u8 Pic8259::read(int index, u32 address)
 		int irq = get_irq(index);
 		if (irq >= 0)
 		{
-			intack(index, irq);
+			intack(index, irq, nullptr);
 			data = (u8)(irq | 0x80);
 		}
 		else
@@ -170,7 +175,7 @@ u8 Pic8259::read(int index, u32 address)
 		{
 			data = state.read_reg_select[index]
 				? state.isr[index]
-				: state.irr[index];
+				: (state.irr[index] | level_requests[index]);
 		}
 		else
 		{
@@ -198,7 +203,34 @@ u8 Pic8259::read_edge_level(int index)
 u8 Pic8259::read_vector()
 {
 	CFastMutex::ScopedLock guard(picLock);
+	return acknowledge_vector(nullptr);
+}
 
+Pic8259::Acknowledge Pic8259::begin_acknowledge()
+{
+	CFastMutex::ScopedLock guard(picLock);
+	Acknowledge cycle{};
+	cycle.vector = acknowledge_vector(&cycle);
+	return cycle;
+}
+
+void Pic8259::end_acknowledge(const Acknowledge& cycle)
+{
+	CFastMutex::ScopedLock guard(picLock);
+	for (int index = 0; index < 2; ++index)
+	{
+		const u8 mask = cycle.auto_eoi[index];
+		if (!mask)
+			continue;
+		state.isr[index] &= ~mask;
+		if (state.rotate_on_aeoi[index])
+			state.priority_add[index] = (pic_priority_of(mask, 0) + 1) & 7;
+	}
+	update_output(cycle.auto_eoi[1] ? 1 : 0);
+}
+
+u8 Pic8259::acknowledge_vector(Acknowledge* cycle)
+{
 	int irq = get_irq(0);
 	int intno;
 
@@ -210,19 +242,19 @@ u8 Pic8259::read_vector()
 			int irq2 = get_irq(1);
 			if (irq2 >= 0)
 			{
-				intack(1, irq2);
+				intack(1, irq2, cycle);
 			}
 			else
 			{
 				irq2 = 7;   // spurious slave IRQ
 			}
 			intno = state.irq_base[1] + irq2;
-			intack(0, irq);
+			intack(0, irq, cycle);
 		}
 		else
 		{
 			intno = state.irq_base[0] + irq;
-			intack(0, irq);
+			intack(0, irq, cycle);
 		}
 	}
 	else
@@ -391,6 +423,17 @@ void Pic8259::latch_request(int index, int irq)
 		pic_messages = true;
 	}
 #endif
+	update_output(index);
+}
+
+void Pic8259::set_level_request(int index, int irq, bool asserted)
+{
+	CFastMutex::ScopedLock guard(picLock);
+	const u8 mask = (u8)(1 << irq);
+	if (asserted)
+		level_requests[index] |= mask;
+	else
+		level_requests[index] &= ~mask;
 	update_output(index);
 }
 

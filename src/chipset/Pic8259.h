@@ -58,6 +58,11 @@ public:
     u8    ltim[2];              // ICW1 bit 3: level-trigger global mode
   };
 
+  struct Acknowledge {
+    u8 vector;
+    u8 auto_eoi[2]; // ISR bits to clear on the second INTA pulse.
+  };
+
   enum class EdgeRelease { Latch, Withdraw };
 
   // The output callback runs under the PIC lock.
@@ -68,22 +73,29 @@ public:
   u8 read(int index, u32 address);
   void write(int index, u32 address, u8 data);
   u8 read_vector();
+  Acknowledge begin_acknowledge();
+  void end_acknowledge(const Acknowledge& cycle);
+  void sync_output();
   u8 read_edge_level(int index);
   void write_edge_level(int index, u8 data);
   // Post a fresh request even when the input is already high.
   void latch_request(int index, int irq);
+  // Internal level requests bypass the edge detector on the external pin.
+  void set_level_request(int index, int irq, bool asserted);
   void set_line(int index, int irq, bool active, EdgeRelease release = EdgeRelease::Latch);
 
 private:
   void init_reset(int index);
   int get_irq(int index) const;
   void update_output(int index);
-  void intack(int index, int irq);
+  u8 acknowledge_vector(Acknowledge* cycle);
+  void intack(int index, int irq, Acknowledge* cycle);
   void drive_line(int index, int irq, bool active, EdgeRelease release);
 
   State& state;
   std::function<void(bool)> output;
   EdgeRelease cascade_release;
+  u8 level_requests[2]{};
   CFastMutex picLock{ "pic" };
   bool pic_messages = false;
 };

@@ -27,25 +27,26 @@
 
 #include "StdAfx.h"
 #include "system/System.h"
-#include "chipset/DMA.h"
+#include "CPU/AlphaCPU.h"
+#include "chipset/Intel82357.h"
 #include "chipset/Intel82358.h"
 #include <algorithm>
 
 namespace {
-enum { SparseIO, HostAddressExtension };
+enum { SparseIO, HostAddressExtension, InterruptAcknowledge };
 
 class JensenHostBus : public CSystemComponent, public CDMAHost
 {
 public:
   JensenHostBus(CConfigurator* cfg, CSystem* system);
   const CSystemComponent* isa_decode_owner() const noexcept override { return this; }
-  void set_isa_irq(int, bool) override {} // Jensen PIC routing is pending.
   bool dma_transfer_enabled() override { return true; }
   void dma_read_memory(u32 address, void* dest, size_t bytes) override;
   void dma_write_memory(u32 address, const void* source, size_t bytes) override;
   u64 ReadMem(int index, u64 address, int dsize) override;
   void WriteMem(int index, u64 address, int dsize, u64 data) override;
   void ResetPCI() override { hae = 0; }
+  Intel82357* const isp;
   Intel82358 ebc;
 
 private:
@@ -53,10 +54,16 @@ private:
 };
 
 JensenHostBus::JensenHostBus(CConfigurator* cfg, CSystem* system)
-  : CSystemComponent(cfg, system), ebc(*this)
+  : CSystemComponent(cfg, system),
+    isp(new Intel82357(cfg, system, *this, [system](bool asserted) {
+      if (system->get_cpu_num())
+        system->get_cpu(0)->irq_h(1, asserted, 0);
+    })),
+    ebc(*isp)
 {
   system->RegisterMemory(this, SparseIO, U64(0x300000000), U64(0x10000) << 7);
   system->RegisterMemory(this, HostAddressExtension, U64(0x1d0000000), 4);
+  system->RegisterMemory(this, InterruptAcknowledge, U64(0x100000000), 8);
   save_item(hae, "hae");
 }
 
@@ -64,6 +71,9 @@ u64 JensenHostBus::ReadMem(int index, u64 address, int dsize)
 {
   if (index == HostAddressExtension && !address && dsize == 32)
     return hae;
+  // Each aligned H_BUS read supplies one INTA pulse; the vector is in the low byte.
+  if (index == InterruptAcknowledge && !address && (dsize == 32 || dsize == 64))
+    return isp->interrupt_acknowledge();
   // Jensen byte I/O uses a longword at port << 7, with the port selecting the lane.
   if (index != SparseIO || dsize != 32 || (address & 0x7f) || hae)
     return dsize == 64 ? ~U64(0) : (U64(1) << dsize) - 1;
@@ -135,8 +145,5 @@ void JensenHostBus::dma_write_memory(u32 address, const void* source, size_t byt
 void CSystem::init_jensen_eisa()
 {
   auto* host = new JensenHostBus(myCfg, this);
-  auto* dma = new CDMA(myCfg, this, *host, CDMA::Model::Intel82357);
-  auto& bus = host->ebc.eisa_bus();
-  bus.bind_dma(*dma);
-  register_isa_bus(0, bus);
+  register_isa_bus(0, host->ebc.eisa_bus());
 }

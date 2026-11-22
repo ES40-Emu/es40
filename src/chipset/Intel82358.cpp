@@ -27,20 +27,23 @@
 
 #include "StdAfx.h"
 #include "Intel82358.h"
-#include "DMA.h"
+#include "Intel82357.h"
+
+Intel82358::Intel82358(Intel82357& isp) : isp(isp), bus(isp)
+{
+  bus.bind_dma(isp.dma_controller());
+}
 
 bool Intel82358::read_port(u16 port, u8& data)
 {
-  CDMA* dma = bus.dma_controller();
-  if (dma && dma->read_82357_port(port, data))
+  if (isp.read_port(port, data))
     return true;
   return bus.read_port(port, data);
 }
 
 bool Intel82358::write_port(u16 port, u8 data)
 {
-  CDMA* dma = bus.dma_controller();
-  if (dma && dma->write_82357_port(port, data))
+  if (isp.write_port(port, data))
     return true;
   return bus.write_port(port, data);
 }

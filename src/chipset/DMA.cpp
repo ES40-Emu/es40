@@ -4,6 +4,8 @@
  *
  * WWW    : https://github.com/ES40-Emu/es40
  *
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
@@ -66,21 +68,18 @@
 
 static constexpr u16 dma_low_page_base = 0x81;
 static constexpr u16 dma_high_page_base = 0x481;
-static constexpr u16 dma0_chaining_mode_port = 0x40a;
-static constexpr u16 dma1_chaining_mode_port = 0x4d4;
-static constexpr u16 dma_chain_expiration_control_port = 0x40c;
-static constexpr u8 dma_chain_enable = 0x04;
-static constexpr u8 dma_programming_complete = 0x08;
-static constexpr u8 dma_chain_master_tc = 0x10;
-static constexpr u16 dma0_extended_mode_port = 0x40b;
-static constexpr u16 dma1_extended_mode_port = 0x4d6;
 static constexpr u8 dma_cascade_mode = 0xc0;
 
 /**
  * Constructor.
  **/
-CDMA::CDMA(CConfigurator* cfg, CSystem* c, CDMAHost& host, Model model) :
-	CSystemComponent(cfg, c), dma_host(host), model(model)
+CDMA::CDMA(CConfigurator* cfg, CSystem* c, CDMAHost& host) :
+	CDMA(cfg, c, host, 0xffff)
+{
+}
+
+CDMA::CDMA(CConfigurator* cfg, CSystem* c, CDMAHost& host, u32 count_mask) :
+	CSystemComponent(cfg, c), dma_host(host), count_mask(count_mask)
 {
 	ResetPCI();
 	printf("dma: $Id$\n");
@@ -102,13 +101,6 @@ void CDMA::ResetPCI()
 	// While guest master clear, system reset also resets channel programming,
 	// request lines and any accept/pending demand/block/cascade service.
 	memset(&state, 0, sizeof(state));
-	if (model == Model::Intel82357)
-	{
-		state.channel[4].mode = dma_cascade_mode;
-		for (int channel = 4; channel < 8; channel++)
-			state.isp.extended_mode[channel] = 0x04;
-		update_chaining_irq();
-	}
 	for (int controller = 0; controller < 2; controller++)
 	{
 		state.controller[controller].mask = 0x0f;
@@ -145,7 +137,7 @@ std::string dma_index_names[] = {
 	"DMA1_IO_EXT"
 };
 
-static int dma_page_channel(u16 port, u16 base)
+int CDMA::page_channel(u16 port, u16 base)
 {
 	static const int channelmap[] = { 2, 3, 1, 0xff, 0xff, 0xff, 0,
 				 0xff, 6, 7, 5 };
@@ -158,31 +150,6 @@ static int dma_page_channel(u16 port, u16 base)
 		return -1;
 
 	return channelmap[address];
-}
-
-static int dma_high_count_channel(u16 port)
-{
-	switch (port)
-	{
-	case 0x401: return 0;
-	case 0x403: return 1;
-	case 0x405: return 2;
-	case 0x407: return 3;
-	case 0x4c6: return 5;
-	case 0x4ca: return 6;
-	case 0x4ce: return 7;
-	default: return -1;
-	}
-}
-
-static bool dma_stop_register(u16 port, int& channel, unsigned& shift)
-{
-	if (port < 0x4e0 || port > 0x4ff)
-		return false;
-	channel = (port - 0x4e0) / 4;
-	const unsigned byte = port & 3;
-	shift = byte * 8;
-	return channel != 4 && byte < 3;
 }
 
 static bool dma_mapped_port(int index, u64 offset, u16& port)
@@ -202,7 +169,7 @@ static bool dma_mapped_port(int index, u64 offset, u16& port)
 	return true;
 }
 
-static bool dma_legacy_register(u16 port, int& ctrlr, int& reg)
+bool CDMA::legacy_register(u16 port, int& ctrlr, int& reg)
 {
 	if (port <= 0x0f)
 	{
@@ -219,59 +186,10 @@ static bool dma_legacy_register(u16 port, int& ctrlr, int& reg)
 	return false;
 }
 
-static bool dma_82357_legacy_port(u16 port, bool write)
-{
-	int ctrlr, reg;
-	if (!dma_legacy_register(port, ctrlr, reg))
-		return dma_page_channel(port, dma_low_page_base) >= 0;
-	// The upper bank uses even ports and omits channel 4's address and count.
-	if (ctrlr == 1 && ((port & 1) || reg < 2))
-		return false;
-	return write || reg <= 0x08 || reg == 0x0f;
-}
-
 void CDMA::validate_device_channel(int channel)
 {
 	if (channel < 0 || channel >= 8 || channel == 4)
 		FAILURE(InvalidArgument, "dma: invalid device channel (channel 4 is cascade)");
-}
-
-void CDMA::select_compatible_address(int channel, bool update_current)
-{
-	if (model != Model::Intel82357)
-		return;
-	auto& ch = state.channel[channel];
-	ch.base_extended_address = false;
-	ch.pagebase &= 0xff;
-	if (update_current)
-	{
-		ch.extended_address = false;
-		ch.current_page &= 0xff;
-	}
-}
-
-bool CDMA::chaining_enabled(int channel) const
-{
-	return model == Model::Intel82357 && channel != 4 && (state.isp.chaining_mode[channel] & dma_chain_enable);
-}
-
-void CDMA::reset_chaining_mode(int channel)
-{
-	if (model != Model::Intel82357)
-		return;
-	state.isp.chaining_mode[channel] = 0;
-	state.isp.chaining_pending &= ~(1 << channel);
-	update_chaining_irq();
-}
-
-u32 CDMA::count_mask() const
-{
-	return model == Model::Intel82357 ? 0xffffffU : 0xffffU;
-}
-
-bool CDMA::accepts_external_eop(int channel) const
-{
-	return model != Model::Intel82357 || (state.isp.extended_mode[channel] & 0x40) != 0;
 }
 
 CDMA::SDMA_transfer_properties CDMA::transfer_properties(int channel) const
@@ -279,17 +197,6 @@ CDMA::SDMA_transfer_properties CDMA::transfer_properties(int channel) const
 	validate_device_channel(channel);
 	static constexpr SDMA_transfer_properties byte = { 1, 1, 1, 0, 0xffff };
 	static constexpr SDMA_transfer_properties shifted_word = { 2, 2, 2, 1, 0x1ffff };
-	if (model == Model::Intel82357)
-	{
-		// 82357 3.7.9: only the shifted word mode counts words.
-		static constexpr SDMA_transfer_properties sizes[] = {
-			byte, shifted_word, { 4, 1, 4, 0, 0xffff }, { 2, 1, 2, 0, 0xffff }
-		};
-		auto properties = sizes[(state.isp.extended_mode[channel] >> 2) & 3];
-		if (state.channel[channel].extended_address)
-			properties.address_mask = 0xffffffffU;
-		return properties;
-	}
 	// ALi's ISA channels count bytes or shifted words. Timing selection does
 	// not change data width, count units or addressing on this controller.
 	return channel < 4 ? byte : shifted_word;
@@ -376,9 +283,9 @@ u8 CDMA::read_legacy_port(u16 port)
 {
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
 	int ctrlr, reg;
-	if (!dma_legacy_register(port, ctrlr, reg))
+	if (!legacy_register(port, ctrlr, reg))
 	{
-		const int num = dma_page_channel(port, dma_low_page_base);
+		const int num = page_channel(port, dma_low_page_base);
 		const u8 data = num < 0 ? 0xff : (u8)state.channel[num].current_page;
 #if defined(DEBUG_DMA)
 		printf("dma: read port %04x: %02x\n", (unsigned)port, (unsigned)data);
@@ -409,25 +316,67 @@ u8 CDMA::read_legacy_port(u16 port)
 	return data;
 }
 
+void CDMA::program_address(int num, u16 keep, u16 bits)
+{
+	release_service(num);
+	auto& ch = channel(num);
+	ch.base = (ch.base & keep) | bits;
+	ch.current = ch.base;
+}
+
+void CDMA::program_count(int num, u32 keep, u32 bits)
+{
+	release_service(num);
+	auto& ch = channel(num);
+	ch.base_count = (ch.base_count & keep) | bits;
+	ch.count = ch.base_count;
+}
+
+void CDMA::program_page(int num, u16 keep, u16 bits)
+{
+	release_service(num);
+	auto& ch = channel(num);
+	ch.pagebase = (ch.pagebase & keep) | bits;
+	ch.current_page = keep == 0x00ff ? (ch.current_page & keep) | bits : ch.pagebase;
+}
+
+void CDMA::mask_channel(int num)
+{
+	state.controller[num / 4].mask |= 1 << (num & 3);
+	release_service(num);
+}
+
+void CDMA::master_clear_channel(int num)
+{
+	release_service(num);
+}
+
+void CDMA::program_mode(int num, u8 data)
+{
+	if (DMA_TRACE_CHANNEL(num))
+	{
+		printf("dma: mode register %d for channel %d written with %x\n", num / 4, num, (unsigned)data);
+		printf("    Mode: %s, Address %s, Autoinit %s, Command: %s\n",
+			(data & 0x80 ? (data & 0x40 ? "Cascade" : "Block") : (data & 0x40 ? "Single" : "Demand")),
+			(data & 0x20 ? "Decrement" : "Increment"),
+			(data & 0x10 ? "Enable" : "Disable"),
+			(data & 0x08 ? (data & 0x04 ? "Illegal" : "Read") : (data & 0x04 ? "Write" : "Verify")));
+	}
+	release_service(num);
+	channel(num).mode = data;
+}
+
 void CDMA::write_legacy_port(u16 port, u8 data)
 {
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
 	int ctrlr, reg;
-	if (!dma_legacy_register(port, ctrlr, reg))
+	if (!legacy_register(port, ctrlr, reg))
 	{
-		const int num = dma_page_channel(port, dma_low_page_base);
+		const int num = page_channel(port, dma_low_page_base);
 		if (num < 0) return;
-		const bool update_current = !chaining_enabled(num);
-		select_compatible_address(num, update_current);
-		u16& page = state.channel[num].pagebase;
-		page = (page & 0xff00) | data;
-		if (update_current)
-		{
-			release_service(num);
-			state.channel[num].current_page = page;
-		}
+		program_page(num, 0xff00, data);
 #if defined(DEBUG_DMA)
-		printf("dma channel %d pagebase: %04x\n", num, (unsigned)page);
+		printf("dma channel %d pagebase: %04x\n", num, (unsigned)channel(num).pagebase);
 #endif
 		return;
 	}
@@ -436,30 +385,16 @@ void CDMA::write_legacy_port(u16 port, u8 data)
 	if (reg < 8)
 	{
 		const int num = ctrlr * 4 + reg / 2;
-		const bool update_current = !chaining_enabled(num);
-		if (update_current)
-			release_service(num);
-		auto& channel = state.channel[num];
 		const u16 keep = controller.lobyte ? 0xff00 : 0x00ff;
 		const u16 bits = controller.lobyte ? data : (u16)(data << 8);
 		if (reg & 1)
-		{
-			// Either legacy count byte clears the 82357 high count byte.
-			channel.base_count = (channel.base_count & keep) | bits;
-			if (update_current)
-				channel.count = model == Model::Intel82357 ? (channel.count & keep) | bits : channel.base_count;
-		}
+			program_count(num, keep, bits);
 		else
-		{
-			select_compatible_address(num, update_current);
-			channel.base = (channel.base & keep) | bits;
-			if (update_current)
-				channel.current = model == Model::Intel82357 ? (channel.current & keep) | bits : channel.base;
-		}
+			program_address(num, keep, bits);
 		controller.lobyte = !controller.lobyte;
 #if defined(DEBUG_DMA)
 		printf("dma channel %d %s: %04x\n", num, (reg & 1) ? "count" : "base",
-			(unsigned)((reg & 1) ? channel.base_count : channel.base));
+			(unsigned)((reg & 1) ? channel(num).base_count : channel(num).base));
 #endif
 		return;
 	}
@@ -488,10 +423,7 @@ void CDMA::write_legacy_port(u16 port, u8 data)
 		if (DMA_TRACE_CHANNEL(selected_channel))
 			printf("dma: mask single on %d : %d %s\n", ctrlr, local_channel, data & 0x4 ? "Masked" : "Unmasked");
 		if (data & 0x04)
-		{
-			controller.mask |= 1 << local_channel;
-			release_service(selected_channel);
-		}
+			mask_channel(selected_channel);
 		else
 			controller.mask &= ~(1 << local_channel);
 		if (DMA_TRACE_CHANNEL(selected_channel))
@@ -500,21 +432,7 @@ void CDMA::write_legacy_port(u16 port, u8 data)
 		break;
 
 	case 0x0b: // mode register
-		if (model == Model::Intel82357 && selected_channel == 4 && (data & 0xc0) != dma_cascade_mode)
-			break;
-		if (DMA_TRACE_CHANNEL(selected_channel))
-		{
-			printf("dma: mode register %d for channel %d written with %x\n", ctrlr, selected_channel, (unsigned)data);
-			printf("    Mode: %s, Address %s, Autoinit %s, Command: %s\n",
-				(data & 0x80 ? (data & 0x40 ? "Cascade" : "Block") : (data & 0x40 ? "Single" : "Demand")),
-				(data & 0x20 ? "Decrement" : "Increment"),
-				(data & 0x10 ? "Enable" : "Disable"),
-				(data & 0x08 ? (data & 0x04 ? "Illegal" : "Read") : (data & 0x04 ? "Write" : "Verify")));
-		}
-
-		release_service(selected_channel);
-		reset_chaining_mode(selected_channel);
-		state.channel[selected_channel].mode = data;
+		program_mode(selected_channel, data);
 		break;
 
 	case 0x0c: // clear flipflop(s)
@@ -528,14 +446,7 @@ void CDMA::write_legacy_port(u16 port, u8 data)
 		printf("DMA-I-RESET: DMA %d reset.", ctrlr);
 #endif
 		for (int channel = 0; channel < 4; channel++)
-		{
-			const int num = ctrlr * 4 + channel;
-			release_service(num);
-			select_compatible_address(num, true);
-			reset_chaining_mode(num);
-			if (model == Model::Intel82357)
-				state.channel[num].mode = num == 4 ? dma_cascade_mode : 0;
-		}
+			master_clear_channel(ctrlr * 4 + channel);
 		controller.lobyte = true;
 		controller.command = 0;
 		controller.status = 0;
@@ -565,7 +476,7 @@ void CDMA::write_legacy_port(u16 port, u8 data)
 u8 CDMA::read_high_page_port(u16 port) const
 {
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
-	const int num = dma_page_channel(port, dma_high_page_base);
+	const int num = page_channel(port, dma_high_page_base);
 	const u8 data = num < 0 ? 0xff : (u8)(state.channel[num].current_page >> 8);
 #if defined(DEBUG_DMA)
 	printf("dma: read port %04x: %02x\n", (unsigned)port, (unsigned)data);
@@ -576,211 +487,23 @@ u8 CDMA::read_high_page_port(u16 port) const
 void CDMA::write_high_page_port(u16 port, u8 data)
 {
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
-	const int num = dma_page_channel(port, dma_high_page_base);
+	const int num = page_channel(port, dma_high_page_base);
 	if (num < 0)
 		return;
-	auto& channel = state.channel[num];
-	channel.pagebase = (channel.pagebase & 0x00ff) | (data << 8);
-	channel.base_extended_address = model == Model::Intel82357;
-	if (!chaining_enabled(num))
-	{
-		release_service(num);
-		channel.current_page = (channel.current_page & 0x00ff) | (data << 8);
-		channel.extended_address = channel.base_extended_address;
-	}
+	program_page(num, 0x00ff, (u16)(data << 8));
 #if defined(DEBUG_DMA)
-	printf("dma channel %d pagebase: %04x\n", num, (unsigned)channel.pagebase);
+	printf("dma channel %d pagebase: %04x\n", num, (unsigned)channel(num).pagebase);
 #endif
 }
 
-u8 CDMA::read_high_count_port(u16 port) const
+void CDMA::write_ali_timing(int controller, u8 data)
 {
-	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
-	const int num = dma_high_count_channel(port);
-	if (model != Model::Intel82357 || num < 0)
-		return 0xff;
-	return (u8)(state.channel[num].count >> 16);
-}
-
-void CDMA::write_high_count_port(u16 port, u8 data)
-{
-	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
-	const int num = dma_high_count_channel(port);
-	if (model != Model::Intel82357 || num < 0)
-		return;
-	auto& channel = state.channel[num];
-	const u32 high = (u32)data << 16;
-	channel.base_count = (channel.base_count & 0xffff) | high;
-	if (!chaining_enabled(num))
-	{
-		release_service(num);
-		channel.count = (channel.count & 0xffff) | high;
-	}
-}
-
-u8 CDMA::read_stop_port(u16 port) const
-{
-	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
-	int channel;
-	unsigned shift;
-	if (model != Model::Intel82357 || !dma_stop_register(port, channel, shift))
-		return 0xff;
-	return (u8)(state.isp.stop_address[channel] >> shift);
-}
-
-void CDMA::write_stop_port(u16 port, u8 data)
-{
-	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
-	int channel;
-	unsigned shift;
-	if (model != Model::Intel82357 || !dma_stop_register(port, channel, shift))
-		return;
-	auto& stop = state.isp.stop_address[channel];
-	stop = (stop & ~(0xffU << shift)) | (((u32)data << shift) & 0x00fffffcU);
-}
-
-u8 CDMA::chaining_channels(u8 flag) const
-{
-	u8 channels = 0;
-	for (int channel = 0; channel < 8; channel++)
-		if (channel != 4 && (state.isp.chaining_mode[channel] & flag))
-			channels |= 1 << channel;
-	return channels;
-}
-
-u8 CDMA::pending_chaining_irqs() const
-{
-	return state.isp.chaining_pending & ~chaining_channels(dma_chain_master_tc);
-}
-
-void CDMA::update_chaining_irq(bool force)
-{
-	const bool asserted = pending_chaining_irqs() != 0;
-	if (force || asserted != chaining_irq_asserted)
-	{
-		chaining_irq_asserted = asserted;
-		dma_host.set_isa_irq(13, asserted);
-	}
-}
-
-u8 CDMA::read_chaining_mode_port(u16 port) const
-{
-	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
-	if (model != Model::Intel82357)
-		return 0xff;
-	if (port == dma0_chaining_mode_port)
-		return pending_chaining_irqs();
-	if (port == dma1_chaining_mode_port)
-		return chaining_channels(dma_chain_enable);
-	if (port == dma_chain_expiration_control_port)
-		return chaining_channels(dma_chain_master_tc);
-	return 0xff;
-}
-
-void CDMA::write_chaining_mode_port(u16 port, u8 data)
-{
-	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
-	if (model != Model::Intel82357 || (port != dma0_chaining_mode_port && port != dma1_chaining_mode_port))
-		return;
-	const int channel = (port == dma1_chaining_mode_port ? 4 : 0) + (data & 3);
-	if (channel == 4)
-		return;
-	state.isp.chaining_mode[channel] = data & 0x1c;
-	if (!(data & dma_chain_enable) || (data & dma_programming_complete))
-		state.isp.chaining_pending &= ~(1 << channel);
-	update_chaining_irq();
-}
-
-u8 CDMA::read_extended_mode_port(u16) const
-{
-	// M1543C extended-mode ports are write-only. Use the same all-ones
-	// value as an unmapped I/O read, without changing controller state.
-	return 0xff;
-}
-
-void CDMA::write_extended_mode_port(u16 port, u8 data)
-{
-	if (port != dma0_extended_mode_port && port != dma1_extended_mode_port)
-		return;
-	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
-	const int controller = port == dma1_extended_mode_port ? 1 : 0;
 	const int num = controller * 4 + (data & 3);
-	switch (model)
-	{
-	case Model::Intel82357:
-		reset_chaining_mode(num);
-		if ((state.isp.extended_mode[num] ^ data) & 0x0c)
-			release_service(num);
-		state.isp.extended_mode[num] = data & 0xfc;
-		break;
-	case Model::AliM1543C:
-		// M1543C 4.2.1: channel select 1:0, timing 5:4; all other bits reserved.
-		state.ali.cycle_timing[num] = data & 0x30;
-		if (DMA_TRACE_CONTROLLER(controller))
-			printf("dma: ALi extended mode channel %d written: %02x (%s timing)\n",
-				num, (unsigned)(data & 0x33), state.ali.cycle_timing[num] == 0x30 ? "Type F" : "compatible");
-		break;
-	}
-}
-
-bool CDMA::access_82357_port(u16 port, u8& data, bool write)
-{
-	if (model != Model::Intel82357)
-		return false;
-
-	int channel;
-	unsigned shift;
-	if (dma_82357_legacy_port(port, write))
-	{
-		if (write)
-			write_legacy_port(port, data);
-		else
-			data = read_legacy_port(port);
-	}
-	else if (dma_page_channel(port, dma_high_page_base) >= 0)
-	{
-		if (write)
-			write_high_page_port(port, data);
-		else
-			data = read_high_page_port(port);
-	}
-	else if (dma_high_count_channel(port) >= 0)
-	{
-		if (write)
-			write_high_count_port(port, data);
-		else
-			data = read_high_count_port(port);
-	}
-	else if (dma_stop_register(port, channel, shift))
-	{
-		if (write)
-			write_stop_port(port, data);
-		else
-			data = read_stop_port(port);
-	}
-	else if (port == dma0_chaining_mode_port || port == dma1_chaining_mode_port ||
-		(!write && port == dma_chain_expiration_control_port))
-	{
-		if (write)
-			write_chaining_mode_port(port, data);
-		else
-			data = read_chaining_mode_port(port);
-	}
-	else if (write && (port == dma0_extended_mode_port || port == dma1_extended_mode_port))
-		write_extended_mode_port(port, data);
-	else
-		return false;
-	return true;
-}
-
-bool CDMA::read_82357_port(u16 port, u8& data)
-{
-	return access_82357_port(port, data, false);
-}
-
-bool CDMA::write_82357_port(u16 port, u8 data)
-{
-	return access_82357_port(port, data, true);
+	// M1543C 4.2.1: channel select 1:0, timing 5:4; all other bits reserved.
+	state.ali.cycle_timing[num] = data & 0x30;
+	if (DMA_TRACE_CONTROLLER(controller))
+		printf("dma: ALi extended mode channel %d written: %02x (%s timing)\n",
+			num, (unsigned)(data & 0x33), state.ali.cycle_timing[num] == 0x30 ? "Type F" : "compatible");
 }
 
 u64 CDMA::ReadMem(int index, u64 address, int dsize)
@@ -811,8 +534,9 @@ u64 CDMA::ReadMem(int index, u64 address, int dsize)
 		{
 		case DMA0_IO_EXT:
 		case DMA1_IO_EXT:
-			data = address == 0 ? read_extended_mode_port(
-				index == DMA0_IO_EXT ? dma0_extended_mode_port : dma1_extended_mode_port) : 0xff;
+			// M1543C extended-mode ports are write-only. Use the same all-ones
+			// value as an unmapped I/O read, without changing controller state.
+			data = 0xff;
 			break;
 
 		default:
@@ -863,8 +587,7 @@ void CDMA::WriteMem(int index, u64 address, int dsize, u64 data)
 			// above, and the following bytes must not alias this register.
 			if (address != 0)
 				return;
-			write_extended_mode_port(index == DMA0_IO_EXT ? dma0_extended_mode_port : dma1_extended_mode_port,
-				(u8)data);
+			write_ali_timing(index == DMA0_IO_EXT ? 0 : 1, (u8)data);
 			break;
 
 
@@ -960,34 +683,23 @@ int CDMA::RestoreState(FILE* f)
 
 	for (auto& channel : restored.channel)
 	{
-		channel.count &= count_mask();
-		channel.base_count &= count_mask();
+		channel.count &= count_mask;
+		channel.base_count &= count_mask;
 	}
 	state = restored;
-	if (model == Model::Intel82357)
-	{
-		state.channel[4].mode |= dma_cascade_mode;
-		state.isp.chaining_pending &= chaining_channels(dma_chain_enable);
-		update_chaining_irq(true);
-	}
 	printf("dma: %ld bytes restored.\n", ss);
 	return 0;
-}
-
-bool CDMA::accepts_software_request(int channel) const
-{
-	return model != Model::Intel82357 || (state.channel[channel].mode & 0xc0) == 0x80;
 }
 
 u8 CDMA::software_requests(int ctrlr) const
 {
 	// A mode write can leave a block request latched but inactive.
 	u8 requests = state.controller[ctrlr].request;
-	if (model == Model::Intel82357 && requests)
+	for (int channel = 0; requests && channel < 4; channel++)
 	{
-		for (int channel = 0; channel < 4; channel++)
-			if (!accepts_software_request(ctrlr * 4 + channel))
-				requests &= ~(1 << channel);
+		const u8 bit = 1 << channel;
+		if ((requests & bit) && !accepts_software_request(ctrlr * 4 + channel))
+			requests &= ~bit;
 	}
 	return requests;
 }
@@ -1274,32 +986,6 @@ size_t CDMA::unit_size(int channel) const
 	return lanes < remaining ? lanes : remaining;
 }
 
-size_t CDMA::bytes_through_stop(int channel, const SDMA_transfer_properties& properties) const
-{
-	if (model != Model::Intel82357 || !(state.isp.extended_mode[channel] & 0x80))
-		return 0;
-
-	const auto& ch = state.channel[channel];
-	const u32 address = dma_address(ch.current_page, ch.current, properties);
-	const u32 compare_mask = 0x00fffffcU;
-	const u32 stop = state.isp.stop_address[channel] & compare_mask;
-	// In compatible address mode, the stop may lie outside the channel's fixed page.
-	if ((address ^ stop) & compare_mask & ~properties.address_mask)
-		return 0;
-
-	const u32 width = (u32)properties.data_width;
-	const u32 cycle = address & ~(width - 1);
-	const u32 lanes = width - (address - cycle);
-	if ((address & compare_mask) == stop)
-		return lanes;
-
-	// Decrementing channels enter the matching dword at its highest bus unit.
-	const bool decrement = (ch.mode & 0x20) != 0;
-	const u32 first = decrement ? stop + 4 - width : stop;
-	const u32 wrap = properties.address_mask & 0x00ffffffU;
-	return ((decrement ? cycle - first : first - cycle) & wrap) + lanes;
-}
-
 size_t CDMA::prepare_transfer(int channel, size_t length, const SDMA_transfer_properties& properties,
 	bool eop, SDMA_result& result) const
 {
@@ -1311,17 +997,7 @@ size_t CDMA::prepare_transfer(int channel, size_t length, const SDMA_transfer_pr
 		FAILURE(InvalidArgument, "dma: word-channel transfer length must be even");
 
 	result.external_eop = eop && accepts_external_eop(channel);
-	const size_t stop = bytes_through_stop(channel, properties);
-	if (stop && length >= stop)
-	{
-		length = stop;
-		result.stop_match = true;
-	}
-	else if (stop && (length == remaining || result.external_eop))
-	{
-		// TC or EOP can finish the matching cycle with only some lanes active.
-		result.stop_match = stop - length < properties.data_width;
-	}
+	length = limit_transfer(channel, length, remaining, properties, result);
 	result.terminal_count = length == remaining;
 	result.blocked = false;
 	return length;
@@ -1365,36 +1041,11 @@ void CDMA::advance_transfer(int channel, size_t length,
 	// Shifted word addressing leaves programmed low-page bit 0 undriven.
 	const u16 page_mask = (u16)(0xffffU << properties.address_shift);
 	ch.current_page = (ch.current_page & ~page_mask) | ((address >> 16) & page_mask);
-	ch.count = (ch.count - (u32)count_units) & count_mask();
+	ch.count = (ch.count - (u32)count_units) & count_mask;
 
 	if (complete)
 		complete_transfer(channel, result);
-	if (result.stop_match)
-	{
-		state.controller[channel / 4].mask |= 1 << (channel & 3);
-		release_service(channel);
-	}
-	notify_chaining(channel, result);
-}
-
-void CDMA::notify_chaining(int channel, SDMA_result& result)
-{
-	if (!chaining_enabled(channel))
-		return;
-	const u8 bit = 1 << channel;
-	if ((result.terminal_count || result.external_eop) && !(state.channel[channel].mode & 0x10))
-	{
-		state.isp.chaining_pending |= bit;
-		update_chaining_irq();
-	}
-
-	// INTOUT drives TC only during service of the channel with the pending request.
-	if ((state.isp.chaining_pending & bit) && (state.isp.chaining_mode[channel] & dma_chain_master_tc) &&
-		!accepts_external_eop(channel))
-	{
-		result.chaining_tc = true;
-		dma_host.dma_master_tc(channel);
-	}
+	transfer_serviced(channel, result);
 }
 
 void CDMA::load_current_from_base(int channel)
@@ -1403,22 +1054,14 @@ void CDMA::load_current_from_base(int channel)
 	ch.current = ch.base;
 	ch.current_page = ch.pagebase;
 	ch.count = ch.base_count;
-	ch.extended_address = ch.base_extended_address;
 }
 
 /**
  * Complete TC or external EOP without consuming any additional DMA units.
  **/
-void CDMA::complete_transfer(int channel, SDMA_result& result)
+void CDMA::complete_transfer(int channel, SDMA_result&)
 {
 	const bool auto_init = (state.channel[channel].mode & 0x10) != 0;
-	if (!auto_init && chaining_enabled(channel) && (state.isp.chaining_mode[channel] & dma_programming_complete))
-	{
-		load_current_from_base(channel);
-		state.isp.chaining_mode[channel] &= ~dma_programming_complete;
-		result.chained = true;
-		return;
-	}
 
 	int ctrlr = channel < 4 ? 0 : 1;
 	int local_channel = channel & 0x03;
@@ -1668,6 +1311,6 @@ CDMA::SDMA_result CDMA::service_eop(int channel)
 	complete_transfer(channel, result);
 	result.blocked = false;
 	result.external_eop = true;
-	notify_chaining(channel, result);
+	transfer_serviced(channel, result);
 	return result;
 }

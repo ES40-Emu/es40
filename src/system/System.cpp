@@ -2296,7 +2296,8 @@ bool CSystem::RestoreState(const char* fn)
 	}
 	for (int i = 0; i < iNumComponents; ++i)
 		acComponents[i]->finalize_restore();
-	update_pchip_error_irqs();
+	if (platform == Platform::Tsunami)
+		update_pchip_error_irqs();
 	return true;
 }
 

@@ -178,6 +178,7 @@ noinst_HEADERS += storage/Disk.h \
        chipset/DMA.h \
        chipset/ISABus.h \
        chipset/EISABus.h \
+       chipset/Intel82357.h \
        chipset/Intel82358.h \
        chipset/Pic8259.h \
        system/DPR.h \
@@ -289,6 +290,8 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        graphics/ibm8514a.cpp \
        chipset/DMA.cpp \
        chipset/EISABus.cpp \
+       chipset/Intel82357.cpp \
+       chipset/Intel82357_dma.cpp \
        chipset/Intel82358.cpp \
        chipset/Pic8259.cpp \
        system/DPR.cpp \

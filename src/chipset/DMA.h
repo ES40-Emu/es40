@@ -4,6 +4,8 @@
  *
  * WWW    : https://github.com/ES40-Emu/es40
  *
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
@@ -75,8 +77,7 @@ public:
 class CDMA : public CSystemComponent
 {
 public:
-  enum class Model { AliM1543C, Intel82357 };
-  CDMA(CConfigurator* cfg, CSystem* c, CDMAHost& host, Model model = Model::AliM1543C);
+  CDMA(CConfigurator* cfg, CSystem* c, CDMAHost& host);
   virtual       ~CDMA();
 
   virtual void  ResetPCI() override;
@@ -88,24 +89,12 @@ public:
   virtual int   DoClock();
   virtual void  WriteMem(int index, u64 address, int dsize, u64 data);
   virtual u64   ReadMem(int index, u64 address, int dsize);
-  // Logical 82357 byte ports. Unclaimed accesses return false and leave data untouched.
-  bool          read_82357_port(u16 port, u8& data);
-  bool          write_82357_port(u16 port, u8 data);
   // Logical byte ports for the two 8237 banks and the ISA low-page registers.
   u8            read_legacy_port(u16 port);
   void          write_legacy_port(u16 port, u8 data);
   // High-page byte ports for bridges that map the 0x481-0x48b bank.
   u8            read_high_page_port(u16 port) const;
   void          write_high_page_port(u16 port, u8 data);
-  // The 82357 exposes count bits 23:16 at a separate byte port per channel.
-  u8            read_high_count_port(u16 port) const;
-  void          write_high_count_port(u16 port, u8 data);
-  u8            read_stop_port(u16 port) const;
-  void          write_stop_port(u16 port, u8 data);
-  u8            read_chaining_mode_port(u16 port) const;
-  void          write_chaining_mode_port(u16 port, u8 data);
-  u8            read_extended_mode_port(u16 port) const;
-  void          write_extended_mode_port(u16 port, u8 data);
   u8            read_ali_shadow(u8 selector) const;
   virtual int   SaveState(FILE* f);
   virtual int   RestoreState(FILE* f);
@@ -198,10 +187,20 @@ public:
   // Current count plus one in bytes; independent of mask/enable state.
   size_t        get_transfer_size(int channel);
 
-private:
-  CDMAHost& dma_host;
-  const Model model;
-  bool chaining_irq_asserted = false;
+protected:
+  CDMA(CConfigurator* cfg, CSystem* c, CDMAHost& host, u32 count_mask);
+
+  /// DMA channel state
+  struct Channel
+  {
+    u16 current;
+    u16 base;
+    u16 pagebase;
+    u16 current_page;
+    u32 count;
+    u32 base_count;
+    u8 mode;
+  };
 
   // Derived transfer geometry; not guest registers or saved state.
   struct SDMA_transfer_properties
@@ -213,33 +212,46 @@ private:
     u32 address_mask;     // Byte address bits that can carry or borrow.
   };
 
-  bool          access_82357_port(u16 port, u8& data, bool write);
+  Channel& channel(int num) { return state.channel[num]; }
+  const Channel& channel(int num) const { return state.channel[num]; }
+  static int    page_channel(u16 port, u16 base);
+  static bool   legacy_register(u16 port, int& ctrlr, int& reg);
   static void   validate_device_channel(int channel);
-  void          select_compatible_address(int channel, bool update_current);
-  bool          chaining_enabled(int channel) const;
-  void          reset_chaining_mode(int channel);
-  u8            chaining_channels(u8 flag) const;
-  u8            pending_chaining_irqs() const;
-  void          update_chaining_irq(bool force = false);
-  void          notify_chaining(int channel, SDMA_result& result);
-  u32           count_mask() const;
-  bool          accepts_external_eop(int channel) const;
-  SDMA_transfer_properties transfer_properties(int channel) const;
   static u32    dma_address(u16 pagebase, u32 current,
                   const SDMA_transfer_properties& properties);
+  void          release_service(int channel);
+  void          mask_channel(int channel);
+
+  virtual void  program_address(int num, u16 keep, u16 bits);
+  virtual void  program_count(int num, u32 keep, u32 bits);
+  virtual void  program_page(int num, u16 keep, u16 bits);
+  virtual void  program_mode(int num, u8 data);
+  virtual void  master_clear_channel(int num);
+  virtual SDMA_transfer_properties transfer_properties(int channel) const;
+  virtual bool  accepts_external_eop(int) const { return true; }
+  virtual bool  accepts_software_request(int) const { return true; }
+  virtual size_t limit_transfer(int, size_t length, size_t, const SDMA_transfer_properties&,
+                  SDMA_result&) const { return length; }
+  virtual void  complete_transfer(int channel, SDMA_result& result);
+  virtual void  load_current_from_base(int channel);
+  virtual void  transfer_serviced(int, SDMA_result&) {}
+
+private:
+  CDMAHost& dma_host;
+  const u32 count_mask;
+
+  void          write_ali_timing(int controller, u8 data);
   static u32    advance_address(u32 address, size_t bytes, bool decrement,
                   bool finish_cycle, const SDMA_transfer_properties& properties);
   static size_t increment_chunk_size(u32 address, size_t length,
                   const SDMA_transfer_properties& properties);
   size_t        unit_size(int channel) const;
-  size_t        bytes_through_stop(int channel, const SDMA_transfer_properties& properties) const;
   size_t        prepare_transfer(int channel, size_t length, const SDMA_transfer_properties& properties,
                   bool eop, SDMA_result& result) const;
   template<typename T>
   SDMA_result   receive_unit(int channel, T& data, bool eop, bool arbitrate);
   void          transfer_memory(u32 address, u8* buffer, size_t length, bool decrement,
                   bool write, const SDMA_transfer_properties& properties);
-  bool          accepts_software_request(int channel) const;
   u8            software_requests(int ctrlr) const;
   u8            get_requests(int ctrlr);
   bool          cascade_enabled() const;
@@ -248,30 +260,15 @@ private:
   bool          service_selected(int channel) const;
   bool          service_ready(int channel, u8 transfer_type) const;
   void          rotate_priority(int channel);
-  void          release_service(int channel);
   void          finish_service(int channel, const SDMA_result& result);
   void          do_dma();
   void          advance_transfer(int channel, size_t length,
                   const SDMA_transfer_properties& properties, SDMA_result& result);
-  void          load_current_from_base(int channel);
-  void          complete_transfer(int channel, SDMA_result& result);
 
   /// The state structure contains all elements that need to be saved to the statefile.
   struct SDMA_state
   {
-    /// DMA channel state
-    struct SDMA_chan
-    {
-      u16   current;
-      u16   base;
-      u16   pagebase;
-      u16   current_page;
-      u32   count;
-      u32   base_count;
-      u8    mode;
-      bool  extended_address; // 82357 high page was written last for the current buffer.
-      bool  base_extended_address; // Address carry mode for the base registers.
-    } channel[8];
+    Channel channel[8];
 
     /// DMA controller state
     struct SDMA_ctrl
@@ -295,13 +292,6 @@ private:
       // System reset clears these; guest master clear preserves them.
       u8 cycle_timing[8];
     } ali;
-    struct SDMA_82357
-    {
-      u8 extended_mode[8]; // Bits 7:2 of each channel's extended-mode register.
-      u8 chaining_mode[8]; // Bits 4:2 select TC output, programming complete and chaining enable.
-      u8 chaining_pending; // Expired buffers awaiting Programming Complete.
-      u32 stop_address[8]; // Address bits 23:2 for channels 0-3 and 5-7.
-    } isp;
   }
   state;
 };

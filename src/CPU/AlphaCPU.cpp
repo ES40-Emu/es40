@@ -944,6 +944,10 @@ void CAlphaCPU::write_ipr(u32 instruction, u64 value, AlphaIPRWriteContext conte
 			ev4_write_sier(value, state.sien, state.asten);
 			kick_int_if_pending();
 			return;
+		case AlphaIPRWriteKind::AstInterruptEnable:
+			state.aster = ev4_aster_from_write(value);
+			kick_int_if_pending();
+			return;
 		case AlphaIPRWriteKind::IboxControl: {
 			const u64 iccsr = ev4_iccsr_from_write(value);
 #ifdef ES40_JIT
@@ -1896,7 +1900,7 @@ void CAlphaCPU::jit_run(int budget)
 			const size_t swap_bytes = m_profile.ipr_write.indexed ? sizeof(m_pal_temp_write) : 0;
 			const int biu_index = verify.word_count + (int)(swap_bytes / sizeof(u64));
 			const bool verify_indexed_iprs = m_profile.ipr_write.indexed != nullptr;
-			const int ipr_count = biu_index + (verify_indexed_iprs ? 12 : 0);
+			const int ipr_count = biu_index + (verify_indexed_iprs ? 13 : 0);
 			auto cap_iprs = [&](u64* d) {
 				if (verify.word_count) verify.capture(*this, d);
 				if (swap_bytes) memcpy(d + verify.word_count, &m_pal_temp_write, swap_bytes);
@@ -1913,6 +1917,7 @@ void CAlphaCPU::jit_run(int budget)
 					d[biu_index + 9] = state.cren;
 					d[biu_index + 10] = state.sien;
 					d[biu_index + 11] = state.asten;
+					d[biu_index + 12] = state.aster;
 				}
 			};
 			auto put_iprs = [&](const u64* s, bool replay) {
@@ -1932,6 +1937,7 @@ void CAlphaCPU::jit_run(int budget)
 					state.cren = static_cast<int>(s[biu_index + 9]);
 					state.sien = static_cast<int>(s[biu_index + 10]);
 					state.asten = static_cast<int>(s[biu_index + 11]);
+					state.aster = static_cast<int>(s[biu_index + 12]);
 				}
 				if (!replay) sync_register_bank();
 			};

@@ -105,6 +105,7 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
     case 2:  kind = AlphaIPRWriteKind::IboxControl; break;
     case 16: kind = AlphaIPRWriteKind::HardwareInterruptEnable; break;
     case 17: kind = AlphaIPRWriteKind::SoftwareInterruptEnable; break;
+    case 18: kind = AlphaIPRWriteKind::AstInterruptEnable; break;
     case 19: kind = AlphaIPRWriteKind::InterruptClear; break;
     default: return kind;
     }
@@ -141,6 +142,12 @@ inline void ev4_write_sier(std::uint64_t value, int& sien, int& asten)
 {
   sien = (value >> 32) & 0xfffe;
   asten = (sien >> 2) & 1;
+}
+
+// ASTER bits 51:48 enable user, supervisor, executive and kernel ASTs (21064 HRM 5.2.19, Fig. 5-16).
+constexpr int ev4_aster_from_write(std::uint64_t value)
+{
+  return static_cast<int>((value >> 48) & 0xf);
 }
 
 // 21064 HRM 5.2.3, Fig. 5-3: ICCSR has distinct HW_MTPR and HW_MFPR layouts.

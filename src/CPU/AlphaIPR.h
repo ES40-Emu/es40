@@ -78,6 +78,7 @@ enum class AlphaIPRWriteKind
   InterruptClear,
   HardwareInterruptEnable,
   SoftwareInterruptEnable,
+  AstInterruptEnable,
   ExceptionAddress, // Write PC[63:2] and PAL[0].
   PalTemp,
   Noop // No write callback; privilege checks still apply.

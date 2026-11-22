@@ -68,7 +68,10 @@ static constexpr u16 dma_low_page_base = 0x81;
 static constexpr u16 dma_high_page_base = 0x481;
 static constexpr u16 dma0_chaining_mode_port = 0x40a;
 static constexpr u16 dma1_chaining_mode_port = 0x4d4;
+static constexpr u16 dma_chain_expiration_control_port = 0x40c;
+static constexpr u8 dma_chain_enable = 0x04;
 static constexpr u8 dma_programming_complete = 0x08;
+static constexpr u8 dma_chain_master_tc = 0x10;
 static constexpr u16 dma0_extended_mode_port = 0x40b;
 static constexpr u16 dma1_extended_mode_port = 0x4d6;
 
@@ -99,8 +102,11 @@ void CDMA::ResetPCI()
 	// request lines and any accept/pending demand/block/cascade service.
 	memset(&state, 0, sizeof(state));
 	if (model == Model::Intel82357)
+	{
 		for (int channel = 4; channel < 8; channel++)
 			state.isp.extended_mode[channel] = 0x04;
+		update_chaining_irq();
+	}
 	for (int controller = 0; controller < 2; controller++)
 	{
 		state.controller[controller].mask = 0x0f;
@@ -233,13 +239,16 @@ void CDMA::select_compatible_address(int channel, bool update_current)
 
 bool CDMA::chaining_enabled(int channel) const
 {
-	return model == Model::Intel82357 && channel != 4 && (state.isp.chaining_mode[channel] & 0x04);
+	return model == Model::Intel82357 && channel != 4 && (state.isp.chaining_mode[channel] & dma_chain_enable);
 }
 
 void CDMA::reset_chaining_mode(int channel)
 {
-	if (model == Model::Intel82357)
-		state.isp.chaining_mode[channel] = 0;
+	if (model != Model::Intel82357)
+		return;
+	state.isp.chaining_mode[channel] = 0;
+	state.isp.chaining_pending &= ~(1 << channel);
+	update_chaining_irq();
 }
 
 u32 CDMA::count_mask() const
@@ -613,21 +622,42 @@ void CDMA::write_stop_port(u16 port, u8 data)
 	stop = (stop & ~(0xffU << shift)) | (((u32)data << shift) & 0x00fffffcU);
 }
 
+u8 CDMA::chaining_channels(u8 flag) const
+{
+	u8 channels = 0;
+	for (int channel = 0; channel < 8; channel++)
+		if (channel != 4 && (state.isp.chaining_mode[channel] & flag))
+			channels |= 1 << channel;
+	return channels;
+}
+
+u8 CDMA::pending_chaining_irqs() const
+{
+	return state.isp.chaining_pending & ~chaining_channels(dma_chain_master_tc);
+}
+
+void CDMA::update_chaining_irq(bool force)
+{
+	const bool asserted = pending_chaining_irqs() != 0;
+	if (force || asserted != chaining_irq_asserted)
+	{
+		chaining_irq_asserted = asserted;
+		dma_host.set_isa_irq(13, asserted);
+	}
+}
+
 u8 CDMA::read_chaining_mode_port(u16 port) const
 {
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
 	if (model != Model::Intel82357)
 		return 0xff;
 	if (port == dma0_chaining_mode_port)
-		return 0; // TODO: report pending chaining IRQs.
-	if (port != dma1_chaining_mode_port)
-		return 0xff;
-
-	u8 enabled = 0;
-	for (int channel = 0; channel < 8; channel++)
-		if (chaining_enabled(channel))
-			enabled |= 1 << channel;
-	return enabled;
+		return pending_chaining_irqs();
+	if (port == dma1_chaining_mode_port)
+		return chaining_channels(dma_chain_enable);
+	if (port == dma_chain_expiration_control_port)
+		return chaining_channels(dma_chain_master_tc);
+	return 0xff;
 }
 
 void CDMA::write_chaining_mode_port(u16 port, u8 data)
@@ -636,8 +666,12 @@ void CDMA::write_chaining_mode_port(u16 port, u8 data)
 	if (model != Model::Intel82357 || (port != dma0_chaining_mode_port && port != dma1_chaining_mode_port))
 		return;
 	const int channel = (port == dma1_chaining_mode_port ? 4 : 0) + (data & 3);
-	if (channel != 4)
-		state.isp.chaining_mode[channel] = data & 0x1c;
+	if (channel == 4)
+		return;
+	state.isp.chaining_mode[channel] = data & 0x1c;
+	if (!(data & dma_chain_enable) || (data & dma_programming_complete))
+		state.isp.chaining_pending &= ~(1 << channel);
+	update_chaining_irq();
 }
 
 u8 CDMA::read_extended_mode_port(u16) const
@@ -853,6 +887,11 @@ int CDMA::RestoreState(FILE* f)
 		channel.base_count &= count_mask();
 	}
 	state = restored;
+	if (model == Model::Intel82357)
+	{
+		state.isp.chaining_pending &= chaining_channels(dma_chain_enable);
+		update_chaining_irq(true);
+	}
 	printf("dma: %ld bytes restored.\n", ss);
 	return 0;
 }
@@ -1239,6 +1278,27 @@ void CDMA::advance_transfer(int channel, size_t length,
 		state.controller[channel / 4].mask |= 1 << (channel & 3);
 		release_service(channel);
 	}
+	notify_chaining(channel, result);
+}
+
+void CDMA::notify_chaining(int channel, SDMA_result& result)
+{
+	if (!chaining_enabled(channel))
+		return;
+	const u8 bit = 1 << channel;
+	if ((result.terminal_count || result.external_eop) && !(state.channel[channel].mode & 0x10))
+	{
+		state.isp.chaining_pending |= bit;
+		update_chaining_irq();
+	}
+
+	// INTOUT drives TC only during service of the channel with the pending request.
+	if ((state.isp.chaining_pending & bit) && (state.isp.chaining_mode[channel] & dma_chain_master_tc) &&
+		!accepts_external_eop(channel))
+	{
+		result.chaining_tc = true;
+		dma_host.dma_master_tc(channel);
+	}
 }
 
 void CDMA::load_current_from_base(int channel)
@@ -1512,5 +1572,6 @@ CDMA::SDMA_result CDMA::service_eop(int channel)
 	complete_transfer(channel, result);
 	result.blocked = false;
 	result.external_eop = true;
+	notify_chaining(channel, result);
 	return result;
 }

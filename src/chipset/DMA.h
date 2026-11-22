@@ -62,6 +62,9 @@ public:
   // Called under the device-bus lock with controller-generated addresses and byte counts.
   virtual void dma_read_memory(u32 address, void* dest, size_t bytes) = 0;
   virtual void dma_write_memory(u32 address, const void* source, size_t bytes) = 0;
+  virtual void set_isa_irq(int irq, bool asserted) {}
+  // The EISA programming master samples TC during service of this channel.
+  virtual void dma_master_tc(int channel) {}
 };
 
   /**
@@ -124,6 +127,7 @@ public:
     bool external_eop = false;   // This call honored the device's EOP indication.
     bool stop_match = false;     // The 82357 masked the channel after a matching bus cycle.
     bool chained = false;        // The 82357 loaded the staged buffer for the next call.
+    bool chaining_tc = false;    // EISA-master TC was asserted during this channel's service.
   };
 
   // Buffers and lengths are in bytes.
@@ -194,6 +198,7 @@ public:
 private:
   CDMAHost& dma_host;
   const Model model;
+  bool chaining_irq_asserted = false;
 
   // Derived transfer geometry; not guest registers or saved state.
   struct SDMA_transfer_properties
@@ -209,6 +214,10 @@ private:
   void          select_compatible_address(int channel, bool update_current);
   bool          chaining_enabled(int channel) const;
   void          reset_chaining_mode(int channel);
+  u8            chaining_channels(u8 flag) const;
+  u8            pending_chaining_irqs() const;
+  void          update_chaining_irq(bool force = false);
+  void          notify_chaining(int channel, SDMA_result& result);
   u32           count_mask() const;
   bool          accepts_external_eop(int channel) const;
   SDMA_transfer_properties transfer_properties(int channel) const;
@@ -284,6 +293,7 @@ private:
     {
       u8 extended_mode[8]; // Bits 7:2 of each channel's extended-mode register.
       u8 chaining_mode[8]; // Bits 4:2 select TC output, programming complete and chaining enable.
+      u8 chaining_pending; // Expired buffers awaiting Programming Complete.
       u32 stop_address[8]; // Address bits 23:2 for channels 0-3 and 5-7.
     } isp;
   }

@@ -110,6 +110,7 @@ noinst_HEADERS = config/ConfigEditor.h config/ConfigDocument.h \
        CPU/Ev68InstructionSet.h \
        CPU/Ev4CPUProfile.h \
        CPU/Ev4Bcache.h \
+       CPU/Ev4Dcache.h \
        CPU/Ev4InstructionFetch.h \
        CPU/Ev4Reset.h \
        CPU/Ev68InstructionFetch.h \

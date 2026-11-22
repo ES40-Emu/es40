@@ -1263,6 +1263,7 @@ static constexpr A64OpClass classify_a64_op(uint32_t ins, bool pal_block,
         case AlphaIPRWriteKind::Helper:
         case AlphaIPRWriteKind::Noop:
           return {A64OpKind::kHwMtpr, A64TerminatorKind::kNone, 0, 0};
+        case AlphaIPRWriteKind::AboxControl:
         case AlphaIPRWriteKind::BcacheControl:
         case AlphaIPRWriteKind::HelperTerminator:
           return {A64OpKind::kHwMtpr, A64TerminatorKind::kRedispatch, 0, 0};

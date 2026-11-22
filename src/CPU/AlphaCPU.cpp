@@ -928,10 +928,17 @@ void CAlphaCPU::write_pal_temp(unsigned slot, u64 value, u64 issue)
 
 void CAlphaCPU::write_ipr(u32 instruction, u64 value, AlphaIPRWriteContext context)
 {
-	if (m_profile.ipr_write.indexed &&
-	    m_profile.ipr_write.describe(instruction, (state.current_pc & 1) != 0) == AlphaIPRWriteKind::BcacheControl) {
-		configure_ev4_bcache(value);
-		return;
+	if (m_profile.ipr_write.indexed) {
+		switch (m_profile.ipr_write.describe(instruction, (state.current_pc & 1) != 0)) {
+		case AlphaIPRWriteKind::AboxControl:
+			configure_ev4_dcache(value);
+			return;
+		case AlphaIPRWriteKind::BcacheControl:
+			configure_ev4_bcache(value);
+			return;
+		default:
+			break;
+		}
 	}
 	m_profile.ipr_write.write(*this, instruction, value, context);
 }
@@ -1219,7 +1226,23 @@ void CAlphaCPU::init()
 void CAlphaCPU::configure_ev4_bcache(u64 value)
 {
 	m_ev4_bcache.control = value & Ev4Bcache::control_mask;
-	const u64 limit = (m_ev4_bcache.control & 1) ? 0 : dram_size;
+	update_ev4_cache_limit();
+}
+
+void CAlphaCPU::configure_ev4_dcache(u64 value, bool flush)
+{
+	m_ev4_dcache.control = value & Ev4Dcache::control_mask;
+#if defined(ES40_JIT) && defined(JIT_VERIFY)
+	if (m_jit_vreplay) flush = false;
+#endif
+	// 21064 HRM Table 5-10: clearing DC_ENA flushes validity; DC_FHIT still overrides it.
+	if (flush && !(value & Ev4Dcache::enable)) m_ev4_dcache.invalidate();
+	update_ev4_cache_limit();
+}
+
+void CAlphaCPU::update_ev4_cache_limit()
+{
+	const u64 limit = ((m_ev4_bcache.control & 1) || m_ev4_dcache.active()) ? 0 : dram_size;
 	if (direct_ram_size != limit)
 	{
 		direct_ram_size = limit;
@@ -1231,6 +1254,7 @@ void CAlphaCPU::ResetForSystemReset()
 {
 	const int savedProcNum = state.iProcNum;
 	m_ev4_bcache = {};
+	m_ev4_dcache = {};
 
 	if (m_idle_armed)
 		cSystem->idle_watch_disarm(savedProcNum);   // the memset clears iProcNum
@@ -1842,18 +1866,24 @@ void CAlphaCPU::jit_run(int budget)
 			const auto& verify = m_profile.cpu_state.verify;
 			const size_t swap_bytes = m_profile.ipr_write.indexed ? sizeof(m_pal_temp_write) : 0;
 			const int biu_index = verify.word_count + (int)(swap_bytes / sizeof(u64));
-			const bool verify_biu = m_profile.ipr_write.indexed != nullptr;
-			const int ipr_count = biu_index + verify_biu;
+			const bool verify_cache_controls = m_profile.ipr_write.indexed != nullptr;
+			const int ipr_count = biu_index + (verify_cache_controls ? 2 : 0);
 			auto cap_iprs = [&](u64* d) {
 				if (verify.word_count) verify.capture(*this, d);
 				if (swap_bytes) memcpy(d + verify.word_count, &m_pal_temp_write, swap_bytes);
-				if (verify_biu) d[biu_index] = m_ev4_bcache.control;
+				if (verify_cache_controls) {
+					d[biu_index] = m_ev4_bcache.control;
+					d[biu_index + 1] = m_ev4_dcache.control;
+				}
 			};
 			auto put_iprs = [&](const u64* s, bool replay) {
 				if (verify.word_count)
 					(replay ? verify.prepare_replay : verify.restore)(*this, s);
 				if (swap_bytes) memcpy(&m_pal_temp_write, s + verify.word_count, swap_bytes);
-				if (verify_biu) configure_ev4_bcache(s[biu_index]);
+				if (verify_cache_controls) {
+					configure_ev4_bcache(s[biu_index]);
+					configure_ev4_dcache(s[biu_index + 1], false);
+				}
 				if (!replay) sync_register_bank();
 			};
 			auto ipr_ne = [&](int ii, u64 x, u64 y, bool side_exit = false) {
@@ -4179,6 +4209,15 @@ void CAlphaCPU::dump_registers() const
 	putchar('\n');
 }
 
+// Older indexed snapshots put BIU_CTL here. Its reserved bits leave this marker free.
+static constexpr u64 kEv4CacheSnapshotMarker = UINT64_MAX;
+struct Ev4CacheSnapshotHeader
+{
+	u64 biu_control;
+	u64 abox_control;
+	u64 dcache_lines;
+};
+
 /**
  * Save state to a Virtual Machine State file.
  **/
@@ -4193,16 +4232,24 @@ int CAlphaCPU::SaveState(FILE* f)
 
 	const bool save_swap = m_profile.ipr_write.indexed != nullptr;
 	const auto& cache = m_ev4_bcache;
-	const bool save_cache = save_swap && (cache.control || !cache.tags.empty());
+	const auto& dcache = m_ev4_dcache;
+	const bool save_dcache = save_swap && (dcache.control || !dcache.lines.empty());
+	const bool save_cache = save_swap && (save_dcache || cache.control || !cache.tags.empty());
+	const u64 cache_word = save_dcache ? kEv4CacheSnapshotMarker : cache.control;
+	const Ev4CacheSnapshotHeader header{cache.control, dcache.control, dcache.lines.size()};
+	const size_t dcache_bytes = dcache.lines.size() * sizeof(Ev4Dcache::Line);
 	const long ss = static_cast<long>(sizeof(state) + (save_swap ? sizeof(m_pal_temp_write) : 0)
-		+ (save_cache ? sizeof(cache.control) + cache.tags.size() * sizeof(u64) : 0));
+		+ (save_cache ? sizeof(cache_word) + cache.tags.size() * sizeof(u64) : 0)
+		+ (save_dcache ? sizeof(header) + dcache_bytes : 0));
 	if (fwrite(&signature->begin, sizeof(signature->begin), 1, f) != 1 ||
 		fwrite(&ss, sizeof(ss), 1, f) != 1 ||
 		fwrite(&state, sizeof(state), 1, f) != 1 ||
 		(save_swap && fwrite(&m_pal_temp_write, sizeof(m_pal_temp_write), 1, f) != 1) ||
-		(save_cache && fwrite(&cache.control, sizeof(cache.control), 1, f) != 1) ||
+		(save_cache && fwrite(&cache_word, sizeof(cache_word), 1, f) != 1) ||
+		(save_dcache && fwrite(&header, sizeof(header), 1, f) != 1) ||
 		(save_cache && !cache.tags.empty() &&
 			fwrite(cache.tags.data(), sizeof(u64), cache.tags.size(), f) != cache.tags.size()) ||
+		(save_dcache && dcache_bytes && fwrite(dcache.lines.data(), dcache_bytes, 1, f) != 1) ||
 		fwrite(&signature->end, sizeof(signature->end), 1, f) != 1)
 		return -1;
 	printf("%s: %d bytes saved.\n", devid_string, (int)ss);
@@ -4258,9 +4305,32 @@ int CAlphaCPU::RestoreState(FILE* f)
 	}
 
 	Ev4Bcache cache;
+	Ev4Dcache dcache;
+	std::vector<u8> saved(has_swap ? swap_size : sizeof(state));
+	if (fread(saved.data(), saved.size(), 1, f) != 1 ||
+		(has_cache && fread(&cache.control, sizeof(cache.control), 1, f) != 1))
+	{
+		printf("%s: unexpected end of file!\n", devid_string);
+		return -1;
+	}
 	if (has_cache)
 	{
-		const long bytes = ss - cache_header;
+		long bytes = ss - cache_header;
+		if (cache.control == kEv4CacheSnapshotMarker)
+		{
+			Ev4CacheSnapshotHeader header;
+			if (bytes < static_cast<long>(sizeof(header)) || fread(&header, sizeof(header), 1, f) != 1 ||
+				(header.abox_control & ~Ev4Dcache::control_mask) ||
+				(header.dcache_lines != 0 && header.dcache_lines != Ev4Dcache::line_count))
+			{
+				printf("%s: invalid EV4 cache header!\n", devid_string);
+				return -1;
+			}
+			bytes -= static_cast<long>(sizeof(header) + header.dcache_lines * sizeof(Ev4Dcache::Line));
+			cache.control = header.biu_control;
+			dcache.control = header.abox_control;
+			dcache.lines.resize(static_cast<size_t>(header.dcache_lines));
+		}
 		const long min_bytes = Ev4Bcache::line_count(0) * sizeof(u64);
 		const long max_bytes = Ev4Bcache::line_count(U64(7) << 28) * sizeof(u64);
 		if (bytes && (bytes < min_bytes || bytes > max_bytes || (bytes & (bytes - 1))))
@@ -4270,10 +4340,8 @@ int CAlphaCPU::RestoreState(FILE* f)
 		}
 		cache.tags.resize(bytes / sizeof(u64));
 	}
-	std::vector<u8> saved(has_swap ? swap_size : sizeof(state));
-	if (fread(saved.data(), saved.size(), 1, f) != 1 ||
-		(has_cache && fread(&cache.control, sizeof(cache.control), 1, f) != 1) ||
-		(!cache.tags.empty() && fread(cache.tags.data(), sizeof(u64), cache.tags.size(), f) != cache.tags.size()))
+	if ((!cache.tags.empty() && fread(cache.tags.data(), sizeof(u64), cache.tags.size(), f) != cache.tags.size()) ||
+		(!dcache.lines.empty() && fread(dcache.lines.data(), sizeof(Ev4Dcache::Line), dcache.lines.size(), f) != dcache.lines.size()))
 	{
 		printf("%s: unexpected end of file!\n", devid_string);
 		return -1;
@@ -4292,6 +4360,11 @@ int CAlphaCPU::RestoreState(FILE* f)
 		return -1;
 	}
 
+	if (!dcache.valid_lines(dram_size))
+	{
+		printf("%s: invalid EV4 Dcache line!\n", devid_string);
+		return -1;
+	}
 	if (cache.control & ~Ev4Bcache::control_mask)
 	{
 		printf("%s: invalid EV4 Bcache control!\n", devid_string);
@@ -4316,6 +4389,8 @@ int CAlphaCPU::RestoreState(FILE* f)
 	{
 		configure_ev4_bcache(cache.control);
 		m_ev4_bcache.tags.swap(cache.tags);
+		configure_ev4_dcache(dcache.control, false);
+		m_ev4_dcache.lines.swap(dcache.lines);
 	}
 	reset_idle_detector();
 	printf("%s: %d bytes restored.\n", devid_string, (int)ss);

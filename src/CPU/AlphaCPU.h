@@ -230,6 +230,7 @@
 #include "cpu_defs.h"
 #include "AlphaCPUProfile.h"
 #include "Ev4Bcache.h"
+#include "Ev4Dcache.h"
 class CJitEngine;   // JIT block-cache engine (ES40_JIT builds)
 
   /// Number of entries in the Instruction Cache
@@ -630,7 +631,10 @@ private:
   u64    dram_size;   // 1ULL << cSystem->get_memory_bits() — size of DRAM in bytes
   u64    direct_ram_size = 0;
   Ev4Bcache m_ev4_bcache;
+  Ev4Dcache m_ev4_dcache;
   void configure_ev4_bcache(u64 value);
+  void configure_ev4_dcache(u64 value, bool flush = true);
+  void update_ev4_cache_limit();
   // Locked accesses go to the system directly (21064 HRM 6.4.10).
   u64 bus_address(u64 phys)
   {
@@ -638,16 +642,26 @@ private:
   }
   u64 read_physical(u64 phys, int size)
   {
-    phys = bus_address(phys);
-    return phys < dram_size ? dram_read(dram_ptr, phys, size) : cSystem->ReadMem(phys, size, this);
+    if (phys < direct_ram_size) return dram_read(dram_ptr, phys, size);
+    const auto read_ram = [&](u64 address) { return dram_read(dram_ptr, address, size); };
+    std::uint64_t value;
+    if (m_ev4_dcache.active() && m_ev4_dcache.read_hit(phys, size, read_ram, value)) return value;
+    const u64 backing = bus_address(phys);
+    if (m_ev4_dcache.active()) m_ev4_dcache.fill(phys, backing, dram_size);
+    return backing < dram_size ? read_ram(backing) : cSystem->ReadMem(backing, size, this);
   }
   void write_physical(u64 phys, int size, u64 value)
   {
-    phys = bus_address(phys);
-    if (phys < dram_size)
+    if (phys < direct_ram_size) {
       cSystem->cpu_write_ram(phys, size, value);
+      return;
+    }
+    const u64 backing = bus_address(phys);
+    if (m_ev4_dcache.active()) m_ev4_dcache.store(phys, backing, size, value);
+    if (backing < dram_size)
+      cSystem->cpu_write_ram(backing, size, value);
     else
-      cSystem->WriteMem(phys, size, value, this);
+      cSystem->WriteMem(backing, size, value, this);
   }
 
   // Sequential icache fast path

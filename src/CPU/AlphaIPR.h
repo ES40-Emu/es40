@@ -72,6 +72,7 @@ enum class AlphaIPRWriteKind
   Helper,
   HelperTerminator,
   BcacheControl, // Ends the block after switching the physical memory path.
+  AboxControl,
   ExceptionAddress, // Write PC[63:2] and PAL[0].
   PalTemp,
   Noop // No write callback; privilege checks still apply.

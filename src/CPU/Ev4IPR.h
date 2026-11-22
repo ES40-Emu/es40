@@ -41,12 +41,18 @@ struct Ev4BIUDiagnostics
   std::uint64_t bus_address = 0, fill_address = 0;
   std::uint16_t status = 0, fill_syndrome = 0;
   std::uint16_t bus_unlocked = 0, fill_unlocked = 0;
+  std::uint32_t bc_tag = 0, bc_tag_unlocked = 0; // Potentially locked at reset (21064 HRM Table 5-20).
 };
 
 // PAL[7], ABX[6], IBX[5], INDEX[4:0] (HRM Table 4-6).
 constexpr Ev4IPRSelector ev4_ipr_selector(std::uint32_t instruction)
 {
   return {instruction & 0x1f, instruction & 0xe0};
+}
+
+constexpr bool ev4_selects_bc_tag(Ev4IPRSelector selector)
+{
+  return selector.index == 20 && (selector.banks & 0x40);
 }
 
 constexpr bool ev4_ipr_ignored(Ev4IPRSelector selector, bool pal_mode)
@@ -80,6 +86,7 @@ constexpr AlphaIPRReadDescriptor ev4_describe_ipr_read(std::uint32_t instruction
     case 13:
     // DC_ADDR unlocks DC_STAT even to R31 (21064-AA data sheet, Table 3-2 and 3.10.2).
     case 11:
+    case 20: // BC_TAG shifts even to R31 (21064 HRM 5.3.22).
       return {AlphaIPRReadKind::Helper, false, false};
     case 10: // BIU_STAT
     case 19: // FILL_SYNDROME
@@ -103,6 +110,11 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
   const auto selector = ev4_ipr_selector(instruction);
   if (ev4_ipr_ignored(selector, pal_mode))
     return AlphaIPRWriteKind::Noop;
+  // BC_TAG unlocks on write; PAL can also select PAL_TEMP20 (21064 HRM 4.8.1, 5.3.22).
+  if (ev4_selects_bc_tag(selector)) {
+    if (slot) *slot = (selector.banks & 0x80) ? 32u + selector.index : 0;
+    return AlphaIPRWriteKind::Helper;
+  }
   // Index 6 clears every entry and resets replacement in each selected TB (21064 HRM 4.8.1, 5.2.8, 5.3.6).
   if (selector.index == 6) {
     const bool itb = pal_mode && (selector.banks & 0x20); // ITBZAP is PAL-only.

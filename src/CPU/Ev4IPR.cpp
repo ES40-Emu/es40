@@ -53,6 +53,11 @@ u64 ev4_read_ipr(CAlphaCPU& cpu, u32 instruction)
     return biu.fill_address & ((biu.status & (1u << 11)) ? U64(0x3ffffffe0) : U64(0x3fffffffc));
   case 0x53: // FILL_SYNDROME: BIU_CTL.ECC selects two syndromes or two parity bits (21064 HRM 5.3.15, 5.3.21).
     return biu.fill_syndrome & ((cpu.m_ev4_bcache.control & 2) ? 0x3fff : 0x81);
+  case 0x54: { // 21064 HRM 5.3.22: read the LSB, then shift; PALcode spaces reads by a null cycle.
+    const auto bit = biu.bc_tag & 1;
+    biu.bc_tag >>= 1;
+    return bit;
+  }
   default:
     FAILURE_2(NotImplemented, "Unsupported EV4 HW_MFPR %08" PRIx32 " at PC %016" PRIx64,
               instruction, state.current_pc);
@@ -61,6 +66,10 @@ u64 ev4_read_ipr(CAlphaCPU& cpu, u32 instruction)
 
 void ev4_write_ipr(CAlphaCPU& cpu, u32 instruction, u64 value, AlphaIPRWriteContext context)
 {
+  if (ev4_selects_bc_tag(ev4_ipr_selector(instruction))) {
+    cpu.m_ev4_biu.bc_tag_unlocked = 1; // Write data is ignored (21064 HRM 5.3.22).
+    return;
+  }
   switch (instruction & 0xff) {
   case 0x29: cpu.set_current_mode(ev4_decode_processor_status(value), context); return;
   case 0x2a: ev4_write_exception_summary(cpu.ev4_arithmetic_state(), value); return;

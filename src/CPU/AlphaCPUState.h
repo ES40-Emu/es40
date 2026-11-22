@@ -42,10 +42,15 @@ struct AlphaJitVerifyPolicy
   // Restore the authoritative post-interpreter snapshot.
   void (*restore)(CAlphaCPU& cpu, const std::uint64_t* words) = nullptr;
   bool (*differs)(int slot, std::uint64_t left, std::uint64_t right, bool side_exit) = nullptr;
+  // Model state changed by a memory access that the compiled verifier replays.
+  static constexpr std::uint32_t no_memory_change = UINT32_MAX;
+  std::uint32_t (*capture_memory)(const CAlphaCPU& cpu) = nullptr;
+  void (*replay_memory)(CAlphaCPU& cpu, std::uint32_t value) = nullptr;
 
   constexpr bool valid() const
   {
-    return word_count >= 0 && (!word_count || (capture && prepare_replay && restore && differs));
+    return word_count >= 0 && (!word_count || (capture && prepare_replay && restore && differs))
+      && ((capture_memory == nullptr) == (replay_memory == nullptr));
   }
 };
 

@@ -122,8 +122,9 @@ int Ev4InstructionFetch::fetch(CAlphaCPU& cpu, u32* instruction)
   auto& line = cpu.state.icache[ev4_cache_index(physical)];
   if (!cache_hit(cpu, physical)) {
     u32 words[line_words];
+    const u64 backing = cpu.bus_address(base); // One Bcache probe per I-cache fill (21064 HRM 6.4.5).
     for (unsigned i = 0; i < line_words; ++i) {
-      const u32 word = static_cast<u32>(cpu.cSystem->ReadMem(cpu.bus_address(base + 4 * i), 32, &cpu));
+      const u32 word = static_cast<u32>(cpu.cSystem->ReadMem(backing + 4 * i, 32, &cpu));
       words[i] = endian_32(word);
     }
 #ifdef ES40_JIT

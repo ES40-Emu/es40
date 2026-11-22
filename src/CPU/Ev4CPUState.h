@@ -51,6 +51,8 @@ inline void ev4_visit_ipr_state(State& state, BIU& biu, Visit visit)
   visit(biu.fill_syndrome);
   visit(biu.bus_unlocked);
   visit(biu.fill_unlocked);
+  visit(biu.bc_tag);
+  visit(biu.bc_tag_unlocked);
 }
 
 inline void ev4_capture_ipr_state(const CAlphaCPU& cpu, u64* words)
@@ -65,9 +67,20 @@ inline void ev4_restore_ipr_state(CAlphaCPU& cpu, const u64* words)
   });
 }
 
+inline u32 ev4_capture_bc_tag(const CAlphaCPU& cpu)
+{
+  return cpu.m_ev4_biu.bc_tag;
+}
+
+inline void ev4_replay_bc_tag(CAlphaCPU& cpu, u32 value)
+{
+  if (cpu.m_ev4_biu.bc_tag_unlocked) cpu.m_ev4_biu.bc_tag = value;
+}
+
 inline constexpr AlphaJitVerifyPolicy kEv4JitVerifyPolicy{
-  18, &ev4_capture_ipr_state, &ev4_restore_ipr_state, &ev4_restore_ipr_state,
-  [](int, u64 left, u64 right, bool) { return left != right; }
+  20, &ev4_capture_ipr_state, &ev4_restore_ipr_state, &ev4_restore_ipr_state,
+  [](int, u64 left, u64 right, bool) { return left != right; },
+  &ev4_capture_bc_tag, &ev4_replay_bc_tag
 };
 
 #endif

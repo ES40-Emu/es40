@@ -2050,10 +2050,10 @@ void CAlphaCPU::jit_run(int budget)
 					&& ipr_read.kind != AlphaIPRReadKind::Noop && ipr_read.replay
 					&& (lra != 31 || !ipr_read.discard_safe);
 				const bool is_fpld = (opc == 0x22 || opc == 0x23 || opc == 0x20 || opc == 0x21);   // LDS/LDT/LDF/LDG: dest is f[lra]
-				// Ordinary loads log only with a destination. Stateful misc/IPR reads log
-				// even to R31 when the compiled helper must consume a replay slot.
+				// A discarded virtual HW_LD can still update model state on the memory access.
 				const bool isld = executes && (((opc == 0x28 || opc == 0x29 || opc == 0x0a || opc == 0x0c
 					|| opc == 0x2a || opc == 0x2b || opc == 0x0b || is_hwld || is_fpld) && lra != 31)
+					|| (verify.capture_memory && is_hwld && hw_load.address == AlphaHWLoadAddress::Virtual)
 					|| is_miscrd || is_ipr_replay);  // +LDBU/LDWU +LDx_L +LDQ_U +RPCC/RC/RS +ISUM +LDS/LDT
 				u64 eva = 0;
 				if (isld && !is_miscrd && !is_ipr_replay)   // misc/ISUM reads have no effective address -- only a logged value
@@ -2106,6 +2106,8 @@ void CAlphaCPU::jit_run(int budget)
 						jtgt_valid = true;
 					}
 				}
+				const auto capture_memory = (isst || (isld && !is_miscrd && !is_ipr_replay)) ? verify.capture_memory : nullptr;
+				const u32 old_memory_state = capture_memory ? capture_memory(*this) : AlphaJitVerifyPolicy::no_memory_change;
 				execute();
 				--budget;
 				vpc += 4;
@@ -2142,14 +2144,18 @@ void CAlphaCPU::jit_run(int budget)
 						clean = false;
 					break;
 				}
+				const u32 new_memory_state = capture_memory ? capture_memory(*this) : old_memory_state;
+				const u32 memory_change = old_memory_state != new_memory_state ? new_memory_state : AlphaJitVerifyPolicy::no_memory_change;
 				if (isld && vn < kJitVlogCap)
 				{
+					if (verify.capture_memory) m_verify_load_state[vn] = memory_change;
 					m_jit_vaddr[vn] = eva;
 					m_jit_vlog[vn] = is_fpld ? state.f[lra] : state.r[RREG(lra)];   // FP dest -> f[]; shadow-aware GPR otherwise
 					vn++;
 				}
 				if (isst && sn < kJitVlogCap)
 				{
+					if (verify.capture_memory) m_verify_store_state[sn] = memory_change;
 					m_jit_slog_addr[sn] = sva;
 					m_jit_slog_val[sn] = sval;
 					m_jit_slog_success[sn] = is_sc ? state.r[RREG(lra)] : (u64)1;   // STx_C result (post-execute); ordinary store = 1
@@ -2483,7 +2489,15 @@ void CAlphaCPU::jit_run(int budget)
 bool CAlphaCPU::jit_verify_load_slot(u32& slot)
 {
 	slot = m_jit_vlog_i++;
-	if (slot < m_jit_vlog_n && slot < kJitVlogCap) return true;
+	if (slot < m_jit_vlog_n && slot < kJitVlogCap)
+	{
+#ifdef JIT_VERIFY
+		const auto replay = m_profile.cpu_state.verify.replay_memory;
+		if (replay && m_verify_load_state[slot] != AlphaJitVerifyPolicy::no_memory_change)
+			replay(*this, m_verify_load_state[slot]);
+#endif
+		return true;
+	}
 	m_jit_vmismatch = true;
 	return false;
 }
@@ -2491,7 +2505,15 @@ bool CAlphaCPU::jit_verify_load_slot(u32& slot)
 bool CAlphaCPU::jit_verify_store_slot(u32& slot)
 {
 	slot = m_jit_slog_i++;
-	if (slot < m_jit_slog_n && slot < kJitVlogCap) return true;
+	if (slot < m_jit_slog_n && slot < kJitVlogCap)
+	{
+#ifdef JIT_VERIFY
+		const auto replay = m_profile.cpu_state.verify.replay_memory;
+		if (replay && m_verify_store_state[slot] != AlphaJitVerifyPolicy::no_memory_change)
+			replay(*this, m_verify_store_state[slot]);
+#endif
+		return true;
+	}
 	m_jit_vmismatch = true;
 	return false;
 }
@@ -2926,9 +2948,7 @@ int CAlphaCPU::jit_read_vpte(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 
 	if (cpu->m_jit_vreplay)
 	{
-		// Virtual HW_LD to R31 is a fault/access probe: Translation and MMIO checks 
-		// still matter, but its discarded value has no slot.
-		if (((ins >> 21) & 0x1f) == 31)
+		if (((ins >> 21) & 0x1f) == 31 && !cpu->m_profile.cpu_state.verify.capture_memory)
 		{
 			*out = 0;
 			return 0;
@@ -4297,13 +4317,14 @@ void CAlphaCPU::dump_registers() const
 // Older indexed snapshots put BIU_CTL here. Its reserved bits leave these markers free.
 static constexpr u64 kEv4CacheSnapshotMarker = UINT64_MAX;
 static constexpr u64 kEv4BiuSnapshotMarker = UINT64_MAX - 1;
+static constexpr u64 kEv4BcacheTagSnapshotMarker = UINT64_MAX - 2;
 struct Ev4CacheSnapshotHeader
 {
 	u64 biu_control;
 	u64 abox_control;
 	u64 dcache_lines;
 };
-static_assert(sizeof(Ev4BIUDiagnostics) == 24);
+static_assert(offsetof(Ev4BIUDiagnostics, bc_tag) == 24 && sizeof(Ev4BIUDiagnostics) == 32);
 
 /**
  * Save state to a Virtual Machine State file.
@@ -4321,11 +4342,11 @@ int CAlphaCPU::SaveState(FILE* f)
 	const auto& cache = m_ev4_bcache;
 	const auto& dcache = m_ev4_dcache;
 	const auto& biu = m_ev4_biu;
-	const bool save_biu = save_swap && (biu.bus_address || biu.fill_address || biu.status ||
-		biu.fill_syndrome || biu.bus_unlocked || biu.fill_unlocked);
+	const bool save_biu = save_swap && (!cache.tags.empty() || biu.bus_address || biu.fill_address || biu.status ||
+		biu.fill_syndrome || biu.bus_unlocked || biu.fill_unlocked || biu.bc_tag || biu.bc_tag_unlocked);
 	const bool save_dcache = save_swap && (save_biu || dcache.control || !dcache.lines.empty());
 	const bool save_cache = save_swap && (save_dcache || cache.control || !cache.tags.empty());
-	const u64 cache_word = save_biu ? kEv4BiuSnapshotMarker : save_dcache ? kEv4CacheSnapshotMarker : cache.control;
+	const u64 cache_word = save_biu ? kEv4BcacheTagSnapshotMarker : save_dcache ? kEv4CacheSnapshotMarker : cache.control;
 	const Ev4CacheSnapshotHeader header{cache.control, dcache.control, dcache.lines.size()};
 	const size_t dcache_bytes = dcache.lines.size() * sizeof(Ev4Dcache::Line);
 	const long ss = static_cast<long>(sizeof(state) + (save_swap ? sizeof(m_pal_temp_write) : 0)
@@ -4405,11 +4426,13 @@ int CAlphaCPU::RestoreState(FILE* f)
 		printf("%s: unexpected end of file!\n", devid_string);
 		return -1;
 	}
+	const bool has_bc_tag = has_cache && cache.control == kEv4BcacheTagSnapshotMarker;
 	if (has_cache)
 	{
 		long bytes = ss - cache_header;
-		const bool has_biu = cache.control == kEv4BiuSnapshotMarker;
-		if (has_biu || cache.control == kEv4CacheSnapshotMarker)
+		const size_t biu_bytes = has_bc_tag ? sizeof(diagnostics) :
+			cache.control == kEv4BiuSnapshotMarker ? offsetof(Ev4BIUDiagnostics, bc_tag) : 0;
+		if (biu_bytes || cache.control == kEv4CacheSnapshotMarker)
 		{
 			Ev4CacheSnapshotHeader header;
 			if (bytes < static_cast<long>(sizeof(header)) || fread(&header, sizeof(header), 1, f) != 1 ||
@@ -4424,15 +4447,16 @@ int CAlphaCPU::RestoreState(FILE* f)
 			dcache.control = header.abox_control;
 			dcache.lines.resize(static_cast<size_t>(header.dcache_lines));
 		}
-		if (has_biu)
+		if (biu_bytes)
 		{
-			if (bytes < static_cast<long>(sizeof(diagnostics)) || fread(&diagnostics, sizeof(diagnostics), 1, f) != 1 ||
-				diagnostics.bus_unlocked > 1 || diagnostics.fill_unlocked > 1)
+			if (bytes < static_cast<long>(biu_bytes) || fread(&diagnostics, biu_bytes, 1, f) != 1 ||
+				diagnostics.bus_unlocked > 1 || diagnostics.fill_unlocked > 1 || diagnostics.bc_tag_unlocked > 1 ||
+				(diagnostics.bc_tag >> 23))
 			{
 				printf("%s: invalid EV4 BIU diagnostics!\n", devid_string);
 				return -1;
 			}
-			bytes -= static_cast<long>(sizeof(diagnostics));
+			bytes -= static_cast<long>(biu_bytes);
 		}
 		const long min_bytes = Ev4Bcache::line_count(0) * sizeof(u64);
 		const long max_bytes = Ev4Bcache::line_count(U64(7) << 28) * sizeof(u64);
@@ -4475,9 +4499,9 @@ int CAlphaCPU::RestoreState(FILE* f)
 	}
 	for (size_t i = 0; i < cache.tags.size(); ++i)
 	{
-		const u64 tag = cache.tags[i];
-		if (tag != UINT64_MAX && (tag >= dram_size || tag >> 34 || (tag & 31) ||
-			((tag >> 5) & (cache.tags.size() - 1)) != i))
+		if (cache.tags[i] == UINT64_MAX) continue;
+		const u64 tag = has_bc_tag ? (cache.tags[i] & ~u64(Ev4Bcache::dirty)) : cache.tags[i];
+		if (tag >= dram_size || tag >> 34 || (tag & 31) || ((tag >> 5) & (cache.tags.size() - 1)) != i)
 		{
 			printf("%s: invalid EV4 Bcache tag!\n", devid_string);
 			return -1;

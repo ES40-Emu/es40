@@ -279,6 +279,8 @@ class CAlphaCPU : public CSystemComponent, public CRunnable
   friend class Ev68CPUState;
   friend void ev4_capture_ipr_state(const CAlphaCPU&, u64*);
   friend void ev4_restore_ipr_state(CAlphaCPU&, const u64*);
+  friend u32 ev4_capture_bc_tag(const CAlphaCPU&);
+  friend void ev4_replay_bc_tag(CAlphaCPU&, u32);
   friend class Ev68InstructionFetch;
   friend class Ev4InstructionFetch;
   friend constexpr AlphaCPUProfile ev4_cpu_profile();
@@ -646,9 +648,10 @@ private:
   void configure_ev4_dcache(u64 value, bool flush = true);
   void update_ev4_cache_limit();
   // Locked accesses go to the system directly (21064 HRM 6.4.10).
-  u64 bus_address(u64 phys)
+  u64 bus_address(u64 phys, bool write = false)
   {
-    return direct_ram_size ? phys : m_ev4_bcache.probe(phys, dram_size);
+    return direct_ram_size ? phys : m_ev4_bcache.probe(phys, dram_size, write,
+        m_ev4_biu.bc_tag_unlocked ? &m_ev4_biu.bc_tag : nullptr);
   }
   u64 read_physical(u64 phys, int size)
   {
@@ -666,7 +669,7 @@ private:
       cSystem->cpu_write_ram(phys, size, value);
       return;
     }
-    const u64 backing = bus_address(phys);
+    const u64 backing = bus_address(phys, true);
     if (m_ev4_dcache.active()) m_ev4_dcache.store(phys, backing, size, value);
     if (backing < dram_size)
       cSystem->cpu_write_ram(backing, size, value);
@@ -844,6 +847,7 @@ private:
 #ifdef JIT_VERIFY
   u64 m_verify_issue_base = 0;
   u64 m_verify_tbia[2] = {};
+  u32 m_verify_load_state[kJitVlogCap], m_verify_store_state[kJitVlogCap];
 #endif
   u32  m_jit_vlog_i  = 0;      // replay cursor
   u32  m_jit_vlog_n  = 0;      // reference loads available to this replay

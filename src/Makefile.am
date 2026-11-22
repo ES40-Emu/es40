@@ -168,6 +168,7 @@ noinst_HEADERS += storage/Disk.h \
        chipset/AliM1543C_usb.h \
        chipset/DMA.h \
        chipset/ISABus.h \
+       chipset/EISABus.h \
        system/DPR.h \
        system/Flash.h \
        system/System.h \
@@ -275,6 +276,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        storage/DiskRam.cpp \
        graphics/ibm8514a.cpp \
        chipset/DMA.cpp \
+       chipset/EISABus.cpp \
        system/DPR.cpp \
        es40_debug.cpp \
        audio/ES1370.cpp \

@@ -216,14 +216,23 @@ void CDMA::validate_device_channel(int channel)
 		FAILURE(InvalidArgument, "dma: invalid device channel (channel 4 is cascade)");
 }
 
-void CDMA::select_compatible_address(int channel)
+void CDMA::select_compatible_address(int channel, bool update_current)
 {
 	if (model != Model::Intel82357)
 		return;
 	auto& ch = state.channel[channel];
-	ch.extended_address = false;
+	ch.base_extended_address = false;
 	ch.pagebase &= 0xff;
-	ch.current_page &= 0xff;
+	if (update_current)
+	{
+		ch.extended_address = false;
+		ch.current_page &= 0xff;
+	}
+}
+
+bool CDMA::chaining_enabled(int channel) const
+{
+	return model == Model::Intel82357 && channel != 4 && (state.isp.chaining_mode[channel] & 0x04);
 }
 
 void CDMA::reset_chaining_mode(int channel)
@@ -385,11 +394,15 @@ void CDMA::write_legacy_port(u16 port, u8 data)
 	{
 		const int num = dma_page_channel(port, dma_low_page_base);
 		if (num < 0) return;
-		release_service(num);
-		select_compatible_address(num);
+		const bool update_current = !chaining_enabled(num);
+		select_compatible_address(num, update_current);
 		u16& page = state.channel[num].pagebase;
 		page = (page & 0xff00) | data;
-		state.channel[num].current_page = page;
+		if (update_current)
+		{
+			release_service(num);
+			state.channel[num].current_page = page;
+		}
 #if defined(DEBUG_DMA)
 		printf("dma channel %d pagebase: %04x\n", num, (unsigned)page);
 #endif
@@ -400,7 +413,9 @@ void CDMA::write_legacy_port(u16 port, u8 data)
 	if (reg < 8)
 	{
 		const int num = ctrlr * 4 + reg / 2;
-		release_service(num);
+		const bool update_current = !chaining_enabled(num);
+		if (update_current)
+			release_service(num);
 		auto& channel = state.channel[num];
 		const u16 keep = controller.lobyte ? 0xff00 : 0x00ff;
 		const u16 bits = controller.lobyte ? data : (u16)(data << 8);
@@ -408,13 +423,15 @@ void CDMA::write_legacy_port(u16 port, u8 data)
 		{
 			// Either legacy count byte clears the 82357 high count byte.
 			channel.base_count = (channel.base_count & keep) | bits;
-			channel.count = model == Model::Intel82357 ? (channel.count & keep) | bits : channel.base_count;
+			if (update_current)
+				channel.count = model == Model::Intel82357 ? (channel.count & keep) | bits : channel.base_count;
 		}
 		else
 		{
-			select_compatible_address(num);
+			select_compatible_address(num, update_current);
 			channel.base = (channel.base & keep) | bits;
-			channel.current = model == Model::Intel82357 ? (channel.current & keep) | bits : channel.base;
+			if (update_current)
+				channel.current = model == Model::Intel82357 ? (channel.current & keep) | bits : channel.base;
 		}
 		controller.lobyte = !controller.lobyte;
 #if defined(DEBUG_DMA)
@@ -489,7 +506,7 @@ void CDMA::write_legacy_port(u16 port, u8 data)
 		{
 			const int num = ctrlr * 4 + channel;
 			release_service(num);
-			select_compatible_address(num);
+			select_compatible_address(num, true);
 			reset_chaining_mode(num);
 		}
 		controller.lobyte = true;
@@ -535,11 +552,15 @@ void CDMA::write_high_page_port(u16 port, u8 data)
 	const int num = dma_page_channel(port, dma_high_page_base);
 	if (num < 0)
 		return;
-	release_service(num);
 	auto& channel = state.channel[num];
 	channel.pagebase = (channel.pagebase & 0x00ff) | (data << 8);
-	channel.current_page = (channel.current_page & 0x00ff) | (data << 8);
-	channel.extended_address = model == Model::Intel82357;
+	channel.base_extended_address = model == Model::Intel82357;
+	if (!chaining_enabled(num))
+	{
+		release_service(num);
+		channel.current_page = (channel.current_page & 0x00ff) | (data << 8);
+		channel.extended_address = channel.base_extended_address;
+	}
 #if defined(DEBUG_DMA)
 	printf("dma channel %d pagebase: %04x\n", num, (unsigned)channel.pagebase);
 #endif
@@ -560,11 +581,14 @@ void CDMA::write_high_count_port(u16 port, u8 data)
 	const int num = dma_high_count_channel(port);
 	if (model != Model::Intel82357 || num < 0)
 		return;
-	release_service(num);
 	auto& channel = state.channel[num];
 	const u32 high = (u32)data << 16;
 	channel.base_count = (channel.base_count & 0xffff) | high;
-	channel.count = (channel.count & 0xffff) | high;
+	if (!chaining_enabled(num))
+	{
+		release_service(num);
+		channel.count = (channel.count & 0xffff) | high;
+	}
 }
 
 u8 CDMA::read_stop_port(u16 port) const
@@ -600,7 +624,7 @@ u8 CDMA::read_chaining_mode_port(u16 port) const
 
 	u8 enabled = 0;
 	for (int channel = 0; channel < 8; channel++)
-		if (channel != 4 && (state.isp.chaining_mode[channel] & 0x04))
+		if (chaining_enabled(channel))
 			enabled |= 1 << channel;
 	return enabled;
 }
@@ -1228,9 +1252,11 @@ void CDMA::complete_transfer(int channel)
 	release_service(channel);
 	if (state.channel[channel].mode & 0x10)
 	{
-		state.channel[channel].current = state.channel[channel].base;
-		state.channel[channel].current_page = state.channel[channel].pagebase;
-		state.channel[channel].count = state.channel[channel].base_count;
+		auto& ch = state.channel[channel];
+		ch.current = ch.base;
+		ch.current_page = ch.pagebase;
+		ch.count = ch.base_count;
+		ch.extended_address = ch.base_extended_address;
 	}
 	else
 		state.controller[ctrlr].mask |= 1 << local_channel;

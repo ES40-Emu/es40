@@ -162,6 +162,7 @@ public:
   // until TC/EOP or a stop match even if DRQ or the software request drops. Auto-init releases it.
   // Between calls, own mask-set/disable/reset or channel reprogramming drops
   // retention without generating TC/EOP. Pending requests can start a new service.
+  // Programming a chained 82357 base buffer preserves the current service.
   // A held DRQ can service successive calls; these calls never lower DRQ.
   // Cascade returns blocked. Existing enable/cascade and completion rules apply.
   // Blocked or verify receives leave data unchanged; blocked calls ignore EOP.
@@ -202,7 +203,8 @@ private:
   };
 
   static void   validate_device_channel(int channel);
-  void          select_compatible_address(int channel);
+  void          select_compatible_address(int channel, bool update_current);
+  bool          chaining_enabled(int channel) const;
   void          reset_chaining_mode(int channel);
   u32           count_mask() const;
   bool          accepts_external_eop(int channel) const;
@@ -248,7 +250,8 @@ private:
       u32   count;
       u32   base_count;
       u8    mode;
-      bool  extended_address; // 82357 high page was written last.
+      bool  extended_address; // 82357 high page was written last for the current buffer.
+      bool  base_extended_address; // Address carry mode for the base registers.
     } channel[8];
 
     /// DMA controller state

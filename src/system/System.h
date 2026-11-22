@@ -288,6 +288,7 @@ public:
   void          UnregisterComponent(CSystemComponent* component);
   int           RegisterCPU(class CAlphaCPU* cpu);
   void          register_isa_bus(unsigned bus, CISABus& owner);
+  void          init_jensen_eisa();
   CISABus*      isa_bus(unsigned bus) const;
 
   bool has_vga_device(const vga_device* exclude = nullptr) const noexcept;

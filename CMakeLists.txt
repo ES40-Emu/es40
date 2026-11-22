@@ -547,6 +547,7 @@ list(APPEND ES40_SOURCES
     src/storage/Sym53C810.cpp
     src/storage/Sym53C895.cpp
     src/system/System.cpp
+    src/system/System_jensen.cpp
     src/system/System_es40.cpp
     src/system/System_tsunami.cpp
     src/emu/SystemComponent.cpp

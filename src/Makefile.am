@@ -326,6 +326,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        storage/Sym53C895.cpp \
        emu/SystemComponent.cpp \
        system/System.cpp \
+       system/System_jensen.cpp \
        system/System_es40.cpp \
        system/System_tsunami.cpp \
        SnapshotFile.h \

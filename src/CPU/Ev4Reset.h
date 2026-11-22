@@ -26,6 +26,7 @@
 #define INCLUDED_EV4RESET_H
 
 #include "AlphaCPU.h"
+#include "Ev4InstructionFetch.h"
 
 // With SROM preload disabled, reset fetches physical zero in PALmode (HRM 6.4.1).
 inline void ev4_reset_no_srom(CAlphaCPU& cpu)
@@ -34,5 +35,12 @@ inline void ev4_reset_no_srom(CAlphaCPU& cpu)
 }
 
 inline constexpr AlphaResetPolicy kEv4ResetPolicy{&ev4_reset_no_srom, true};
+
+inline constexpr AlphaResetPolicy kEv4SromResetPolicy{
+  [](CAlphaCPU& cpu) {
+    Ev4InstructionFetch::preload_srom(cpu);
+    cpu.set_pc(1);
+  }, true
+};
 
 #endif

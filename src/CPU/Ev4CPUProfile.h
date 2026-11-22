@@ -38,4 +38,12 @@ constexpr AlphaCPUProfile ev4_no_srom_boot_profile(AlphaCPUProfile profile)
   return profile;
 }
 
+// rom.srom on the board supplies the packed serial PROM.
+constexpr AlphaCPUProfile ev4_srom_boot_profile(AlphaCPUProfile profile)
+{
+  profile.reset = kEv4SromResetPolicy;
+  profile.instruction_fetch = kEv4InstructionFetchPolicy;
+  return profile;
+}
+
 #endif

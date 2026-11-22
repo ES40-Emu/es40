@@ -33,10 +33,10 @@ class CAlphaCPU;
 struct AlphaResetPolicy
 {
   // Called on init and system reset after shared state/cache/TB clearing and
-  // CPU-ID assignment. Host lifecycle and firmware loading remain with the caller.
+  // CPU-ID assignment.
   // An absent callback leaves the cleared state without family bootstrap defaults.
   void (*initialize)(CAlphaCPU& cpu) = nullptr;
-  bool external_reset_vector = false; // Fetch board memory directly on reset.
+  bool external_reset_vector = false; // Use the CPU reset vector without the ES40 SRM loader.
 };
 
 #endif

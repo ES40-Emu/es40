@@ -32,6 +32,7 @@
 class Ev4InstructionFetch
 {
 public:
+  static void preload_srom(CAlphaCPU& cpu);
   static int fetch(CAlphaCPU& cpu, std::uint32_t* instruction);
   static AlphaInstructionMapping probe(CAlphaCPU& cpu, std::uint64_t pc);
   static bool matches_interpreted(const CAlphaCPU& cpu, std::uint64_t pc,
@@ -41,6 +42,7 @@ public:
   static void invalidate(CAlphaCPU& cpu, bool non_global);
 
 private:
+  static bool cache_hit(const CAlphaCPU& cpu, std::uint64_t physical);
   static AlphaInstructionSourceView cached_source(const CAlphaCPU& cpu, std::uint64_t pc);
 };
 

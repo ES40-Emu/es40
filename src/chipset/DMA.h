@@ -88,6 +88,9 @@ public:
   virtual int   DoClock();
   virtual void  WriteMem(int index, u64 address, int dsize, u64 data);
   virtual u64   ReadMem(int index, u64 address, int dsize);
+  // Logical 82357 byte ports. Unclaimed accesses return false and leave data untouched.
+  bool          read_82357_port(u16 port, u8& data);
+  bool          write_82357_port(u16 port, u8 data);
   // Logical byte ports for the two 8237 banks and the ISA low-page registers.
   u8            read_legacy_port(u16 port);
   void          write_legacy_port(u16 port, u8 data);
@@ -210,6 +213,7 @@ private:
     u32 address_mask;     // Byte address bits that can carry or borrow.
   };
 
+  bool          access_82357_port(u16 port, u8& data, bool write);
   static void   validate_device_channel(int channel);
   void          select_compatible_address(int channel, bool update_current);
   bool          chaining_enabled(int channel) const;

@@ -219,6 +219,17 @@ static bool dma_legacy_register(u16 port, int& ctrlr, int& reg)
 	return false;
 }
 
+static bool dma_82357_legacy_port(u16 port, bool write)
+{
+	int ctrlr, reg;
+	if (!dma_legacy_register(port, ctrlr, reg))
+		return dma_page_channel(port, dma_low_page_base) >= 0;
+	// The upper bank uses even ports and omits channel 4's address and count.
+	if (ctrlr == 1 && ((port & 1) || reg < 2))
+		return false;
+	return write || reg <= 0x08 || reg == 0x0f;
+}
+
 void CDMA::validate_device_channel(int channel)
 {
 	if (channel < 0 || channel >= 8 || channel == 4)
@@ -710,6 +721,66 @@ void CDMA::write_extended_mode_port(u16 port, u8 data)
 				num, (unsigned)(data & 0x33), state.ali.cycle_timing[num] == 0x30 ? "Type F" : "compatible");
 		break;
 	}
+}
+
+bool CDMA::access_82357_port(u16 port, u8& data, bool write)
+{
+	if (model != Model::Intel82357)
+		return false;
+
+	int channel;
+	unsigned shift;
+	if (dma_82357_legacy_port(port, write))
+	{
+		if (write)
+			write_legacy_port(port, data);
+		else
+			data = read_legacy_port(port);
+	}
+	else if (dma_page_channel(port, dma_high_page_base) >= 0)
+	{
+		if (write)
+			write_high_page_port(port, data);
+		else
+			data = read_high_page_port(port);
+	}
+	else if (dma_high_count_channel(port) >= 0)
+	{
+		if (write)
+			write_high_count_port(port, data);
+		else
+			data = read_high_count_port(port);
+	}
+	else if (dma_stop_register(port, channel, shift))
+	{
+		if (write)
+			write_stop_port(port, data);
+		else
+			data = read_stop_port(port);
+	}
+	else if (port == dma0_chaining_mode_port || port == dma1_chaining_mode_port ||
+		(!write && port == dma_chain_expiration_control_port))
+	{
+		if (write)
+			write_chaining_mode_port(port, data);
+		else
+			data = read_chaining_mode_port(port);
+	}
+	else if (write && (port == dma0_extended_mode_port || port == dma1_extended_mode_port))
+		write_extended_mode_port(port, data);
+	else
+		return false;
+	return true;
+}
+
+bool CDMA::read_82357_port(u16 port, u8& data)
+{
+	return access_82357_port(port, data, false);
+}
+
+bool CDMA::write_82357_port(u16 port, u8 data)
+{
+	return access_82357_port(port, data, true);
 }
 
 u64 CDMA::ReadMem(int index, u64 address, int dsize)

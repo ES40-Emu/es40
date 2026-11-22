@@ -109,6 +109,7 @@ constexpr AlphaCPUProfile ev4_cpu_profile()
       return {mode ? AlphaMMUAddressKind::AccessViolation : AlphaMMUAddressKind::Direct, va & U64(0x3fffffff)};
     return {AlphaMMUAddressKind::TranslationBuffer, 0};
   };
+  profile.mmu_address.find_itb = &Ev4InstructionFetch::find_itb;
   profile.tb_fill.base_page_match_mask = U64(0x7ffffffe000);
   profile.tb_fill.decode = [](const CAlphaCPU&, u64, u64, u64, int) -> AlphaTBFill {
     FAILURE(NotImplemented, "EV4 translation buffer fill");

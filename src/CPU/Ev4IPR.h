@@ -35,6 +35,10 @@ struct Ev4IPRSelector
   std::uint32_t banks;
 };
 
+// The small and large ITB arrays have independent replacement pointers (21064 HRM 5.2.2).
+inline constexpr unsigned kEv4SmallItbEntries = 8, kEv4LargeItbEntries = 4;
+inline constexpr unsigned kEv4ItbEntries = kEv4SmallItbEntries + kEv4LargeItbEntries;
+
 // The two BIU error groups can power up locked and survive reset (21064 HRM 5.3.18, Table 5-20).
 struct Ev4BIUDiagnostics
 {
@@ -81,8 +85,12 @@ constexpr AlphaIPRReadDescriptor ev4_describe_ipr_read(std::uint32_t instruction
   const auto selector = ev4_ipr_selector(instruction);
   if (ev4_ipr_ignored(selector, pal_mode))
     return {AlphaIPRReadKind::Noop, false, true};
+  if (selector.banks == 0x20 && selector.index == 1) // ITB_PTE advances the selected pointer even to R31 (21064 HRM 5.2.2).
+    return {AlphaIPRReadKind::Helper, false, false};
   if (selector.banks == 0x20 && selector.index == 2) // ICCSR (21064 HRM Table 4-7).
     return {AlphaIPRReadKind::IboxControl, false, true};
+  if (selector.banks == 0x20 && selector.index == 3) // ITB_PTE_TEMP returns the latched PTE (21064 HRM 5.2.4).
+    return {AlphaIPRReadKind::Helper, false, true};
   if (selector.banks == 0x80) // PAL_TEMP only.
     return {AlphaIPRReadKind::PalTemp, false, true, static_cast<std::uint8_t>(selector.index)};
   if (selector.banks == 0x20 && selector.index == 4) // EXC_ADDR.
@@ -130,6 +138,13 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
     if (slot) *slot = pal_temp ? 32u : 0;
     if ((selector.banks & 0x40) || (pal_mode && (selector.banks & 0x20)))
       return AlphaIPRWriteKind::Helper;
+    return pal_temp ? AlphaIPRWriteKind::PalTemp : AlphaIPRWriteKind::Noop;
+  }
+  // The PAL-only ITB_PTE write can also select PAL_TEMP1 (21064 HRM 4.6, 4.8.1, 5.2.2).
+  if (selector.index == 1 && (selector.banks & 0x20)) {
+    const bool pal_temp = (selector.banks & 0x80) != 0;
+    if (slot) *slot = pal_temp ? 33u : 0;
+    if (pal_mode) return AlphaIPRWriteKind::HelperTerminator;
     return pal_temp ? AlphaIPRWriteKind::PalTemp : AlphaIPRWriteKind::Noop;
   }
   if (ev4_selects_icache_flush(selector)) { // PAL also selects PAL_TEMP21/23 (21064 HRM 4.8.1, Table 4-7).

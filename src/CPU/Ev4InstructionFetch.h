@@ -33,7 +33,9 @@ class Ev4InstructionFetch
 {
 public:
   static void preload_srom(CAlphaCPU& cpu);
+  static int find_itb(const CAlphaCPU& cpu, std::uint64_t pc);
   static int fetch(CAlphaCPU& cpu, std::uint32_t* instruction);
+  static void prepare_dispatch(CAlphaCPU& cpu);
   static AlphaInstructionMapping probe(CAlphaCPU& cpu, std::uint64_t pc);
   static bool matches_interpreted(const CAlphaCPU& cpu, std::uint64_t pc,
                                   std::uint32_t count);
@@ -42,13 +44,14 @@ public:
   static void invalidate(CAlphaCPU& cpu, bool non_global);
 
 private:
-  static AlphaInstructionMapping mapping(const CAlphaCPU& cpu, std::uint64_t pc);
+  static AlphaInstructionMapping mapping(const CAlphaCPU& cpu, std::uint64_t pc, int* itb_slot = nullptr);
+  static void note_itb_hit(CAlphaCPU& cpu, int slot);
   static bool cache_hit(const CAlphaCPU& cpu, std::uint64_t physical);
   static AlphaInstructionSourceView cached_source(const CAlphaCPU& cpu, std::uint64_t pc);
 };
 
 inline constexpr AlphaInstructionFetchPolicy kEv4InstructionFetchPolicy{
-  &Ev4InstructionFetch::fetch, nullptr, &Ev4InstructionFetch::probe, nullptr,
+  &Ev4InstructionFetch::fetch, &Ev4InstructionFetch::prepare_dispatch, &Ev4InstructionFetch::probe, nullptr,
   &Ev4InstructionFetch::matches_interpreted, &Ev4InstructionFetch::can_chain,
   &Ev4InstructionFetch::source, true, false, &Ev4InstructionFetch::invalidate
 };

@@ -105,6 +105,7 @@ struct AlphaMMUAddressPolicy
   AlphaMMUAccess (*access)(const CAlphaCPU& cpu, int access_flags);
   AlphaMMUAddress (*map)(const CAlphaCPU& cpu, std::uint64_t virt,
                          int access_flags, int mode);
+  int (*find_itb)(const CAlphaCPU& cpu, std::uint64_t virt) = nullptr;
 };
 
 #endif

@@ -396,6 +396,10 @@ private:
   int             FindTBEntry(u64 virt, int flags, int asn);
   int             initiate_acv_fault(u64 virt, int flags, u32 instruction);
   void            add_tb(u64 virt, u64 pte_phys, u64 pte_flags, int flags, int asn);
+  void            itb_mapping_changed();
+  void            ev4_write_itb_pte(u64 value);
+  void            ev4_latch_itb_pte();
+  unsigned        ev4_advance_itb_pointer();
   void            tbia(int flags);
   void            tbiap(int flags);
   void            tbis(u64 virt, int flags, int asn);
@@ -946,9 +950,13 @@ private:
     u64   mm_stat;      /**< Memory fault status: EV68 MM_STAT or EV4 MM_CSR. */
     bool  hwe;          /**< IPR I_CLT: hwe (allow palmode ins in kernel mode) [HRM p 5-15..17] */
     u8    ev4_tb_gh;    // TB_CTL granularity hint (21064 HRM 5.3.1).
+    u8    ev4_itb_next[2]; // Independent small- and large-page pointers (21064 HRM 5.2.2).
     int   m_ctl_spe;    /**< IPR M_CTL: spe (Super Page mode enabled) [HRM p 5-29..30] */
     int   i_ctl_spe;    /**< IPR I_CTL: spe (Super Page mode enabled) [HRM p 5-15..18] */
-    u64   pmpc;
+    union {
+      u64 pmpc;
+      u64 ev4_itb_pte_temp; // ITB readback latch (21064 HRM 5.2.4).
+    };
     u64   fpcr;         /**< Floating-Point Control Register [HRM p 2-36] */
     bool  bIntrFlag;
 
@@ -986,6 +994,7 @@ private:
       int   access[2][4]; /**< Access permitted [read/write][current mode]*/
       int   fault[3];     /**< Fault on access [read/write/execute]*/
       bool  valid;        /**< Valid entry*/
+      u64 translated_address(u64 address) const { return (phys & ~keep_mask) | (address & keep_mask); }
     } tb[2][TB_ENTRIES];  /**< Unified Dstream TB model plus Istream TB entries */
 
     int   next_tb[2];     /**< Number of next translation buffer entry to use */

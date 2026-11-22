@@ -939,7 +939,10 @@ void CAlphaCPU::write_ipr(u32 instruction, u64 value, AlphaIPRWriteContext conte
 		case AlphaIPRWriteKind::InvalidateInstructionTb:
 		case AlphaIPRWriteKind::InvalidateDataTb:
 		case AlphaIPRWriteKind::InvalidateBothTbs:
-			if (kind != AlphaIPRWriteKind::InvalidateDataTb) tbia(ACCESS_EXEC);
+			if (kind != AlphaIPRWriteKind::InvalidateDataTb) {
+				state.ev4_itb_next[0] = state.ev4_itb_next[1] = 0; // ITBZAP resets both pointers (21064 HRM 5.2.8).
+				tbia(ACCESS_EXEC);
+			}
 			if (kind != AlphaIPRWriteKind::InvalidateInstructionTb) tbia(ACCESS_READ);
 			return;
 		case AlphaIPRWriteKind::InterruptClear:
@@ -4542,6 +4545,8 @@ int CAlphaCPU::RestoreState(FILE* f)
   **/
 int CAlphaCPU::FindTBEntry(u64 virt, int flags, int asn)
 {
+	if ((flags & ACCESS_EXEC) && m_profile.mmu_address.find_itb)
+		return m_profile.mmu_address.find_itb(*this, virt);
 
 	// Use ITB (tb[1]) if ACCESS_EXEC is set, otherwise the unified Dstream TB (tb[0]).
 	int t = (flags & ACCESS_EXEC) ? TB_INDEX_ITB : TB_INDEX_DATA;
@@ -4805,7 +4810,7 @@ int CAlphaCPU::virt2phys(u64 virt, u64* phys, int flags, bool* asm_bit, u32 ins)
 
 	// No access violations or faults
 	// Return the converted address
-	*phys = state.tb[t][i].phys | (virt & state.tb[t][i].keep_mask);
+	*phys = state.tb[t][i].translated_address(virt);
 	if (asm_bit)
 		*asm_bit = state.tb[t][i].asm_bit ? true : false;
 
@@ -4892,15 +4897,8 @@ void CAlphaCPU::add_tb(u64 virt, u64 pte_phys, u64 pte_flags, int flags, int asn
 	state.last_found_tb[t][rw] = i;
 	m_tb_idx[t][tb_idx_slot(fill.virt)] = (u16)(i + 1);
 
-#ifdef ES40_JIT
-	if (itb_changed && m_jit) m_jit->note_itb_invalidate(CJitEngine::kBumpRemap);
-#endif
 	if (itb_changed)
-	{
-		// Keep cached instruction bytes until IMB, but discard derived access proofs.
-		// Recheck same-physical permission change on next fetch.
-		instruction_fetch_event(AlphaInstructionFetchEvent::TranslationChanged);
-	}
+		itb_mapping_changed();
 
 #if defined(DEBUG_TB_)
 #if defined(IDB)
@@ -4928,6 +4926,14 @@ void CAlphaCPU::add_tb(u64 virt, u64 pte_phys, u64 pte_flags, int flags, int asn
 #endif
 }
 
+void CAlphaCPU::itb_mapping_changed()
+{
+#ifdef ES40_JIT
+	if (m_jit) m_jit->note_itb_invalidate(CJitEngine::kBumpRemap);
+#endif
+	instruction_fetch_event(AlphaInstructionFetchEvent::TranslationChanged);
+}
+
 /**
  * \brief Invalidate all translation-buffer entries
  *
@@ -4941,7 +4947,7 @@ void CAlphaCPU::tbia(int flags)
 #if defined(ES40_JIT) && defined(JIT_VERIFY)
 	if (m_profile.ipr_write.indexed) {
 		++m_verify_tbia[t];
-		if (m_jit_vreplay) return; // Compare the bank cleared. The interpreter already invalidated its mappings.
+		if (m_jit_vreplay && t == TB_INDEX_DATA) return;
 	}
 #endif
 	int i;

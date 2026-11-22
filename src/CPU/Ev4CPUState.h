@@ -55,6 +55,20 @@ inline void ev4_visit_ipr_state(State& state, BIU& biu, Visit visit)
   visit(biu.bc_tag_unlocked);
   visit(state.ev4_tb_gh);
   visit(state.last_tb_virt);
+  visit(state.ev4_itb_next[0]);
+  visit(state.ev4_itb_next[1]);
+  visit(state.ev4_itb_pte_temp);
+  // ITBZAP preserves the PTE payload for diagnostic reads (21064 HRM 5.2.2, 5.2.8).
+  for (unsigned i = 0; i < kEv4ItbEntries; ++i) {
+    auto& entry = state.tb[TB_INDEX_ITB][i];
+    visit(entry.virt);
+    visit(entry.phys);
+    visit(entry.match_mask);
+    visit(entry.keep_mask);
+    visit(entry.asm_bit);
+    for (auto& permission : entry.access[0]) visit(permission);
+    visit(entry.valid);
+  }
 }
 
 inline void ev4_capture_ipr_state(const CAlphaCPU& cpu, u64* words)
@@ -82,7 +96,7 @@ inline void ev4_replay_memory_state(CAlphaCPU& cpu, u32 value)
 }
 
 inline constexpr AlphaJitVerifyPolicy kEv4JitVerifyPolicy{
-  22, &ev4_capture_ipr_state, &ev4_restore_ipr_state, &ev4_restore_ipr_state,
+  25 + kEv4ItbEntries * 10, &ev4_capture_ipr_state, &ev4_restore_ipr_state, &ev4_restore_ipr_state,
   [](int, u64 left, u64 right, bool) { return left != right; },
   &ev4_capture_memory_state, &ev4_replay_memory_state
 };

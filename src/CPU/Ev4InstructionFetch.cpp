@@ -37,16 +37,59 @@ static constexpr unsigned line_count = 256;
 static constexpr unsigned line_bytes = line_words * 4;
 static_assert(ICACHE_ENTRIES >= line_count && ICACHE_LINE_SIZE >= line_words);
 
-AlphaInstructionMapping Ev4InstructionFetch::mapping(const CAlphaCPU& cpu, u64 pc)
+int Ev4InstructionFetch::find_itb(const CAlphaCPU& cpu, u64 pc)
+{
+  // ICCSR.ASN tags the I-cache only (21064 HRM 2.3.2, 2.8.1.1).
+  for (unsigned i = 0; i < kEv4ItbEntries; ++i) {
+    const auto& entry = cpu.state.tb[TB_INDEX_ITB][i];
+    if (entry.valid && !((entry.virt ^ pc) & entry.match_mask))
+      return i;
+  }
+  return -1;
+}
+
+AlphaInstructionMapping Ev4InstructionFetch::mapping(const CAlphaCPU& cpu, u64 pc, int* itb_slot)
 {
   if ((pc & 3) == 1 && !(pc >> 34))
     return {pc & ~U64(3), true, true};
-  // 21064 HRM 2.3.2: MAP bypasses the ITB for kernel VPC[42:41] = 2 and sets ASM.
-  const auto access = cpu.get_profile().mmu_address.access;
-  if (!(pc & 3) && ((pc >> 41) & 3) == 2 && (cpu.state.ibox_ctl & kEv4IccsrMap) &&
-      access && access(cpu, ACCESS_EXEC).mode == 0)
-    return {pc & U64(0x3ffffffff), true, true};
-  return {};
+  if (pc & 3)
+    return {};
+  const auto& mmu = cpu.get_profile().mmu_address;
+  const int mode = mmu.access(cpu, ACCESS_EXEC).mode;
+  const auto address = mmu.map(cpu, pc, ACCESS_EXEC, mode);
+  if (address.kind == AlphaMMUAddressKind::Direct)
+    return {address.phys, true, true};
+  if (address.kind != AlphaMMUAddressKind::TranslationBuffer)
+    return {};
+  const int index = find_itb(cpu, pc);
+  if (index < 0)
+    return {};
+  const auto& entry = cpu.state.tb[TB_INDEX_ITB][index];
+  if (!entry.access[0][mode])
+    return {};
+  if (itb_slot)
+    *itb_slot = index;
+  return {entry.translated_address(pc), entry.asm_bit != 0, true};
+}
+
+void Ev4InstructionFetch::note_itb_hit(CAlphaCPU& cpu, int slot)
+{
+  if (slot < 0)
+    return;
+  const bool large = unsigned(slot) >= kEv4SmallItbEntries;
+  const unsigned index = large ? unsigned(slot) - kEv4SmallItbEntries : unsigned(slot);
+  auto& next = cpu.state.ev4_itb_next[large];
+  if (index == next) // Skip the last-used entry on replacement (21064 HRM 2.3.2).
+    next = (next + 1) & ((large ? kEv4LargeItbEntries : kEv4SmallItbEntries) - 1);
+}
+
+void Ev4InstructionFetch::prepare_dispatch(CAlphaCPU& cpu)
+{
+  if ((cpu.state.pc & 3) || cpu.state.check_int || cpu.state.check_timers)
+    return;
+  int slot = -1;
+  mapping(cpu, cpu.state.pc, &slot);
+  note_itb_hit(cpu, slot);
 }
 
 static unsigned ev4_cache_index(u64 physical)
@@ -113,9 +156,15 @@ bool Ev4InstructionFetch::cache_hit(const CAlphaCPU& cpu, u64 physical)
 
 int Ev4InstructionFetch::fetch(CAlphaCPU& cpu, u32* instruction)
 {
-  const auto address = mapping(cpu, cpu.state.pc);
-  if (!address.valid)
-    FAILURE_1(NotImplemented, "Unsupported EV4 instruction fetch at PC %016" PRIx64, cpu.state.pc);
+  int slot = -1;
+  auto address = mapping(cpu, cpu.state.pc, &slot);
+  if (!address.valid) {
+    if (cpu.state.pc & 3)
+      FAILURE_1(NotImplemented, "Unsupported EV4 instruction fetch at PC %016" PRIx64, cpu.state.pc);
+    if (cpu.virt2phys(cpu.state.pc, &address.physical, ACCESS_EXEC, &address.asm_global, 0) != 0)
+      return -1;
+  }
+  note_itb_hit(cpu, slot);
 
   const u64 physical = address.physical;
   const u64 base = physical & ~u64(line_bytes - 1);
@@ -175,6 +224,9 @@ AlphaInstructionSourceView Ev4InstructionFetch::source(CAlphaCPU& cpu, u64 pc)
 
 bool Ev4InstructionFetch::matches_interpreted(const CAlphaCPU& cpu, u64 pc, u32 count)
 {
+  // Each compiled native span uses the ITB entry accounted for at dispatch (21064 HRM 2.3.2).
+  if (!(pc & 1) && u64(count) * 4 > (ALPHA_BASE_PAGE_MASK + 1) - (pc & ALPHA_BASE_PAGE_MASK))
+    return false;
   while (count) {
     const auto view = cached_source(cpu, pc);
     if (!view.contains(1)) return false;
@@ -187,7 +239,9 @@ bool Ev4InstructionFetch::matches_interpreted(const CAlphaCPU& cpu, u64 pc, u32 
 
 bool Ev4InstructionFetch::can_chain(const CAlphaCPU& cpu, u64 pc)
 {
-  return cached_source(cpu, pc).contains(1);
+  int slot = -1;
+  const auto address = mapping(cpu, pc, &slot);
+  return slot < 0 && address.valid && cache_hit(cpu, address.physical);
 }
 
 void Ev4InstructionFetch::invalidate(CAlphaCPU& cpu, bool non_global)

@@ -29,11 +29,55 @@
 #include "Ev4ArithmeticTrap.h"
 #include "Ev4IPR.h"
 
+unsigned CAlphaCPU::ev4_advance_itb_pointer()
+{
+  const bool large = state.ev4_tb_gh == 3; // Only GH=11 selects 4 MiB (21064 HRM 5.3.1).
+  auto& next = state.ev4_itb_next[large];
+  const unsigned mask = (large ? kEv4LargeItbEntries : kEv4SmallItbEntries) - 1;
+  const unsigned slot = next & mask;
+  next = (slot + 1) & mask;
+  return slot + (large ? kEv4SmallItbEntries : 0);
+}
+
+template<typename Entry>
+static u64 ev4_itb_read_image(const Entry& entry)
+{
+  u64 value = entry.phys | (u64(entry.asm_bit) << 34); // 21064 HRM Fig. 5-4.
+  for (unsigned mode = 0; mode < 4; ++mode)
+    value |= u64(entry.access[0][mode]) << (9 + mode);
+  return value;
+}
+
+void CAlphaCPU::ev4_latch_itb_pte()
+{
+  state.ev4_itb_pte_temp = ev4_itb_read_image(state.tb[TB_INDEX_ITB][ev4_advance_itb_pointer()]);
+}
+
+void CAlphaCPU::ev4_write_itb_pte(u64 value)
+{
+  auto& entry = state.tb[TB_INDEX_ITB][ev4_advance_itb_pointer()];
+  entry = {};
+  entry.keep_mask = state.ev4_tb_gh == 3 ? 0x3fffff : 0x1fff;
+  entry.match_mask = m_profile.tb_fill.base_page_match_mask & ~entry.keep_mask;
+  entry.virt = state.last_tb_virt & entry.match_mask;
+  entry.phys = ((value >> 32) & 0x1fffff) << 13; // Readback retains the full PFN (21064 HRM 5.2.2).
+  entry.asm_bit = (value >> 4) & 1;
+  for (unsigned mode = 0; mode < 4; ++mode)
+    entry.access[0][mode] = (value >> (8 + mode)) & 1;
+  entry.valid = true; // PALcode checks V and FOE before filling the ITB (21064 HRM 4.7.1.1).
+  state.ev4_itb_pte_temp = ev4_itb_read_image(entry);
+  itb_mapping_changed();
+}
+
 u64 ev4_read_ipr(CAlphaCPU& cpu, u32 instruction)
 {
   auto& state = cpu.state;
   auto& biu = cpu.m_ev4_biu;
   switch (instruction & 0xff) {
+  case 0x21:
+    cpu.ev4_latch_itb_pte();
+    return 0; // Model the unpredictable GPR result as zero (21064 HRM 4.6, restriction 16).
+  case 0x23: return state.ev4_itb_pte_temp; // ITB_PTE_TEMP (21064 HRM 5.2.4).
   case 0x29: return ev4_read_processor_status(state.cm);
   case 0x2a: return ev4_read_exception_summary(cpu.ev4_arithmetic_state());
   case 0x2b: return state.pal_base;
@@ -89,6 +133,10 @@ void ev4_write_ipr(CAlphaCPU& cpu, u32 instruction, u64 value, AlphaIPRWriteCont
     const bool pal_mode = context == AlphaIPRWriteContext::Compiled || (cpu.state.current_pc & 1);
     if ((selector.banks & 0x20) && pal_mode)
       cpu.state.last_tb_virt = value & cpu.get_profile().tb_fill.base_page_match_mask;
+    return;
+  }
+  if (selector.index == 1 && (selector.banks & 0x20)) {
+    cpu.ev4_write_itb_pte(value); // Commit the staged TB_TAG (21064 HRM 5.2.1, 5.2.2).
     return;
   }
   if (ev4_selects_icache_flush(selector)) {

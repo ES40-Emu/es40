@@ -31,9 +31,12 @@
 #include "chipset/Intel82357.h"
 #include "chipset/Intel82358.h"
 #include <algorithm>
+#include <fstream>
+#include <string>
+#include <vector>
 
 namespace {
-enum { SparseIO, HostAddressExtension, InterruptAcknowledge };
+enum { SparseIO, HostAddressExtension, InterruptAcknowledge, Feprom0, Feprom1 };
 constexpr u64 sparse_io_size = U64(0x10000) << 7;
 
 int sparse_io_width(u64 address)
@@ -49,8 +52,28 @@ int sparse_io_width(u64 address)
   }
 }
 
+std::vector<u8> load_feprom(CConfigurator* cfg, unsigned bank)
+{
+  const char* path = cfg->get_text_value(bank == 0 ? "rom.flash0" : "rom.flash1");
+  if (!path)
+    return {};
+  std::ifstream file(path, std::ios::binary | std::ios::ate);
+  if (!file)
+    FAILURE(Configuration, std::string("Cannot open Jensen FEPROM image: ") + path);
+  const std::streamoff size = file.tellg();
+  if (size != 1024 * 1024 && !(bank == 0 && size == 256 * 1024))
+    FAILURE(Configuration, std::string("Jensen FEPROM image must be ") +
+            (bank == 0 ? "256 KiB or 1 MiB: " : "1 MiB: ") + path);
+  std::vector<u8> image(static_cast<size_t>(size));
+  file.seekg(0);
+  if (!file.read(reinterpret_cast<char*>(image.data()), size))
+    FAILURE(IO, std::string("Error reading Jensen FEPROM image: ") + path);
+  return image;
+}
+
 class JensenHostBus : public CSystemComponent, public CDMAHost
 {
+  const std::vector<u8> feprom[2];
 public:
   JensenHostBus(CConfigurator* cfg, CSystem* system);
   const CSystemComponent* isa_decode_owner() const noexcept override { return this; }
@@ -73,6 +96,7 @@ private:
 
 JensenHostBus::JensenHostBus(CConfigurator* cfg, CSystem* system)
   : CSystemComponent(cfg, system),
+    feprom{load_feprom(cfg, 0), load_feprom(cfg, 1)},
     isp(new Intel82357(cfg, system, *this, [system](bool asserted) {
       if (system->get_cpu_num())
         system->get_cpu(0)->irq_h(1, asserted, 0);
@@ -82,12 +106,18 @@ JensenHostBus::JensenHostBus(CConfigurator* cfg, CSystem* system)
   system->RegisterMemory(this, SparseIO, U64(0x300000000), sparse_io_size);
   system->RegisterMemory(this, HostAddressExtension, U64(0x1d0000000), 4);
   system->RegisterMemory(this, InterruptAcknowledge, U64(0x100000000), 8);
+  // PB22H-KB Tables 8-1 and 8-3: CA[28:9] selects the ROM byte within each socket.
+  system->RegisterMemory(this, Feprom0, U64(0x180000000), u64(feprom[0].size()) << 9);
+  system->RegisterMemory(this, Feprom1, U64(0x1a0000000), u64(feprom[1].size()) << 9);
   save_item(hae, "hae");
   save_item(ebc.eisa_bus().snapshot_state().enabled_slots, "eisa.enabled_slots");
+  save_item(ebc.eisa_bus().snapshot_state().irq_requests, "eisa.irq_requests");
 }
 
 u64 JensenHostBus::ReadMem(int index, u64 address, int dsize)
 {
+  if ((index == Feprom0 || index == Feprom1) && !(address & 0x1ff) && (dsize == 32 || dsize == 64))
+    return feprom[index - Feprom0][address >> 9]; // L_BUS drives the low byte (PB22H-KB, p. 8-8).
   if (index == HostAddressExtension && !address && dsize == 32)
     return hae;
   // Each aligned H_BUS read supplies one INTA pulse; the vector is in the low byte.

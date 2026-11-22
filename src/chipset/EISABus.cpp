@@ -55,7 +55,7 @@ void EISABus::register_eisa_io(CSystemComponent& device, int index, u16 port, u3
 void EISABus::register_slot_io(unsigned slot, CSystemComponent& device, int index,
   u16 port, u32 length, int max_dsize)
 {
-  if (!slot || slot > last_expansion_slot || !find_io(slot_id_port(slot)))
+  if (!slot_registered(slot))
     FAILURE(Configuration, "EISA I/O range needs a registered expansion slot");
   register_io(slot, device, index, port, length, max_dsize);
 }
@@ -96,6 +96,11 @@ bool EISABus::slot_enabled(unsigned slot) const noexcept
   return slot && slot <= last_expansion_slot && (state.enabled_slots & (1U << slot));
 }
 
+bool EISABus::slot_registered(unsigned slot) const noexcept
+{
+  return slot && slot <= last_expansion_slot && find_io(slot_id_port(slot));
+}
+
 const EISABus::IoRange* EISABus::find_io(u32 port, unsigned bytes) const noexcept
 {
   for (const auto& range : io_ranges) {
@@ -125,9 +130,55 @@ const CSystemComponent* EISABus::isa_decode_owner() const noexcept
   return host.isa_decode_owner();
 }
 
+u16 EISABus::active_irqs() const noexcept
+{
+  u16 active = state.irq_requests[0];
+  for (unsigned slot = 1; slot <= last_expansion_slot; ++slot)
+    if (slot_enabled(slot))
+      active |= state.irq_requests[slot];
+  return active;
+}
+
+void EISABus::update_irq_lines(u16 previous)
+{
+  const u16 active = active_irqs();
+  const u16 changed = previous ^ active;
+  for (int irq = 0; irq < 16; ++irq) {
+    const u16 bit = (u16)(1U << irq);
+    if (changed & bit)
+      host.set_isa_irq(irq, (active & bit) != 0);
+  }
+}
+
+void EISABus::set_irq_request(unsigned slot, int irq, bool asserted)
+{
+  const u16 previous = active_irqs();
+  const u16 bit = (u16)(1U << irq);
+  if (asserted)
+    state.irq_requests[slot] |= bit;
+  else
+    state.irq_requests[slot] &= ~bit;
+  update_irq_lines(previous);
+}
+
+void EISABus::set_slot_irq(unsigned slot, int irq, bool asserted)
+{
+  if (irq < 3 || irq > 15 || irq == 8 || irq == 13 || !slot_registered(slot))
+    return;
+  set_irq_request(slot, irq, asserted);
+}
+
 void EISABus::set_isa_irq(int irq, bool asserted)
 {
-  host.set_isa_irq(irq, asserted);
+  if (irq >= 0 && irq < 16)
+    set_irq_request(0, irq, asserted);
+}
+
+void EISABus::reset()
+{
+  const u16 previous = active_irqs();
+  state = {};
+  update_irq_lines(previous);
 }
 
 const EISABus::IoRange* EISABus::decode_io(u16 port, int dsize, bool write) const noexcept
@@ -190,11 +241,13 @@ bool EISABus::write_port(u16 port, int dsize, u32 data)
   if (range->device) {
     range->device->WriteMem(range->index, offset, dsize, data & (0xffffffffU >> (32 - dsize)));
   } else if (offset == slot_control_offset) {
+    const u16 previous = active_irqs();
     const u16 bit = (u16)(1U << range->slot);
     if (data & 1)
       state.enabled_slots |= bit;
     else
       state.enabled_slots &= ~bit;
+    update_irq_lines(previous);
   }
   return true;
 }

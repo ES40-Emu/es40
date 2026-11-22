@@ -39,11 +39,12 @@ class EISABus : public CISABus
 public:
   struct State {
     u16 enabled_slots = 0;
+    u16 irq_requests[16]{}; // Legacy ISA input at index 0, EISA slots at 1-15.
   };
 
   explicit EISABus(CDMAHost& host) : host(host) {}
   State& snapshot_state() noexcept { return state; }
-  void reset() noexcept { state = {}; }
+  void reset();
   void bind_dma(CDMA& controller) { dma = &controller; }
   CDMA* dma_controller() noexcept override { return dma; }
   const CSystemComponent* isa_decode_owner() const noexcept override;
@@ -57,6 +58,8 @@ public:
     u16 port, u32 length, int max_dsize);
   bool slot_enabled(unsigned slot) const noexcept;
   IsaIoDecode isa_io_decode(u32 port) const noexcept override;
+  // Cards update their IRQ levels under the system device-bus lock.
+  void set_slot_irq(unsigned slot, int irq, bool asserted);
   void set_isa_irq(int irq, bool asserted) override;
 
   // Unclaimed logical port reads leave data untouched.
@@ -79,6 +82,10 @@ private:
 
   void register_io(unsigned owner_slot, CSystemComponent& device, int index,
     u16 port, u32 length, int max_dsize);
+  bool slot_registered(unsigned slot) const noexcept;
+  u16 active_irqs() const noexcept;
+  void update_irq_lines(u16 previous);
+  void set_irq_request(unsigned slot, int irq, bool asserted);
   const IoRange* find_io(u32 port, unsigned bytes = 1) const noexcept;
   const IoRange* decode_io(u16 port, int dsize, bool write) const noexcept;
   std::vector<IoRange> io_ranges;

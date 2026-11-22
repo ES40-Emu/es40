@@ -116,10 +116,11 @@ public:
 
   struct SDMA_result
   {
-    size_t transferred;    // Bytes moved; zero for verify or standalone EOP.
-    bool blocked;          // No DMA service; registers and buffers are unchanged.
-    bool terminal_count;   // This call exhausted the count, even with auto-init.
-    bool external_eop;     // This call honored the device's EOP indication.
+    size_t transferred = 0;      // Bytes moved; zero for verify or standalone EOP.
+    bool blocked = true;         // No DMA service; registers and buffers are unchanged.
+    bool terminal_count = false; // This call exhausted the count, even with auto-init.
+    bool external_eop = false;   // This call honored the device's EOP indication.
+    bool stop_match = false;     // The 82357 masked the channel after a matching bus cycle.
   };
 
   // Buffers and lengths are in bytes.
@@ -135,8 +136,9 @@ public:
   // Verify services the count without accessing memory or the buffer:
   // blocked is false, transferred is zero, and terminal_count reports exhaustion.
   // The 82357 accepts device EOP only when extended-mode bit 6 selects input.
+  // With bit 7 set, the 82357 services through the first matching bus cycle.
   // eop ends the transfer after the last unit serviced by this call, including
-  // when length is capped by the current count. It is not a latched pin level.
+  // when length is capped by the current count or a stop match. It is not a latched pin level.
   // Blocked calls do not apply EOP, including calls on cascade-mode channels.
   // EOP sets completion status and masks or auto-initializes the channel;
   // otherwise the remaining address/count are retained. DRQ is unchanged.
@@ -155,7 +157,7 @@ public:
   // Explicit-request service, at most one bus cycle per call.
   // Demand requires unmasked hardware DRQ; single also accepts a software request.
   // Block starts from either request and, after successful service, retains it
-  // until TC/EOP even if DRQ or the software request drops. Auto-init releases it.
+  // until TC/EOP or a stop match even if DRQ or the software request drops. Auto-init releases it.
   // Between calls, own mask-set/disable/reset or channel reprogramming drops
   // retention without generating TC/EOP. Pending requests can start a new service.
   // A held DRQ can service successive calls; these calls never lower DRQ.
@@ -209,6 +211,9 @@ private:
   static size_t increment_chunk_size(u32 address, size_t length,
                   const SDMA_transfer_properties& properties);
   size_t        unit_size(int channel) const;
+  size_t        bytes_through_stop(int channel, const SDMA_transfer_properties& properties) const;
+  size_t        prepare_transfer(int channel, size_t length, const SDMA_transfer_properties& properties,
+                  bool eop, SDMA_result& result) const;
   template<typename T>
   SDMA_result   receive_unit(int channel, T& data, bool eop, bool arbitrate);
   void          transfer_memory(u32 address, u8* buffer, size_t length, bool decrement,
@@ -223,8 +228,8 @@ private:
   void          release_service(int channel);
   void          finish_service(int channel, const SDMA_result& result);
   void          do_dma();
-  bool          advance_transfer(int channel, size_t length,
-                  const SDMA_transfer_properties& properties, bool eop);
+  void          advance_transfer(int channel, size_t length,
+                  const SDMA_transfer_properties& properties, const SDMA_result& result);
   void          complete_transfer(int channel);
 
   /// The state structure contains all elements that need to be saved to the statefile.

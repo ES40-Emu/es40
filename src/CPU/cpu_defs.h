@@ -800,6 +800,7 @@ inline u64 fsqrt64(u64 asig, s32 exp)
 #define PROBEW        512
 #define VPTE_IFETCH   1024   /* interpreter VPTE data read on behalf of an instruction fetch */
 #define PAL_KSTACK    2048   /* interpreter kernel-stack access: memory faults must halt */
+#define DTB_REFERENCE 4096   /* A nonfaulting JIT memory reference still uses a successful DTB translation. */
 
 #define FPSTART       if(!fp_start()) /* flt point disabled? */ \
   {                                                                 \

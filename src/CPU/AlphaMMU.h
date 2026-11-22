@@ -51,6 +51,7 @@ struct AlphaTBFillPolicy
   AlphaTBFill (*decode)(const CAlphaCPU& cpu, std::uint64_t virt,
                         std::uint64_t pte_phys, std::uint64_t pte_flags,
                         int access_flags);
+  unsigned indexed_dtb_entries = 0; // Nonzero for a DTB with a hardware replacement pointer.
 };
 
 // Family fault state and PAL/HLE delivery, called only for real TB misses.

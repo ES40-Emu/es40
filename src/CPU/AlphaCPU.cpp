@@ -961,6 +961,7 @@ void CAlphaCPU::write_ipr(u32 instruction, u64 value, AlphaIPRWriteContext conte
 			kick_int_if_pending();
 			return;
 		case AlphaIPRWriteKind::IboxControl: {
+			if (instruction & 0x40) ev4_write_dtb_pte(value); // ABX selects DTB_PTE alongside ICCSR (21064 HRM 4.8.1).
 			const u64 iccsr = ev4_iccsr_from_write(value);
 #ifdef ES40_JIT
 			if ((iccsr ^ state.ibox_ctl) & (kEv4IccsrAsnMask | kEv4IccsrMap)) {
@@ -1289,7 +1290,7 @@ void CAlphaCPU::configure_ev4_dcache(u64 value, bool flush)
 #endif
 	// 21064 HRM Table 5-10: clearing DC_ENA flushes validity; DC_FHIT still overrides it.
 	if (flush && !(value & Ev4Dcache::enable)) m_ev4_dcache.invalidate();
-	if (changed & (Ev4Dcache::spe_1 | Ev4Dcache::spe_2)) flush_data_page_cache();
+	if (changed & (Ev4Dcache::spe_1 | Ev4Dcache::spe_2 | Ev4Dcache::dtb_rr)) flush_data_page_cache();
 	update_ev4_cache_limit();
 }
 
@@ -2612,7 +2613,7 @@ int CAlphaCPU::jit_read(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 			// A nonzero result means virt2phys has already selected native-PAL fault.
 			if (cpu->virt2phys(va, &phys, ACCESS_READ, nullptr, ins)) return 2;
 		}
-		else if (cpu->virt2phys(va, &phys, ACCESS_READ | FAKE, nullptr, ins)) return 1;
+		else if (cpu->virt2phys(va, &phys, ACCESS_READ | FAKE | DTB_REFERENCE, nullptr, ins)) return 1;
 		dpc.phys_base = phys & ~U64(0x1FFF);
 		dpc.host_bias = ((phys | U64(0x1FFF)) < cpu->direct_ram_size)
 			? ((u64)cpu->dram_ptr + (phys & ~U64(0x1FFF)) - vp) : 0;
@@ -2861,7 +2862,7 @@ int CAlphaCPU::jit_read_locked(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 			// The emitter installed current_pc. Translation faults enter native PAL here.
 			if (cpu->virt2phys(va, &phys, ACCESS_READ, nullptr, ins)) return 2;
 		}
-		else if (cpu->virt2phys(va, &phys, ACCESS_READ | FAKE, nullptr, ins)) return 1;
+		else if (cpu->virt2phys(va, &phys, ACCESS_READ | FAKE | DTB_REFERENCE, nullptr, ins)) return 1;
 		dpc.phys_base = phys & ~U64(0x1FFF);
 		dpc.host_bias = ((phys | U64(0x1FFF)) < cpu->direct_ram_size)
 			? ((u64)cpu->dram_ptr + (phys & ~U64(0x1FFF)) - vp) : 0;
@@ -2920,7 +2921,7 @@ int CAlphaCPU::jit_read_vpte(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 		// native-PAL DTB/access-fault entry.
 		if (cpu->virt2phys(va, &phys, flags, nullptr, ins)) return 2;
 	}
-	else if (cpu->virt2phys(va, &phys, flags | FAKE, nullptr, ins)) return 1;
+	else if (cpu->virt2phys(va, &phys, flags | FAKE | DTB_REFERENCE, nullptr, ins)) return 1;
 
 	phys &= ~amask;
 
@@ -2970,10 +2971,11 @@ int CAlphaCPU::jit_read_wchk(CAlphaCPU* cpu, u64 va, int size_bits, u64* out)
 	if (!e.access[0][cm]) return 1;            // no read access (ACV)
 	if (!e.access[1][cm]) return 1;            // no write access -- WrChk fails (ACV)
 	if (e.fault[0] || e.fault[1]) return 1;    // FOR/FOW: bail so the interpreter vectors the fault
-	const u64 phys = e.phys | (va & e.keep_mask);
+	const u64 phys = e.translated_address(va);
 
 	if (phys >= cpu->dram_size)               // MMIO: bail before the replay (mirrors jit_read_vpte)
 		return 1;
+	cpu->note_dtb_hit(i);
 
 	if (cpu->m_jit_vreplay)
 	{
@@ -3081,7 +3083,8 @@ int CAlphaCPU::jit_write(CAlphaCPU* cpu, u64 va, u64 descr, u64 value)
 			if (i < 0) return 1;
 			const auto& e = cpu->state.tb[TB_INDEX_DATA][i];
 			if (!e.access[1][access.mode] || e.fault[1]) return 1;
-			phys = e.phys | (va & e.keep_mask);
+			phys = e.translated_address(va);
+			cpu->note_dtb_hit(i);
 		}
 		dpc.phys_base = phys & ~U64(0x1FFF);
 		dpc.host_bias = ((phys | U64(0x1FFF)) < cpu->direct_ram_size)
@@ -3178,7 +3181,8 @@ u64 CAlphaCPU::jit_stc(CAlphaCPU* cpu, u64 va, u64 descr, u64 value)
 			const auto& e = cpu->state.tb[TB_INDEX_DATA][i];
 			if (!e.access[1][access.mode]) return U64(0x100);                 // protection (ACV)
 			if (e.fault[1]) return U64(0x100);                               // fault-on-write (FOW)
-			phys = e.phys | (va & e.keep_mask);
+			phys = e.translated_address(va);
+			cpu->note_dtb_hit(i);
 		}
 		dpc.phys_base = phys & ~U64(0x1FFF);
 		dpc.host_bias = ((phys | U64(0x1FFF)) < cpu->direct_ram_size)
@@ -4566,7 +4570,9 @@ int CAlphaCPU::FindTBEntry(u64 virt, int flags, int asn)
 		&& !((state.tb[t][i].virt ^ virt) & state.tb[t][i].match_mask)
 		&& TB_ASN_MATCH(state.tb[t][i]))	{ m_tb_idx[t][h] = (u16)(i + 1); return i; }
 
-	for (i = 0; i < TB_ENTRIES; i++)
+	const int slots = t == TB_INDEX_DATA && m_profile.tb_fill.indexed_dtb_entries
+		? m_profile.tb_fill.indexed_dtb_entries : TB_ENTRIES;
+	for (i = 0; i < slots; i++)
 	{
 		if (state.tb[t][i].valid
 			&& !((state.tb[t][i].virt ^ virt) & state.tb[t][i].match_mask)
@@ -4811,6 +4817,8 @@ int CAlphaCPU::virt2phys(u64 virt, u64* phys, int flags, bool* asm_bit, u32 ins)
 	// No access violations or faults
 	// Return the converted address
 	*phys = state.tb[t][i].translated_address(virt);
+	if (t == TB_INDEX_DATA && (forreal || (flags & DTB_REFERENCE)))
+		note_dtb_hit(i);
 	if (asm_bit)
 		*asm_bit = state.tb[t][i].asm_bit ? true : false;
 
@@ -4822,6 +4830,28 @@ int CAlphaCPU::virt2phys(u64 virt, u64* phys, int flags, bool* asm_bit, u32 ins)
 			printf("phys: %" PRIx64 " - OK\n", *phys);
 #endif
 	return 0;
+}
+
+void CAlphaCPU::ev4_set_dtb_pointer(int next)
+{
+	state.next_tb[TB_INDEX_DATA] = next & (kEv4DtbEntries - 1);
+	// A hit on the NLU candidate must reach the DTB even if its page was cached by the host (21064 HRM 5.3.2).
+	const auto& entry = state.tb[TB_INDEX_DATA][state.next_tb[TB_INDEX_DATA]];
+	if (entry.valid && !(m_ev4_dcache.control & Ev4Dcache::dtb_rr))
+		invalidate_data_page_cache(entry.virt, entry.match_mask);
+}
+
+void CAlphaCPU::note_dtb_hit(int slot)
+{
+	if (m_profile.tb_fill.indexed_dtb_entries && slot == state.next_tb[TB_INDEX_DATA]
+	    && !(m_ev4_dcache.control & Ev4Dcache::dtb_rr))
+		ev4_set_dtb_pointer(slot + 1);
+}
+
+void CAlphaCPU::ev4_write_dtb_pte(u64 pte)
+{
+	const u64 pa = ((pte >> 32) & 0x1fffff) << 13; // DTB_PTE installs the PFN with the staged TB_TAG (21064 HRM 5.3.2).
+	add_tb(state.last_tb_virt, pa, pte, ACCESS_READ, 0);
 }
 
  /**
@@ -4840,12 +4870,11 @@ void CAlphaCPU::add_tb(u64 virt, u64 pte_phys, u64 pte_flags, int flags, int asn
 	int t = (flags & ACCESS_EXEC) ? TB_INDEX_ITB : TB_INDEX_DATA;
 	int rw = (flags & ACCESS_WRITE) ? 1 : 0;
 	const auto fill = m_profile.tb_fill.decode(*this, virt, pte_phys, pte_flags, flags);
-	int i;
-
-	// Refill of a mapped page: the page-indexed hint finds it; otherwise take a fresh entry. A
-	// stale duplicate left behind by a hint collision is harmless: lookups prefer the hint, and
-	// every invalidate scans the whole buffer.
-	i = -1;
+	int i = -1;
+	if (t == TB_INDEX_DATA && m_profile.tb_fill.indexed_dtb_entries) {
+		i = state.next_tb[t] & (kEv4DtbEntries - 1);
+		ev4_set_dtb_pointer(i + 1); // Every PTE port write advances, even on a refill (21064 HRM 5.3.2).
+	} else
 	{
 		const int h = (int)m_tb_idx[t][tb_idx_slot(fill.virt)] - 1;
 		if (h >= 0 && state.tb[t][h].valid
@@ -4945,10 +4974,7 @@ void CAlphaCPU::tbia(int flags)
 {
 	int t = (flags & ACCESS_EXEC) ? TB_INDEX_ITB : TB_INDEX_DATA;
 #if defined(ES40_JIT) && defined(JIT_VERIFY)
-	if (m_profile.ipr_write.indexed) {
-		++m_verify_tbia[t];
-		if (m_jit_vreplay && t == TB_INDEX_DATA) return;
-	}
+	if (m_profile.ipr_write.indexed) ++m_verify_tbia[t];
 #endif
 	int i;
 	for (i = 0; i < TB_ENTRIES; i++)

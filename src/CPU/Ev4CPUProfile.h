@@ -111,8 +111,21 @@ constexpr AlphaCPUProfile ev4_cpu_profile()
   };
   profile.mmu_address.find_itb = &Ev4InstructionFetch::find_itb;
   profile.tb_fill.base_page_match_mask = U64(0x7ffffffe000);
-  profile.tb_fill.decode = [](const CAlphaCPU&, u64, u64, u64, int) -> AlphaTBFill {
-    FAILURE(NotImplemented, "EV4 translation buffer fill");
+  profile.tb_fill.indexed_dtb_entries = kEv4DtbEntries;
+  profile.tb_fill.decode = [](const CAlphaCPU& cpu, u64 va, u64 pa, u64 pte, int) -> AlphaTBFill {
+    AlphaTBFill fill{};
+    fill.virt = va;
+    fill.phys = pa; // Retain PFN[33:13]; the selected granule supplies its own offset (21064 HRM Fig. 5-19).
+    fill.keep_mask = (U64(1) << (13 + 3 * (cpu.state.ev4_tb_gh & 3))) - 1;
+    fill.match_mask = cpu.m_profile.tb_fill.base_page_match_mask & ~fill.keep_mask;
+    fill.fault[0] = (pte >> 1) & 1;
+    fill.fault[1] = (pte >> 2) & 1;
+    fill.asm_bit = (pte >> 4) & 1;
+    for (unsigned mode = 0; mode < 4; ++mode) {
+      fill.access[0][mode] = (pte >> (8 + mode)) & 1;
+      fill.access[1][mode] = (pte >> (12 + mode)) & 1;
+    }
+    return fill;
   };
   profile.tb_miss.handle = [](CAlphaCPU& cpu, u64 va, int flags, u32 ins) {
     const auto reason = (flags & ACCESS_EXEC) ? AlphaPALException::InstructionTlbMiss : AlphaPALException::DataTlbMiss;

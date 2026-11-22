@@ -8,6 +8,8 @@
 #include <cstdint>
 #include <vector>
 
+inline constexpr unsigned kEv4DtbEntries = 32; // 21064 HRM 2.5.1.
+
 struct Ev4Dcache
 {
   // 21064 HRM 5.3.11, Fig. 5-22 and Table 5-10. Bits 15:12 belong to the 21064A.
@@ -15,6 +17,7 @@ struct Ev4Dcache
   static constexpr unsigned spe_1 = 1u << 4, spe_2 = 1u << 5;
   static constexpr unsigned enable = 1u << 10, force_hit = 1u << 11;
   static constexpr unsigned ncache_ndisturb = 1u << 8;
+  static constexpr unsigned dtb_rr = 1u << 9; // 21064 HRM Table 5-10.
   static constexpr unsigned dc_hit = 1u << 3; // DC_STAT (21064 HRM Table 5-15).
   // HRM 2.8.2.1: 8 KiB, physically direct-mapped, 32-byte lines, read-allocate and write-through.
   static constexpr unsigned line_bytes = 32, line_count = 256;

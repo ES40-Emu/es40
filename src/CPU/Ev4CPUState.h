@@ -58,9 +58,8 @@ inline void ev4_visit_ipr_state(State& state, BIU& biu, Visit visit)
   visit(state.ev4_itb_next[0]);
   visit(state.ev4_itb_next[1]);
   visit(state.ev4_itb_pte_temp);
-  // ITBZAP preserves the PTE payload for diagnostic reads (21064 HRM 5.2.2, 5.2.8).
-  for (unsigned i = 0; i < kEv4ItbEntries; ++i) {
-    auto& entry = state.tb[TB_INDEX_ITB][i];
+  visit(state.next_tb[TB_INDEX_DATA]);
+  auto visit_pte = [&](auto& entry) {
     visit(entry.virt);
     visit(entry.phys);
     visit(entry.match_mask);
@@ -68,6 +67,15 @@ inline void ev4_visit_ipr_state(State& state, BIU& biu, Visit visit)
     visit(entry.asm_bit);
     for (auto& permission : entry.access[0]) visit(permission);
     visit(entry.valid);
+  };
+  // ITBZAP preserves the PTE payload for diagnostic reads (21064 HRM 5.2.2, 5.2.8).
+  for (unsigned i = 0; i < kEv4ItbEntries; ++i) visit_pte(state.tb[TB_INDEX_ITB][i]);
+  for (unsigned i = 0; i < kEv4DtbEntries; ++i) {
+    auto& entry = state.tb[TB_INDEX_DATA][i];
+    visit_pte(entry);
+    for (auto& permission : entry.access[1]) visit(permission);
+    visit(entry.fault[0]);
+    visit(entry.fault[1]);
   }
 }
 
@@ -81,22 +89,26 @@ inline void ev4_restore_ipr_state(CAlphaCPU& cpu, const u64* words)
   ev4_visit_ipr_state(cpu.state, cpu.m_ev4_biu, [&](auto& field) {
     field = static_cast<std::remove_reference_t<decltype(field)>>(*words++);
   });
+  cpu.flush_data_page_cache();
 }
 
 inline u32 ev4_capture_memory_state(const CAlphaCPU& cpu)
 {
-  // Pack the 23-bit BC_TAG (21064 HRM Fig. 5-33) above the DC_HIT sample.
-  return (cpu.m_ev4_biu.bc_tag << 1) | ((cpu.state.dc_stat & Ev4Dcache::dc_hit) != 0);
+  // A D-stream access can advance the DTB pointer (21064 HRM 5.3.2).
+  return (u32(cpu.state.next_tb[TB_INDEX_DATA]) << 24) | (cpu.m_ev4_biu.bc_tag << 1)
+      | ((cpu.state.dc_stat & Ev4Dcache::dc_hit) != 0);
 }
 
 inline void ev4_replay_memory_state(CAlphaCPU& cpu, u32 value)
 {
-  if (cpu.m_ev4_biu.bc_tag_unlocked) cpu.m_ev4_biu.bc_tag = value >> 1;
+  if (u32(cpu.state.next_tb[TB_INDEX_DATA]) != (value >> 24)) cpu.ev4_set_dtb_pointer(value >> 24);
+  if (cpu.m_ev4_biu.bc_tag_unlocked) cpu.m_ev4_biu.bc_tag = (value >> 1) & 0x7fffff;
   cpu.note_ev4_dcache_access((value & 1) != 0);
 }
 
 inline constexpr AlphaJitVerifyPolicy kEv4JitVerifyPolicy{
-  25 + kEv4ItbEntries * 10, &ev4_capture_ipr_state, &ev4_restore_ipr_state, &ev4_restore_ipr_state,
+  26 + kEv4ItbEntries * 10 + kEv4DtbEntries * 16,
+  &ev4_capture_ipr_state, &ev4_restore_ipr_state, &ev4_restore_ipr_state,
   [](int, u64 left, u64 right, bool) { return left != right; },
   &ev4_capture_memory_state, &ev4_replay_memory_state
 };

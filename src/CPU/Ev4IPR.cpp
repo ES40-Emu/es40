@@ -151,6 +151,10 @@ void ev4_write_ipr(CAlphaCPU& cpu, u32 instruction, u64 value, AlphaIPRWriteCont
     cpu.ev4_write_itb_pte(value); // Commit the staged TB_TAG (21064 HRM 5.2.1, 5.2.2).
     return;
   }
+  if (selector.index == 2 && (selector.banks & 0x40)) {
+    cpu.ev4_write_dtb_pte(value); // DTB_PTE commits the staged TB_TAG (21064 HRM 5.3.2).
+    return;
+  }
   if (ev4_selects_icache_flush(selector)) {
     const bool non_global = selector.index == 23; // FLUSH_IC_ASM keeps ASM lines (21064 HRM 5.3.9-10).
 #if defined(ES40_JIT) && defined(JIT_VERIFY)

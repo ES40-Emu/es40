@@ -151,6 +151,11 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
     if (pal_mode) return AlphaIPRWriteKind::HelperTerminator;
     return pal_temp ? AlphaIPRWriteKind::PalTemp : AlphaIPRWriteKind::Noop;
   }
+  // DTB_PTE can be written together with ICCSR and PAL_TEMP2 (21064 HRM 4.8.1, Table 4-7).
+  if (selector.index == 2 && (selector.banks & 0x60)) {
+    if (slot) *slot = (selector.banks & 0x80) ? 34u : 0;
+    return (selector.banks & 0x20) ? AlphaIPRWriteKind::IboxControl : AlphaIPRWriteKind::HelperTerminator;
+  }
   if (ev4_selects_icache_flush(selector)) { // PAL also selects PAL_TEMP21/23 (21064 HRM 4.8.1, Table 4-7).
     if (slot) *slot = (selector.banks & 0x80) ? 32u + selector.index : 0;
     return AlphaIPRWriteKind::HelperTerminator;
@@ -190,7 +195,6 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
   if (selector.banks == 0x20 || selector.banks == 0xa0) {
     auto kind = AlphaIPRWriteKind::Interpreter;
     switch (selector.index) {
-    case 2:  kind = AlphaIPRWriteKind::IboxControl; break;
     case 9:  kind = AlphaIPRWriteKind::Helper; break; // PS (21064 HRM 5.2.11).
     case 13: kind = AlphaIPRWriteKind::SoftwareInterruptRequest; break;
     case 14: kind = AlphaIPRWriteKind::AstInterruptRequest; break;

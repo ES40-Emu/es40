@@ -398,6 +398,9 @@ private:
   void            add_tb(u64 virt, u64 pte_phys, u64 pte_flags, int flags, int asn);
   void            itb_mapping_changed();
   void            ev4_write_itb_pte(u64 value);
+  void            ev4_write_dtb_pte(u64 value);
+  void            ev4_set_dtb_pointer(int next);
+  void            note_dtb_hit(int slot);
   void            ev4_latch_itb_pte();
   unsigned        ev4_advance_itb_pointer();
   void            tbia(int flags);

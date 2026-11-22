@@ -339,7 +339,6 @@
 #include "AlphaCPU.h"
 #include "Ev4IPR.h"
 #include "jit/jitengine.h"
-#include "chipset/AliM1543C.h"
 #include "TraceEngine.h"
 #include "network/lockstep.h"
 #include "cpu_memory.h"
@@ -541,7 +540,7 @@ void CAlphaCPU::idle_nap(bool detected)
 
 	const auto start = steady_clock::now();
 	auto deadline = start + (mp && !watched ? microseconds(idle_mp_nap_us) : microseconds(1000));
-	if (state.iProcNum == 0 && cSystem->has_cchip())
+	if (state.iProcNum == 0 && cSystem->has_interval_timer())
 	{
 		// A due tick still waits for the catch-up gap (service_interval_timer).
 		auto fire = next_timer_fire;
@@ -834,17 +833,17 @@ void CAlphaCPU::idle_detect_sample(u64 start_virt, const AlphaInstructionSource&
 // Jensen wires CPU IRQ2 to the 82357 NMI output (PB22H-KB, p. 9-8).
 void CAlphaCPU::service_interval_timer(std::chrono::steady_clock::time_point now)
 {
-	if (state.iProcNum == 0 && cSystem->has_cchip())
+	if (state.iProcNum == 0 && cSystem->has_interval_timer())
 	{
 		if (now >= next_timer_fire)
 		{
-			const u64 period_ns = theAli ? theAli->get_interval_period_ns() : 0;
+			const u64 period_ns = cSystem->interval_timer_period_ns();
 			if (period_ns)
 			{
 				// Count-preserving, paced catch-up.
 				if (now - tick_last_fire >= std::chrono::nanoseconds(tick_gap_ns))
 				{
-					cSystem->interrupt(-1, true);
+					cSystem->interval_timer_tick();
 					tick_last_fire = now;
 					tick_gap_ns = tick_next_gap_ns(period_ns);
 					next_timer_fire += std::chrono::nanoseconds(period_ns);
@@ -854,7 +853,7 @@ void CAlphaCPU::service_interval_timer(std::chrono::steady_clock::time_point now
 			}
 			else
 			{
-				cSystem->interrupt(-1, true);
+				cSystem->interval_timer_tick();
 				tick_last_fire = now;
 				next_timer_fire = now + std::chrono::seconds(1);
 			}
@@ -1266,7 +1265,7 @@ void CAlphaCPU::init()
 
 	printf("%s(%d): $Id$\n",
 		devid_string, state.iProcNum);
-	if (state.iProcNum == 0 && cSystem->has_cchip())
+	if (state.iProcNum == 0 && cSystem->has_interval_timer())
 	{
 		if (m_max_instr_per_tick)
 			printf("%s: interval timer paced to %" PRIu64 " guest instr/tick\n",
@@ -1665,8 +1664,8 @@ void CAlphaCPU::jit_run(int budget)
 	// A CPU that retires the envelope before the wall-clock tick is due shall sleep until
 	// the correct tick time, the cpu should never receive early/extra. 
 	// The RPCC/cycle counter is unaffected (it stays wall-clock accurate via sync_cc_wallclock).
-	const u64 pace_period_ns = (cSystem->has_cchip() && m_max_instr_per_tick && theAli && instruction_pacing_enabled())
-		? theAli->get_interval_period_ns() : 0;   // 0 = pacing off, or the guest hasn't programmed the tick yet
+	const u64 pace_period_ns = (m_max_instr_per_tick && instruction_pacing_enabled())
+		? cSystem->interval_timer_period_ns() : 0;   // 0 = pacing off, or the guest hasn't programmed the tick yet
 	if (pace_period_ns)
 	{
 		const u64 ic = state.instruction_count;

@@ -184,6 +184,8 @@ noinst_HEADERS += storage/Disk.h \
        system/DPR.h \
        system/Flash.h \
        system/System.h \
+       system/System_jensen.h \
+       system/System_tsunami.h \
        system/i2c_spd.h \
        io/Keyboard.h \
        qmp/QmpInput.h \

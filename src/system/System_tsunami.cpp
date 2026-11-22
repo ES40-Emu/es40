@@ -32,11 +32,130 @@
   **/
 #define __STDC_FORMAT_MACROS 1
 #include "StdAfx.h"
-#include "System.h"
-#include "emu/PCIDevice.h"
+#include "System_tsunami.h"
+#include "DPR.h"
+#include "Flash.h"
+#include "chipset/AliM1543C.h"
+#include "chipset/AliM1543C_pmu.h"
 #include "CPU/AlphaCPU.h"
 
-bool CSystem::tsunami_shared_pci_range(u64 address, int dsize)
+/* constants for P-Chip CSR's */
+#define PCI_PCTL_HOLE       U64(0x0000000000000020) /* <5>     */
+#define PCI_PCTL_HOLE_START 0x00080000
+#define PCI_PCTL_HOLE_END   0x000fffff
+
+/* constants for pci-to-phys-address-mapping */
+#define PCI_WSM_MASK      U64(0x00000000fff00000)   /* <31:20> */
+#define PCI_ADD_MASK      U64(0x00000000000fffff)   /* <19:0>  */
+#define PCI_TBA_MASK      U64(0x00000007fff00000)   /* <34:20> */
+#define PCI_PTE_ADD_MASK  U64(0x00000000000fe000)   /* <19:13> */
+#define PCI_PTE_ADD_SHIFT 10
+#define PCI_PTE_TBA_MASK  U64(0x00000007fffffc00)   /* <34:10> */
+#define PCI_PTE_MASK      U64(0x00000007ffffe000)   /* <34:13> */
+#define PCI_PTE_SHIFT     12
+#define PCI_PTE_ADD2_MASK U64(0x0000000000001fff)   /* <12:0>  */
+#define PCI_PTE_PEER_BIT  U64(0x0000000090000000)   /* <31,28> */
+
+#define PHYS_PIO_ACCESS   U64(0x0000080000000000)   /* <43>    */
+
+static unsigned tsunami_memory_bits(CConfigurator* cfg)
+{
+	const u64 bits = cfg->get_num_value("memory.bits", false, 27);
+	// Four Typhoon arrays of at most 8GB (ASIZ 1010), populated in sets of four DIMMs.
+	if (bits > 35)
+		FAILURE(Configuration, "memory.bits > 35 (32GB) exceeds the 4-array Typhoon maximum");
+	if (bits < 22)
+		FAILURE(Configuration, "Too little memory for four Tsunami DIMMs");
+	return static_cast<unsigned>(bits);
+}
+
+Tsunami::Tsunami(CConfigurator* cfg)
+	: CSystem(cfg, U64(0x00000807ffffffff), tsunami_memory_bits(cfg))
+{
+	init_spd_from_config_mb(1U << (get_memory_bits() - 20));
+	reset_chipset();
+}
+
+u64 Tsunami::interval_timer_period_ns()
+{
+	return theAli ? theAli->get_interval_period_ns() : 0;
+}
+
+void Tsunami::attach_board_devices(CConfigurator* cfg)
+{
+	new CDPR(cfg, this);
+	new CFlash(cfg, this);
+}
+
+void Tsunami::bind_board_devices()
+{
+	CAliM1543C* bridge = nullptr;
+	for (auto* component : components())
+		if (auto* candidate = dynamic_cast<CAliM1543C*>(component))
+		{
+			if (bridge && bridge != candidate)
+				FAILURE(Configuration, "Multiple ISA bridges in one system");
+			bridge = candidate;
+		}
+	CAliM1543C_pmu* pmu = nullptr;
+	if (bridge)
+		for (auto* component : components())
+			if (auto* candidate = dynamic_cast<CAliM1543C_pmu*>(component))
+				if (candidate->pci_bus() == bridge->pci_bus())
+				{
+					if (pmu && pmu != candidate)
+						FAILURE(Configuration, "Multiple PMU functions for one ISA bridge");
+					pmu = candidate;
+				}
+	if (bridge)
+		bridge->bind_pmu(pmu);
+	for (auto* component : components())
+		if (component)
+		{
+			const auto* pci = dynamic_cast<const CPCIDevice*>(component);
+			// Legacy devices using these bindings map their ports on hose 0.
+			const int bus = pci ? pci->pci_bus() : 0;
+			auto* owner = bridge && bridge->pci_bus() == bus ? bridge : nullptr;
+			component->bind_isa_bridge(owner);
+			component->bind_isa_dma(owner ? owner->dma_controller() : nullptr);
+		}
+}
+
+void Tsunami::reset_chipset()
+{
+	for (int i = 0; i < 4; i++)
+		state.cchip.dim[i] = 0;
+	state.cchip.drir = 0;
+	state.cchip.misc = U64(0x0000000800000000);
+	state.cchip.csc = U64(0x3142444014157803);
+
+	state.dchip.drev = 0x01;
+	state.dchip.dsc = 0x43;
+	state.dchip.dsc2 = 0x03;
+	state.dchip.str = 0x25;
+
+	for (int i = 0; i < 2; i++)
+	{
+		memset(&state.pchip[i], 0, sizeof(state.pchip[i]));
+		state.pchip[i].wsba[3] = 2;
+	}
+
+	state.pchip[0].pctl = U64(0x0000104401440081);
+	state.pchip[1].pctl = U64(0x0000504401440081);
+
+	state.tig.FwWrite = 0;
+	state.tig.HaltA = 0;
+	state.tig.HaltB = 0;
+	state.tig.ModInfo = 0;
+	memset(state.tig.ipcr, 0, sizeof(state.tig.ipcr));
+}
+
+void Tsunami::finish_board_restore()
+{
+	update_pchip_error_irqs();
+}
+
+bool Tsunami::allows_shared_access(u64 address, int dsize) const
 {
 	const bool valid_width = dsize == 8 || dsize == 16 || dsize == 32 || dsize == 64;
 	auto within = [&](u64 base, u64 length) {
@@ -49,7 +168,7 @@ bool CSystem::tsunami_shared_pci_range(u64 address, int dsize)
 		within(U64(0x803fc000000), U64(0x2000000));
 }
 
-bool CSystem::tsunami_decode_pci_io_write(u64 address, int dsize, u64 data, CSystemComponent::PciIoWrite& write)
+static bool decode_pci_io_write(u64 address, int dsize, u64 data, CSystemComponent::PciIoWrite& write)
 {
 	const u64 io_base = address & ~U64(0x1ffffff);
 	if ((io_base != U64(0x801fc000000) && io_base != U64(0x803fc000000)) ||
@@ -57,6 +176,43 @@ bool CSystem::tsunami_decode_pci_io_write(u64 address, int dsize, u64 data, CSys
 		return false;
 	write = { io_base == U64(0x803fc000000) ? 1 : 0, (u32)(address & U64(0x1ffffff)), dsize, data };
 	return true;
+}
+
+void Tsunami::dispatch_mapped_write(u64 address, int dsize, u64 data, const SDecodeClaims& claims)
+{
+	CSystemComponent::PciIoWrite write;
+	if (!decode_pci_io_write(address, dsize, data, write))
+	{
+		claims.write(address, dsize, data);
+		return;
+	}
+
+	struct Observation { CSystemComponent* component; u64 captured; };
+	std::vector<Observation> observers;
+
+	for (CSystemComponent* component : components())
+	{
+		if (!component)
+			continue;
+		bool skip = false;
+		for (int k = 0; k < claims.count && !skip; ++k)
+			skip = component->memory_decode_owner() ==
+				claims.range[k].component->memory_decode_owner();
+		for (const auto& observer : observers)
+			skip |= observer.component == component;
+		if (skip)
+			continue;
+		const u64 captured = component->capture_pci_io_write(write);
+		if (captured)
+			observers.push_back({ component, captured });
+	}
+
+	claims.write(address, write.dsize, write.data);
+	const auto dispatch = claims.count
+		? CSystemComponent::PciIoWriteDispatch::MappedTargetReturned
+		: CSystemComponent::PciIoWriteDispatch::NoMappedTarget;
+	for (const auto& observer : observers)
+		observer.component->observe_pci_io_write(write, observer.captured, dispatch);
 }
 
 /**
@@ -141,7 +297,7 @@ bool CSystem::tsunami_decode_pci_io_write(u64 address, int dsize, u64 data, CSys
  * +-------------------+--------+-------------------------------+---------------------------------+
  * \endcode
  **/
-void CSystem::tsunami_pio_write(u64 a, int dsize, u64 data, CSystemComponent* source)
+void Tsunami::write_unmapped(u64 a, int dsize, u64 data, CSystemComponent* source)
 {
 	const u64 config_base = a & ~U64(0xffffff);
 	if ((config_base == U64(0x801fe000000) || config_base == U64(0x803fe000000)) &&
@@ -359,7 +515,7 @@ void CSystem::tsunami_pio_write(u64 a, int dsize, u64 data, CSystemComponent* so
  * +-------------------+--------+-------------------------------+---------------------------------+
  * \endcode
  **/
-u64 CSystem::tsunami_pio_read(u64 a, int dsize, CSystemComponent* source)
+u64 Tsunami::read_unmapped(u64 a, int dsize, CSystemComponent* source)
 {
 	if (a >= U64(0x00000801A0000000) && a <= U64(0x00000801AFFFFFFF))
 		return cchip_csr_read((u32)a & 0xFFFFFFF, source);
@@ -874,7 +1030,7 @@ u64 CSystem::tsunami_pio_read(u64 a, int dsize, CSystemComponent* source)
 static const u64 pchip_error_flags = U64(0xdff);
 static const u64 pchip_error_info = U64(0xffffffffffff0000);
 
-void CSystem::latch_pchip_error(int num, u64 data)
+void Tsunami::latch_pchip_error(int num, u64 data)
 {
 	const u64 flags = data & state.pchip[num].perrmask & pchip_error_flags;
 	if (!flags)
@@ -886,7 +1042,7 @@ void CSystem::latch_pchip_error(int num, u64 data)
 	update_pchip_error_irqs();
 }
 
-void CSystem::pchip_config_write_abort(int num, u32 address)
+void Tsunami::pchip_config_write_abort(int num, u32 address)
 {
 	u32 pci_address = address & 0xfffffc;
 	if (!(address & 0xff0000))
@@ -905,7 +1061,7 @@ void CSystem::pchip_config_write_abort(int num, u32 address)
 	latch_pchip_error(num, (U64(0xb) << 52) | ((u64)pci_address << 16) | U64(0x100));
 }
 
-u64 CSystem::pchip_csr_read(int num, u32 a)
+u64 Tsunami::pchip_csr_read(int num, u32 a)
 {
 	switch (a)
 	{
@@ -969,7 +1125,7 @@ u64 CSystem::pchip_csr_read(int num, u32 a)
  *
  * For a description of the PCHIP registers, see pchip_csr_read.
  **/
-void CSystem::pchip_csr_write(int num, u32 a, u64 data)
+void Tsunami::pchip_csr_write(int num, u32 a, u64 data)
 {
 	switch (a)
 	{
@@ -1066,9 +1222,9 @@ void CSystem::pchip_csr_write(int num, u32 a, u64 data)
 
 	case 0x800: // PCI reset
 		// Tsunami HRM 8.7: each Pchip resets only its own PCI bus.
-		for (int i = 0; i < iNumComponents; i++)
+		for (auto* component : components())
 		{
-			auto* device = dynamic_cast<CPCIDevice*>(acComponents[i]);
+			auto* device = dynamic_cast<CPCIDevice*>(component);
 			if (device && device->pci_bus() == num)
 				device->ResetPCI();
 		}
@@ -1080,7 +1236,7 @@ void CSystem::pchip_csr_write(int num, u32 a, u64 data)
 	}
 }
 
-u64 CSystem::cchip_csr_read(u32 a, CSystemComponent* source)
+u64 Tsunami::cchip_csr_read(u32 a, CSystemComponent* source)
 {
 	CAlphaCPU* cpu = (CAlphaCPU*)source;
 	switch (a)
@@ -1089,7 +1245,7 @@ u64 CSystem::cchip_csr_read(u32 a, CSystemComponent* source)
 		return state.cchip.csc;
 
 	case 0x080:
-		//    printf("MISC: %016" PRIx64 " from CPU %d (@%" PRIx64 ") (other @ %" PRIx64 ").\n",state.cchip.misc | cpu->get_cpuid(),cpu->get_cpuid(), cpu->get_pc()-4, acCPUs[1-cpu->get_cpuid()]->get_pc());
+		//    printf("MISC: %016" PRIx64 " from CPU %d (@%" PRIx64 ") (other @ %" PRIx64 ").\n",state.cchip.misc | cpu->get_cpuid(),cpu->get_cpuid(), cpu->get_pc()-4, get_cpu(1-cpu->get_cpuid())->get_pc());
 	{
 		// Consistent read of MISC against the concurrent RMW in cchip_csr_write()/clear_clock_int().
 		std::lock_guard<std::mutex> g(drir_lock);
@@ -1139,7 +1295,7 @@ u64 CSystem::cchip_csr_read(u32 a, CSystemComponent* source)
 	}
 }
 
-void CSystem::cchip_csr_write(u32 a, u64 data, CSystemComponent* source)
+void Tsunami::cchip_csr_write(u32 a, u64 data, CSystemComponent* source)
 {
 	CAlphaCPU* cpu = (CAlphaCPU*)source;
 	switch (a)
@@ -1183,11 +1339,11 @@ void CSystem::cchip_csr_write(u32 a, u64 data, CSystemComponent* source)
 		// stop interval timer interrupt
 		if (data & U64(0x00000000000000f0))
 		{
-			for (int i = 0; i < iNumCPUs; i++)
+			for (int i = 0; i < get_cpu_num(); i++)
 			{
 				if (data & (U64(0x10) << i))
 				{
-					acCPUs[i]->irq_h(2, false, 0);
+					get_cpu(i)->irq_h(2, false, 0);
 
 					//printf("*** TIMER interrupt cleared for CPU %d\n",i);
 				}
@@ -1197,11 +1353,11 @@ void CSystem::cchip_csr_write(u32 a, u64 data, CSystemComponent* source)
 		// stop inter processor interrupt
 		if (data & U64(0x0000000000000f00))
 		{
-			for (int i = 0; i < iNumCPUs; i++)
+			for (int i = 0; i < get_cpu_num(); i++)
 			{
 				if (data & (U64(0x100) << i))
 				{
-					acCPUs[i]->irq_h(3, false, 0);
+					get_cpu(i)->irq_h(3, false, 0);
 #ifdef DEBUG_IPI
 					printf("*** IP interrupt cleared for CPU %d from CPU %d(@ %" PRIx64 ").\n",
 						i, cpu->get_cpuid(), cpu->get_pc() - 4);
@@ -1213,12 +1369,12 @@ void CSystem::cchip_csr_write(u32 a, u64 data, CSystemComponent* source)
 		// set inter processor interrupt
 		if (data & U64(0x000000000000f000))
 		{
-			for (int i = 0; i < iNumCPUs; i++)
+			for (int i = 0; i < get_cpu_num(); i++)
 			{
 				if (data & (U64(0x1000) << i))
 				{
 					state.cchip.misc |= U64(0x100) << i;
-					acCPUs[i]->irq_h(3, true, 0);
+					get_cpu(i)->irq_h(3, true, 0);
 #ifdef DEBUG_IPI
 					printf("*** IP interrupt set for CPU %d from CPU %d(@ %" PRIx64 ")\n", i,
 						cpu->get_cpuid(), cpu->get_pc() - 4);
@@ -1261,7 +1417,7 @@ void CSystem::cchip_csr_write(u32 a, u64 data, CSystemComponent* source)
 	}
 }
 
-u8 CSystem::dchip_csr_read(u32 a)
+u8 Tsunami::dchip_csr_read(u32 a)
 {
 	switch (a)
 	{
@@ -1277,7 +1433,7 @@ u8 CSystem::dchip_csr_read(u32 a)
 	}
 }
 
-void CSystem::dchip_csr_write(u32 a, u8 data)
+void Tsunami::dchip_csr_write(u32 a, u8 data)
 {
 	printf("Unknown DCHIP CSR %07x write with %02x attempted.\n", a, data);
 }
@@ -1365,7 +1521,7 @@ void CSystem::dchip_csr_write(u32 a, u8 data)
  * Internals and Data Structures Handbook.
  *
  **/
-void CSystem::interrupt(int number, bool assert)
+void Tsunami::interrupt(int number, bool assert)
 {
 	int i;
 
@@ -1378,8 +1534,8 @@ void CSystem::interrupt(int number, bool assert)
 
 		// timer int...
 		state.cchip.misc |= 0xf0;
-		for (i = 0; i < iNumCPUs; i++)
-			acCPUs[i]->irq_h(2, true, 0);   // timer interrupt is immediate
+		for (i = 0; i < get_cpu_num(); i++)
+			get_cpu(i)->irq_h(2, true, 0);   // timer interrupt is immediate
 		m_tick_seq.fetch_add(1, std::memory_order_relaxed);
 	}
 	else if (assert)
@@ -1401,7 +1557,7 @@ void CSystem::interrupt(int number, bool assert)
 }
 
 // Called with device_bus_mutex held; keep the two Pchip levels coherent.
-void CSystem::update_pchip_error_irqs()
+void Tsunami::update_pchip_error_irqs()
 {
 	std::lock_guard<std::mutex> guard(drir_lock);
 	// ES40 Service Guide Table D-21: Pchip0 -> DRIR<62>, Pchip1 -> DRIR<61>.
@@ -1416,19 +1572,19 @@ void CSystem::update_pchip_error_irqs()
  * Re-drive each CPU device-interrupt lines from DRIR & DIM. 
  * C-chip actually does this continuously. 
  **/
-void CSystem::recompute_device_irqs()
+void Tsunami::recompute_device_irqs()
 {
-	for (int i = 0; i < iNumCPUs; i++)
+	for (int i = 0; i < get_cpu_num(); i++)
 	{
 		if (state.cchip.drir & state.cchip.dim[i] & U64(0x00ffffffffffffff))
-			acCPUs[i]->irq_h(1, true, 100); // device interrupts delayed by 100 clocks
+			get_cpu(i)->irq_h(1, true, 100); // device interrupts delayed by 100 clocks
 		else
-			acCPUs[i]->irq_h(1, false, 0);
+			get_cpu(i)->irq_h(1, false, 0);
 
 		if (state.cchip.drir & state.cchip.dim[i] & U64(0xfc00000000000000))
-			acCPUs[i]->irq_h(0, true, 100); // device interrupts delayed by 100 clocks
+			get_cpu(i)->irq_h(0, true, 100); // device interrupts delayed by 100 clocks
 		else
-			acCPUs[i]->irq_h(0, false, 0);
+			get_cpu(i)->irq_h(0, false, 0);
 	}
 }
 
@@ -1520,7 +1676,7 @@ void CSystem::recompute_device_irqs()
  * \todo Dual-Acces-Cycle (DAC) access from the PCI bus is not supported. If a device is ever
  *       added that uses this, we should probably support it.
  **/
-u64 CSystem::PCI_Phys(int pcibus, u32 address)
+u64 Tsunami::PCI_Phys(int pcibus, u32 address)
 {
 	u64 a;
 	int j;
@@ -1618,7 +1774,7 @@ u64 CSystem::PCI_Phys(int pcibus, u32 address)
  * +-------------+----------------+---------------------------+
  * \endcode
  **/
-u64 CSystem::PCI_Phys_direct_mapped(u32 address, u64 wsm, u64 tba)
+u64 Tsunami::PCI_Phys_direct_mapped(u32 address, u64 wsm, u64 tba)
 {
 	u64 a;
 
@@ -1697,7 +1853,7 @@ u64 CSystem::PCI_Phys_direct_mapped(u32 address, u64 wsm, u64 tba)
  * +----------------------------+-------------------+
  * \endcode
  **/
-u64 CSystem::PCI_Phys_scatter_gather(u32 address, u64 wsm, u64 tba)
+u64 Tsunami::PCI_Phys_scatter_gather(u32 address, u64 wsm, u64 tba)
 {
 	u64 pte_a;
 
@@ -1730,11 +1886,11 @@ u64 CSystem::PCI_Phys_scatter_gather(u32 address, u64 wsm, u64 tba)
 /**
  * Clear the clock interrupt for a specific CPU. Used by the CPU to acknowledge the interrupt.
  **/
-void CSystem::clear_clock_int(int ProcNum)
+void Tsunami::clear_clock_int(int ProcNum)
 {
 	std::lock_guard<std::mutex> g(drir_lock);
 	state.cchip.misc &= ~(U64(0x10) << ProcNum);
-	acCPUs[ProcNum]->irq_h(2, false, 0);
+	get_cpu(ProcNum)->irq_h(2, false, 0);
 }
 
 /**
@@ -1742,11 +1898,11 @@ void CSystem::clear_clock_int(int ProcNum)
  * deassert b_irq<3>, so (like the interval clock) PALcode clears MISC<IPINTR>
  * on dispatch; otherwise it re-fires the instant IPL drops. (HRM 6.3.3)
  **/
-void CSystem::clear_ipi(int ProcNum)
+void Tsunami::clear_ipi(int ProcNum)
 {
 	std::lock_guard<std::mutex> g(drir_lock);
 	state.cchip.misc &= ~(U64(0x100) << ProcNum);
-	acCPUs[ProcNum]->irq_h(3, false, 0);
+	get_cpu(ProcNum)->irq_h(3, false, 0);
 #ifdef DEBUG_IPI
 	printf("*** IP interrupt cleared for CPU %d (PALcode dispatch ack).\n", ProcNum);
 #endif

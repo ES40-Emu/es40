@@ -1,4 +1,4 @@
-/* ES40 emulator -- Jensen host bus
+/* ES40 emulator -- Jensen system and host bus
  * Copyright (C) 2026 by gdwnldsKSC
  * All rights reserved.
  *
@@ -26,7 +26,7 @@
  */
 
 #include "StdAfx.h"
-#include "system/System.h"
+#include "system/System_jensen.h"
 #include "CPU/AlphaCPU.h"
 #include "chipset/Intel82357.h"
 #include "chipset/Intel82358.h"
@@ -38,6 +38,13 @@
 namespace {
 enum { SparseIO, HostAddressExtension, InterruptAcknowledge, Feprom0, Feprom1 };
 constexpr u64 sparse_io_size = U64(0x10000) << 7;
+
+unsigned int checked_memory_bits(u64 bits)
+{
+  if (bits < 24 || bits > 27)
+    FAILURE(Configuration, "Jensen memory.bits must be 24 through 27 (16 to 128 MB)");
+  return static_cast<unsigned int>(bits);
+}
 
 int sparse_io_width(u64 address)
 {
@@ -192,8 +199,18 @@ void JensenHostBus::dma_write_memory(u32 address, const void* source, size_t byt
 }
 }
 
-void CSystem::init_jensen_eisa()
+Jensen::Jensen(CConfigurator* cfg)
+  : CSystem(cfg, ~U64(0), checked_memory_bits(cfg->get_num_value("memory.bits", false, 27)))
 {
-  auto* host = new JensenHostBus(myCfg, this);
+}
+
+void Jensen::ResetMem(unsigned int membits)
+{
+  CSystem::ResetMem(checked_memory_bits(membits));
+}
+
+void Jensen::attach_board_devices(CConfigurator* cfg)
+{
+  auto* host = new JensenHostBus(cfg, this);
   register_isa_bus(0, host->ebc.eisa_bus());
 }

@@ -362,7 +362,7 @@ u32   ali_cfg_mask[64] = {
 CAliM1543C::CAliM1543C(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev)
 	: CPCIDevice(cfg, c, pcibus, pcidev),
 	  // The cascade drives Tsunami DRIR55 and withdraws IRQ2 when the slave drops INT.
-	  pic(state.pic, [this](bool high) { cSystem->interrupt(55, high); }, Pic8259::EdgeRelease::Withdraw)
+	  pic(state.pic, [this](bool high) { pci_host.interrupt(55, high); }, Pic8259::EdgeRelease::Withdraw)
 {
 	if (theAli != 0)
 		FAILURE(Configuration, "More than one Ali");

@@ -314,8 +314,6 @@
   **/
 #define __STDC_FORMAT_MACROS 1
 #include "StdAfx.h"
-#include "chipset/AliM1543C.h"
-#include "chipset/AliM1543C_pmu.h"
 #include "System.h"
 #include "emu/PCIDevice.h"
 #include "graphics/VGA.h"
@@ -324,8 +322,6 @@
 #include "CPU/jit/jitengine.h"
 #endif
 #include "network/lockstep.h"
-#include "DPR.h"
-#include "Flash.h"
 #include "SnapshotFile.h"
 #include "gui/gui.h"
 #include "io/Keyboard.h"
@@ -382,8 +378,8 @@ std::chrono::steady_clock::time_point CSystem::device_access_time() const
 /**
  * Constructor.
  **/
-CSystem::CSystem(CConfigurator* cfg, Platform platform) : platform(platform),
-	physical_address_mask(platform == Platform::Tsunami ? U64(0x00000807ffffffff) : ~U64(0))
+CSystem::CSystem(CConfigurator* cfg, u64 address_mask, unsigned memory_bits)
+	: physical_address_mask(address_mask)
 {
 	if (theSystem != 0)
 		FAILURE(Configuration, "More than one system");
@@ -409,21 +405,7 @@ CSystem::CSystem(CConfigurator* cfg, Platform platform) : platform(platform),
 	iNumComponents = 0;
 	iNumMemories = 0;
 	iNumCPUs = 0;
-	const u64 memory_bits = cfg->get_num_value("memory.bits", false, 27);
-	if (platform == Platform::Jensen)
-	{
-		if (memory_bits < 24 || memory_bits > 27)
-			FAILURE(Configuration, "Jensen memory.bits must be 24 through 27 (16 to 128 MB)");
-	}
-	else
-	{
-		// 4 Typhoon arrays of at most 8GB (ASIZ 1010) each.
-		if (memory_bits > 35)
-			FAILURE(Configuration, "memory.bits > 35 (32GB) exceeds the 4-array Typhoon maximum");
-		const uint32_t total_mb = static_cast<uint32_t>((U64(1) << memory_bits) >> 20);
-		init_spd_from_config_mb(total_mb);
-	}
-	iNumMemoryBits = (int)memory_bits;
+	iNumMemoryBits = memory_bits;
 
 	//  iNumConfig = 0;
 #if defined(IDB)
@@ -447,7 +429,7 @@ CSystem::CSystem(CConfigurator* cfg, Platform platform) : platform(platform),
 		m_ll_buckets[llb].sequence.store(0, std::memory_order_relaxed);
 		m_ll_buckets[llb].lock.store(0, std::memory_order_relaxed);
 	}
-	ResetChipsetState();
+	reset_system_state();
 	allocate_ll_watch();
 	theSystem = this;
 
@@ -461,18 +443,20 @@ CSystem::CSystem(CConfigurator* cfg, Platform platform) : platform(platform),
  **/
 CSystem::~CSystem()
 {
-	qmp_input.reset();
-	int i;
-
 	printf("Freeing memory in use by system...\n");
-
-	for (i = 0; i < iNumComponents; i++)
-		if (acComponents[i])
-			delete acComponents[i];
-
+	destroy_components();
 	asMemories.clear();
-
 	free(memory);
+	theSystem = nullptr;
+}
+
+void CSystem::destroy_components()
+{
+	qmp_input.reset();
+	for (auto* component : acComponents)
+		delete component;
+	acComponents.clear();
+	iNumComponents = 0;
 }
 
 /**
@@ -480,8 +464,6 @@ CSystem::~CSystem()
  **/
 void CSystem::ResetMem(unsigned int membits)
 {
-	if (platform == Platform::Jensen && (membits < 24 || membits > 27))
-		FAILURE(Configuration, "Jensen memory.bits must be 24 through 27 (16 to 128 MB)");
 	free(memory);
 	iNumMemoryBits = membits;
 	if (iNumMemoryBits > 30) {
@@ -931,14 +913,14 @@ bool CSystem::ProcessPendingReset()
 	};
 
 	printf("\n%%SYS-I-RESET: System reset requested.\n");
-	if (theSROM)
-		theSROM->FlushIfDirty();
+	flush_boot_rom();
 
 	ResetInProgressGuard rip(this);
 	stop_threads();
 	{
 		std::lock_guard<std::recursive_mutex> bus_lock(device_bus_mutex);
-		ResetChipsetState();
+		reset_system_state();
+		reset_chipset();
 		for (int dev = 0; dev < iNumComponents; dev++)
 			acComponents[dev]->ResetPCI();
 	}
@@ -949,42 +931,13 @@ bool CSystem::ProcessPendingReset()
 	return true;
 }
 
-void CSystem::ResetChipsetState()
+void CSystem::reset_system_state()
 {
 	// Re-establish the same power-on defaults used in the constructor.
 	m_x86_bios_clock_active.store(false, std::memory_order_release);
 	state.cpu_lock_flags = 0;
 	memset(state.cpu_lock_address, 0, sizeof(state.cpu_lock_address));
 	clear_ll_reservations();
-	if (platform != Platform::Tsunami)
-		return;
-
-	for (int i = 0; i < 4; i++)
-		state.cchip.dim[i] = 0;
-	state.cchip.drir = 0;
-	state.cchip.misc = U64(0x0000000800000000);
-	state.cchip.csc = U64(0x3142444014157803);
-
-	state.dchip.drev = 0x01;
-	state.dchip.dsc = 0x43;
-	state.dchip.dsc2 = 0x03;
-	state.dchip.str = 0x25;
-
-	for (int i = 0; i < 2; i++)
-	{
-		memset(&state.pchip[i], 0, sizeof(struct SSys_state::SSys_pchip));
-		state.pchip[i].wsba[3] = 2;
-	}
-
-	state.pchip[0].pctl = U64(0x0000104401440081);
-	state.pchip[1].pctl = U64(0x0000504401440081);
-
-	state.tig.FwWrite = 0;
-	state.tig.HaltA = 0;
-	state.tig.HaltB = 0;
-	state.tig.ModInfo = 0;
-	memset(state.tig.ipcr, 0, sizeof(state.tig.ipcr));
-
 }
 
 /**
@@ -1519,7 +1472,7 @@ void CSystem::report_decode_overlap(u64 address, int dsize, bool write,
 {
 	print_pio_trace();
 	std::ostringstream message;
-	message << "Unresolved PCI decode overlap (" << reason << ") for "
+	message << "Unresolved mapped I/O decode overlap (" << reason << ") for "
 		<< (write ? "write " : "read ") << std::dec << dsize << "-bit at 0x"
 		<< std::hex << address << ", source " << describe_source(source)
 		<< ", " << (claims.subtractive ? "subtractive" : "positive") << " decode";
@@ -1550,9 +1503,9 @@ void CSystem::prepare_shared_access(u64 address, int dsize, bool write,
 	if (claims.subtractive)
 		report_decode_overlap(address, dsize, write, claims, source,
 			"several subtractive responders");
-	if (platform != Platform::Tsunami || !tsunami_shared_pci_range(address, dsize))
+	if (!allows_shared_access(address, dsize))
 		report_decode_overlap(address, dsize, write, claims, source,
-			"shared completion is only modeled for PCI I/O and memory");
+			"shared completion is unavailable for this address");
 
 	std::ostringstream key, line;
 	key << (write ? 'W' : 'R') << dsize << ':' << std::hex << address;
@@ -1650,35 +1603,14 @@ void CSystem::SDecodeClaims::write(u64 address, int dsize, u64 data) const
 	}
 }
 
-void CSystem::dispatch_pci_io_write(u64 address, const CSystemComponent::PciIoWrite& write,
-	const SDecodeClaims& claims)
+void CSystem::dispatch_mapped_write(u64 address, int dsize, u64 data, const SDecodeClaims& claims)
 {
-	struct Observation { CSystemComponent* component; u64 captured; };
-	std::vector<Observation> observers;
+	claims.write(address, dsize, data);
+}
 
-	for (CSystemComponent* component : acComponents)
-	{
-		if (!component)
-			continue;
-		bool skip = false;
-		for (int k = 0; k < claims.count && !skip; ++k)
-			skip = component->memory_decode_owner() ==
-				claims.range[k].component->memory_decode_owner();
-		for (const auto& observer : observers)
-			skip |= observer.component == component;
-		if (skip)
-			continue;
-		const u64 captured = component->capture_pci_io_write(write);
-		if (captured)
-			observers.push_back({ component, captured });
-	}
-
-	claims.write(address, write.dsize, write.data);
-	const auto dispatch = claims.count
-		? CSystemComponent::PciIoWriteDispatch::MappedTargetReturned
-		: CSystemComponent::PciIoWriteDispatch::NoMappedTarget;
-	for (const auto& observer : observers)
-		observer.component->observe_pci_io_write(write, observer.captured, dispatch);
+u64 CSystem::read_unmapped(u64, int dsize, CSystemComponent*)
+{
+	return dsize == 64 ? ~U64(0) : (U64(1) << dsize) - 1;
 }
 
 // Write to PIO space above main memory, including mapped devices and internal chipset registers.
@@ -1693,13 +1625,9 @@ void CSystem::pio_write(u64 a, int dsize, u64 data, CSystemComponent* source)
 	if (claims.count)
 		note_pio_access(a, dsize, true, data, claims.count);
 
-	CSystemComponent::PciIoWrite write;
-	if (platform == Platform::Tsunami && tsunami_decode_pci_io_write(a, dsize, data, write))
-		dispatch_pci_io_write(a, write, claims);
-	else
-		claims.write(a, dsize, data);
-	if (!claims.count && platform == Platform::Tsunami)
-		tsunami_pio_write(a, dsize, data, source);
+	dispatch_mapped_write(a, dsize, data, claims);
+	if (!claims.count)
+		write_unmapped(a, dsize, data, source);
 }
 
 // Read from PIO space above main memory, including mapped devices and internal chipset registers.
@@ -1723,9 +1651,7 @@ u64 CSystem::pio_read(u64 a, int dsize, CSystemComponent* source)
 		note_pio_access(a, dsize, false, data, claims.count);
 		return data;
 	}
-	if (platform == Platform::Tsunami)
-		return tsunami_pio_read(a, dsize, source);
-	return dsize == 64 ? ~U64(0) : (U64(1) << dsize) - 1;
+	return read_unmapped(a, dsize, source);
 }
 
 /**
@@ -1802,190 +1728,6 @@ u64 CSystem::ReadMem(u64 address, int dsize, CSystemComponent* source)
 	}
 }
 
-/**
- * Run one progress chunk of the SRM self-decompressor on CPU 0. Returns true
- * once the decompressor has jumped below 0x200000 (into the inflated console).
- **/
-static bool srm_decomp_chunk(CSystem* sys, CAlphaCPU* cpu)
-{
-#ifdef ES40_JIT
-	(void)sys;
-	for (int i = 0; i < 90000; i++)
-	{
-		cpu->jit_step((int) CJitEngine::kChainCeiling);
-		if (cpu->get_clean_pc() < U64(0x200000))
-			return true;
-	}
-#else
-	for (int i = 0; i < 1800000; i++)
-	{
-		sys->SingleStep();
-		if (cpu->get_clean_pc() < U64(0x200000))
-			return true;
-	}
-#endif
-	return false;
-}
-
-/**
- * Load ROM contents from file. Decompress cl67srmrom.exe (or the boot
- * firmware partition from flash) into low memory.
- **/
-int CSystem::LoadROM()
-{
-	if (!iNumCPUs || acCPUs[0]->get_profile().reset.external_reset_vector)
-		return 0;
-
-	FILE* f;
-	char* buffer;
-	int     i;
-	int     j;
-	u32     scratch;
-	bool loadedFromFlash = false;
-
-	// If flash.rom contains a partitioned ES40 image (CPQ header at the SRM
-	// partition), execute its embedded self-decompressor to inflate the console
-	// into low RAM just like the cl67srmrom.exe path would.
-	if (theSROM && theSROM->HasBootFirmware())
-	{
-		printf("%%SYS-I-READFLASH: Reading boot ROM image from %s.\n",
-			myCfg->get_text_value("rom.flash", "flash.rom"));
-
-		const u8* flash = theSROM->GetFlashBytes();
-		const u32 srm_off = 0x00010000;
-		const u32 srm_len = 0x000E0000;
-
-		printf("%%SYS-I-DECOMP: Decompressing SRM image from flash.\n0%%");
-		fflush(stdout);
-
-		// The SRM partition is wrapped in a 0x40-byte CPQ header. The
-		// self-decompressing payload is not position independent and expects
-		// to be loaded exactly like the cl67srmrom.exe path: payload at
-		// 0x900000, PC=0x900001, PAL_BASE=0x900000.
-		const u64 load_base = U64(0x0000000000900000);
-		const u32 cpq_hdr_len = 0x40;
-
-		memcpy(PtrToMem(load_base), flash + srm_off + cpq_hdr_len, srm_len - cpq_hdr_len);
-
-		acCPUs[0]->set_pc(load_base | 1);
-		acCPUs[0]->set_PAL_BASE(load_base);
-		acCPUs[0]->enable_icache();
-
-		bool decomp_ok = true;
-		j = 0;
-		while (acCPUs[0]->get_clean_pc() > U64(0x200000))
-		{
-			srm_decomp_chunk(this, acCPUs[0]);
-			j++;
-			if (j < 50)
-			{
-				printf("%d%%", j * 2);
-				fflush(stdout);
-			}
-			else
-			{
-				printf(".");
-				fflush(stdout);
-			}
-			if (j > 500)
-			{
-				printf("\n%%SYS-F-DECOMPFAIL: SRM decompressor did not return to low memory.\n");
-				decomp_ok = false;
-				break;
-			}
-		}
-		printf("100%%\n");
-
-		acCPUs[0]->restore_icache();
-
-		if (decomp_ok)
-		{
-			for (i = 0; i < iNumCPUs; i++)
-				acCPUs[i]->set_pc(acCPUs[0]->get_pc());
-			for (i = 0; i < iNumCPUs; i++)
-				acCPUs[i]->set_PAL_BASE(acCPUs[0]->get_pal_base());
-
-			loadedFromFlash = true;
-		}
-	}
-
-	if (!loadedFromFlash)
-	{
-		f = fopen(myCfg->get_text_value("rom.srm", "cl67srmrom.exe"), "rb");
-		if (!f)
-			FAILURE(Runtime, "No SRM ROM image found");
-		printf("%%SYS-I-READROM: Reading original ROM image from %s.\n",
-			myCfg->get_text_value("rom.srm", "cl67srmrom.exe"));
-		for (i = 0; i < 0x240; i++)
-		{
-			auto r = fread(&scratch, 1, 1, f);
-			if (r != 1)
-			{
-				const bool read_error = ferror(f) != 0;
-				fclose(f);
-				if (read_error)
-					FAILURE(IO, "Error reading SRM ROM image");
-				FAILURE(Runtime, "File is too short to be a SRM ROM image");
-			}
-		}
-
-		buffer = PtrToMem(0x900000);
-		const char* payload_start = buffer;
-		// EOF terminates the variable-length payload; only a read error is fatal.
-		while (fread(buffer, 1, 1, f) == 1)
-			++buffer;
-		const bool read_error = ferror(f) != 0;
-		fclose(f);
-		if (read_error)
-			FAILURE(IO, "Error reading SRM ROM image");
-		if (buffer == payload_start)
-			FAILURE(Runtime, "File is too short to be a SRM ROM image");
-
-		printf("%%SYS-I-DECOMP: Decompressing ROM image.\n0%%");
-		acCPUs[0]->set_pc(0x900001);
-		acCPUs[0]->set_PAL_BASE(0x900000);
-		acCPUs[0]->enable_icache();
-
-		j = 0;
-		while (acCPUs[0]->get_clean_pc() > 0x200000)
-		{
-			srm_decomp_chunk(this, acCPUs[0]);
-			j++;
-			if (((j % 5) == 0) && (j < 50))
-				printf("%d%%", j * 2);
-			else
-				printf(".");
-			fflush(stdout);
-		}
-
-		printf("100%%\n");
-		acCPUs[0]->restore_icache();
-	}
-
-#if !defined(SRM_NO_SPEEDUPS) || !defined(SRM_NO_IDE)
-	printf("%%SYM-I-PATCHROM: Patching ROM for speed.\n");
-#endif
-#if !defined(SRM_NO_SPEEDUPS)
-	WriteMem(U64(0x14248), 32, 0xe7e00000, 0);  // e7e00000 = BEQ r31, +0
-	WriteMem(U64(0x14288), 32, 0xe7e00000, 0);
-	WriteMem(U64(0x142c8), 32, 0xe7e00000, 0);
-	WriteMem(U64(0x68320), 32, 0xe7e00000, 0);
-	WriteMem(U64(0x8bb78), 32, 0xe7e00000, 0);  // memory test (aa)
-	WriteMem(U64(0x8bc0c), 32, 0xe7e00000, 0);  // memory test (bb)
-	WriteMem(U64(0x8bc94), 32, 0xe7e00000, 0);  // memory test (00)
-
-	//WriteMem(U64(0xb1158),32,0xe7e00000,0);   // CPU sync?
-#endif
-#ifdef ES40_JIT
-	// The chunked jit_step drive overshoots the decompressor's exit by up to a
-	// dispatch batch and may have compiled blocks over the patch sites above;
-	// drop them so the patched bytes take effect.
-	acCPUs[0]->flush_icache();
-#endif
-	printf("%%SYS-I-ROMLOADED: ROM Image loaded successfully!\n");
-	return 0;
-}
-
 void CSystem::register_isa_bus(unsigned bus, CISABus& owner)
 {
 	if (!isa_buses.emplace(bus, &owner).second)
@@ -1998,40 +1740,6 @@ CISABus* CSystem::isa_bus(unsigned bus) const
 	return it == isa_buses.end() ? nullptr : it->second;
 }
 
-void CSystem::bind_isa_devices()
-{
-	CAliM1543C* bridge = nullptr;
-	for (auto* component : acComponents)
-		if (auto* candidate = dynamic_cast<CAliM1543C*>(component))
-		{
-			if (bridge && bridge != candidate)
-				FAILURE(Configuration, "Multiple ISA bridges in one system");
-			bridge = candidate;
-		}
-	CAliM1543C_pmu* pmu = nullptr;
-	if (bridge)
-		for (auto* component : acComponents)
-			if (auto* candidate = dynamic_cast<CAliM1543C_pmu*>(component))
-				if (candidate->pci_bus() == bridge->pci_bus())
-				{
-					if (pmu && pmu != candidate)
-						FAILURE(Configuration, "Multiple PMU functions for one ISA bridge");
-					pmu = candidate;
-				}
-	if (bridge)
-		bridge->bind_pmu(pmu);
-	for (auto* component : acComponents)
-		if (component)
-		{
-			const auto* pci = dynamic_cast<const CPCIDevice*>(component);
-			// Legacy devices using these bindings map their ports on hose 0.
-			const int bus = pci ? pci->pci_bus() : 0;
-			auto* owner = bridge && bridge->pci_bus() == bus ? bridge : nullptr;
-			component->bind_isa_bridge(owner);
-			component->bind_isa_dma(owner ? owner->dma_controller() : nullptr);
-		}
-}
-
 void CSystem::init()
 {
 	SDeviceAccessScope time_scope(this);
@@ -2040,7 +1748,7 @@ void CSystem::init()
 	if (!graphics_multihead && get_display_outputs().size() > 1)
 		FAILURE(Configuration,
 			"Multiple display outputs require graphics.multihead=true in the system configuration");
-	bind_isa_devices();
+	bind_board_devices();
 	{
 		// Owner links are bound above, after the ranges were registered.
 		std::lock_guard<std::recursive_mutex> bus_lock(device_bus_mutex);
@@ -2336,8 +2044,7 @@ bool CSystem::RestoreState(const char* fn)
 	}
 	for (int i = 0; i < iNumComponents; ++i)
 		acComponents[i]->finalize_restore();
-	if (platform == Platform::Tsunami)
-		update_pchip_error_irqs();
+	finish_board_restore();
 	return true;
 }
 

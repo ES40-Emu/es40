@@ -29,6 +29,7 @@
 #include "StdAfx.h"
 #include "AlphaCPU.h"
 #include "Ev68Interrupt.h"
+#include "system/System_tsunami.h"
 
 bool Ev68Interrupt::pending(CAlphaCPU& cpu)
 {
@@ -62,9 +63,13 @@ AlphaInterruptResult Ev68Interrupt::service(CAlphaCPU& cpu)
 
     // irq<1>=device, irq<2>=timer, irq<3>=IPI. (Was 0x6 = device+timer only,
     // which stranded incoming IPIs under VMS PALcode -> CPUSPINWAIT.)
-    if (state.eir & state.eien & 0xe)
-      if (cpu.vmspal_ent_ext_int(state.eir & state.eien & 0xe))
+    if (state.eir & state.eien & 0xe) {
+      auto* board = dynamic_cast<Tsunami*>(cpu.cSystem);
+      if (!board)
+        return AlphaInterruptResult::EnterPAL;
+      if (cpu.vmspal_ent_ext_int(*board, state.eir & state.eien & 0xe))
         return AlphaInterruptResult::Return;
+    }
 
     if (state.sir & state.sien & 0xfffc)
       if (cpu.vmspal_ent_sw_int(state.sir & state.sien))

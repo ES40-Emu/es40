@@ -132,13 +132,12 @@
 
 #ifndef CONFIGURATION_ONLY
 
-#include "system/System.h"
+#include "system/System_jensen.h"
+#include "system/System_tsunami.h"
 #include "CPU/AlphaCPU.h"
 #include "CPU/Ev4CPUProfile.h"
 #include "CPU/Ev68CPUProfile.h"
 #include "io/Serial.h"
-#include "system/Flash.h"
-#include "system/DPR.h"
 #include "chipset/AliM1543C.h"
 #include "io/Keyboard.h"
 #include "chipset/DMA.h"
@@ -1159,16 +1158,15 @@ void CConfigurator::initialize()
 	switch (myClassId)
 	{
 	case c_tsunami:
-		myDevice = new CSystem(this);
-		new CDPR(this, (CSystem*)myDevice);
-		new CFlash(this, (CSystem*)myDevice);
-		break;
-
 	case c_jensen:
 	{
-		auto* system = new CSystem(this, CSystem::Platform::Jensen);
+		CSystem* system;
+		if (myClassId == c_tsunami)
+			system = new Tsunami(this);
+		else
+			system = new Jensen(this);
 		myDevice = system;
-		system->init_jensen_eisa();
+		system->attach_board_devices(this);
 		break;
 	}
 

@@ -104,7 +104,7 @@
   **/
 #include "StdAfx.h"
 #include "DPR.h"
-#include "System.h"
+#include "System_tsunami.h"
 #include "io/Serial.h"
 #include <time.h>
 #include "CPU/AlphaCPU.h"
@@ -116,13 +116,12 @@ extern CSerial* srl[2];
 /**
  * Constructor.
  **/
-CDPR::CDPR(CConfigurator* cfg, CSystem* c) : CSystemComponent(cfg, c)
+CDPR::CDPR(CConfigurator* cfg, Tsunami* system) : CSystemComponent(cfg, system), tsunami(*system)
 {
 	if (theDPR)
 		FAILURE(Configuration, "More than one DPR");
+	system->RegisterMemory(this, 0, U64(0x0000080110000000), 0x100000);  // 16KB
 	theDPR = this;
-
-	c->RegisterMemory(this, 0, U64(0x0000080110000000), 0x100000);  // 16KB
 }
 
 /**
@@ -204,10 +203,10 @@ void CDPR::init()
 
 	state.ram[0xda] = 0xaa; // TIG load
 
-	// DIMM config: mirror the modeled topology (CSystem::init_spd_from_config_mb):
+	// DIMM config: mirror the modeled topology (Tsunami::init_spd_from_config_mb):
 	// array a = MMB a, DIMMs J1..J4 (and J5..J8 when twice-split).
-	const CSystem::SDimmLayout& lay = cSystem->get_dimm_layout();
-	const std::vector<uint8_t>& spd = cSystem->get_dimm_spd();
+	const auto& lay = tsunami.get_dimm_layout();
+	const std::vector<uint8_t>& spd = tsunami.get_dimm_spd();
 	for (int a = 0; a < lay.n_arrays; a++)
 	{
 		// Service guide Table C-1, byte 0x80: <7:4> F = twice-split 8 DIMMs,
@@ -434,6 +433,7 @@ void CDPR::init()
  **/
 CDPR::~CDPR()
 {
+	theDPR = nullptr;
 	FlushIfDirty();
 }
 

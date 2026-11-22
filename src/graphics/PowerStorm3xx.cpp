@@ -862,7 +862,7 @@ bool CPowerStorm3xx::dma_ram_range(u32 start, size_t length)
 		return false;
 	for (size_t done = 0; done < length;)
 	{
-		const u64 physical = cSystem->PCI_Phys(myPCIBus, start + u32(done));
+		const u64 physical = pci_host.PCI_Phys(myPCIBus, start + u32(done));
 		const size_t chunk = std::min(length - done, size_t(8192 - (physical & 8191)));
 		if (!cSystem->PtrToMem(physical) || !cSystem->PtrToMem(physical + chunk - 1))
 			return false;

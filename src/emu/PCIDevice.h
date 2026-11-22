@@ -64,6 +64,14 @@
 
 #include "SystemComponent.h"
 
+class PCIHost
+{
+public:
+  virtual ~PCIHost() = default;
+  virtual u64 PCI_Phys(int pcibus, u32 address) = 0;
+  virtual void interrupt(int number, bool asserted) = 0;
+};
+
   /**
    * \brief Abstract base class for devices on the PCI-bus.
    **/
@@ -110,6 +118,7 @@ public:
   int pci_dev() const { return myPCIDev; }
 
 protected:
+  PCIHost& pci_host;
   bool pci_bus_master_enabled() { return (config_read(0, 0x04, 16) & 0x04) != 0; }
   bool  do_pci_interrupt(int func, bool asserted);
   void  add_function(int func, u32 data[64], u32 mask[64]);

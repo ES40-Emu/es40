@@ -82,6 +82,7 @@
 #include "StdAfx.h"
 #include "AlphaCPU.h"
 #include "Ev68MMU.h"
+#include "system/System_tsunami.h"
 
 #include "io/Serial.h"
 #include "chipset/AliM1543C_ide.h"
@@ -1134,7 +1135,7 @@ int CAlphaCPU::vmspal_ent_sw_int(int si)
 /**
  * Interrupt entry point for External Interrupts.
  **/
-int CAlphaCPU::vmspal_ent_ext_int(int ei)
+int CAlphaCPU::vmspal_ent_ext_int(Tsunami& board, int ei)
 {
 	bool  do_11670 = false;
 
@@ -1146,7 +1147,7 @@ int CAlphaCPU::vmspal_ent_ext_int(int ei)
 		// Interprocessor interrupt (b_irq<3>, HRM 6.3.3). clear_ipi() acks it (no
 		// device deasserts the line), then vector via the OpenVMS IPINTR SCB slot.
 		// Highest b_irq => checked before timer/device.
-		cSystem->clear_ipi(state.iProcNum);
+		board.clear_ipi(state.iProcNum);
 		p20 = 0x610;
 		p7 = 0x16;
 		do_11670 = true;
@@ -1155,8 +1156,8 @@ int CAlphaCPU::vmspal_ent_ext_int(int ei)
 	{
 
 		// TIMER interrupt
-		cSystem->clear_clock_int(state.iProcNum);
-		p6 = cSystem->get_c_misc();
+		board.clear_clock_int(state.iProcNum);
+		p6 = board.get_c_misc();
 
 		p22 += U64(0x0000010000000000);
 		p22 &= U64(0xffff0fffffffffff);
@@ -1179,7 +1180,7 @@ int CAlphaCPU::vmspal_ent_ext_int(int ei)
 	}
 	else if (ei & 0x02)
 	{
-		p5 = cSystem->get_c_dir(state.iProcNum);
+		p5 = board.get_c_dir(state.iProcNum);
 		if (test_bit_64(p5, 0x32))
 			FAILURE(NotImplemented, "Can't handle IRQ 50");
 
@@ -1238,8 +1239,8 @@ int CAlphaCPU::vmspal_ent_ext_int(int ei)
 		{
 			p6 = p5 & U64(0x0060000000000000);
 			if (p6)
-				cSystem->set_c_dim(state.iProcNum,
-					cSystem->get_c_dim(state.iProcNum) & ~p6);
+				board.set_c_dim(state.iProcNum,
+					board.get_c_dim(state.iProcNum) & ~p6);
 			return 0;
 		}
 	}

@@ -26,14 +26,17 @@
 
  /**
   * \file
-  * ES40 (Clipper) board: TIGbus registers and DIMM topology.
+  * ES40 (Clipper) board: TIGbus registers, DIMM topology and SRM console loading.
   *
   * Split out of System.cpp; change history remains there.
   **/
 #define __STDC_FORMAT_MACROS 1
 #include "StdAfx.h"
-#include "System.h"
+#include "System_tsunami.h"
 #include "CPU/AlphaCPU.h"
+#ifdef ES40_JIT
+#include "CPU/jit/jitengine.h"
+#endif
 #include "Flash.h"
 
 /**
@@ -82,7 +85,7 @@
  * +-----------------+--------+
  * \endcode
  **/
-u8 CSystem::tig_read(u32 a)
+u8 Tsunami::tig_read(u32 a)
 {
 	switch (a)
 	{
@@ -119,14 +122,14 @@ u8 CSystem::tig_read(u32 a)
  * storing the work code in the target's impure area. 
  * Target's halt-interrupt handler XOR-clears its own bit to ack and deassert.
  **/
-void CSystem::tig_update_halt_lines()
+void Tsunami::tig_update_halt_lines()
 {
 	u8 lines = state.tig.HaltA | state.tig.HaltB;
-	for (int i = 0; i < iNumCPUs; i++)
-		acCPUs[i]->irq_h(4, (lines >> i) & 1, 0);
+	for (int i = 0; i < get_cpu_num(); i++)
+		get_cpu(i)->irq_h(4, (lines >> i) & 1, 0);
 }
 
-void CSystem::tig_write(u32 a, u8 data)
+void Tsunami::tig_write(u32 a, u8 data)
 {
 	switch (a)
 	{
@@ -161,8 +164,7 @@ void CSystem::tig_write(u32 a, u8 data)
 		if (data & 0x30)
 		{
 			printf("%%SYS-I-RESETREQ: TIG SRCR write %07x=%02x\n", a, data);
-			if (theSROM)
-				theSROM->FlushIfDirty();
+			flush_boot_rom();
 			RequestSystemReset();
 		}
 		return;
@@ -182,7 +184,7 @@ void CSystem::tig_write(u32 a, u8 data)
 
 /* ---------------- DIMM topology ---------------- */
 
-void CSystem::init_spd_from_config_mb(uint32_t total_mb)
+void Tsunami::init_spd_from_config_mb(uint32_t total_mb)
 {
 	// Sets of 4 identical DIMMs fill one MMB's slot set (J1-4, then J5-8);
 	// each populated MMB is one array (8 DIMMs max = Typhoon ASIZ max 8GB).
@@ -199,4 +201,194 @@ void CSystem::init_spd_from_config_mb(uint32_t total_mb)
 	for (int a = 0; a < m_dimm_layout.n_arrays; a++)
 		for (int s = 0; s < m_dimm_layout.dimms_per_array / 4; s++)
 			m_mpd_bus.attach(std::make_shared<Eeprom24C02>(uint8_t(0x50 + a * 2 + s), m_dimm_spd));
+}
+
+void Tsunami::flush_boot_rom()
+{
+	if (theSROM)
+		theSROM->FlushIfDirty();
+}
+
+/**
+ * Run one progress chunk of the SRM self-decompressor on CPU 0. Returns true
+ * once the decompressor has jumped below 0x200000 (into the inflated console).
+ **/
+static bool srm_decomp_chunk(CSystem* sys, CAlphaCPU* cpu)
+{
+#ifdef ES40_JIT
+	(void)sys;
+	for (int i = 0; i < 90000; i++)
+	{
+		cpu->jit_step((int) CJitEngine::kChainCeiling);
+		if (cpu->get_clean_pc() < U64(0x200000))
+			return true;
+	}
+#else
+	for (int i = 0; i < 1800000; i++)
+	{
+		sys->SingleStep();
+		if (cpu->get_clean_pc() < U64(0x200000))
+			return true;
+	}
+#endif
+	return false;
+}
+
+/**
+ * Load ROM contents from file. Decompress cl67srmrom.exe (or the boot
+ * firmware partition from flash) into low memory.
+ **/
+int Tsunami::LoadROM()
+{
+	if (!get_cpu_num() || get_cpu(0)->get_profile().reset.external_reset_vector)
+		return 0;
+
+	FILE* f;
+	char* buffer;
+	int     i;
+	int     j;
+	u32     scratch;
+	bool loadedFromFlash = false;
+
+	// If flash.rom contains a partitioned ES40 image (CPQ header at the SRM
+	// partition), execute its embedded self-decompressor to inflate the console
+	// into low RAM just like the cl67srmrom.exe path would.
+	if (theSROM && theSROM->HasBootFirmware())
+	{
+		printf("%%SYS-I-READFLASH: Reading boot ROM image from %s.\n",
+			config()->get_text_value("rom.flash", "flash.rom"));
+
+		const u8* flash = theSROM->GetFlashBytes();
+		const u32 srm_off = 0x00010000;
+		const u32 srm_len = 0x000E0000;
+
+		printf("%%SYS-I-DECOMP: Decompressing SRM image from flash.\n0%%");
+		fflush(stdout);
+
+		// The SRM partition is wrapped in a 0x40-byte CPQ header. The
+		// self-decompressing payload is not position independent and expects
+		// to be loaded exactly like the cl67srmrom.exe path: payload at
+		// 0x900000, PC=0x900001, PAL_BASE=0x900000.
+		const u64 load_base = U64(0x0000000000900000);
+		const u32 cpq_hdr_len = 0x40;
+
+		memcpy(PtrToMem(load_base), flash + srm_off + cpq_hdr_len, srm_len - cpq_hdr_len);
+
+		get_cpu(0)->set_pc(load_base | 1);
+		get_cpu(0)->set_PAL_BASE(load_base);
+		get_cpu(0)->enable_icache();
+
+		bool decomp_ok = true;
+		j = 0;
+		while (get_cpu(0)->get_clean_pc() > U64(0x200000))
+		{
+			srm_decomp_chunk(this, get_cpu(0));
+			j++;
+			if (j < 50)
+			{
+				printf("%d%%", j * 2);
+				fflush(stdout);
+			}
+			else
+			{
+				printf(".");
+				fflush(stdout);
+			}
+			if (j > 500)
+			{
+				printf("\n%%SYS-F-DECOMPFAIL: SRM decompressor did not return to low memory.\n");
+				decomp_ok = false;
+				break;
+			}
+		}
+		printf("100%%\n");
+
+		get_cpu(0)->restore_icache();
+
+		if (decomp_ok)
+		{
+			for (i = 0; i < get_cpu_num(); i++)
+				get_cpu(i)->set_pc(get_cpu(0)->get_pc());
+			for (i = 0; i < get_cpu_num(); i++)
+				get_cpu(i)->set_PAL_BASE(get_cpu(0)->get_pal_base());
+
+			loadedFromFlash = true;
+		}
+	}
+
+	if (!loadedFromFlash)
+	{
+		f = fopen(config()->get_text_value("rom.srm", "cl67srmrom.exe"), "rb");
+		if (!f)
+			FAILURE(Runtime, "No SRM ROM image found");
+		printf("%%SYS-I-READROM: Reading original ROM image from %s.\n",
+			config()->get_text_value("rom.srm", "cl67srmrom.exe"));
+		for (i = 0; i < 0x240; i++)
+		{
+			auto r = fread(&scratch, 1, 1, f);
+			if (r != 1)
+			{
+				const bool read_error = ferror(f) != 0;
+				fclose(f);
+				if (read_error)
+					FAILURE(IO, "Error reading SRM ROM image");
+				FAILURE(Runtime, "File is too short to be a SRM ROM image");
+			}
+		}
+
+		buffer = PtrToMem(0x900000);
+		const char* payload_start = buffer;
+		// EOF terminates the variable-length payload; only a read error is fatal.
+		while (fread(buffer, 1, 1, f) == 1)
+			++buffer;
+		const bool read_error = ferror(f) != 0;
+		fclose(f);
+		if (read_error)
+			FAILURE(IO, "Error reading SRM ROM image");
+		if (buffer == payload_start)
+			FAILURE(Runtime, "File is too short to be a SRM ROM image");
+
+		printf("%%SYS-I-DECOMP: Decompressing ROM image.\n0%%");
+		get_cpu(0)->set_pc(0x900001);
+		get_cpu(0)->set_PAL_BASE(0x900000);
+		get_cpu(0)->enable_icache();
+
+		j = 0;
+		while (get_cpu(0)->get_clean_pc() > 0x200000)
+		{
+			srm_decomp_chunk(this, get_cpu(0));
+			j++;
+			if (((j % 5) == 0) && (j < 50))
+				printf("%d%%", j * 2);
+			else
+				printf(".");
+			fflush(stdout);
+		}
+
+		printf("100%%\n");
+		get_cpu(0)->restore_icache();
+	}
+
+#if !defined(SRM_NO_SPEEDUPS) || !defined(SRM_NO_IDE)
+	printf("%%SYM-I-PATCHROM: Patching ROM for speed.\n");
+#endif
+#if !defined(SRM_NO_SPEEDUPS)
+	WriteMem(U64(0x14248), 32, 0xe7e00000, 0);  // e7e00000 = BEQ r31, +0
+	WriteMem(U64(0x14288), 32, 0xe7e00000, 0);
+	WriteMem(U64(0x142c8), 32, 0xe7e00000, 0);
+	WriteMem(U64(0x68320), 32, 0xe7e00000, 0);
+	WriteMem(U64(0x8bb78), 32, 0xe7e00000, 0);  // memory test (aa)
+	WriteMem(U64(0x8bc0c), 32, 0xe7e00000, 0);  // memory test (bb)
+	WriteMem(U64(0x8bc94), 32, 0xe7e00000, 0);  // memory test (00)
+
+	//WriteMem(U64(0xb1158),32,0xe7e00000,0);   // CPU sync?
+#endif
+#ifdef ES40_JIT
+	// The chunked jit_step drive overshoots the decompressor's exit by up to a
+	// dispatch batch and may have compiled blocks over the patch sites above;
+	// drop them so the patched bytes take effect.
+	get_cpu(0)->flush_icache();
+#endif
+	printf("%%SYS-I-ROMLOADED: ROM Image loaded successfully!\n");
+	return 0;
 }

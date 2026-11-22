@@ -79,7 +79,7 @@
 class CDPR : public CSystemComponent
 {
 public:
-  CDPR(CConfigurator* cfg, class CSystem* c);
+  CDPR(CConfigurator* cfg, class Tsunami* system);
   virtual       ~CDPR();
   virtual void  init();
   virtual void  check_state();
@@ -93,6 +93,7 @@ public:
   void          RestoreStateF(char* fn);
   void          FlushIfDirty();
 protected:
+  const Tsunami& tsunami;
   bool          dirty = false;
   time_t        last_dirty = 0;
 

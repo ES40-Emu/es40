@@ -146,7 +146,6 @@
   **/
 #include "emu/SystemComponent.h"
 #include "CPU/TraceEngine.h"
-#include "i2c_spd.h"
 #include <atomic>
 #include <chrono>
 #include <cstddef>
@@ -194,12 +193,6 @@ extern bool   profile_started;
 extern char* dbg_strptr;
 #endif
 
-struct MPDState {
-  // Host open-drain drivers (1 = released high, 0 = pulling low)
-  bool cks_out = true;   // SCL
-  bool ds_out = true;   // SDA
-};
-
 /// Structure used for mapping memory ranges to devices.
 struct SMemoryUser
 {
@@ -219,41 +212,21 @@ struct SConfig
   char* value;  /**< Value of the value. */
 };
 
-/**
- * \brief Emulated Typhoon 21272 chipset.
- *
- * Documentation consulted:
- *  - Tsunami/Typhoon 21272 Chipset Hardware Reference Manual  [HRM] (http://download.majix.org/dec/tsunami_typhoon_21272_hrm.pdf)
- *  - AlphaServer ES40 and AlphaStation ES40 Service Guide [SG] (http://www.dec-store.com/PD_00158.aspx)
- *  - Tru64 include file dc104x.h [T64] (http://samy.pl/packet/MISC/tru64/usr/include/alpha/dc104x.h)
- *  .
- *
- * The ES40 emulator has the following chipset configuration:
- *   - 1 x 21274-C1 Cchip (controller chip) - The Cchip controls the other chips in the
- *     chipset, as well as the DRAM memory array in a system. The Cchip interfaces with
- *     the CPU’s command and address buses.
- *   - 8 x 21274-D1 Dchip (data slice chip) - The Dchips interface with the system data
- *     bus and provide the data path between the CPU, DRAM memory, and the Pchip(s).
- *   - 2 x 21272-P1 Pchip (peripheral interface chip) - The interface to the PCI bus.
- *   .
- **/
+/// RAM, mapped devices and lifecycle shared by the emulated systems.
 class CSystem
 {
 public:
-  enum class Platform { Tsunami, Jensen };
   void          DumpMemory(unsigned int filenum);
   char* PtrToMem(u64 address);
   unsigned int  get_memory_bits();
   bool          RestoreState(const char* fn);
   void          SaveState(const char* fn);
   void          flush_storage();
-  u64           PCI_Phys(int pcibus, u32 address);
-  u64           PCI_Phys_direct_mapped(u32 address, u64 wsm, u64 tba);
-  u64           PCI_Phys_scatter_gather(u32 address, u64 wsm, u64 tba);
-  bool          has_cchip() const noexcept { return platform == Platform::Tsunami; }
-  void          interrupt(int number, bool assert);
-  u32           get_tick_seq() { return m_tick_seq.load(std::memory_order_relaxed); }
-  int           LoadROM();
+  virtual bool  has_interval_timer() const noexcept { return false; }
+  virtual u64   interval_timer_period_ns() { return 0; }
+  virtual void  interval_timer_tick() {}
+  virtual u32   get_tick_seq() { return 0; }
+  virtual int   LoadROM() { return 0; }
   void          PrepareX86OptionROMMemory();
   u64           ReadMem(u64 address, int dsize, CSystemComponent* source);
   void          WriteMem(u64 address, int dsize, u64 data,
@@ -289,7 +262,7 @@ public:
   void          UnregisterComponent(CSystemComponent* component);
   int           RegisterCPU(class CAlphaCPU* cpu);
   void          register_isa_bus(unsigned bus, CISABus& owner);
-  void          init_jensen_eisa();
+  virtual void  attach_board_devices(CConfigurator* cfg) = 0;
   CISABus*      isa_bus(unsigned bus) const;
 
   bool has_vga_device(const vga_device* exclude = nullptr) const noexcept;
@@ -305,8 +278,7 @@ public:
   // Query completed devices for outputs
   std::vector<SDisplayOutput> get_display_outputs() const;
 
-  CSystem(CConfigurator* cfg, Platform platform = Platform::Tsunami);
-  void          ResetMem(unsigned int membits);
+  virtual void  ResetMem(unsigned int membits);
 
   CAlphaCPU* get_cpu(int cpunum) { return acCPUs[cpunum]; };
   int           get_cpu_num() { return iNumCPUs; };
@@ -321,18 +293,6 @@ public:
   };
   bool          native_pal_requested() { return bNativePal; };
 
-  // DIMM topology: 4 MMBs of 8 slots; array a lives on MMB a as sets of 4
-  // identical DIMMs (J1-4 lower set, J5-8 upper set). Max config = 4 arrays
-  // x 8 x 1GB DIMMs = 32GB (all 32 slots).
-  struct SDimmLayout
-  {
-    int      n_arrays;        // populated arrays == populated MMBs (1, 2 or 4)
-    int      dimms_per_array; // 8 (twice-split) or 4 (lower set only)
-    uint32_t dimm_mb;         // capacity of each (identical) DIMM
-  };
-  const SDimmLayout& get_dimm_layout() { return m_dimm_layout; };
-  const std::vector<uint8_t>& get_dimm_spd() { return m_dimm_spd; };
-
   virtual       ~CSystem();
   unsigned int  iNumMemoryBits;
 
@@ -342,13 +302,6 @@ public:
 #define PANIC_SHUTDOWN    1
 #define PANIC_ASKSHUTDOWN 2
 #define PANIC_LISTING     4
-  void          clear_clock_int(int ProcNum);
-  void          clear_ipi(int ProcNum);   // ack interprocessor interrupt: clear MISC<IPINTR>, drop b_irq<3>
-  u64           get_c_misc();
-  u64           get_c_dir(int ProcNum);
-  u64           get_c_dim(int ProcNum);
-  void          set_c_dim(int ProcNum, u64 value);
-
   // Shared by JIT stores and LL/SC. 64-byte spacing avoids false sharing on
   // 64-byte host cache lines. JIT code keeps these addresses until destruction.
   struct alignas(64) LLBucket {
@@ -423,7 +376,6 @@ public:
   bool          IsShutdownRequested() const noexcept;
 
 private:
-  const Platform platform;
   const u64 physical_address_mask;
   struct SDeviceAccessScope
   {
@@ -437,7 +389,13 @@ private:
     bool sampled = false;
   };
   static thread_local SDeviceAccessScope* active_device_access;
-  void bind_isa_devices();
+
+protected:
+  CSystem(CConfigurator* cfg, u64 address_mask, unsigned memory_bits);
+  CConfigurator* config() const { return myCfg; }
+  void destroy_components();
+  const std::vector<CSystemComponent*>& components() const { return acComponents; }
+
   // Recipients and coordinates captured before handlers; nested accesses may
   // remap registry entries without changing the outer transaction.
   struct SDecodeClaims
@@ -448,6 +406,16 @@ private:
     bool subtractive = false;
     void write(u64 address, int dsize, u64 data) const;
   };
+  virtual void bind_board_devices() {}
+  virtual void flush_boot_rom() {}
+  virtual void reset_chipset() {}
+  virtual void finish_board_restore() {}
+  virtual bool allows_shared_access(u64 address, int dsize) const { return false; }
+  virtual u64 read_unmapped(u64 address, int dsize, CSystemComponent* source);
+  virtual void write_unmapped(u64 address, int dsize, u64 data, CSystemComponent* source) {}
+  virtual void dispatch_mapped_write(u64 address, int dsize, u64 data, const SDecodeClaims& claims);
+
+private:
   void recompute_range_overlaps();
   void collect_decode_claims(u64 address, int dsize, bool write,
     SDecodeClaims& claims, const CSystemComponent* source) const;
@@ -461,16 +429,13 @@ private:
   std::string describe_claimant(const SMemoryUser& range, u64 address) const;
   void log_shared_event(const std::string& key, const std::string& line);
   void note_pio_access(u64 address, int dsize, bool write, u64 data, int claims);
-  void dispatch_pci_io_write(u64 address, const CSystemComponent::PciIoWrite& write,
-    const SDecodeClaims& claims);
   void          CheckForShutdown() const;
-  void          ResetChipsetState();
+  void          reset_system_state();
   void          UpdateX86BIOSClock();
   std::atomic<bool> m_reset_requested{ false };
   // Host control request, deliberately outside serialized guest state.
   std::atomic<bool> m_shutdown_requested{ false };
   std::atomic<bool> m_reset_in_progress{ false };
-  std::atomic<bool> m_reported_3c509_probe{ false };
   std::atomic<bool> m_x86_bios_clock_active{ false };
   u32           m_x86_bios_clock_initial_ticks{ 0 };
   u64           m_x86_bios_clock_elapsed_ticks{ 0 };
@@ -478,33 +443,6 @@ private:
   // Mapped devices share PIO dispatch above main memory, followed by chipset decode (under device_bus_mutex).
   u64           pio_read(u64 address, int dsize, CSystemComponent* source);
   void          pio_write(u64 address, int dsize, u64 data, CSystemComponent* source);
-  u64           tsunami_pio_read(u64 address, int dsize, CSystemComponent* source);
-  void          tsunami_pio_write(u64 address, int dsize, u64 data, CSystemComponent* source);
-  static bool   tsunami_shared_pci_range(u64 address, int dsize);
-  static bool   tsunami_decode_pci_io_write(u64 address, int dsize, u64 data, CSystemComponent::PciIoWrite& write);
-  u64           cchip_csr_read(u32 address, CSystemComponent* source);
-  void          cchip_csr_write(u32 address, u64 data, CSystemComponent* source);
-  u64           pchip_csr_read(int num, u32 address);
-  void          pchip_csr_write(int num, u32 address, u64 data);
-  void          latch_pchip_error(int num, u64 data);
-  void          pchip_config_write_abort(int num, u32 address);
-  u8            dchip_csr_read(u32 address);
-  void          dchip_csr_write(u32 address, u8 data);
-  u8            tig_read(u32 address);
-  void          tig_write(u32 address, u8 data);
-  void          tig_update_halt_lines();
-  void          update_pchip_error_irqs();
-  void          recompute_device_irqs();
-
-  // --- MPD / SPD wiring ---
-  MPDState       m_mpd;
-  I2CBus         m_mpd_bus;
-
-  // Build SPD images that match configured memory.
-  void init_spd_from_config_mb(uint32_t total_mb);
-  SDimmLayout    m_dimm_layout{};
-  std::vector<uint8_t> m_dimm_spd; // shared SPD image (all DIMMs identical)
-
   int           iNumCPUs;
   bool          bNativePal = false;
   // Only the owning CPU accesses its reservation while CPUs are running.
@@ -563,14 +501,11 @@ private:
     u32 first, last;
   };
 
-  // Serializes drir RMW + delivery in interrupt() across device threads. On
-  // CSystem (not in saved 'state'), so SaveState is unaffected.
-  std::mutex    drir_lock;
   // Shared by mapped-device dispatch and DMA; not part of saved guest state.
   std::recursive_mutex device_bus_mutex;
-  std::atomic<u32> m_tick_seq{ 0 };  // interval-tick sequence; CPU instruction pacing
 
-  /// The state structure contains all elements that need to be saved to the statefile.
+protected:
+  /// Keep the legacy statefile layout for CPU reservations and Tsunami registers.
   struct SSys_state
   {
     // Snapshot mirrors, refreshed by SaveState with CPUs stopped.
@@ -757,6 +692,8 @@ private:
     } pchip[2];
 
   } state{};
+
+private:
   void* memory;
 
   //    void * memmap;
@@ -799,44 +736,6 @@ private:
 #endif
 };
 
-inline u64 CSystem::get_c_misc()
-{
-  return state.cchip.misc;
-}
-
-inline u64 CSystem::get_c_dir(int ProcNum)
-{
-  return state.cchip.drir & state.cchip.dim[ProcNum];
-}
-
-inline u64 CSystem::get_c_dim(int ProcNum)
-{
-  return state.cchip.dim[ProcNum];
-}
-
-inline void CSystem::set_c_dim(int ProcNum, u64 value)
-{
-  state.cchip.dim[ProcNum] = value;
-}
-
 extern CSystem* theSystem;
 
-/* constants for P-Chip CSR's */
-#define PCI_PCTL_HOLE       U64(0x0000000000000020) /* <5>     */
-#define PCI_PCTL_HOLE_START 0x00080000
-#define PCI_PCTL_HOLE_END   0x000fffff
-
-/* constants for pci-to-phys-address-mapping */
-#define PCI_WSM_MASK      U64(0x00000000fff00000)   /* <31:20> */
-#define PCI_ADD_MASK      U64(0x00000000000fffff)   /* <19:0>  */
-#define PCI_TBA_MASK      U64(0x00000007fff00000)   /* <34:20> */
-#define PCI_PTE_ADD_MASK  U64(0x00000000000fe000)   /* <19:13> */
-#define PCI_PTE_ADD_SHIFT 10
-#define PCI_PTE_TBA_MASK  U64(0x00000007fffffc00)   /* <34:10> */
-#define PCI_PTE_MASK      U64(0x00000007ffffe000)   /* <34:13> */
-#define PCI_PTE_SHIFT     12
-#define PCI_PTE_ADD2_MASK U64(0x0000000000001fff)   /* <12:0>  */
-#define PCI_PTE_PEER_BIT  U64(0x0000000090000000)   /* <31,28> */
-
-#define PHYS_PIO_ACCESS   U64(0x0000080000000000)   /* <43>    */
 #endif // !defined(INCLUDED_SYSTEM_H)

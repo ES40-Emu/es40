@@ -502,7 +502,7 @@ private:
   int             vmspal_ent_itbm(int flags);
   int             vmspal_ent_iacv(int flags);
   int             vmspal_ent_dfault(int flags);
-  int             vmspal_ent_ext_int(int ei);
+  int             vmspal_ent_ext_int(class Tsunami& board, int ei);
   int             vmspal_ent_sw_int(int si);
   int             vmspal_ent_ast_int(int ast);
 

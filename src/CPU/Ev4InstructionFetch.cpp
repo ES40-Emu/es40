@@ -57,7 +57,9 @@ static unsigned ev4_cache_index(u64 physical)
 void Ev4InstructionFetch::preload_srom(CAlphaCPU& cpu)
 {
   const char* path = cpu.myCfg->get_myParent()->get_text_value("rom.srom");
-  if (!path || !*path)
+  if (!path)
+    return;
+  if (!*path)
     FAILURE(Configuration, "EV4 SROM preload requires rom.srom");
   std::ifstream rom(path, std::ios::binary);
   if (!rom)

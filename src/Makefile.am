@@ -109,9 +109,18 @@ noinst_HEADERS = config/ConfigEditor.h config/ConfigDocument.h \
        CPU/AlphaDataFault.h \
        CPU/Ev68InstructionSet.h \
        CPU/Ev4CPUProfile.h \
+       CPU/Ev4CPUState.h \
+       CPU/Ev4ArithmeticTrap.h \
        CPU/Ev4Bcache.h \
        CPU/Ev4Dcache.h \
+       CPU/Ev4FPCR.h \
+       CPU/Ev4HWLoad.h \
+       CPU/Ev4HWStore.h \
+       CPU/Ev4IEEETrap.h \
+       CPU/Ev4IPR.h \
        CPU/Ev4InstructionFetch.h \
+       CPU/Ev4InstructionSet.h \
+       CPU/Ev4PAL.h \
        CPU/Ev4Reset.h \
        CPU/Ev68InstructionFetch.h \
        CPU/idle_detect.h \
@@ -249,6 +258,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        chipset/AliM1543C_pmu.cpp \
        CPU/AlphaCPU.cpp \
        CPU/Ev68PAL.cpp \
+       CPU/Ev4IPR.cpp \
        CPU/Ev68IPR.cpp \
        CPU/Ev68MMU.cpp \
        CPU/Ev68Reset.cpp \

@@ -919,14 +919,6 @@ u64 CAlphaCPU::read_ipr(u32 instruction, AlphaIPRReadDescriptor descriptor, u64 
 	}
 	if (descriptor.kind == AlphaIPRReadKind::ExceptionAddress)
 		return state.exc_addr;
-	if (descriptor.kind == AlphaIPRReadKind::LatchedFaultAddress) {
-		state.ev4_va_locked = 0;
-		return state.fault_va;
-	}
-	if (descriptor.kind == AlphaIPRReadKind::UnlockDcacheStatus) {
-		state.ev4_dc_stat_unlocked = 1;
-		return 0; // The 21064-AA data sheet (3.10.2) specifies only the unlock.
-	}
 	return m_profile.ipr_read.read(*this, instruction);
 }
 
@@ -1108,7 +1100,9 @@ CAlphaCPU::CAlphaCPU(CConfigurator* cfg, CSystem* system, const AlphaCPUProfile&
 	// The JIT compiles PALcode like any other guest code; the HLE can't be used
 	system->request_native_pal("JIT build");
 #else
-	if (cfg->get_bool_value("palcode.vms.nohle", false))
+	if (!profile.pal.call_pal_compatibility)
+		system->request_native_pal(cfg->get_myValue());
+	else if (cfg->get_bool_value("palcode.vms.nohle", false))
 	{
 		char why[64];
 		snprintf(why, sizeof(why), "palcode.vms.nohle set on %s", cfg->get_myName());
@@ -1287,12 +1281,14 @@ void CAlphaCPU::configure_ev4_bcache(u64 value)
 
 void CAlphaCPU::configure_ev4_dcache(u64 value, bool flush)
 {
+	const u64 changed = m_ev4_dcache.control ^ value;
 	m_ev4_dcache.control = value & Ev4Dcache::control_mask;
 #if defined(ES40_JIT) && defined(JIT_VERIFY)
 	if (m_jit_vreplay) flush = false;
 #endif
 	// 21064 HRM Table 5-10: clearing DC_ENA flushes validity; DC_FHIT still overrides it.
 	if (flush && !(value & Ev4Dcache::enable)) m_ev4_dcache.invalidate();
+	if (changed & (Ev4Dcache::spe_1 | Ev4Dcache::spe_2)) flush_data_page_cache();
 	update_ev4_cache_limit();
 }
 
@@ -1925,7 +1921,7 @@ void CAlphaCPU::jit_run(int budget)
 			const size_t swap_bytes = m_profile.ipr_write.indexed ? sizeof(m_pal_temp_write) : 0;
 			const int biu_index = verify.word_count + (int)(swap_bytes / sizeof(u64));
 			const bool verify_indexed_iprs = m_profile.ipr_write.indexed != nullptr;
-			const int ipr_count = biu_index + (verify_indexed_iprs ? 22 : 0);
+			const int ipr_count = biu_index + (verify_indexed_iprs ? 17 : 0);
 			auto cap_iprs = [&](u64* d) {
 				if (verify.word_count) verify.capture(*this, d);
 				if (swap_bytes) memcpy(d + verify.word_count, &m_pal_temp_write, swap_bytes);
@@ -1947,11 +1943,6 @@ void CAlphaCPU::jit_run(int budget)
 					d[biu_index + 14] = state.astrr;
 					d[biu_index + 15] = m_verify_tbia[TB_INDEX_ITB];
 					d[biu_index + 16] = m_verify_tbia[TB_INDEX_DATA];
-					d[biu_index + 17] = state.fault_va;
-					d[biu_index + 18] = state.mm_stat;
-					d[biu_index + 19] = state.ev4_va_locked;
-					d[biu_index + 20] = state.dc_stat;
-					d[biu_index + 21] = state.ev4_dc_stat_unlocked;
 				}
 			};
 			auto put_iprs = [&](const u64* s, bool replay) {
@@ -1976,11 +1967,6 @@ void CAlphaCPU::jit_run(int budget)
 					state.astrr = static_cast<int>(s[biu_index + 14]);
 					m_verify_tbia[TB_INDEX_ITB] = s[biu_index + 15];
 					m_verify_tbia[TB_INDEX_DATA] = s[biu_index + 16];
-					state.fault_va = s[biu_index + 17];
-					state.mm_stat = s[biu_index + 18];
-					state.ev4_va_locked = static_cast<u8>(s[biu_index + 19]);
-					state.dc_stat = s[biu_index + 20];
-					state.ev4_dc_stat_unlocked = static_cast<u8>(s[biu_index + 21]);
 				}
 				if (!replay) sync_register_bank();
 			};

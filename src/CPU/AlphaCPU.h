@@ -229,6 +229,7 @@
 #include "system/System.h"
 #include "cpu_defs.h"
 #include "AlphaCPUProfile.h"
+#include "Ev4ArithmeticTrap.h"
 #include "Ev4Bcache.h"
 #include "Ev4Dcache.h"
 class CJitEngine;   // JIT block-cache engine (ES40_JIT builds)
@@ -268,15 +269,20 @@ class CAlphaCPU : public CSystemComponent, public CRunnable
   friend class Ev68MMU;
   friend class Ev68Interrupt;
   friend class Ev68ArithmeticTrap;
+  friend void ev4_report_arithmetic_trap(CAlphaCPU&, u64, u32, AlphaArithmeticTrapKind);
   friend class Ev68FPStart;
   friend bool alpha_cycle_counter_enabled(const CAlphaCPU& cpu);
   friend std::uint64_t alpha_read_cycle_counter(const CAlphaCPU& cpu);
   friend class Ev68Idle;
   friend class Ev68Reset;
   friend class Ev68CPUState;
+  friend void ev4_capture_ipr_state(const CAlphaCPU&, u64*);
+  friend void ev4_restore_ipr_state(CAlphaCPU&, const u64*);
   friend class Ev68InstructionFetch;
   friend class Ev4InstructionFetch;
-  friend constexpr AlphaCPUProfile ev4_ibox_profile(AlphaCPUProfile profile);
+  friend constexpr AlphaCPUProfile ev4_cpu_profile();
+  friend u64 ev4_read_ipr(CAlphaCPU& cpu, u32 instruction);
+  friend void ev4_write_ipr(CAlphaCPU& cpu, u32 instruction, u64 value, AlphaIPRWriteContext context);
   friend int ev4_memory_fault(CAlphaCPU&, u64, int, u32, unsigned, AlphaPALException);
 public:
   void          flush_icache_asm();
@@ -886,8 +892,9 @@ private:
     bool  sde;            /**< IPR I_CTL: sde[1] (PALshadow enable) [HRM p 5-15..18] */
     u8    ev4_va_locked;  // VA and MM_CSR share a lock (21064 HRM 5.3.5). Uses saved-state padding.
     u8    ev4_dc_stat_unlocked; // Model the potentially locked reset state as locked (21064-AA data sheet, Table 3-8).
+    bool  ev4_swc_blocked;  // Non-/S floating trap observed since the last EXC_SUM write.
     u64   fault_va;       /**< IPR VA: virtual address of last Dstream miss or fault [HRM p 5-4] */
-    u64   va_form_va;     /**< Address used for VA_FORM computation (may differ from VA for VPTE) */
+    u64   va_form_va;     /**< EV68 VA_FORM source or EV4 EXC_SUM serial register mask (21064 HRM 5.2.12). */
     u64   exc_sum;        /**< IPR EXC_SUM: exception summary [HRM p 5-13..15] */
     int   i_ctl_va_mode;  /**< IPR I_CTL: (va_form_32 + va_48) [HRM p 5-15..17] */
     int   va_ctl_va_mode; /**< IPR VA_CTL: (va_form_32 + va_48) [HRM p 5-4] */
@@ -960,6 +967,11 @@ private:
     bool  pal_vms;            /**< Family-selected VMS PAL replacements enabled. */
     int   irq_h_timer[6];     /**< Delayed IRQ_H[0:5] timers; guarded by m_irq_lock while running */
   } state;  /**< Determines CPU state that needs to be saved to the state file */
+
+  Ev4ArithmeticTrapView ev4_arithmetic_state()
+  {
+    return {state.exc_sum, state.va_form_va, state.ev4_swc_blocked};
+  }
 
   // An unstalled EV4 read on the next issue sees the pre-write value (HRM 4.6).
   struct {

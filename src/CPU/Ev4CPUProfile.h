@@ -1,4 +1,4 @@
-/* ES40 emulator -- EV4 physical bootstrap profile
+/* ES40 emulator -- EV4 CPU identity profile
  * Copyright (C) 2026 by gdwnldsKSC
  * All rights reserved.
  *
@@ -30,6 +30,20 @@
 #include "Ev4Reset.h"
 #include "Ev4InstructionFetch.h"
 #include "Ev4IPR.h"
+#include "Ev4CPUState.h"
+#include "Ev4InstructionSet.h"
+#include "Ev4PAL.h"
+#include "Ev4HWLoad.h"
+#include "Ev4HWStore.h"
+#include "Ev4FPCR.h"
+#include "Ev4IEEETrap.h"
+
+inline void ev4_report_arithmetic_trap(CAlphaCPU& cpu, u64 flags, u32 dest, AlphaArithmeticTrapKind kind)
+{
+  ev4_record_arithmetic_trap(cpu.ev4_arithmetic_state(), flags, dest, kind);
+}
+
+inline constexpr AlphaArithmeticTrapPolicy kEv4ArithmeticTrapPolicy{&ev4_report_arithmetic_trap};
 
 // The first D-stream fault latches VA and MM_CSR together (21064 HRM 4.7.1.2, 5.3.4, 5.3.5).
 inline int ev4_memory_fault(CAlphaCPU& cpu, u64 address, int flags, u32 ins, unsigned status,
@@ -55,61 +69,84 @@ constexpr unsigned ev4_mm_fault_bits(int flags, bool on_read, bool on_write)
   return for_bit | fow_bit;
 }
 
-constexpr AlphaCPUProfile ev4_memory_fault_profile(AlphaCPUProfile profile)
+constexpr AlphaCPUProfile ev4_cpu_profile()
 {
-  if (!profile.tb_miss.handle)
-    profile.tb_miss.handle = [](CAlphaCPU& cpu, u64 va, int flags, u32 ins) {
-      const auto reason = (flags & ACCESS_EXEC) ? AlphaPALException::InstructionTlbMiss : AlphaPALException::DataTlbMiss;
-      return ev4_memory_fault(cpu, va, flags, ins, 0, reason);
-    };
-  if (!profile.data_fault.unaligned)
-    profile.data_fault.unaligned = [](CAlphaCPU& cpu, u64 va, int flags, u32 ins, int) {
-      ev4_memory_fault(cpu, va, flags, ins, 0, AlphaPALException::Unaligned);
-    };
-  if (!profile.data_fault.access_violation)
-    profile.data_fault.access_violation = [](CAlphaCPU& cpu, u64 va, int flags, u32 ins, AlphaDataFaultSource source) {
-      const auto status = 2 | ev4_mm_fault_bits(flags, source.fault_on_read, source.fault_on_write);
-      return ev4_memory_fault(cpu, va, flags, ins, status, AlphaPALException::DataFault);
-    };
-  if (!profile.data_fault.access_fault)
-    profile.data_fault.access_fault = [](CAlphaCPU& cpu, u64 va, int flags, u32 ins, bool on_read, bool on_write) {
-      const auto status = ev4_mm_fault_bits(flags, on_read, on_write);
-      return ev4_memory_fault(cpu, va, flags, ins, status, AlphaPALException::DataFault);
-    };
-  return profile;
-}
-
-// 21064 HRM 5.2.3: ICCSR controls FPE, kernel HWE and the I-stream ASN.
-constexpr AlphaCPUProfile ev4_ibox_profile(AlphaCPUProfile profile)
-{
-  if (!profile.fp_start.enabled)
-    profile.fp_start.enabled = [](const CAlphaCPU& cpu) { return (cpu.state.ibox_ctl & kEv4IccsrFpe) != 0; };
-  if (!profile.pal.access_context)
-    profile.pal.access_context = [](const CAlphaCPU& cpu) -> AlphaPALAccessContext {
-      return {static_cast<std::uint32_t>(cpu.state.cm), (cpu.state.ibox_ctl & kEv4IccsrHwe) != 0};
-    };
-  if (!profile.mmu_address.access)
-    profile.mmu_address.access = [](const CAlphaCPU& cpu, int flags) -> AlphaMMUAccess {
-      return {(flags & ALT) ? cpu.state.alt_cm : cpu.state.cm,
-              (flags & ACCESS_EXEC) ? static_cast<int>(ev4_iccsr_asn(cpu.state.ibox_ctl)) : 0};
-    };
-  return profile;
-}
-
-// Select external PAL fetch at reset while preserving the model's execution rules.
-constexpr AlphaCPUProfile ev4_no_srom_boot_profile(AlphaCPUProfile profile)
-{
+  // Production 21064, pass 3 (21064 HRM Table 5-15; Alpha A.R.M. Table E-1).
+  AlphaCPUProfile profile{0, 0, 7, 2, 1};
+  profile.pal = {&ev4_pal_exception_entry, &ev4_call_pal_valid, &ev4_call_pal_entry,
+                 &ev4_hardware_instruction_access, &ev4_hardware_return};
+  profile.ipr_read = kEv4IPRReadPolicy;
+  profile.ipr_write = kEv4IPRWritePolicy;
+  profile.hw_load = kEv4HWLoadPolicy;
+  profile.hw_store = kEv4HWStorePolicy;
   profile.reset = kEv4ResetPolicy;
   profile.instruction_fetch = kEv4InstructionFetchPolicy;
-  return ev4_ibox_profile(ev4_memory_fault_profile(profile));
+  profile.instruction_decode = kEv4InstructionDecodePolicy;
+  profile.fpcr = kEv4FPCRPolicy;
+  profile.arithmetic_trap = kEv4ArithmeticTrapPolicy;
+  profile.ieee_trap = kEv4IEEETrapPolicy;
+  profile.cycle_counter = kAlphaCycleCounterPolicy;
+  profile.cpu_state = {nullptr, kEv4JitVerifyPolicy, AlphaCPUSnapshotSignature{0x210640e4, 0x4e046012}};
+
+  // 21064 HRM 5.2.3: ICCSR controls FPE, kernel HWE and the I-stream ASN.
+  profile.fp_start.enabled = [](const CAlphaCPU& cpu) { return (cpu.state.ibox_ctl & kEv4IccsrFpe) != 0; };
+  profile.pal.access_context = [](const CAlphaCPU& cpu) -> AlphaPALAccessContext {
+    return {static_cast<std::uint32_t>(cpu.state.cm), (cpu.state.ibox_ctl & kEv4IccsrHwe) != 0};
+  };
+  profile.mmu_address.access = [](const CAlphaCPU& cpu, int flags) -> AlphaMMUAccess {
+    return {(flags & ALT) ? cpu.state.alt_cm : cpu.state.cm,
+            (flags & ACCESS_EXEC) ? static_cast<int>(ev4_iccsr_asn(cpu.state.ibox_ctl)) : 0};
+  };
+  // 21064 HRM 2.3.2, 2.5.1 and Table 5-10: I-stream MAP and D-stream superpages.
+  profile.mmu_address.map = [](const CAlphaCPU& cpu, u64 va, int flags, int mode) -> AlphaMMUAddress {
+    if ((va >> 42) != 0 && (va >> 42) != (UINT64_MAX >> 42))
+      return {AlphaMMUAddressKind::Invalid, 0};
+    const auto control = cpu.m_ev4_dcache.control;
+    const bool exec = (flags & ACCESS_EXEC) != 0;
+    if (((va >> 41) & 3) == 2 && (exec ? (cpu.state.ibox_ctl & kEv4IccsrMap) : (control & Ev4Dcache::spe_2)))
+      return {mode ? AlphaMMUAddressKind::AccessViolation : AlphaMMUAddressKind::Direct, va & U64(0x3ffffffff)};
+    if (!exec && (control & Ev4Dcache::spe_1) && ((va >> 30) & 0x1fff) == 0x1ffe)
+      return {mode ? AlphaMMUAddressKind::AccessViolation : AlphaMMUAddressKind::Direct, va & U64(0x3fffffff)};
+    return {AlphaMMUAddressKind::TranslationBuffer, 0};
+  };
+  profile.tb_fill.base_page_match_mask = U64(0x7ffffffe000);
+  profile.tb_fill.decode = [](const CAlphaCPU&, u64, u64, u64, int) -> AlphaTBFill {
+    FAILURE(NotImplemented, "EV4 translation buffer fill");
+  };
+  profile.tb_miss.handle = [](CAlphaCPU& cpu, u64 va, int flags, u32 ins) {
+    const auto reason = (flags & ACCESS_EXEC) ? AlphaPALException::InstructionTlbMiss : AlphaPALException::DataTlbMiss;
+    return ev4_memory_fault(cpu, va, flags, ins, 0, reason);
+  };
+  profile.instruction_fault.handle = [](CAlphaCPU& cpu, u64 va, int flags, u32 ins, AlphaInstructionFaultSource) {
+    return ev4_memory_fault(cpu, va, flags, ins, 0, AlphaPALException::InstructionAccessViolation);
+  };
+  profile.data_fault.unaligned = [](CAlphaCPU& cpu, u64 va, int flags, u32 ins, int) {
+    ev4_memory_fault(cpu, va, flags, ins, 0, AlphaPALException::Unaligned);
+  };
+  profile.data_fault.access_violation = [](CAlphaCPU& cpu, u64 va, int flags, u32 ins, AlphaDataFaultSource source) {
+    const auto status = 2 | ev4_mm_fault_bits(flags, source.fault_on_read, source.fault_on_write);
+    return ev4_memory_fault(cpu, va, flags, ins, status, AlphaPALException::DataFault);
+  };
+  profile.data_fault.access_fault = [](CAlphaCPU& cpu, u64 va, int flags, u32 ins, bool on_read, bool on_write) {
+    const auto status = ev4_mm_fault_bits(flags, on_read, on_write);
+    return ev4_memory_fault(cpu, va, flags, ins, status, AlphaPALException::DataFault);
+  };
+
+  // 21064 HRM 2.3.3 and 5.2.14-19: only enabled requests interrupt native mode.
+  profile.interrupt.pending = [](CAlphaCPU& cpu) {
+    const auto& state = cpu.state;
+    return (state.eien & state.eir) || (state.pcen & state.pcr) || (state.slen & state.slr) ||
+           (state.cren & state.crr) || (state.sien & state.sir) ||
+           (state.asten && (state.aster & state.astrr & ((1 << (state.cm + 1)) - 1)));
+  };
+  profile.interrupt.service = [](CAlphaCPU& cpu) {
+    return cpu.get_profile().interrupt.pending(cpu) ? AlphaInterruptResult::EnterPAL : AlphaInterruptResult::Continue;
+  };
+  // Use the 21064 HRM Fig. A-26 example until Jensen supplies its own lock flag (PB22H-KB, p. 3-2).
+  profile.llsc.matches = [](u64 locked, u64 address) { return (locked >> 5) == (address >> 5); };
+  return profile;
 }
 
-// rom.srom on the board supplies the packed serial PROM.
-constexpr AlphaCPUProfile ev4_srom_boot_profile(AlphaCPUProfile profile)
-{
-  profile.reset = kEv4SromResetPolicy;
-  profile.instruction_fetch = kEv4InstructionFetchPolicy;
-  return ev4_ibox_profile(ev4_memory_fault_profile(profile));
-}
+inline constexpr AlphaCPUProfile kEv4Profile = ev4_cpu_profile();
 
 #endif

@@ -65,10 +65,10 @@ constexpr AlphaIPRReadDescriptor ev4_describe_ipr_read(std::uint32_t instruction
     return {AlphaIPRReadKind::ExceptionAddress, false, true};
   // Reading VA unlocks VA and MM_CSR even to R31 (21064 HRM Table 4-7, 5.3.4, 5.3.5).
   if (selector.banks == 0x40 && selector.index == 5)
-    return {AlphaIPRReadKind::LatchedFaultAddress, false, false};
+    return {AlphaIPRReadKind::Helper, false, false};
   // DC_ADDR unlocks DC_STAT even to R31 (21064-AA data sheet, Table 3-2 and 3.10.2).
   if (selector.banks == 0x40 && selector.index == 11)
-    return {AlphaIPRReadKind::UnlockDcacheStatus, false, false};
+    return {AlphaIPRReadKind::Helper, false, false};
   if (selector.banks == 0x20 && selector.index == 9) // PS.
     return {AlphaIPRReadKind::Helper, false, true};
   if (selector.banks == 0x20 && selector.index == 10) // EXC_SUM shifts MSK, even to R31.
@@ -254,5 +254,12 @@ constexpr void ev4_write_pal_temp(Ev4PALTempState& state, std::uint32_t index,
 {
   state.r[index & 31] = value;
 }
+
+std::uint64_t ev4_read_ipr(CAlphaCPU& cpu, std::uint32_t instruction);
+void ev4_write_ipr(CAlphaCPU& cpu, std::uint32_t instruction, std::uint64_t value,
+                   AlphaIPRWriteContext context);
+
+inline constexpr AlphaIPRReadPolicy kEv4IPRReadPolicy{&ev4_read_ipr, &ev4_describe_ipr_read};
+inline constexpr AlphaIPRWritePolicy kEv4IPRWritePolicy{&ev4_write_ipr, &ev4_describe_ipr_write};
 
 #endif

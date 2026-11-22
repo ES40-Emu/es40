@@ -440,6 +440,7 @@ list(APPEND ES40_SOURCES
     src/CPU/AlphaCPU.cpp
     src/CPU/Ev68CPUProfile.h
     src/CPU/Ev68PAL.cpp
+    src/CPU/Ev4IPR.cpp
     src/CPU/Ev68IPR.cpp
     src/CPU/AlphaReset.h
     src/CPU/Ev68Reset.h

@@ -27,14 +27,23 @@
 
 #include "AlphaArithmeticTrap.h"
 
+struct Ev4ArithmeticTrapView
+{
+  std::uint64_t& summary;
+  std::uint64_t& write_mask;
+  bool& swc_blocked;
+};
+
 struct Ev4ArithmeticTrapState
 {
   std::uint64_t summary = 0;
   std::uint64_t write_mask = 0;
   bool swc_blocked = false;
+
+  constexpr operator Ev4ArithmeticTrapView() { return {summary, write_mask, swc_blocked}; }
 };
 
-constexpr void ev4_record_arithmetic_trap(Ev4ArithmeticTrapState& state,
+constexpr void ev4_record_arithmetic_trap(Ev4ArithmeticTrapView state,
     std::uint64_t flags, std::uint32_t destination, AlphaArithmeticTrapKind kind)
 {
   const bool floating = kind == AlphaArithmeticTrapKind::FloatingPoint;
@@ -52,7 +61,7 @@ constexpr void ev4_record_arithmetic_trap(Ev4ArithmeticTrapState& state,
 }
 
 // EXC_SUM.MSK shifts out F31-F0, then I31-I0 (HRM 5.2.12).
-constexpr std::uint64_t ev4_read_exception_summary(Ev4ArithmeticTrapState& state)
+constexpr std::uint64_t ev4_read_exception_summary(Ev4ArithmeticTrapView state)
 {
   const auto value = (state.summary & 0x1fc) | ((state.write_mask >> 63) << 33);
   state.write_mask <<= 1;
@@ -60,7 +69,7 @@ constexpr std::uint64_t ev4_read_exception_summary(Ev4ArithmeticTrapState& state
 }
 
 // Writes leave the serial register mask intact.
-constexpr void ev4_write_exception_summary(Ev4ArithmeticTrapState& state, std::uint64_t)
+constexpr void ev4_write_exception_summary(Ev4ArithmeticTrapView state, std::uint64_t)
 {
   state.summary = 0;
   state.swc_blocked = false;

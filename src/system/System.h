@@ -250,6 +250,7 @@ public:
   u64           PCI_Phys(int pcibus, u32 address);
   u64           PCI_Phys_direct_mapped(u32 address, u64 wsm, u64 tba);
   u64           PCI_Phys_scatter_gather(u32 address, u64 wsm, u64 tba);
+  bool          has_cchip() const noexcept { return platform == Platform::Tsunami; }
   void          interrupt(int number, bool assert);
   u32           get_tick_seq() { return m_tick_seq.load(std::memory_order_relaxed); }
   int           LoadROM();

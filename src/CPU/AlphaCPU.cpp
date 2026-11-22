@@ -541,7 +541,7 @@ void CAlphaCPU::idle_nap(bool detected)
 
 	const auto start = steady_clock::now();
 	auto deadline = start + (mp && !watched ? microseconds(idle_mp_nap_us) : microseconds(1000));
-	if (state.iProcNum == 0)
+	if (state.iProcNum == 0 && cSystem->has_cchip())
 	{
 		// A due tick still waits for the catch-up gap (service_interval_timer).
 		auto fire = next_timer_fire;
@@ -830,10 +830,10 @@ void CAlphaCPU::idle_detect_sample(u64 start_virt, const AlphaInstructionSource&
 	m_spin_ic = _ic;
 }
 
-// System interval-timer policy shared by both execution engines and idle paths.
+// Jensen wires CPU IRQ2 to the 82357 NMI output (PB22H-KB, p. 9-8).
 void CAlphaCPU::service_interval_timer(std::chrono::steady_clock::time_point now)
 {
-	if (state.iProcNum == 0)
+	if (state.iProcNum == 0 && cSystem->has_cchip())
 	{
 		if (now >= next_timer_fire)
 		{
@@ -1265,7 +1265,7 @@ void CAlphaCPU::init()
 
 	printf("%s(%d): $Id$\n",
 		devid_string, state.iProcNum);
-	if (state.iProcNum == 0)
+	if (state.iProcNum == 0 && cSystem->has_cchip())
 	{
 		if (m_max_instr_per_tick)
 			printf("%s: interval timer paced to %" PRIu64 " guest instr/tick\n",
@@ -1664,7 +1664,7 @@ void CAlphaCPU::jit_run(int budget)
 	// A CPU that retires the envelope before the wall-clock tick is due shall sleep until
 	// the correct tick time, the cpu should never receive early/extra. 
 	// The RPCC/cycle counter is unaffected (it stays wall-clock accurate via sync_cc_wallclock).
-	const u64 pace_period_ns = (m_max_instr_per_tick && theAli && instruction_pacing_enabled())
+	const u64 pace_period_ns = (cSystem->has_cchip() && m_max_instr_per_tick && theAli && instruction_pacing_enabled())
 		? theAli->get_interval_period_ns() : 0;   // 0 = pacing off, or the guest hasn't programmed the tick yet
 	if (pace_period_ns)
 	{

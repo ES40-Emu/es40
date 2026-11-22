@@ -346,6 +346,7 @@ SafeOp classify(uint32_t ins, bool pal_block, const AlphaIPRReadPolicy& ipr_read
         case AlphaIPRWriteKind::PalTemp: return OP_HW_MTPR_PAL_TEMP;
         case AlphaIPRWriteKind::InterruptClear:
         case AlphaIPRWriteKind::HardwareInterruptEnable:
+        case AlphaIPRWriteKind::SoftwareInterruptEnable:
         case AlphaIPRWriteKind::Helper: return OP_HW_MTPR;
         case AlphaIPRWriteKind::AboxControl:
         case AlphaIPRWriteKind::IboxControl:

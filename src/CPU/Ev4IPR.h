@@ -80,13 +80,6 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
   const auto selector = ev4_ipr_selector(instruction);
   if (ev4_ipr_ignored(selector, pal_mode))
     return AlphaIPRWriteKind::Noop;
-  // IBX selects ICCSR (2), HIER (16) or SL_CLR (19) with an optional PAL_TEMP write (21064 HRM 4.8.1, Table 4-7).
-  if ((selector.banks == 0x20 || selector.banks == 0xa0) &&
-      (selector.index == 2 || selector.index == 16 || selector.index == 19)) {
-    if (slot) *slot = (selector.banks & 0x80) ? 32u + selector.index : 0;
-    if (selector.index == 16) return AlphaIPRWriteKind::HardwareInterruptEnable;
-    return selector.index == 2 ? AlphaIPRWriteKind::IboxControl : AlphaIPRWriteKind::InterruptClear;
-  }
   // 21064 HRM 4.8.1, Table 4-7: ABX selects ABOX_CTL (14) or BIU_CTL (18), PAL writes the same-index PAL_TEMP.
   if ((selector.banks == 0x40 || selector.banks == 0xc0) &&
       (selector.index == 14 || selector.index == 18)) {
@@ -105,6 +98,19 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
     return AlphaIPRWriteKind::Helper;
   if (selector.banks == 0x20 && selector.index == 11) // PAL_BASE.
     return AlphaIPRWriteKind::Helper;
+  // IBX and PAL together also write the same-index PAL_TEMP (21064 HRM 4.8.1, Table 4-7).
+  if (selector.banks == 0x20 || selector.banks == 0xa0) {
+    auto kind = AlphaIPRWriteKind::Interpreter;
+    switch (selector.index) {
+    case 2:  kind = AlphaIPRWriteKind::IboxControl; break;
+    case 16: kind = AlphaIPRWriteKind::HardwareInterruptEnable; break;
+    case 17: kind = AlphaIPRWriteKind::SoftwareInterruptEnable; break;
+    case 19: kind = AlphaIPRWriteKind::InterruptClear; break;
+    default: return kind;
+    }
+    if (slot) *slot = (selector.banks & 0x80) ? 32u + selector.index : 0;
+    return kind;
+  }
   if (selector.banks == 0x40 && selector.index == 15) // ALT_MODE.
     return AlphaIPRWriteKind::Helper;
   if (selector.banks == 0x40 && selector.index == 16) // CC.
@@ -128,6 +134,13 @@ inline void ev4_write_hier(std::uint64_t value, int& eien, int& pcen, int& slen,
   pcen = (((value >> 15) & 1) << 1) | ((value >> 8) & 1);
   slen = (value >> 32) & 1;
   cren = (value >> 2) & 1;
+}
+
+// Bits 47:33 write SIER[15:1]. SIER[2] also gates ASTs (21064 HRM 5.2.16 and 5.2.18, Fig. 5-15).
+inline void ev4_write_sier(std::uint64_t value, int& sien, int& asten)
+{
+  sien = (value >> 32) & 0xfffe;
+  asten = (sien >> 2) & 1;
 }
 
 // 21064 HRM 5.2.3, Fig. 5-3: ICCSR has distinct HW_MTPR and HW_MFPR layouts.

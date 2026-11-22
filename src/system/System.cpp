@@ -1550,15 +1550,7 @@ void CSystem::prepare_shared_access(u64 address, int dsize, bool write,
 	if (claims.subtractive)
 		report_decode_overlap(address, dsize, write, claims, source,
 			"several subtractive responders");
-	const bool valid_width = dsize == 8 || dsize == 16 || dsize == 32 || dsize == 64;
-	auto within = [&](u64 base, u64 length) {
-		return valid_width && address >= base && address < base + length &&
-			(u64)(dsize / 8) <= base + length - address;
-	};
-	if (!within(U64(0x80000000000), U64(0x100000000)) &&
-		!within(U64(0x80200000000), U64(0x100000000)) &&
-		!within(U64(0x801fc000000), U64(0x2000000)) &&
-		!within(U64(0x803fc000000), U64(0x2000000)))
+	if (platform != Platform::Tsunami || !tsunami_shared_pci_range(address, dsize))
 		report_decode_overlap(address, dsize, write, claims, source,
 			"shared completion is only modeled for PCI I/O and memory");
 
@@ -1649,13 +1641,18 @@ u64 CSystem::resolve_shared_read(u64 address, int dsize,
 		"debug.shared_read_claimant is not among the claimants", detail.str());
 }
 
-void CSystem::dispatch_pci_io_write(u64 address, int dsize, u64 data,
+void CSystem::SDecodeClaims::write(u64 address, int dsize, u64 data) const
+{
+	for (int k = 0; k < count; ++k)
+	{
+		const auto& r = range[k];
+		r.component->WriteMem(r.index, address - r.base, dsize, data);
+	}
+}
+
+void CSystem::dispatch_pci_io_write(u64 address, const CSystemComponent::PciIoWrite& write,
 	const SDecodeClaims& claims)
 {
-	const CSystemComponent::PciIoWrite write = {
-		address >= U64(0x803fc000000) ? 1 : 0,
-		(u32)(address & U64(0x1ffffff)), dsize, data
-	};
 	struct Observation { CSystemComponent* component; u64 captured; };
 	std::vector<Observation> observers;
 
@@ -1676,11 +1673,7 @@ void CSystem::dispatch_pci_io_write(u64 address, int dsize, u64 data,
 			observers.push_back({ component, captured });
 	}
 
-	for (int k = 0; k < claims.count; ++k)
-	{
-		const SMemoryUser* r = &claims.range[k];
-		r->component->WriteMem(r->index, address - r->base, dsize, data);
-	}
+	claims.write(address, write.dsize, write.data);
 	const auto dispatch = claims.count
 		? CSystemComponent::PciIoWriteDispatch::MappedTargetReturned
 		: CSystemComponent::PciIoWriteDispatch::NoMappedTarget;
@@ -1688,9 +1681,56 @@ void CSystem::dispatch_pci_io_write(u64 address, int dsize, u64 data,
 		observer.component->observe_pci_io_write(write, observer.captured, dispatch);
 }
 
+// Write to PIO space above main memory, including mapped devices and internal chipset registers.
+void CSystem::pio_write(u64 a, int dsize, u64 data, CSystemComponent* source)
+{
+	std::lock_guard<std::recursive_mutex> bus_lock(device_bus_mutex);
+	SDeviceAccessScope time_scope(this);
+	SDecodeClaims claims;
+	collect_decode_claims(a, dsize, true, claims, source);
+	if (claims.count > 1)
+		prepare_shared_access(a, dsize, true, claims, source);
+	if (claims.count)
+		note_pio_access(a, dsize, true, data, claims.count);
+
+	CSystemComponent::PciIoWrite write;
+	if (platform == Platform::Tsunami && tsunami_decode_pci_io_write(a, dsize, data, write))
+		dispatch_pci_io_write(a, write, claims);
+	else
+		claims.write(a, dsize, data);
+	if (!claims.count && platform == Platform::Tsunami)
+		tsunami_pio_write(a, dsize, data, source);
+}
+
+// Read from PIO space above main memory, including mapped devices and internal chipset registers.
+u64 CSystem::pio_read(u64 a, int dsize, CSystemComponent* source)
+{
+	std::lock_guard<std::recursive_mutex> bus_lock(device_bus_mutex);
+	SDeviceAccessScope time_scope(this);
+	SDecodeClaims claims;
+	collect_decode_claims(a, dsize, false, claims, source);
+	if (claims.count == 1)
+	{
+		const SMemoryUser* r = &claims.range[0];
+		const u64 data = r->component->ReadMem(r->index, a - r->base, dsize);
+		note_pio_access(a, dsize, false, data, 1);
+		return data;
+	}
+	if (claims.count > 1)
+	{
+		prepare_shared_access(a, dsize, false, claims, source);
+		const u64 data = resolve_shared_read(a, dsize, claims, source);
+		note_pio_access(a, dsize, false, data, claims.count);
+		return data;
+	}
+	if (platform == Platform::Tsunami)
+		return tsunami_pio_read(a, dsize, source);
+	return dsize == 64 ? ~U64(0) : (U64(1) << dsize) - 1;
+}
+
 /**
  * Write 8, 16, 32 or 64 bits to a system address: main memory here, PIO
- * space via pio_write() (System_tsunami.cpp).
+ * space via pio_write().
  **/
 void CSystem::WriteMem(u64 address, int dsize, u64 data, CSystemComponent* source)
 {
@@ -1740,7 +1780,7 @@ void CSystem::WriteMem(u64 address, int dsize, u64 data, CSystemComponent* sourc
 
 /**
  * Read 8, 16, 32 or 64 bits from a system address: main memory here, PIO
- * space via pio_read() (System_tsunami.cpp).
+ * space via pio_read().
  **/
 u64 CSystem::ReadMem(u64 address, int dsize, CSystemComponent* source)
 {

@@ -36,9 +36,32 @@
 #include "emu/PCIDevice.h"
 #include "CPU/AlphaCPU.h"
 
+bool CSystem::tsunami_shared_pci_range(u64 address, int dsize)
+{
+	const bool valid_width = dsize == 8 || dsize == 16 || dsize == 32 || dsize == 64;
+	auto within = [&](u64 base, u64 length) {
+		return valid_width && address >= base && address < base + length &&
+			(u64)(dsize / 8) <= base + length - address;
+	};
+	return within(U64(0x80000000000), U64(0x100000000)) ||
+		within(U64(0x80200000000), U64(0x100000000)) ||
+		within(U64(0x801fc000000), U64(0x2000000)) ||
+		within(U64(0x803fc000000), U64(0x2000000));
+}
+
+bool CSystem::tsunami_decode_pci_io_write(u64 address, int dsize, u64 data, CSystemComponent::PciIoWrite& write)
+{
+	const u64 io_base = address & ~U64(0x1ffffff);
+	if ((io_base != U64(0x801fc000000) && io_base != U64(0x803fc000000)) ||
+		(dsize != 8 && dsize != 16 && dsize != 32) || (address & 3) + dsize / 8 > 4)
+		return false;
+	write = { io_base == U64(0x803fc000000) ? 1 : 0, (u32)(address & U64(0x1ffffff)), dsize, data };
+	return true;
+}
+
 /**
- * \brief Write to PIO space (address above main memory): a mapped device,
- * internal chipset registers, or nothing.
+ * \brief Write to PIO space (address above main memory) after mapped device
+ * dispatch: internal chipset registers or an unclaimed Tsunami address.
  *
  * Source: HRM, 10.1.1:
  *
@@ -118,34 +141,8 @@
  * +-------------------+--------+-------------------------------+---------------------------------+
  * \endcode
  **/
-void CSystem::pio_write(u64 a, int dsize, u64 data, CSystemComponent* source)
+void CSystem::tsunami_pio_write(u64 a, int dsize, u64 data, CSystemComponent* source)
 {
-	std::lock_guard<std::recursive_mutex> bus_lock(device_bus_mutex);
-	SDeviceAccessScope time_scope(this);
-	SDecodeClaims claims;
-	collect_decode_claims(a, dsize, true, claims, source);
-	const bool mapped = claims.count != 0;
-	if (claims.count > 1)
-		prepare_shared_access(a, dsize, true, claims, source);
-	if (mapped)
-		note_pio_access(a, dsize, true, data, claims.count);
-	const u64 io_base = a & ~U64(0x1ffffff);
-
-	const bool observed_io = platform == Platform::Tsunami &&
-		(io_base == U64(0x801fc000000) || io_base == U64(0x803fc000000)) &&
-		(dsize == 8 || dsize == 16 || dsize == 32) &&
-		(a & 3) + dsize / 8 <= 4;
-	if (observed_io)
-		dispatch_pci_io_write(a, dsize, data, claims);
-	else
-		for (int k = 0; k < claims.count; ++k)
-		{
-			const SMemoryUser* r = &claims.range[k];
-			r->component->WriteMem(r->index, a - r->base, dsize, data);
-		}
-	if (mapped || platform != Platform::Tsunami)
-		return;
-
 	const u64 config_base = a & ~U64(0xffffff);
 	if ((config_base == U64(0x801fe000000) || config_base == U64(0x803fe000000)) &&
 		(dsize == 8 || dsize == 16 || dsize == 32 || dsize == 64) &&
@@ -281,8 +278,8 @@ void CSystem::pio_write(u64 a, int dsize, u64 data, CSystemComponent* source)
 }
 
 /**
- * \brief Read from PIO space (address above main memory): a mapped device,
- * internal chipset registers, or nothing.
+ * \brief Read from PIO space (address above main memory) after mapped device
+ * dispatch: internal chipset registers or an unclaimed Tsunami address.
  *
  * Source: HRM, 10.1.1:
  *
@@ -362,30 +359,8 @@ void CSystem::pio_write(u64 a, int dsize, u64 data, CSystemComponent* source)
  * +-------------------+--------+-------------------------------+---------------------------------+
  * \endcode
  **/
-u64 CSystem::pio_read(u64 a, int dsize, CSystemComponent* source)
+u64 CSystem::tsunami_pio_read(u64 a, int dsize, CSystemComponent* source)
 {
-	std::lock_guard<std::recursive_mutex> bus_lock(device_bus_mutex);
-	SDeviceAccessScope time_scope(this);
-	SDecodeClaims claims;
-	collect_decode_claims(a, dsize, false, claims, source);
-	if (claims.count == 1)
-	{
-		const SMemoryUser* r = &claims.range[0];
-		const u64 data = r->component->ReadMem(r->index, a - r->base, dsize);
-		note_pio_access(a, dsize, false, data, 1);
-		return data;
-	}
-	if (claims.count > 1)
-	{
-		prepare_shared_access(a, dsize, false, claims, source);
-		const u64 data = resolve_shared_read(a, dsize, claims, source);
-		note_pio_access(a, dsize, false, data, claims.count);
-		return data;
-	}
-
-	if (platform != Platform::Tsunami)
-		return dsize == 64 ? ~U64(0) : (U64(1) << dsize) - 1;
-
 	if (a >= U64(0x00000801A0000000) && a <= U64(0x00000801AFFFFFFF))
 		return cchip_csr_read((u32)a & 0xFFFFFFF, source);
 

@@ -830,6 +830,7 @@ void CAlphaCPU::idle_detect_sample(u64 start_virt, const AlphaInstructionSource&
 	m_spin_ic = _ic;
 }
 
+// System interval-timer policy shared by both execution engines and idle paths.
 // Jensen wires CPU IRQ2 to the 82357 NMI output (PB22H-KB, p. 9-8).
 void CAlphaCPU::service_interval_timer(std::chrono::steady_clock::time_point now)
 {

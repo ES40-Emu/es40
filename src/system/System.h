@@ -446,6 +446,7 @@ private:
     int count = 0;
     SMemoryUser range[kMax];
     bool subtractive = false;
+    void write(u64 address, int dsize, u64 data) const;
   };
   void recompute_range_overlaps();
   void collect_decode_claims(u64 address, int dsize, bool write,
@@ -460,7 +461,7 @@ private:
   std::string describe_claimant(const SMemoryUser& range, u64 address) const;
   void log_shared_event(const std::string& key, const std::string& line);
   void note_pio_access(u64 address, int dsize, bool write, u64 data, int claims);
-  void dispatch_pci_io_write(u64 address, int dsize, u64 data,
+  void dispatch_pci_io_write(u64 address, const CSystemComponent::PciIoWrite& write,
     const SDecodeClaims& claims);
   void          CheckForShutdown() const;
   void          ResetChipsetState();
@@ -474,9 +475,13 @@ private:
   u32           m_x86_bios_clock_initial_ticks{ 0 };
   u64           m_x86_bios_clock_elapsed_ticks{ 0 };
   std::chrono::steady_clock::time_point m_x86_bios_clock_epoch;
-  // Chipset PIO decode for addresses above main memory (under device_bus_mutex).
+  // Mapped devices share PIO dispatch above main memory, followed by chipset decode (under device_bus_mutex).
   u64           pio_read(u64 address, int dsize, CSystemComponent* source);
   void          pio_write(u64 address, int dsize, u64 data, CSystemComponent* source);
+  u64           tsunami_pio_read(u64 address, int dsize, CSystemComponent* source);
+  void          tsunami_pio_write(u64 address, int dsize, u64 data, CSystemComponent* source);
+  static bool   tsunami_shared_pci_range(u64 address, int dsize);
+  static bool   tsunami_decode_pci_io_write(u64 address, int dsize, u64 data, CSystemComponent::PciIoWrite& write);
   u64           cchip_csr_read(u32 address, CSystemComponent* source);
   void          cchip_csr_write(u32 address, u64 data, CSystemComponent* source);
   u64           pchip_csr_read(int num, u32 address);

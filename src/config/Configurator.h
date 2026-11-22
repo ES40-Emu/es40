@@ -101,6 +101,7 @@ typedef enum
 
   // system devices
   c_ev68cb,
+  c_ev4,
   c_serial,
   c_floppy,
 

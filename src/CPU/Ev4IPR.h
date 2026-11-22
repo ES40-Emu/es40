@@ -104,6 +104,7 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
     switch (selector.index) {
     case 2:  kind = AlphaIPRWriteKind::IboxControl; break;
     case 13: kind = AlphaIPRWriteKind::SoftwareInterruptRequest; break;
+    case 14: kind = AlphaIPRWriteKind::AstInterruptRequest; break;
     case 16: kind = AlphaIPRWriteKind::HardwareInterruptEnable; break;
     case 17: kind = AlphaIPRWriteKind::SoftwareInterruptEnable; break;
     case 18: kind = AlphaIPRWriteKind::AstInterruptEnable; break;
@@ -151,8 +152,8 @@ inline void ev4_write_sier(std::uint64_t value, int& sien, int& asten)
   asten = (sien >> 2) & 1;
 }
 
-// ASTER bits 51:48 enable user, supervisor, executive and kernel ASTs (21064 HRM 5.2.19, Fig. 5-16).
-constexpr int ev4_aster_from_write(std::uint64_t value)
+// ASTRR and ASTER use bits 51:48 for user, supervisor, executive and kernel (21064 HRM Figs. 5-13 and 5-16).
+constexpr int ev4_ast_mask_from_write(std::uint64_t value)
 {
   return static_cast<int>((value >> 48) & 0xf);
 }

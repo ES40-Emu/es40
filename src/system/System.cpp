@@ -382,10 +382,9 @@ std::chrono::steady_clock::time_point CSystem::device_access_time() const
 /**
  * Constructor.
  **/
-CSystem::CSystem(CConfigurator* cfg)
+CSystem::CSystem(CConfigurator* cfg, Platform platform) : platform(platform),
+	physical_address_mask(platform == Platform::Tsunami ? U64(0x00000807ffffffff) : ~U64(0))
 {
-	int i;
-
 	if (theSystem != 0)
 		FAILURE(Configuration, "More than one system");
 	graphics_multihead = cfg->get_bool_value("graphics.multihead", false);
@@ -405,54 +404,32 @@ CSystem::CSystem(CConfigurator* cfg)
 		shared_read_policy = SharedReadPolicy::Or;
 	else if (read_policy != "stop")
 		FAILURE(Configuration, "debug.shared_read_policy must be stop, claimant, and or or");
-	theSystem = this;
 	myCfg = cfg;
 
 	iNumComponents = 0;
 	iNumMemories = 0;
 	iNumCPUs = 0;
-	iNumMemoryBits = (int)myCfg->get_num_value("memory.bits", false, 27);
-
-	// 4 Typhoon arrays of at most 8GB (ASIZ 1010) each.
-	if (iNumMemoryBits > 35)
-		FAILURE(Configuration, "memory.bits > 35 (32GB) exceeds the 4-array Typhoon maximum");
-
-	// initialize SPD data according to configured memory size
-	const uint32_t total_mb = static_cast<uint32_t>((1ULL << iNumMemoryBits) >> 20);
-	init_spd_from_config_mb(total_mb);
+	const u64 memory_bits = cfg->get_num_value("memory.bits", false, 27);
+	if (platform == Platform::Jensen)
+	{
+		if (memory_bits < 24 || memory_bits > 27)
+			FAILURE(Configuration, "Jensen memory.bits must be 24 through 27 (16 to 128 MB)");
+	}
+	else
+	{
+		// 4 Typhoon arrays of at most 8GB (ASIZ 1010) each.
+		if (memory_bits > 35)
+			FAILURE(Configuration, "memory.bits > 35 (32GB) exceeds the 4-array Typhoon maximum");
+		const uint32_t total_mb = static_cast<uint32_t>((U64(1) << memory_bits) >> 20);
+		init_spd_from_config_mb(total_mb);
+	}
+	iNumMemoryBits = (int)memory_bits;
 
 	//  iNumConfig = 0;
 #if defined(IDB)
 	iSingleStep = 0;
 	iSSCycles = 0;
 #endif
-	for (i = 0; i < 4; i++)
-		state.cchip.dim[i] = 0;
-	state.cchip.drir = 0;
-	state.cchip.misc = U64(0x0000000800000000);
-	state.cchip.csc = U64(0x3142444014157803);
-
-	state.dchip.drev = 0x01;
-	state.dchip.dsc = 0x43;
-	state.dchip.dsc2 = 0x03;
-	state.dchip.str = 0x25;
-
-	// initialize pchip data
-	for (i = 0; i < 2; i++)
-	{
-		memset(&state.pchip[i], 0, sizeof(struct SSys_state::SSys_pchip));
-		state.pchip[i].wsba[3] = 2;
-	}
-
-	state.pchip[0].pctl = U64(0x0000104401440081);
-	state.pchip[1].pctl = U64(0x0000504401440081);
-
-	state.tig.FwWrite = 0;
-	state.tig.HaltA = 0;
-	state.tig.HaltB = 0;
-	state.tig.ModInfo = 0;
-	memset(state.tig.ipcr, 0, sizeof(state.tig.ipcr));
-
 	if (iNumMemoryBits > 30)
 	{
 
@@ -470,8 +447,9 @@ CSystem::CSystem(CConfigurator* cfg)
 		m_ll_buckets[llb].sequence.store(0, std::memory_order_relaxed);
 		m_ll_buckets[llb].lock.store(0, std::memory_order_relaxed);
 	}
-	clear_ll_reservations();
+	ResetChipsetState();
 	allocate_ll_watch();
+	theSystem = this;
 
 	printf("%s(%s): $Id$\n",
 		cfg->get_myName(), cfg->get_myValue());
@@ -502,6 +480,8 @@ CSystem::~CSystem()
  **/
 void CSystem::ResetMem(unsigned int membits)
 {
+	if (platform == Platform::Jensen && (membits < 24 || membits > 27))
+		FAILURE(Configuration, "Jensen memory.bits must be 24 through 27 (16 to 128 MB)");
 	free(memory);
 	iNumMemoryBits = membits;
 	if (iNumMemoryBits > 30) {
@@ -974,6 +954,8 @@ void CSystem::ResetChipsetState()
 	state.cpu_lock_flags = 0;
 	memset(state.cpu_lock_address, 0, sizeof(state.cpu_lock_address));
 	clear_ll_reservations();
+	if (platform != Platform::Tsunami)
+		return;
 
 	for (int i = 0; i < 4; i++)
 		state.cchip.dim[i] = 0;
@@ -1206,7 +1188,7 @@ void CSystem::CLLRAMGuard::invalidate()
 
 u64 CSystem::cpu_read_locked(int cpuid, u64 phys, int size_bits, CSystemComponent* source)
 {
-	phys &= U64(0x00000807ffffffff);
+	phys &= physical_address_mask;
 	if (phys >> iNumMemoryBits)
 	{
 		// Device access must not run while holding a RAM bucket.
@@ -1275,7 +1257,7 @@ bool CSystem::cpu_take_lock(int cpuid, u64 address, u64* expected, bool* same_ad
 u64 CSystem::cpu_stx_c(int cpuid, u64 phys, int size_bits, u64 value,
 	char* dram, u64 dram_sz, CSystemComponent* source)
 {
-	phys &= U64(0x00000807ffffffff);
+	phys &= physical_address_mask;
 	u64  expected = 0;
 	bool same_address = false;
 	if (!cpu_take_lock(cpuid, phys, &expected, &same_address))
@@ -1717,7 +1699,7 @@ void CSystem::WriteMem(u64 address, int dsize, u64 data, CSystemComponent* sourc
 	u32   t32;
 	u16   t16;
 #endif //defined(ALIGN_MEM_ACCESS)
-	a = address & U64(0x00000807ffffffff);
+	a = address & physical_address_mask;
 
 	if (a >> iNumMemoryBits) // non-memory: chipset PIO decode
 	{
@@ -1763,7 +1745,7 @@ u64 CSystem::ReadMem(u64 address, int dsize, CSystemComponent* source)
 	u64   a;
 	u8* p;
 
-	a = address & U64(0x00000807ffffffff);
+	a = address & physical_address_mask;
 	if (a >> iNumMemoryBits) // non-memory: chipset PIO decode
 		return pio_read(a, dsize, source);
 

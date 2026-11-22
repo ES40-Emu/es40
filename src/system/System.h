@@ -240,6 +240,7 @@ struct SConfig
 class CSystem
 {
 public:
+  enum class Platform { Tsunami, Jensen };
   void          DumpMemory(unsigned int filenum);
   char* PtrToMem(u64 address);
   unsigned int  get_memory_bits();
@@ -302,7 +303,7 @@ public:
   // Query completed devices for outputs
   std::vector<SDisplayOutput> get_display_outputs() const;
 
-  CSystem(CConfigurator* cfg);
+  CSystem(CConfigurator* cfg, Platform platform = Platform::Tsunami);
   void          ResetMem(unsigned int membits);
 
   CAlphaCPU* get_cpu(int cpunum) { return acCPUs[cpunum]; };
@@ -420,6 +421,8 @@ public:
   bool          IsShutdownRequested() const noexcept;
 
 private:
+  const Platform platform;
+  const u64 physical_address_mask;
   struct SDeviceAccessScope
   {
     explicit SDeviceAccessScope(const CSystem* system);
@@ -492,7 +495,7 @@ private:
 
   // Build SPD images that match configured memory.
   void init_spd_from_config_mb(uint32_t total_mb);
-  SDimmLayout    m_dimm_layout;
+  SDimmLayout    m_dimm_layout{};
   std::vector<uint8_t> m_dimm_spd; // shared SPD image (all DIMMs identical)
 
   int           iNumCPUs;
@@ -746,7 +749,7 @@ private:
       u64 tba[4];
     } pchip[2];
 
-  } state;
+  } state{};
   void* memory;
 
   //    void * memmap;

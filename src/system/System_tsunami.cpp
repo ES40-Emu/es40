@@ -131,7 +131,7 @@ void CSystem::pio_write(u64 a, int dsize, u64 data, CSystemComponent* source)
 		note_pio_access(a, dsize, true, data, claims.count);
 	const u64 io_base = a & ~U64(0x1ffffff);
 
-	const bool observed_io =
+	const bool observed_io = platform == Platform::Tsunami &&
 		(io_base == U64(0x801fc000000) || io_base == U64(0x803fc000000)) &&
 		(dsize == 8 || dsize == 16 || dsize == 32) &&
 		(a & 3) + dsize / 8 <= 4;
@@ -143,7 +143,7 @@ void CSystem::pio_write(u64 a, int dsize, u64 data, CSystemComponent* source)
 			const SMemoryUser* r = &claims.range[k];
 			r->component->WriteMem(r->index, a - r->base, dsize, data);
 		}
-	if (mapped)
+	if (mapped || platform != Platform::Tsunami)
 		return;
 
 	const u64 config_base = a & ~U64(0xffffff);
@@ -382,6 +382,9 @@ u64 CSystem::pio_read(u64 a, int dsize, CSystemComponent* source)
 		note_pio_access(a, dsize, false, data, claims.count);
 		return data;
 	}
+
+	if (platform != Platform::Tsunami)
+		return dsize == 64 ? ~U64(0) : (U64(1) << dsize) - 1;
 
 	if (a >= U64(0x00000801A0000000) && a <= U64(0x00000801AFFFFFFF))
 		return cchip_csr_read((u32)a & 0xFFFFFFF, source);

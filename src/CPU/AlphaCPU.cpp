@@ -919,6 +919,10 @@ u64 CAlphaCPU::read_ipr(u32 instruction, AlphaIPRReadDescriptor descriptor, u64 
 	}
 	if (descriptor.kind == AlphaIPRReadKind::ExceptionAddress)
 		return state.exc_addr;
+	if (descriptor.kind == AlphaIPRReadKind::LatchedFaultAddress) {
+		state.ev4_va_locked = 0;
+		return state.fault_va;
+	}
 	return m_profile.ipr_read.read(*this, instruction);
 }
 
@@ -1917,7 +1921,7 @@ void CAlphaCPU::jit_run(int budget)
 			const size_t swap_bytes = m_profile.ipr_write.indexed ? sizeof(m_pal_temp_write) : 0;
 			const int biu_index = verify.word_count + (int)(swap_bytes / sizeof(u64));
 			const bool verify_indexed_iprs = m_profile.ipr_write.indexed != nullptr;
-			const int ipr_count = biu_index + (verify_indexed_iprs ? 17 : 0);
+			const int ipr_count = biu_index + (verify_indexed_iprs ? 20 : 0);
 			auto cap_iprs = [&](u64* d) {
 				if (verify.word_count) verify.capture(*this, d);
 				if (swap_bytes) memcpy(d + verify.word_count, &m_pal_temp_write, swap_bytes);
@@ -1939,6 +1943,9 @@ void CAlphaCPU::jit_run(int budget)
 					d[biu_index + 14] = state.astrr;
 					d[biu_index + 15] = m_verify_tbia[TB_INDEX_ITB];
 					d[biu_index + 16] = m_verify_tbia[TB_INDEX_DATA];
+					d[biu_index + 17] = state.fault_va;
+					d[biu_index + 18] = state.mm_stat;
+					d[biu_index + 19] = state.ev4_va_locked;
 				}
 			};
 			auto put_iprs = [&](const u64* s, bool replay) {
@@ -1963,6 +1970,9 @@ void CAlphaCPU::jit_run(int budget)
 					state.astrr = static_cast<int>(s[biu_index + 14]);
 					m_verify_tbia[TB_INDEX_ITB] = s[biu_index + 15];
 					m_verify_tbia[TB_INDEX_DATA] = s[biu_index + 16];
+					state.fault_va = s[biu_index + 17];
+					state.mm_stat = s[biu_index + 18];
+					state.ev4_va_locked = static_cast<u8>(s[biu_index + 19]);
 				}
 				if (!replay) sync_register_bank();
 			};
@@ -4564,7 +4574,7 @@ int CAlphaCPU::initiate_acv_fault(u64 virt, int flags, u32 ins)
 	}
 
 	res = m_profile.data_fault.access_violation(*this, virt, flags, ins,
-		AlphaDataFaultSource::AddressCheck);
+		{AlphaDataFaultSource::AddressCheck});
 	return res ? res : -1;
 }
 
@@ -4738,7 +4748,8 @@ int CAlphaCPU::virt2phys(u64 virt, u64* phys, int flags, bool* asm_bit, u32 ins)
 
 				// Handle D-stream access violation
 				res = m_profile.data_fault.access_violation(*this, virt, flags, ins,
-					AlphaDataFaultSource::TranslationBuffer);
+					{AlphaDataFaultSource::TranslationBuffer, state.tb[t][i].fault[0] != 0,
+					 state.tb[t][i].fault[1] != 0});
 				if (res) return res;
 			}
 		}

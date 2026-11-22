@@ -29,10 +29,11 @@
 
 class CAlphaCPU;
 
-enum class AlphaDataFaultSource
+struct AlphaDataFaultSource
 {
-  AddressCheck,
-  TranslationBuffer
+  enum Kind { AddressCheck, TranslationBuffer } kind;
+  bool fault_on_read = false;
+  bool fault_on_write = false;
 };
 
 // Family fault state and PAL/HLE delivery, called only for real faults.

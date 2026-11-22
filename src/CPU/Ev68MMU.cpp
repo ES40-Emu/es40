@@ -329,7 +329,7 @@ int Ev68MMU::access_violation(CAlphaCPU& cpu, std::uint64_t virt, int flags,
     return cpu.vmspal_ent_dfault(flags);
 
 #ifdef JIT_STATS
-  if (source == AlphaDataFaultSource::TranslationBuffer)
+  if (source.kind == AlphaDataFaultSource::TranslationBuffer)
     cpu.m_stat_tb[3]++;
 #endif
   cpu.set_pc(state.pal_base + cpu.pal_exception_offset(AlphaPALException::DataFault) + 1);

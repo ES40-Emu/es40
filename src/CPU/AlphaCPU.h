@@ -277,6 +277,7 @@ class CAlphaCPU : public CSystemComponent, public CRunnable
   friend class Ev68InstructionFetch;
   friend class Ev4InstructionFetch;
   friend constexpr AlphaCPUProfile ev4_ibox_profile(AlphaCPUProfile profile);
+  friend int ev4_memory_fault(CAlphaCPU&, u64, int, u32, unsigned, AlphaPALException);
 public:
   void          flush_icache_asm();
   virtual int   SaveState(FILE* f);
@@ -883,6 +884,7 @@ private:
     int   alt_cm;         /**< IPR DTB_ALTMODE: alternative cm for HW_LD/HW_ST [HRM p 5-26..27] */
     int   smc;            /**< IPR M_CTL: smc (speculative miss control) [HRM p 5-29..30] */
     bool  sde;            /**< IPR I_CTL: sde[1] (PALshadow enable) [HRM p 5-15..18] */
+    u8    ev4_va_locked;  // VA and MM_CSR share a lock (21064 HRM 5.3.5). Uses saved-state padding.
     u64   fault_va;       /**< IPR VA: virtual address of last Dstream miss or fault [HRM p 5-4] */
     u64   va_form_va;     /**< Address used for VA_FORM computation (may differ from VA for VPTE) */
     u64   exc_sum;        /**< IPR EXC_SUM: exception summary [HRM p 5-13..15] */
@@ -905,7 +907,7 @@ private:
     int   astrr;        /**< IPR PCTX: astrr (AST request) [HRM p 5-21..22] */
     int   aster;        /**< IPR PCTX: aster (AST enable) [HRM p 5-21..22] */
     u64   ibox_ctl;     /**< EV4 ICCSR read image or remaining EV68 I_CTL fields. */
-    u64   mm_stat;      /**< IPR MM_STAT: memory management status [HRM p 5-28..29] */
+    u64   mm_stat;      /**< Memory fault status: EV68 MM_STAT or EV4 MM_CSR. */
     bool  hwe;          /**< IPR I_CLT: hwe (allow palmode ins in kernel mode) [HRM p 5-15..17] */
     int   m_ctl_spe;    /**< IPR M_CTL: spe (Super Page mode enabled) [HRM p 5-29..30] */
     int   i_ctl_spe;    /**< IPR I_CTL: spe (Super Page mode enabled) [HRM p 5-15..18] */

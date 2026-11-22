@@ -44,6 +44,7 @@ enum class AlphaIPRReadKind
   PalBase,
   MemoryFaultStatus,
   FaultAddress,
+  LatchedFaultAddress,
   Noop // No read or destination write; privilege checks still apply.
 };
 

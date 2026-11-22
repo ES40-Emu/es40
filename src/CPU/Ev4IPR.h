@@ -63,6 +63,9 @@ constexpr AlphaIPRReadDescriptor ev4_describe_ipr_read(std::uint32_t instruction
     return {AlphaIPRReadKind::PalTemp, false, true, static_cast<std::uint8_t>(selector.index)};
   if (selector.banks == 0x20 && selector.index == 4) // EXC_ADDR.
     return {AlphaIPRReadKind::ExceptionAddress, false, true};
+  // Reading VA unlocks VA and MM_CSR even to R31 (21064 HRM Table 4-7, 5.3.4, 5.3.5).
+  if (selector.banks == 0x40 && selector.index == 5)
+    return {AlphaIPRReadKind::LatchedFaultAddress, false, false};
   if (selector.banks == 0x20 && selector.index == 9) // PS.
     return {AlphaIPRReadKind::Helper, false, true};
   if (selector.banks == 0x20 && selector.index == 10) // EXC_SUM shifts MSK, even to R31.

@@ -164,6 +164,16 @@ static int dma_high_count_channel(u16 port)
 	}
 }
 
+static bool dma_stop_register(u16 port, int& channel, unsigned& shift)
+{
+	if (port < 0x4e0 || port > 0x4ff)
+		return false;
+	channel = (port - 0x4e0) / 4;
+	const unsigned byte = port & 3;
+	shift = byte * 8;
+	return channel != 4 && byte < 3;
+}
+
 static bool dma_mapped_port(int index, u64 offset, u16& port)
 {
 	switch (index)
@@ -544,6 +554,27 @@ void CDMA::write_high_count_port(u16 port, u8 data)
 	const u32 high = (u32)data << 16;
 	channel.base_count = (channel.base_count & 0xffff) | high;
 	channel.count = (channel.count & 0xffff) | high;
+}
+
+u8 CDMA::read_stop_port(u16 port) const
+{
+	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
+	int channel;
+	unsigned shift;
+	if (model != Model::Intel82357 || !dma_stop_register(port, channel, shift))
+		return 0xff;
+	return (u8)(state.isp.stop_address[channel] >> shift);
+}
+
+void CDMA::write_stop_port(u16 port, u8 data)
+{
+	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
+	int channel;
+	unsigned shift;
+	if (model != Model::Intel82357 || !dma_stop_register(port, channel, shift))
+		return;
+	auto& stop = state.isp.stop_address[channel];
+	stop = (stop & ~(0xffU << shift)) | (((u32)data << shift) & 0x00fffffcU);
 }
 
 u8 CDMA::read_extended_mode_port(u16) const

@@ -94,6 +94,8 @@ public:
   // The 82357 exposes count bits 23:16 at a separate byte port per channel.
   u8            read_high_count_port(u16 port) const;
   void          write_high_count_port(u16 port, u8 data);
+  u8            read_stop_port(u16 port) const;
+  void          write_stop_port(u16 port, u8 data);
   u8            read_extended_mode_port(u16 port) const;
   void          write_extended_mode_port(u16 port, u8 data);
   u8            read_ali_shadow(u8 selector) const;
@@ -266,6 +268,7 @@ private:
     struct SDMA_82357
     {
       u8 extended_mode[8]; // Bits 7:2 of each channel's extended-mode register.
+      u32 stop_address[8]; // Address bits 23:2 for channels 0-3 and 5-7.
     } isp;
   }
   state;

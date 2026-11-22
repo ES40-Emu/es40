@@ -122,6 +122,8 @@ constexpr AlphaIPRReadDescriptor ev4_describe_ipr_read(std::uint32_t instruction
     return {AlphaIPRReadKind::PalBase, false, true};
   if (selector.banks == 0x20 && selector.index >= 12 && selector.index <= 14) // HIRR, SIRR, ASTRR.
     return {AlphaIPRReadKind::Helper, true, true};
+  if (selector.banks == 0x20 && selector.index >= 16 && selector.index <= 18) // HIER, SIER, ASTER (21064 HRM 5.2.17-19).
+    return {AlphaIPRReadKind::Helper, false, true};
   return {AlphaIPRReadKind::Unsupported, false, false};
 }
 

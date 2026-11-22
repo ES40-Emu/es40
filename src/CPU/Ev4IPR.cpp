@@ -69,6 +69,16 @@ void CAlphaCPU::ev4_write_itb_pte(u64 value)
   itb_mapping_changed();
 }
 
+// HIRR and HIER share the layout of bits 32:4 (21064 HRM 5.2.14, 5.2.17).
+static u64 ev4_interrupt_fields(unsigned ast, unsigned software, unsigned irq,
+                                unsigned serial, unsigned counters, unsigned correctable)
+{
+  return (u64(ast & 0xf) << 29) | (u64(software & 0xfffe) << 13)
+       | ((serial & 1) << 13) | ((irq & 7) << 10)
+       | ((counters & 1) << 9) | ((counters & 2) << 7)
+       | ((irq & 0x38) << 2) | ((correctable & 1) << 4);
+}
+
 u64 ev4_read_ipr(CAlphaCPU& cpu, u32 instruction)
 {
   auto& state = cpu.state;
@@ -85,12 +95,13 @@ u64 ev4_read_ipr(CAlphaCPU& cpu, u32 instruction)
   case 0x2d:
   case 0x2e: {
     const unsigned irq = state.eir.load(); // HWR must agree with the IRQ pins from this read.
-    return (u64(state.astrr & 0xf) << 29) | (u64(state.sir & 0xfffe) << 13)
-         | ((state.slr & 1) << 13) | ((irq & 7) << 10)
-         | ((state.pcr & 1) << 9) | ((state.pcr & 2) << 7)
-         | ((irq & 0x38) << 2) | ((state.crr & 1) << 4)
+    return ev4_interrupt_fields(state.astrr, state.sir, irq, state.slr, state.pcr, state.crr)
          | ev4_interrupt_summary(state, irq);
   }
+  case 0x30: // HIER, SIER and ASTER read all enables (21064 HRM 5.2.17-19).
+  case 0x31:
+  case 0x32:
+    return ev4_interrupt_fields(state.aster, state.sien, state.eien, state.slen, state.pcen, state.cren);
   case 0x45: // VA (21064 HRM 5.3.5).
     state.ev4_va_locked = 0;
     return state.fault_va;

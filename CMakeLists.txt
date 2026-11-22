@@ -503,6 +503,7 @@ list(APPEND ES40_SOURCES
     src/chipset/DMA.cpp
     src/chipset/EISABus.cpp
     src/chipset/Intel82358.cpp
+    src/chipset/Pic8259.cpp
     src/dox.cpp
     src/system/DPR.cpp
     src/es40_debug.cpp

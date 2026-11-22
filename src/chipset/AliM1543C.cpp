@@ -277,10 +277,6 @@
 #include <limits>
 #include <string>
 
-#ifdef DEBUG_PIC
-bool  pic_messages = false;
-#endif
-
 /* Timer Calibration: Instructions per Microsecond (assuming 1 clock = 1 instruction) */
 #define IPus  847
 #define REFRESH_TOGGLE_NS 15085ULL
@@ -363,7 +359,10 @@ u32   ali_cfg_mask[64] = {
 /**
  * Constructor.
  **/
-CAliM1543C::CAliM1543C(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev) : CPCIDevice(cfg, c, pcibus, pcidev)
+CAliM1543C::CAliM1543C(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev)
+	: CPCIDevice(cfg, c, pcibus, pcidev),
+	  // The cascade drives Tsunami DRIR55 and withdraws IRQ2 when the slave drops INT.
+	  pic(state.pic, [this](bool high) { cSystem->interrupt(55, high); }, Pic8259::EdgeRelease::Withdraw)
 {
 	if (theAli != 0)
 		FAILURE(Configuration, "More than one Ali");
@@ -546,12 +545,7 @@ void CAliM1543C::init()
 	// A PCI IACK cycle reads the interrupt vector on this hose.
 	cSystem->RegisterMemory(this, 20, U64(0x00000801f8000000) + U64(0x200000000) * myPCIBus, 1);
 
-	for (i = 0; i < 2; i++)
-	{
-		state.pic_elcr[i] = 0;
-		state.pic_ltim[i] = 0;
-		pic_init_reset(i);
-	}
+	pic.reset();
 
 	// Initialize parallel port - IO registration is SuperIO driven, so not here, just output handling
 	filename = myCfg->get_text_value("lpt.outfile");
@@ -910,19 +904,19 @@ u32 CAliM1543C::ReadMem_Legacy(int index, u32 address, int dsize)
 		return pit_read(address);
 
 	case 7:   
-		return pic_read(0, address);
+		return pic.read(0, address);
 
 	case 8:   
-		return pic_read(1, address);
+		return pic.read(1, address);
 
 	case 9:   
 		return pic_control_read(address);
 
 	case 20:  
-		return pic_read_vector();
+		return pic.read_vector();
 
 	case 30:
-		return pic_read_edge_level(address);
+		return pic.read_edge_level(address);
 
 	case 40:
 		return superio_read(address);
@@ -989,11 +983,11 @@ void CAliM1543C::WriteMem_Legacy(int index, u32 address, int dsize, u32 data)
 		return;
 
 	case 7:
-		pic_write(0, address, (u8)data);
+		pic.write(0, address, (u8)data);
 		return;
 
 	case 8:   
-		pic_write(1, address, (u8)data);
+		pic.write(1, address, (u8)data);
 		return;
 
 	case 9:
@@ -1001,7 +995,7 @@ void CAliM1543C::WriteMem_Legacy(int index, u32 address, int dsize, u32 data)
 		return;
 
 	case 30:
-		pic_write_edge_level(address, (u8)data);
+		pic.write_edge_level(address, (u8)data);
 		return;
 
 	case 40:
@@ -2121,8 +2115,8 @@ void CAliM1543C::pic_control_write(u32 address, u8 data)
 
 	// port 0x23 — data; dispatch by latched index
 	switch (state.pic_control_index) {
-	case 0x03:  pic_write_edge_level(0, data); return;  // ELCR_1
-	case 0x04:  pic_write_edge_level(1, data); return;  // ELCR_2
+	case 0x03:  pic.write_edge_level(0, data); return;  // ELCR_1
+	case 0x04:  pic.write_edge_level(1, data); return;  // ELCR_2
 	case 0x01: case 0x02: case 0x05:
 		// PIC CFG_1/CFG_2/RTC_CFG — not modelled, ignore
 		return;
@@ -2141,8 +2135,8 @@ u8 CAliM1543C::pic_control_read(u32 address)
 	}
 
 	switch (state.pic_control_index) {
-	case 0x03:  return pic_read_edge_level(0);
-	case 0x04:  return pic_read_edge_level(1);
+	case 0x03:  return pic.read_edge_level(0);
+	case 0x04:  return pic.read_edge_level(1);
 	case 0x01: case 0x02: case 0x05:
 		return 0;
 	default:
@@ -2150,526 +2144,21 @@ u8 CAliM1543C::pic_control_read(u32 address)
 	}
 }
 
-/**
- * Reset the PIC to its post-ICW1 state.  ELCR/LTIM are intentionally not reset
- * Caller must hold picLock.
- **/
-void CAliM1543C::pic_init_reset(int index)
-{
-	state.pic_last_irr[index] = 0;
-	state.pic_irr[index] &= state.pic_elcr[index];
-	state.pic_imr[index] = 0;
-	state.pic_isr[index] = 0;
-	state.pic_priority_add[index] = 0;
-	state.pic_irq_base[index] = 0;
-	state.pic_read_reg_select[index] = 0;
-	state.pic_poll[index] = 0;
-	state.pic_special_mask[index] = 0;
-	state.pic_init_state[index] = 0;
-	state.pic_auto_eoi[index] = 0;
-	state.pic_rotate_on_aeoi[index] = 0;
-	state.pic_special_fnm[index] = 0;
-	state.pic_init4[index] = 0;
-	state.pic_single_mode[index] = 0;
-	pic_update_output(index);
-}
-
-/* Highest-priority bit in mask, considering rotation.  Returns 8 if mask==0. */
-static int pic_priority_of(u8 mask, u8 priority_add)
-{
-	if (mask == 0)
-		return 8;
-	int priority = 0;
-	while ((mask & (1 << ((priority + priority_add) & 7))) == 0)
-		priority++;
-	return priority;
-}
-
-/**
- * Determine which IRQ (if any) the controller wants to deliver right now.
- * Returns -1 if nothing pending above the in-service priority threshold.
- * Caller must hold picLock.
- **/
-int CAliM1543C::pic_get_irq(int index)
-{
-	int mask = state.pic_irr[index] & ~state.pic_imr[index];
-	int priority = pic_priority_of((u8)mask, state.pic_priority_add[index]);
-	if (priority == 8)
-		return -1;
-
-	// Compute current in-service priority.  In SFNM on the master, slave-
-	// originated IRQs (cascade IRQ2) do not block other slave IRQs.
-	int isr_mask = state.pic_isr[index];
-	if (state.pic_special_mask[index])
-		isr_mask &= ~state.pic_imr[index];
-	if (state.pic_special_fnm[index] && index == 0)
-		isr_mask &= ~(1 << 2);
-
-	int cur_priority = pic_priority_of((u8)isr_mask, state.pic_priority_add[index]);
-	if (priority < cur_priority)
-		return (priority + state.pic_priority_add[index]) & 7;
-	return -1;
-}
-
-/**
- * Recompute and drive the controller's output line.  For the master, this is
- * the wired-OR of all 8259 outputs that goes to Tsunami DRIR55 and from there
- * to the CPU's external IRQ1.  For the slave, this propagates into the
- * master's IRQ2 (cascade) and recurses to the master.  Caller must hold
- * picLock.
- **/
-void CAliM1543C::pic_update_output(int index)
-{
-	bool line_high = (pic_get_irq(index) >= 0);
-
-	if (index == 1)
-	{
-		// Slave output drives master IRQ2.  Cascade is conventionally edge-
-		// triggered; honor ELCR/LTIM in case the OS programs it as level.
-		const u8 cascade_mask = (1 << 2);
-		const bool is_level =
-			(state.pic_elcr[0] & cascade_mask) || state.pic_ltim[0];
-
-		if (line_high)
-		{
-			if (is_level)
-			{
-				state.pic_irr[0] |= cascade_mask;
-			}
-			else
-			{
-				if ((state.pic_last_irr[0] & cascade_mask) == 0)
-					state.pic_irr[0] |= cascade_mask;
-			}
-			state.pic_last_irr[0] |= cascade_mask;
-		}
-		else
-		{
-			// The cascade request is derived from the slave output, so it
-			// must disappear with that output.  Keeping a master IRQ2 after
-			// the slave request was canceled produces a phantom IRQ15 and
-			// can leave master ISR2 permanently in service.
-			state.pic_irr[0] &= ~cascade_mask;
-			state.pic_last_irr[0] &= ~cascade_mask;
-		}
-		pic_update_output(0);
-	}
-	else
-	{
-		cSystem->interrupt(55, line_high);
-	}
-}
-
-/**
- * Acknowledge an IRQ during the INTA cycle.  Sets ISR (unless AEOI), clears
- * IRR for edge-triggered lines, and re-evaluates the output. 
- * Caller must hold picLock.
- **/
-void CAliM1543C::pic_intack(int index, int irq)
-{
-	if (state.pic_auto_eoi[index])
-	{
-		if (state.pic_rotate_on_aeoi[index])
-			state.pic_priority_add[index] = (irq + 1) & 7;
-	}
-	else
-	{
-		state.pic_isr[index] |= (1 << irq);
-	}
-
-	// Level-sensitive lines keep their IRR bit set as long as the source
-	// holds the line high; only edge-sensitive bits clear at INTA.
-	const bool is_level =
-		(state.pic_elcr[index] & (1 << irq)) || state.pic_ltim[index];
-	if (!is_level)
-		state.pic_irr[index] &= ~(1 << irq);
-
-	pic_update_output(index);
-}
-
-/**
- * Read a byte from one of the programmable interrupt controller's registers.
- **/
-u8 CAliM1543C::pic_read(int index, u32 address)
-{
-	CFastMutex::ScopedLock guard(picLock);
-	u8 data;
-
-	if (state.pic_poll[index])
-	{
-		int irq = pic_get_irq(index);
-		if (irq >= 0)
-		{
-			pic_intack(index, irq);
-			data = (u8)(irq | 0x80);
-		}
-		else
-		{
-			data = 0;
-		}
-		state.pic_poll[index] = 0;
-	}
-	else
-	{
-		if (address == 0)
-		{
-			data = state.pic_read_reg_select[index]
-				? state.pic_isr[index]
-				: state.pic_irr[index];
-		}
-		else
-		{
-			data = state.pic_imr[index];
-		}
-	}
-
-#ifdef DEBUG_PIC
-	if (pic_messages)
-		printf("%%PIC-I-READ: read %02x from port %" PRId64 " on PIC %d\n", data,
-			address, index);
-#endif
-	return data;
-}
-
-/**
- * Read a byte from the edge/level register of one of the programmable interrupt controllers.
- **/
-u8 CAliM1543C::pic_read_edge_level(int index)
-{
-	CFastMutex::ScopedLock guard(picLock);
-	return state.pic_elcr[index];
-}
-
-/**
- * Read the interrupt vector during a PCI IACK cycle.  This is the hook the
- * Tsunami chipset uses on INTACK; it must mirror what the master 8259 would
- * place on the data bus, including the cascade hand-off to the slave for
- * IRQs 8-15. 
- **/
-u8 CAliM1543C::pic_read_vector()
-{
-	CFastMutex::ScopedLock guard(picLock);
-
-	int irq = pic_get_irq(0);
-	int intno;
-
-	if (irq >= 0)
-	{
-		if (irq == 2)
-		{
-			// Cascade: fetch vector from slave.
-			int irq2 = pic_get_irq(1);
-			if (irq2 >= 0)
-			{
-				pic_intack(1, irq2);
-			}
-			else
-			{
-				irq2 = 7;   // spurious slave IRQ
-			}
-			intno = state.pic_irq_base[1] + irq2;
-			pic_intack(0, irq);
-		}
-		else
-		{
-			intno = state.pic_irq_base[0] + irq;
-			pic_intack(0, irq);
-		}
-	}
-	else
-	{
-		// Spurious master IRQ.
-		intno = state.pic_irq_base[0] + 7;
-	}
-
-	return (u8)intno;
-}
-
-/**
- * Write a byte to one of the programmable interrupt controller's registers.
- * Implements the ICW1/ICW2/ICW3/ICW4 init sequence and the OCW1/OCW2/OCW3
- * operational commands. 
- **/
-void CAliM1543C::pic_write(int index, u32 address, u8 data)
-{
-	CFastMutex::ScopedLock guard(picLock);
-
-#ifdef DEBUG_PIC
-	if (pic_messages)
-		printf("%%PIC-I-WRITE: write %02x to port %" PRId64 " on PIC %d\n", data,
-			address, index);
-#endif
-
-	if (address == 0)
-	{
-		if (data & 0x10)
-		{
-			// ICW1: start init sequence.
-			pic_init_reset(index);
-			state.pic_init_state[index] = 1;
-			state.pic_init4[index]      = (data & 0x01) ? 1 : 0;
-			state.pic_single_mode[index] = (data & 0x02) ? 1 : 0;
-			state.pic_ltim[index]       = (data & 0x08) ? 1 : 0;
-		}
-		else if (data & 0x08)
-		{
-			// OCW3
-			if (data & 0x04)
-				state.pic_poll[index] = 1;
-			if (data & 0x02)
-				state.pic_read_reg_select[index] = data & 0x01;
-			if (data & 0x40)
-				state.pic_special_mask[index] = (data >> 5) & 0x01;
-		}
-		else
-		{
-			// OCW2
-			const int cmd   = (data >> 5) & 7;
-			const int level = data & 7;
-			int eoi_irq;
-			int priority;
-
-			switch (cmd)
-			{
-			case 0: // rotate in auto-EOI mode (clear)
-			case 4: // rotate in auto-EOI mode (set)
-				state.pic_rotate_on_aeoi[index] = (u8)(cmd >> 2);
-				break;
-
-			case 1: // non-specific EOI
-			case 5: // rotate on non-specific EOI
-				priority = pic_priority_of(state.pic_isr[index],
-					state.pic_priority_add[index]);
-				if (priority != 8)
-				{
-					eoi_irq = (priority + state.pic_priority_add[index]) & 7;
-					state.pic_isr[index] &= ~(1 << eoi_irq);
-					if (cmd == 5)
-						state.pic_priority_add[index] = (u8)((eoi_irq + 1) & 7);
-					pic_update_output(index);
-				}
-#ifdef DEBUG_PIC
-				pic_messages = false;
-#endif
-				break;
-
-			case 3: // specific EOI
-				state.pic_isr[index] &= ~(1 << level);
-				pic_update_output(index);
-#ifdef DEBUG_PIC
-				pic_messages = false;
-#endif
-				break;
-
-			case 6: // set priority command
-				state.pic_priority_add[index] = (u8)((level + 1) & 7);
-				pic_update_output(index);
-				break;
-
-			case 7: // rotate on specific EOI
-				state.pic_isr[index] &= ~(1 << level);
-				state.pic_priority_add[index] = (u8)((level + 1) & 7);
-				pic_update_output(index);
-#ifdef DEBUG_PIC
-				pic_messages = false;
-#endif
-				break;
-
-			default:
-				// no operation
-				break;
-			}
-		}
-		return;
-	}
-
-	// address == 1: ICW2/3/4 during init, IMR (OCW1) otherwise.
-	switch (state.pic_init_state[index])
-	{
-	case 0:
-		// OCW1: write IMR.  Masking only gates delivery; IRR and ISR are
-		// unaffected — re-evaluating the output picks up any newly-unmasked
-		// pending IRR bit.
-		state.pic_imr[index] = data;
-		pic_update_output(index);
-		break;
-
-	case 1:
-		// ICW2: vector base.
-		state.pic_irq_base[index] = data & 0xf8;
-		state.pic_init_state[index] = state.pic_single_mode[index]
-			? (state.pic_init4[index] ? 3 : 0)
-			: 2;
-		break;
-
-	case 2:
-		// ICW3: cascade configuration (we hard-wire master IRQ2 ↔ slave).
-		state.pic_init_state[index] = state.pic_init4[index] ? 3 : 0;
-		break;
-
-	case 3:
-		// ICW4
-		state.pic_special_fnm[index] = (data >> 4) & 0x01;
-		state.pic_auto_eoi[index]    = (data >> 1) & 0x01;
-		state.pic_init_state[index]  = 0;
-		break;
-	}
-}
-
-/**
- * Write a byte to the edge/level register of one of the programmable interrupt controllers.
- **/
-void CAliM1543C::pic_write_edge_level(int index, u8 data)
-{
-	CFastMutex::ScopedLock guard(picLock);
-	state.pic_elcr[index] = data;
-	// Changing trigger mode can affect the wanted-IRQ calculation if any
-	// previously-edge-latched bit is now considered level.
-	pic_update_output(index);
-}
-
-#define DEBUG_EXPR  (index != 0 || (intno != 0 && intno > 4))
-
-/**
- * Assert an interrupt — inner implementation, no lock.
- * Caller MUST hold picLock.
- *
- * Each call latches a fresh edge in IRR regardless of prior line state.  This
- * preserves the historical es40 API where pic_interrupt() is treated as a
- * single-shot "this device fired" event by KBD/PIT/serial/IDE.  Level-mode
- * pins (ELCR or LTIM) additionally have IRR follow the line until pic_deassert.
- **/
-void CAliM1543C::pic_interrupt_inner(int index, int intno)
-{
-#ifdef DEBUG_PIC
-	if (DEBUG_EXPR)
-	{
-		printf("%%PIC-I-INCOMING: Interrupt %d incomming on PIC %d", intno, index);
-		pic_messages = true;
-	}
-#endif
-
-	const u8 mask = (u8)(1 << intno);
-
-	// Latch a fresh edge: drop last_irr first, then raise.
-	state.pic_last_irr[index] &= ~mask;
-	state.pic_irr[index]      |= mask;
-	state.pic_last_irr[index] |= mask;
-
-#ifdef DEBUG_PIC
-	if (DEBUG_EXPR)
-	{
-		if (state.pic_imr[index] & mask)
-			printf(" (masked, latched)\n");
-		else
-			printf("\n");
-	}
-#endif
-
-	pic_update_output(index);
-}
-
-/**
- * De-assert an interrupt — inner implementation, no lock.
- * Caller MUST hold picLock.
- *
- * For level-mode pins, this clears IRR (the line dropped low).  For edge-
- * mode pins, only last_irr drops; any IRR bit already latched stays pending
- * until INTA, which matches real-hardware edge semantics.
- **/
-void CAliM1543C::pic_deassert_inner(int index, int intno)
-{
-	const u8 mask = (u8)(1 << intno);
-	const bool is_level =
-		(state.pic_elcr[index] & mask) || state.pic_ltim[index];
-
-	if (is_level)
-		state.pic_irr[index] &= ~mask;
-	state.pic_last_irr[index] &= ~mask;
-
-	pic_update_output(index);
-}
-
-/**
- * Assert an interrupt on one of the programmable interrupt controllers.
- **/
 void CAliM1543C::pic_interrupt(int index, int intno)
 {
-	CFastMutex::ScopedLock guard(picLock);
-	pic_interrupt_inner(index, intno);
+	// Each device notification latches a fresh request, even if the line is already high.
+	pic.latch_request(index, intno);
 }
 
-/**
- * De-assert an interrupt on one of the programmable interrupt controllers.
- **/
 void CAliM1543C::pic_deassert(int index, int intno)
 {
-	CFastMutex::ScopedLock guard(picLock);
-	pic_deassert_inner(index, intno);
+	pic.set_line(index, intno, false);
 }
 
-/**
- * Drive a device IRQ input line to a level (active/inactive) — the model for
- * sources whose "interrupt" is a level the device holds until the guest clears
- * the cause.
- *
- * Because the source is a level, IRR FOLLOWS the line: a rising edge latches
- * IRR (debounced via last_irr so a held line yields one interrupt), and a
- * falling line RETRACTS IRR.  This intentionally differs from a stock 8259
- * which keeps an edge latched until INTA: a real 8259 has a wire whose source
- * holds it, but here the "wire" IS the emulated device cause and once that
- * cause disappears there is nothing left to deliver.
- * 
- * caller must hold picLock 
- **/
-void CAliM1543C::pic_set_line_inner(int index, int intno, bool active)
-{
-	const u8 mask = (u8)(1 << intno);
-
-	if ((state.pic_elcr[index] & mask) || state.pic_ltim[index])
-	{
-		// Level triggered: IRR follows the input line.
-		if (active)
-		{
-			state.pic_irr[index]      |= mask;
-			state.pic_last_irr[index] |= mask;
-		}
-		else
-		{
-			state.pic_irr[index]      &= ~mask;
-			state.pic_last_irr[index] &= ~mask;
-		}
-	}
-	else
-	{
-		// Edge triggered: latch IRR only on the rising edge.  A held line
-		// produces no duplicate edge; INTA consumes it unless the emulated
-		// cause falls first.
-		if (active)
-		{
-			if ((state.pic_last_irr[index] & mask) == 0)
-				state.pic_irr[index] |= mask;
-			state.pic_last_irr[index] |= mask;
-		}
-		else
-		{
-			// The emulated cause disappeared before INTA.  Retract the
-			// request and rearm edge detection.
-			state.pic_irr[index]      &= ~mask;
-			state.pic_last_irr[index] &= ~mask;
-		}
-	}
-
-	pic_update_output(index);
-}
-
-/**
- * Drive a device IRQ input line — locked wrapper, see pic_set_line_inner.
- **/
 void CAliM1543C::pic_set_line(int index, int intno, bool active)
 {
-	CFastMutex::ScopedLock guard(picLock);
-	pic_set_line_inner(index, intno, active);
+	// ES40 devices withdraw a pending edge when the interrupt cause disappears.
+	pic.set_line(index, intno, active, Pic8259::EdgeRelease::Withdraw);
 }
 
 static u32  ali_magic1 = 0xA111543C;

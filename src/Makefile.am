@@ -170,6 +170,7 @@ noinst_HEADERS += storage/Disk.h \
        chipset/ISABus.h \
        chipset/EISABus.h \
        chipset/Intel82358.h \
+       chipset/Pic8259.h \
        system/DPR.h \
        system/Flash.h \
        system/System.h \
@@ -279,6 +280,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        chipset/DMA.cpp \
        chipset/EISABus.cpp \
        chipset/Intel82358.cpp \
+       chipset/Pic8259.cpp \
        system/DPR.cpp \
        es40_debug.cpp \
        audio/ES1370.cpp \

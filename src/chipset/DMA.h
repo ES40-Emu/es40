@@ -123,10 +123,12 @@ public:
     bool terminal_count = false; // This call exhausted the count, even with auto-init.
     bool external_eop = false;   // This call honored the device's EOP indication.
     bool stop_match = false;     // The 82357 masked the channel after a matching bus cycle.
+    bool chained = false;        // The 82357 loaded the staged buffer for the next call.
   };
 
   // Buffers and lengths are in bytes.
   // length 0 uses the current count.
+  // Bulk calls end at the current buffer boundary even when the next buffer is ready.
   // Shifted word transfers must cover whole words.
   // send: device to memory; recv: memory to device.
   // Calls remain device-paced and do not require an explicit set_drq().
@@ -142,8 +144,8 @@ public:
   // eop ends the transfer after the last unit serviced by this call, including
   // when length is capped by the current count or a stop match. It is not a latched pin level.
   // Blocked calls do not apply EOP, including calls on cascade-mode channels.
-  // EOP sets completion status and masks or auto-initializes the channel;
-  // otherwise the remaining address/count are retained. DRQ is unchanged.
+  // A chained reload preserves TC status, mask and requests. A stop match still masks.
+  // Otherwise EOP sets completion status and masks or auto-initializes the channel.
   // terminal_count and external_eop can both be true; completion occurs once.
   // Results do not clear the guest-visible terminal-count status.
   SDMA_result   send_data(int channel, void* data, size_t length = 0,
@@ -159,7 +161,8 @@ public:
   // Explicit-request service, at most one bus cycle per call.
   // Demand requires unmasked hardware DRQ; single also accepts a software request.
   // Block starts from either request and, after successful service, retains it
-  // until TC/EOP or a stop match even if DRQ or the software request drops. Auto-init releases it.
+  // across a chained reload even if DRQ or the software request drops.
+  // Final TC/EOP, auto-init or a stop match releases the block.
   // Between calls, own mask-set/disable/reset or channel reprogramming drops
   // retention without generating TC/EOP. Pending requests can start a new service.
   // Programming a chained 82357 base buffer preserves the current service.
@@ -174,7 +177,7 @@ public:
   SDMA_result   service_send_unit(int channel, u32 data, bool eop = false);
   SDMA_result   service_recv_unit(int channel, u32& data, bool eop = false);
   SDMA_result   service_recv_unit(int channel, u16& data, bool eop = false);
-  // End an accepted demand/block service without consuming another unit.
+  // Apply EOP to an accepted demand/block service without consuming another unit.
   SDMA_result   service_eop(int channel);
   // Device queries use global channels 0-3 or 5-7; invalid channels throw.
   // Raw programmed 8237 mode byte, including the local channel-select bits.
@@ -234,8 +237,9 @@ private:
   void          finish_service(int channel, const SDMA_result& result);
   void          do_dma();
   void          advance_transfer(int channel, size_t length,
-                  const SDMA_transfer_properties& properties, const SDMA_result& result);
-  void          complete_transfer(int channel);
+                  const SDMA_transfer_properties& properties, SDMA_result& result);
+  void          load_current_from_base(int channel);
+  void          complete_transfer(int channel, SDMA_result& result);
 
   /// The state structure contains all elements that need to be saved to the statefile.
   struct SDMA_state

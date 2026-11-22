@@ -68,6 +68,7 @@ static constexpr u16 dma_low_page_base = 0x81;
 static constexpr u16 dma_high_page_base = 0x481;
 static constexpr u16 dma0_chaining_mode_port = 0x40a;
 static constexpr u16 dma1_chaining_mode_port = 0x4d4;
+static constexpr u8 dma_programming_complete = 0x08;
 static constexpr u16 dma0_extended_mode_port = 0x40b;
 static constexpr u16 dma1_extended_mode_port = 0x4d6;
 
@@ -618,7 +619,7 @@ u8 CDMA::read_chaining_mode_port(u16 port) const
 	if (model != Model::Intel82357)
 		return 0xff;
 	if (port == dma0_chaining_mode_port)
-		return 0; // Pending IRQ bits are raised by chained buffer expiration.
+		return 0; // TODO: report pending chaining IRQs.
 	if (port != dma1_chaining_mode_port)
 		return 0xff;
 
@@ -1046,7 +1047,8 @@ void CDMA::finish_service(int channel, const SDMA_result& result)
 	int ctrlr = channel < 4 ? 0 : 1;
 	u8 bit = 1 << (channel & 0x03);
 	u8 mode = state.channel[channel].mode & 0xc0;
-	if (result.terminal_count || result.external_eop || result.stop_match || mode == 0x40 ||
+	const bool ended = (result.terminal_count || result.external_eop) && !result.chained;
+	if (ended || result.stop_match || mode == 0x40 ||
 		(mode == 0x00 && !(state.controller[ctrlr].drq & bit)))
 	{
 		release_service(channel);
@@ -1217,7 +1219,7 @@ void CDMA::transfer_memory(u32 address, u8* buffer, size_t length, bool decremen
  * Account for serviced bytes, including verify.
  **/
 void CDMA::advance_transfer(int channel, size_t length,
-	const SDMA_transfer_properties& properties, const SDMA_result& result)
+	const SDMA_transfer_properties& properties, SDMA_result& result)
 {
 	const size_t count_units = length / properties.count_unit;
 	const bool complete = result.terminal_count || result.external_eop;
@@ -1231,7 +1233,7 @@ void CDMA::advance_transfer(int channel, size_t length,
 	ch.count = (ch.count - (u32)count_units) & count_mask();
 
 	if (complete)
-		complete_transfer(channel);
+		complete_transfer(channel, result);
 	if (result.stop_match)
 	{
 		state.controller[channel / 4].mask |= 1 << (channel & 3);
@@ -1239,25 +1241,37 @@ void CDMA::advance_transfer(int channel, size_t length,
 	}
 }
 
+void CDMA::load_current_from_base(int channel)
+{
+	auto& ch = state.channel[channel];
+	ch.current = ch.base;
+	ch.current_page = ch.pagebase;
+	ch.count = ch.base_count;
+	ch.extended_address = ch.base_extended_address;
+}
+
 /**
  * Complete TC or external EOP without consuming any additional DMA units.
  **/
-void CDMA::complete_transfer(int channel)
+void CDMA::complete_transfer(int channel, SDMA_result& result)
 {
+	const bool auto_init = (state.channel[channel].mode & 0x10) != 0;
+	if (!auto_init && chaining_enabled(channel) && (state.isp.chaining_mode[channel] & dma_programming_complete))
+	{
+		load_current_from_base(channel);
+		state.isp.chaining_mode[channel] &= ~dma_programming_complete;
+		result.chained = true;
+		return;
+	}
+
 	int ctrlr = channel < 4 ? 0 : 1;
 	int local_channel = channel & 0x03;
 	state.controller[ctrlr].status |= 1 << local_channel;
 	// TC and EOP clear the software request; the device owns its DRQ level.
 	state.controller[ctrlr].request &= ~(1 << local_channel);
 	release_service(channel);
-	if (state.channel[channel].mode & 0x10)
-	{
-		auto& ch = state.channel[channel];
-		ch.current = ch.base;
-		ch.current_page = ch.pagebase;
-		ch.count = ch.base_count;
-		ch.extended_address = ch.base_extended_address;
-	}
+	if (auto_init)
+		load_current_from_base(channel);
 	else
 		state.controller[ctrlr].mask |= 1 << local_channel;
 }
@@ -1495,7 +1509,7 @@ CDMA::SDMA_result CDMA::service_eop(int channel)
 		return result;
 
 	// No new memory cycle or arbitration: complete only the accepted service.
-	complete_transfer(channel);
+	complete_transfer(channel, result);
 	result.blocked = false;
 	result.external_eop = true;
 	return result;

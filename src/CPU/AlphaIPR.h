@@ -37,6 +37,7 @@ enum class AlphaIPRReadKind
 {
   Unsupported,
   Helper,
+  IboxControl,
   ExceptionAddress,
   PalTemp,
   ExceptionSummary,
@@ -73,6 +74,7 @@ enum class AlphaIPRWriteKind
   HelperTerminator,
   BcacheControl, // Ends the block after switching the physical memory path.
   AboxControl,
+  IboxControl,
   ExceptionAddress, // Write PC[63:2] and PAL[0].
   PalTemp,
   Noop // No write callback; privilege checks still apply.

@@ -42,6 +42,7 @@ public:
   static void invalidate(CAlphaCPU& cpu, bool non_global);
 
 private:
+  static AlphaInstructionMapping mapping(const CAlphaCPU& cpu, std::uint64_t pc);
   static bool cache_hit(const CAlphaCPU& cpu, std::uint64_t physical);
   static AlphaInstructionSourceView cached_source(const CAlphaCPU& cpu, std::uint64_t pc);
 };

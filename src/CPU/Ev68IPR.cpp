@@ -134,7 +134,7 @@ std::uint64_t Ev68IPR::read(CAlphaCPU& cpu, std::uint32_t instruction)
   case 0x0f: return state.exc_sum;                      // EXC_SUM
   case 0x10: return state.pal_base;                     // PAL_BASE
   case 0x11:                                           // I_CTL
-    return state.i_ctl_other | (((u64)cpu.get_profile().chip_id) << 24) | (u64)state.i_ctl_vptb
+    return state.ibox_ctl | (((u64)cpu.get_profile().chip_id) << 24) | (u64)state.i_ctl_vptb
       | (((u64)state.i_ctl_va_mode) << 15) | (state.hwe ? U64(0x1) << 12 : 0)
       | (state.sde ? U64(0x1) << 7 : 0) | (((u64)state.i_ctl_spe) << 3);
   case 0x14: return state.pctr_ctl;                     // PCTR_CTL
@@ -254,7 +254,7 @@ void Ev68IPR::write(CAlphaCPU& cpu, std::uint32_t instruction, std::uint64_t val
 
     case 0x11:  /* i_ctl */
       /* Bit 20 (CALL_PAL_R23 / ST_WAIT_64K) is hardwired-on for EV6/EV68 */
-      state.i_ctl_other = (value & U64(0x00000000006e2f67))
+      state.ibox_ctl = (value & U64(0x00000000006e2f67))
                           | U64(0x0000000000100000);
       state.i_ctl_vptb = sext_u64_48(value & U64(0x0000ffffc0000000));
       state.i_ctl_spe = (int) ((value >> 3) & 7);

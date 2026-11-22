@@ -27,6 +27,8 @@
 #if !defined(INCLUDED_ALPHARESET_H)
 #define INCLUDED_ALPHARESET_H
 
+#include <cstdint>
+
 class CAlphaCPU;
 
 // Family startup state, copied with the profile and outside saved CPU state.
@@ -37,6 +39,7 @@ struct AlphaResetPolicy
   // An absent callback leaves the cleared state without family bootstrap defaults.
   void (*initialize)(CAlphaCPU& cpu) = nullptr;
   bool external_reset_vector = false; // Use the CPU reset vector without the ES40 SRM loader.
+  std::uint64_t retained_ibox_bits = 0;
 };
 
 #endif

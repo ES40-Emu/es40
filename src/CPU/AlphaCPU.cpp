@@ -337,6 +337,7 @@
   **/
 #include "StdAfx.h"
 #include "AlphaCPU.h"
+#include "Ev4IPR.h"
 #include "jit/jitengine.h"
 #include "chipset/AliM1543C.h"
 #include "TraceEngine.h"
@@ -906,6 +907,8 @@ CAlphaCPU::TickHold CAlphaCPU::tick_hold(u64 period_ns)
 
 u64 CAlphaCPU::read_ipr(u32 instruction, AlphaIPRReadDescriptor descriptor, u64 issue)
 {
+	if (descriptor.kind == AlphaIPRReadKind::IboxControl)
+		return state.ibox_ctl;
 	if (descriptor.kind == AlphaIPRReadKind::PalTemp)
 	{
 		const unsigned slot = descriptor.pal_temp_slot();
@@ -930,6 +933,19 @@ void CAlphaCPU::write_ipr(u32 instruction, u64 value, AlphaIPRWriteContext conte
 {
 	if (m_profile.ipr_write.indexed) {
 		switch (m_profile.ipr_write.describe(instruction, (state.current_pc & 1) != 0)) {
+		case AlphaIPRWriteKind::IboxControl: {
+			const u64 iccsr = ev4_iccsr_from_write(value);
+#ifdef ES40_JIT
+			if ((iccsr ^ state.ibox_ctl) & (kEv4IccsrAsnMask | kEv4IccsrMap)) {
+				m_link_from = nullptr;
+				jit_flush_blocks();
+			}
+#endif
+			state.ibox_ctl = iccsr;
+			if (context == AlphaIPRWriteContext::Compiled)
+				sync_native_context();
+			return;
+		}
 		case AlphaIPRWriteKind::AboxControl:
 			configure_ev4_dcache(value);
 			return;
@@ -1253,6 +1269,7 @@ void CAlphaCPU::update_ev4_cache_limit()
 void CAlphaCPU::ResetForSystemReset()
 {
 	const int savedProcNum = state.iProcNum;
+	const u64 retained_ibox = state.ibox_ctl & m_profile.reset.retained_ibox_bits;
 	m_ev4_bcache = {};
 	m_ev4_dcache = {};
 
@@ -1260,6 +1277,7 @@ void CAlphaCPU::ResetForSystemReset()
 		cSystem->idle_watch_disarm(savedProcNum);   // the memset clears iProcNum
 	m_idle_armed = false;
 	memset(&state, 0, sizeof(state));
+	state.ibox_ctl = retained_ibox;
 	m_pal_temp_write = {};
 	reset_idle_detector();
 	if (m_profile.cpu_state.replaced)
@@ -1867,13 +1885,14 @@ void CAlphaCPU::jit_run(int budget)
 			const size_t swap_bytes = m_profile.ipr_write.indexed ? sizeof(m_pal_temp_write) : 0;
 			const int biu_index = verify.word_count + (int)(swap_bytes / sizeof(u64));
 			const bool verify_cache_controls = m_profile.ipr_write.indexed != nullptr;
-			const int ipr_count = biu_index + (verify_cache_controls ? 2 : 0);
+			const int ipr_count = biu_index + (verify_cache_controls ? 3 : 0);
 			auto cap_iprs = [&](u64* d) {
 				if (verify.word_count) verify.capture(*this, d);
 				if (swap_bytes) memcpy(d + verify.word_count, &m_pal_temp_write, swap_bytes);
 				if (verify_cache_controls) {
 					d[biu_index] = m_ev4_bcache.control;
 					d[biu_index + 1] = m_ev4_dcache.control;
+					d[biu_index + 2] = state.ibox_ctl;
 				}
 			};
 			auto put_iprs = [&](const u64* s, bool replay) {
@@ -1883,6 +1902,7 @@ void CAlphaCPU::jit_run(int budget)
 				if (verify_cache_controls) {
 					configure_ev4_bcache(s[biu_index]);
 					configure_ev4_dcache(s[biu_index + 1], false);
+					state.ibox_ctl = s[biu_index + 2];
 				}
 				if (!replay) sync_register_bank();
 			};

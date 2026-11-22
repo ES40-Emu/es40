@@ -276,6 +276,7 @@ class CAlphaCPU : public CSystemComponent, public CRunnable
   friend class Ev68CPUState;
   friend class Ev68InstructionFetch;
   friend class Ev4InstructionFetch;
+  friend constexpr AlphaCPUProfile ev4_ibox_profile(AlphaCPUProfile profile);
 public:
   void          flush_icache_asm();
   virtual int   SaveState(FILE* f);
@@ -902,7 +903,7 @@ private:
     int   pcr;          /**< perf counter interrupt */
     int   astrr;        /**< IPR PCTX: astrr (AST request) [HRM p 5-21..22] */
     int   aster;        /**< IPR PCTX: aster (AST enable) [HRM p 5-21..22] */
-    u64   i_ctl_other;  /**< various bits in IPR I_CTL that have no meaning to the emulator */
+    u64   ibox_ctl;     /**< EV4 ICCSR read image or remaining EV68 I_CTL fields. */
     u64   mm_stat;      /**< IPR MM_STAT: memory management status [HRM p 5-28..29] */
     bool  hwe;          /**< IPR I_CLT: hwe (allow palmode ins in kernel mode) [HRM p 5-15..17] */
     int   m_ctl_spe;    /**< IPR M_CTL: spe (Super Page mode enabled) [HRM p 5-29..30] */

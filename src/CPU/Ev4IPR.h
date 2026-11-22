@@ -57,6 +57,8 @@ constexpr AlphaIPRReadDescriptor ev4_describe_ipr_read(std::uint32_t instruction
   const auto selector = ev4_ipr_selector(instruction);
   if (ev4_ipr_ignored(selector, pal_mode))
     return {AlphaIPRReadKind::Noop, false, true};
+  if (selector.banks == 0x20 && selector.index == 2) // ICCSR (21064 HRM Table 4-7).
+    return {AlphaIPRReadKind::IboxControl, false, true};
   if (selector.banks == 0x80) // PAL_TEMP only.
     return {AlphaIPRReadKind::PalTemp, false, true, static_cast<std::uint8_t>(selector.index)};
   if (selector.banks == 0x20 && selector.index == 4) // EXC_ADDR.
@@ -78,6 +80,11 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
   const auto selector = ev4_ipr_selector(instruction);
   if (ev4_ipr_ignored(selector, pal_mode))
     return AlphaIPRWriteKind::Noop;
+  // 21064 HRM 4.8.1, Table 4-7: IBX index 2 writes ICCSR, PAL adds PAL_TEMP2.
+  if (selector.index == 2 && (selector.banks == 0x20 || selector.banks == 0xa0)) {
+    if (slot) *slot = (selector.banks & 0x80) ? 32u + selector.index : 0;
+    return AlphaIPRWriteKind::IboxControl;
+  }
   // 21064 HRM 4.8.1, Table 4-7: ABX selects ABOX_CTL (14) or BIU_CTL (18), PAL writes the same-index PAL_TEMP.
   if ((selector.banks == 0x40 || selector.banks == 0xc0) &&
       (selector.index == 14 || selector.index == 18)) {
@@ -101,6 +108,28 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
   if (selector.banks == 0x40 && selector.index == 16) // CC.
     return AlphaIPRWriteKind::Helper;
   return AlphaIPRWriteKind::Interpreter;
+}
+
+// 21064 HRM 5.2.3, Fig. 5-3: ICCSR has distinct HW_MTPR and HW_MFPR layouts.
+// Keep the defined controls and read the Digital-reserved fields as zero.
+constexpr std::uint64_t ev4_iccsr_from_write(std::uint64_t value)
+{
+  return (((value >> 47) & 0x3f) << 28)   // ASN
+       | (value & (UINT64_C(3) << 44))     // PCE
+       | (((value >> 32) & 0x7ff) << 13)  // FPE..PIPE and PCMUX1
+       | (((value >> 8) & 0xf) << 9)      // PCMUX0
+       | (((value >> 3) & 1) << 1)        // PC0
+       | ((value & 1) << 2);              // PC1
+}
+
+inline constexpr std::uint64_t kEv4IccsrFpe = UINT64_C(1) << 23;
+inline constexpr std::uint64_t kEv4IccsrMap = UINT64_C(1) << 22;
+inline constexpr std::uint64_t kEv4IccsrHwe = UINT64_C(1) << 21;
+inline constexpr std::uint64_t kEv4IccsrAsnMask = UINT64_C(0x3f) << 28;
+
+constexpr unsigned ev4_iccsr_asn(std::uint64_t iccsr)
+{
+  return static_cast<unsigned>((iccsr & kEv4IccsrAsnMask) >> 28);
 }
 
 // PS reads use bits 34/1; writes use bits 4:3 (HRM 5.2.11).

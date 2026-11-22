@@ -35,7 +35,7 @@ void Ev68Reset::initialize(CAlphaCPU& cpu)
 {
   auto& state = cpu.state;
   state.fpen = true;
-  state.i_ctl_other = U64(0x502086);
+  state.ibox_ctl = U64(0x502086);
   state.smc = 1;
 
   // Preserve the synthetic SROM data mapping through the normal TB-fill path.

@@ -27,6 +27,7 @@
 #include "StdAfx.h"
 #include "AlphaCPU.h"
 #include "Ev4InstructionFetch.h"
+#include "Ev4IPR.h"
 #include "config/Configurator.h"
 #include <fstream>
 
@@ -36,11 +37,16 @@ static constexpr unsigned line_count = 256;
 static constexpr unsigned line_bytes = line_words * 4;
 static_assert(ICACHE_ENTRIES >= line_count && ICACHE_LINE_SIZE >= line_words);
 
-static AlphaInstructionMapping ev4_pal_mapping(u64 pc)
+AlphaInstructionMapping Ev4InstructionFetch::mapping(const CAlphaCPU& cpu, u64 pc)
 {
-  if ((pc & 3) != 1 || (pc >> 34) != 0)
-    return {};
-  return {pc & ~U64(3), true, true};
+  if ((pc & 3) == 1 && !(pc >> 34))
+    return {pc & ~U64(3), true, true};
+  // 21064 HRM 2.3.2: MAP bypasses the ITB for kernel VPC[42:41] = 2 and sets ASM.
+  const auto access = cpu.get_profile().mmu_address.access;
+  if (!(pc & 3) && ((pc >> 41) & 3) == 2 && (cpu.state.ibox_ctl & kEv4IccsrMap) &&
+      access && access(cpu, ACCESS_EXEC).mode == 0)
+    return {pc & U64(0x3ffffffff), true, true};
+  return {};
 }
 
 static unsigned ev4_cache_index(u64 physical)
@@ -105,12 +111,11 @@ bool Ev4InstructionFetch::cache_hit(const CAlphaCPU& cpu, u64 physical)
 
 int Ev4InstructionFetch::fetch(CAlphaCPU& cpu, u32* instruction)
 {
-  const auto mapping = ev4_pal_mapping(cpu.state.pc);
-  if (!mapping.valid)
-    FAILURE_1(NotImplemented, "EV4 instruction fetch at PC %016" PRIx64
-      " requires a word-aligned 34-bit PAL address", cpu.state.pc);
+  const auto address = mapping(cpu, cpu.state.pc);
+  if (!address.valid)
+    FAILURE_1(NotImplemented, "Unsupported EV4 instruction fetch at PC %016" PRIx64, cpu.state.pc);
 
-  const u64 physical = mapping.physical;
+  const u64 physical = address.physical;
   const u64 base = physical & ~u64(line_bytes - 1);
   auto& line = cpu.state.icache[ev4_cache_index(physical)];
   if (!cache_hit(cpu, physical)) {
@@ -125,7 +130,9 @@ int Ev4InstructionFetch::fetch(CAlphaCPU& cpu, u32* instruction)
 #endif
     memcpy(line.data, words, sizeof(words));
     line.p_address = base;
-    line.asm_bit = true;
+    const auto access = cpu.get_profile().mmu_address.access;
+    line.asn = access ? (access(cpu, ACCESS_EXEC).asn & 63) : 0;
+    line.asm_bit = address.asm_global;
     line.valid = true;
   }
 
@@ -139,18 +146,18 @@ int Ev4InstructionFetch::fetch(CAlphaCPU& cpu, u32* instruction)
 
 AlphaInstructionMapping Ev4InstructionFetch::probe(CAlphaCPU& cpu, u64 pc)
 {
-  auto mapping = ev4_pal_mapping(pc);
-  if (mapping.valid && cache_hit(cpu, mapping.physical))
-    mapping.asm_global = cpu.state.icache[ev4_cache_index(mapping.physical)].asm_bit;
-  return mapping;
+  auto address = mapping(cpu, pc);
+  if (address.valid && cache_hit(cpu, address.physical))
+    address.asm_global = cpu.state.icache[ev4_cache_index(address.physical)].asm_bit;
+  return address;
 }
 
 AlphaInstructionSourceView Ev4InstructionFetch::cached_source(const CAlphaCPU& cpu, u64 pc)
 {
-  const auto mapping = ev4_pal_mapping(pc);
-  if (!mapping.valid)
+  const auto address = mapping(cpu, pc);
+  if (!address.valid)
     return {};
-  const u64 physical = mapping.physical;
+  const u64 physical = address.physical;
   const auto& line = cpu.state.icache[ev4_cache_index(physical)];
   if (!cache_hit(cpu, physical))
     return {};

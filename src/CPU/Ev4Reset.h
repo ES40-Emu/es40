@@ -27,6 +27,7 @@
 
 #include "AlphaCPU.h"
 #include "Ev4InstructionFetch.h"
+#include "Ev4IPR.h"
 
 // With SROM preload disabled, reset fetches physical zero in PALmode (HRM 6.4.1).
 inline void ev4_reset_no_srom(CAlphaCPU& cpu)
@@ -34,13 +35,15 @@ inline void ev4_reset_no_srom(CAlphaCPU& cpu)
   cpu.set_pc(1);
 }
 
-inline constexpr AlphaResetPolicy kEv4ResetPolicy{&ev4_reset_no_srom, true};
+// 21064 HRM 5.2.3 and Table 5-20: reset leaves ASN, PC0 and PC1 alone.
+inline constexpr std::uint64_t kEv4RetainedIccsr = kEv4IccsrAsnMask | 6;
+inline constexpr AlphaResetPolicy kEv4ResetPolicy{&ev4_reset_no_srom, true, kEv4RetainedIccsr};
 
 inline constexpr AlphaResetPolicy kEv4SromResetPolicy{
   [](CAlphaCPU& cpu) {
     Ev4InstructionFetch::preload_srom(cpu);
     cpu.set_pc(1);
-  }, true
+  }, true, kEv4RetainedIccsr
 };
 
 #endif

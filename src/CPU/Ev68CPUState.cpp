@@ -46,7 +46,7 @@ void Ev68CPUState::capture(const CAlphaCPU& cpu, std::uint64_t* d)
   d[14] = state.fpcr;      // MT_FPCR (compiled FLTL) writes it
   d[15] = (u64)state.sde; d[16] = (u64)state.hwe;            // I_CTL (compiled as terminator)
   d[17] = (u64)(u32)state.i_ctl_spe; d[18] = (u64)(u32)state.i_ctl_va_mode;
-  d[19] = state.i_ctl_vptb; d[20] = state.i_ctl_other;
+  d[19] = state.i_ctl_vptb; d[20] = state.ibox_ctl;
   d[21] = (u64)(u32)state.cm;    d[22] = (u64)(u32)state.sir;     // CM, SIRR
   d[23] = (u64)(u32)state.aster; d[24] = (u64)(u32)state.astrr;   // 0x40-group ASTER/ASTRR
   d[25] = (u64)(u32)state.fpen;  d[26] = (u64)(u32)state.ppcen;   // 0x40-group FPEN/PPCEN
@@ -58,7 +58,7 @@ void Ev68CPUState::prepare_replay(CAlphaCPU& cpu, const std::uint64_t* s)
   auto& state = cpu.state;
   state.sde = (bool)s[15]; state.hwe = (bool)s[16];   // restore I_CTL too: a compiled HW_MFPR must read the pre-interp value
   state.i_ctl_spe = (int)s[17]; state.i_ctl_va_mode = (int)s[18];
-  state.i_ctl_vptb = s[19]; state.i_ctl_other = s[20];
+  state.i_ctl_vptb = s[19]; state.ibox_ctl = s[20];
   state.cm = (int)s[21]; state.sir = (int)s[22];                      // ...and CM/SIRR
   cpu.flush_data_page_cache();
   state.aster = (int)s[23]; state.astrr = (int)s[24];            // ...and the PCTX read-backs (a
@@ -79,7 +79,7 @@ void Ev68CPUState::restore(CAlphaCPU& cpu, const std::uint64_t* s)
   state.fpcr = s[14];
   state.sde = (bool)s[15]; state.hwe = (bool)s[16];
   state.i_ctl_spe = (int)s[17]; state.i_ctl_va_mode = (int)s[18];
-  state.i_ctl_vptb = s[19]; state.i_ctl_other = s[20];
+  state.i_ctl_vptb = s[19]; state.ibox_ctl = s[20];
   state.cm = (int)s[21]; state.sir = (int)s[22];
   cpu.flush_data_page_cache();
   state.aster = (int)s[23]; state.astrr = (int)s[24];

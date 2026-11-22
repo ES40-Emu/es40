@@ -178,8 +178,6 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
   }
   if (selector.banks == 0x20 && selector.index == 4) // EXC_ADDR.
     return AlphaIPRWriteKind::ExceptionAddress;
-  if (selector.banks == 0x20 && selector.index == 9) // PS.
-    return AlphaIPRWriteKind::Helper;
   if (selector.banks == 0x20 && selector.index == 10) // EXC_SUM.
     return AlphaIPRWriteKind::Helper;
   if (selector.banks == 0x20 && selector.index == 11) // PAL_BASE.
@@ -189,6 +187,7 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
     auto kind = AlphaIPRWriteKind::Interpreter;
     switch (selector.index) {
     case 2:  kind = AlphaIPRWriteKind::IboxControl; break;
+    case 9:  kind = AlphaIPRWriteKind::Helper; break; // PS (21064 HRM 5.2.11).
     case 13: kind = AlphaIPRWriteKind::SoftwareInterruptRequest; break;
     case 14: kind = AlphaIPRWriteKind::AstInterruptRequest; break;
     case 16: kind = AlphaIPRWriteKind::HardwareInterruptEnable; break;

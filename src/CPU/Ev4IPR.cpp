@@ -173,7 +173,11 @@ void ev4_write_ipr(CAlphaCPU& cpu, u32 instruction, u64 value, AlphaIPRWriteCont
     return;
   }
   switch (instruction & 0xff) {
-  case 0x29: cpu.set_current_mode(ev4_decode_processor_status(value), context); return;
+  case 0x29:
+  case 0xa9: // PS and PAL_TEMP9 can share a write (21064 HRM 4.8.1, 5.2.11).
+    cpu.set_current_mode(ev4_decode_processor_status(value), context);
+    cpu.kick_int_if_pending(); // AST eligibility depends on the new mode (21064 HRM 2.3.3).
+    return;
   case 0x2a: ev4_write_exception_summary(cpu.ev4_arithmetic_state(), value); return;
   case 0x2b: cpu.set_PAL_BASE(ev4_normalize_pal_base(value)); return;
   case 0x4f: cpu.state.alt_cm = ev4_decode_alternate_mode(value); return;

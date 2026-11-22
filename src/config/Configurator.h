@@ -97,6 +97,7 @@ typedef enum
 
   // chipsets
   c_tsunami,
+  c_jensen,
 
   // system devices
   c_ev68cb,

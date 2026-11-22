@@ -753,6 +753,7 @@ static const char* const kv_tsunami[] = {
   "memory.bits", "rom.srm", "rom.flash", "rom.dpr", "rom.toy", "time",
   "arc_year_compat", "exit_on_pal_halt", "graphics.multihead", "qmp.port", "debug.stop_on_decode_conflict",
   "debug.shared_read_policy", "debug.shared_read_claimant", "framebuffer.path", 0 };
+static const char* const kv_jensen[] = { "memory.bits", 0 };
 static const char* const kv_ev68cb[] = {
   "speed", "palcode.vms.nohle", "idle_nap", "idle_detect",
   "idle_spin_count", "idle_nap_poll_us", "idle_pc_lo", "idle_pc_hi",
@@ -817,6 +818,7 @@ static const char* const kv_wss[] = { "io_port", 0 };
 
 classinfo classes[] = {
   {"tsunami", c_tsunami, N_P | IS_CS | HAS_PCI, kv_tsunami},
+  {"jensen", c_jensen, N_P | IS_CS | HAS_ISA, kv_jensen},
   {"ev68cb", c_ev68cb, ON_CS, kv_ev68cb},
   {"ali", c_ali, IS_PCI | HAS_ISA, kv_ali},
   {"ali_ide", c_ali_ide, IS_PCI | HAS_DISK, kv_ali_ide},
@@ -873,6 +875,7 @@ const char* CConfigurator::isa_card_config_error(const CConfigurator* card, cons
 	if (!parse_isa_slot(name, bus, slot))
 		return "Name an ISA card isa<bus>.<slot> using decimal bus and slot numbers";
 	if (board.id == c_tsunami && bus != 0) return "The ES40 ISA bridge provides bus isa0";
+	if (board.id == c_jensen && bus != 0) return "The Jensen EISA bridge provides bus isa0";
 	const auto* ports = isa_card_ports(type);
 	u16 port = 0;
 	if (ports && !parse_isa_io_port(io_port, *ports, port))
@@ -1036,6 +1039,8 @@ void CConfigurator::initialize()
 		if (!(pParent->get_flags() & IS_CS))
 			FAILURE_2(Configuration, "Class %s for %s needs a chipset parent",
 				myValue, myName);
+		if (pParent->get_class_id() == c_jensen && !(myFlags & IS_ISA))
+			FAILURE_2(Configuration, "Class %s for %s is unavailable on Jensen", myValue, myName);
 	}
 
 	if (myFlags & ON_GUI)
@@ -1154,6 +1159,14 @@ void CConfigurator::initialize()
 		new CDPR(this, (CSystem*)myDevice);
 		new CFlash(this, (CSystem*)myDevice);
 		break;
+
+	case c_jensen:
+	{
+		auto* system = new CSystem(this, CSystem::Platform::Jensen);
+		myDevice = system;
+		system->init_jensen_eisa();
+		break;
+	}
 
 	case c_ev68cb:
 		myDevice = new CAlphaCPU(this, (CSystem*)pParent->get_device(), kEv68CBProfile);
@@ -1429,7 +1442,7 @@ void CConfigurator::initialize()
 	// Synthesize mandatory system hardware omitted from the configuration.
 	// Missing serial ports use null_attach (bit-bucket) mode; the IDE and
 	// floppy controllers are chipset integrated and always exist.
-	if (myFlags & IS_CS)
+	if (myClassId == c_tsunami)
 	{
 		bool have_serial[2] = { false, false };
 		bool have_ide = false;

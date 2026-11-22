@@ -504,6 +504,8 @@ int main(int argc, char* argv[])
 			FAILURE(Configuration, "no system initialized");
 
 #if defined(IDB)
+		if (!theSystem->get_cpu_num())
+			FAILURE(Configuration, "The interactive debugger requires a configured CPU");
 		trc = new CTraceEngine(theSystem);
 #endif
 		// Components are initialized and no workers have started. 
@@ -524,7 +526,8 @@ int main(int argc, char* argv[])
 		if (!restored)
 		{
 			theSystem->LoadROM();
-			theDPR->init();
+			if (theDPR)
+				theDPR->init();
 		}
 
 #if defined(PROFILE)
@@ -608,8 +611,10 @@ static int run_emulator(int argc, char* argv[])
 			theSystem->flush_storage();
 
 			// save flash and dpr rom only if not terminated with a fatal error
-			theSROM->SaveStateF();
-			theDPR->SaveStateF();
+			if (theSROM)
+				theSROM->SaveStateF();
+			if (theDPR)
+				theDPR->SaveStateF();
 			if (theAli)
 				theAli->save_toy_nvram(true);
 

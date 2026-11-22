@@ -872,6 +872,8 @@ void CSystem::Run()
 		for (i = 0; i < iNumComponents; i++)
 			acComponents[i]->check_state();
 #if !defined(HIDE_COUNTER)
+		if (!iNumCPUs)
+			continue;
 #if defined(PROFILE)
 		printf("%d | %016" PRIx64 " | %" PRId64 " profiled instructions.  \r", k,
 			acCPUs[0]->get_pc(), profiled_insts);
@@ -1791,7 +1793,7 @@ static bool srm_decomp_chunk(CSystem* sys, CAlphaCPU* cpu)
  **/
 int CSystem::LoadROM()
 {
-	if (iNumCPUs && acCPUs[0]->get_profile().reset.external_reset_vector)
+	if (!iNumCPUs || acCPUs[0]->get_profile().reset.external_reset_vector)
 		return 0;
 
 	FILE* f;

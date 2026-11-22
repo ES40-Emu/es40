@@ -103,6 +103,7 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
     auto kind = AlphaIPRWriteKind::Interpreter;
     switch (selector.index) {
     case 2:  kind = AlphaIPRWriteKind::IboxControl; break;
+    case 13: kind = AlphaIPRWriteKind::SoftwareInterruptRequest; break;
     case 16: kind = AlphaIPRWriteKind::HardwareInterruptEnable; break;
     case 17: kind = AlphaIPRWriteKind::SoftwareInterruptEnable; break;
     case 18: kind = AlphaIPRWriteKind::AstInterruptEnable; break;
@@ -137,10 +138,16 @@ inline void ev4_write_hier(std::uint64_t value, int& eien, int& pcen, int& slen,
   cren = (value >> 2) & 1;
 }
 
+// SIRR writes replace requests 15:1 using the same field as SIER (21064 HRM 5.2.15, Fig. 5-12).
+constexpr int ev4_software_interrupts_from_write(std::uint64_t value)
+{
+  return static_cast<int>((value >> 32) & 0xfffe);
+}
+
 // Bits 47:33 write SIER[15:1]. SIER[2] also gates ASTs (21064 HRM 5.2.16 and 5.2.18, Fig. 5-15).
 inline void ev4_write_sier(std::uint64_t value, int& sien, int& asten)
 {
-  sien = (value >> 32) & 0xfffe;
+  sien = ev4_software_interrupts_from_write(value);
   asten = (sien >> 2) & 1;
 }
 

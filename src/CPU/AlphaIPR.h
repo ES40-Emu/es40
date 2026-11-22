@@ -76,6 +76,7 @@ enum class AlphaIPRWriteKind
   AboxControl,
   IboxControl,
   InterruptClear,
+  SoftwareInterruptRequest,
   HardwareInterruptEnable,
   SoftwareInterruptEnable,
   AstInterruptEnable,

@@ -97,6 +97,8 @@ constexpr AlphaIPRReadDescriptor ev4_describe_ipr_read(std::uint32_t instruction
     return {AlphaIPRReadKind::ExceptionAddress, false, true};
   if (selector.banks == 0x40) {
     switch (selector.index) {
+    case 4: // MM_CSR (21064 HRM 5.3.4).
+      return {AlphaIPRReadKind::MemoryFaultStatus, false, true};
     // Reading VA unlocks VA and MM_CSR even to R31 (21064 HRM Table 4-7, 5.3.4, 5.3.5).
     case 5:
     // BIU_ADDR and FILL_ADDR unlock their groups even to R31 (21064 HRM 5.3.19-20).

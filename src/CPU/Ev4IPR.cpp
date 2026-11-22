@@ -102,6 +102,7 @@ u64 ev4_read_ipr(CAlphaCPU& cpu, u32 instruction)
   case 0x31:
   case 0x32:
     return ev4_interrupt_fields(state.aster, state.sien, state.eien, state.slen, state.pcen, state.cren);
+  case 0x44: return state.mm_stat; // MM_CSR stays latched until VA is read (21064 HRM 5.3.4).
   case 0x45: // VA (21064 HRM 5.3.5).
     state.ev4_va_locked = 0;
     return state.fault_va;

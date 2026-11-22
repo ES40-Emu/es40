@@ -59,7 +59,11 @@ public:
   void dma_write_memory(u32 address, const void* source, size_t bytes) override;
   u64 ReadMem(int index, u64 address, int dsize) override;
   void WriteMem(int index, u64 address, int dsize, u64 data) override;
-  void ResetPCI() override { hae = 0; }
+  void ResetPCI() override
+  {
+    hae = 0;
+    ebc.eisa_bus().reset();
+  }
   Intel82357* const isp;
   Intel82358 ebc;
 
@@ -79,6 +83,7 @@ JensenHostBus::JensenHostBus(CConfigurator* cfg, CSystem* system)
   system->RegisterMemory(this, HostAddressExtension, U64(0x1d0000000), 4);
   system->RegisterMemory(this, InterruptAcknowledge, U64(0x100000000), 8);
   save_item(hae, "hae");
+  save_item(ebc.eisa_bus().snapshot_state().enabled_slots, "eisa.enabled_slots");
 }
 
 u64 JensenHostBus::ReadMem(int index, u64 address, int dsize)

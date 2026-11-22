@@ -30,6 +30,7 @@
 #include "DMA.h"
 
 static constexpr unsigned last_expansion_slot = 15;
+static constexpr unsigned slot_control_offset = 4; // xC84 follows the four product ID bytes.
 
 static constexpr u16 slot_id_port(unsigned slot)
 {
@@ -48,19 +49,33 @@ void EISABus::register_isa_io(CSystemComponent& device, int index, u16 port, u32
 
 void EISABus::register_eisa_io(CSystemComponent& device, int index, u16 port, u32 length, int max_dsize)
 {
+  register_io(0, device, index, port, length, max_dsize);
+}
+
+void EISABus::register_slot_io(unsigned slot, CSystemComponent& device, int index,
+  u16 port, u32 length, int max_dsize)
+{
+  if (!slot || slot > last_expansion_slot || !find_io(slot_id_port(slot)))
+    FAILURE(Configuration, "EISA I/O range needs a registered expansion slot");
+  register_io(slot, device, index, port, length, max_dsize);
+}
+
+void EISABus::register_io(unsigned owner_slot, CSystemComponent& device, int index,
+  u16 port, u32 length, int max_dsize)
+{
   if (!valid_io_width(max_dsize))
     FAILURE(Configuration, "Invalid EISA I/O width");
   if (!length || length > 0x10000U - port)
     FAILURE(Configuration, "Invalid EISA I/O port range");
   for (unsigned slot = 1; slot <= last_expansion_slot; ++slot) {
     const u32 base = slot_id_port(slot);
-    if (port < base + 4 && base < port + length)
-      FAILURE(Configuration, "EISA I/O range overlaps reserved slot product ID ports");
+    if (port < base + slot_control_offset + 1 && base < port + length)
+      FAILURE(Configuration, "EISA I/O range overlaps reserved slot ID or control ports");
   }
   for (const auto& range : io_ranges)
     if (port < range.base + range.length && range.base < port + length)
       FAILURE(Configuration, "Overlapping EISA I/O port ranges");
-  io_ranges.push_back({&device, index, port, length, max_dsize});
+  io_ranges.push_back({&device, index, port, length, max_dsize, owner_slot});
 }
 
 void EISABus::register_slot_id(unsigned slot, const std::array<u8, 4>& product_id)
@@ -73,14 +88,30 @@ void EISABus::register_slot_id(unsigned slot, const std::array<u8, 4>& product_i
   u32 value = 0;
   for (unsigned i = 0; i < product_id.size(); ++i)
     value |= (u32)product_id[i] << (i * 8);
-  io_ranges.push_back({nullptr, 0, base, 4, 32, value});
+  io_ranges.push_back({nullptr, 0, base, slot_control_offset + 1, 32, slot, value});
 }
 
-const EISABus::IoRange* EISABus::find_io(u32 port) const noexcept
+bool EISABus::slot_enabled(unsigned slot) const noexcept
 {
-  for (const auto& range : io_ranges)
-    if (port >= range.base && port - range.base < range.length)
-      return &range;
+  return slot && slot <= last_expansion_slot && (state.enabled_slots & (1U << slot));
+}
+
+const EISABus::IoRange* EISABus::find_io(u32 port, unsigned bytes) const noexcept
+{
+  for (const auto& range : io_ranges) {
+    if (port < range.base || port - range.base >= range.length)
+      continue;
+    if (bytes > range.length - (port - range.base))
+      return nullptr;
+    if (range.device && range.slot && !slot_enabled(range.slot)) {
+      // Disabled boards still decode their own x000, x400, x800 and xC00 I/O windows.
+      const u32 slot_base = range.slot << 12;
+      const u32 last = port + bytes - 1;
+      if ((port & 0xf300) != slot_base || (last & 0xf300) != slot_base)
+        return nullptr;
+    }
+    return &range;
+  }
   return nullptr;
 }
 
@@ -103,11 +134,13 @@ const EISABus::IoRange* EISABus::decode_io(u16 port, int dsize, bool write) cons
 {
   if (!valid_io_width(dsize))
     return nullptr;
-  const auto* range = find_io(port);
+  const unsigned bytes = dsize / 8;
+  const auto* range = find_io(port, bytes);
   if (!range || dsize > range->max_dsize)
     return nullptr;
   const u32 offset = port - range->base;
-  if (offset + dsize / 8 > range->length)
+  // The four-byte ID and one-byte control register are separate transfers.
+  if (!range->device && offset < slot_control_offset && offset + bytes > slot_control_offset)
     return nullptr;
   if (range->device && !range->device->decodes_memory_access(range->index, offset, dsize, write))
     return nullptr;
@@ -138,6 +171,10 @@ bool EISABus::read_port(u16 port, int dsize, u32& data)
   if (!range)
     return false;
   const u32 offset = port - range->base;
+  if (!range->device && offset == slot_control_offset) {
+    data = slot_enabled(range->slot);
+    return true;
+  }
   const u64 value = range->device ? range->device->ReadMem(range->index, offset, dsize) :
     range->product_id >> (offset * 8);
   data = (u32)value & (0xffffffffU >> (32 - dsize));
@@ -149,7 +186,15 @@ bool EISABus::write_port(u16 port, int dsize, u32 data)
   const auto* range = decode_io(port, dsize, true);
   if (!range)
     return false;
-  if (range->device)
-    range->device->WriteMem(range->index, port - range->base, dsize, data & (0xffffffffU >> (32 - dsize)));
+  const u32 offset = port - range->base;
+  if (range->device) {
+    range->device->WriteMem(range->index, offset, dsize, data & (0xffffffffU >> (32 - dsize)));
+  } else if (offset == slot_control_offset) {
+    const u16 bit = (u16)(1U << range->slot);
+    if (data & 1)
+      state.enabled_slots |= bit;
+    else
+      state.enabled_slots &= ~bit;
+  }
   return true;
 }

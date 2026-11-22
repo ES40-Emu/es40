@@ -37,7 +37,13 @@ class CDMAHost;
 class EISABus : public CISABus
 {
 public:
+  struct State {
+    u16 enabled_slots = 0;
+  };
+
   explicit EISABus(CDMAHost& host) : host(host) {}
+  State& snapshot_state() noexcept { return state; }
+  void reset() noexcept { state = {}; }
   void bind_dma(CDMA& controller) { dma = &controller; }
   CDMA* dma_controller() noexcept override { return dma; }
   const CSystemComponent* isa_decode_owner() const noexcept override;
@@ -46,6 +52,10 @@ public:
   void register_eisa_io(CSystemComponent& device, int index, u16 port, u32 length, int max_dsize);
   // Product ID bytes are in ascending port order.
   void register_slot_id(unsigned slot, const std::array<u8, 4>& product_id);
+  // Attach an I/O range after the card registers its slot ID.
+  void register_slot_io(unsigned slot, CSystemComponent& device, int index,
+    u16 port, u32 length, int max_dsize);
+  bool slot_enabled(unsigned slot) const noexcept;
   IsaIoDecode isa_io_decode(u32 port) const noexcept override;
   void set_isa_irq(int irq, bool asserted) override;
 
@@ -58,17 +68,21 @@ public:
 
 private:
   struct IoRange {
-    CSystemComponent* device; // Null for a read-only slot product ID.
+    CSystemComponent* device; // Null for the slot ID and control registers.
     int index;
     u16 base;
     u32 length;
     int max_dsize;
+    unsigned slot;
     u32 product_id = 0;
   };
 
-  const IoRange* find_io(u32 port) const noexcept;
+  void register_io(unsigned owner_slot, CSystemComponent& device, int index,
+    u16 port, u32 length, int max_dsize);
+  const IoRange* find_io(u32 port, unsigned bytes = 1) const noexcept;
   const IoRange* decode_io(u16 port, int dsize, bool write) const noexcept;
   std::vector<IoRange> io_ranges;
+  State state;
   CDMAHost& host;
   CDMA* dma = nullptr;
 };

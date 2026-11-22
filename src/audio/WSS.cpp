@@ -85,7 +85,7 @@ bool CWSS::uses_subtractive_decode(int, u64 address, int, bool) const noexcept
 void CWSS::set_drq(bool asserted)
 {
     if (asserted != state.drq) {
-        dma->set_drq(dma_channels[state.config & 3], asserted);
+        bus.set_isa_drq(dma_channels[state.config & 3], asserted);
         state.drq = asserted;
     }
 }

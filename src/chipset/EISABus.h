@@ -39,13 +39,15 @@ class EISABus : public CISABus
 public:
   struct State {
     u16 enabled_slots = 0;
-    u16 irq_requests[16]{}; // Legacy ISA input at index 0, EISA slots at 1-15.
+    // Legacy ISA input at index 0, EISA slots at 1-15.
+    u16 irq_requests[16]{};
+    u8 drq_requests[16]{};
   };
 
   explicit EISABus(CDMAHost& host) : host(host) {}
   State& snapshot_state() noexcept { return state; }
   void reset();
-  void bind_dma(CDMA& controller) { dma = &controller; }
+  void bind_dma(CDMA& controller);
   CDMA* dma_controller() noexcept override { return dma; }
   const CSystemComponent* isa_decode_owner() const noexcept override;
   void register_isa_io(CSystemComponent& device, int index, u16 port, u32 length) override;
@@ -58,9 +60,11 @@ public:
     u16 port, u32 length, int max_dsize);
   bool slot_enabled(unsigned slot) const noexcept;
   IsaIoDecode isa_io_decode(u32 port) const noexcept override;
-  // Cards update their IRQ levels under the system device-bus lock.
+  // Cards report IRQ and DRQ levels under the device-bus lock, even while disabled.
   void set_slot_irq(unsigned slot, int irq, bool asserted);
   void set_isa_irq(int irq, bool asserted) override;
+  void set_slot_drq(unsigned slot, int channel, bool asserted);
+  void set_isa_drq(int channel, bool asserted) override;
 
   // Unclaimed logical port reads leave data untouched.
   bool read_port(u16 port, u8& data);
@@ -80,12 +84,18 @@ private:
     u32 product_id = 0;
   };
 
+  struct RequestLines {
+    u16 irqs;
+    u8 drqs;
+  };
+
   void register_io(unsigned owner_slot, CSystemComponent& device, int index,
     u16 port, u32 length, int max_dsize);
   bool slot_registered(unsigned slot) const noexcept;
-  u16 active_irqs() const noexcept;
-  void update_irq_lines(u16 previous);
-  void set_irq_request(unsigned slot, int irq, bool asserted);
+  RequestLines active_requests() const noexcept;
+  void update_request_lines(RequestLines previous);
+  template <typename Mask>
+  void set_request(Mask& requests, int line, bool asserted);
   const IoRange* find_io(u32 port, unsigned bytes = 1) const noexcept;
   const IoRange* decode_io(u16 port, int dsize, bool write) const noexcept;
   std::vector<IoRange> io_ranges;

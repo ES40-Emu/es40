@@ -130,55 +130,99 @@ const CSystemComponent* EISABus::isa_decode_owner() const noexcept
   return host.isa_decode_owner();
 }
 
-u16 EISABus::active_irqs() const noexcept
+EISABus::RequestLines EISABus::active_requests() const noexcept
 {
-  u16 active = state.irq_requests[0];
-  for (unsigned slot = 1; slot <= last_expansion_slot; ++slot)
-    if (slot_enabled(slot))
-      active |= state.irq_requests[slot];
+  RequestLines active{state.irq_requests[0], state.drq_requests[0]};
+  for (unsigned slot = 1; slot <= last_expansion_slot; ++slot) {
+    if (slot_enabled(slot)) {
+      active.irqs |= state.irq_requests[slot];
+      active.drqs |= state.drq_requests[slot];
+    }
+  }
   return active;
 }
 
-void EISABus::update_irq_lines(u16 previous)
+static void drive_drqs(CDMA& dma, u8 previous, u8 active)
 {
-  const u16 active = active_irqs();
-  const u16 changed = previous ^ active;
-  for (int irq = 0; irq < 16; ++irq) {
-    const u16 bit = (u16)(1U << irq);
+  const u8 changed = previous ^ active;
+  for (int channel = 0; channel < 8; ++channel) {
+    const u8 bit = (u8)(1U << channel);
     if (changed & bit)
-      host.set_isa_irq(irq, (active & bit) != 0);
+      dma.set_drq(channel, (active & bit) != 0);
   }
 }
 
-void EISABus::set_irq_request(unsigned slot, int irq, bool asserted)
+void EISABus::bind_dma(CDMA& controller)
 {
-  const u16 previous = active_irqs();
-  const u16 bit = (u16)(1U << irq);
+  if (dma == &controller)
+    return;
+  const u8 active = active_requests().drqs;
+  if (dma)
+    drive_drqs(*dma, active, 0);
+  dma = &controller;
+  drive_drqs(controller, 0, active);
+}
+
+void EISABus::update_request_lines(RequestLines previous)
+{
+  const RequestLines active = active_requests();
+  const u16 changed = previous.irqs ^ active.irqs;
+  for (int irq = 0; irq < 16; ++irq) {
+    const u16 bit = (u16)(1U << irq);
+    if (changed & bit)
+      host.set_isa_irq(irq, (active.irqs & bit) != 0);
+  }
+  if (dma && previous.drqs != active.drqs)
+    drive_drqs(*dma, previous.drqs, active.drqs);
+}
+
+template <typename Mask>
+void EISABus::set_request(Mask& requests, int line, bool asserted)
+{
+  const RequestLines previous = active_requests();
+  const Mask bit = static_cast<Mask>(1U << line);
   if (asserted)
-    state.irq_requests[slot] |= bit;
+    requests |= bit;
   else
-    state.irq_requests[slot] &= ~bit;
-  update_irq_lines(previous);
+    requests &= ~bit;
+  update_request_lines(previous);
 }
 
 void EISABus::set_slot_irq(unsigned slot, int irq, bool asserted)
 {
   if (irq < 3 || irq > 15 || irq == 8 || irq == 13 || !slot_registered(slot))
     return;
-  set_irq_request(slot, irq, asserted);
+  set_request(state.irq_requests[slot], irq, asserted);
 }
 
 void EISABus::set_isa_irq(int irq, bool asserted)
 {
   if (irq >= 0 && irq < 16)
-    set_irq_request(0, irq, asserted);
+    set_request(state.irq_requests[0], irq, asserted);
+}
+
+static bool valid_drq_channel(int channel)
+{
+  return channel >= 0 && channel < 8 && channel != 4;
+}
+
+void EISABus::set_slot_drq(unsigned slot, int channel, bool asserted)
+{
+  if (valid_drq_channel(channel) && slot_registered(slot))
+    set_request(state.drq_requests[slot], channel, asserted);
+}
+
+void EISABus::set_isa_drq(int channel, bool asserted)
+{
+  if (valid_drq_channel(channel))
+    set_request(state.drq_requests[0], channel, asserted);
 }
 
 void EISABus::reset()
 {
-  const u16 previous = active_irqs();
+  const RequestLines previous = active_requests();
   state = {};
-  update_irq_lines(previous);
+  update_request_lines(previous);
 }
 
 const EISABus::IoRange* EISABus::decode_io(u16 port, int dsize, bool write) const noexcept
@@ -241,13 +285,13 @@ bool EISABus::write_port(u16 port, int dsize, u32 data)
   if (range->device) {
     range->device->WriteMem(range->index, offset, dsize, data & (0xffffffffU >> (32 - dsize)));
   } else if (offset == slot_control_offset) {
-    const u16 previous = active_irqs();
+    const RequestLines previous = active_requests();
     const u16 bit = (u16)(1U << range->slot);
     if (data & 1)
       state.enabled_slots |= bit;
     else
       state.enabled_slots &= ~bit;
-    update_irq_lines(previous);
+    update_request_lines(previous);
   }
   return true;
 }

@@ -44,6 +44,7 @@ public:
   virtual const CSystemComponent* isa_decode_owner() const noexcept = 0;
   virtual CDMA* dma_controller() noexcept = 0;
   virtual void set_isa_irq(int irq, bool asserted) = 0;
+  virtual void set_isa_drq(int channel, bool asserted) = 0;
 };
 
 #endif

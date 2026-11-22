@@ -659,6 +659,12 @@ void CAliM1543C::set_isa_irq(int irq, bool asserted)
 	pic_set_line(irq >> 3, irq & 7, asserted);
 }
 
+void CAliM1543C::set_isa_drq(int channel, bool asserted)
+{
+	if (isa_dma)
+		isa_dma->set_drq(channel, asserted);
+}
+
 void CAliM1543C::bind_dma(CDMA& dma)
 {
 	register_isa_io(dma, DMA0_IO_CHANNEL, 0x00, 8);

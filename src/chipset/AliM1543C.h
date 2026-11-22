@@ -180,6 +180,7 @@ public:
   void register_isa_io(CSystemComponent& device, int index, u16 port, u32 length) override;
   const CSystemComponent* isa_decode_owner() const noexcept override { return this; }
   void set_isa_irq(int irq, bool asserted) override;
+  void set_isa_drq(int channel, bool asserted) override;
   // Read existing register state under the system device-bus lock.
   IsaIoDecode isa_io_decode(u32 port) const noexcept override;
   bool is_docking_mode() const noexcept;

@@ -112,6 +112,7 @@ JensenHostBus::JensenHostBus(CConfigurator* cfg, CSystem* system)
   save_item(hae, "hae");
   save_item(ebc.eisa_bus().snapshot_state().enabled_slots, "eisa.enabled_slots");
   save_item(ebc.eisa_bus().snapshot_state().irq_requests, "eisa.irq_requests");
+  save_item(ebc.eisa_bus().snapshot_state().drq_requests, "eisa.drq_requests");
 }
 
 u64 JensenHostBus::ReadMem(int index, u64 address, int dsize)

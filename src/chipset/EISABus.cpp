@@ -27,7 +27,6 @@
 
 #include "StdAfx.h"
 #include "EISABus.h"
-#include "DMA.h"
 
 static constexpr unsigned last_expansion_slot = 15;
 static constexpr unsigned slot_control_offset = 4; // xC84 follows the four product ID bytes.
@@ -216,6 +215,49 @@ void EISABus::set_isa_drq(int channel, bool asserted)
 {
   if (valid_drq_channel(channel))
     set_request(state.drq_requests[0], channel, asserted);
+}
+
+bool EISABus::slot_allows_dma(unsigned slot, int channel) const noexcept
+{
+  return dma && valid_drq_channel(channel) && slot_enabled(slot) && slot_registered(slot);
+}
+
+bool EISABus::slot_dma_can_send(unsigned slot, int channel) const
+{
+  return slot_allows_dma(slot, channel) && dma->can_service_send(channel);
+}
+
+bool EISABus::slot_dma_can_recv(unsigned slot, int channel) const
+{
+  return slot_allows_dma(slot, channel) && dma->can_service_recv(channel);
+}
+
+CDMA::SDMA_result EISABus::slot_dma_send_unit(unsigned slot, int channel, u32 data, bool eop)
+{
+  if (!slot_allows_dma(slot, channel))
+    return {};
+  return dma->service_send_unit(channel, data, eop);
+}
+
+CDMA::SDMA_result EISABus::slot_dma_recv_unit(unsigned slot, int channel, u16& data, bool eop)
+{
+  if (!slot_allows_dma(slot, channel))
+    return {};
+  return dma->service_recv_unit(channel, data, eop);
+}
+
+CDMA::SDMA_result EISABus::slot_dma_recv_unit(unsigned slot, int channel, u32& data, bool eop)
+{
+  if (!slot_allows_dma(slot, channel))
+    return {};
+  return dma->service_recv_unit(channel, data, eop);
+}
+
+CDMA::SDMA_result EISABus::slot_dma_eop(unsigned slot, int channel)
+{
+  if (!slot_allows_dma(slot, channel))
+    return {};
+  return dma->service_eop(channel);
 }
 
 void EISABus::reset()

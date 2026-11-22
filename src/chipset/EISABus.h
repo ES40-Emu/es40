@@ -29,10 +29,9 @@
 #define ES40_EISA_BUS_H
 
 #include "ISABus.h"
+#include "DMA.h"
 #include <array>
 #include <vector>
-
-class CDMAHost;
 
 class EISABus : public CISABus
 {
@@ -48,7 +47,6 @@ public:
   State& snapshot_state() noexcept { return state; }
   void reset();
   void bind_dma(CDMA& controller);
-  CDMA* dma_controller() noexcept override { return dma; }
   const CSystemComponent* isa_decode_owner() const noexcept override;
   void register_isa_io(CSystemComponent& device, int index, u16 port, u32 length) override;
   // Register the maximum native I/O width in bits.
@@ -66,6 +64,14 @@ public:
   void set_slot_drq(unsigned slot, int channel, bool asserted);
   void set_isa_drq(int channel, bool asserted) override;
 
+  // Native cards use these calls under the device-bus lock for each DMA service cycle.
+  bool slot_dma_can_send(unsigned slot, int channel) const;
+  bool slot_dma_can_recv(unsigned slot, int channel) const;
+  CDMA::SDMA_result slot_dma_send_unit(unsigned slot, int channel, u32 data, bool eop = false);
+  CDMA::SDMA_result slot_dma_recv_unit(unsigned slot, int channel, u16& data, bool eop = false);
+  CDMA::SDMA_result slot_dma_recv_unit(unsigned slot, int channel, u32& data, bool eop = false);
+  CDMA::SDMA_result slot_dma_eop(unsigned slot, int channel);
+
   // Unclaimed logical port reads leave data untouched.
   bool read_port(u16 port, u8& data);
   bool write_port(u16 port, u8 data) { return write_port(port, 8, data); }
@@ -74,6 +80,9 @@ public:
   bool write_port(u16 port, int dsize, u32 data);
 
 private:
+  // Legacy ISA devices get the controller through CISABus.
+  CDMA* dma_controller() noexcept override { return dma; }
+
   struct IoRange {
     CSystemComponent* device; // Null for the slot ID and control registers.
     int index;
@@ -92,6 +101,7 @@ private:
   void register_io(unsigned owner_slot, CSystemComponent& device, int index,
     u16 port, u32 length, int max_dsize);
   bool slot_registered(unsigned slot) const noexcept;
+  bool slot_allows_dma(unsigned slot, int channel) const noexcept;
   RequestLines active_requests() const noexcept;
   void update_request_lines(RequestLines previous);
   template <typename Mask>

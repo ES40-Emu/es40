@@ -96,6 +96,8 @@ public:
   void          write_high_count_port(u16 port, u8 data);
   u8            read_stop_port(u16 port) const;
   void          write_stop_port(u16 port, u8 data);
+  u8            read_chaining_mode_port(u16 port) const;
+  void          write_chaining_mode_port(u16 port, u8 data);
   u8            read_extended_mode_port(u16 port) const;
   void          write_extended_mode_port(u16 port, u8 data);
   u8            read_ali_shadow(u8 selector) const;
@@ -201,6 +203,7 @@ private:
 
   static void   validate_device_channel(int channel);
   void          select_compatible_address(int channel);
+  void          reset_chaining_mode(int channel);
   u32           count_mask() const;
   bool          accepts_external_eop(int channel) const;
   SDMA_transfer_properties transfer_properties(int channel) const;
@@ -273,6 +276,7 @@ private:
     struct SDMA_82357
     {
       u8 extended_mode[8]; // Bits 7:2 of each channel's extended-mode register.
+      u8 chaining_mode[8]; // Bits 4:2 select TC output, programming complete and chaining enable.
       u32 stop_address[8]; // Address bits 23:2 for channels 0-3 and 5-7.
     } isp;
   }

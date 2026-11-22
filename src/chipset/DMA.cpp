@@ -66,6 +66,8 @@
 
 static constexpr u16 dma_low_page_base = 0x81;
 static constexpr u16 dma_high_page_base = 0x481;
+static constexpr u16 dma0_chaining_mode_port = 0x40a;
+static constexpr u16 dma1_chaining_mode_port = 0x4d4;
 static constexpr u16 dma0_extended_mode_port = 0x40b;
 static constexpr u16 dma1_extended_mode_port = 0x4d6;
 
@@ -222,6 +224,12 @@ void CDMA::select_compatible_address(int channel)
 	ch.extended_address = false;
 	ch.pagebase &= 0xff;
 	ch.current_page &= 0xff;
+}
+
+void CDMA::reset_chaining_mode(int channel)
+{
+	if (model == Model::Intel82357)
+		state.isp.chaining_mode[channel] = 0;
 }
 
 u32 CDMA::count_mask() const
@@ -463,6 +471,7 @@ void CDMA::write_legacy_port(u16 port, u8 data)
 		}
 
 		release_service(selected_channel);
+		reset_chaining_mode(selected_channel);
 		state.channel[selected_channel].mode = data;
 		break;
 
@@ -478,8 +487,10 @@ void CDMA::write_legacy_port(u16 port, u8 data)
 #endif
 		for (int channel = 0; channel < 4; channel++)
 		{
-			release_service(ctrlr * 4 + channel);
-			select_compatible_address(ctrlr * 4 + channel);
+			const int num = ctrlr * 4 + channel;
+			release_service(num);
+			select_compatible_address(num);
+			reset_chaining_mode(num);
 		}
 		controller.lobyte = true;
 		controller.command = 0;
@@ -577,6 +588,33 @@ void CDMA::write_stop_port(u16 port, u8 data)
 	stop = (stop & ~(0xffU << shift)) | (((u32)data << shift) & 0x00fffffcU);
 }
 
+u8 CDMA::read_chaining_mode_port(u16 port) const
+{
+	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
+	if (model != Model::Intel82357)
+		return 0xff;
+	if (port == dma0_chaining_mode_port)
+		return 0; // Pending IRQ bits are raised by chained buffer expiration.
+	if (port != dma1_chaining_mode_port)
+		return 0xff;
+
+	u8 enabled = 0;
+	for (int channel = 0; channel < 8; channel++)
+		if (channel != 4 && (state.isp.chaining_mode[channel] & 0x04))
+			enabled |= 1 << channel;
+	return enabled;
+}
+
+void CDMA::write_chaining_mode_port(u16 port, u8 data)
+{
+	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
+	if (model != Model::Intel82357 || (port != dma0_chaining_mode_port && port != dma1_chaining_mode_port))
+		return;
+	const int channel = (port == dma1_chaining_mode_port ? 4 : 0) + (data & 3);
+	if (channel != 4)
+		state.isp.chaining_mode[channel] = data & 0x1c;
+}
+
 u8 CDMA::read_extended_mode_port(u16) const
 {
 	// M1543C extended-mode ports are write-only. Use the same all-ones
@@ -594,6 +632,7 @@ void CDMA::write_extended_mode_port(u16 port, u8 data)
 	switch (model)
 	{
 	case Model::Intel82357:
+		reset_chaining_mode(num);
 		if ((state.isp.extended_mode[num] ^ data) & 0x0c)
 			release_service(num);
 		state.isp.extended_mode[num] = data & 0xfc;

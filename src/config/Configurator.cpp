@@ -753,7 +753,8 @@ static const char* const kv_tsunami[] = {
   "memory.bits", "rom.srm", "rom.flash", "rom.dpr", "rom.toy", "time",
   "arc_year_compat", "exit_on_pal_halt", "graphics.multihead", "qmp.port", "debug.stop_on_decode_conflict",
   "debug.shared_read_policy", "debug.shared_read_claimant", "framebuffer.path", 0 };
-static const char* const kv_jensen[] = { "memory.bits", "rom.srom", "rom.flash0", "rom.flash1", "qmp.port", 0 };
+static const char* const kv_jensen[] = {
+  "memory.bits", "rom.srom", "rom.flash0", "rom.flash1", "rom.toy", "time", "qmp.port", 0 };
 static const char* const kv_alpha_cpu[] = {
   "speed", "palcode.vms.nohle", "idle_nap", "idle_detect",
   "idle_spin_count", "idle_nap_poll_us", "idle_pc_lo", "idle_pc_hi",

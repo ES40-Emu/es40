@@ -270,6 +270,7 @@
   **/
 #include "StdAfx.h"
 #include "AliM1543C.h"
+#include "MC146818.h"
 #include "AliM1543C_pmu.h"
 #include "system/System.h"
 #include "graphics/VGA.h"
@@ -412,21 +413,12 @@ void CAliM1543C::init()
 	if (faketime)
 	{
 		struct tm ft = {};
-		int n = sscanf(faketime, "%d-%d-%d %d:%d:%d",
-			&ft.tm_year, &ft.tm_mon, &ft.tm_mday,
-			&ft.tm_hour, &ft.tm_min, &ft.tm_sec);
-		if (n < 3)
+		if (!mc146818::parse_datetime(faketime, ft))
 			FAILURE_1(Configuration,
 				"Invalid time format: %s (use YYYY-MM-DD or "
 				"YYYY-MM-DD HH:MM:SS)",
 				faketime);
-		ft.tm_year -= 1900;
-		ft.tm_mon -= 1;
-#ifdef _WIN32
-		time_t set_time = _mkgmtime(&ft);
-#else
-		time_t set_time = timegm(&ft);
-#endif
+		time_t set_time = mc146818::utc_time(ft);
 		if (set_time == (time_t)-1)
 			FAILURE_1(Configuration, "Invalid time value: %s", faketime);
 		time_t host_now;
@@ -1590,8 +1582,8 @@ void CAliM1543C::toy_write(u32 address, u8 data)
 			{
 
 				// BCD
-				state.toy_stored_data[0] = (u8)(((stime.tm_sec / 10) << 4) | (stime.tm_sec % 10));
-				state.toy_stored_data[2] = (u8)(((stime.tm_min / 10) << 4) | (stime.tm_min % 10));
+				state.toy_stored_data[0] = mc146818::to_bcd(stime.tm_sec);
+				state.toy_stored_data[2] = mc146818::to_bcd(stime.tm_min);
 				if (state.toy_stored_data[0x0b] & 2) // 24-hour
 					state.toy_stored_data[4] = (u8)(((stime.tm_hour / 10) << 4) | (stime.tm_hour % 10));
 				else
@@ -1688,20 +1680,11 @@ void CAliM1543C::toy_write(u32 address, u8 data)
 			/*
 			  See sys/dev/ic/mc146818reg.h and sys/arch/alpha/alpha/mcclock.c in NetBSD
 			*/
-#define MC_BASE_32_KHz  0x20
 #define RTC_PF 0x40
 			// Wall-exact, count-preserving periodic flag: PF sets exactly once per elapsed
 			// rate period, from an analytic fires-due count against a fixed epoch, so a fast
 			// poller sees the true cadence (976.5625us at the SRM-programmed 1024Hz). 
-			const int rate_pow = state.toy_stored_data[0x0a] & 0x0f;
-			u64 pf_freq = rate_pow ? (65536ull >> rate_pow) : 0;
-			if (state.toy_stored_data[0x0a] & MC_BASE_32_KHz)
-			{
-				if (rate_pow == 0x1)
-					pf_freq = 256;
-				else if (rate_pow == 0x2)
-					pf_freq = 128;
-			}
+			const u64 pf_freq = mc146818::periodic_hz(state.toy_stored_data[0x0a]);
 			if (pf_freq)
 			{
 				const auto now = std::chrono::steady_clock::now();
@@ -1756,31 +1739,26 @@ void CAliM1543C::toy_write(u32 address, u8 data)
 			bool pm = false;
 			if (!h24) { pm = (hh & 0x80) != 0; hh &= 0x7f; }
 
-			auto unbcd = [](u8 v) -> int { return ((v >> 4) & 0x0f) * 10 + (v & 0x0f); };
-
+			using mc146818::from_bcd;
 			struct tm st = {};
-			st.tm_sec  = binary ? ss : unbcd(ss);
-			st.tm_min  = binary ? mm : unbcd(mm);
-			st.tm_hour = binary ? hh : unbcd(hh);
-			st.tm_mday = binary ? dd : unbcd(dd);
-			st.tm_mon  = (binary ? mo : unbcd(mo)) - 1;
+			st.tm_sec  = binary ? ss : from_bcd(ss);
+			st.tm_min  = binary ? mm : from_bcd(mm);
+			st.tm_hour = binary ? hh : from_bcd(hh);
+			st.tm_mday = binary ? dd : from_bcd(dd);
+			st.tm_mon  = (binary ? mo : from_bcd(mo)) - 1;
 			if (arc_year_compat)
 			{
-				st.tm_year = (binary ? yy : unbcd(yy)) + 80;   // 1980-base
+				st.tm_year = (binary ? yy : from_bcd(yy)) + 80;   // 1980-base
 			}
 			else
 			{
-				st.tm_year = binary ? yy : unbcd(yy);
+				st.tm_year = binary ? yy : from_bcd(yy);
 				if (st.tm_year < 70) st.tm_year += 100;   // 20XX pivot
 			}
 
 			if (!h24 &&  pm && st.tm_hour < 12) st.tm_hour += 12;
 			if (!h24 && !pm && st.tm_hour == 12) st.tm_hour = 0;
-#ifdef _WIN32
-			time_t set_time = _mkgmtime(&st);
-#else
-			time_t set_time = timegm(&st);
-#endif
+			time_t set_time = mc146818::utc_time(st);
 			time_t host_now;
 			time(&host_now);
 			if (set_time != (time_t)-1)
@@ -2097,17 +2075,8 @@ void CAliM1543C::do_pit_clock()
 
 u64 CAliM1543C::get_interval_period_ns() const
 {
-	const u8 reg_a = state.toy_stored_data[0x0a];
-	const int rate_pow = reg_a & 0x0f;
-	if (rate_pow == 0)
-		return 0;
-
-	if (reg_a & 0x20)
-	{
-		if (rate_pow == 0x1) return 1000000000ull / 256;
-		if (rate_pow == 0x2) return 1000000000ull / 128;
-	}
-	return ((1ull << rate_pow) * 1000000000ull) / 65536ull;
+	const unsigned hz = mc146818::periodic_hz(state.toy_stored_data[0x0a]);
+	return hz ? 1000000000ull / hz : 0;
 }
 
 // 8259 PIC

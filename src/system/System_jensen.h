@@ -38,7 +38,7 @@ class Jensen final : public CSystem
 {
 public:
   explicit Jensen(CConfigurator* cfg);
-  ~Jensen() override { destroy_components(); }
+  ~Jensen() override;
   void attach_board_devices(CConfigurator* cfg) override;
   void ResetMem(unsigned int membits) override;
   CSerial& serial_port(unsigned number) const;

@@ -1,4 +1,4 @@
-/* ES40 emulator -- VL82C106 keyboard, mouse and serial controller
+/* ES40 emulator -- VL82C106 keyboard, mouse, serial and real-time clock controller
  * Copyright (C) 2026 by gdwnldsKSC
  * All rights reserved.
  *
@@ -37,8 +37,10 @@ constexpr u8 input_port = 0xc0;
 }
 
 VL82C106::VL82C106(CConfigurator* cfg, CSystem* system, u64 base,
-  std::function<void(bool)> irq_output, std::function<void(unsigned, bool)> serial_irq_output)
-  : CKeyboard(cfg, system), local_base(base), irq_output(std::move(irq_output))
+  std::function<void(bool)> irq_output, std::function<void(unsigned, bool)> serial_irq_output,
+  std::function<void(bool)> rtc_irq_output)
+  : CKeyboard(cfg, system), local_base(base), irq_output(std::move(irq_output)),
+    rtc_irq_output(std::move(rtc_irq_output))
 {
   for (unsigned i = 0; i < 2; ++i)
     serial[i] = new CSerial(cfg, system, i, [serial_irq_output, i](bool level) { serial_irq_output(i, level); });
@@ -57,6 +59,30 @@ VL82C106::VL82C106(CConfigurator* cfg, CSystem* system, u64 base,
   save_item(recent_keys, "recent_keys");
   save_item(recent_count, "recent_count");
   save_item(locked, "locked");
+}
+
+VL82C106::~VL82C106()
+{
+  stop_threads();
+  try {
+    flush_storage();
+  } catch (const CException& error) {
+    printf("%%RTC-F-NOSAVE: %s\n", error.displayText().c_str());
+  }
+}
+
+void VL82C106::init()
+{
+  load_battery();
+  CKeyboard::init();
+  rtc_reset();
+}
+
+void VL82C106::ResetPCI()
+{
+  reset_controller();
+  rtc_reset();
+  rtc_wakeup.notify_one();
 }
 
 void VL82C106::map_ports()
@@ -100,8 +126,8 @@ int VL82C106::decode_port(u16 port, bool write) const noexcept
       selected = RtcIndex;
     break;
   case 0x171:
-    // Chip control and serial selects are write-only through the RTC (PB22H-KB, Tables 22-1 and 24-6).
-    if (write && rtc_index >= 0x69 && rtc_index <= 0x70)
+    // Clock and standby RAM are readable; chip control and serial selects are write-only (Tables 22-1, 24-6).
+    if (rtc_index < sizeof(rtc_bytes) || (write && rtc_index >= 0x69 && rtc_index <= 0x70))
       selected = RtcData;
     break;
   }
@@ -125,6 +151,8 @@ u64 VL82C106::ReadMem(int, u64 address, int dsize)
 {
   const u16 port = u16(address >> 9);
   const int selected = decode_port(port, false);
+  if (selected == RtcData)
+    return rtc_read(rtc_index);
   if (selected == ComA || selected == ComB)
     return serial_port(selected - ComA).ReadMem(0, port & 7, 8);
   return CKeyboard::ReadMem(selected, 0, dsize);
@@ -138,6 +166,8 @@ void VL82C106::WriteMem(int, u64 address, int dsize, u64 data)
     serial_port(selected - ComA).WriteMem(0, port & 7, 8, u8(data));
   } else if (selected == RtcIndex) {
     rtc_index = data & 0x7f;
+  } else if (selected == RtcData && rtc_index < sizeof(rtc_bytes)) {
+    rtc_write(rtc_index, u8(data));
   } else if (selected == Control0 || (selected == RtcData && rtc_index == 0x69)) {
     control0 = u8(data);
   } else if (selected == RtcData && rtc_index == 0x6a) {
@@ -146,6 +176,8 @@ void VL82C106::WriteMem(int, u64 address, int dsize, u64 data)
     kbd_update_irq();
   } else if (selected == RtcData) {
     const unsigned reg = rtc_index - 0x6b;
+    if (serial_cs[reg / 3][reg % 3] != u8(data) || !(serial_cs_written[reg / 3] & (1u << (reg % 3))))
+      battery_dirty = true;
     serial_cs[reg / 3][reg % 3] = u8(data);
     serial_cs_written[reg / 3] |= u8(1u << (reg % 3));
   } else {
@@ -330,20 +362,37 @@ int VL82C106::SaveState(FILE* f)
   const auto remaining = pulse_end - cSystem->device_access_time();
   pulse_remaining_ns = remaining > decltype(remaining)::zero() ?
     std::chrono::duration_cast<std::chrono::nanoseconds>(remaining).count() : 0;
-  if (CKeyboard::SaveState(f))
+  rtc_refresh(cSystem->device_access_time());
+  if (fwrite("VRT1", 4, 1, f) != 1 || CKeyboard::SaveState(f) || CSystemComponent::SaveState(f))
     return -1;
-  return CSystemComponent::SaveState(f);
+  return save_rtc(f) ? 0 : -1;
 }
 
 int VL82C106::RestoreState(FILE* f)
 {
+  battery_ready = false;
+  const int first = fgetc(f);
+  if (first == EOF || ungetc(first, f) == EOF)
+    return -1;
+  const bool legacy = first != 'V';
+  char tag[4];
+  if (!legacy && (fread(tag, sizeof(tag), 1, f) != 1 || memcmp(tag, "VRT1", sizeof(tag))))
+    return -1;
   if (CKeyboard::RestoreState(f) || CSystemComponent::RestoreState(f))
     return -1;
-  if (password_length > sizeof(password) || (locked && !password_length) ||
+  if (rtc_index > 0x7f || serial_cs_written[0] > 7 || serial_cs_written[1] > 7 ||
+      password_length > sizeof(password) || (locked && !password_length) ||
       recent_count > sizeof(recent_keys) || (locked && recent_count > password_length) ||
       pulse_remaining_ns > 6000)
     return -1;
   pulse_end = cSystem->device_access_time() + std::chrono::nanoseconds(pulse_remaining_ns);
+  // Older VL82C106 snapshots contain the index and chip selects but no clock (PB22H-KB, Table 22-1).
+  if (legacy)
+    seed_clock();
+  else if (!restore_rtc(f))
+    return -1;
+  rtc_sample = {};
+  battery_dirty = true;
   return 0;
 }
 
@@ -352,4 +401,7 @@ void VL82C106::finalize_restore() noexcept
   CFastMutex::ScopedLock guard(kbdLock);
   irq_level.reset();
   kbd_update_irq();
+  rtc_irq_level.reset();
+  rtc_sync_irq();
+  battery_ready = true;
 }

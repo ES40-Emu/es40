@@ -52,6 +52,7 @@ public:
   bool restore(FILE* file, bool legacy);
   void finalize_restore();
   void check_paths(const JensenFlash& other) const;
+  bool uses_path(const std::string& path) const;
 
 private:
   using Clock = std::chrono::steady_clock;

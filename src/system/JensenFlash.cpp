@@ -102,6 +102,11 @@ void JensenFlash::check_paths(const JensenFlash& other) const
     FAILURE(Configuration, "Jensen FEPROM sockets require distinct writable images");
 }
 
+bool JensenFlash::uses_path(const std::string& path) const
+{
+  return same_file(seed_path, path) || same_file(backing_path, path);
+}
+
 void JensenFlash::advance(Clock::time_point now)
 {
   if (now <= sampled)

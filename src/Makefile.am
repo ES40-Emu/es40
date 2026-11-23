@@ -182,6 +182,7 @@ noinst_HEADERS += storage/Disk.h \
        chipset/Intel28F008SA.h \
        chipset/Intel82358.h \
        chipset/VL82C106.h \
+       chipset/MC146818.h \
        chipset/Pic8259.h \
        system/DPR.h \
        system/Flash.h \
@@ -301,6 +302,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        chipset/Intel28F008SA.cpp \
        chipset/Intel82358.cpp \
        chipset/VL82C106.cpp \
+       chipset/VL82C106_rtc.cpp \
        chipset/Pic8259.cpp \
        system/DPR.cpp \
        es40_debug.cpp \

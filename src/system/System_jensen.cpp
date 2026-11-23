@@ -101,6 +101,9 @@ JensenHostBus::JensenHostBus(CConfigurator* cfg, CSystem* system)
     ebc(*isp)
 {
   feprom[0].check_paths(feprom[1]);
+  const char* battery_path = cfg->get_text_value("rom.toy", VL82C106::default_battery_path);
+  if (feprom[0].uses_path(battery_path) || feprom[1].uses_path(battery_path))
+    FAILURE(Configuration, "Jensen RTC and flash require separate image files");
   system->RegisterMemory(this, SparseIO, U64(0x300000000), sparse_io_size);
   system->RegisterMemory(this, HostAddressExtension, U64(0x1d0000000), 4);
   system->RegisterMemory(this, InterruptAcknowledge, U64(0x100000000), 8);
@@ -265,6 +268,13 @@ Jensen::Jensen(CConfigurator* cfg)
 {
 }
 
+Jensen::~Jensen()
+{
+  if (combo)
+    combo->stop_threads();
+  destroy_components();
+}
+
 void Jensen::ResetMem(unsigned int membits)
 {
   CSystem::ResetMem(checked_memory_bits(membits));
@@ -278,7 +288,13 @@ void Jensen::attach_board_devices(CConfigurator* cfg)
   combo = new VL82C106(cfg, this, U64(0x1c0000000), [this](bool asserted) {
     if (get_cpu_num())
       get_cpu(0)->irq_h(3, asserted, 0);
-  }, [this](unsigned channel, bool asserted) { set_serial_irq(channel, asserted); });
+  }, [this](unsigned channel, bool asserted) { set_serial_irq(channel, asserted); },
+  [this, isp = host->isp](bool asserted) {
+    // The RTC drives CPU IRQ0 and ISP IRQ8(L) (PB22H-KB, Tables 6-4 and 17-2).
+    isp->set_isa_irq(8, asserted);
+    if (get_cpu_num())
+      get_cpu(0)->irq_h(0, asserted, 0);
+  });
 }
 
 CSerial& Jensen::serial_port(unsigned number) const

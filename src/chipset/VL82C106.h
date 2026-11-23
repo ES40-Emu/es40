@@ -1,4 +1,4 @@
-/* ES40 emulator -- VL82C106 keyboard, mouse and serial controller
+/* ES40 emulator -- VL82C106 keyboard, mouse, serial and real-time clock controller
  * Copyright (C) 2026 by gdwnldsKSC
  * All rights reserved.
  *
@@ -30,22 +30,33 @@
 
 #include "io/Keyboard.h"
 #include <chrono>
+#include <condition_variable>
+#include <ctime>
 #include <functional>
 #include <optional>
+#include <string>
+#include <thread>
 
 class CSerial;
 
 class VL82C106 final : public CKeyboard
 {
 public:
+  static constexpr const char* default_battery_path = "jensen-toy.rom";
   VL82C106(CConfigurator* cfg, CSystem* system, u64 local_base,
-    std::function<void(bool)> irq_output, std::function<void(unsigned, bool)> serial_irq_output);
-  ~VL82C106() override { stop_threads(); }
+    std::function<void(bool)> irq_output, std::function<void(unsigned, bool)> serial_irq_output,
+    std::function<void(bool)> rtc_irq_output);
+  ~VL82C106() override;
+  void init() override;
+  void start_threads() override;
+  void stop_threads() override;
+  void check_state() override;
+  void flush_storage() override;
   CSerial& serial_port(unsigned number) const { return *serial[number]; }
   bool decodes_memory_access(int index, u64 address, int dsize, bool write) const noexcept override;
   u64 ReadMem(int index, u64 address, int dsize) override;
   void WriteMem(int index, u64 address, int dsize, u64 data) override;
-  void ResetPCI() override { reset_controller(); }
+  void ResetPCI() override;
   int SaveState(FILE* f) override;
   int RestoreState(FILE* f) override;
   void finalize_restore() noexcept override;
@@ -65,11 +76,39 @@ private:
   void password_scancodes(const u8* bytes, bool released) override;
   u8 output_port() const;
 
+  using Clock = std::chrono::steady_clock;
+  void rtc_seed(const std::tm& now);
+  void rtc_set_calendar(const std::tm& now);
+  void rtc_reset();
+  void rtc_advance(u64 elapsed_ns);
+  void rtc_refresh(Clock::time_point now);
+  void rtc_sync_irq();
+  u64 rtc_next_irq_ns() const;
+  u8 rtc_read(u8 index);
+  void rtc_write(u8 index, u8 value);
+  void run_rtc();
+  void load_battery();
+  bool save_rtc(FILE* file) const;
+  bool restore_rtc(FILE* file);
+  void seed_clock();
+
   const u64 local_base;
   const std::function<void(bool)> irq_output;
   CSerial* serial[2];
   std::optional<bool> irq_level;
   u8 rtc_index = 0;
+  const std::function<void(bool)> rtc_irq_output;
+  u8 rtc_bytes[0x50]{};
+  u32 rtc_phase_ns = 0;
+  bool rtc_fall_back = false;
+  bool rtc_skip_update = false;
+  Clock::time_point rtc_sample{}, next_flush{};
+  std::optional<bool> rtc_irq_level;
+  std::condition_variable_any rtc_wakeup;
+  std::thread rtc_worker;
+  std::string battery_path;
+  bool battery_dirty = false;
+  bool battery_ready = false;
   u8 control0 = 0;
   u8 control1 = 0;
   u8 serial_cs[2][3]{};

@@ -597,10 +597,11 @@ bool CAlphaCPU::idle_load_ram(u64 va, int bytes, u64* value, u64* phys)
 	bool asm_bit;
 	if (virt2phys(va, &pa, ACCESS_READ | NO_CHECK | FAKE, &asm_bit, 0))
 		return false;
-	if (pa + (u64) bytes > (U64(1) << cSystem->get_memory_bits()))
+	const u64 offset = cSystem->ram_offset(pa);
+	if (offset >= dram_size || (u64)bytes > dram_size - offset)
 		return false;
 	*value = cSystem->ReadMem(pa, bytes * 8, this);
-	*phys = pa;
+	*phys = offset;
 	return true;
 }
 
@@ -1255,11 +1256,7 @@ void CAlphaCPU::init()
 	cc_per_instruction = 70;
 #endif
 
-	dram_ptr = cSystem->PtrToMem(0);
-	dram_size = U64(1) << cSystem->get_memory_bits();
-	direct_ram_size = dram_size;
-
-	flush_data_page_cache();
+	refresh_ram_mapping();
 
 	instruction_fetch_event(AlphaInstructionFetchEvent::Initialize);
 
@@ -1281,6 +1278,14 @@ void CAlphaCPU::configure_ev4_bcache(u64 value)
 	update_ev4_cache_limit();
 }
 
+void CAlphaCPU::refresh_ram_mapping()
+{
+	dram_ptr = cSystem->ram_data();
+	dram_size = U64(1) << cSystem->get_memory_bits();
+	flush_data_page_cache();
+	update_ev4_cache_limit();
+}
+
 void CAlphaCPU::configure_ev4_dcache(u64 value, bool flush)
 {
 	const u64 changed = m_ev4_dcache.control ^ value;
@@ -1298,7 +1303,7 @@ void CAlphaCPU::update_ev4_cache_limit()
 {
 	// After disabling the Dcache, the next data access must still clear DC_HIT.
 	const u64 limit = ((m_ev4_bcache.control & 1) || m_ev4_dcache.active() ||
-	                   (state.dc_stat & Ev4Dcache::dc_hit)) ? 0 : dram_size;
+	                   (state.dc_stat & Ev4Dcache::dc_hit)) ? 0 : cSystem->linear_ram_size();
 	if (direct_ram_size != limit)
 	{
 		direct_ram_size = limit;
@@ -1367,11 +1372,7 @@ void CAlphaCPU::ResetForSystemReset()
 	cc_per_instruction = 70;
 #endif
 
-	dram_ptr = cSystem->PtrToMem(0);
-	dram_size = U64(1) << cSystem->get_memory_bits();
-	direct_ram_size = dram_size;
-
-	flush_data_page_cache();
+	refresh_ram_mapping();
 
 	instruction_fetch_event(AlphaInstructionFetchEvent::Initialize);
 }
@@ -2570,7 +2571,7 @@ int CAlphaCPU::jit_unaligned_rw(CAlphaCPU* cpu, u64 va, int size_bits, u32 ins, 
 			dpc.valid = dpc.host_bias != 0;
 		}
 	}
-	if (phys[0] >= cpu->dram_size || phys[1] >= cpu->dram_size) return 1;   // MMIO: interpreter
+	if (!cpu->is_ram(phys[0]) || !cpu->is_ram(phys[1])) return 1;   // MMIO: interpreter
 	u64 v = rw ? *data : 0;
 	for (int k = 0; k < n; ++k)
 	{
@@ -2628,7 +2629,7 @@ int CAlphaCPU::jit_read(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 	// size-truncated (LDBU/LDWU use READ_VIRT, no sext func), so replaying an MMIO value and then
 	// re-truncating it with movzx would falsely mismatch the interpreter. Bailing -> the compiled
 	// block stops at the load (done < prefix_len) and the verify skips the compare, matching prod.
-	if (phys >= cpu->dram_size)
+	if (!cpu->is_ram(phys))
 		return 1;
 
 	// Verify replay: return the value the interpreter pass loaded here, rather than
@@ -2872,7 +2873,7 @@ int CAlphaCPU::jit_read_locked(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 		dpc.valid = dpc.host_bias != 0;
 	}
 
-	if (phys >= cpu->dram_size)                // MMIO: interpreter handles the I/O-space locked path
+	if (!cpu->is_ram(phys))                    // MMIO: interpreter handles the I/O-space locked path
 		return 1;
 
 	if (cpu->m_jit_vreplay)
@@ -2925,7 +2926,7 @@ int CAlphaCPU::jit_read_vpte(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 
 	phys &= ~amask;
 
-	if (phys >= cpu->dram_size)               // MMIO: bail before the replay (mirrors jit_read)
+	if (!cpu->is_ram(phys))                   // MMIO: bail before the replay (mirrors jit_read)
 		return 1;
 
 	if (cpu->m_jit_vreplay)
@@ -2973,7 +2974,7 @@ int CAlphaCPU::jit_read_wchk(CAlphaCPU* cpu, u64 va, int size_bits, u64* out)
 	if (e.fault[0] || e.fault[1]) return 1;    // FOR/FOW: bail so the interpreter vectors the fault
 	const u64 phys = e.translated_address(va);
 
-	if (phys >= cpu->dram_size)               // MMIO: bail before the replay (mirrors jit_read_vpte)
+	if (!cpu->is_ram(phys))                   // MMIO: bail before the replay (mirrors jit_read_vpte)
 		return 1;
 	cpu->note_dtb_hit(i);
 
@@ -3004,9 +3005,8 @@ int CAlphaCPU::jit_read_wchk(CAlphaCPU* cpu, u64 va, int size_bits, u64* out)
 int CAlphaCPU::jit_read_phys(CAlphaCPU* cpu, u64 phys, int size_bits, u64* out)
 {
 	// MMIO: bail before the replay so verify models production (which bails here). A device read
-	// isn't size-truncated, so a replayed+re-truncated value would falsely mismatch. dram_size is
-	// page-aligned and the align below only rounds within 8 bytes, so this raw check is exact.
-	if (phys >= cpu->dram_size)
+	// isn't size-truncated, so a replayed+re-truncated value would falsely mismatch.
+	if (!cpu->is_ram(phys))
 		return 1;
 
 	if (cpu->m_jit_vreplay)
@@ -3122,7 +3122,7 @@ int CAlphaCPU::jit_write_phys(CAlphaCPU* cpu, u64 phys, int size_bits, u64 value
 	}
 
 	phys &= ~((u64)(size_bits / 8) - 1);     // align like WRITE_PHYS_NT (ALIGN_PHYS)
-	if (phys >= cpu->dram_size)
+	if (!cpu->is_ram(phys))
 		return 1;                              // MMIO: let the interpreter do the ordered write
 	cpu->write_physical(phys, size_bits, value);
 	return 0;
@@ -4485,7 +4485,8 @@ int CAlphaCPU::RestoreState(FILE* f)
 	{
 		if (cache.tags[i] == UINT64_MAX) continue;
 		const u64 tag = has_bc_tag ? (cache.tags[i] & ~u64(Ev4Bcache::dirty)) : cache.tags[i];
-		if (tag >= dram_size || tag >> 34 || (tag & 31) || ((tag >> 5) & (cache.tags.size() - 1)) != i)
+		// A physical cache tag can outlive the memory bank mapping that supplied it.
+		if (tag >> 34 || (tag & 31) || ((tag >> 5) & (cache.tags.size() - 1)) != i)
 		{
 			printf("%s: invalid EV4 Bcache tag!\n", devid_string);
 			return -1;

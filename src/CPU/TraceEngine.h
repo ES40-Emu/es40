@@ -147,6 +147,7 @@ public:
   void    trace_dev(const char* text);
   int     parse(char command[100][100]);
   void    run_script(const char* filename);
+  bool    list_strings(const char* annotation, u64 address, u64& next);
   void    list_all();
 protected:
   class CSystem* cSystem;

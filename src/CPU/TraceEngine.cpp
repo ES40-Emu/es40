@@ -176,14 +176,16 @@ CTraceEngine* trc;
  * The maximum length of the resulting string is 100 characters.
  *
  * @param dest Destination string
- * @param org  Source string
+ * @param address Physical address of the source string
  **/
-inline void write_printable_s(char* dest, const char* org)
+static void write_printable_s(char* dest, CSystem& system, u64 address)
 {
-	int cnt = 100;
-	while (*org && cnt--)
+	for (unsigned i = 0; i < 100; ++i)
 	{
-		*(dest++) = printable(*(org++));
+		const char* p = system.PtrToMem(address + i);
+		if (!p || !*p)
+			break;
+		*dest++ = printable(*p);
 	}
 
 	*dest = '\0';
@@ -666,8 +668,8 @@ void CTraceEngine::write_arglist(CAlphaCPU* c, FILE* fl, const char* a)
 				while (*op)
 					op++;
 				value = real_address(value, c, false);
-				if ((value > 0) && (value < (U64(0x1) << cSystem->get_memory_bits())))
-					write_printable_s(op, cSystem->PtrToMem(value));
+				if (value && cSystem->PtrToMem(value))
+					write_printable_s(op, *cSystem, value);
 				else
 					sprintf(op, "INVPTR");
 				while (*op)
@@ -1723,6 +1725,56 @@ struct sRegion
 	struct sRegion* pNext;
 };
 
+// Print a listing string up to its terminator, annotation limit, or the first RAM hole.
+static u64 print_ram_string(CSystem& system, u64 label, u64 address, u64 end)
+{
+	printf("%08" PRIx64 ": \"", label);
+	while (address < end) {
+		const char* p = system.PtrToMem(address);
+		if (!p || !*p) break;
+		putchar(static_cast<unsigned char>(*p));
+		++address;
+	}
+	puts("\"");
+	return address;
+}
+
+bool CTraceEngine::list_strings(const char* annotation, u64 address, u64& next)
+{
+	if (!*annotation) {
+		next = (print_ram_string(*cSystem, address, address, ~U64(0)) + 4) & ~U64(3);
+		while (next < 0x600000 && cSystem->PtrToMem(next) && !cSystem->ReadMem(next, 32, nullptr))
+			next += 4;
+		return true;
+	}
+	const bool counted = !strncmp(annotation, "!LCHAR-", 7);
+	if (!counted && strncmp(annotation, "!CHAR-", 6))
+		return false;
+	u64 end;
+	if (sscanf(annotation + (counted ? 7 : 6), "%" SCNx64, &end) != 1 || end <= address)
+		return false;
+	next = address;
+	while (next < end) {
+		const char* p = cSystem->PtrToMem(next);
+		if (!p) {
+			next = end;
+			break;
+		}
+		if (counted) {
+			const u64 label = next++;
+			const u64 length = static_cast<unsigned char>(*p);
+			const u64 limit = length < end - next ? next + length : end;
+			print_ram_string(*cSystem, label, next, limit);
+			next = limit;
+		} else {
+			next = print_ram_string(*cSystem, next, next, end);
+		}
+		while (next < end && (p = cSystem->PtrToMem(next)) && !*p)
+			++next;
+	}
+	return true;
+}
+
 /**
  * List all memory contents. Try to leave out memory that is only 00's, ef's or ff's.
  **/
@@ -1734,15 +1786,24 @@ void CTraceEngine::list_all()
 	s64               f = 0;
 	s64               t = 0;
 	s64               ms = (s64)(U64(1) << (theSystem->get_memory_bits() - 3));
-	u64* pM = (u64*)theSystem->PtrToMem(0);
+	u64 page = ~U64(0);
+	const char* data = nullptr;
+	auto has_content = [&](s64 index) {
+		const u64 address = u64(index) * 8;
+		const u64 base = address & ~U64(0x1fff);
+		if (page != base) {
+			page = base;
+			data = theSystem->PtrToMem(base);
+		}
+		if (!data) return false;
+		u64 value;
+		memcpy(&value, data + (address - base), sizeof(value));
+		return value && value != U64(0xefefefefefefefef) && value != ~U64(0);
+	};
 
 	for (;;)
 	{
-		while
-			(
-				(!pM[f] || pM[f] == U64(0xefefefefefefefef) || pM[f] == U64(0xffffffffffffffff))
-				&& f < ms
-				)
+		while (f < ms && !has_content(f))
 		{
 			f++;
 			if (!(f & 0x1ffff))
@@ -1754,29 +1815,15 @@ void CTraceEngine::list_all()
 		t = f;
 		for (;;)
 		{
-			while
-				(
-					pM[t]
-					&& pM[t] != U64(0xefefefefefefefef)
-					&& pM[t] != U64(0xffffffffffffffff)
-					&& t < ms
-					)
+			while (t < ms && has_content(t))
 			{
 				t++;
 				if (!(t & 0x1ffff))
 					printf("x");
 			}
 
-			if (t + 3 < ms)
-			{
-				if ((!pM[t + 1] || pM[t + 1] == U64(0xefefefefefefefef)
-					|| pM[t + 1] == U64(0xffffffffffffffff)) && (!pM[t + 2]
-						|| pM[t + 2] == U64(0xefefefefefefefef)
-						|| pM[t + 2] == U64(0xffffffffffffffff)) && (!pM[t + 3]
-							|| pM[t + 3] == U64(0xefefefefefefefef)
-							|| pM[t + 3] == U64(0xffffffffffffffff)))
-					break;
-			}
+			if (t + 3 < ms && !has_content(t + 1) && !has_content(t + 2) && !has_content(t + 3))
+				break;
 
 			if (t >= ms)
 				break;

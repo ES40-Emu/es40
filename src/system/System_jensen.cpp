@@ -35,8 +35,9 @@
 #include <algorithm>
 
 namespace {
-enum { SparseIO, HostAddressExtension, InterruptAcknowledge, Feprom0, Feprom1 };
+enum { SparseIO, HostAddressExtension, InterruptAcknowledge, Feprom0, Feprom1, SystemControl };
 constexpr u64 sparse_io_size = U64(0x10000) << 7;
+constexpr u64 small_bank_size = U64(1) << 24;
 
 unsigned int checked_memory_bits(u64 bits)
 {
@@ -60,9 +61,10 @@ int sparse_io_width(u64 address)
 
 class JensenHostBus : public CSystemComponent, public CDMAHost
 {
+  Jensen& board;
   JensenFlash feprom[2];
 public:
-  JensenHostBus(CConfigurator* cfg, CSystem* system);
+  JensenHostBus(CConfigurator* cfg, Jensen* system);
   ~JensenHostBus() override;
   void start_threads() override;
   void stop_threads() override;
@@ -80,6 +82,7 @@ public:
   void ResetPCI() override
   {
     hae = 0;
+    board.write_sysctl(0);
     for (auto& socket : feprom)
       socket.reset();
     ebc.eisa_bus().reset();
@@ -91,8 +94,8 @@ private:
   u8 hae = 0;
 };
 
-JensenHostBus::JensenHostBus(CConfigurator* cfg, CSystem* system)
-  : CSystemComponent(cfg, system),
+JensenHostBus::JensenHostBus(CConfigurator* cfg, Jensen* system)
+  : CSystemComponent(cfg, system), board(*system),
     feprom{{cfg, *system, 0}, {cfg, *system, 1}},
     isp(new Intel82357(cfg, system, *this, [system](bool asserted) {
       if (system->get_cpu_num())
@@ -106,6 +109,7 @@ JensenHostBus::JensenHostBus(CConfigurator* cfg, CSystem* system)
     FAILURE(Configuration, "Jensen RTC and flash require separate image files");
   system->RegisterMemory(this, SparseIO, U64(0x300000000), sparse_io_size);
   system->RegisterMemory(this, HostAddressExtension, U64(0x1d0000000), 4);
+  system->RegisterMemory(this, SystemControl, U64(0x1e0000000), 8); // PB22H-KB, Table 8-1.
   system->RegisterMemory(this, InterruptAcknowledge, U64(0x100000000), 8);
   // PB22H-KB Tables 8-1 and 8-3: CA[28:9] selects the ROM byte within each socket.
   system->RegisterMemory(this, Feprom0, U64(0x180000000), u64(feprom[0].size()) << 9);
@@ -156,7 +160,8 @@ void JensenHostBus::flush_storage()
 
 int JensenHostBus::SaveState(FILE* file)
 {
-  if (fwrite("JFL1", 4, 1, file) != 1 || CSystemComponent::SaveState(file))
+  if (fwrite("JFL2", 4, 1, file) != 1 || fputc(board.read_sysctl(), file) == EOF ||
+      CSystemComponent::SaveState(file))
     return -1;
   return feprom[0].save(file) && feprom[1].save(file) ? 0 : -1;
 }
@@ -168,12 +173,25 @@ int JensenHostBus::RestoreState(FILE* file)
   if (first == EOF || ungetc(first, file) == EOF)
     return -1;
   const bool legacy = first != 'J';
-  char tag[4];
-  if (!legacy && (fread(tag, sizeof(tag), 1, file) != 1 || memcmp(tag, "JFL1", sizeof(tag))))
+  // Older snapshots used a contiguous array of installed RAM.
+  const auto bits = board.get_memory_bits();
+  int sysctl = bits == 27 ? 0xa0 : bits == 26 ? 0x20 : 0;
+  if (!legacy) {
+    char tag[4];
+    if (fread(tag, sizeof(tag), 1, file) != 1)
+      return -1;
+    if (memcmp(tag, "JFL2", sizeof(tag)) == 0) {
+      sysctl = fgetc(file);
+      if (sysctl == EOF)
+        return -1;
+    } else if (memcmp(tag, "JFL1", sizeof(tag)) != 0)
+      return -1;
+  }
+  if (CSystemComponent::RestoreState(file) || !feprom[0].restore(file, legacy) ||
+      !feprom[1].restore(file, legacy))
     return -1;
-  if (CSystemComponent::RestoreState(file))
-    return -1;
-  return feprom[0].restore(file, legacy) && feprom[1].restore(file, legacy) ? 0 : -1;
+  board.write_sysctl(u8(sysctl));
+  return 0;
 }
 
 void JensenHostBus::finalize_restore() noexcept
@@ -188,6 +206,8 @@ u64 JensenHostBus::ReadMem(int index, u64 address, int dsize)
     return feprom[index - Feprom0].read(u32(address >> 9)); // L_BUS drives the low byte (PB22H-KB, p. 8-8).
   if (index == HostAddressExtension && !address && dsize == 32)
     return hae;
+  if (index == SystemControl && !address && (dsize == 32 || dsize == 64))
+    return board.read_sysctl();
   // Each aligned H_BUS read supplies one INTA pulse; the vector is in the low byte.
   if (index == InterruptAcknowledge && !address && (dsize == 32 || dsize == 64))
     return isp->interrupt_acknowledge();
@@ -212,6 +232,10 @@ void JensenHostBus::WriteMem(int index, u64 address, int dsize, u64 data)
     hae = (u8)(data & 0x7f);
     return;
   }
+  if (index == SystemControl && !address && (dsize == 32 || dsize == 64)) {
+    board.write_sysctl(u8(data));
+    return;
+  }
   if (index != SparseIO || dsize != 32 || hae)
     return;
 
@@ -220,12 +244,13 @@ void JensenHostBus::WriteMem(int index, u64 address, int dsize, u64 data)
   ebc.write_port(port, sparse_io_width(address), value);
 }
 
-// Split at installed RAM and the EISA memory hole in the upper half of the first MiB.
+// Split at SIMM decode boundaries and the EISA hole in the first MiB (PB22H-KB, pp. 4-4, 7-2).
 static char* dma_ram_span(CSystem& system, u64 address, size_t& bytes)
 {
-  u64 end = U64(1) << system.get_memory_bits();
-  if (address >= end)
+  if (address >= (U64(1) << 31))
     return nullptr;
+  address &= (U64(1) << 27) - 1; // HA[30:27] are ignored (PB22H-KB, p. 7-2).
+  u64 end = (address | (small_bank_size - 1)) + 1;
   if (address < 0x80000)
     end = 0x80000;
   else if (address < 0x100000) {
@@ -278,6 +303,53 @@ Jensen::~Jensen()
 void Jensen::ResetMem(unsigned int membits)
 {
   CSystem::ResetMem(checked_memory_bits(membits));
+}
+
+void Jensen::write_sysctl(u8 value)
+{
+  // SYSCTL[7:4] selects the banks and [3:0] drives the LEDs (PB22H-KB, Fig. 5-1).
+  if ((sysctl.exchange(value, std::memory_order_relaxed) ^ value) & 0xf0)
+    ram_mapping_changed();
+}
+
+u64 Jensen::ram_offset(u64 address) const noexcept
+{
+  if (address >> 32)
+    return ~U64(0);
+  address &= 0x0fffffff; // Local memory ignores CA[31:28] (PB22H-KB, p. 4-4).
+
+  const unsigned config = read_sysctl();
+  const unsigned bank_config[2] = {(config >> 4) & 3, config >> 6};
+  // The larger bank starts at zero, with bank 0 first for equal sizes (PB22H-KB, Table 4-2).
+  unsigned bank = bank_config[1] > bank_config[0] ? 1 : 0;
+  const u64 first_size = small_bank_size << bank_config[bank];
+  if (address >= first_size) {
+    address -= first_size;
+    bank ^= 1;
+  }
+  // Single-sided SIMMs respond only in the first side of the window (PB22H-KB, Fig. 5-1).
+  const u64 side_size = small_bank_size << (bank_config[bank] & 2);
+  if (address >= side_size)
+    return ~U64(0);
+
+  // Each populated bank holds four identical 1M x 36 or 4M x 36 SIMMs (PB22H-KB, Table 4-1).
+  const u64 installed_size = U64(1) << get_memory_bits();
+  const u64 installed_bank_size = installed_size < 4 * small_bank_size ? small_bank_size : 4 * small_bank_size;
+  const u64 bank_offset = bank * installed_bank_size;
+  if (bank_offset >= installed_size)
+    return ~U64(0);
+  return bank_offset + (address & (installed_bank_size - 1));
+}
+
+u64 Jensen::linear_ram_size() const noexcept
+{
+  if (get_cpu_num() > 1)
+    return 0;
+  const u64 installed_size = U64(1) << get_memory_bits();
+  u64 end = 0;
+  while (end < installed_size && ram_offset(end) == end)
+    end += small_bank_size;
+  return end;
 }
 
 void Jensen::attach_board_devices(CConfigurator* cfg)

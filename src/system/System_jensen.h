@@ -29,6 +29,7 @@
 #define ES40_SYSTEM_JENSEN_H
 
 #include "System.h"
+#include <atomic>
 #include <mutex>
 
 class CSerial;
@@ -42,10 +43,15 @@ public:
   void attach_board_devices(CConfigurator* cfg) override;
   void ResetMem(unsigned int membits) override;
   CSerial& serial_port(unsigned number) const;
+  u8 read_sysctl() const noexcept { return sysctl.load(std::memory_order_relaxed); }
+  void write_sysctl(u8 value);
 
 private:
+  u64 ram_offset(u64 address) const noexcept override;
+  u64 linear_ram_size() const noexcept override;
   void set_serial_irq(unsigned channel, bool asserted);
   void finish_board_restore() override;
+  std::atomic<u8> sysctl{0};
   VL82C106* combo = nullptr;
   std::mutex serial_irq_mutex;
   unsigned serial_irqs = 0;

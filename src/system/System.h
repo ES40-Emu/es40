@@ -218,7 +218,10 @@ class CSystem
 public:
   void          DumpMemory(unsigned int filenum);
   char* PtrToMem(u64 address);
-  unsigned int  get_memory_bits();
+  unsigned int  get_memory_bits() const;
+  char* ram_data() const noexcept { return static_cast<char*>(memory); }
+  virtual u64 ram_offset(u64 address) const noexcept { return address; }
+  virtual u64 linear_ram_size() const noexcept { return U64(1) << iNumMemoryBits; }
   bool          RestoreState(const char* fn);
   void          SaveState(const char* fn);
   void          flush_storage();
@@ -281,7 +284,7 @@ public:
   virtual void  ResetMem(unsigned int membits);
 
   CAlphaCPU* get_cpu(int cpunum) { return acCPUs[cpunum]; };
-  int           get_cpu_num() { return iNumCPUs; };
+  int           get_cpu_num() const { return iNumCPUs; };
 
   // We determine the PALcode (native or optimized C++ replacements) during config ingestion
   // if any CPU has nohle = true set. If any single CPU has it set, we apply to all
@@ -394,6 +397,7 @@ protected:
   CSystem(CConfigurator* cfg, u64 address_mask, unsigned memory_bits);
   CConfigurator* config() const { return myCfg; }
   void destroy_components();
+  void ram_mapping_changed();
   const std::vector<CSystemComponent*>& components() const { return acComponents; }
 
   // Recipients and coordinates captured before handlers; nested accesses may

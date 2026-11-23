@@ -474,6 +474,8 @@ void CSystem::ResetMem(unsigned int membits)
 	}
 	// Caller must stop CPUs and discard JIT code before replacing RAM/watch pointers.
 	allocate_ll_watch();
+	for (int cpu = 0; cpu < iNumCPUs; ++cpu)
+		acCPUs[cpu]->refresh_ram_mapping();
 }
 
 void CSystem::allocate_ll_watch()
@@ -605,7 +607,7 @@ std::vector<CSystem::SDisplayOutput> CSystem::get_display_outputs() const
  * Get the number of bits that corresponds to the amount of RAM installed.
  * (e.g. 28 = 256 MB, 29 = 512 MB, 30 = 1 GB)
  **/
-unsigned int CSystem::get_memory_bits()
+unsigned int CSystem::get_memory_bits() const
 {
 	return iNumMemoryBits;
 }
@@ -615,10 +617,15 @@ unsigned int CSystem::get_memory_bits()
  **/
 char* CSystem::PtrToMem(u64 address)
 {
-	if (address >> iNumMemoryBits) // Non Memory
-		return 0;
+	const u64 offset = ram_offset(address);
+	return offset >> iNumMemoryBits ? nullptr : ram_data() + offset;
+}
 
-	return (char*)memory + address;
+void CSystem::ram_mapping_changed()
+{
+	// Only a single CPU can cache a mutable board mapping in its direct access paths.
+	if (iNumCPUs == 1)
+		acCPUs[0]->refresh_ram_mapping();
 }
 
 /**
@@ -630,6 +637,8 @@ int CSystem::RegisterCPU(class CAlphaCPU* cpu)
 		return -1;
 	acCPUs[iNumCPUs] = cpu;
 	iNumCPUs++;
+	if (iNumCPUs == 2)
+		acCPUs[0]->refresh_ram_mapping();
 	return iNumCPUs - 1;
 }
 
@@ -1144,7 +1153,8 @@ void CSystem::CLLRAMGuard::invalidate()
 u64 CSystem::cpu_read_locked(int cpuid, u64 phys, int size_bits, CSystemComponent* source)
 {
 	phys &= physical_address_mask;
-	if (phys >> iNumMemoryBits)
+	const u64 offset = ram_offset(phys);
+	if (offset >> iNumMemoryBits)
 	{
 		// Device access must not run while holding a RAM bucket.
 		const u64 value = ReadMem(phys, size_bits, source);
@@ -1152,9 +1162,9 @@ u64 CSystem::cpu_read_locked(int cpuid, u64 phys, int size_bits, CSystemComponen
 		return value;
 	}
 
-	watch_ll_line(cpuid, phys);
-	CLLRAMGuard guard(this, phys);
-	const u64 value = dram_read((const char*)memory, phys, size_bits);
+	watch_ll_line(cpuid, offset);
+	CLLRAMGuard guard(this, offset);
+	const u64 value = dram_read(ram_data(), offset, size_bits);
 	cpu_lock(cpuid, phys, size_bits == 32 ? sext_u64_32(value) : value);
 	return value;
 }
@@ -1218,23 +1228,24 @@ u64 CSystem::cpu_stx_c(int cpuid, u64 phys, int size_bits, u64 value,
 	if (!cpu_take_lock(cpuid, phys, &expected, &same_address))
 		return 0;
 
-	if (phys >= dram_sz)
+	const u64 offset = ram_offset(phys);
+	if (offset >= dram_sz)
 	{
 		WriteMem(phys, size_bits, value, source);   // I/O-space conditional store
 		return 1;
 	}
 
-	const u32 b = (u32)((phys >> 6) & (kLLBuckets - 1));
-	CLLRAMGuard guard(this, phys);
+	const u32 b = (u32)((offset >> 6) & (kLLBuckets - 1));
+	CLLRAMGuard guard(this, offset);
 	u64 ok;
 	if (m_ll_buckets[b].sequence.load(std::memory_order_relaxed) != m_ll_reservations[cpuid].sequence)
 		ok = 0;    // a store hit this reservation bucket since our LDx_L
 	else if (same_address)
-		ok = dram_cas(dram, phys, expected, value, size_bits) ? 1 : 0;
+		ok = dram_cas(dram, offset, expected, value, size_bits) ? 1 : 0;
 	else
 	{
 		// STx_C to a different quadword in the locked line: no value to compare.
-		dram_write(dram, phys, size_bits, value);
+		dram_write(dram, offset, size_bits, value);
 		ok = 1;
 	}
 	if (ok)
@@ -1654,6 +1665,18 @@ u64 CSystem::pio_read(u64 a, int dsize, CSystemComponent* source)
 	return read_unmapped(a, dsize, source);
 }
 
+// Split a scalar only when its two guest pages have discontinuous RAM backing.
+static bool split_ram_access(const CSystem& system, u64 first, u64 last, u64 first_offset)
+{
+	if ((first ^ last) < 0x2000)
+		return false;
+	const u64 last_offset = system.ram_offset(last);
+	const u64 ram_size = U64(1) << system.get_memory_bits();
+	const bool first_ram = first_offset < ram_size;
+	const bool last_ram = last_offset < ram_size;
+	return first_ram != last_ram || (first_ram && last_offset - first_offset != last - first);
+}
+
 /**
  * Write 8, 16, 32 or 64 bits to a system address: main memory here, PIO
  * space via pio_write().
@@ -1669,7 +1692,15 @@ void CSystem::WriteMem(u64 address, int dsize, u64 data, CSystemComponent* sourc
 #endif //defined(ALIGN_MEM_ACCESS)
 	a = address & physical_address_mask;
 
-	if (a >> iNumMemoryBits) // non-memory: chipset PIO decode
+	const u64 offset = ram_offset(a);
+	const unsigned bytes = dsize / 8;
+	if (split_ram_access(*this, a, (address + bytes - 1) & physical_address_mask, offset))
+	{
+		for (unsigned i = 0; i < bytes; ++i)
+			WriteMem(address + i, 8, u8(data >> (8 * i)), source);
+		return;
+	}
+	if (offset >> iNumMemoryBits) // non-memory: chipset PIO decode
 	{
 		pio_write(a, dsize, data, source);
 		return;
@@ -1689,11 +1720,11 @@ void CSystem::WriteMem(u64 address, int dsize, u64 data, CSystemComponent* sourc
 			case 32: data = endian_32((u32)data); break;
 			default: data = endian_64(data); dsize = 64; break;
 			}
-			cpu_write_ram(a, dsize, data);
+			cpu_write_ram(offset, dsize, data);
 			return;
 		}
 
-	p = (u8*)memory + a;
+	p = (u8*)memory + offset;
 
 	switch (dsize)
 	{
@@ -1714,10 +1745,19 @@ u64 CSystem::ReadMem(u64 address, int dsize, CSystemComponent* source)
 	u8* p;
 
 	a = address & physical_address_mask;
-	if (a >> iNumMemoryBits) // non-memory: chipset PIO decode
+	const u64 offset = ram_offset(a);
+	const unsigned bytes = dsize / 8;
+	if (split_ram_access(*this, a, (address + bytes - 1) & physical_address_mask, offset))
+	{
+		u64 value = 0;
+		for (unsigned i = 0; i < bytes; ++i)
+			value |= (ReadMem(address + i, 8, source) & 0xff) << (8 * i);
+		return value;
+	}
+	if (offset >> iNumMemoryBits) // non-memory: chipset PIO decode
 		return pio_read(a, dsize, source);
 
-	p = (u8*)memory + a;
+	p = (u8*)memory + offset;
 
 	switch (dsize)
 	{

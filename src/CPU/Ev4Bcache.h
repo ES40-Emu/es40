@@ -23,7 +23,7 @@ struct Ev4Bcache
     return 4096u << size;
   }
 
-  std::uint64_t probe(std::uint64_t phys, std::uint64_t ram_size, bool write = false,
+  std::uint64_t probe(std::uint64_t phys, bool ram, bool write = false,
                       std::uint32_t* bc_tag = nullptr)
   {
     // HRM Tables 5-12/5-14: BC_ENA and the PA[33:32] disable take priority over FHIT.
@@ -54,7 +54,7 @@ struct Ev4Bcache
       return resident | (phys & 31);
     }
     // An uninitialized SRAM slot takes its first RAM line as deterministic cold data.
-    if (phys < ram_size)
+    if (ram)
       tag = base;
     return phys;
   }

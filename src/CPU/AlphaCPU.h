@@ -358,6 +358,7 @@ public:
   virtual void  start_threads();
   virtual void  stop_threads();
   void ResetForSystemReset();
+  void refresh_ram_mapping();
 private:
   u64 read_ipr(u32 instruction, AlphaIPRReadDescriptor descriptor, u64 issue);
   void write_pal_temp(unsigned slot, u64 value, u64 issue);
@@ -645,9 +646,10 @@ private:
   }
 
   // DRAM fast-path cache
-  char* dram_ptr;    // cSystem->PtrToMem(0) - host pointer to base es40 ram array thingy
+  char* dram_ptr;    // Host base of the installed RAM.
   u64    dram_size;   // 1ULL << cSystem->get_memory_bits() — size of DRAM in bytes
   u64    direct_ram_size = 0;
+  bool is_ram(u64 phys) const { return phys < direct_ram_size || cSystem->ram_offset(phys) < dram_size; }
   Ev4Bcache m_ev4_bcache;
   Ev4Dcache m_ev4_dcache;
   Ev4BIUDiagnostics m_ev4_biu;
@@ -675,7 +677,7 @@ private:
   }
   u64 bus_address(u64 phys, bool write = false)
   {
-    return direct_ram_size ? phys : m_ev4_bcache.probe(phys, dram_size, write,
+    return !(m_ev4_bcache.control & 1) ? phys : m_ev4_bcache.probe(phys, is_ram(phys), write,
         m_ev4_biu.bc_tag_unlocked ? &m_ev4_biu.bc_tag : nullptr);
   }
   u64 read_physical(u64 phys, int size)
@@ -686,9 +688,10 @@ private:
     const bool hit = m_ev4_dcache.read_hit(phys, size, read_ram, value);
     note_ev4_dcache_access(hit);
     if (hit) return value;
-    const u64 backing = bus_address(phys);
+    const u64 bus = bus_address(phys);
+    const u64 backing = cSystem->ram_offset(bus);
     if (m_ev4_dcache.active()) m_ev4_dcache.fill(phys, backing, dram_size);
-    return backing < dram_size ? read_ram(backing) : cSystem->ReadMem(backing, size, this);
+    return backing < dram_size ? read_ram(backing) : cSystem->ReadMem(bus, size, this);
   }
   void write_physical(u64 phys, int size, u64 value)
   {
@@ -696,12 +699,13 @@ private:
       cSystem->cpu_write_ram(phys, size, value);
       return;
     }
-    const u64 backing = bus_address(phys, true);
+    const u64 bus = bus_address(phys, true);
+    const u64 backing = cSystem->ram_offset(bus);
     note_ev4_dcache_access(m_ev4_dcache.store(phys, backing, size, value));
     if (backing < dram_size)
       cSystem->cpu_write_ram(backing, size, value);
     else
-      cSystem->WriteMem(backing, size, value, this);
+      cSystem->WriteMem(bus, size, value, this);
   }
 
   // Sequential icache fast path

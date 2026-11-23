@@ -201,66 +201,13 @@ void          handle_debug_string(char* s);
 #if defined(IDB)
 #define DEBUG_XX  if(trc->get_fnc_name(this, state.current_pc &~U64(0x3), &funcname)) \
   {                                                                                   \
-    if(bListing && !strcmp(funcname, ""))                                             \
-    {                                                                                 \
-      printf("%08" PRIx64 ": \"%s\"\n", state.current_pc,                                 \
-             cSystem->PtrToMem(state.current_pc));                                    \
-      state.pc =                                                                      \
-        (                                                                             \
-          state.current_pc +                                                          \
-          strlen(cSystem->PtrToMem(state.current_pc)) +                               \
-          4                                                                           \
-        ) &~U64(0x3);                                                                 \
-      while(state.pc < 0x600000 && cSystem->ReadMem(state.pc, 32, this) == 0)         \
-        state.pc += 4;                                                                \
-      return;                                                                       \
-    }                                                                                 \
+    if(bListing && trc->list_strings(funcname, state.current_pc, state.pc))            \
+      return;                                                                         \
     else if(bListing && !strcmp(funcname, "!SKIP"))                                   \
     {                                                                                 \
       while(state.pc < 0x600000 && cSystem->ReadMem(state.pc, 32, this) == 0)         \
         state.pc += 4;                                                                \
       return;                                                                       \
-    }                                                                                 \
-    else if(bListing && !strncmp(funcname, "!CHAR-", 6))                              \
-    {                                                                                 \
-      u64 xx_upto;                                                                    \
-      int xx_result;                                                                  \
-      xx_result = sscanf(&(funcname[6]), "%" SCNx64, &xx_upto);                       \
-      if(xx_result == 1)                                                              \
-      {                                                                               \
-        state.pc = state.current_pc;                                                  \
-        while(state.pc < xx_upto)                                                     \
-        {                                                                             \
-          printf("%08" PRIx64 ": \"%s\"\n", state.pc, cSystem->PtrToMem(state.pc));       \
-          state.pc += strlen(cSystem->PtrToMem(state.pc));                            \
-          while(state.pc < xx_upto && cSystem->ReadMem(state.pc, 8, this) == 0)       \
-            state.pc++;                                                               \
-        }                                                                             \
-        return;                                                                     \
-      }                                                                               \
-    }                                                                                 \
-    else if(bListing && !strncmp(funcname, "!LCHAR-", 7))                             \
-    {                                                                                 \
-      char  stringval[300];                                                           \
-      int   stringlen;                                                                \
-      u64   xx_upto;                                                                  \
-      int   xx_result;                                                                \
-      xx_result = sscanf(&(funcname[7]), "%" SCNx64, &xx_upto);                       \
-      if(xx_result == 1)                                                              \
-      {                                                                               \
-        state.pc = state.current_pc;                                                  \
-        while(state.pc < xx_upto)                                                     \
-        {                                                                             \
-          stringlen = (int) cSystem->ReadMem(state.pc++, 8, this);                    \
-          memset(stringval, 0, 300);                                                  \
-          strncpy(stringval, cSystem->PtrToMem(state.pc), stringlen);                 \
-          printf("%08" PRIx64 ": \"%s\"\n", state.pc - 1, stringval);                     \
-          state.pc += stringlen;                                                      \
-          while(state.pc < xx_upto && cSystem->ReadMem(state.pc, 8, this) == 0)       \
-            state.pc++;                                                               \
-        }                                                                             \
-        return;                                                                     \
-      }                                                                               \
     }                                                                                 \
     else if(bListing && !strncmp(funcname, "!X64-", 5))                               \
     {                                                                                 \

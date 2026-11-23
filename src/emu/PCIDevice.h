@@ -118,7 +118,7 @@ public:
   int pci_dev() const { return myPCIDev; }
 
 protected:
-  PCIHost& pci_host;
+  PCIHost& pci_host() const;
   bool pci_bus_master_enabled() { return (config_read(0, 0x04, 16) & 0x04) != 0; }
   bool  do_pci_interrupt(int func, bool asserted);
   void  add_function(int func, u32 data[64], u32 mask[64]);

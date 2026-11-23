@@ -141,8 +141,14 @@ static PCIHost& require_pci_host(CSystem* system)
 	return *host;
 }
 
+// Looked up when a PCI operation runs, so a device that never does PCI needs no PCI host.
+PCIHost& CPCIDevice::pci_host() const
+{
+	return require_pci_host(cSystem);
+}
+
 CPCIDevice::CPCIDevice(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev)
-	: CSystemComponent(cfg, c), pci_host(require_pci_host(c))
+	: CSystemComponent(cfg, c)
 {
 	int i;
 
@@ -168,6 +174,8 @@ CPCIDevice::~CPCIDevice(void)
 
 void CPCIDevice::add_function(int func, u32 data[64], u32 mask[64])
 {
+	// Fixed-address ranges work on any board; a PCI function needs the PCI host.
+	require_pci_host(cSystem);
 	memcpy(std_config_data[func], data, 64 * sizeof(u32));
 	memcpy(std_config_mask[func], mask, 64 * sizeof(u32));
 #if defined(ES40_BIG_ENDIAN)
@@ -668,7 +676,7 @@ bool CPCIDevice::do_pci_interrupt(int func, bool asserted)
 		devid_string, func, asserted ? "ASSERT  " : "DEASSERT",
 		line, pin, myPCIDev, myPCIBus, drir_bit);
 #endif
-	pci_host.interrupt(drir_bit, asserted);
+	pci_host().interrupt(drir_bit, asserted);
 	return true;
 }
 
@@ -822,7 +830,7 @@ void CPCIDevice::do_pci_read(u32 address, void* dest, size_t element_size,
 	}
 
 	// get the 64-bit system wide address
-	u64 phys_addr = pci_host.PCI_Phys(myPCIBus, address);
+	u64 phys_addr = pci_host().PCI_Phys(myPCIBus, address);
 
 	// if there is only one element to read, this is a simple ReadMem operation.
 	if (element_count == 1)
@@ -860,7 +868,7 @@ void CPCIDevice::do_pci_read(u32 address, void* dest, size_t element_size,
 
 		while (remaining != 0)
 		{
-			u64 cur_phys = pci_host.PCI_Phys(myPCIBus, cur_address);
+			u64 cur_phys = pci_host().PCI_Phys(myPCIBus, cur_address);
 			size_t chunk = pci_dma_chunk_limit(cur_phys, remaining);
 
 			// get a pointer to system memory if the address is inside main memory
@@ -948,7 +956,7 @@ void CPCIDevice::do_pci_write(u32 address, const void* source, size_t element_si
 		return;
 
 	// get the 64-bit system wide address
-	u64 phys_addr = pci_host.PCI_Phys(myPCIBus, address);
+	u64 phys_addr = pci_host().PCI_Phys(myPCIBus, address);
 
 	// if there is only one element to read, this is a simple ReadMem operation.
 	if (element_count == 1)
@@ -976,7 +984,7 @@ void CPCIDevice::do_pci_write(u32 address, const void* source, size_t element_si
 
 		while (remaining != 0)
 		{
-			u64 cur_phys = pci_host.PCI_Phys(myPCIBus, cur_address);
+			u64 cur_phys = pci_host().PCI_Phys(myPCIBus, cur_address);
 			size_t chunk = pci_dma_chunk_limit(cur_phys, remaining);
 
 			// get a pointer to system memory if the address is inside main memory

@@ -398,6 +398,15 @@ void Jensen::register_legacy_io(CSystemComponent& device, int index, int bus, u3
   owner->register_isa_io(device, index, (u16)port, length);
 }
 
+void Jensen::register_legacy_mem(CSystemComponent& device, int index, int bus, u32 address, u32 length)
+{
+  // Fixed-address memory is ISA memory; like the ports it gives no size signal, so it is an 8-bit slave.
+  auto* owner = dynamic_cast<EISABus*>(isa_bus(bus));
+  if (!owner)
+    FAILURE_2(Configuration, "Address %x is not on ISA bus isa%d", address, bus);
+  owner->register_eisa_mem(device, index, address, length, 8);
+}
+
 CSerial& Jensen::serial_port(unsigned number) const
 {
   return combo->serial_port(number);

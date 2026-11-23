@@ -737,6 +737,7 @@ u64 CConfigurator::get_num_value(const char* n, bool decimal, u64 def)
 #define IS_NIC    1024
 
 #define N_P       2048  // no parent
+#define ON_ISA    4096  // also made as an ISA card; it is one when named isa<bus>.<slot>
 typedef struct
 {
 	const char* name;
@@ -831,7 +832,7 @@ classinfo classes[] = {
   {"gloria", c_gloria, IS_PCI | ON_GUI, kv_gloria},
   {"radeon", c_radeon, IS_PCI | ON_GUI, kv_radeon},
   {"powerstorm", c_powerstorm, IS_PCI | ON_GUI, kv_powerstorm},
-  {"cirrus", c_cirrus, IS_PCI | ON_GUI, kv_cirrus},
+  {"cirrus", c_cirrus, IS_PCI | ON_ISA | ON_GUI, kv_cirrus},
   {"dec21143", c_dec21143, IS_PCI | IS_NIC, kv_dec21143},
   {"lsi53c1020", c_lsi53c1020, IS_PCI | HAS_DISK, kv_lsi53c1020},
   {"sym53c895", c_sym53c895, IS_PCI | HAS_DISK, kv_none},
@@ -856,6 +857,12 @@ static const classinfo& config_class(const char* name)
 	int i = 0;
 	while (classes[i].name && (!name || strcasecmp(name, classes[i].name))) ++i;
 	return classes[i];
+}
+
+// A class that is also made as an ISA card is one when its name is an ISA slot.
+static bool is_isa_card(const classinfo& device, const char* name)
+{
+	return (device.flags & IS_ISA) || ((device.flags & ON_ISA) && !strncasecmp(name, "isa", 3));
 }
 
 static const IsaIoPorts* isa_card_ports(classid type)
@@ -908,7 +915,7 @@ const char* CConfigurator::isa_config_error() const
 		CConfigurator* child = pChildren[i];
 		const classinfo& device = config_class(child->myValue);
 		if (device.flags & HAS_ISA) has_bridge = true;
-		if (device.flags & IS_ISA)
+		if (is_isa_card(device, child->myName))
 		{
 			has_cards = true;
 			if (const char* error = isa_card_config_error(child, child->myName, device.id, child->get_text_value("io_port")))
@@ -1005,6 +1012,17 @@ void CConfigurator::initialize()
 		myFlags = device->flags;
 	}
 #endif
+
+	// An ISA slot name selects the ISA form of the card; the slot stands in for the PCI position.
+	if (!(myFlags & IS_ISA) && is_isa_card(*device, myName))
+	{
+		unsigned bus, slot;
+		if (!parse_isa_slot(myName, bus, slot))
+			FAILURE_1(Configuration, "Name an ISA card isa<bus>.<slot>, not %s", myName);
+		myFlags = (myFlags & ~IS_PCI) | IS_ISA;
+		pcibus = bus;
+		pcidev = slot;
+	}
 
 	// Warn about configuration values this device class does not read;
 	// they have no effect and should be removed from the config file.
@@ -1245,6 +1263,9 @@ void CConfigurator::initialize()
 		CSystem* const system = (CSystem*)pParent->get_device();
 		bx_gui_c& display = bx_gui->display_for_output(get_device_path(), 0);
 		const char* model = get_text_value("model", "GD5430");
+		// GD5430 and GD5446 are PCI chips; an ISA slot takes GD5401, GD5428 or AVGA1.
+		if ((myFlags & IS_ISA) && (!strcasecmp(model, "GD5430") || !strcasecmp(model, "GD5446")))
+			FAILURE_2(Configuration, "cirrus model %s is a PCI chip and cannot sit in %s", model, myName);
 		const std::string tag = get_device_path();
 		if (!strcasecmp(model, "GD5401"))
 			myDevice = new cirrus_gd5401_vga_device(
@@ -1553,7 +1574,7 @@ void CConfigurator::initialize()
 	for (i = 0; i < iNumChildren; i++)
 	{
 		auto* child = pChildren[i];
-		if ((myFlags & IS_CS) && (config_class(child->myValue).flags & IS_ISA))
+		if ((myFlags & IS_CS) && is_isa_card(config_class(child->myValue), child->myName))
 			isa_cards.push_back(child);
 		else
 			child->initialize();

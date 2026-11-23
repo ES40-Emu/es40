@@ -175,6 +175,12 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
     if (dtb) return AlphaIPRWriteKind::InvalidateDataTb;
     return pal_temp ? AlphaIPRWriteKind::PalTemp : AlphaIPRWriteKind::Noop;
   }
+  // HIRR and DC_STAT ignore writes, leaving only PAL_TEMP12 writable (21064 HRM 4.8.1, 5.2.14, 5.3.16).
+  if (selector.index == 12) {
+    const bool pal_temp = (selector.banks & 0x80) != 0;
+    if (slot) *slot = pal_temp ? 32u + selector.index : 0;
+    return pal_temp ? AlphaIPRWriteKind::PalTemp : AlphaIPRWriteKind::Noop;
+  }
   // 21064 HRM 4.8.1, Table 4-7: ABX selects ABOX_CTL (14) or BIU_CTL (18), PAL writes the same-index PAL_TEMP.
   if ((selector.banks == 0x40 || selector.banks == 0xc0) &&
       (selector.index == 14 || selector.index == 18)) {

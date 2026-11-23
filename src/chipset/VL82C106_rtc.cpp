@@ -362,6 +362,22 @@ bool VL82C106::restore_rtc(FILE* file)
   return true;
 }
 
+bool VL82C106::save_lpt_cs(FILE* file) const
+{
+  return fwrite(lpt_cs, sizeof(lpt_cs), 1, file) == 1 && fputc(lpt_cs_written, file) != EOF;
+}
+
+bool VL82C106::restore_lpt_cs(FILE* file)
+{
+  if (fread(lpt_cs, sizeof(lpt_cs), 1, file) != 1)
+    return false;
+  const int mask = fgetc(file);
+  if (mask < 0 || mask > 7)
+    return false;
+  lpt_cs_written = u8(mask);
+  return true;
+}
+
 void VL82C106::load_battery()
 {
   battery_path = myCfg->get_text_value("rom.toy", default_battery_path);
@@ -371,13 +387,15 @@ void VL82C106::load_battery()
       FAILURE(IO, "Cannot open Jensen RTC battery image: " + battery_path);
     seed_clock();
   } else {
-    char tag[4];
+    char tag[4]{};
     u64 saved;
-    if (fread(tag, sizeof(tag), 1, file.get()) != 1 || memcmp(tag, "VLB1", sizeof(tag)) ||
+    const bool has_lpt = fread(tag, sizeof(tag), 1, file.get()) == 1 && !memcmp(tag, "VLB2", sizeof(tag));
+    if ((!has_lpt && memcmp(tag, "VLB1", sizeof(tag))) ||
         fread(&saved, sizeof(saved), 1, file.get()) != 1 || !restore_rtc(file.get()) ||
         fread(serial_cs, sizeof(serial_cs), 1, file.get()) != 1 ||
         fread(serial_cs_written, sizeof(serial_cs_written), 1, file.get()) != 1 ||
-        serial_cs_written[0] > 7 || serial_cs_written[1] > 7 || fgetc(file.get()) != EOF || ferror(file.get()))
+        serial_cs_written[0] > 7 || serial_cs_written[1] > 7 || (has_lpt && !restore_lpt_cs(file.get())) ||
+        fgetc(file.get()) != EOF || ferror(file.get()))
       FAILURE(Configuration, "Invalid Jensen RTC battery image: " + battery_path);
     // VBAT powers the clock and standby RAM while the system is off (PB22H-KB, pp. 1-10, 22-4).
     const u64 now = wall_time_ns();
@@ -398,9 +416,9 @@ void VL82C106::flush_storage()
     rtc_refresh(cSystem->device_access_time());
   CSnapshotFile file(battery_path.c_str());
   const u64 stamp = wall_time_ns();
-  if (fwrite("VLB1", 4, 1, file.get()) != 1 || fwrite(&stamp, sizeof(stamp), 1, file.get()) != 1 ||
+  if (fwrite("VLB2", 4, 1, file.get()) != 1 || fwrite(&stamp, sizeof(stamp), 1, file.get()) != 1 ||
       !save_rtc(file.get()) || fwrite(serial_cs, sizeof(serial_cs), 1, file.get()) != 1 ||
-      fwrite(serial_cs_written, sizeof(serial_cs_written), 1, file.get()) != 1)
+      fwrite(serial_cs_written, sizeof(serial_cs_written), 1, file.get()) != 1 || !save_lpt_cs(file.get()))
     FAILURE(IO, "Cannot save Jensen RTC battery image: " + battery_path);
   file.publish();
   battery_dirty = false;

@@ -366,6 +366,8 @@ void Jensen::attach_board_devices(CConfigurator* cfg)
     isp->set_isa_irq(8, asserted);
     if (get_cpu_num())
       get_cpu(0)->irq_h(0, asserted, 0);
+  }, [isp = host->isp](bool asserted) {
+    isp->set_isa_irq(1, asserted); // IRQP drives ISP IRQ1 (PB22H-KB, p. 1-11 and Table 17-2).
   });
 }
 

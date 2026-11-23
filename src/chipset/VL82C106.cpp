@@ -1,4 +1,4 @@
-/* ES40 emulator -- VL82C106 keyboard, mouse, serial and real-time clock controller
+/* ES40 emulator -- VL82C106 keyboard, mouse, serial, parallel and real-time clock controller
  * Copyright (C) 2026 by gdwnldsKSC
  * All rights reserved.
  *
@@ -31,16 +31,26 @@
 #include "system/System.h"
 
 namespace {
-enum { Unselected = -1, Data, CommandStatus, RtcIndex, RtcData, Control0, ComA, ComB };
+enum { Unselected = -1, Data, CommandStatus, RtcIndex, RtcData, Control0, ComA, ComB, Lpt };
 // P17 is tied high and P16 senses the unlocked front-panel switch (PB22H-KB, p. 1-11).
 constexpr u8 input_port = 0xc0;
+
+bool selects_programmed(const u8 (&cs)[3], u8 written, u16 port) noexcept
+{
+  // Battery-backed bases and masks have no specified initial values (PB22H-KB, p. 24-7).
+  if (written != 7)
+    return false;
+  // Each set range bit masks its matching address bit (PB22H-KB, Tables 24-1 to 24-3).
+  const u16 base = cs[0] | (u16(cs[1]) << 8);
+  return ((port ^ base) & ~(cs[2] & 0x1f)) == 0;
+}
 }
 
 VL82C106::VL82C106(CConfigurator* cfg, CSystem* system, u64 base,
   std::function<void(bool)> irq_output, std::function<void(unsigned, bool)> serial_irq_output,
-  std::function<void(bool)> rtc_irq_output)
+  std::function<void(bool)> rtc_irq_output, std::function<void(bool)> lpt_irq_output)
   : CKeyboard(cfg, system), local_base(base), irq_output(std::move(irq_output)),
-    rtc_irq_output(std::move(rtc_irq_output))
+    rtc_irq_output(std::move(rtc_irq_output)), lpt_irq_output(std::move(lpt_irq_output))
 {
   for (unsigned i = 0; i < 2; ++i)
     serial[i] = new CSerial(cfg, system, i, [serial_irq_output, i](bool level) { serial_irq_output(i, level); });
@@ -96,18 +106,64 @@ bool VL82C106::selects_serial(unsigned channel, u16 port) const noexcept
   // COMA needs SYS BD EN and COM1 EN, while COMB needs COM2 EN (PB22H-KB, Tables 24-7 and 24-9).
   if (channel == 0 ? (control0 & 5) != 5 : !(control1 & 1))
     return false;
-  if (control1 & 8) {
-    // Battery-backed bases and masks have no specified initial values (PB22H-KB, p. 24-7).
-    if (serial_cs_written[channel] != 7)
-      return false;
-    // Each set range bit masks its matching address bit (PB22H-KB, Tables 24-1 to 24-3).
-    const u8* cs = serial_cs[channel];
-    const u16 base = cs[0] | (u16(cs[1]) << 8);
-    return ((port ^ base) & ~(cs[2] & 0x1f)) == 0;
-  }
+  if (control1 & 8)
+    return selects_programmed(serial_cs[channel], serial_cs_written[channel], port);
   // COM1 DEF exchanges the two hardwired bases (PB22H-KB, Table 24-5).
   const bool at_3f8 = (channel == 0) == ((control0 & 8) != 0);
   return (port & 0xfff8) == (at_3f8 ? 0x3f8 : 0x2f8);
+}
+
+bool VL82C106::selects_lpt(u16 port) const noexcept
+{
+  // SYS BD EN and LPT EN gate CS3 in both address modes (PB22H-KB, Table 24-7).
+  if ((control0 & 0x11) != 0x11)
+    return false;
+  if (control1 & 8)
+    return selects_programmed(lpt_cs, lpt_cs_written, port);
+  // LPT DEF[1:0] selects the fixed window (PB22H-KB, Table 24-5 and VL82C106, p. 6-207).
+  constexpr u16 bases[] = {0x3bc, 0x378, 0x278};
+  const unsigned index = (control0 >> 5) & 3;
+  return index < 3 && (port & 0xfffc) == bases[index];
+}
+
+void VL82C106::set_parallel_inputs(u8 data, u8 status_pins)
+{
+  std::lock_guard<std::recursive_mutex> lock(cSystem->get_device_bus_mutex());
+  // ACK_L returning high latches an enabled request (PB22H-KB, Table 21-2).
+  if ((lpt_control & 0x10) && !(lpt_status_pins & 0x40) && (status_pins & 0x40))
+    lpt_irq_pending = true;
+  lpt_status_pins = status_pins & 0xf8;
+  lpt_input_data = data;
+  sync_lpt_irq();
+}
+
+void VL82C106::sync_lpt_irq()
+{
+  // AT passes ACK_L through and PS/2 holds IRQP until a status read (VL82C106, p. 6-192).
+  const bool level = (lpt_control & 0x10) && (at_mode() ? (lpt_status_pins & 0x40) != 0 : lpt_irq_pending);
+  if (!lpt_irq_level || *lpt_irq_level != level) {
+    lpt_irq_level = level;
+    lpt_irq_output(level);
+  }
+}
+
+VL82C106::ParallelOutputs VL82C106::parallel_outputs() const
+{
+  std::lock_guard<std::recursive_mutex> lock(cSystem->get_device_bus_mutex());
+  ParallelOutputs pins{std::nullopt, u8((lpt_control ^ 0x0b) & 0x0f)};
+  if ((control0 & 0x80) || !(lpt_control & 0x20))
+    pins.data = lpt_data;
+  return pins;
+}
+
+u8 VL82C106::read_lpt_status()
+{
+  // BUSY is inverted and extended IRQ status is active low, cleared on read (PB22H-KB, pp. 21-2, 21-4–5).
+  const u8 irq = (control0 & 0x80) || !lpt_irq_pending ? 4 : 0;
+  const u8 status = (lpt_status_pins ^ 0x80) | irq | 3;
+  lpt_irq_pending = false;
+  sync_lpt_irq();
+  return status;
 }
 
 int VL82C106::decode_port(u16 port, bool write) const noexcept
@@ -126,8 +182,8 @@ int VL82C106::decode_port(u16 port, bool write) const noexcept
       selected = RtcIndex;
     break;
   case 0x171:
-    // Clock and standby RAM are readable; chip control and serial selects are write-only (Tables 22-1, 24-6).
-    if (rtc_index < sizeof(rtc_bytes) || (write && rtc_index >= 0x69 && rtc_index <= 0x70))
+    // This port selects the clock, standby RAM and chip controls (PB22H-KB, Tables 22-1 and 24-6).
+    if (rtc_index < sizeof(rtc_bytes) || (rtc_index >= 0x69 && rtc_index <= 0x73))
       selected = RtcData;
     break;
   }
@@ -137,6 +193,11 @@ int VL82C106::decode_port(u16 port, bool write) const noexcept
         return Unselected;
       selected = ComA + channel;
     }
+  }
+  if (selects_lpt(port)) {
+    if (selected != Unselected || (port & 3) == 3)
+      return Unselected;
+    return Lpt;
   }
   return selected;
 }
@@ -151,8 +212,20 @@ u64 VL82C106::ReadMem(int, u64 address, int dsize)
 {
   const u16 port = u16(address >> 9);
   const int selected = decode_port(port, false);
-  if (selected == RtcData)
+  if (selected == RtcData) {
+    // SRM 2.2 reads both live controls during LPT setup (PB22H-KB, Tables 24-6 to 24-9).
+    if (rtc_index == 0x69) return control0;
+    if (rtc_index == 0x6a) return control1;
+    if (rtc_index >= 0x6b) return 0; // W fields read as zero (PB22H-KB, Tables 1 and 22-1).
     return rtc_read(rtc_index);
+  }
+  if (selected == Lpt) {
+    switch (port & 3) {
+    case 0: return parallel_outputs().data.value_or(lpt_input_data);
+    case 1: return read_lpt_status();
+    case 2: return lpt_control | 0xe0; // DIR is write-only and reads high (VL82C106, p. 6-192).
+    }
+  }
   if (selected == ComA || selected == ComB)
     return serial_port(selected - ComA).ReadMem(0, port & 7, 8);
   return CKeyboard::ReadMem(selected, 0, dsize);
@@ -164,6 +237,15 @@ void VL82C106::WriteMem(int, u64 address, int dsize, u64 data)
   const int selected = decode_port(port, true);
   if (selected == ComA || selected == ComB) {
     serial_port(selected - ComA).WriteMem(0, port & 7, 8, u8(data));
+  } else if (selected == Lpt) {
+    if ((port & 3) == 0)
+      lpt_data = u8(data); // The output latch is writable in either direction (PB22H-KB, p. 21-3).
+    else if ((port & 3) == 2) {
+      lpt_control = u8(data) & 0x3f;
+      if (!(lpt_control & 0x10))
+        lpt_irq_pending = false;
+      sync_lpt_irq();
+    }
   } else if (selected == RtcIndex) {
     rtc_index = data & 0x7f;
   } else if (selected == RtcData && rtc_index < sizeof(rtc_bytes)) {
@@ -174,12 +256,15 @@ void VL82C106::WriteMem(int, u64 address, int dsize, u64 data)
     CFastMutex::ScopedLock guard(kbdLock);
     control1 = u8(data);
     kbd_update_irq();
+    sync_lpt_irq();
   } else if (selected == RtcData) {
     const unsigned reg = rtc_index - 0x6b;
-    if (serial_cs[reg / 3][reg % 3] != u8(data) || !(serial_cs_written[reg / 3] & (1u << (reg % 3))))
+    u8* cs = reg < 6 ? serial_cs[reg / 3] : lpt_cs;
+    u8& written = reg < 6 ? serial_cs_written[reg / 3] : lpt_cs_written;
+    if (cs[reg % 3] != u8(data) || !(written & (1u << (reg % 3))))
       battery_dirty = true;
-    serial_cs[reg / 3][reg % 3] = u8(data);
-    serial_cs_written[reg / 3] |= u8(1u << (reg % 3));
+    cs[reg % 3] = u8(data);
+    written |= u8(1u << (reg % 3));
   } else {
     CKeyboard::WriteMem(selected, 0, dsize, data);
   }
@@ -188,8 +273,12 @@ void VL82C106::WriteMem(int, u64 address, int dsize, u64 data)
 void VL82C106::reset_controller_state()
 {
   rtc_index = 0;
-  control0 = 0x9d; // Reset enables COMA at 3F8h (PB22H-KB, Tables 24-5 and 24-7).
+  control0 = 0x9d; // Reset enables COMA at 3F8h and LPT at 3BCh (PB22H-KB, Tables 24-5 and 24-7).
   control1 = 0x07; // COMB uses hardwired selects and AT mode lasts until bit 1 clears (PB22H-KB, Table 24-9).
+  lpt_data = lpt_control = 0;
+  lpt_irq_pending = false;
+  lpt_irq_level.reset();
+  sync_lpt_irq();
   at_inhibit_override = 0;
   memset(ram, 0, sizeof(ram));
   output_latch = 1;
@@ -363,9 +452,10 @@ int VL82C106::SaveState(FILE* f)
   pulse_remaining_ns = remaining > decltype(remaining)::zero() ?
     std::chrono::duration_cast<std::chrono::nanoseconds>(remaining).count() : 0;
   rtc_refresh(cSystem->device_access_time());
-  if (fwrite("VRT1", 4, 1, f) != 1 || CKeyboard::SaveState(f) || CSystemComponent::SaveState(f))
+  const u8 port[]{lpt_data, lpt_control, lpt_input_data, lpt_status_pins, u8(lpt_irq_pending)};
+  if (fwrite("VRT2", 4, 1, f) != 1 || CKeyboard::SaveState(f) || CSystemComponent::SaveState(f))
     return -1;
-  return save_rtc(f) ? 0 : -1;
+  return save_rtc(f) && save_lpt_cs(f) && fwrite(port, sizeof(port), 1, f) == 1 ? 0 : -1;
 }
 
 int VL82C106::RestoreState(FILE* f)
@@ -375,8 +465,9 @@ int VL82C106::RestoreState(FILE* f)
   if (first == EOF || ungetc(first, f) == EOF)
     return -1;
   const bool legacy = first != 'V';
-  char tag[4];
-  if (!legacy && (fread(tag, sizeof(tag), 1, f) != 1 || memcmp(tag, "VRT1", sizeof(tag))))
+  char tag[4]{};
+  const bool has_lpt = !legacy && fread(tag, sizeof(tag), 1, f) == 1 && !memcmp(tag, "VRT2", sizeof(tag));
+  if (!legacy && !has_lpt && memcmp(tag, "VRT1", sizeof(tag)))
     return -1;
   if (CKeyboard::RestoreState(f) || CSystemComponent::RestoreState(f))
     return -1;
@@ -391,6 +482,20 @@ int VL82C106::RestoreState(FILE* f)
     seed_clock();
   else if (!restore_rtc(f))
     return -1;
+  u8 port[]{0, 0, 0xff, 0xf8, 0};
+  if (has_lpt) {
+    if (!restore_lpt_cs(f) || fread(port, sizeof(port), 1, f) != 1 ||
+        (port[1] & 0xc0) || (port[3] & 7) || port[4] > 1)
+      return -1;
+  } else {
+    memset(lpt_cs, 0, sizeof(lpt_cs));
+    lpt_cs_written = 0;
+  }
+  lpt_data = port[0];
+  lpt_control = port[1];
+  lpt_input_data = port[2];
+  lpt_status_pins = port[3];
+  lpt_irq_pending = port[4] != 0;
   rtc_sample = {};
   battery_dirty = true;
   return 0;
@@ -403,5 +508,7 @@ void VL82C106::finalize_restore() noexcept
   kbd_update_irq();
   rtc_irq_level.reset();
   rtc_sync_irq();
+  lpt_irq_level.reset();
+  sync_lpt_irq();
   battery_ready = true;
 }

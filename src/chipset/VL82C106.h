@@ -1,4 +1,4 @@
-/* ES40 emulator -- VL82C106 keyboard, mouse, serial and real-time clock controller
+/* ES40 emulator -- VL82C106 keyboard, mouse, serial, parallel and real-time clock controller
  * Copyright (C) 2026 by gdwnldsKSC
  * All rights reserved.
  *
@@ -45,7 +45,7 @@ public:
   static constexpr const char* default_battery_path = "jensen-toy.rom";
   VL82C106(CConfigurator* cfg, CSystem* system, u64 local_base,
     std::function<void(bool)> irq_output, std::function<void(unsigned, bool)> serial_irq_output,
-    std::function<void(bool)> rtc_irq_output);
+    std::function<void(bool)> rtc_irq_output, std::function<void(bool)> lpt_irq_output);
   ~VL82C106() override;
   void init() override;
   void start_threads() override;
@@ -53,6 +53,13 @@ public:
   void check_state() override;
   void flush_storage() override;
   CSerial& serial_port(unsigned number) const { return *serial[number]; }
+  // Connector inputs are PD[7:0] and BUSY, ACK_L, PE, SLCT, ERR_L in bits 7:3 (PB22H-KB, Table 21-2).
+  void set_parallel_inputs(u8 data, u8 status_pins);
+  struct ParallelOutputs {
+    std::optional<u8> data;
+    u8 control; // SLIN_L, INIT_L, AFD_L and STB_L in bits 3:0 (PB22H-KB, Table 21-3).
+  };
+  ParallelOutputs parallel_outputs() const;
   bool decodes_memory_access(int index, u64 address, int dsize, bool write) const noexcept override;
   u64 ReadMem(int index, u64 address, int dsize) override;
   void WriteMem(int index, u64 address, int dsize, u64 data) override;
@@ -65,6 +72,9 @@ private:
   void map_ports() override;
   int decode_port(u16 port, bool write) const noexcept;
   bool selects_serial(unsigned channel, u16 port) const noexcept;
+  bool selects_lpt(u16 port) const noexcept;
+  u8 read_lpt_status();
+  void sync_lpt_irq();
   bool at_mode() const { return (control1 & 2) != 0; }
   void set_irq_lines(bool keyboard, bool mouse) override;
   void reset_controller_state() override;
@@ -90,6 +100,8 @@ private:
   void load_battery();
   bool save_rtc(FILE* file) const;
   bool restore_rtc(FILE* file);
+  bool save_lpt_cs(FILE* file) const;
+  bool restore_lpt_cs(FILE* file);
   void seed_clock();
 
   const u64 local_base;
@@ -113,6 +125,12 @@ private:
   u8 control1 = 0;
   u8 serial_cs[2][3]{};
   u8 serial_cs_written[2]{};
+  const std::function<void(bool)> lpt_irq_output;
+  std::optional<bool> lpt_irq_level;
+  u8 lpt_cs[3]{}, lpt_cs_written = 0;
+  u8 lpt_data = 0, lpt_control = 0;
+  u8 lpt_input_data = 0xff, lpt_status_pins = 0xf8; // Unplugged status inputs have pull-ups (VL82C106, p. 6-191).
+  bool lpt_irq_pending = false;
   u8 at_inhibit_override = 0;
   u8 ram[31]{};
   u8 output_latch = 1;

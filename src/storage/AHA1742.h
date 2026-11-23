@@ -37,6 +37,13 @@ class AHA1742 final : public CSystemComponent
 {
 public:
   AHA1742(CConfigurator* cfg, CSystem* system, EISABus& bus, unsigned slot);
+  u64 ReadMem(int index, u64 address, int dsize) override;
+  void WriteMem(int index, u64 address, int dsize, u64 data) override;
+
+private:
+  enum { Configuration };
+  // PORTADDR, BIOSADDR, INTDEF, SCSIDEF, BUSDEF and three reserved bytes, zCC0-zCC7 (AHA-1740A TRM, pp. 4-13 to 4-16).
+  u8 config[8]{};
 };
 
 #endif

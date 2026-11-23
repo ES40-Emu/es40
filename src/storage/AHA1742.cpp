@@ -34,4 +34,21 @@ AHA1742::AHA1742(CConfigurator* cfg, CSystem* system, EISABus& bus, unsigned slo
 {
   // HID0-HID3 spell "ADP", product 00h, revision 02h for the AHA-1742A (AHA-1740A TRM, pp. 4-11, 4-12).
   bus.register_slot_id(slot, {0x04, 0x90, 0x00, 0x02});
+  // The configuration registers are byte-wide and accessible at any time (AHA-1740A TRM, p. 4-12).
+  bus.register_slot_io(slot, *this, Configuration, u16((slot << 12) | 0xcc0), sizeof(config), 8);
+  save_item(config, "config");
+}
+
+u64 AHA1742::ReadMem(int index, u64 address, int dsize)
+{
+  if (index == Configuration && dsize == 8)
+    return config[address];
+  return 0xff;
+}
+
+void AHA1742::WriteMem(int index, u64 address, int dsize, u64 data)
+{
+  // Each register is write/read, so a write is kept whole and read back as written.
+  if (index == Configuration && dsize == 8)
+    config[address] = u8(data);
 }

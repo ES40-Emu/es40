@@ -166,6 +166,8 @@ void VL82C106::rtc_seed(const std::tm& now)
 {
   std::fill_n(rtc_bytes, sizeof(rtc_bytes), u8{0});
   rtc_bytes[reg_a] = 0x20;
+  // Initialize the calendar and alarms in SRM's binary 24-hour format (PB22H-KB, p. 22-15).
+  rtc_bytes[reg_b] = binary | hours_24;
   rtc_set_calendar(now);
   rtc_phase_ns = update_end;
   rtc_skip_update = false;
@@ -300,6 +302,7 @@ void VL82C106::rtc_write(u8 index, u8 value)
     // Entering SET clears UIE; bit 3 is unused (PB22H-KB, p. 22-11).
     if ((value & set) && !(rtc_bytes[index] & set))
       value &= ~uf;
+    // Software rewrites the time and alarm bytes when changing formats (PB22H-KB, p. 22-15).
     rtc_bytes[index] = value & ~0x08;
   } else {
     if (index < reg_a && active_update && !(rtc_bytes[reg_b] & set) && !rtc_skip_update)
@@ -317,6 +320,31 @@ void VL82C106::rtc_write(u8 index, u8 value)
 }
 
 namespace {
+bool valid_bcd_calendar(const u8* regs)
+{
+  const auto valid = [&](unsigned index, unsigned low, unsigned high) {
+    const unsigned value = mc146818::from_bcd(regs[index]);
+    return value >= low && value <= high && mc146818::to_bcd(value) == regs[index];
+  };
+  const unsigned hour = hours(regs[4], 0);
+  const unsigned last_day = month_length(mc146818::from_bcd(regs[8]), mc146818::from_bcd(regs[9]));
+  return valid(0, 0, 59) && valid(2, 0, 59) && encoded_hour(hour, 0) == regs[4] &&
+    valid(6, 1, 7) && valid(7, 1, last_day) && valid(8, 1, 12) && valid(9, 0, 99);
+}
+
+bool recover_legacy_clock(u8* regs)
+{
+  // VLB1/VLB2 could retain the BCD/12-hour seed after SRM selected binary/24-hour.
+  const u8 mode = regs[reg_b];
+  if ((mode & (set | binary | hours_24)) != (binary | hours_24) ||
+      (regs[0] < 60 && regs[2] < 60 && regs[4] < 24) || !valid_bcd_calendar(regs))
+    return false;
+  for (unsigned index : {0, 2, 7, 8, 9})
+    regs[index] = u8(mc146818::from_bcd(regs[index]));
+  regs[4] = u8(hours(regs[4], 0));
+  return true;
+}
+
 u64 wall_time_ns()
 {
   const auto elapsed = std::chrono::system_clock::now().time_since_epoch();
@@ -389,14 +417,15 @@ void VL82C106::load_battery()
   } else {
     char tag[4]{};
     u64 saved;
-    const bool has_lpt = fread(tag, sizeof(tag), 1, file.get()) == 1 && !memcmp(tag, "VLB2", sizeof(tag));
-    if ((!has_lpt && memcmp(tag, "VLB1", sizeof(tag))) ||
+    if (fread(tag, sizeof(tag), 1, file.get()) != 1 || memcmp(tag, "VLB", 3) || tag[3] < '1' || tag[3] > '3' ||
         fread(&saved, sizeof(saved), 1, file.get()) != 1 || !restore_rtc(file.get()) ||
         fread(serial_cs, sizeof(serial_cs), 1, file.get()) != 1 ||
         fread(serial_cs_written, sizeof(serial_cs_written), 1, file.get()) != 1 ||
-        serial_cs_written[0] > 7 || serial_cs_written[1] > 7 || (has_lpt && !restore_lpt_cs(file.get())) ||
+        serial_cs_written[0] > 7 || serial_cs_written[1] > 7 || (tag[3] != '1' && !restore_lpt_cs(file.get())) ||
         fgetc(file.get()) != EOF || ferror(file.get()))
       FAILURE(Configuration, "Invalid Jensen RTC battery image: " + battery_path);
+    if (tag[3] != '3' && recover_legacy_clock(rtc_bytes))
+      battery_dirty = true;
     // VBAT powers the clock and standby RAM while the system is off (PB22H-KB, pp. 1-10, 22-4).
     const u64 now = wall_time_ns();
     if (now > saved)
@@ -416,7 +445,7 @@ void VL82C106::flush_storage()
     rtc_refresh(cSystem->device_access_time());
   CSnapshotFile file(battery_path.c_str());
   const u64 stamp = wall_time_ns();
-  if (fwrite("VLB2", 4, 1, file.get()) != 1 || fwrite(&stamp, sizeof(stamp), 1, file.get()) != 1 ||
+  if (fwrite("VLB3", 4, 1, file.get()) != 1 || fwrite(&stamp, sizeof(stamp), 1, file.get()) != 1 ||
       !save_rtc(file.get()) || fwrite(serial_cs, sizeof(serial_cs), 1, file.get()) != 1 ||
       fwrite(serial_cs_written, sizeof(serial_cs_written), 1, file.get()) != 1 || !save_lpt_cs(file.get()))
     FAILURE(IO, "Cannot save Jensen RTC battery image: " + battery_path);

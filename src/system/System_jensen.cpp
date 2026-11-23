@@ -35,7 +35,7 @@
 #include <algorithm>
 
 namespace {
-enum { SparseIO, HostAddressExtension, InterruptAcknowledge, Feprom0, Feprom1, SystemControl };
+enum { SparseIO, HostAddressExtension, InterruptAcknowledge, Feprom0, Feprom1, SystemControl, SparseMemory };
 constexpr u64 sparse_io_size = U64(0x10000) << 7;
 constexpr u64 small_bank_size = U64(1) << 24;
 
@@ -46,10 +46,9 @@ unsigned int checked_memory_bits(u64 bits)
   return static_cast<unsigned int>(bits);
 }
 
-int sparse_io_width(u64 address)
+// CA<6:5> give the length and CA<8:7> the offset in both EISA spaces (PB22H-KB, Table 8-2).
+int sparse_width(u64 address)
 {
-  if (address >= sparse_io_size)
-    return 0;
   const unsigned lane = (address >> 7) & 3;
   switch (address & 0x7f) {
   case 0x00: return 8;
@@ -57,6 +56,11 @@ int sparse_io_width(u64 address)
   case 0x60: return lane == 0 ? 32 : 0;
   default: return 0;
   }
+}
+
+int sparse_io_width(u64 address)
+{
+  return address < sparse_io_size ? sparse_width(address) : 0;
 }
 
 class JensenHostBus : public CSystemComponent, public CDMAHost
@@ -108,6 +112,7 @@ JensenHostBus::JensenHostBus(CConfigurator* cfg, Jensen* system)
   if (feprom[0].uses_path(battery_path) || feprom[1].uses_path(battery_path))
     FAILURE(Configuration, "Jensen RTC and flash require separate image files");
   system->RegisterMemory(this, SparseIO, U64(0x300000000), sparse_io_size);
+  system->RegisterMemory(this, SparseMemory, U64(0x200000000), U64(1) << 32); // PB22H-KB, Table 8-1.
   system->RegisterMemory(this, HostAddressExtension, U64(0x1d0000000), 4);
   system->RegisterMemory(this, SystemControl, U64(0x1e0000000), 8); // PB22H-KB, Table 8-1.
   system->RegisterMemory(this, InterruptAcknowledge, U64(0x100000000), 8);
@@ -211,6 +216,14 @@ u64 JensenHostBus::ReadMem(int index, u64 address, int dsize)
   // Each aligned H_BUS read supplies one INTA pulse; the vector is in the low byte.
   if (index == InterruptAcknowledge && !address && (dsize == 32 || dsize == 64))
     return isp->interrupt_acknowledge();
+  // EISA memory uses a CPU longword too; HAE<6:0> extends CA<31:7> to the EISA address (PB22H-KB, Table 8-1).
+  if (index == SparseMemory && dsize == 32) {
+    const u32 target = ((u32)hae << 25) | (u32)(address >> 7);
+    u32 data;
+    if (!ebc.eisa_bus().read_mem(target, sparse_width(address), data))
+      return 0xffffffffU;
+    return data << ((target & 3) * 8);
+  }
   // Sparse I/O uses a CPU longword, with the port selecting the first byte lane.
   if (index != SparseIO || dsize != 32 || hae)
     return dsize == 64 ? ~U64(0) : (U64(1) << dsize) - 1;
@@ -234,6 +247,11 @@ void JensenHostBus::WriteMem(int index, u64 address, int dsize, u64 data)
   }
   if (index == SystemControl && !address && (dsize == 32 || dsize == 64)) {
     board.write_sysctl(u8(data));
+    return;
+  }
+  if (index == SparseMemory && dsize == 32) {
+    const u32 target = ((u32)hae << 25) | (u32)(address >> 7);
+    ebc.eisa_bus().write_mem(target, sparse_width(address), (u32)data >> ((target & 3) * 8));
     return;
   }
   if (index != SparseIO || dsize != 32 || hae)

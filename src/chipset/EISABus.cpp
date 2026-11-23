@@ -77,6 +77,18 @@ void EISABus::register_io(unsigned owner_slot, CSystemComponent& device, int ind
   io_ranges.push_back({&device, index, port, length, max_dsize, owner_slot});
 }
 
+void EISABus::register_eisa_mem(CSystemComponent& device, int index, u32 address, u32 length, int max_dsize)
+{
+  if (!valid_io_width(max_dsize))
+    FAILURE(Configuration, "Invalid EISA memory width");
+  if (!length || length - 1 > 0xffffffffU - address)
+    FAILURE(Configuration, "Invalid EISA memory range");
+  for (const auto& range : mem_ranges)
+    if (address < (u64)range.base + range.length && range.base < (u64)address + length)
+      FAILURE(Configuration, "Overlapping EISA memory ranges");
+  mem_ranges.push_back({&device, index, address, length, max_dsize});
+}
+
 void EISABus::register_slot_id(unsigned slot, const std::array<u8, 4>& product_id)
 {
   if (!slot || slot > last_expansion_slot)
@@ -337,5 +349,40 @@ bool EISABus::write_port(u16 port, int dsize, u32 data)
       state.enabled_slots &= ~bit;
     update_request_lines(previous);
   }
+  return true;
+}
+
+const EISABus::MemRange* EISABus::decode_mem(u32 address, int dsize, bool write) const noexcept
+{
+  if (!valid_io_width(dsize))
+    return nullptr;
+  for (const auto& range : mem_ranges) {
+    if (address < range.base || address - range.base >= range.length)
+      continue;
+    const u32 offset = address - range.base;
+    // As with I/O, a cycle wider than the range's native width or running past it is not claimed.
+    if (dsize > range.max_dsize || (u32)dsize / 8 > range.length - offset ||
+        !range.device->decodes_memory_access(range.index, offset, dsize, write))
+      return nullptr;
+    return &range;
+  }
+  return nullptr;
+}
+
+bool EISABus::read_mem(u32 address, int dsize, u32& data)
+{
+  const auto* range = decode_mem(address, dsize, false);
+  if (!range)
+    return false;
+  data = (u32)range->device->ReadMem(range->index, address - range->base, dsize) & (0xffffffffU >> (32 - dsize));
+  return true;
+}
+
+bool EISABus::write_mem(u32 address, int dsize, u32 data)
+{
+  const auto* range = decode_mem(address, dsize, true);
+  if (!range)
+    return false;
+  range->device->WriteMem(range->index, address - range->base, dsize, data & (0xffffffffU >> (32 - dsize)));
   return true;
 }

@@ -56,6 +56,8 @@ public:
   // Attach an I/O range after the card registers its slot ID.
   void register_slot_io(unsigned slot, CSystemComponent& device, int index,
     u16 port, u32 length, int max_dsize);
+  // Register a memory range with its maximum native width in bits.
+  void register_eisa_mem(CSystemComponent& device, int index, u32 address, u32 length, int max_dsize);
   bool slot_enabled(unsigned slot) const noexcept;
   IsaIoDecode isa_io_decode(u32 port) const noexcept override;
   // Cards report IRQ and DRQ levels under the device-bus lock, even while disabled.
@@ -78,6 +80,9 @@ public:
   bool read_port(u16 port, int dsize, u16& data);
   bool read_port(u16 port, int dsize, u32& data);
   bool write_port(u16 port, int dsize, u32 data);
+  // Unclaimed memory reads leave data untouched.
+  bool read_mem(u32 address, int dsize, u32& data);
+  bool write_mem(u32 address, int dsize, u32 data);
 
 private:
   // Legacy ISA devices get the controller through CISABus.
@@ -91,6 +96,14 @@ private:
     int max_dsize;
     unsigned slot;
     u32 product_id = 0;
+  };
+
+  struct MemRange {
+    CSystemComponent* device;
+    int index;
+    u32 base;
+    u32 length;
+    int max_dsize;
   };
 
   struct RequestLines {
@@ -108,7 +121,9 @@ private:
   void set_request(Mask& requests, int line, bool asserted);
   const IoRange* find_io(u32 port, unsigned bytes = 1) const noexcept;
   const IoRange* decode_io(u16 port, int dsize, bool write) const noexcept;
+  const MemRange* decode_mem(u32 address, int dsize, bool write) const noexcept;
   std::vector<IoRange> io_ranges;
+  std::vector<MemRange> mem_ranges;
   State state;
   CDMAHost& host;
   CDMA* dma = nullptr;

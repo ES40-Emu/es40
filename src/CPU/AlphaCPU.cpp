@@ -337,7 +337,7 @@
   **/
 #include "StdAfx.h"
 #include "AlphaCPU.h"
-#include "Ev4IPR.h"
+#include "EV4/Ev4IPR.h"
 #include "jit/jitengine.h"
 #include "TraceEngine.h"
 #include "network/lockstep.h"

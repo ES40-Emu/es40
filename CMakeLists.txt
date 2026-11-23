@@ -438,59 +438,59 @@ list(APPEND ES40_SOURCES
     src/CPU/AlphaCPU_vaxfloat.cpp
     src/CPU/AlphaCPU_vmspal.cpp
     src/CPU/AlphaCPU.cpp
-    src/CPU/Ev68CPUProfile.h
-    src/CPU/Ev68PAL.cpp
-    src/CPU/Ev4IPR.cpp
-    src/CPU/Ev68IPR.cpp
+    src/CPU/EV68/Ev68CPUProfile.h
+    src/CPU/EV68/Ev68PAL.cpp
+    src/CPU/EV4/Ev4IPR.cpp
+    src/CPU/EV68/Ev68IPR.cpp
     src/CPU/AlphaReset.h
-    src/CPU/Ev68Reset.h
-    src/CPU/Ev68Reset.cpp
+    src/CPU/EV68/Ev68Reset.h
+    src/CPU/EV68/Ev68Reset.cpp
     src/CPU/AlphaCPUState.h
-    src/CPU/Ev68CPUState.h
-    src/CPU/Ev68CPUState.cpp
+    src/CPU/EV68/Ev68CPUState.h
+    src/CPU/EV68/Ev68CPUState.cpp
     src/CPU/AlphaInterrupt.h
-    src/CPU/Ev68Interrupt.h
-    src/CPU/Ev68Interrupt.cpp
+    src/CPU/EV68/Ev68Interrupt.h
+    src/CPU/EV68/Ev68Interrupt.cpp
     src/CPU/AlphaFPCR.h
-    src/CPU/Ev68FPCR.h
-    src/CPU/Ev68FPCR.cpp
+    src/CPU/EV68/Ev68FPCR.h
+    src/CPU/EV68/Ev68FPCR.cpp
     src/CPU/AlphaFPStart.h
-    src/CPU/Ev68FPStart.h
-    src/CPU/Ev68FPStart.cpp
+    src/CPU/EV68/Ev68FPStart.h
+    src/CPU/EV68/Ev68FPStart.cpp
     src/CPU/AlphaCycleCounter.h
     src/CPU/AlphaCycleCounter.cpp
     src/CPU/AlphaIdle.h
-    src/CPU/Ev68Idle.h
-    src/CPU/Ev68Idle.cpp
+    src/CPU/EV68/Ev68Idle.h
+    src/CPU/EV68/Ev68Idle.cpp
     src/CPU/AlphaArithmeticTrap.h
-    src/CPU/Ev68ArithmeticTrap.h
-    src/CPU/Ev68ArithmeticTrap.cpp
+    src/CPU/EV68/Ev68ArithmeticTrap.h
+    src/CPU/EV68/Ev68ArithmeticTrap.cpp
     src/CPU/AlphaIEEETrap.h
-    src/CPU/Ev68IEEETrap.h
-    src/CPU/Ev68IEEETrap.cpp
+    src/CPU/EV68/Ev68IEEETrap.h
+    src/CPU/EV68/Ev68IEEETrap.cpp
     src/CPU/AlphaInstructionFetch.h
     src/CPU/AlphaInstructionSource.h
     src/CPU/AlphaInstructionSet.h
     src/CPU/AlphaRegisterBank.h
     src/CPU/AlphaDataFault.h
-    src/CPU/Ev68InstructionSet.h
-    src/CPU/Ev4CPUProfile.h
-    src/CPU/Ev4Bcache.h
-    src/CPU/Ev4Dcache.h
-    src/CPU/Ev4InstructionFetch.h
-    src/CPU/Ev4Reset.h
-    src/CPU/Ev68InstructionFetch.h
-    src/CPU/Ev4InstructionFetch.cpp
-    src/CPU/Ev68InstructionFetch.cpp
+    src/CPU/EV68/Ev68InstructionSet.h
+    src/CPU/EV4/Ev4CPUProfile.h
+    src/CPU/EV4/Ev4Bcache.h
+    src/CPU/EV4/Ev4Dcache.h
+    src/CPU/EV4/Ev4InstructionFetch.h
+    src/CPU/EV4/Ev4Reset.h
+    src/CPU/EV68/Ev68InstructionFetch.h
+    src/CPU/EV4/Ev4InstructionFetch.cpp
+    src/CPU/EV68/Ev68InstructionFetch.cpp
     src/CPU/AlphaMMU.h
-    src/CPU/Ev68MMU.h
-    src/CPU/Ev68MMU.cpp
+    src/CPU/EV68/Ev68MMU.h
+    src/CPU/EV68/Ev68MMU.cpp
     src/CPU/AlphaHWLoad.h
-    src/CPU/Ev68HWLoad.h
+    src/CPU/EV68/Ev68HWLoad.h
     src/CPU/AlphaHWStore.h
-    src/CPU/Ev68HWStore.h
+    src/CPU/EV68/Ev68HWStore.h
     src/CPU/AlphaLLSC.h
-    src/CPU/Ev68LLSC.h
+    src/CPU/EV68/Ev68LLSC.h
     src/AlphaSim.cpp
     src/graphics/Cirrus.cpp
     src/config/Configurator.cpp

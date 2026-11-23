@@ -31,7 +31,7 @@
 
 #ifdef ES40_JIT_A64
 
-#include "../Ev68CPUProfile.h"
+#include "../EV68/Ev68CPUProfile.h"
 
 #include <array>
 #include <cassert>

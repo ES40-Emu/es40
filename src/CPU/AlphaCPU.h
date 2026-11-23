@@ -229,10 +229,10 @@
 #include "system/System.h"
 #include "cpu_defs.h"
 #include "AlphaCPUProfile.h"
-#include "Ev4ArithmeticTrap.h"
-#include "Ev4Bcache.h"
-#include "Ev4Dcache.h"
-#include "Ev4IPR.h"
+#include "EV4/Ev4ArithmeticTrap.h"
+#include "EV4/Ev4Bcache.h"
+#include "EV4/Ev4Dcache.h"
+#include "EV4/Ev4IPR.h"
 class CJitEngine;   // JIT block-cache engine (ES40_JIT builds)
 
   /// Number of entries in the Instruction Cache

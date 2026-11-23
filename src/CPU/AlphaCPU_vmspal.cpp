@@ -81,7 +81,7 @@
   **/
 #include "StdAfx.h"
 #include "AlphaCPU.h"
-#include "Ev68MMU.h"
+#include "EV68/Ev68MMU.h"
 #include "system/System_tsunami.h"
 
 #include "io/Serial.h"

@@ -84,58 +84,58 @@ noinst_HEADERS = config/ConfigEditor.h config/ConfigDocument.h \
        CPU/AlphaCPU.h \
        base/HostWakeEvent.h \
        CPU/AlphaCPUProfile.h \
-       CPU/Ev68CPUProfile.h \
+       CPU/EV68/Ev68CPUProfile.h \
        CPU/AlphaReset.h \
-       CPU/Ev68Reset.h \
+       CPU/EV68/Ev68Reset.h \
        CPU/AlphaCPUState.h \
-       CPU/Ev68CPUState.h \
+       CPU/EV68/Ev68CPUState.h \
        CPU/AlphaInterrupt.h \
-       CPU/Ev68Interrupt.h \
+       CPU/EV68/Ev68Interrupt.h \
        CPU/AlphaFPCR.h \
-       CPU/Ev68FPCR.h \
+       CPU/EV68/Ev68FPCR.h \
        CPU/AlphaFPStart.h \
-       CPU/Ev68FPStart.h \
+       CPU/EV68/Ev68FPStart.h \
        CPU/AlphaCycleCounter.h \
        CPU/AlphaIdle.h \
-       CPU/Ev68Idle.h \
+       CPU/EV68/Ev68Idle.h \
        CPU/AlphaArithmeticTrap.h \
-       CPU/Ev68ArithmeticTrap.h \
+       CPU/EV68/Ev68ArithmeticTrap.h \
        CPU/AlphaIEEETrap.h \
-       CPU/Ev68IEEETrap.h \
+       CPU/EV68/Ev68IEEETrap.h \
        CPU/AlphaInstructionFetch.h \
        CPU/AlphaInstructionSource.h \
        CPU/AlphaInstructionSet.h \
        CPU/AlphaRegisterBank.h \
        CPU/AlphaDataFault.h \
-       CPU/Ev68InstructionSet.h \
-       CPU/Ev4CPUProfile.h \
-       CPU/Ev4CPUState.h \
-       CPU/Ev4ArithmeticTrap.h \
-       CPU/Ev4Bcache.h \
-       CPU/Ev4Dcache.h \
-       CPU/Ev4FPCR.h \
-       CPU/Ev4HWLoad.h \
-       CPU/Ev4HWStore.h \
-       CPU/Ev4IEEETrap.h \
-       CPU/Ev4IPR.h \
-       CPU/Ev4InstructionFetch.h \
-       CPU/Ev4InstructionSet.h \
-       CPU/Ev4PAL.h \
-       CPU/Ev4Reset.h \
-       CPU/Ev68InstructionFetch.h \
+       CPU/EV68/Ev68InstructionSet.h \
+       CPU/EV4/Ev4CPUProfile.h \
+       CPU/EV4/Ev4CPUState.h \
+       CPU/EV4/Ev4ArithmeticTrap.h \
+       CPU/EV4/Ev4Bcache.h \
+       CPU/EV4/Ev4Dcache.h \
+       CPU/EV4/Ev4FPCR.h \
+       CPU/EV4/Ev4HWLoad.h \
+       CPU/EV4/Ev4HWStore.h \
+       CPU/EV4/Ev4IEEETrap.h \
+       CPU/EV4/Ev4IPR.h \
+       CPU/EV4/Ev4InstructionFetch.h \
+       CPU/EV4/Ev4InstructionSet.h \
+       CPU/EV4/Ev4PAL.h \
+       CPU/EV4/Ev4Reset.h \
+       CPU/EV68/Ev68InstructionFetch.h \
        CPU/idle_detect.h \
        CPU/AlphaPAL.h \
-       CPU/Ev68PAL.h \
+       CPU/EV68/Ev68PAL.h \
        CPU/AlphaIPR.h \
-       CPU/Ev68IPR.h \
+       CPU/EV68/Ev68IPR.h \
        CPU/AlphaMMU.h \
-       CPU/Ev68MMU.h \
+       CPU/EV68/Ev68MMU.h \
        CPU/AlphaHWLoad.h \
-       CPU/Ev68HWLoad.h \
+       CPU/EV68/Ev68HWLoad.h \
        CPU/AlphaHWStore.h \
-       CPU/Ev68HWStore.h \
+       CPU/EV68/Ev68HWStore.h \
        CPU/AlphaLLSC.h \
-       CPU/Ev68LLSC.h \
+       CPU/EV68/Ev68LLSC.h \
        CPU/cpu_arith.h \
        CPU/cpu_bwx.h \
        CPU/cpu_control.h \
@@ -266,21 +266,21 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        chipset/AliM1543C_usb.cpp \
        chipset/AliM1543C_pmu.cpp \
        CPU/AlphaCPU.cpp \
-       CPU/Ev68PAL.cpp \
-       CPU/Ev4IPR.cpp \
-       CPU/Ev68IPR.cpp \
-       CPU/Ev68MMU.cpp \
-       CPU/Ev68Reset.cpp \
-       CPU/Ev68CPUState.cpp \
-       CPU/Ev68Interrupt.cpp \
-       CPU/Ev68FPCR.cpp \
-       CPU/Ev68FPStart.cpp \
+       CPU/EV68/Ev68PAL.cpp \
+       CPU/EV4/Ev4IPR.cpp \
+       CPU/EV68/Ev68IPR.cpp \
+       CPU/EV68/Ev68MMU.cpp \
+       CPU/EV68/Ev68Reset.cpp \
+       CPU/EV68/Ev68CPUState.cpp \
+       CPU/EV68/Ev68Interrupt.cpp \
+       CPU/EV68/Ev68FPCR.cpp \
+       CPU/EV68/Ev68FPStart.cpp \
        CPU/AlphaCycleCounter.cpp \
-       CPU/Ev68Idle.cpp \
-       CPU/Ev68ArithmeticTrap.cpp \
-       CPU/Ev68IEEETrap.cpp \
-       CPU/Ev4InstructionFetch.cpp \
-       CPU/Ev68InstructionFetch.cpp \
+       CPU/EV68/Ev68Idle.cpp \
+       CPU/EV68/Ev68ArithmeticTrap.cpp \
+       CPU/EV68/Ev68IEEETrap.cpp \
+       CPU/EV4/Ev4InstructionFetch.cpp \
+       CPU/EV68/Ev68InstructionFetch.cpp \
        CPU/AlphaCPU_ieeefloat.cpp \
        CPU/AlphaCPU_vaxfloat.cpp \
        CPU/AlphaCPU_vmspal.cpp \

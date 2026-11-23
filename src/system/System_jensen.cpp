@@ -371,6 +371,15 @@ void Jensen::attach_board_devices(CConfigurator* cfg)
   });
 }
 
+void Jensen::register_legacy_io(CSystemComponent& device, int index, int bus, u32 port, u32 length)
+{
+  // Fixed-address ports are ISA ports, which the EISA bus decodes.
+  CISABus* owner = isa_bus(bus);
+  if (!owner || port > 0xffff)
+    FAILURE_2(Configuration, "Port %x is not on ISA bus isa%d", port, bus);
+  owner->register_isa_io(device, index, (u16)port, length);
+}
+
 CSerial& Jensen::serial_port(unsigned number) const
 {
   return combo->serial_port(number);

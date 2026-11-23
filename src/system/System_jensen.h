@@ -41,6 +41,7 @@ public:
   explicit Jensen(CConfigurator* cfg);
   ~Jensen() override;
   void attach_board_devices(CConfigurator* cfg) override;
+  void register_legacy_io(CSystemComponent& device, int index, int bus, u32 port, u32 length) override;
   void ResetMem(unsigned int membits) override;
   CSerial& serial_port(unsigned number) const;
   u8 read_sysctl() const noexcept { return sysctl.load(std::memory_order_relaxed); }

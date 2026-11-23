@@ -551,6 +551,7 @@ list(APPEND ES40_SOURCES
     src/io/Serial.cpp
     src/io/Uart.cpp
     src/StdAfx.cpp
+    src/storage/AHA1742.cpp
     src/storage/LSI53C1020.cpp
     src/storage/Sym53C810.cpp
     src/storage/Sym53C895.cpp

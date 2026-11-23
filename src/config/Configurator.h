@@ -108,6 +108,7 @@ typedef enum
   // isa cards
   c_mpu401,
   c_wss,
+  c_aha1742,
 
   // pci devices
   c_ali,

@@ -166,6 +166,7 @@ noinst_HEADERS += storage/Disk.h \
        storage/DiskFileBinCue.h \
        storage/DiskRam.h \
        storage/FloppyController.h \
+       storage/AHA1742.h \
        storage/LSI53C1020.h \
        storage/SCSIBus.h \
        storage/SCSIDevice.h \
@@ -347,6 +348,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        io/Uart.cpp \
        io/SerialListenAddress.h \
        StdAfx.cpp \
+       storage/AHA1742.cpp \
        storage/LSI53C1020.cpp \
        storage/Sym53C810.cpp \
        storage/Sym53C895.cpp \

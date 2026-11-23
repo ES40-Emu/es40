@@ -1780,6 +1780,16 @@ CISABus* CSystem::isa_bus(unsigned bus) const
 	return it == isa_buses.end() ? nullptr : it->second;
 }
 
+void CSystem::register_legacy_io(CSystemComponent& device, int index, int bus, u32 port, u32 length)
+{
+	FAILURE(Configuration, std::string(device.devid_string) + ": this board places no fixed-address I/O ranges");
+}
+
+void CSystem::register_legacy_mem(CSystemComponent& device, int index, int bus, u32 address, u32 length)
+{
+	FAILURE(Configuration, std::string(device.devid_string) + ": this board places no fixed-address memory ranges");
+}
+
 void CSystem::init()
 {
 	SDeviceAccessScope time_scope(this);

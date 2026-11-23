@@ -267,6 +267,9 @@ public:
   void          register_isa_bus(unsigned bus, CISABus& owner);
   virtual void  attach_board_devices(CConfigurator* cfg) = 0;
   CISABus*      isa_bus(unsigned bus) const;
+  // Fixed-address decode ranges are placed by the board, on whichever I/O bus it has.
+  virtual void  register_legacy_io(CSystemComponent& device, int index, int bus, u32 port, u32 length);
+  virtual void  register_legacy_mem(CSystemComponent& device, int index, int bus, u32 address, u32 length);
 
   bool has_vga_device(const vga_device* exclude = nullptr) const noexcept;
   bool graphics_multihead_enabled() const noexcept { return graphics_multihead; }

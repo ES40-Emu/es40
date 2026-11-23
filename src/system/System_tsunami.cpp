@@ -87,6 +87,18 @@ void Tsunami::attach_board_devices(CConfigurator* cfg)
 	new CFlash(cfg, this);
 }
 
+void Tsunami::register_legacy_io(CSystemComponent& device, int index, int bus, u32 port, u32 length)
+{
+	// Each hose's PCI I/O space is linear from 801.FC00.0000, 2.0000.0000 apart (21272 HRM, Table 10-1).
+	RegisterMemory(&device, index, U64(0x00000801fc000000) + (U64(0x0000000200000000) * bus) + port, length);
+}
+
+void Tsunami::register_legacy_mem(CSystemComponent& device, int index, int bus, u32 address, u32 length)
+{
+	// Each hose's PCI memory space is linear from 800.0000.0000, 2.0000.0000 apart (21272 HRM, Table 10-1).
+	RegisterMemory(&device, index, U64(0x0000080000000000) + (U64(0x0000000200000000) * bus) + address, length);
+}
+
 void Tsunami::bind_board_devices()
 {
 	CAliM1543C* bridge = nullptr;

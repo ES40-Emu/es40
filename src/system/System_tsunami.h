@@ -61,6 +61,8 @@ public:
   u32 get_tick_seq() override { return m_tick_seq.load(std::memory_order_relaxed); }
   void interrupt(int number, bool assert) override;
   u64 PCI_Phys(int pcibus, u32 address) override;
+  void register_legacy_io(CSystemComponent& device, int index, int bus, u32 port, u32 length) override;
+  void register_legacy_mem(CSystemComponent& device, int index, int bus, u32 address, u32 length) override;
 
   void clear_clock_int(int ProcNum);
   void clear_ipi(int ProcNum);   // ack interprocessor interrupt: clear MISC<IPINTR>, drop b_irq<3>

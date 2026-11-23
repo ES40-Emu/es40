@@ -1,4 +1,4 @@
-/* ES40 emulator -- VL82C106 keyboard and mouse controller
+/* ES40 emulator -- VL82C106 keyboard, mouse and serial controller
  * Copyright (C) 2026 by gdwnldsKSC
  * All rights reserved.
  *
@@ -33,13 +33,17 @@
 #include <functional>
 #include <optional>
 
+class CSerial;
+
 class VL82C106 final : public CKeyboard
 {
 public:
   VL82C106(CConfigurator* cfg, CSystem* system, u64 local_base,
-    std::function<void(bool)> irq_output);
+    std::function<void(bool)> irq_output, std::function<void(unsigned, bool)> serial_irq_output);
   ~VL82C106() override { stop_threads(); }
+  CSerial& serial_port(unsigned number) const { return *serial[number]; }
   bool decodes_memory_access(int index, u64 address, int dsize, bool write) const noexcept override;
+  u64 ReadMem(int index, u64 address, int dsize) override;
   void WriteMem(int index, u64 address, int dsize, u64 data) override;
   void ResetPCI() override { reset_controller(); }
   int SaveState(FILE* f) override;
@@ -48,6 +52,9 @@ public:
 
 private:
   void map_ports() override;
+  int decode_port(u16 port, bool write) const noexcept;
+  bool selects_serial(unsigned channel, u16 port) const noexcept;
+  bool at_mode() const { return (control1 & 2) != 0; }
   void set_irq_lines(bool keyboard, bool mouse) override;
   void reset_controller_state() override;
   u8 default_scancode_set() const override { return 2; }
@@ -60,9 +67,13 @@ private:
 
   const u64 local_base;
   const std::function<void(bool)> irq_output;
+  CSerial* serial[2];
   std::optional<bool> irq_level;
   u8 rtc_index = 0;
-  bool at_mode = true;
+  u8 control0 = 0;
+  u8 control1 = 0;
+  u8 serial_cs[2][3]{};
+  u8 serial_cs_written[2]{};
   u8 at_inhibit_override = 0;
   u8 ram[31]{};
   u8 output_latch = 1;

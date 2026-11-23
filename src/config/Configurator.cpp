@@ -1040,7 +1040,8 @@ void CConfigurator::initialize()
 		if (!(pParent->get_flags() & IS_CS))
 			FAILURE_2(Configuration, "Class %s for %s needs a chipset parent",
 				myValue, myName);
-		if (pParent->get_class_id() == c_jensen && !(myFlags & IS_ISA) && myClassId != c_ev4)
+		if (pParent->get_class_id() == c_jensen && !(myFlags & IS_ISA) &&
+			myClassId != c_ev4 && myClassId != c_serial)
 			FAILURE_2(Configuration, "Class %s for %s is unavailable on Jensen", myValue, myName);
 		if (pParent->get_class_id() == c_tsunami && myClassId == c_ev4)
 			FAILURE_2(Configuration, "Class %s for %s is unavailable on Tsunami", myValue, myName);
@@ -1349,6 +1350,16 @@ void CConfigurator::initialize()
 		break;
 
 	case c_serial:
+		if (pParent->get_class_id() == c_jensen)
+		{
+			if (strcasecmp(myName, "serial0") && strcasecmp(myName, "serial1"))
+				FAILURE_1(Configuration, "Jensen serial port %s must be named serial0 or serial1", myName);
+			auto* system = static_cast<CSystem*>(pParent->get_device());
+			auto& port = static_cast<Jensen*>(system)->serial_port(myName[6] - '0');
+			port.configure_terminal(this);
+			myDevice = &port;
+			break;
+		}
 		number = 0;
 		if (!strncasecmp(myName, "serial", 6))
 		{

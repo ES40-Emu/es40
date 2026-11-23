@@ -242,9 +242,34 @@ int iCounter = 0;
 /**
  * Constructor.
  **/
-CSerial::CSerial(CConfigurator* cfg, CSystem* c, u16 number) : CSystemComponent(cfg, c)
+CSerial::CSerial(CConfigurator* cfg, CSystem* c, u16 number)
+	: CSystemComponent(cfg, c), uart(Uart::Model::Legacy16550), port_number(number),
+	terminal_config(cfg), irq_output([this](bool level) {
+		if (isa_bridge)
+			isa_bridge->pic_set_line(0, 4 - port_number, level);
+	})
 {
-	state.iNumber = number;
+}
+
+CSerial::CSerial(CConfigurator* cfg, CSystem* c, u16 number, std::function<void(bool)> irq)
+	: CSystemComponent(cfg, c), uart(Uart::Model::VL16C450B), port_number(number),
+	irq_output(std::move(irq))
+{
+}
+
+void CSerial::configure_terminal(CConfigurator* cfg)
+{
+	if (terminal_config)
+		FAILURE(Configuration, "Duplicate serial terminal configuration");
+	terminal_config = cfg;
+}
+
+std::string CSerial::snapshot_identity() const
+{
+	auto identity = CSystemComponent::snapshot_identity();
+	if (uart.is_vl16c450())
+		identity += "/com" + std::to_string(port_number + 1);
+	return identity;
 }
 
 const CSystemComponent* CSerial::memory_decode_owner() const noexcept
@@ -258,7 +283,7 @@ bool CSerial::decodes_memory_access(int index, u64 address, int, bool) const noe
 		return false;
 	if (!isa_bridge)
 		return true;
-	const u32 port = 0x3f8u - 0x100u * (u32)state.iNumber + (u32)address;
+	const u32 port = 0x3f8u - 0x100u * (u32)port_number + (u32)address;
 	return isa_bridge->isa_io_decode(port) != CAliM1543C::IsaIoDecode::None;
 }
 
@@ -267,7 +292,7 @@ bool CSerial::uses_subtractive_decode(int index, u64 address, int dsize,
 {
 	if (!isa_bridge || !decodes_memory_access(index, address, dsize, write))
 		return false;
-	const u32 port = 0x3f8u - 0x100u * (u32)state.iNumber + (u32)address;
+	const u32 port = 0x3f8u - 0x100u * (u32)port_number + (u32)address;
 	return isa_bridge->isa_io_decode(port) == CAliM1543C::IsaIoDecode::Subtractive;
 }
 
@@ -276,63 +301,37 @@ bool CSerial::uses_subtractive_decode(int index, u64 address, int dsize,
  **/
 void CSerial::init()
 {
-	disabled = myCfg->get_bool_value("disabled");
-	raw_mode = myCfg->get_bool_value("raw_mode");
-	null_attach = myCfg->get_bool_value("null_attach");
-	wait_for_connection = myCfg->get_bool_value("wait_for_connection", true);
-	listenPort = (int)myCfg->get_num_value("port", false, 8000 + state.iNumber);
-
-	cSystem->RegisterMemory(this, 0,
-		U64(0x00000801fc0003f8) - (0x100 * state.iNumber), 8);
+	const bool onboard = uart.is_vl16c450();
+	const bool host_disabled = terminal_config && terminal_config->get_bool_value("disabled");
+	disabled = !onboard && host_disabled;
+	null_attach = !terminal_config || host_disabled || terminal_config->get_bool_value("null_attach");
+	if (!onboard)
+		cSystem->RegisterMemory(this, 0, U64(0x00000801fc0003f8) - (0x100 * port_number), 8);
 
 	if (disabled)
 	{
-		// Port is claimed in the address map but presents itself as a missing UART:
-		// scratchpad writes don't stick, MSR/LSR read 0xff, IIR=0xff. KDCOM and
-		// SERIAL.SYS conclude "no UART here" and skip further probing/polling.
-		state.rcvW = 0;
-		state.rcvR = 0;
+		// The port is claimed, but scratchpad writes don't stick and MSR/LSR/IIR read 0xff.
+		// KDCOM and SERIAL.SYS recognize the missing UART and skip further probing.
 		printf("%s: disabled - guest will see no UART at this address.\n", devid_string);
 		return;
 	}
 
 	if (null_attach)
 	{
-		// Bit-bucket UART: port exists in the address map and presents itself as a
-		// healthy idle 16550 — TX shift register always empty (THRE/TSRE), modem
-		// signals up (CTS/DSR), RX FIFO permanently empty. TX bytes from the guest
-		// are silently discarded; nothing ever arrives at RX. No socket is opened,
-		// no I/O thread runs, no <BREAK> menu. ReadMem/WriteMem stay on the normal
-		// path so register reads return live values (e.g. LSR=0x60 because rcvR==rcvW),
-		// MCR.LOOP self-test still works (loopback writes go to rcvBuffer, never the
-		// socket), and TX-empty interrupts still fire when the guest enables IER.bit1.
-		state.rcvW = 0;
-		state.rcvR = 0;
-		state.bTHR = 0x00;
-		state.bRDR = 0x00;
-		state.bBRB_LSB = 0x00;
-		state.bBRB_MSB = 0x00;
-		state.bIER = 0x00;
-		state.bIIR = 0x01;  // no interrupt pending
-		state.bFCR = 0x00;
-		state.bLCR = 0x00;
-		state.bMCR = 0x00;
-		state.bLSR = 0x60;  // THRE, TSRE
-		state.bMSR = 0x30;  // CTS, DSR
-		state.bSPR = 0x00;
-		state.serial_cycles = 0;
-		state.thre_pending = false;
-		iac_carry_len = 0;
-		in_subneg = false;
-		stageLen = 0;
-		myThread = 0;
-		printf("%s: null_attach - TX discarded, RX always empty.\n", devid_string);
+		// This bit-bucket UART discards guest TX and has no socket or BREAK menu.
+		// The legacy 16550 needs no worker and keeps THRE/TSRE and CTS/DSR set.
+		// Register reads, MCR.LOOP self-tests and TX-empty interrupts still work.
+		printf("%s: COM%d has no host terminal.\n", devid_string, port_number + 1);
 		return;
 	}
 
+	raw_mode = terminal_config->get_bool_value("raw_mode");
+	wait_for_connection = terminal_config->get_bool_value("wait_for_connection", !onboard);
+	listenPort = (int)terminal_config->get_num_value("port", false, 8000 + port_number);
+
 	std::vector<std::string> configured_addresses;
 	std::string address_error;
-	if (!serial_parse_listen_addresses(myCfg->get_text_value("listen_address", ""),
+	if (!serial_parse_listen_addresses(terminal_config->get_text_value("listen_address", ""),
 		configured_addresses, address_error))
 		FAILURE(Configuration, std::string(devid_string) + ": listen_address: " + address_error);
 
@@ -450,7 +449,7 @@ void CSerial::init()
 	throughSocket = socket(AF_INET, SOCK_STREAM, 0);
 
 	dest_addr.sin_family = AF_INET;
-	dest_addr.sin_port = htons((u16)(listenPort + state.iNumber));
+	dest_addr.sin_port = htons((u16)(listenPort + port_number));
 	dest_addr.sin_addr.s_addr = inet_addr(ls_IP);
 
 	printf("%s: Waiting to initiate remote connection to %s.\n", devid_string,
@@ -462,28 +461,6 @@ void CSerial::init()
 			sizeof(struct sockaddr));
 	}
 #endif
-	state.rcvW = 0;
-	state.rcvR = 0;
-
-	state.bTHR = 0x00;
-	state.bRDR = 0x00;
-	state.bBRB_LSB = 0x00;
-	state.bBRB_MSB = 0x00;
-	state.bIER = 0x00;
-	state.bIIR = 0x01;  // no interrupt
-	state.bFCR = 0x00;
-	state.bLCR = 0x00;
-	state.bMCR = 0x00;  // Important: reads of MCR.LOOP gate the case-0 LOOP-mode write path
-	state.bLSR = 0x60;  // THRE, TSRE
-	state.bMSR = 0x30;  // CTS, DSR
-	state.bSPR = 0x00;
-	state.serial_cycles = 0;
-	state.thre_pending = false;
-	iac_carry_len = 0;
-	in_subneg = false;
-	stageLen = 0;
-	myThread = 0;
-
 	printf("%s: $Id$\n",
 		devid_string);
 }
@@ -491,11 +468,11 @@ void CSerial::init()
 void CSerial::start_threads()
 {
 	char  buffer[5];
-	if (disabled || null_attach)
+	if (disabled || (null_attach && !uart.is_vl16c450()))
 		return;
 	if (!myThread)
 	{
-		sprintf(buffer, "srl%d", state.iNumber);
+		sprintf(buffer, "srl%d", port_number);
 		myThread = new CThread(buffer);
 		printf(" %s", myThread->getName().c_str());
 		StopThread = false;
@@ -505,15 +482,29 @@ void CSerial::start_threads()
 
 void CSerial::stop_threads()
 {
-	if (disabled || null_attach)
-		return;
-	StopThread = true;
+	{
+		std::lock_guard<std::recursive_mutex> lock(m_register_mutex);
+		StopThread = true;
+		uart_wakeup.notify_all();
+	}
 	if (myThread)
 	{
 		printf(" %s", myThread->getName().c_str());
 		myThread->join();
 		delete myThread;
 		myThread = 0;
+	}
+	prepare_snapshot();
+}
+
+void CSerial::prepare_snapshot()
+{
+	std::lock_guard<std::recursive_mutex> lock(m_register_mutex);
+	if (uart.is_vl16c450() && uart_sample != Clock::time_point{})
+	{
+		advance_uart(cSystem->device_access_time());
+		publish_irq();
+		uart_sample = {};
 	}
 }
 
@@ -522,7 +513,8 @@ void CSerial::stop_threads()
  **/
 CSerial::~CSerial()
 {
-	stop_threads();
+	if (myThread)
+		stop_threads();
 	close_sockets();
 }
 
@@ -577,224 +569,106 @@ void CSerial::close_sockets()
 
 u64 CSerial::ReadMem(int index, u64 address, int dsize)
 {
-	u8  d;
-
 	if (disabled)
 		return 0xffu;  // missing-UART signature
 
 	std::lock_guard<std::recursive_mutex> lock(m_register_mutex);
-
-	switch (address)
+	if (uart.is_vl16c450())
+		advance_uart(cSystem->device_access_time());
+	const bool had_data = uart.data_ready();
+	const u8 value = uart.read((unsigned)address);
+	if (address == 0 && !(uart.regs.lcr & 0x80))
 	{
-	case 0: // data buffer
-		if (state.bLCR & 0x80)
+		if (had_data)
 		{
-			return state.bBRB_LSB;
-		}
-		else
-		{
-			if (state.rcvR != state.rcvW)
-			{
-				state.bRDR = state.rcvBuffer[state.rcvR];
-				state.rcvR++;
-				if (state.rcvR == FIFO_SIZE)
-					state.rcvR = 0;
-				TRC_DEV4("Read character %02x (%c) on serial port %d\n", state.bRDR,
-					printable(state.bRDR), state.iNumber);
+			TRC_DEV4("Read character %02x (%c) on serial port %d\n", value, printable(value), port_number);
 #if defined(DEBUG_SERIAL)
-				printf("Read character %02x (%c) on serial port %d\n", state.bRDR,
-					printable(state.bRDR), state.iNumber);
+			printf("Read character %02x (%c) on serial port %d\n", value, printable(value), port_number);
 #endif
-			}
-			else
-			{
-				TRC_DEV2("Read past FIFO on serial port %d\n", state.iNumber);
+		}
+		else
+		{
+			TRC_DEV2("Read past FIFO on serial port %d\n", port_number);
 #if defined(DEBUG_SERIAL)
-				printf("Read past FIFO on serial port %d\n", state.iNumber);
+			printf("Read past FIFO on serial port %d\n", port_number);
 #endif
-			}
-
-			// Received-data interrupt follows the FIFO — it may have just emptied.
-			eval_interrupts();
-			return state.bRDR;
 		}
-
-	case 1:
-		if (state.bLCR & 0x80)
-		{
-			return state.bBRB_MSB;
-		}
-		else
-		{
-			return state.bIER;
-		}
-
-	case 2: //interrupt cause
-		d = state.bIIR;
-		if (d == 0x02)
-			state.thre_pending = false;  // reading IIR acknowledges THRE
-		eval_interrupts();               // recompute IIR and re-drive the IRQ line
-		return d;
-
-	case 3:
-		return state.bLCR;
-
-	case 4:
-		return state.bMCR;
-
-	case 5: //serialization state
-		if (state.rcvR != state.rcvW)
-			state.bLSR = 0x61;    // THRE, TSRE, RxRD
-		else
-			state.bLSR = 0x60;    // THRE, TSRE
-		return state.bLSR;
-
-	case 6:
-		return state.bMSR;
-
-	default:
-		return state.bSPR;
 	}
+	publish_irq();
+	return value;
 }
 
 void CSerial::WriteMem(int index, u64 address, int dsize, u64 data)
 {
-	u8    d;
-	d = (u8)data;
-
 	if (disabled)
-		return;  // ignore guest writes to a disabled port
+		return;
 
 	std::unique_lock<std::recursive_mutex> lock(m_register_mutex);
-
-	switch (address)
+	if (uart.is_vl16c450())
+		advance_uart(cSystem->device_access_time());
+	const u8 previous_mcr = uart.regs.mcr;
+	const auto output = uart.write((unsigned)address, (u8)data);
+	if (address == 0 && !(uart.regs.lcr & 0x80))
 	{
-	case 0:
-		if (state.bLCR & 0x80)   // divisor latch access bit set
-		{
-
-			// LSB of divisor latch
-			state.bBRB_LSB = d;
-		}
-		else
-		{
-			if (state.bMCR & 0x10)
-			{
-				// MCR.LOOP set: deliver TX byte to our own RX FIFO instead of the wire.
-				// Windows 2000 UART detection writes a sentinel here and expects to read it back via LSR.DR.
-				int nextW = state.rcvW + 1;
-				if (nextW == FIFO_SIZE)
-					nextW = 0;
-				if (nextW != state.rcvR)
-				{
-					state.rcvBuffer[state.rcvW] = (char)d;
-					state.rcvW = nextW;
-				}
-			}
-			else
-			{
-				// Keep the UART lock separate from the output queue lock.
-				lock.unlock();
-				write((const char*)&d, 1);
-				lock.lock();
-			}
-			TRC_DEV4("Write character %02x (%c) on serial port %d\n", d, printable(d),
-				state.iNumber);
+		const u8 d = (u8)data;
+		TRC_DEV4("Write character %02x (%c) on serial port %d\n", d, printable(d), port_number);
 #if defined(DEBUG_SERIAL)
-			printf("Write character %02x (%c) on serial port %d\n", d, printable(d),
-				state.iNumber);
+		printf("Write character %02x (%c) on serial port %d\n", d, printable(d), port_number);
 #endif
-			// TX is instantaneous: the holding register is empty again, so
-			// re-arm THRE (delivered only if the THRE interrupt is enabled).
-			state.thre_pending = true;
-			eval_interrupts();
-		}
-		break;
-
-	case 1:
-		if (state.bLCR & 0x80)   // divisor latch access bit set
-		{
-
-			// MSB of divisor latch
-			state.bBRB_MSB = d;
-		}
-		else
-		{
-			// Interrupt Enable Register.  Enabling the THRE interrupt while the
-			// (instantly-drained) holding register is empty arms one THRE edge.
-			u8 prev_ier = state.bIER;
-			state.bIER = d;
-			if ((d & 0x02) && !(prev_ier & 0x02))
-				state.thre_pending = true;
-			eval_interrupts();
-		}
-		break;
-
-	case 2:
-		state.bFCR = d;
-		break;
-
-	case 3:
-		state.bLCR = d;
-		break;
-
-	case 4:
-	{
-		u8 prev_mcr = state.bMCR;
-		state.bMCR = d;
-		if (d & 0x10)
-		{
-			// MCR.LOOP set: mirror modem-control output bits into MSR status bits.
-			// PC16550D loopback: DTR->DSR, RTS->CTS, OUT1->RI, OUT2->DCD.
-			// Windows 2000 SERIAL.SYS uses this to confirm a 16550 by toggling MCR.OUT1
-			// and watching MSR.RI track it.
-			u8 status = 0;
-			if (d & 0x01) status |= 0x20;  // DTR  -> DSR
-			if (d & 0x02) status |= 0x10;  // RTS  -> CTS
-			if (d & 0x04) status |= 0x40;  // OUT1 -> RI
-			if (d & 0x08) status |= 0x80;  // OUT2 -> DCD
-			state.bMSR = status | (state.bMSR & 0x0f);
-		}
-		else
-		{
-			// Loopback released: present the default "modem connected" status the rest of the code assumes.
-			state.bMSR = (state.bMSR & 0x0f) | 0x30;
-		}
-		if (prev_mcr != d)
-			printf("SRL%d: MCR %02x -> %02x (LOOP=%d DTR=%d RTS=%d OUT1=%d OUT2=%d), MSR now %02x\n",
-				state.iNumber, prev_mcr, d,
-				(d >> 4) & 1, d & 1, (d >> 1) & 1, (d >> 2) & 1, (d >> 3) & 1,
-				state.bMSR);
-		break;
 	}
+	if (!uart.is_vl16c450() && previous_mcr != uart.regs.mcr)
+	{
+		const u8 d = uart.regs.mcr;
+		printf("SRL%d: MCR %02x -> %02x (LOOP=%d DTR=%d RTS=%d OUT1=%d OUT2=%d), MSR now %02x\n",
+			port_number, previous_mcr, d, (d >> 4) & 1, d & 1, (d >> 1) & 1,
+			(d >> 2) & 1, (d >> 3) & 1, uart.regs.msr);
+	}
+	publish_irq();
+	if (uart.is_vl16c450() && uart.next_event_ns())
+		uart_wakeup.notify_one();
+	lock.unlock();  // Legacy THR writes can release the UART lock before sending.
+	if (output)
+		write((const char*)&*output, 1);
+}
 
-	default:
-		state.bSPR = d;
+void CSerial::publish_irq(bool force)
+{
+	const bool level = uart.interrupt_pending();
+	if (force || level != irq_level)
+	{
+		irq_level = level;
+		irq_output(level);
 	}
 }
 
 void CSerial::eval_interrupts()
 {
-	if (disabled)
-		return;
+	if (!disabled)
+	{
+		std::lock_guard<std::recursive_mutex> lock(m_register_mutex);
+		publish_irq(!uart.is_vl16c450());
+	}
+}
 
-	std::lock_guard<std::recursive_mutex> lock(m_register_mutex);
+void CSerial::ResetPCI()
+{
+	if (uart.is_vl16c450())
+	{
+		std::lock_guard<std::recursive_mutex> lock(m_register_mutex);
+		uart.reset();
+		uart_sample = {};
+		uart_wakeup.notify_one();
+		publish_irq(true);
+	}
+}
 
-	// RX-available is a level (follows the receive FIFO); THR-empty is edge-
-	// latched in thre_pending (set on THR write / THRE enable, cleared on IIR
-	// read) because es40's instant TX would make a plain THRE level storm.
-	u8 iir = 0x01;           // no interrupt
-	if ((state.bIER & 0x01) && (state.rcvR != state.rcvW))
-		iir = 0x04;          // received data available
-	else if ((state.bIER & 0x02) && state.thre_pending)
-		iir = 0x02;          // transmitter holding register empty
-	state.bIIR = iir;
-
-	// Drive IRQ4 (serial0) / IRQ3 (serial1) as a level following the cause;
-	// pic_set_line() makes one edge per rising transition, retracting on fall.
-	// Keep the UART lock until publication so a newer cause cannot be
-	// followed by a stale IRQ level from another thread.
-	theAli->pic_set_line(0, 4 - state.iNumber, (iir & 0x01) == 0);
+void CSerial::finalize_restore() noexcept
+{
+	if (!disabled)
+	{
+		std::lock_guard<std::recursive_mutex> lock(m_register_mutex);
+		publish_irq(true);
+	}
 }
 
 static bool serial_io_retryable()
@@ -887,23 +761,9 @@ int CSerial::receive(const char* data, int dsize)
 	std::lock_guard<std::recursive_mutex> lock(m_register_mutex);
 	int consumed = 0;
 
-	while (dsize)
-	{
-		int nextW = state.rcvW + 1;
-		if (nextW == FIFO_SIZE)
-			nextW = 0;
-
-		if (nextW == state.rcvR)
-			break;  // FIFO full
-
-		state.rcvBuffer[state.rcvW] = *data;
-		state.rcvW = nextW;
-		data++;
-		dsize--;
+	while (consumed < dsize && uart.receive((u8)data[consumed]))
 		consumed++;
-		eval_interrupts();
-	}
-
+	publish_irq();
 	return consumed;
 }
 
@@ -913,7 +773,7 @@ int CSerial::receive(const char* data, int dsize)
  **/
 void CSerial::drain_staging()
 {
-	if (stageLen == 0)
+	if (uart.is_vl16c450() || stageLen == 0)
 		return;
 
 	std::lock_guard<std::recursive_mutex> lock(m_register_mutex);
@@ -923,7 +783,7 @@ void CSerial::drain_staging()
 	// UART where the next character doesn't arrive until the baud
 	// rate shifts it in — and the CPU is always fast enough to read
 	// it before then.
-	if (state.rcvR != state.rcvW)
+	if (uart.data_ready())
 		return;  // previous character not yet read
 
 	// Deliver exactly one character
@@ -943,6 +803,11 @@ void CSerial::run()
 		return;
 	try
 	{
+		if (uart.is_vl16c450())
+		{
+			run_onboard();
+			return;
+		}
 		for (;;)
 		{
 			if (StopThread)
@@ -960,6 +825,56 @@ void CSerial::run()
 	}
 }
 
+void CSerial::advance_uart(Clock::time_point now)
+{
+	if (now <= uart_sample)
+		return;
+	if (uart_sample != Clock::time_point{} && uart.next_event_ns())
+	{
+		const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(now - uart_sample);
+		const auto output = uart.advance(elapsed.count());
+		if (output.size)
+			write((const char*)output.bytes, output.size);
+	}
+	uart_sample = now;
+}
+
+void CSerial::stage_uart_input(const char* data, int size)
+{
+	std::lock_guard<std::recursive_mutex> lock(m_register_mutex);
+	advance_uart(Clock::now());
+	uart.stage_input(data, size);
+	publish_irq();
+	uart_wakeup.notify_one();
+}
+
+void CSerial::run_onboard()
+{
+	std::unique_lock<std::recursive_mutex> lock(m_register_mutex);
+	auto next_poll = Clock::now();
+	while (!StopThread)
+	{
+		const auto now = Clock::now();
+		advance_uart(now);
+		publish_irq();
+		if (!null_attach && now >= next_poll)
+		{
+			next_poll = now + std::chrono::milliseconds(CYCLE_TIME_MS);
+			lock.unlock();
+			execute();
+			lock.lock();
+			continue;
+		}
+		auto wake = null_attach ? (Clock::time_point::max)() : next_poll;
+		if (uart.next_event_ns())
+			wake = (std::min)(wake, now + std::chrono::ceil<Clock::duration>(std::chrono::nanoseconds(uart.next_event_ns())));
+		if (wake == (Clock::time_point::max)())
+			uart_wakeup.wait(lock);
+		else
+			uart_wakeup.wait_until(lock, wake);
+	}
+}
+
 /**
  * Check if threads are still running.
  *
@@ -967,7 +882,7 @@ void CSerial::run()
  **/
 void CSerial::check_state()
 {
-	if (disabled || null_attach)
+	if (disabled || (null_attach && !uart.is_vl16c450()))
 		return;
 	if (breakHit)
 		serial_menu();
@@ -1131,7 +1046,7 @@ void CSerial::execute()
 {
 	if (!flush_output())
 	{
-		printf("%%SRL-W-DISCONNECT: Serial output failed or queue full on port %d.\n", state.iNumber);
+		printf("%%SRL-W-DISCONNECT: Serial output failed or queue full on port %d.\n", port_number);
 		close_connection();
 	}
 	// Poll for clients without suspending UART processing.
@@ -1156,16 +1071,19 @@ void CSerial::execute()
 	// ------------------------------------------------------------------
 	// Every RECV_TICKS cycles: read from the socket and cook telnet out
 	// ------------------------------------------------------------------
-	state.serial_cycles++;
-	if (state.serial_cycles >= RECV_TICKS)
+	serial_cycles++;
+	if (serial_cycles >= RECV_TICKS)
 	{
 		// If staging buffer still has data, don't pull more off the socket.
 		// TCP backpressure holds the rest at the OS level.
-		if (stageLen > 0)
 		{
-			state.serial_cycles = 0;
-			eval_interrupts();
-			return;
+			std::lock_guard<std::recursive_mutex> lock(m_register_mutex);
+			if (stageLen > 0 || (uart.is_vl16c450() && uart.input_staged()))
+			{
+				serial_cycles = 0;
+				publish_irq();
+				return;
+			}
 		}
 
 		FD_ZERO(&readset);
@@ -1188,7 +1106,7 @@ void CSerial::execute()
 
 			if (size < 0 && serial_io_retryable())
 			{
-				state.serial_cycles = 0;
+				serial_cycles = 0;
 				eval_interrupts();
 				return;
 			}
@@ -1196,7 +1114,7 @@ void CSerial::execute()
 			if (size <= 0 && !got_sigint)
 			{
 				printf("%%SRL-W-DISCONNECT: Write socket closed on other end for serial port %d.\n",
-					state.iNumber);
+					port_number);
 				printf("-SRL-I-WAITFOR: Waiting for a new connection on port %d.\n",
 					listenPort);
 				close_connection();
@@ -1205,7 +1123,7 @@ void CSerial::execute()
 
 			if (size <= 0)
 			{
-				state.serial_cycles = 0;
+				serial_cycles = 0;
 				eval_interrupts();
 				return;
 			}
@@ -1218,17 +1136,24 @@ void CSerial::execute()
 				iac_carry_len = 0;
 			}
 
-			// raw_mode: skip telnet IAC cooking AND the staging buffer's baud-rate
+			// raw_mode skips telnet IAC cooking and, on the legacy UART, the staging buffer's
 			// drip-feed.  The byte stream must stay 8-bit clean and flow at line
 			// rate for windbg/kgdb, which sends arbitrary binary (including 0xff)
 			// in KD packets and times out if delivery is throttled.
 			if (raw_mode)
 			{
+				if (uart.is_vl16c450())
+				{
+					// Pace a raw socket burst into the single-byte RBR (PB22H-KB, p. 20-17).
+					stage_uart_input((const char*)raw, size);
+					serial_cycles = 0;
+					return;
+				}
 				int delivered = receive((const char*)raw, (int)size);
 				if (delivered < (int)size)
 					printf("%%SRL-W-RAWFULL: raw_mode FIFO full on port %d, dropped %d byte(s)\n",
-						state.iNumber, (int)size - delivered);
-				state.serial_cycles = 0;
+						port_number, (int)size - delivered);
+				serial_cycles = 0;
 				eval_interrupts();
 				return;
 			}
@@ -1347,7 +1272,9 @@ void CSerial::execute()
 			{
 				int cooked_len = (int)(c - cbuffer);
 
-				if (cooked_len <= (int)(STAGE_SIZE - stageLen))
+				if (uart.is_vl16c450())
+					stage_uart_input((const char*)cbuffer, cooked_len);
+				else if (cooked_len <= (int)(STAGE_SIZE - stageLen))
 				{
 					memcpy(stageBuf + stageLen, cbuffer, cooked_len);
 					stageLen += cooked_len;
@@ -1365,13 +1292,13 @@ void CSerial::execute()
 					}
 #if defined(DEBUG_SERIAL)
 					printf("%%SRL-W-STAGEDROP: staging buffer full on port %d, "
-						"dropped %d bytes\n", state.iNumber, cooked_len - space);
+						"dropped %d bytes\n", port_number, cooked_len - space);
 #endif
 				}
 			}
 		}
 
-		state.serial_cycles = 0;
+		serial_cycles = 0;
 	}
 
 	eval_interrupts();
@@ -1386,12 +1313,18 @@ static u32  srl_magic2 = 0x1A51A51A;
  **/
 int CSerial::SaveState(FILE* f)
 {
-	long  ss = sizeof(state);
-
-	fwrite(&srl_magic1, sizeof(u32), 1, f);
-	fwrite(&ss, sizeof(long), 1, f);
-	fwrite(&state, sizeof(state), 1, f);
-	fwrite(&srl_magic2, sizeof(u32), 1, f);
+	const SSrl_state state{uart.regs, serial_cycles, uart.queue, port_number, uart.thre_pending};
+	const u8 routing = u8(uart.tx.loopback) | (u8(uart.tx.suppress) << 1);
+	const long ss = sizeof(state) + (uart.is_vl16c450() ? 2 * sizeof(u64) + 2 : 0);
+	if (!fwrite(&srl_magic1, sizeof(u32), 1, f) || !fwrite(&ss, sizeof(long), 1, f)
+		|| !fwrite(&state, sizeof(state), 1, f))
+		return -1;
+	if (uart.is_vl16c450() && (!fwrite(&uart.tx.remaining_ns, sizeof(u64), 1, f)
+		|| !fwrite(&uart.tx.shift, 1, 1, f) || !fwrite(&routing, 1, 1, f)
+		|| !fwrite(&uart.rx_remaining_ns, sizeof(u64), 1, f)))
+		return -1;
+	if (!fwrite(&srl_magic2, sizeof(u32), 1, f))
+		return -1;
 	printf("%s: %d bytes saved.\n", devid_string, (int)ss);
 	return 0;
 }
@@ -1401,6 +1334,7 @@ int CSerial::SaveState(FILE* f)
  **/
 int CSerial::RestoreState(FILE* f)
 {
+	SSrl_state state{};
 	long    ss;
 	u32     m1;
 	u32     m2;
@@ -1426,7 +1360,7 @@ int CSerial::RestoreState(FILE* f)
 		return -1;
 	}
 
-	if (ss != sizeof(state))
+	if (ss != sizeof(state) + (uart.is_vl16c450() ? 2 * sizeof(u64) + 2 : 0))
 	{
 		printf("%s: STRUCT SIZE does not match!\n", devid_string);
 		return -1;
@@ -1439,6 +1373,18 @@ int CSerial::RestoreState(FILE* f)
 		return -1;
 	}
 
+	Uart::Transmitter tx{};
+	u64 rx_remaining_ns = 0;
+	if (uart.is_vl16c450())
+	{
+		u8 routing;
+		if (!fread(&tx.remaining_ns, sizeof(u64), 1, f) || !fread(&tx.shift, 1, 1, f)
+			|| !fread(&routing, 1, 1, f) || !fread(&rx_remaining_ns, sizeof(u64), 1, f)
+			|| routing > 3 || tx.remaining_ns > 10000000000ULL || rx_remaining_ns > 10000000000ULL)
+			return -1;
+		tx.loopback = (routing & 1) != 0;
+		tx.suppress = (routing & 2) != 0;
+	}
 	r = fread(&m2, sizeof(u32), 1, f);
 	if (r != 1)
 	{
@@ -1452,6 +1398,20 @@ int CSerial::RestoreState(FILE* f)
 		return -1;
 	}
 
+	const unsigned queue_limit = sizeof(state.queue.bytes) - (uart.is_vl16c450() ? 0 : 1);
+	if (state.iNumber != port_number || (unsigned)state.queue.read > queue_limit
+		|| (unsigned)state.queue.write > queue_limit)
+		return -1;
+	if (uart.is_vl16c450() && (state.queue.read > state.queue.write
+		|| (rx_remaining_ns && state.queue.read == state.queue.write)))
+		return -1;
+	uart.regs = state.regs;
+	uart.queue = state.queue;
+	uart.thre_pending = state.thre_pending != 0;
+	uart.tx = tx;
+	uart.rx_remaining_ns = rx_remaining_ns;
+	uart_sample = {};
+	serial_cycles = state.serial_cycles;
 	printf("%s: %d bytes restored.\n", devid_string, (int)ss);
 	return 0;
 }
@@ -1480,7 +1440,7 @@ void CSerial::start_connection_action()
 	char                s2[200];
 	char* argv[20];
 
-	strncpy(s, myCfg->get_text_value("action", ""), 999);
+	strncpy(s, terminal_config->get_text_value("action", ""), 999);
 	s[999] = '\0';
 
 	//printf("%s: Specified : %s\n",devid_string,s);
@@ -1643,7 +1603,7 @@ bool CSerial::accept_connection(int timeout_us)
 			iac_carry_len = 0;
 			in_subneg = false;
 			stageLen = 0;
-			state.serial_cycles = 0;
+			serial_cycles = 0;
 			connectSocket = connection;
 			return true;
 		}
@@ -1660,7 +1620,7 @@ bool CSerial::initialize_connection(int64_t connection)
 {
 	tx_head = tx_size = 0;
 	tx_failed = false;
-	if (state.iNumber != 1 && !raw_mode) // skip for kgdb-default port and any raw-mode port
+	if (port_number != 1 && !raw_mode) // skip for kgdb-default port and any raw-mode port
 	{
 		// Use explicit lengths: TELOPT_BINARY is zero.
 		const unsigned char options[] = {
@@ -1669,7 +1629,7 @@ bool CSerial::initialize_connection(int64_t connection)
 			IAC, DO, TELOPT_BINARY, IAC, WILL, TELOPT_BINARY
 		};
 		char banner[100];
-		snprintf(banner, sizeof(banner), "This is serial port #%d on ES40 Emulator\r\n", state.iNumber);
+		snprintf(banner, sizeof(banner), "This is serial port #%d on ES40 Emulator\r\n", port_number);
 		queue_output((const char*)options, sizeof(options));
 		queue_output(banner, strlen(banner));
 		flush_output_locked(connection);

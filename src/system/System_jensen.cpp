@@ -215,8 +215,31 @@ void Jensen::attach_board_devices(CConfigurator* cfg)
   auto* host = new JensenHostBus(cfg, this);
   register_isa_bus(0, host->ebc.eisa_bus());
   // IRQK and IRQM share CPU IRQ3 on Jensen (PB22H-KB, Table 6-4).
-  new VL82C106(cfg, this, U64(0x1c0000000), [this](bool asserted) {
+  combo = new VL82C106(cfg, this, U64(0x1c0000000), [this](bool asserted) {
     if (get_cpu_num())
       get_cpu(0)->irq_h(3, asserted, 0);
-  });
+  }, [this](unsigned channel, bool asserted) { set_serial_irq(channel, asserted); });
+}
+
+CSerial& Jensen::serial_port(unsigned number) const
+{
+  return combo->serial_port(number);
+}
+
+void Jensen::set_serial_irq(unsigned channel, bool asserted)
+{
+  // IRQA and IRQB share CPU IRQ5 on Jensen (PB22H-KB, Table 6-4).
+  std::lock_guard<std::mutex> guard(serial_irq_mutex);
+  const bool previous = serial_irqs != 0;
+  const unsigned bit = 1u << channel;
+  serial_irqs = asserted ? serial_irqs | bit : serial_irqs & ~bit;
+  if (previous != (serial_irqs != 0) && get_cpu_num())
+    get_cpu(0)->irq_h(5, serial_irqs != 0, 0);
+}
+
+void Jensen::finish_board_restore()
+{
+  std::lock_guard<std::mutex> guard(serial_irq_mutex);
+  if (get_cpu_num())
+    get_cpu(0)->irq_h(5, serial_irqs != 0, 0);
 }

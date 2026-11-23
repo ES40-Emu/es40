@@ -193,6 +193,7 @@ noinst_HEADERS += storage/Disk.h \
        qmp/QmpKeymap.h \
        io/Port80.h \
        io/Serial.h \
+       io/Uart.h \
        io/SerialListenAddress.h \
        config/Configurator.h \
        config/ISASlot.h \
@@ -338,6 +339,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        storage/SCSIBus.cpp \
        storage/SCSIDevice.cpp \
        io/Serial.cpp \
+       io/Uart.cpp \
        io/SerialListenAddress.h \
        StdAfx.cpp \
        storage/LSI53C1020.cpp \

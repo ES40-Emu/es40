@@ -1,4 +1,4 @@
-/* ES40 emulator -- VL82C106 keyboard and mouse controller
+/* ES40 emulator -- VL82C106 keyboard, mouse and serial controller
  * Copyright (C) 2026 by gdwnldsKSC
  * All rights reserved.
  *
@@ -27,20 +27,26 @@
 
 #include "StdAfx.h"
 #include "VL82C106.h"
+#include "io/Serial.h"
 #include "system/System.h"
 
 namespace {
-enum { Data, CommandStatus, RtcIndex, RtcData };
+enum { Unselected = -1, Data, CommandStatus, RtcIndex, RtcData, Control0, ComA, ComB };
 // P17 is tied high and P16 senses the unlocked front-panel switch (PB22H-KB, p. 1-11).
 constexpr u8 input_port = 0xc0;
 }
 
 VL82C106::VL82C106(CConfigurator* cfg, CSystem* system, u64 base,
-  std::function<void(bool)> irq_output)
+  std::function<void(bool)> irq_output, std::function<void(unsigned, bool)> serial_irq_output)
   : CKeyboard(cfg, system), local_base(base), irq_output(std::move(irq_output))
 {
+  for (unsigned i = 0; i < 2; ++i)
+    serial[i] = new CSerial(cfg, system, i, [serial_irq_output, i](bool level) { serial_irq_output(i, level); });
   save_item(rtc_index, "rtc_index");
-  save_item(at_mode, "at_mode");
+  save_item(control0, "control0");
+  save_item(control1, "control1");
+  save_item(serial_cs, "serial_cs");
+  save_item(serial_cs_written, "serial_cs_written");
   save_item(at_inhibit_override, "at_inhibit_override");
   save_item(ram, "ram");
   save_item(output_latch, "output_latch");
@@ -56,37 +62,102 @@ VL82C106::VL82C106(CConfigurator* cfg, CSystem* system, u64 base,
 void VL82C106::map_ports()
 {
   // Local port n uses CA[24:9]; only the low data byte is wired (PB22H-KB, Table 8-3).
-  const u16 ports[] = { 0x60, 0x64, 0x170, 0x171 };
-  for (unsigned i = 0; i < sizeof(ports) / sizeof(ports[0]); ++i)
-    cSystem->RegisterMemory(this, i, local_base + (u64(ports[i]) << 9), 1);
+  cSystem->RegisterMemory(this, 0, local_base, U64(0x10000) << 9);
+}
+
+bool VL82C106::selects_serial(unsigned channel, u16 port) const noexcept
+{
+  // COMA needs SYS BD EN and COM1 EN, while COMB needs COM2 EN (PB22H-KB, Tables 24-7 and 24-9).
+  if (channel == 0 ? (control0 & 5) != 5 : !(control1 & 1))
+    return false;
+  if (control1 & 8) {
+    // Battery-backed bases and masks have no specified initial values (PB22H-KB, p. 24-7).
+    if (serial_cs_written[channel] != 7)
+      return false;
+    // Each set range bit masks its matching address bit (PB22H-KB, Tables 24-1 to 24-3).
+    const u8* cs = serial_cs[channel];
+    const u16 base = cs[0] | (u16(cs[1]) << 8);
+    return ((port ^ base) & ~(cs[2] & 0x1f)) == 0;
+  }
+  // COM1 DEF exchanges the two hardwired bases (PB22H-KB, Table 24-5).
+  const bool at_3f8 = (channel == 0) == ((control0 & 8) != 0);
+  return (port & 0xfff8) == (at_3f8 ? 0x3f8 : 0x2f8);
+}
+
+int VL82C106::decode_port(u16 port, bool write) const noexcept
+{
+  int selected = Unselected;
+  switch (port) {
+  case 0x60: selected = Data; break;
+  case 0x64: selected = CommandStatus; break;
+  case 0x102:
+    // PS/2 mode exposes control register 0 at port 102h (VL82C106, p. 6-192).
+    if (write && !at_mode())
+      selected = Control0;
+    break;
+  case 0x170:
+    if (write)
+      selected = RtcIndex;
+    break;
+  case 0x171:
+    // Chip control and serial selects are write-only through the RTC (PB22H-KB, Tables 22-1 and 24-6).
+    if (write && rtc_index >= 0x69 && rtc_index <= 0x70)
+      selected = RtcData;
+    break;
+  }
+  for (unsigned channel = 0; channel < 2; ++channel) {
+    if (selects_serial(channel, port)) {
+      if (selected != Unselected)
+        return Unselected;
+      selected = ComA + channel;
+    }
+  }
+  return selected;
 }
 
 bool VL82C106::decodes_memory_access(int index, u64 address, int dsize, bool write) const noexcept
 {
-  if (address || (dsize != 32 && dsize != 64))
-    return false;
-  // Control register 1 is write-only through the RTC index (PB22H-KB, Tables 22-1 and 24-9).
-  return index == Data || index == CommandStatus ||
-    (write && (index == RtcIndex || (index == RtcData && rtc_index == 0x6a)));
+  return index == 0 && !(address & 0x1ff) && (dsize == 32 || dsize == 64) &&
+    decode_port(u16(address >> 9), write) != Unselected;
 }
 
-void VL82C106::WriteMem(int index, u64 address, int dsize, u64 data)
+u64 VL82C106::ReadMem(int, u64 address, int dsize)
 {
-  if (index == RtcIndex) {
+  const u16 port = u16(address >> 9);
+  const int selected = decode_port(port, false);
+  if (selected == ComA || selected == ComB)
+    return serial_port(selected - ComA).ReadMem(0, port & 7, 8);
+  return CKeyboard::ReadMem(selected, 0, dsize);
+}
+
+void VL82C106::WriteMem(int, u64 address, int dsize, u64 data)
+{
+  const u16 port = u16(address >> 9);
+  const int selected = decode_port(port, true);
+  if (selected == ComA || selected == ComB) {
+    serial_port(selected - ComA).WriteMem(0, port & 7, 8, u8(data));
+  } else if (selected == RtcIndex) {
     rtc_index = data & 0x7f;
-  } else if (index == RtcData) {
+  } else if (selected == Control0 || (selected == RtcData && rtc_index == 0x69)) {
+    control0 = u8(data);
+  } else if (selected == RtcData && rtc_index == 0x6a) {
     CFastMutex::ScopedLock guard(kbdLock);
-    at_mode = (data & 2) != 0;
+    control1 = u8(data);
     kbd_update_irq();
+  } else if (selected == RtcData) {
+    const unsigned reg = rtc_index - 0x6b;
+    serial_cs[reg / 3][reg % 3] = u8(data);
+    serial_cs_written[reg / 3] |= u8(1u << (reg % 3));
   } else {
-    CKeyboard::WriteMem(index, address, dsize, data);
+    CKeyboard::WriteMem(selected, 0, dsize, data);
   }
 }
 
 void VL82C106::reset_controller_state()
 {
   rtc_index = 0;
-  at_mode = true; // Power-on selects AT until firmware clears bit 1 (PB22H-KB, Table 24-9).
+  control0 = 0x9d; // Reset enables COMA at 3F8h (PB22H-KB, Tables 24-5 and 24-7).
+  control1 = 0x07; // COMB uses hardwired selects and AT mode lasts until bit 1 clears (PB22H-KB, Table 24-9).
   at_inhibit_override = 0;
   memset(ram, 0, sizeof(ram));
   output_latch = 1;
@@ -105,7 +176,7 @@ void VL82C106::reset_controller_state()
 
 void VL82C106::set_irq_lines(bool keyboard, bool mouse)
 {
-  const bool asserted = keyboard || (mouse && !at_mode);
+  const bool asserted = keyboard || (mouse && !at_mode());
   if (!irq_level || *irq_level != asserted) {
     irq_output(asserted);
     irq_level = asserted;
@@ -117,7 +188,7 @@ u8 VL82C106::status_byte(u8 normal) const
   // C/D clears on completion; a parameter write completes a multi-byte command (PB22H-KB, Table 23-4).
   if (!state.expecting_port60h)
     normal &= ~0x08;
-  if (at_mode)
+  if (at_mode())
     return normal & ~0x20; // AT status bit 5 reports transmit timeout (VL82C106, Fig. 3).
   // C1/C2 substitute the selected P1 nibble until the next command (PB22H-KB, p. 23-13).
   if (state.last_comm == 0xc1)
@@ -131,7 +202,7 @@ u8 VL82C106::output_port() const
 {
   // P2 reports serial lines, interrupt outputs, RC_L and the front LED (PB22H-KB, Table 23-8).
   const bool keyboard_irq = state.status.outb && !state.status.auxb && state.allow_irq1;
-  const bool mouse_irq = state.status.auxb && state.allow_irq12 && !at_mode;
+  const bool mouse_irq = state.status.auxb && state.allow_irq12 && !at_mode();
   const u8 pulses = cSystem->device_access_time() < pulse_end ? pulse_mask : 0;
   return (output_latch & ~pulses) | 0x84 | (state.aux_clock_enabled << 3) |
     (keyboard_irq << 4) | (mouse_irq << 5) | (state.kbd_clock_enabled << 6);
@@ -156,7 +227,7 @@ bool VL82C106::handle_controller_command(u8 command)
     }
     return true;
   }
-  if (at_mode) {
+  if (at_mode()) {
     if (command == 0x20) {
       controller_enQ((mode_byte() & 0x75) | at_inhibit_override, 0);
       return true;
@@ -212,7 +283,7 @@ bool VL82C106::handle_controller_parameter(u8 command, u8 data)
 {
   if (command == 0)
     return !state.kbd_clock_enabled; // AD inhibits keyboard transmission (PB22H-KB, p. 23-12).
-  if (at_mode && command == 0x60) {
+  if (at_mode() && command == 0x60) {
     at_inhibit_override = data & 8;
     set_mode_byte(data & 0x75); // Bit 1 is reserved in AT mode (VL82C106, Fig. 1).
     return true;

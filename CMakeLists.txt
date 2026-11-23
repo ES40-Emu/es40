@@ -547,6 +547,7 @@ list(APPEND ES40_SOURCES
     src/storage/SCSIBus.cpp
     src/storage/SCSIDevice.cpp
     src/io/Serial.cpp
+    src/io/Uart.cpp
     src/StdAfx.cpp
     src/storage/LSI53C1020.cpp
     src/storage/Sym53C810.cpp

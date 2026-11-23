@@ -29,13 +29,26 @@
 #define ES40_SYSTEM_JENSEN_H
 
 #include "System.h"
+#include <mutex>
+
+class CSerial;
+class VL82C106;
 
 class Jensen final : public CSystem
 {
 public:
   explicit Jensen(CConfigurator* cfg);
+  ~Jensen() override { destroy_components(); }
   void attach_board_devices(CConfigurator* cfg) override;
   void ResetMem(unsigned int membits) override;
+  CSerial& serial_port(unsigned number) const;
+
+private:
+  void set_serial_irq(unsigned channel, bool asserted);
+  void finish_board_restore() override;
+  VL82C106* combo = nullptr;
+  std::mutex serial_irq_mutex;
+  unsigned serial_irqs = 0;
 };
 
 #endif

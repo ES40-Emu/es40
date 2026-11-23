@@ -99,8 +99,12 @@
 
 #include "emu/SystemComponent.h"
 #include "network/telnet.h"
+#include "Uart.h"
+#include <functional>
 #include <array>
 #include <atomic>
+#include <chrono>
+#include <condition_variable>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -122,6 +126,12 @@ public:
   virtual void  WriteMem(int index, u64 address, int dsize, u64 data);
   virtual u64   ReadMem(int index, u64 address, int dsize);
   CSerial(CConfigurator* cfg, CSystem* c, u16 number);
+  CSerial(CConfigurator* cfg, CSystem* c, u16 number, std::function<void(bool)> irq);
+  void configure_terminal(CConfigurator* cfg);
+  void ResetPCI() override;
+  void prepare_snapshot() override;
+  void finalize_restore() noexcept override;
+  std::string snapshot_identity() const override;
   virtual       ~CSerial();
 
   void bind_isa_bridge(CAliM1543C* bridge) override { isa_bridge = bridge; }
@@ -144,14 +154,28 @@ public:
   virtual void  start_threads();
   virtual void  stop_threads();
 private:
+  Uart uart;
+  const int port_number;
+  int serial_cycles = 0;
+  CConfigurator* terminal_config = nullptr;
+  std::function<void(bool)> irq_output;
+  bool irq_level = false;
+  void publish_irq(bool force = false);
+  using Clock = std::chrono::steady_clock;
+  Clock::time_point uart_sample{};
+  std::condition_variable_any uart_wakeup;
+  void advance_uart(Clock::time_point now);
+  void run_onboard();
+  void stage_uart_input(const char* data, int size);
+
   // Borrowed routing owner; not part of the saved device state.
-  const CAliM1543C* isa_bridge = nullptr;
+  CAliM1543C* isa_bridge = nullptr;
 
   // Protect guest registers, RX FIFO and IRQ publication together. Recursive
-  // because register/FIFO operations call eval_interrupts(). Lock order:
+  // because staged delivery calls receive(). Lock order:
   // device bus -> UART -> PIC -> chipset interrupt state -> CPU wake.
   // Initialization and snapshots run with all device/CPU threads stopped;
-  // staging, telnet parsing and serial_cycles belong to the UART worker.
+  // legacy staging, telnet parsing and serial_cycles belong to the UART worker.
   // Keep the mutex outside SSrl_state to preserve the snapshot format.
   std::recursive_mutex m_register_mutex;
 
@@ -167,7 +191,7 @@ private:
   bool          flush_output();
 
   // Worker (or paused menu) owns RX and replacement; lock TX and publication.
-  // Never hold this lock during accept waits or with m_register_mutex.
+  // Timed TX may take this lock under m_register_mutex; accept waits hold neither.
   std::mutex m_connection_mutex;
   // Host output is bounded and belongs only to the current connection.
   std::array<char, 64 * 1024> tx_buffer;
@@ -181,34 +205,21 @@ private:
   std::atomic<bool> breakHit{false};
 
   unsigned char  iac_carry[8];          // Partial telnet sequence carried across recv() calls
-  int            iac_carry_len;         // Number of valid bytes in iac_carry
-  bool           in_subneg;             // Currently inside IAC SB ... IAC SE subnegotiation
+  int            iac_carry_len = 0;         // Number of valid bytes in iac_carry
+  bool           in_subneg = false;             // Currently inside IAC SB ... IAC SE subnegotiation
 
   char           stageBuf[STAGE_SIZE];  // Cooked data waiting for baud-rate delivery
-  int            stageLen;              // Number of valid bytes in stageBuf
+  int            stageLen = 0;              // Number of valid bytes in stageBuf
 
   /// The state structure contains all elements that need to be saved to the statefile.
   struct SSrl_state
   {
-    u8    bTHR; /**< Transmit Hold Register */
-    u8    bRDR; /**< Received Data Register */
-    u8    bBRB_LSB;
-    u8    bBRB_MSB;
-    u8    bIER; /**< Interrupt Enable Register */
-    u8    bIIR; /**< Interrupt Identification Register */
-    u8    bFCR;
-    u8    bLCR; /**< Line Control Register (Data Format Register) */
-    u8    bMCR; /**< Modem Control Register */
-    u8    bLSR; /**< Line Status Register */
-    u8    bMSR; /**< Modem Status Register */
-    u8    bSPR; /**< Scratch Pad Register */
-    int   serial_cycles;
-    char  rcvBuffer[1024];
-    int   rcvW;
-    int   rcvR;
-    int   iNumber;
-    bool  thre_pending; /**< THRE interrupt latched (THR emptied, not yet acked by an IIR read) */
-  } state;
+    Uart::Registers regs;
+    int serial_cycles;
+    Uart::ReceiveQueue queue;
+    int iNumber;
+    u8 thre_pending;
+  };
   int listenPort = 0;
   std::vector<int64_t> listenSockets;
   std::vector<std::string> listenAddresses;

@@ -131,6 +131,20 @@ const EISABus::IoRange* EISABus::find_io(u32 port, unsigned bytes) const noexcep
   return nullptr;
 }
 
+int EISABus::io_slave_width(u16 port) const noexcept
+{
+  const auto* range = find_io(port);
+  return range ? range->max_dsize : 8;
+}
+
+int EISABus::mem_slave_width(u32 address) const noexcept
+{
+  for (const auto& range : mem_ranges)
+    if (address >= range.base && address - range.base < range.length)
+      return range.max_dsize;
+  return 8;
+}
+
 CISABus::IsaIoDecode EISABus::isa_io_decode(u32 port) const noexcept
 {
   return find_io(port) ? IsaIoDecode::Positive : IsaIoDecode::None;

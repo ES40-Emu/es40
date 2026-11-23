@@ -220,7 +220,7 @@ u64 JensenHostBus::ReadMem(int index, u64 address, int dsize)
   if (index == SparseMemory && dsize == 32) {
     const u32 target = ((u32)hae << 25) | (u32)(address >> 7);
     u32 data;
-    if (!ebc.eisa_bus().read_mem(target, sparse_width(address), data))
+    if (!ebc.read_mem(target, sparse_width(address), data))
       return 0xffffffffU;
     return data << ((target & 3) * 8);
   }
@@ -251,7 +251,7 @@ void JensenHostBus::WriteMem(int index, u64 address, int dsize, u64 data)
   }
   if (index == SparseMemory && dsize == 32) {
     const u32 target = ((u32)hae << 25) | (u32)(address >> 7);
-    ebc.eisa_bus().write_mem(target, sparse_width(address), (u32)data >> ((target & 3) * 8));
+    ebc.write_mem(target, sparse_width(address), (u32)data >> ((target & 3) * 8));
     return;
   }
   if (index != SparseIO || dsize != 32 || hae)

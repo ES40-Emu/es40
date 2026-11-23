@@ -42,9 +42,14 @@ public:
   bool read_port(u16 port, int dsize, u16& data);
   bool read_port(u16 port, int dsize, u32& data);
   bool write_port(u16 port, int dsize, u32 data);
+  bool read_mem(u32 address, int dsize, u32& data);
+  bool write_mem(u32 address, int dsize, u32 data);
 
 private:
   bool slot_io_cycle(u16 port, int dsize, bool write) const;
+  // Runs one cycle per slave-sized unit, lowest address first; true if any unit was claimed.
+  template <typename Cycle>
+  bool split_cycle(u32 address, int dsize, int unit, Cycle cycle);
   Intel82357& isp;
   EISABus bus;
 };

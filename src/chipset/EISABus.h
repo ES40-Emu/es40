@@ -59,6 +59,9 @@ public:
   // Register a memory range with its maximum native width in bits.
   void register_eisa_mem(CSystemComponent& device, int index, u32 address, u32 length, int max_dsize);
   bool slot_enabled(unsigned slot) const noexcept;
+  // Data size in bits of the slave at an address; a slave giving no size signal is 8-bit.
+  int io_slave_width(u16 port) const noexcept;
+  int mem_slave_width(u32 address) const noexcept;
   IsaIoDecode isa_io_decode(u32 port) const noexcept override;
   // Cards report IRQ and DRQ levels under the device-bus lock, even while disabled.
   void set_slot_irq(unsigned slot, int irq, bool asserted);

@@ -27,14 +27,12 @@
 
 #include "StdAfx.h"
 #include "system/System_jensen.h"
+#include "system/JensenFlash.h"
 #include "CPU/AlphaCPU.h"
 #include "chipset/Intel82357.h"
 #include "chipset/Intel82358.h"
 #include "chipset/VL82C106.h"
 #include <algorithm>
-#include <fstream>
-#include <string>
-#include <vector>
 
 namespace {
 enum { SparseIO, HostAddressExtension, InterruptAcknowledge, Feprom0, Feprom1 };
@@ -60,30 +58,19 @@ int sparse_io_width(u64 address)
   }
 }
 
-std::vector<u8> load_feprom(CConfigurator* cfg, unsigned bank)
-{
-  const char* path = cfg->get_text_value(bank == 0 ? "rom.flash0" : "rom.flash1");
-  if (!path)
-    return {};
-  std::ifstream file(path, std::ios::binary | std::ios::ate);
-  if (!file)
-    FAILURE(Configuration, std::string("Cannot open Jensen FEPROM image: ") + path);
-  const std::streamoff size = file.tellg();
-  if (size != 1024 * 1024 && !(bank == 0 && size == 256 * 1024))
-    FAILURE(Configuration, std::string("Jensen FEPROM image must be ") +
-            (bank == 0 ? "256 KiB or 1 MiB: " : "1 MiB: ") + path);
-  std::vector<u8> image(static_cast<size_t>(size));
-  file.seekg(0);
-  if (!file.read(reinterpret_cast<char*>(image.data()), size))
-    FAILURE(IO, std::string("Error reading Jensen FEPROM image: ") + path);
-  return image;
-}
-
 class JensenHostBus : public CSystemComponent, public CDMAHost
 {
-  const std::vector<u8> feprom[2];
+  JensenFlash feprom[2];
 public:
   JensenHostBus(CConfigurator* cfg, CSystem* system);
+  ~JensenHostBus() override;
+  void start_threads() override;
+  void stop_threads() override;
+  void check_state() override;
+  void flush_storage() override;
+  int SaveState(FILE* file) override;
+  int RestoreState(FILE* file) override;
+  void finalize_restore() noexcept override;
   const CSystemComponent* isa_decode_owner() const noexcept override { return this; }
   bool dma_transfer_enabled() override { return true; }
   void dma_read_memory(u32 address, void* dest, size_t bytes) override;
@@ -93,6 +80,8 @@ public:
   void ResetPCI() override
   {
     hae = 0;
+    for (auto& socket : feprom)
+      socket.reset();
     ebc.eisa_bus().reset();
   }
   Intel82357* const isp;
@@ -104,13 +93,14 @@ private:
 
 JensenHostBus::JensenHostBus(CConfigurator* cfg, CSystem* system)
   : CSystemComponent(cfg, system),
-    feprom{load_feprom(cfg, 0), load_feprom(cfg, 1)},
+    feprom{{cfg, *system, 0}, {cfg, *system, 1}},
     isp(new Intel82357(cfg, system, *this, [system](bool asserted) {
       if (system->get_cpu_num())
         system->get_cpu(0)->irq_h(1, asserted, 0);
     })),
     ebc(*isp)
 {
+  feprom[0].check_paths(feprom[1]);
   system->RegisterMemory(this, SparseIO, U64(0x300000000), sparse_io_size);
   system->RegisterMemory(this, HostAddressExtension, U64(0x1d0000000), 4);
   system->RegisterMemory(this, InterruptAcknowledge, U64(0x100000000), 8);
@@ -123,10 +113,76 @@ JensenHostBus::JensenHostBus(CConfigurator* cfg, CSystem* system)
   save_item(ebc.eisa_bus().snapshot_state().drq_requests, "eisa.drq_requests");
 }
 
+JensenHostBus::~JensenHostBus()
+{
+  for (auto& socket : feprom) {
+    try {
+      socket.pause();
+    } catch (const CException& error) {
+      printf("%%FLS-F-NOSAVE: %s\n", error.displayText().c_str());
+    }
+  }
+}
+
+void JensenHostBus::start_threads()
+{
+  std::lock_guard<std::recursive_mutex> lock(cSystem->get_device_bus_mutex());
+  for (auto& socket : feprom)
+    socket.resume();
+}
+
+void JensenHostBus::stop_threads()
+{
+  std::lock_guard<std::recursive_mutex> lock(cSystem->get_device_bus_mutex());
+  for (auto& socket : feprom)
+    socket.pause();
+}
+
+void JensenHostBus::check_state()
+{
+  std::lock_guard<std::recursive_mutex> lock(cSystem->get_device_bus_mutex());
+  for (auto& socket : feprom)
+    socket.service(false);
+}
+
+void JensenHostBus::flush_storage()
+{
+  for (auto& socket : feprom)
+    socket.service(true);
+}
+
+int JensenHostBus::SaveState(FILE* file)
+{
+  if (fwrite("JFL1", 4, 1, file) != 1 || CSystemComponent::SaveState(file))
+    return -1;
+  return feprom[0].save(file) && feprom[1].save(file) ? 0 : -1;
+}
+
+int JensenHostBus::RestoreState(FILE* file)
+{
+  // Older host-bus records contain only registered state and used the original ROM bytes.
+  const int first = fgetc(file);
+  if (first == EOF || ungetc(first, file) == EOF)
+    return -1;
+  const bool legacy = first != 'J';
+  char tag[4];
+  if (!legacy && (fread(tag, sizeof(tag), 1, file) != 1 || memcmp(tag, "JFL1", sizeof(tag))))
+    return -1;
+  if (CSystemComponent::RestoreState(file))
+    return -1;
+  return feprom[0].restore(file, legacy) && feprom[1].restore(file, legacy) ? 0 : -1;
+}
+
+void JensenHostBus::finalize_restore() noexcept
+{
+  for (auto& socket : feprom)
+    socket.finalize_restore();
+}
+
 u64 JensenHostBus::ReadMem(int index, u64 address, int dsize)
 {
   if ((index == Feprom0 || index == Feprom1) && !(address & 0x1ff) && (dsize == 32 || dsize == 64))
-    return feprom[index - Feprom0][address >> 9]; // L_BUS drives the low byte (PB22H-KB, p. 8-8).
+    return feprom[index - Feprom0].read(u32(address >> 9)); // L_BUS drives the low byte (PB22H-KB, p. 8-8).
   if (index == HostAddressExtension && !address && dsize == 32)
     return hae;
   // Each aligned H_BUS read supplies one INTA pulse; the vector is in the low byte.
@@ -145,6 +201,10 @@ u64 JensenHostBus::ReadMem(int index, u64 address, int dsize)
 
 void JensenHostBus::WriteMem(int index, u64 address, int dsize, u64 data)
 {
+  if ((index == Feprom0 || index == Feprom1) && !(address & 0x1ff) && (dsize == 32 || dsize == 64)) {
+    feprom[index - Feprom0].write(u32(address >> 9), u8(data));
+    return;
+  }
   if (index == HostAddressExtension && !address && dsize == 32) {
     hae = (u8)(data & 0x7f);
     return;

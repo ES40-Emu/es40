@@ -505,6 +505,7 @@ list(APPEND ES40_SOURCES
     src/chipset/EISABus.cpp
     src/chipset/Intel82357.cpp
     src/chipset/Intel82357_dma.cpp
+    src/chipset/Intel28F008SA.cpp
     src/chipset/Intel82358.cpp
     src/chipset/VL82C106.cpp
     src/chipset/Pic8259.cpp
@@ -553,6 +554,7 @@ list(APPEND ES40_SOURCES
     src/storage/Sym53C810.cpp
     src/storage/Sym53C895.cpp
     src/system/System.cpp
+    src/system/JensenFlash.cpp
     src/system/System_jensen.cpp
     src/system/System_es40.cpp
     src/system/System_tsunami.cpp

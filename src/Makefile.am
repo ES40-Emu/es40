@@ -179,12 +179,14 @@ noinst_HEADERS += storage/Disk.h \
        chipset/ISABus.h \
        chipset/EISABus.h \
        chipset/Intel82357.h \
+       chipset/Intel28F008SA.h \
        chipset/Intel82358.h \
        chipset/VL82C106.h \
        chipset/Pic8259.h \
        system/DPR.h \
        system/Flash.h \
        system/System.h \
+       system/JensenFlash.h \
        system/System_jensen.h \
        system/System_tsunami.h \
        system/i2c_spd.h \
@@ -296,6 +298,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        chipset/EISABus.cpp \
        chipset/Intel82357.cpp \
        chipset/Intel82357_dma.cpp \
+       chipset/Intel28F008SA.cpp \
        chipset/Intel82358.cpp \
        chipset/VL82C106.cpp \
        chipset/Pic8259.cpp \
@@ -347,6 +350,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        storage/Sym53C895.cpp \
        emu/SystemComponent.cpp \
        system/System.cpp \
+       system/JensenFlash.cpp \
        system/System_jensen.cpp \
        system/System_es40.cpp \
        system/System_tsunami.cpp \

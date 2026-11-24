@@ -170,7 +170,7 @@ void AHA1742::start_ccb(u32 address)
   // The option flags in bits 14-12 are not part of the operation code (AHA-1740A TRM, p. 6-4).
   const u16 operation = get_le16(ecb + CommandWord) & 0x0fff, flags = get_le16(ecb + FlagWord1);
   // Other operations are not carried out yet.
-  if (operation != InitiatorCommand && operation != ReadInquiryData)
+  if (operation != InitiatorCommand && operation != ReadSenseInformation && operation != ReadInquiryData)
     return;
   u8 status[32]{};
   // With every completion slot taken the control block is refused with Queue Full and no action is taken on it (AHA-1740A TRM, p. 6-14).
@@ -181,6 +181,8 @@ void AHA1742::start_ccb(u32 address)
   }
   if (operation == InitiatorCommand)
     initiator_command(ecb, status);
+  else if (operation == ReadSenseInformation)
+    read_sense_information(ecb, status);
   else
     read_inquiry_data(ecb, status);
   // The host is interrupted unless the command is done without error and it set Disable Interrupt (AHA-1740A TRM, pp. 6-5, 6-15).
@@ -236,27 +238,14 @@ void AHA1742::initiator_command(const u8* ecb, u8* status)
     entries = length / 8;
   }
   const scsi_result command = scsi_command(ecb, ecb + CDBBytes, cdb_length, list, entries);
-  // With no target at the ID in ATTN bits 3-0 the selection times out, which is a major error (AHA-1740A TRM, pp. 6-16, 6-17, 6-26).
-  if (!command.selected) {
-    put_le16(status + StatusWord, MajorError);
-    status[HostAdapterStatus] = SelectionTimeout;
+  if (!report_target(command, status))
     return;
-  }
-  // Only Good status leaves the command done without error, and a check condition is not a major error (AHA-1740A TRM, pp. 6-14, 6-16).
-  status[TargetStatus] = command.status;
-  put_le16(status + StatusWord, command.status ? 0 : CommandDone);
-  // With Automatic Request Sense set, a check condition is followed at once by a Request Sense for as many bytes as the sense length allows (AHA-1740A TRM, pp. 6-6, 6-12).
+  // With Automatic Request Sense set, a check condition is followed at once by a Request Sense (AHA-1740A TRM, p. 6-6).
   if (command.status == CheckCondition && (flags1 & AutomaticRequestSense)) {
     u8 pair[8];
-    put_le32(pair, get_le32(ecb + SensePointer));
-    put_le32(pair + 4, ecb[SenseLength]);
-    const u8 cdb[6] = {0x03, 0, 0, 0, ecb[SenseLength], 0};
-    const scsi_result sense = scsi_command(ecb, cdb, u8(sizeof(cdb)), pair, 1);
+    const scsi_result sense = request_sense(ecb, pair);
     if (sense.selected && !sense.status) {
-      // Sense Information Stored comes with one byte of additional status, byte 14, which counts the sense bytes stored (AHA-1740A TRM, pp. 6-16, 6-19).
-      put_le16(status + StatusWord, AdditionalStatus | SenseStored);
-      put_le16(status + AdditionalStatusLength, 1);
-      status[StoredSenseLength] = u8(sense.moved);
+      sense_stored(status, sense.moved);
     } else {
       // A Request Sense that does not end with Good status is a major error of its own (AHA-1740A TRM, p. 6-17).
       put_le16(status + StatusWord, MajorError);
@@ -264,6 +253,49 @@ void AHA1742::initiator_command(const u8* ecb, u8* status)
     }
   }
   account_transfer(ecb, status, list, entries, command.moved, command.overrun);
+}
+
+// Read Sense Information: the adapter issues a Request Sense to the target, as the host must ask after a check condition without Automatic Request Sense (AHA-1740A TRM, p. 6-34).
+void AHA1742::read_sense_information(const u8* ecb, u8* status)
+{
+  u8 pair[8];
+  const scsi_result sense = request_sense(ecb, pair);
+  if (!report_target(sense, status))
+    return;
+  if (!sense.status)
+    sense_stored(status, sense.moved);
+  // Suppress Error on Underrun is supported, so the sense bytes are counted against the sense length as data is against its length (AHA-1740A TRM, p. 6-35).
+  account_transfer(ecb, status, pair, 1, sense.moved, sense.overrun);
+}
+
+// What the target made of a command: no answer to the selection is a timeout and a major error, and only Good status leaves the command done without error (AHA-1740A TRM, pp. 6-14, 6-16, 6-17).
+bool AHA1742::report_target(const scsi_result& result, u8* status)
+{
+  if (!result.selected) {
+    put_le16(status + StatusWord, MajorError);
+    status[HostAdapterStatus] = SelectionTimeout;
+    return false;
+  }
+  status[TargetStatus] = result.status;
+  put_le16(status + StatusWord, result.status ? 0 : CommandDone);
+  return true;
+}
+
+// Request Sense for as many bytes as the sense length allows, stored at the sense information pointer; pair is filled with that data area (AHA-1740A TRM, pp. 6-6, 6-12).
+AHA1742::scsi_result AHA1742::request_sense(const u8* ecb, u8* pair)
+{
+  put_le32(pair, get_le32(ecb + SensePointer));
+  put_le32(pair + 4, ecb[SenseLength]);
+  const u8 cdb[6] = {0x03, 0, 0, 0, ecb[SenseLength], 0};
+  return scsi_command(ecb, cdb, u8(sizeof(cdb)), pair, 1);
+}
+
+// Sense Information Stored comes with one byte of additional status, byte 14, which counts the sense bytes stored (AHA-1740A TRM, pp. 6-16, 6-19).
+void AHA1742::sense_stored(u8* status, u32 count)
+{
+  put_le16(status + StatusWord, u16(get_le16(status + StatusWord) | AdditionalStatus | SenseStored));
+  put_le16(status + AdditionalStatusLength, 1);
+  status[StoredSenseLength] = u8(count);
 }
 
 // One command on the adapter's SCSI bus, from selection to the target's status byte, for the target in ATTN bits 3-0 and the LUN in the control block.
@@ -355,8 +387,8 @@ void AHA1742::account_transfer(const u8* ecb, u8* status, const u8* list, u32 en
   put_le16(status + StatusWord, word);
   // The residual count is what is left of the pair used last, or zero after an overrun (AHA-1740A TRM, p. 6-18).
   put_le32(status + ResidualCount, overrun ? 0 : u32(end - moved));
-  // The residual address is the data pointer, or with Scatter/Gather set the address in the list of the pair used last (AHA-1740A TRM, pp. 6-18, 6-19).
-  put_le32(status + ResidualAddress, get_le32(ecb + DataPointer) + ((get_le16(ecb + FlagWord1) & ScatterGather) ? 8 * last : 0));
+  // The residual address is the area's own pointer, or with Scatter/Gather set the address in the list of the pair used last (AHA-1740A TRM, pp. 6-18, 6-19).
+  put_le32(status + ResidualAddress, (get_le16(ecb + FlagWord1) & ScatterGather) ? get_le32(ecb + DataPointer) + 8 * last : get_le32(list));
 }
 
 // With the EISA interrupt clear, the oldest completion is loaded in the mailbox in and its status code sets the interrupt (AHA-1740A TRM, pp. 4-20, 4-22).

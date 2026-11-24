@@ -59,7 +59,7 @@ private:
   // Byte offsets in the 48-byte control block and the 32-byte status block (AHA-1740A TRM, pp. 6-3, 6-13).
   enum { CommandWord = 0x00, FlagWord1 = 0x02, FlagWord2 = 0x04, DataPointer = 0x08, DataLength = 0x0c, StatusBlockPointer = 0x10, SensePointer = 0x1c, SenseLength = 0x20, CDBLength = 0x21, CDBBytes = 0x24 };
   enum { StatusWord = 0x00, HostAdapterStatus = 0x02, TargetStatus = 0x03, ResidualCount = 0x04, ResidualAddress = 0x08, AdditionalStatusLength = 0x0c, StoredSenseLength = 0x0e };
-  enum { InitiatorCommand = 0x01, ReadInquiryData = 0x0a }; // Operation codes (AHA-1740A TRM, p. 6-4).
+  enum { InitiatorCommand = 0x01, ReadSenseInformation = 0x08, ReadInquiryData = 0x0a }; // Operation codes (AHA-1740A TRM, p. 6-4).
   // Flag word 1 bits 7, 10, 12, 14 and 15 (AHA-1740A TRM, pp. 6-5, 6-6).
   enum { DisableInterrupt = 0x0080, SuppressUnderrunError = 0x0400, ScatterGather = 0x1000, DisableStatusBlock = 0x4000, AutomaticRequestSense = 0x8000 };
   enum { LogicalUnit = 0x0007, NoDisconnect = 0x0040 }; // Flag word 2 bits 2-0 and 6 (AHA-1740A TRM, p. 6-7).
@@ -74,6 +74,10 @@ private:
   void start_ccb(u32 address);
   void read_inquiry_data(const u8* ecb, u8* status);
   void initiator_command(const u8* ecb, u8* status);
+  void read_sense_information(const u8* ecb, u8* status);
+  bool report_target(const scsi_result& result, u8* status);
+  scsi_result request_sense(const u8* ecb, u8* pair);
+  void sense_stored(u8* status, u32 count);
   scsi_result scsi_command(const u8* ecb, const u8* cdb, u8 cdb_length, const u8* list, u32 entries);
   // The data area is given as 8-byte {pointer, length} pairs: the control block's own, or its scatter/gather list (AHA-1740A TRM, pp. 6-10, 6-11).
   u32 move_data(const u8* list, u32 entries, u32 skip, u8* data, u32 count, bool to_host);

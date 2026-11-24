@@ -605,13 +605,13 @@ bool CKeyboard::apply_input_key(u32 key, size_t source)
 		return false;
 	if (!external && !down)
 		held = false;
-	if ((!other || (down && held)) && !gen_scancode_locked(key))
+	if ((!other || (down && held)) && !gen_scancode_locked(key, down && held))
 		return false;
 	held = down;
 	return true;
 }
 
-bool CKeyboard::gen_scancode_locked(u32 key)
+bool CKeyboard::gen_scancode_locked(u32 key, bool repeat)
 {
 	if ((key & ~BX_KEY_RELEASED) >= BX_KEY_NBKEYS || state.current_scancodes_set >= 3)
 		return false;
@@ -686,6 +686,14 @@ bool CKeyboard::gen_scancode_locked(u32 key)
 	// for Set 2, key release is indicated by a f0 prefix in
 	// those cases where it is indicated. There is nothing
 	// special with the Pause key in scancode mode 3.
+	if (state.current_scancodes_set == 2)
+	{
+		const auto type = state.set3_key_types[key & ~BX_KEY_RELEASED];
+		if (repeat && (type == Set3KeyType::MakeOnly || type == Set3KeyType::MakeBreak))
+			return true;
+		if ((key & BX_KEY_RELEASED) && (type == Set3KeyType::MakeOnly || type == Set3KeyType::Typematic))
+			return true;
+	}
 	if (key & BX_KEY_RELEASED)
 		scancode = (unsigned char*)scancodes[(key & 0xFF)][state.current_scancodes_set].brek;
 	else
@@ -784,7 +792,9 @@ void CKeyboard::resetinternals(bool powerup)
 	state.deferred_scancode_valid = false;
 
 	state.kbd_internal_buffer.expecting_typematic = 0;
-	state.kbd_internal_buffer.expecting_make_break = 0;
+	state.kbd_internal_buffer.expecting_key_id = false;
+	state.set3_key_command = Set3KeyType::Default;
+	state.set3_key_types.fill(Set3KeyType::Default);
 
 	// Translation is controlled by the 8042; the scancode table uses zero-based sets.
 	state.expecting_scancodes_set = 0;
@@ -1490,7 +1500,7 @@ bool CKeyboard::input_transaction_active() const
 		|| state.expecting_scancodes_set
 		|| state.kbd_internal_buffer.expecting_typematic
 		|| state.kbd_internal_buffer.expecting_led_write
-		|| state.kbd_internal_buffer.expecting_make_break
+		|| state.kbd_internal_buffer.expecting_key_id
 		|| state.expecting_mouse_parameter;
 }
 
@@ -1631,14 +1641,26 @@ void CKeyboard::ctrl_to_kbd(u8 value)
 #ifdef DEBUG_KBD
 	BX_DEBUG(("controller passed byte %02xh to keyboard", value));
 #endif
-	if (state.kbd_internal_buffer.expecting_make_break)
+	if (state.set3_key_command != Set3KeyType::Default)
 	{
-		state.kbd_internal_buffer.expecting_make_break = 0;
-#ifdef DEBUG_KBD
-		printf("setting key %x to make/break mode (unused)   \n", value);
-#endif
-		kbd_response_enQ(0xFA);      // send ACK
-		return;
+		// Key IDs always use the set 3 make code (IBM Keyboard Technical Reference, Fig. 3).
+		state.kbd_internal_buffer.expecting_key_id = false;
+		bool found = false;
+		for (size_t key = 0; key < state.set3_key_types.size(); ++key)
+		{
+			const char* make = scancodes[key][2].make;
+			if (*make && u8(*make) == value && !make[1])
+			{
+				state.set3_key_types[key] = state.set3_key_command;
+				found = true;
+			}
+		}
+		if (found)
+		{
+			kbd_response_enQ(0xFA);      // send ACK
+			return;
+		}
+		state.set3_key_command = Set3KeyType::Default;
 	}
 
 	if (state.kbd_internal_buffer.expecting_typematic)
@@ -1804,14 +1826,6 @@ void CKeyboard::ctrl_to_kbd(u8 value)
 #endif
 		break;
 
-	case 0xfc:        // PS/2 Set Key Type to Make/Break
-		state.kbd_internal_buffer.expecting_make_break = 1;
-#ifdef DEBUG_KBD
-		printf("kbd: Expecting make/break info.   \n");
-#endif
-		kbd_response_enQ(0xFA);      /* send ACK */
-		break;
-
 	case 0xfe:        // resend. aiiee.
 		printf("kbd: resend command received.   \n");
 		break;
@@ -1831,13 +1845,28 @@ void CKeyboard::ctrl_to_kbd(u8 value)
 		//  break;
 	case 0xf7:        // PS/2 Set All Keys To Typematic
 	case 0xf8:        // PS/2 Set All Keys to Make/Break
-	case 0xf9:        // PS/2 PS/2 Set All Keys to Make
+	case 0xf9:        // PS/2 Set All Keys to Make
 	case 0xfa:        // PS/2 Set All Keys to Typematic Make/Break
 	case 0xfb:        // PS/2 Set Key Type to Typematic
+	case 0xfc:        // PS/2 Set Key Type to Make/Break
 	case 0xfd:        // PS/2 Set Key Type to Make
-		printf("kbd: unhandled command: %02x, ACKing     \n", value);
+	{
+		// Both command groups use the same key types (IBM Keyboard Technical Reference, Figs. 2–3).
+		static constexpr Set3KeyType types[] = {Set3KeyType::Typematic, Set3KeyType::MakeBreak,
+			Set3KeyType::MakeOnly, Set3KeyType::TypematicMakeBreak};
+		if (value <= 0xfa)
+			state.set3_key_types.fill(types[value - 0xf7]);
+		else
+		{
+			state.set3_key_command = types[value - 0xfb];
+			state.kbd_internal_buffer.expecting_key_id = true;
+		}
+		state.kbd_internal_buffer.num_elements = 0;
+		state.kbd_internal_buffer.head = 0;
+		state.deferred_scancode_valid = false;
 		kbd_response_enQ(0xFA);
 		break;
+	}
 
 	default:
 		printf("kbd: command %02x: not recognized!   \n", value);
@@ -2486,10 +2515,9 @@ int CKeyboard::SaveState(FILE* f)
 {
 	long  ss = sizeof(state);
 
-	fwrite(&kb_magic1, sizeof(u32), 1, f);
-	fwrite(&ss, sizeof(long), 1, f);
-	fwrite(&state, sizeof(state), 1, f);
-	fwrite(&kb_magic2, sizeof(u32), 1, f);
+	if (fwrite(&kb_magic1, sizeof(u32), 1, f) != 1 || fwrite(&ss, sizeof(long), 1, f) != 1 ||
+		fwrite(&state, sizeof(state), 1, f) != 1 || fwrite(&kb_magic2, sizeof(u32), 1, f) != 1)
+		return -1;
 	printf("kbc: %d bytes saved.\n", (int)ss);
 	return 0;
 }
@@ -2538,7 +2566,8 @@ int CKeyboard::RestoreState(FILE* f)
 		return -1;
 	}
 
-	r = fread(&state, sizeof(state), 1, f);
+	SKb_state restored{};
+	r = fread(&restored, sizeof(restored), 1, f);
 	if (r != 1)
 	{
 		printf("kbc: unexpected end of file!\n");
@@ -2558,6 +2587,13 @@ int CKeyboard::RestoreState(FILE* f)
 		return -1;
 	}
 
+	if (restored.set3_key_command >= Set3KeyType::TypematicMakeBreak ||
+		(restored.kbd_internal_buffer.expecting_key_id && restored.set3_key_command == Set3KeyType::Default))
+		return -1;
+	for (auto type : restored.set3_key_types)
+		if (type > Set3KeyType::TypematicMakeBreak)
+			return -1;
+	state = restored;
 	printf("kbc: %d bytes restored.\n", (int)ss);
 	return 0;
 }

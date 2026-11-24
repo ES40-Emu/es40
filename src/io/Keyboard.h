@@ -190,7 +190,7 @@ private:
   void service_input();
   void service_input_release();
   bool apply_input_key(u32 key, size_t source = INPUT_SOURCES);
-  bool gen_scancode_locked(u32 key);
+  bool gen_scancode_locked(u32 key, bool repeat = false);
 
   u8        read_60();
   void      write_60(u8 data);
@@ -214,6 +214,8 @@ private:
   void      create_mouse_packet(bool force_enq);
 
 protected:
+  enum class Set3KeyType : u8 { Default, MakeOnly, MakeBreak, Typematic, TypematicMakeBreak };
+
   /// The state structure contains all elements that need to be saved to the statefile.
   struct SKb_state
   {
@@ -311,7 +313,7 @@ protected:
       int   head;
       bool  expecting_typematic;
       bool  expecting_led_write;
-      bool  expecting_make_break;
+      bool  expecting_key_id;
       u8    delay;
       u8    repeat_rate;
       u8    led_status;
@@ -330,6 +332,8 @@ protected:
     u8        kbd_controller_Q[BX_KBD_CONTROLLER_QSIZE];
     unsigned  kbd_controller_Qsize;
     unsigned  kbd_controller_Qsource; /**< Per-entry source bitmask: 0=keyboard, 1=mouse. */
+    std::array<Set3KeyType, BX_KEY_NBKEYS> set3_key_types;
+    Set3KeyType set3_key_command;
   } state{};
 };
 

@@ -149,6 +149,7 @@
 #include "storage/DiskRam.h"
 #include "io/Port80.h"
 #include "graphics/S3Trio64.h"
+#include "graphics/NumberNineGXE.h"
 #include "graphics/GloriaSynergy.h"
 #include "graphics/Radeon7500.h"
 #include "graphics/PowerStorm3xx.h"
@@ -836,6 +837,7 @@ classinfo classes[] = {
   {"ali_pmu", c_ali_pmu, IS_PCI, kv_none},
   {"serial", c_serial, ON_CS, kv_serial},
   {"s3", c_s3, IS_PCI | ON_GUI, kv_vga},
+  {"number9_gxe", c_number9_gxe, IS_ISA | ON_CS | ON_GUI, kv_vga},
   {"gloria", c_gloria, IS_PCI | ON_GUI, kv_gloria},
   {"radeon", c_radeon, IS_PCI | ON_GUI, kv_radeon},
   {"powerstorm", c_powerstorm, IS_PCI | ON_GUI, kv_powerstorm},
@@ -1023,7 +1025,7 @@ void CConfigurator::initialize()
 #endif
 
 	// An ISA slot name selects the ISA form of the card; the slot stands in for the PCI position.
-	if (!(myFlags & IS_ISA) && is_isa_card(*device, myName))
+	if (is_isa_card(*device, myName))
 	{
 		unsigned bus, slot;
 		if (!parse_isa_slot(myName, bus, slot))
@@ -1249,6 +1251,11 @@ void CConfigurator::initialize()
 	case c_ali_pmu:
 		myDevice = new CAliM1543C_pmu(this, (CSystem*)pParent->get_device(),
 			pcibus, pcidev);
+		break;
+
+	case c_number9_gxe:
+		myDevice = new NumberNineGXE(this, (CSystem*)pParent->get_device(), pcibus,
+			pcidev, bx_gui->display_for_output(get_device_path(), 0));
 		break;
 
 	case c_s3:

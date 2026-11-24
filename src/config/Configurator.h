@@ -110,6 +110,7 @@ typedef enum
   c_wss,
   c_aha1742,
   c_de422,
+  c_number9_gxe,
 
   // pci devices
   c_ali,

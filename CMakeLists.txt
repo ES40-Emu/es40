@@ -550,6 +550,7 @@ list(APPEND ES40_SOURCES
     src/graphics/REALimage2100.cpp
     src/graphics/RV200.cpp
     src/graphics/S3Trio64.cpp
+    src/graphics/NumberNineGXE.cpp
     src/graphics/Bt485.cpp
     src/graphics/Icd2061A.cpp
     src/storage/SCSIBus.cpp

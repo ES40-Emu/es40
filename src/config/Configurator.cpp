@@ -849,7 +849,7 @@ classinfo classes[] = {
   {"X11", c_x11, N_P | IS_GUI, kv_gui_x11},
   {"mpu401", c_mpu401, IS_ISA | ON_CS, kv_mpu401},
   {"wss", c_wss, IS_ISA | ON_CS, kv_wss},
-  {"aha1742", c_aha1742, IS_ISA | ON_CS, kv_none},
+  {"aha1742", c_aha1742, IS_ISA | ON_CS | HAS_DISK, kv_none},
   {"es1370", c_es1370, IS_PCI, kv_es1370},
   {"es1371", c_es1371, IS_PCI, kv_es1371},
   {0, c_none, 0, 0}
@@ -1321,7 +1321,8 @@ void CConfigurator::initialize()
 		// The card identifies itself by slot, which only an EISA bus provides.
 		auto* eisa = dynamic_cast<EISABus*>(system->isa_bus(bus));
 		if (!eisa) FAILURE_1(Configuration, "%s needs an EISA slot", myName);
-		myDevice = new AHA1742(this, system, *eisa, slot);
+		// As with the other disk controllers, myDevice is the CDiskController part that disks register with.
+		myDevice = static_cast<CDiskController*>(new AHA1742(this, system, *eisa, slot));
 		break;
 	}
 	case c_es1370:

@@ -29,14 +29,17 @@
 #define ES40_AHA1742_H
 
 #include "emu/SystemComponent.h"
+#include "DiskController.h"
+#include "SCSIDevice.h"
 
 class EISABus;
 
 // Host interface of the AHA-1742A as system software sees it; the card's own microcode is not run.
-class AHA1742 final : public CSystemComponent
+class AHA1742 final : public CSystemComponent, public CDiskController, public CSCSIDevice
 {
 public:
   AHA1742(CConfigurator* cfg, CSystem* system, EISABus& bus, unsigned slot);
+  void register_disk(CDisk* dsk, int bus, int dev) override;
   bool decodes_memory_access(int index, u64 address, int dsize, bool write) const noexcept override;
   u64 ReadMem(int index, u64 address, int dsize) override;
   void WriteMem(int index, u64 address, int dsize, u64 data) override;

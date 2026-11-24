@@ -28,6 +28,8 @@
 #include "StdAfx.h"
 #include "AHA1742.h"
 #include "chipset/EISABus.h"
+#include "Disk.h"
+#include "SCSIBus.h"
 
 // What Read Host Adapter Inquiry Data returns; a real board's name and release fields are not known (AHA-1740A TRM, pp. 6-31 to 6-33).
 static const u8 inquiry_data[] = {
@@ -45,8 +47,10 @@ static const u8 inquiry_data[] = {
 };
 
 AHA1742::AHA1742(CConfigurator* cfg, CSystem* system, EISABus& bus, unsigned slot)
-  : CSystemComponent(cfg, system), bus(bus), slot(slot)
+  : CSystemComponent(cfg, system), CDiskController(1, 8), bus(bus), slot(slot)
 {
+  // The adapter is the initiator on its SCSI bus and takes no ID as a target, since Target Mode stays disabled (AHA-1740A TRM, p. 5-10).
+  scsi_bus[0] = new CSCSIBus(cfg, system);
   // HID0-HID3 spell "ADP", product 00h, revision 02h for the AHA-1742A (AHA-1740A TRM, pp. 4-11, 4-12).
   bus.register_slot_id(slot, {0x04, 0x90, 0x00, 0x02});
   // The configuration registers are byte-wide and accessible at any time (AHA-1740A TRM, p. 4-12).
@@ -63,6 +67,16 @@ AHA1742::AHA1742(CConfigurator* cfg, CSystem* system, EISABus& bus, unsigned slo
   save_item(completion_head, "completion_head");
   save_item(completion_count, "completion_count");
   save_item(in_reset, "in_reset");
+}
+
+void AHA1742::register_disk(CDisk* dsk, int bus, int dev)
+{
+  // The SCSI data bus is 8 bits wide, which gives eight IDs (AHA-1740A TRM, p. 6-33).
+  if (bus != 0 || dev < 0 || dev > 7)
+    FAILURE(Configuration, "AHA-1742A disks are named disk0.0 to disk0.7");
+  CDiskController::register_disk(dsk, bus, dev);
+  dsk->scsi_register(0, scsi_bus[0], dev);
+  dsk->scsi_reset();
 }
 
 bool AHA1742::decodes_memory_access(int index, u64, int, bool) const noexcept

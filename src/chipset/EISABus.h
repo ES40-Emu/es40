@@ -76,6 +76,9 @@ public:
   CDMA::SDMA_result slot_dma_recv_unit(unsigned slot, int channel, u16& data, bool eop = false);
   CDMA::SDMA_result slot_dma_recv_unit(unsigned slot, int channel, u32& data, bool eop = false);
   CDMA::SDMA_result slot_dma_eop(unsigned slot, int channel);
+  // A bus master in an enabled slot reads or writes system memory at an EISA address, under the device-bus lock.
+  bool slot_master_read(unsigned slot, u32 address, void* dest, size_t bytes);
+  bool slot_master_write(unsigned slot, u32 address, const void* source, size_t bytes);
 
   // Unclaimed logical port reads leave data untouched.
   bool read_port(u16 port, u8& data);

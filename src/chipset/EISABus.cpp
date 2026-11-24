@@ -288,6 +288,23 @@ CDMA::SDMA_result EISABus::slot_dma_eop(unsigned slot, int channel)
   return dma->service_eop(channel, slot);
 }
 
+// The host answers a master's memory cycle as it does a DMA cycle (PB22H-KB, p. 7-2).
+bool EISABus::slot_master_read(unsigned slot, u32 address, void* dest, size_t bytes)
+{
+  if (!slot_enabled(slot))
+    return false;
+  host.dma_read_memory(address, dest, bytes);
+  return true;
+}
+
+bool EISABus::slot_master_write(unsigned slot, u32 address, const void* source, size_t bytes)
+{
+  if (!slot_enabled(slot))
+    return false;
+  host.dma_write_memory(address, source, bytes);
+  return true;
+}
+
 void EISABus::reset()
 {
   const RequestLines previous = active_requests();

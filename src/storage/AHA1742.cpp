@@ -70,6 +70,9 @@ AHA1742::AHA1742(CConfigurator* cfg, CSystem* system, EISABus& bus, unsigned slo
   save_item(completions, "completions");
   save_item(completion_head, "completion_head");
   save_item(completion_count, "completion_count");
+  save_item(held, "held");
+  save_item(held_count, "held_count");
+  save_item(allegiance, "allegiance");
   save_item(in_reset, "in_reset");
 }
 
@@ -134,7 +137,7 @@ void AHA1742::WriteMem(int index, u64 address, int dsize, u64 data)
     // For Start CCB it then reads the mailbox out address and sets Mailbox Out Empty (AHA-1740A TRM, p. 4-20).
     if (!in_reset && attn >> 4 == StartCCB) {
       g2stat |= MailboxOutEmpty;
-      start_ccb(get_le32(mboxout));
+      start_ccb(get_le32(mboxout), attn & 0x0f);
     }
     return;
   }
@@ -149,8 +152,10 @@ void AHA1742::WriteMem(int index, u64 address, int dsize, u64 data)
   if (data & HardReset) {
     in_reset = true;
     g2stat |= Busy;
-    // The local processor loses what it held, waiting completions included (AHA-1740A TRM, p. 4-8).
+    // The local processor loses what it held, waiting completions and kept control blocks included, and a reset ends every allegiance (AHA-1740A TRM, pp. 4-8, 6-18).
     completion_count = 0;
+    held_count = 0;
+    allegiance = 0;
   } else if (in_reset) {
     // Released with diagnostics passing: 00 is loaded in MBOXIN0, Busy clears and the mailbox out is empty (AHA-1740A TRM, pp. 4-20, 4-21).
     in_reset = false;
@@ -161,7 +166,8 @@ void AHA1742::WriteMem(int index, u64 address, int dsize, u64 data)
   post_completion();
 }
 
-void AHA1742::start_ccb(u32 address)
+// A control block is started with the SCSI ID that was in ATTN bits 3-0 when its address was given (AHA-1740A TRM, p. 6-20).
+void AHA1742::start_ccb(u32 address, u8 target)
 {
   // Control and status block fields are stored least significant byte first (AHA-1740A TRM, p. 6-10).
   u8 ecb[48];
@@ -173,31 +179,53 @@ void AHA1742::start_ccb(u32 address)
   if (operation != InitiatorCommand && operation != ReadSenseInformation && operation != ReadInquiryData)
     return;
   u8 status[32]{};
-  // With every completion slot taken the control block is refused with Queue Full and no action is taken on it (AHA-1740A TRM, p. 6-14).
-  if (completion_count == QueueSize) {
+  // With every slot taken, by waiting completions and kept control blocks, the control block is refused with Queue Full and no action is taken on it (AHA-1740A TRM, p. 6-14).
+  if (completion_count + held_count == QueueSize) {
     put_le16(status + StatusWord, QueueFull);
     bus.slot_master_write(slot, get_le32(ecb + StatusBlockPointer), status, sizeof(status));
     return;
   }
+  // While its target is in contingent allegiance a control block is accepted and kept, not carried out, unless it is the Read Sense Information that ends it (AHA-1740A TRM, p. 6-18).
+  if ((allegiance >> target & 1) && operation != ReadSenseInformation) {
+    held[held_count++] = u64(target) << 32 | address;
+    return;
+  }
   if (operation == InitiatorCommand)
-    initiator_command(ecb, status);
+    initiator_command(ecb, target, status);
   else if (operation == ReadSenseInformation)
-    read_sense_information(ecb, status);
+    read_sense_information(ecb, target, status);
   else
     read_inquiry_data(ecb, status);
-  // The host is interrupted unless the command is done without error and it set Disable Interrupt (AHA-1740A TRM, pp. 6-5, 6-15).
   const u16 word = get_le16(status + StatusWord);
+  // A check condition whose sense information was not stored puts the target in contingent allegiance (AHA-1740A TRM, p. 6-18).
+  if (status[TargetStatus] == CheckCondition && !(word & SenseStored))
+    allegiance |= u16(1 << target);
+  // The host is interrupted unless the command is done without error and it set Disable Interrupt (AHA-1740A TRM, pp. 6-5, 6-15).
   const bool interrupt = !(word & CommandDone) || !(flags & DisableInterrupt);
   put_le16(status + StatusWord, u16(word | (interrupt ? InterruptIssued : 0)));
   // The status block is left out only when the command is done without error and the host disabled it (AHA-1740A TRM, p. 6-11).
   if (!(word & CommandDone) || !(flags & DisableStatusBlock))
     bus.slot_master_write(slot, get_le32(ecb + StatusBlockPointer), status, sizeof(status));
-  if (!interrupt)
+  if (interrupt) {
+    // The completion waits its turn with its status code and target, behind any the host has not yet taken (AHA-1740A TRM, pp. 4-20, 4-22).
+    const u8 code = u8(((word & CommandDone) ? CompletedGood : CompletedError) << 4 | target);
+    completions[(completion_head + completion_count++) % QueueSize] = u64(code) << 32 | address;
+    post_completion();
+  }
+  // Completion of Read Sense Information releases the allegiance, and the target's kept control blocks are started in the order they came (AHA-1740A TRM, pp. 6-18, 6-34).
+  if (operation != ReadSenseInformation || !(allegiance >> target & 1))
     return;
-  // The completion waits its turn with its status code and target, behind any the host has not yet taken (AHA-1740A TRM, pp. 4-20, 4-22).
-  const u8 code = u8(((word & CommandDone) ? CompletedGood : CompletedError) << 4 | (attn & 0x0f));
-  completions[(completion_head + completion_count++) % QueueSize] = u64(code) << 32 | address;
-  post_completion();
+  allegiance &= u16(~(1 << target));
+  const u8 kept = held_count;
+  held_count = 0;
+  for (u8 i = 0; i < kept; ++i) {
+    // One of them can bring the allegiance back, and those after it are then kept again in the same order.
+    const u64 entry = held[i];
+    if (u8(entry >> 32) == target)
+      start_ccb(u32(entry), target);
+    else
+      held[held_count++] = entry;
+  }
 }
 
 // Read Host Adapter Inquiry Data: the data is cut to the length the host allows, and a longer buffer is left short (AHA-1740A TRM, pp. 6-30, 6-32).
@@ -211,7 +239,7 @@ void AHA1742::read_inquiry_data(const u8* ecb, u8* status)
 }
 
 // Initiator SCSI Command: the adapter selects the target and follows it through the bus phases of one command (AHA-1740A TRM, p. 6-26).
-void AHA1742::initiator_command(const u8* ecb, u8* status)
+void AHA1742::initiator_command(const u8* ecb, u8 target, u8* status)
 {
   const u8 cdb_length = ecb[CDBLength];
   const u16 flags1 = get_le16(ecb + FlagWord1);
@@ -237,13 +265,13 @@ void AHA1742::initiator_command(const u8* ecb, u8* status)
     list = gathered;
     entries = length / 8;
   }
-  const scsi_result command = scsi_command(ecb, ecb + CDBBytes, cdb_length, list, entries);
+  const scsi_result command = scsi_command(ecb, target, ecb + CDBBytes, cdb_length, list, entries);
   if (!report_target(command, status))
     return;
   // With Automatic Request Sense set, a check condition is followed at once by a Request Sense (AHA-1740A TRM, p. 6-6).
   if (command.status == CheckCondition && (flags1 & AutomaticRequestSense)) {
     u8 pair[8];
-    const scsi_result sense = request_sense(ecb, pair);
+    const scsi_result sense = request_sense(ecb, target, pair);
     if (sense.selected && !sense.status) {
       sense_stored(status, sense.moved);
     } else {
@@ -256,10 +284,10 @@ void AHA1742::initiator_command(const u8* ecb, u8* status)
 }
 
 // Read Sense Information: the adapter issues a Request Sense to the target, as the host must ask after a check condition without Automatic Request Sense (AHA-1740A TRM, p. 6-34).
-void AHA1742::read_sense_information(const u8* ecb, u8* status)
+void AHA1742::read_sense_information(const u8* ecb, u8 target, u8* status)
 {
   u8 pair[8];
-  const scsi_result sense = request_sense(ecb, pair);
+  const scsi_result sense = request_sense(ecb, target, pair);
   if (!report_target(sense, status))
     return;
   if (!sense.status)
@@ -282,12 +310,12 @@ bool AHA1742::report_target(const scsi_result& result, u8* status)
 }
 
 // Request Sense for as many bytes as the sense length allows, stored at the sense information pointer; pair is filled with that data area (AHA-1740A TRM, pp. 6-6, 6-12).
-AHA1742::scsi_result AHA1742::request_sense(const u8* ecb, u8* pair)
+AHA1742::scsi_result AHA1742::request_sense(const u8* ecb, u8 target, u8* pair)
 {
   put_le32(pair, get_le32(ecb + SensePointer));
   put_le32(pair + 4, ecb[SenseLength]);
   const u8 cdb[6] = {0x03, 0, 0, 0, ecb[SenseLength], 0};
-  return scsi_command(ecb, cdb, u8(sizeof(cdb)), pair, 1);
+  return scsi_command(ecb, target, cdb, u8(sizeof(cdb)), pair, 1);
 }
 
 // Sense Information Stored comes with one byte of additional status, byte 14, which counts the sense bytes stored (AHA-1740A TRM, pp. 6-16, 6-19).
@@ -298,10 +326,9 @@ void AHA1742::sense_stored(u8* status, u32 count)
   status[StoredSenseLength] = u8(count);
 }
 
-// One command on the adapter's SCSI bus, from selection to the target's status byte, for the target in ATTN bits 3-0 and the LUN in the control block.
-AHA1742::scsi_result AHA1742::scsi_command(const u8* ecb, const u8* cdb, u8 cdb_length, const u8* list, u32 entries)
+// One command on the adapter's SCSI bus, from selection to the target's status byte, for the control block's target and its LUN.
+AHA1742::scsi_result AHA1742::scsi_command(const u8* ecb, u8 target, const u8* cdb, u8 cdb_length, const u8* list, u32 entries)
 {
-  const u8 target = attn & 0x0f;
   const u16 flags2 = get_le16(ecb + FlagWord2);
   scsi_result result{};
   // The adapter is the only initiator on its bus, so it wins arbitration with the ID in SCSIDEF bits 3-0 (AHA-1740A TRM, p. 4-16).

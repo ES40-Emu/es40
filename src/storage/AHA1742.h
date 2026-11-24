@@ -71,14 +71,14 @@ private:
   enum { QueueSize = 64 }; // Control blocks the adapter holds at once (AHA-1740A TRM, p. 6-2).
   // What one command on the SCSI bus came to: whether a target answered, its status byte, the bytes moved and whether it wanted to move more.
   struct scsi_result { bool selected; u8 status; u32 moved; bool overrun; };
-  void start_ccb(u32 address);
+  void start_ccb(u32 address, u8 target);
   void read_inquiry_data(const u8* ecb, u8* status);
-  void initiator_command(const u8* ecb, u8* status);
-  void read_sense_information(const u8* ecb, u8* status);
+  void initiator_command(const u8* ecb, u8 target, u8* status);
+  void read_sense_information(const u8* ecb, u8 target, u8* status);
   bool report_target(const scsi_result& result, u8* status);
-  scsi_result request_sense(const u8* ecb, u8* pair);
+  scsi_result request_sense(const u8* ecb, u8 target, u8* pair);
   void sense_stored(u8* status, u32 count);
-  scsi_result scsi_command(const u8* ecb, const u8* cdb, u8 cdb_length, const u8* list, u32 entries);
+  scsi_result scsi_command(const u8* ecb, u8 target, const u8* cdb, u8 cdb_length, const u8* list, u32 entries);
   // The data area is given as 8-byte {pointer, length} pairs: the control block's own, or its scatter/gather list (AHA-1740A TRM, pp. 6-10, 6-11).
   u32 move_data(const u8* list, u32 entries, u32 skip, u8* data, u32 count, bool to_host);
   void account_transfer(const u8* ecb, u8* status, const u8* list, u32 entries, u32 moved, bool overrun);
@@ -99,6 +99,10 @@ private:
   u64 completions[QueueSize]{};
   u8 completion_head = 0;
   u8 completion_count = 0;
+  // Control blocks kept while their target is in contingent allegiance, oldest first: the target in bits 35-32 over the address (AHA-1740A TRM, p. 6-18).
+  u64 held[QueueSize]{};
+  u8 held_count = 0;
+  u16 allegiance = 0; // One bit for each SCSI ID that is in contingent allegiance.
   bool in_reset = false;
 };
 

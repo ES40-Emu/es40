@@ -305,6 +305,17 @@ bool EISABus::slot_master_write(unsigned slot, u32 address, const void* source, 
   return true;
 }
 
+void EISABus::set_slot_lock(unsigned slot, bool asserted)
+{
+  if (!slot_enabled(slot) || !slot_registered(slot))
+    return;
+  const u16 bit = (u16)(1U << slot);
+  if (asserted)
+    state.lock_requests |= bit;
+  else
+    state.lock_requests &= ~bit;
+}
+
 void EISABus::reset()
 {
   const RequestLines previous = active_requests();
@@ -376,8 +387,10 @@ bool EISABus::write_port(u16 port, int dsize, u32 data)
     const u16 bit = (u16)(1U << range->slot);
     if (data & 1)
       state.enabled_slots |= bit;
-    else
+    else {
       state.enabled_slots &= ~bit;
+      state.lock_requests &= ~bit;
+    }
     update_request_lines(previous);
   }
   return true;

@@ -41,6 +41,7 @@ public:
     // Legacy ISA input at index 0, EISA slots at 1-15.
     u16 irq_requests[16]{};
     u8 drq_requests[16]{};
+    u16 lock_requests = 0;
   };
 
   explicit EISABus(CDMAHost& host) : host(host) {}
@@ -79,6 +80,9 @@ public:
   // A bus master in an enabled slot reads or writes system memory at an EISA address, under the device-bus lock.
   bool slot_master_read(unsigned slot, u32 address, void* dest, size_t bytes);
   bool slot_master_write(unsigned slot, u32 address, const void* source, size_t bytes);
+  // A master asserts LOCK(L) on A59 to signal a pending lock (PB22H-KB, p. 3-2 and Table B-5).
+  void set_slot_lock(unsigned slot, bool asserted);
+  bool lock_pending() const noexcept { return state.lock_requests != 0; }
 
   // Unclaimed logical port reads leave data untouched.
   bool read_port(u16 port, u8& data);

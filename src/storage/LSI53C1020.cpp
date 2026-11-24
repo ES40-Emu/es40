@@ -323,31 +323,6 @@ static u32 olsi_cfg_mask[64] =
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-/* MPI messages contain little-endian byte fields. */
-static inline u16 read_le16(const u8* p)
-{
-	return (u16)((u16)p[0] | ((u16)p[1] << 8));
-}
-
-static inline u32 read_le32(const u8* p)
-{
-	return (u32)p[0] | ((u32)p[1] << 8) | ((u32)p[2] << 16) | ((u32)p[3] << 24);
-}
-
-static inline void write_le16(u8* p, u16 value)
-{
-	p[0] = (u8)value;
-	p[1] = (u8)(value >> 8);
-}
-
-static inline void write_le32(u8* p, u32 value)
-{
-	p[0] = (u8)value;
-	p[1] = (u8)(value >> 8);
-	p[2] = (u8)(value >> 16);
-	p[3] = (u8)(value >> 24);
-}
-
 /* Validate an x86 PCI option ROM and return its size. */
 static bool valid_option_rom(const u8* image, size_t available, u32* image_bytes)
 {
@@ -355,14 +330,14 @@ static bool valid_option_rom(const u8* image, size_t available, u32* image_bytes
 		return false;
 
 	const u32 bytes = (u32)image[2] * 512U;
-	const u32 pcir = read_le16(&image[0x18]);
+	const u32 pcir = get_le16(&image[0x18]);
 	if (bytes > available || pcir > bytes - 0x18U ||
 	    memcmp(&image[pcir], "PCIR", 4U) != 0 ||
-	    read_le16(&image[pcir + 4U]) != LSI_PCI_VENDOR_ID ||
-	    read_le16(&image[pcir + 6U]) != LSI_PCI_DEVICE_ID ||
-	    read_le16(&image[pcir + 0x0AU]) < 0x18U ||
-	    (read_le32(&image[pcir + 0x0CU]) >> 8) != LSI_PCI_CLASS_CODE ||
-	    (u32)read_le16(&image[pcir + 0x10U]) * 512U != bytes ||
+	    get_le16(&image[pcir + 4U]) != LSI_PCI_VENDOR_ID ||
+	    get_le16(&image[pcir + 6U]) != LSI_PCI_DEVICE_ID ||
+	    get_le16(&image[pcir + 0x0AU]) < 0x18U ||
+	    (get_le32(&image[pcir + 0x0CU]) >> 8) != LSI_PCI_CLASS_CODE ||
+	    (u32)get_le16(&image[pcir + 0x10U]) * 512U != bytes ||
 	    image[pcir + 0x14U] != 0)
 		return false;
 
@@ -384,22 +359,22 @@ static bool valid_option_rom(const u8* image, size_t available, u32* image_bytes
  */
 static bool valid_ioc_firmware(const u8* image, size_t available, u32* image_bytes)
 {
-	const u16 product_id = available >= 0x24U ? read_le16(&image[0x22]) : 0U;
-	if (available < 0x34U || read_le32(&image[0x04]) != 0x5AEAA55AU ||
-	    read_le32(&image[0x08]) != 0xA55AEAA5U ||
-	    read_le32(&image[0x0C]) != 0x5AA55AEAU ||
-	    read_le16(&image[0x20]) != LSI_PCI_VENDOR_ID ||
+	const u16 product_id = available >= 0x24U ? get_le16(&image[0x22]) : 0U;
+	if (available < 0x34U || get_le32(&image[0x04]) != 0x5AEAA55AU ||
+	    get_le32(&image[0x08]) != 0xA55AEAA5U ||
+	    get_le32(&image[0x0C]) != 0x5AA55AEAU ||
+	    get_le16(&image[0x20]) != LSI_PCI_VENDOR_ID ||
 	    (product_id != LSI_FW_PRODUCT_1020_C0 &&
 	     product_id != LSI_FW_PRODUCT_1030_B0_COMPAT))
 		return false;
 
-	const u32 bytes = read_le32(&image[0x2C]);
+	const u32 bytes = get_le32(&image[0x2C]);
 	if (bytes < 0x34U || bytes > available || (bytes & 3U) != 0)
 		return false;
 
 	u32 checksum = 0;
 	for (u32 i = 0; i < bytes; i += 4U)
-		checksum += read_le32(&image[i]);
+		checksum += get_le32(&image[i]);
 	if (checksum != 0)
 		return false;
 
@@ -671,8 +646,8 @@ bool CLSI53C1020::load_ioc_firmware(const std::string& path)
 
 	std::copy(image.begin(), image.end(), flash.begin());
 	mark_flash_dirty();
-	const u32 version = read_le32(&image[0x24]);
-	if (read_le16(&image[0x22]) == LSI_FW_PRODUCT_1030_B0_COMPAT)
+	const u32 version = get_le32(&image[0x24]);
+	if (get_le16(&image[0x22]) == LSI_FW_PRODUCT_1030_B0_COMPAT)
 	{
 		printf("%s: IOC image is tagged for the 1030 B0 family; it is "
 			"retained in flash while the emulated IOC remains a 53C1020 C0.\n",
@@ -701,7 +676,7 @@ void CLSI53C1020::rebuild_flash_views()
 
 	if (valid_ioc_firmware(flash.data(), flash.size(), &ioc_firmware_size))
 	{
-		firmware_version = read_le32(&flash[0x24]);
+		firmware_version = get_le32(&flash[0x24]);
 	}
 
 	/* A production BIOS is top-aligned; use the highest valid image. */
@@ -1261,10 +1236,10 @@ void CLSI53C1020::write_l_doorbell(u32 value)
 		const u32 count = state.reply_free_count;
 
 		memset(reply, 0, sizeof(reply));
-		write_le32(reply, count);
+		put_le32(reply, count);
 		for (u32 i = 0; i < count; i++)
 		{
-			write_le32(&reply[sizeof(u32) * (i + 1U)],
+			put_le32(&reply[sizeof(u32) * (i + 1U)],
 				state.reply_free_fifo[state.reply_free_head]);
 			state.reply_free_head =
 				(state.reply_free_head + 1U) % LSI_REPLY_FIFO_DEPTH;
@@ -1553,7 +1528,7 @@ void CLSI53C1020::write_l_diag(u32 address, u32 value)
 u32 CLSI53C1020::peek_l_register(u32 reg, bool io_space) const
 {
 	if (!io_space && reg >= LSI_SHARED_RAM_OFFSET && reg < LSI_MEMORY0_SIZE)
-		return read_le32(&state.shared_ram[reg - LSI_SHARED_RAM_OFFSET]);
+		return get_le32(&state.shared_ram[reg - LSI_SHARED_RAM_OFFSET]);
 
 	switch (reg)
 	{
@@ -1676,7 +1651,7 @@ void CLSI53C1020::write_l_register(u32 reg, u32 value, bool io_space)
 {
 	if (!io_space && reg >= LSI_SHARED_RAM_OFFSET && reg < LSI_MEMORY0_SIZE)
 	{
-		write_le32(&state.shared_ram[reg - LSI_SHARED_RAM_OFFSET], value);
+		put_le32(&state.shared_ram[reg - LSI_SHARED_RAM_OFFSET], value);
 		return;
 	}
 
@@ -1998,15 +1973,15 @@ void CLSI53C1020::post_event(u32 event, u32 event_data0)
 
 	u8 reply[LSI_FRAME_MAX];
 	memset(reply, 0, sizeof(reply));
-	write_le16(&reply[0x00], 1U);
+	put_le16(&reply[0x00], 1U);
 	reply[MPI_REPLY_MSG_LENGTH] = 8U;
 	reply[MPI_MSG_FUNCTION] = LSI_FUNCTION_EVENT_NOTIFICATION;
-	write_le32(&reply[MPI_MSG_CONTEXT], state.event_msg_context);
-	write_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_SUCCESS);
-	write_le32(&reply[0x14], event);
+	put_le32(&reply[MPI_MSG_CONTEXT], state.event_msg_context);
+	put_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_SUCCESS);
+	put_le32(&reply[0x14], event);
 	state.event_context++;
-	write_le32(&reply[0x18], state.event_context);
-	write_le32(&reply[0x1C], event_data0);
+	put_le32(&reply[0x18], state.event_context);
+	put_le32(&reply[0x1C], event_data0);
 	post_address_reply(reply, 0x20U);
 }
 
@@ -2015,35 +1990,35 @@ u32 CLSI53C1020::build_default_reply(const u8* request, u8* reply, u16 iocstatus
 	reply[MPI_REPLY_MSG_LENGTH] = 5U;
 	reply[MPI_MSG_FUNCTION] = request[MPI_MSG_FUNCTION];
 	memcpy(&reply[MPI_MSG_CONTEXT], &request[MPI_MSG_CONTEXT], 4U);
-	write_le16(&reply[MPI_REPLY_IOC_STATUS], iocstatus);
+	put_le16(&reply[MPI_REPLY_IOC_STATUS], iocstatus);
 	return 20U;
 }
 
 u32 CLSI53C1020::execute_ioc_facts(const u8* request, u8* reply)
 {
-	write_le16(&reply[0x00], LSI_MPI_VERSION);
+	put_le16(&reply[0x00], LSI_MPI_VERSION);
 	reply[MPI_REPLY_MSG_LENGTH] = 0x0FU;
 	reply[MPI_MSG_FUNCTION] = request[MPI_MSG_FUNCTION];
-	write_le16(&reply[0x04], LSI_MPI_HEADER_VERSION);
+	put_le16(&reply[0x04], LSI_MPI_HEADER_VERSION);
 	reply[0x06] = 0;
 	memcpy(&reply[MPI_MSG_CONTEXT], &request[MPI_MSG_CONTEXT], 4U);
 	reply[0x14] = (u8)LSI_MAX_CHAIN_DEPTH;
 	reply[0x15] = state.who_init;
 	/* Request descriptors count 16-dword (64-byte) IOC blocks. */
 	reply[0x16] = LSI_IOC_BLOCK_DWORDS;
-	write_le16(&reply[0x18], LSI_REPLY_QUEUE_DEPTH);
-	write_le16(&reply[0x1A], LSI_REQUEST_FRAME_DWORDS);
-	write_le16(&reply[0x1E], firmware_product_id);
-	write_le32(&reply[0x20], state.host_mfa_high_addr);
-	write_le16(&reply[0x24], LSI_GLOBAL_CREDITS);
+	put_le16(&reply[0x18], LSI_REPLY_QUEUE_DEPTH);
+	put_le16(&reply[0x1A], LSI_REQUEST_FRAME_DWORDS);
+	put_le16(&reply[0x1E], firmware_product_id);
+	put_le32(&reply[0x20], state.host_mfa_high_addr);
+	put_le16(&reply[0x24], LSI_GLOBAL_CREDITS);
 	reply[0x26] = LSI_NUMBER_OF_PORTS;
 	reply[0x27] = state.events_enabled ? 1U : 0U;
-	write_le32(&reply[0x28], state.sense_buffer_high_addr);
-	write_le16(&reply[0x2C], state.reply_frame_size);
+	put_le32(&reply[0x28], state.sense_buffer_high_addr);
+	put_le16(&reply[0x2C], state.reply_frame_size);
 	reply[0x2E] = LSI_MAX_TARGETS;
 	reply[0x2F] = LSI_MAX_BUSES;
-	write_le32(&reply[0x30], ioc_firmware_size);
-	write_le32(&reply[0x38], firmware_version);
+	put_le32(&reply[0x30], ioc_firmware_size);
+	put_le32(&reply[0x38], firmware_version);
 	return 0x3CU;
 }
 
@@ -2056,13 +2031,13 @@ u32 CLSI53C1020::execute_port_facts(const u8* request, u8* reply)
 	memcpy(&reply[MPI_MSG_CONTEXT], &request[MPI_MSG_CONTEXT], 4U);
 	if (port != 0)
 	{
-		write_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_INVALID_FIELD);
+		put_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_INVALID_FIELD);
 		return 0x28U;
 	}
 	reply[0x15] = LSI_PORTFACTS_PORTTYPE_SCSI;
-	write_le16(&reply[0x16], LSI_MAX_TARGETS);
-	write_le16(&reply[0x18], LSI_PORT_SCSI_ID);
-	write_le16(&reply[0x1A], LSI_PORTFACTS_PROTOCOL_INITIATOR);
+	put_le16(&reply[0x16], LSI_MAX_TARGETS);
+	put_le16(&reply[0x18], LSI_PORT_SCSI_ID);
+	put_le16(&reply[0x1A], LSI_PORTFACTS_PROTOCOL_INITIATOR);
 	return 0x28U;
 }
 
@@ -2075,13 +2050,13 @@ u32 CLSI53C1020::execute_ioc_init(const u8* request, u8* reply)
 	}
 	else
 	{
-		u16 reply_frame_size = read_le16(&request[0x0C]);
+		u16 reply_frame_size = get_le16(&request[0x0C]);
 		state.who_init = request[0x00];
 		if (reply_frame_size == 0 || reply_frame_size > LSI_REPLY_FRAME_BYTES)
 			reply_frame_size = LSI_REPLY_FRAME_BYTES;
 		state.reply_frame_size = reply_frame_size;
-		state.host_mfa_high_addr = read_le32(&request[0x10]);
-		state.sense_buffer_high_addr = read_le32(&request[0x14]);
+		state.host_mfa_high_addr = get_le32(&request[0x10]);
+		state.sense_buffer_high_addr = get_le32(&request[0x14]);
 		state.ioc_state = LSI_IOC_STATE_OPERATIONAL;
 	}
 
@@ -2092,7 +2067,7 @@ u32 CLSI53C1020::execute_ioc_init(const u8* request, u8* reply)
 	reply[0x05] = request[0x05];
 	reply[0x06] = request[0x06];
 	memcpy(&reply[MPI_MSG_CONTEXT], &request[MPI_MSG_CONTEXT], 4U);
-	write_le16(&reply[MPI_REPLY_IOC_STATUS], iocstatus);
+	put_le16(&reply[MPI_REPLY_IOC_STATUS], iocstatus);
 	return 20U;
 }
 
@@ -2111,7 +2086,7 @@ u32 CLSI53C1020::execute_port_enable(const u8* request, u8* reply)
 	reply[MPI_MSG_FUNCTION] = request[MPI_MSG_FUNCTION];
 	reply[0x06] = port;
 	memcpy(&reply[MPI_MSG_CONTEXT], &request[MPI_MSG_CONTEXT], 4U);
-	write_le16(&reply[MPI_REPLY_IOC_STATUS], iocstatus);
+	put_le16(&reply[MPI_REPLY_IOC_STATUS], iocstatus);
 	return 20U;
 }
 
@@ -2119,18 +2094,18 @@ u32 CLSI53C1020::execute_event_notification(const u8* request, u8* reply)
 {
 	state.events_enabled = request[0x00] != 0;
 	if (state.events_enabled)
-		state.event_msg_context = read_le32(&request[MPI_MSG_CONTEXT]);
-	write_le16(&reply[0x00], 1U);
+		state.event_msg_context = get_le32(&request[MPI_MSG_CONTEXT]);
+	put_le16(&reply[0x00], 1U);
 	reply[MPI_REPLY_MSG_LENGTH] = 8U;
 	reply[MPI_MSG_FUNCTION] = request[MPI_MSG_FUNCTION];
 	reply[0x06] = 0;
 	reply[0x07] = LSI_MSGFLAGS_CONTINUATION_REPLY;
 	memcpy(&reply[MPI_MSG_CONTEXT], &request[MPI_MSG_CONTEXT], 4U);
-	write_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_SUCCESS);
-	write_le32(&reply[0x14], LSI_EVENT_EVENT_CHANGE);
+	put_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_SUCCESS);
+	put_le32(&reply[0x14], LSI_EVENT_EVENT_CHANGE);
 	state.event_context++;
-	write_le32(&reply[0x18], state.event_context);
-	write_le32(&reply[0x1C], state.events_enabled ? 1U : 0U);
+	put_le32(&reply[0x18], state.event_context);
+	put_le32(&reply[0x1C], state.events_enabled ? 1U : 0U);
 	return 0x20U;
 }
 
@@ -2140,8 +2115,8 @@ u32 CLSI53C1020::execute_event_notification(const u8* request, u8* reply)
 u32 CLSI53C1020::execute_fw_download(const u8* request, u8* reply)
 {
 	const u8 image_type = request[0x00];
-	const u32 image_offset = read_le32(&request[0x14]);
-	const u32 image_size = read_le32(&request[0x18]);
+	const u32 image_offset = get_le32(&request[0x14]);
+	const u32 image_size = get_le32(&request[0x18]);
 	u16 iocstatus = LSI_IOCSTATUS_SUCCESS;
 
 	reply[0x00] = image_type;
@@ -2287,7 +2262,7 @@ u32 CLSI53C1020::execute_fw_download(const u8* request, u8* reply)
 		download_image.clear();
 	}
 
-	write_le16(&reply[MPI_REPLY_IOC_STATUS], iocstatus);
+	put_le16(&reply[MPI_REPLY_IOC_STATUS], iocstatus);
 	return 20U;
 }
 
@@ -2297,8 +2272,8 @@ u32 CLSI53C1020::execute_fw_download(const u8* request, u8* reply)
 u32 CLSI53C1020::execute_fw_upload(const u8* request, u8* reply)
 {
 	const u8 image_type = request[0x00];
-	const u32 image_offset = read_le32(&request[0x14]);
-	const u32 image_size = read_le32(&request[0x18]);
+	const u32 image_offset = get_le32(&request[0x14]);
+	const u32 image_size = get_le32(&request[0x18]);
 	const u8* image = nullptr;
 	u32 actual_size = 0;
 	u16 iocstatus = LSI_IOCSTATUS_SUCCESS;
@@ -2379,8 +2354,8 @@ u32 CLSI53C1020::execute_fw_upload(const u8* request, u8* reply)
 		}
 	}
 
-	write_le16(&reply[MPI_REPLY_IOC_STATUS], iocstatus);
-	write_le32(&reply[0x14], actual_size);
+	put_le16(&reply[MPI_REPLY_IOC_STATUS], iocstatus);
+	put_le32(&reply[0x14], actual_size);
 	return 24U;
 }
 
@@ -2407,7 +2382,7 @@ int CLSI53C1020::collect_sgl(const u8* frame, u32 sge_offset,
 		if (++elements > LSI_SGL_MAX_ELEMENTS || pos + 8U > segment_len)
 			return -1;
 
-		const u32 flags_len = read_le32(&current[pos]);
+		const u32 flags_len = get_le32(&current[pos]);
 		const u8 flags = (u8)(flags_len >> 24);
 		const u8 type = (u8)(flags & LSI_SGEF_TYPE_MASK);
 		u64 address;
@@ -2421,11 +2396,11 @@ int CLSI53C1020::collect_sgl(const u8* frame, u32 sge_offset,
 				if (pos + 12U > segment_len)
 					return -1;
 				address =
-				    (u64)read_le32(&current[pos + 4U]) | ((u64)read_le32(&current[pos + 8U]) << 32);
+				    (u64)get_le32(&current[pos + 4U]) | ((u64)get_le32(&current[pos + 8U]) << 32);
 			}
 			else
 			{
-				address = read_le32(&current[pos + 4U]);
+				address = get_le32(&current[pos + 4U]);
 			}
 			if (chain_len < 8U || chain_len > sizeof(segment))
 				return -1;
@@ -2446,12 +2421,12 @@ int CLSI53C1020::collect_sgl(const u8* frame, u32 sge_offset,
 			if (pos + 12U > segment_len)
 				return -1;
 			address =
-			    (u64)read_le32(&current[pos + 4U]) | ((u64)read_le32(&current[pos + 8U]) << 32);
+			    (u64)get_le32(&current[pos + 4U]) | ((u64)get_le32(&current[pos + 8U]) << 32);
 			pos += 12U;
 		}
 		else
 		{
-			address = read_le32(&current[pos + 4U]);
+			address = get_le32(&current[pos + 4U]);
 			pos += 8U;
 		}
 
@@ -2622,9 +2597,9 @@ u32 CLSI53C1020::execute_scsi_io(const u8* request, u8* reply)
 	u8 cdb_len = request[MPI_SCSI_CDB_LENGTH];
 	const u8 sense_buf_len = request[MPI_SCSI_SENSE_LENGTH];
 	const u8 lun = request[MPI_SCSI_LUN_BYTE];
-	const u32 control = read_le32(&request[MPI_SCSI_CONTROL]);
-	const u32 data_length = read_le32(&request[MPI_SCSI_DATA_LENGTH]);
-	const u32 sense_low = read_le32(&request[MPI_SCSI_SENSE_ADDRESS]);
+	const u32 control = get_le32(&request[MPI_SCSI_CONTROL]);
+	const u32 data_length = get_le32(&request[MPI_SCSI_DATA_LENGTH]);
+	const u32 sense_low = get_le32(&request[MPI_SCSI_SENSE_ADDRESS]);
 	const u64 sense_addr = ((u64)state.sense_buffer_high_addr << 32) | sense_low;
 	const u32 direction = control & LSI_SCSIIO_CONTROL_DIR_MASK;
 
@@ -2632,18 +2607,18 @@ u32 CLSI53C1020::execute_scsi_io(const u8* request, u8* reply)
 	{
 		init_scsi_io_reply(request, reply);
 		reply[MPI_SCSI_REPLY_STATE] = LSI_SCSI_STATE_NO_SCSI_STATUS;
-		write_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_INVALID_STATE);
+		put_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_INVALID_STATE);
 		return 0x24U;
 	}
 	if (bus != 0 || target >= LSI_MAX_TARGETS || !get_disk(0, target))
 	{
 		init_scsi_io_reply(request, reply);
 		reply[MPI_SCSI_REPLY_STATE] = LSI_SCSI_STATE_NO_SCSI_STATUS;
-		write_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_SCSI_DEVICE_NOT_THERE);
+		put_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_SCSI_DEVICE_NOT_THERE);
 		return 0x24U;
 	}
 
-	if (lun != 0 || read_le32(&request[0x0C]) != 0 || read_le32(&request[0x10]) != 0)
+	if (lun != 0 || get_le32(&request[0x0C]) != 0 || get_le32(&request[0x10]) != 0)
 	{
 		u8 sense[18];
 		memset(sense, 0, sizeof(sense));
@@ -2657,8 +2632,8 @@ u32 CLSI53C1020::execute_scsi_io(const u8* request, u8* reply)
 		init_scsi_io_reply(request, reply);
 		reply[MPI_SCSI_REPLY_STATUS] = LSI_SCSI_STATUS_CHECK_CONDITION;
 		reply[MPI_SCSI_REPLY_STATE] = sense_n ? LSI_SCSI_STATE_AUTOSENSE_VALID : 0;
-		write_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_SUCCESS);
-		write_le32(&reply[MPI_SCSI_REPLY_SENSE_COUNT], sense_n);
+		put_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_SUCCESS);
+		put_le32(&reply[MPI_SCSI_REPLY_SENSE_COUNT], sense_n);
 		return 0x24U;
 	}
 
@@ -2682,7 +2657,7 @@ u32 CLSI53C1020::execute_scsi_io(const u8* request, u8* reply)
 				return 0;
 			init_scsi_io_reply(request, reply);
 			reply[MPI_SCSI_REPLY_STATE] = LSI_SCSI_STATE_NO_SCSI_STATUS;
-			write_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_INTERNAL_ERROR);
+			put_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_INTERNAL_ERROR);
 			return 0x24U;
 		}
 	}
@@ -2707,7 +2682,7 @@ u32 CLSI53C1020::execute_scsi_io(const u8* request, u8* reply)
 	{
 		init_scsi_io_reply(request, reply);
 		reply[MPI_SCSI_REPLY_STATE] = LSI_SCSI_STATE_NO_SCSI_STATUS;
-		write_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_INTERNAL_ERROR);
+		put_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_INTERNAL_ERROR);
 		return 0x24U;
 	}
 
@@ -2731,8 +2706,8 @@ u32 CLSI53C1020::execute_scsi_io(const u8* request, u8* reply)
 	{
 		init_scsi_io_reply(request, reply);
 		reply[MPI_SCSI_REPLY_STATE] = LSI_SCSI_STATE_NO_SCSI_STATUS;
-		write_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_SCSI_DATA_UNDERRUN);
-		write_le32(&reply[MPI_SCSI_REPLY_TRANSFER_COUNT], transferred);
+		put_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_SCSI_DATA_UNDERRUN);
+		put_le32(&reply[MPI_SCSI_REPLY_TRANSFER_COUNT], transferred);
 		return 0x24U;
 	}
 
@@ -2740,8 +2715,8 @@ u32 CLSI53C1020::execute_scsi_io(const u8* request, u8* reply)
 	{
 		init_scsi_io_reply(request, reply);
 		reply[MPI_SCSI_REPLY_STATUS] = LSI_SCSI_STATUS_GOOD;
-		write_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_SCSI_DATA_OVERRUN);
-		write_le32(&reply[MPI_SCSI_REPLY_TRANSFER_COUNT], transferred);
+		put_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_SCSI_DATA_OVERRUN);
+		put_le32(&reply[MPI_SCSI_REPLY_TRANSFER_COUNT], transferred);
 		return 0x24U;
 	}
 
@@ -2749,14 +2724,14 @@ u32 CLSI53C1020::execute_scsi_io(const u8* request, u8* reply)
 	{
 		init_scsi_io_reply(request, reply);
 		reply[MPI_SCSI_REPLY_STATUS] = LSI_SCSI_STATUS_GOOD;
-		write_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_SUCCESS);
-		write_le32(&reply[MPI_SCSI_REPLY_TRANSFER_COUNT], transferred);
+		put_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_SUCCESS);
+		put_le32(&reply[MPI_SCSI_REPLY_TRANSFER_COUNT], transferred);
 		return 0x24U;
 	}
 
 	init_scsi_io_reply(request, reply);
 	reply[MPI_SCSI_REPLY_STATUS] = result.status;
-	write_le32(&reply[MPI_SCSI_REPLY_TRANSFER_COUNT], transferred);
+	put_le32(&reply[MPI_SCSI_REPLY_TRANSFER_COUNT], transferred);
 	if (result.status == LSI_SCSI_STATUS_CHECK_CONDITION)
 	{
 		u8 sense[18];
@@ -2765,12 +2740,12 @@ u32 CLSI53C1020::execute_scsi_io(const u8* request, u8* reply)
 		if (sense_n && !dma_write(sense_addr, sense, sense_n))
 			return 0;
 		reply[MPI_SCSI_REPLY_STATE] = sense_n ? LSI_SCSI_STATE_AUTOSENSE_VALID : 0;
-		write_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_SUCCESS);
-		write_le32(&reply[MPI_SCSI_REPLY_SENSE_COUNT], sense_n);
+		put_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_SUCCESS);
+		put_le32(&reply[MPI_SCSI_REPLY_SENSE_COUNT], sense_n);
 	}
 	else
 	{
-		write_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_SCSI_DATA_UNDERRUN);
+		put_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_SCSI_DATA_UNDERRUN);
 	}
 	return 0x24U;
 }
@@ -2856,12 +2831,12 @@ u32 CLSI53C1020::build_config_page(u8 type, u8 number, u32 page_address, bool fa
 			data[1] = (u8)(bytes / 4U);
 			data[2] = number;
 			data[3] = LSI_CFG_PAGETYPE_IOC | LSI_CFG_PAGEATTR_READ_ONLY;
-			write_le16(&data[0x0C], LSI_PCI_VENDOR_ID);
-			write_le16(&data[0x0E], LSI_PCI_DEVICE_ID);
+			put_le16(&data[0x0C], LSI_PCI_VENDOR_ID);
+			put_le16(&data[0x0E], LSI_PCI_DEVICE_ID);
 			data[0x10] = LSI_PCI_REVISION_ID;
-			write_le32(&data[0x14], LSI_PCI_CLASS_CODE);
-			write_le16(&data[0x18], LSI_PCI_SUBSYSTEM_VENDOR_ID);
-			write_le16(&data[0x1A], LSI_PCI_SUBSYSTEM_DEVICE_ID);
+			put_le32(&data[0x14], LSI_PCI_CLASS_CODE);
+			put_le16(&data[0x18], LSI_PCI_SUBSYSTEM_VENDOR_ID);
+			put_le16(&data[0x1A], LSI_PCI_SUBSYSTEM_DEVICE_ID);
 		}
 		else if (number == 1U)
 		{
@@ -2921,8 +2896,8 @@ u32 CLSI53C1020::build_config_page(u8 type, u8 number, u32 page_address, bool fa
 			data[1] = (u8)(bytes / 4U);
 			data[2] = number;
 			data[3] = LSI_CFG_PAGETYPE_IO_UNIT | LSI_CFG_PAGEATTR_READ_ONLY;
-			write_le32(&data[0x04], 0x53C10200U);
-			write_le32(&data[0x08], 0x0000103CU);
+			put_le32(&data[0x04], 0x53C10200U);
+			put_le32(&data[0x08], 0x0000103CU);
 		}
 		else if (number == 1U)
 		{
@@ -2931,7 +2906,7 @@ u32 CLSI53C1020::build_config_page(u8 type, u8 number, u32 page_address, bool fa
 			data[1] = (u8)(bytes / 4U);
 			data[2] = number;
 			data[3] = LSI_CFG_PAGETYPE_IO_UNIT | LSI_CFG_PAGEATTR_PERSISTENT;
-			write_le32(&data[0x04], 0x00000001U);
+			put_le32(&data[0x04], 0x00000001U);
 		}
 		else if (number == 2U)
 		{
@@ -2954,8 +2929,8 @@ u32 CLSI53C1020::build_config_page(u8 type, u8 number, u32 page_address, bool fa
 			data[1] = (u8)(bytes / 4U);
 			data[2] = number;
 			data[3] = LSI_CFG_PAGETYPE_SCSI_PORT | LSI_CFG_PAGEATTR_READ_ONLY;
-			write_le32(&data[0x04], LSI_U320_PORT_CAPABILITIES);
-			write_le32(&data[0x08], LSI_PHYS_INTERFACE_LVD);
+			put_le32(&data[0x04], LSI_U320_PORT_CAPABILITIES);
+			put_le32(&data[0x08], LSI_PHYS_INTERFACE_LVD);
 		}
 		else if (number == 1U)
 		{
@@ -2966,13 +2941,13 @@ u32 CLSI53C1020::build_config_page(u8 type, u8 number, u32 page_address, bool fa
 			data[3] = LSI_CFG_PAGETYPE_SCSI_PORT | LSI_CFG_PAGEATTR_CHANGEABLE;
 			if (factory_default)
 			{
-				write_le32(&data[0x04], LSI_PORT1_CONFIGURATION);
-				write_le32(&data[0x08], 0U);
+				put_le32(&data[0x04], LSI_PORT1_CONFIGURATION);
+				put_le32(&data[0x08], 0U);
 			}
 			else
 			{
-				write_le32(&data[0x04], state.scsi_port1_cfg[0]);
-				write_le32(&data[0x08], state.scsi_port1_cfg[1]);
+				put_le32(&data[0x04], state.scsi_port1_cfg[0]);
+				put_le32(&data[0x08], state.scsi_port1_cfg[1]);
 			}
 		}
 		else if (number == 2U)
@@ -2982,7 +2957,7 @@ u32 CLSI53C1020::build_config_page(u8 type, u8 number, u32 page_address, bool fa
 			data[1] = (u8)(bytes / 4U);
 			data[2] = number;
 			data[3] = LSI_CFG_PAGETYPE_SCSI_PORT | LSI_CFG_PAGEATTR_PERSISTENT;
-			write_le32(&data[0x08], LSI_PORT_SCSI_ID);
+			put_le32(&data[0x08], LSI_PORT_SCSI_ID);
 			for (u32 target = 0; target < LSI_MAX_TARGETS; target++)
 			{
 				data[0x0C + target * 4U] = 10U;
@@ -3005,10 +2980,10 @@ u32 CLSI53C1020::build_config_page(u8 type, u8 number, u32 page_address, bool fa
 			data[1] = (u8)(bytes / 4U);
 			data[2] = number;
 			data[3] = LSI_CFG_PAGETYPE_SCSI_DEVICE | LSI_CFG_PAGEATTR_READ_ONLY;
-			write_le32(&data[0x04],
+			put_le32(&data[0x04],
 			           factory_default ? LSI_U320_DEV1_PARAMS : state.scsi_dev1_params[target]);
 			if (get_disk(0, (int)target))
-				write_le32(&data[0x08], 0x00000001U);
+				put_le32(&data[0x08], 0x00000001U);
 		}
 		else if (number == 1U)
 		{
@@ -3019,13 +2994,13 @@ u32 CLSI53C1020::build_config_page(u8 type, u8 number, u32 page_address, bool fa
 			data[3] = LSI_CFG_PAGETYPE_SCSI_DEVICE | LSI_CFG_PAGEATTR_CHANGEABLE;
 			if (factory_default)
 			{
-				write_le32(&data[0x04], LSI_U320_DEV1_PARAMS);
-				write_le32(&data[0x0C], 0U);
+				put_le32(&data[0x04], LSI_U320_DEV1_PARAMS);
+				put_le32(&data[0x0C], 0U);
 			}
 			else
 			{
-				write_le32(&data[0x04], state.scsi_dev1_params[target]);
-				write_le32(&data[0x0C], state.scsi_dev1_cfg[target]);
+				put_le32(&data[0x04], state.scsi_dev1_params[target]);
+				put_le32(&data[0x0C], state.scsi_dev1_cfg[target]);
 			}
 		}
 		else if (number == 9U)
@@ -3051,9 +3026,9 @@ void CLSI53C1020::store_config_page(u8 type, u8 number, u32 page_address, const 
 	if (type == LSI_CFG_PAGETYPE_SCSI_PORT && number == 1U)
 	{
 		if (bytes >= 0x08U)
-			state.scsi_port1_cfg[0] = read_le32(&data[0x04]);
+			state.scsi_port1_cfg[0] = get_le32(&data[0x04]);
 		if (bytes >= 0x0CU)
-			state.scsi_port1_cfg[1] = read_le32(&data[0x08]);
+			state.scsi_port1_cfg[1] = get_le32(&data[0x08]);
 	}
 	else if (type == LSI_CFG_PAGETYPE_SCSI_DEVICE && number == 1U)
 	{
@@ -3061,9 +3036,9 @@ void CLSI53C1020::store_config_page(u8 type, u8 number, u32 page_address, const 
 		if (target < LSI_MAX_TARGETS)
 		{
 			if (bytes >= 0x08U)
-				state.scsi_dev1_params[target] = read_le32(&data[0x04]);
+				state.scsi_dev1_params[target] = get_le32(&data[0x04]);
 			if (bytes >= 0x10U)
-				state.scsi_dev1_cfg[target] = read_le32(&data[0x0C]);
+				state.scsi_dev1_cfg[target] = get_le32(&data[0x0C]);
 		}
 	}
 }
@@ -3073,15 +3048,15 @@ u32 CLSI53C1020::execute_config(const u8* request, u8* reply)
 	const u8 action = request[0x00];
 	const u8 number = request[0x16];
 	const u8 type = request[0x17] & 0x0FU;
-	const u32 page_address = read_le32(&request[0x18]);
-	const u32 sge_flags_len = read_le32(&request[0x1C]);
+	const u32 page_address = get_le32(&request[0x18]);
+	const u32 sge_flags_len = get_le32(&request[0x1C]);
 	const u32 sge_len = sge_flags_len & LSI_SGE_LENGTH_MASK;
-	u64 sge_address = read_le32(&request[0x20]);
+	u64 sge_address = get_le32(&request[0x20]);
 	u8 page[LSI_CFG_PAGE_MAX];
 	u16 iocstatus = LSI_IOCSTATUS_SUCCESS;
 
 	if ((sge_flags_len & LSI_SGE_FLAG_64BIT) != 0U)
-		sge_address |= (u64)read_le32(&request[0x24]) << 32;
+		sge_address |= (u64)get_le32(&request[0x24]) << 32;
 
 	reply[0x00] = action;
 	reply[MPI_REPLY_MSG_LENGTH] = 6U;
@@ -3093,7 +3068,7 @@ u32 CLSI53C1020::execute_config(const u8* request, u8* reply)
 	    build_config_page(type, number, page_address, action == LSI_CFG_ACTION_READ_DEFAULT, page);
 	if (page_bytes == 0U)
 	{
-		write_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_CONFIG_INVALID_PAGE);
+		put_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_CONFIG_INVALID_PAGE);
 		return 0x18U;
 	}
 	memcpy(&reply[0x14], page, 4U);
@@ -3147,7 +3122,7 @@ u32 CLSI53C1020::execute_config(const u8* request, u8* reply)
 		break;
 	}
 
-	write_le16(&reply[MPI_REPLY_IOC_STATUS], iocstatus);
+	put_le16(&reply[MPI_REPLY_IOC_STATUS], iocstatus);
 	return 0x18U;
 }
 
@@ -3161,7 +3136,7 @@ void CLSI53C1020::trace_message(const char* via, const u8* request, const u8* re
 	if (!trace_enabled)
 		return;
 
-	const u16 status = reply_bytes ? read_le16(&reply[MPI_REPLY_IOC_STATUS]) : 0U;
+	const u16 status = reply_bytes ? get_le16(&reply[MPI_REPLY_IOC_STATUS]) : 0U;
 	if (request[MPI_MSG_FUNCTION] == LSI_FUNCTION_SCSI_IO_REQUEST)
 	{
 		char cdb[3U * 16U + 1U];
@@ -3172,21 +3147,21 @@ void CLSI53C1020::trace_message(const char* via, const u8* request, const u8* re
 		trace("%s SCSIIO target=%u lun=%u cdb=[%s] length=%u -> "
 		      "status=0x%04x xfer=%u",
 		      via, request[MPI_SCSI_TARGET_ID], request[MPI_SCSI_LUN_BYTE], cdb,
-		      (unsigned)read_le32(&request[MPI_SCSI_DATA_LENGTH]), status,
-		      reply_bytes ? (unsigned)read_le32(&reply[MPI_SCSI_REPLY_TRANSFER_COUNT]) : 0U);
+		      (unsigned)get_le32(&request[MPI_SCSI_DATA_LENGTH]), status,
+		      reply_bytes ? (unsigned)get_le32(&reply[MPI_SCSI_REPLY_TRANSFER_COUNT]) : 0U);
 	}
 	else if (request[MPI_MSG_FUNCTION] == LSI_FUNCTION_CONFIG)
 	{
 		trace("%s CONFIG action=%u type=0x%02x page=%u address=0x%08x "
 		      "-> status=0x%04x",
-		      via, request[0], request[0x17], request[0x16], (unsigned)read_le32(&request[0x18]),
+		      via, request[0], request[0x17], request[0x16], (unsigned)get_le32(&request[0x18]),
 		      status);
 	}
 	else
 	{
 		trace("%s function=0x%02x context=0x%08x -> status=0x%04x", via,
 		      request[MPI_MSG_FUNCTION],
-		      (unsigned)read_le32(&request[MPI_MSG_CONTEXT]), status);
+		      (unsigned)get_le32(&request[MPI_MSG_CONTEXT]), status);
 	}
 }
 
@@ -3230,7 +3205,7 @@ u32 CLSI53C1020::execute(const u8* request, u8* reply)
 		reply[0x04] = 0U;
 		reply[0x05] = task_type;
 		memcpy(&reply[MPI_MSG_CONTEXT], &request[MPI_MSG_CONTEXT], 4U);
-		write_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_SUCCESS);
+		put_le16(&reply[MPI_REPLY_IOC_STATUS], LSI_IOCSTATUS_SUCCESS);
 		return 0x18U;
 	}
 
@@ -3268,7 +3243,7 @@ void CLSI53C1020::execute_handshake()
 
 	memset(request, 0, sizeof(request));
 	for (u32 i = 0; i < dwords; i++)
-		write_le32(&request[i * 4U], state.hs_buffer[i]);
+		put_le32(&request[i * 4U], state.hs_buffer[i]);
 
 	const u32 reply_bytes = execute(request, reply);
 	trace_message("handshake", request, reply, reply_bytes);

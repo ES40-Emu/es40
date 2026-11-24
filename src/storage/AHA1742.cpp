@@ -29,12 +29,6 @@
 #include "AHA1742.h"
 #include "chipset/EISABus.h"
 
-// Control and status block fields are stored least significant byte first (AHA-1740A TRM, p. 6-10).
-static u16 get_u16le(const u8* p) { return u16(p[0] | (p[1] << 8)); }
-static u32 get_u32le(const u8* p) { return u32(get_u16le(p)) | (u32(get_u16le(p + 2)) << 16); }
-static void put_u16le(u8* p, u16 value) { p[0] = u8(value); p[1] = u8(value >> 8); }
-static void put_u32le(u8* p, u32 value) { put_u16le(p, u16(value)); put_u16le(p + 2, u16(value >> 16)); }
-
 // What Read Host Adapter Inquiry Data returns; a real board's name and release fields are not known (AHA-1740A TRM, pp. 6-31 to 6-33).
 static const u8 inquiry_data[] = {
   0x23, 0x00, // Processor device; Target Mode is supported and a reset leaves it disabled (AHA-1740A TRM, pp. 5-10, 6-32).
@@ -119,7 +113,7 @@ void AHA1742::WriteMem(int index, u64 address, int dsize, u64 data)
     // For Start CCB it then reads the mailbox out address and sets Mailbox Out Empty (AHA-1740A TRM, p. 4-20).
     if (!in_reset && attn >> 4 == StartCCB) {
       g2stat |= MailboxOutEmpty;
-      start_ccb(get_u32le(mboxout));
+      start_ccb(get_le32(mboxout));
     }
     return;
   }
@@ -144,12 +138,13 @@ void AHA1742::WriteMem(int index, u64 address, int dsize, u64 data)
 
 void AHA1742::start_ccb(u32 address)
 {
+  // Control and status block fields are stored least significant byte first (AHA-1740A TRM, p. 6-10).
   u8 ecb[48];
   // Only Read Host Adapter Inquiry Data is carried out; the option flags in bits 14-12 are not part of the operation code (AHA-1740A TRM, p. 6-4).
-  if (!bus.slot_master_read(slot, address, ecb, sizeof(ecb)) || (get_u16le(ecb + CommandWord) & 0x0fff) != ReadInquiryData)
+  if (!bus.slot_master_read(slot, address, ecb, sizeof(ecb)) || (get_le16(ecb + CommandWord) & 0x0fff) != ReadInquiryData)
     return;
-  const u16 flags = get_u16le(ecb + FlagWord1);
-  const u32 pointer = get_u32le(ecb + DataPointer), length = get_u32le(ecb + DataLength);
+  const u16 flags = get_le16(ecb + FlagWord1);
+  const u32 pointer = get_le32(ecb + DataPointer), length = get_le32(ecb + DataLength);
   // The data is cut to the length the host allows, and a longer buffer is left short (AHA-1740A TRM, pp. 6-30, 6-32).
   const u32 count = length < sizeof(inquiry_data) ? length : u32(sizeof(inquiry_data));
   bus.slot_master_write(slot, pointer, inquiry_data, count);
@@ -160,19 +155,19 @@ void AHA1742::start_ccb(u32 address)
     const bool error = !(flags & SuppressUnderrunError);
     word = u16(error ? DataUnderrun | MajorError : CommandDone | DataUnderrun);
     status[HostAdapterStatus] = error ? UnderrunOccurred : 0;
-    put_u32le(status + ResidualCount, length - count);
-    put_u32le(status + ResidualAddress, pointer);
+    put_le32(status + ResidualCount, length - count);
+    put_le32(status + ResidualAddress, pointer);
   }
   // The host is interrupted unless the command is done without error and it set Disable Interrupt (AHA-1740A TRM, pp. 6-5, 6-15).
   const bool interrupt = !(word & CommandDone) || !(flags & DisableInterrupt);
-  put_u16le(status + StatusWord, u16(word | (interrupt ? InterruptIssued : 0)));
+  put_le16(status + StatusWord, u16(word | (interrupt ? InterruptIssued : 0)));
   // The status block is left out only when the command is done without error and the host disabled it (AHA-1740A TRM, p. 6-11).
   if (!(word & CommandDone) || !(flags & DisableStatusBlock))
-    bus.slot_master_write(slot, get_u32le(ecb + StatusBlockPointer), status, sizeof(status));
+    bus.slot_master_write(slot, get_le32(ecb + StatusBlockPointer), status, sizeof(status));
   if (!interrupt)
     return;
   // The control block address is loaded in the mailbox in, then the status code and target set the interrupt (AHA-1740A TRM, pp. 4-20, 4-22).
-  put_u32le(mboxin, address);
+  put_le32(mboxin, address);
   g2intst = u8(((word & CommandDone) ? CompletedGood : CompletedError) << 4 | (attn & 0x0f));
   g2stat |= InterruptPending;
   drive_irq(true);

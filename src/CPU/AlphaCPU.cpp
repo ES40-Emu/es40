@@ -941,7 +941,7 @@ void CAlphaCPU::write_ipr(u32 instruction, u64 value, AlphaIPRWriteContext conte
 		case AlphaIPRWriteKind::InvalidateDataTb:
 		case AlphaIPRWriteKind::InvalidateBothTbs:
 			if (kind != AlphaIPRWriteKind::InvalidateDataTb) {
-				state.ev4_itb_next[0] = state.ev4_itb_next[1] = 0; // ITBZAP resets both pointers (21064 HRM 5.2.8).
+				state.ev4_itb_next[0] = state.ev4_itb_next[1] = 0; // ITBZAP and ITBIS reset both pointers (21064 HRM 5.2.8, 5.2.10).
 				tbia(ACCESS_EXEC);
 			}
 			if (kind != AlphaIPRWriteKind::InvalidateInstructionTb) tbia(ACCESS_READ);

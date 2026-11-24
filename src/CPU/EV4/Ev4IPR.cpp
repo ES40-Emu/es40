@@ -138,11 +138,11 @@ u64 ev4_read_ipr(CAlphaCPU& cpu, u32 instruction)
 void ev4_write_ipr(CAlphaCPU& cpu, u32 instruction, u64 value, AlphaIPRWriteContext context)
 {
   const auto selector = ev4_ipr_selector(instruction);
+  const bool pal_mode = context == AlphaIPRWriteContext::Compiled || (cpu.state.current_pc & 1);
   if (selector.index == 0) {
     // TB_CTL.GH[6:5] selects the page size for ITB/DTB PTE reads and writes (21064 HRM 5.3.1, Fig. 5-18).
     if (selector.banks & 0x40) cpu.state.ev4_tb_gh = (value >> 5) & 3;
     // TB_TAG stages VA[42:13] for either PTE write, in PALmode only (21064 HRM 5.2.1).
-    const bool pal_mode = context == AlphaIPRWriteContext::Compiled || (cpu.state.current_pc & 1);
     if ((selector.banks & 0x20) && pal_mode)
       cpu.state.last_tb_virt = value & cpu.get_profile().tb_fill.base_page_match_mask;
     return;
@@ -153,6 +153,15 @@ void ev4_write_ipr(CAlphaCPU& cpu, u32 instruction, u64 value, AlphaIPRWriteCont
   }
   if (selector.index == 2 && (selector.banks & 0x40)) {
     cpu.ev4_write_dtb_pte(value); // DTB_PTE commits the staged TB_TAG (21064 HRM 5.3.2).
+    return;
+  }
+  if (selector.index == 7) { // ITBASM and DTBASM keep entries with PTE[ASM] set (21064 HRM 5.2.9, 5.3.7).
+    if (pal_mode && (selector.banks & 0x20)) cpu.tbiap(ACCESS_EXEC);
+    if (selector.banks & 0x40) cpu.tbiap(ACCESS_READ);
+    return;
+  }
+  if (selector.index == 8 && (selector.banks & 0x40)) {
+    cpu.tbis_d(value, 0); // DTBIS uses Rb's VA in the single DTB address space (21064 HRM 2.5.1, 5.3.8).
     return;
   }
   if (ev4_selects_icache_flush(selector)) {

@@ -165,15 +165,17 @@ constexpr AlphaIPRWriteKind ev4_describe_ipr_write(std::uint32_t instruction,
     if (slot) *slot = (selector.banks & 0x80) ? 32u + selector.index : 0;
     return AlphaIPRWriteKind::Helper;
   }
-  // Index 6 clears every entry and resets replacement in each selected TB (21064 HRM 4.8.1, 5.2.8, 5.3.6).
-  if (selector.index == 6) {
-    const bool itb = pal_mode && (selector.banks & 0x20); // ITBZAP is PAL-only.
+  if (selector.index >= 6 && selector.index <= 8) {
+    const bool itb = pal_mode && (selector.banks & 0x20); // ITBZAP, ITBASM and ITBIS are PAL-only (21064 HRM 4.8.1).
     const bool dtb = (selector.banks & 0x40) != 0;
     const bool pal_temp = (selector.banks & 0x80) != 0;
     if (slot) *slot = pal_temp ? 32u + selector.index : 0;
+    if (!itb && !dtb) return pal_temp ? AlphaIPRWriteKind::PalTemp : AlphaIPRWriteKind::Noop;
+    // A simultaneous DTBIS suppresses ITBIS (21064 HRM 4.6, restriction 7).
+    if (selector.index == 7 || (selector.index == 8 && dtb)) return AlphaIPRWriteKind::HelperTerminator;
+    // ZAP clears every entry and resets replacement in each selected TB (21064 HRM 5.2.8, 5.3.6).
     if (itb) return dtb ? AlphaIPRWriteKind::InvalidateBothTbs : AlphaIPRWriteKind::InvalidateInstructionTb;
-    if (dtb) return AlphaIPRWriteKind::InvalidateDataTb;
-    return pal_temp ? AlphaIPRWriteKind::PalTemp : AlphaIPRWriteKind::Noop;
+    return AlphaIPRWriteKind::InvalidateDataTb;
   }
   // HIRR and DC_STAT ignore writes, leaving only PAL_TEMP12 writable (21064 HRM 4.8.1, 5.2.14, 5.3.16).
   if (selector.index == 12) {

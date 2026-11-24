@@ -401,6 +401,7 @@ void CS3Trio64::crtc_map(address_map& map)
 			}),
 		NAME([this](offs_t offset, u8 data) {
 			s3.cr3a = data;
+			if (chip == Chip::S3_86C928D) s3_define_video_mode();
 			})
 	);
 	// CR3B: Data Transfer Position (DT_EX-POS)
@@ -739,6 +740,7 @@ void CS3Trio64::crtc_map(address_map& map)
 			}),
 		NAME([this](offs_t offset, u8 data) {
 			s3.extended_dac_ctrl = data;
+			if (chip == Chip::S3_86C928D) s3_define_video_mode();
 			})
 	);
 	// External Sync Control 1 Register (EX_SYNC_1) (CR56)
@@ -1829,7 +1831,13 @@ static u32                 s3_cfg_mask[64] = {
  * Bind the card's sole display output; device initialization is done by init().
  **/
 CS3Trio64::CS3Trio64(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
-	bx_gui_c& display) : svga_device(cfg, c, pcibus, pcidev), CDisplayOutputProvider(0, display, cfg)
+	bx_gui_c& display) : CS3Trio64(cfg, c, pcibus, pcidev, display, Chip::Trio64)
+{
+}
+
+CS3Trio64::CS3Trio64(CConfigurator* cfg, CSystem* c, int pcibus, int pcidev,
+	bx_gui_c& display, Chip model) : svga_device(cfg, c, pcibus, pcidev),
+	CDisplayOutputProvider(0, display, cfg), chip(model)
 {
 	// PCI setup consults linear-enable state before the accelerator starts.
 	m_8514.ibm8514.advfunction_ctrl = 0;
@@ -1918,7 +1926,7 @@ bool CS3Trio64::uses_sized_linear_bar_window() const noexcept
 u8 CS3Trio64::cpu_bank() const noexcept
 {
 	// DB014-B 17-13: nonzero CR6A overrides the older CR35/CR51 bank.
-	const u8 extended = vga.crtc.data[0x6a] & 0x3f;
+	const u8 extended = chip == Chip::Trio64 ? vga.crtc.data[0x6a] & 0x3f : 0;
 	return extended ? extended :
 		(s3.crt_reg_lock & 0x0f) | ((s3.cr51 & 0x0c) << 2);
 }
@@ -1990,7 +1998,8 @@ void CS3Trio64::on_crtc_linear_regs_changed(const char* reason)
 
 	// Apply/unapply the mapping now that CR regs changed
 	lfb_recalc_and_map();
-	trace_lfb_if_changed(reason);
+	if (chip == Chip::Trio64)
+		trace_lfb_if_changed(reason);
 }
 
 /**
@@ -1998,14 +2007,15 @@ void CS3Trio64::on_crtc_linear_regs_changed(const char* reason)
  **/
 void CS3Trio64::init()
 {
-	// Register PCI device
-	add_function(0, s3_cfg_data, s3_cfg_mask);
+	if (chip == Chip::Trio64) {
+		// Register the PCI Trio64 device.
+		add_function(0, s3_cfg_data, s3_cfg_mask);
 
-	// Make the 21272/21274 PCI config window visible for this device now.
-	// NetBSD reads PCI_ID_REG at 0/1/0 during console bring-up; without this
-	// mapping it sees ~0/0 and panics with "no device at 255/255/0".
-	ResetPCI();
-
+		// Make the 21272/21274 PCI config window visible for this device now.
+		// NetBSD reads PCI_ID_REG at 0/1/0 during console bring-up; without this
+		// mapping it sees ~0/0 and panics with "no device at 255/255/0".
+		ResetPCI();
+	}
 
 	// Initialize all state variables to 0
 	memset((void*)&state, 0, sizeof(state));
@@ -2034,51 +2044,52 @@ void CS3Trio64::init()
 	// and update decomposed vga.crtc.* / s3.* fields + trigger recomputes.
 	init_maps();
 
-	vga.attribute.state = atc_flip_flop() ? 1 : 0;
-	vga.attribute.index = vga.attribute.index & 0x1f;
-
-	vga.gc.bit_mask = 0xFF;
-
-	vga.sequencer.char_sel.base[0] = 0x20000;  // font B (attr bit3=0)
-	vga.sequencer.char_sel.base[1] = 0x20000;  // font A (attr bit3=1)
-
-	// 8514/A-style S3 accel ports (byte-wide) - always register;
-	// runtime gating is done via CR40 (state.accel.enabled).
-	add_legacy_io(10, 0x42E8, 2); // SUBSYS_CNTL/STAT
-	add_legacy_io(11, 0x4AE8, 2); // ADVFUNC_CNTL
+	// 8514/A-style S3 accel ports accept ISA words on the 928 (DB02-C §10).
+	// Runtime gating is done via CR40 (state.accel.enabled).
+	auto add_enhanced_port = [this](int index, u32 port, u32 length) {
+		const int width = chip == Chip::S3_86C928D ? 16 : 8;
+		add_legacy_io(index, port, length, width);
+		if (chip == Chip::S3_86C928D)
+			add_legacy_io(index + 30, port ^ 0x3a0, length, width); // DB02-C §3.4.3, CR43.XEN.
+	};
+	add_enhanced_port(10, 0x42E8, 2); // SUBSYS_CNTL/STAT
+	add_enhanced_port(11, 0x4AE8, 2); // ADVFUNC_CNTL
 	add_legacy_io(12, 0x46E8, 2); // MODE_SETUP / video subsystem enable
-	add_legacy_io(13, 0x4EE8, 2); // legacy compatibility stub
-	add_legacy_io(14, 0x86E8, 2); // CUR_X
-	add_legacy_io(15, 0x8EE8, 2); // DESTX_DIASTP
-	add_legacy_io(16, 0x96E8, 2); // MAJ_AXIS_PCNT
-	add_legacy_io(17, 0x9AE8, 2); // CMD
-	add_legacy_io(18, 0xA2E8, 4); // BKGD_COLOR
-	add_legacy_io(19, 0xA6E8, 4); // FRGD_COLOR
-	add_legacy_io(20, 0xAAE8, 4); // WRT_MASK
-	add_legacy_io(21, 0xAEE8, 4); // RD_MASK
-	add_legacy_io(22, 0xB6E8, 2); // BKGD_MIX
-	add_legacy_io(23, 0xBAE8, 2); // FRGD_MIX
-	add_legacy_io(24, 0xE2E8, 8); // PIX_TRANS (0xE2E8..0xE2EF)
-	add_legacy_io(25, 0xB2E8, 4); // PIX_CNTL or ALT PIX_TRANS (gated by MULTIFUNC[E].bit8)
-	add_legacy_io(26, 0xBEE8, 2); // MULTIFUNC_CNTL (word)
-	add_legacy_io(27, 0xD2E8, 2); // ROP_MIX       (word; some paths read this)
-	add_legacy_io(28, 0x9EE8, 2); // SHORT_STROKE  (word; latch)
-	add_legacy_io(29, 0xCAE8, 2); // DESTY/AXSTP alias (might be wrong)
-	add_legacy_io(30, 0x82E8, 2); // CUR_Y
-	add_legacy_io(31, 0x92E8, 2); // ERR_TERM
-	add_legacy_io(33, 0x8AE8, 2); // DESTY_AXSTP
+	if (chip == Chip::Trio64) add_legacy_io(13, 0x4EE8, 2); // legacy compatibility stub
+	add_enhanced_port(14, 0x86E8, 2); // CUR_X
+	add_enhanced_port(15, 0x8EE8, 2); // DESTX_DIASTP
+	add_enhanced_port(16, 0x96E8, 2); // MAJ_AXIS_PCNT
+	add_enhanced_port(17, 0x9AE8, 2); // CMD
+	add_enhanced_port(18, 0xA2E8, chip == Chip::Trio64 ? 4 : 2); // BKGD_COLOR
+	add_enhanced_port(19, 0xA6E8, chip == Chip::Trio64 ? 4 : 2); // FRGD_COLOR
+	add_enhanced_port(20, 0xAAE8, chip == Chip::Trio64 ? 4 : 2); // WRT_MASK
+	add_enhanced_port(21, 0xAEE8, chip == Chip::Trio64 ? 4 : 2); // RD_MASK
+	add_enhanced_port(22, 0xB6E8, 2); // BKGD_MIX
+	add_enhanced_port(23, 0xBAE8, 2); // FRGD_MIX
+	add_enhanced_port(24, 0xE2E8, chip == Chip::Trio64 ? 8 : 4); // PIX_TRANS (0xE2E8..0xE2EF)
+	add_enhanced_port(25, 0xB2E8, chip == Chip::Trio64 ? 4 : 2); // PIX_CNTL or ALT PIX_TRANS (gated by MULTIFUNC[E].bit8)
+	add_enhanced_port(26, 0xBEE8, 2); // MULTIFUNC_CNTL (word)
+	if (chip == Chip::Trio64) add_legacy_io(27, 0xD2E8, 2); // ROP_MIX       (word; some paths read this)
+	add_enhanced_port(28, 0x9EE8, 2); // SHORT_STROKE  (word; latch)
+	if (chip == Chip::Trio64) add_legacy_io(29, 0xCAE8, 2); // DESTY/AXSTP alias (might be wrong)
+	add_enhanced_port(30, 0x82E8, 2); // CUR_Y
+	add_enhanced_port(31, 0x92E8, 2); // ERR_TERM
+	add_enhanced_port(33, 0x8AE8, 2); // DESTY_AXSTP
 
 	// Legacy video address space: A0000 -> bffff
 	add_legacy_mem(4, 0xa0000, 128 * 1024);
+	if (chip == Chip::S3_86C928D)
+		add_legacy_mem(5, 0xc0000, 32 * 1024); // DB02-C §7, CR36.PD3.
 
 	// Default: no linear window until guest enables CR58 or ADVFUNC bit 4.
 	// Seed base/size from PCI config defaults; CR58/59 will override when written.
 	lfb_active = false;
-	lfb_base = s3_cfg_data[0x10 >> 2] & s3_cfg_mask[0x10 >> 2];
+	lfb_base = chip == Chip::Trio64 ? (s3_cfg_data[4] & s3_cfg_mask[4]) : 0xa0000;
 	lfb_size = vga.svga_intf.vram_size;                        // clamp to VRAM for now
 
-	// Reset the base PCI device
-	ResetPCI();
+	// Reset the base PCI device when present.
+	if (chip == Chip::Trio64)
+		ResetPCI();
 
 	/* The configuration file variable "rom" should point to a VGA BIOS
 	   image. If not, try "vgabios.bin". */
@@ -2091,6 +2102,36 @@ void CS3Trio64::init()
 
 	rom_max = (unsigned)fread(option_rom, 1, sizeof(option_rom), rom);
 	fclose(rom);
+	if (chip == Chip::S3_86C928D && rom_max >= 3 && option_rom[0] == 0x55 && option_rom[1] == 0xaa) {
+		const unsigned length = option_rom[2] * 512u;
+		if (length > 0x8000 || length > rom_max)
+			FAILURE_2(Configuration, "Number Nine GXE option ROM declares %u bytes, %u accessible (86C928 sec. 12.3)",
+				length, std::min(rom_max, 0x8000u));
+	}
+
+	// Use VIDEO_RAM_SIZE (in bits) to size VRAM. With 22 this is 4 MB.
+	vga.svga_intf.vram_size = chip == Chip::Trio64 ? 1u << VIDEO_RAM_SIZE : 2u << 20;
+	vga.memory = new u8[vga.svga_intf.vram_size];
+	memset(vga.memory, 0, vga.svga_intf.vram_size);
+
+	reset_video_registers();
+
+	myThread = 0;
+
+	printf("%s: $Id$\n",
+		devid_string);
+}
+
+
+void CS3Trio64::reset_video_registers()
+{
+	vga.attribute.state = atc_flip_flop() ? 1 : 0;
+	vga.attribute.index = vga.attribute.index & 0x1f;
+
+	vga.gc.bit_mask = 0xFF;
+
+	vga.sequencer.char_sel.base[0] = 0x20000;  // font B (attr bit3=0)
+	vga.sequencer.char_sel.base[1] = 0x20000;  // font A (attr bit3=1)
 
 	vga.attribute.state = 1;
 
@@ -2122,34 +2163,33 @@ void CS3Trio64::init()
 	s3.clk_pll_n = 0x00;
 	s3.clk_pll_r = 0x00;
 
-	// Use VIDEO_RAM_SIZE (in bits) to size VRAM. With 22 this is 4 MB.
-	vga.svga_intf.vram_size = 1u << VIDEO_RAM_SIZE;
-	vga.memory = new u8[vga.svga_intf.vram_size];
-	memset(vga.memory, 0, vga.svga_intf.vram_size);
-
 	state.last_bpp = 8;
 
 	state.x_tilesize = X_TILESIZE;
 	state.y_tilesize = Y_TILESIZE;
 
-	s3.id_cr30 = 0xE1; // Chip ID/REV register CR30, dosbox-x implementation returns 0x00 for our use case. poweron default is E1H however.
 	m_crtc_map.write_byte(0x32, 0x00); // Locked by default
 	m_crtc_map.write_byte(0x33, 0x00); // CR33 (Backward Compatibility 2) default 00h (no locks).
 	m_crtc_map.write_byte(0x36, s3_cr36_from_memsize(vga.svga_intf.vram_size, true)); // Configuration 2 Register (CONFG_REG1) (CR36) - bootstrap config
 	m_crtc_map.write_byte(0x37, 0xE5); // Configuration 2 Register (CONFG_REG2) (CR37)  - bootstrap read, sane value from 86box
 	m_crtc_map.write_byte(0x3B, 0x00); // CR3B: Data Transfer Position (DTPC)
 	m_crtc_map.write_byte(0x3C, 0x00); // CR3C: IL_RTSTART defaulting
-	m_crtc_map.write_byte(0x40, 0x30); // System Configuration Register, power on default 30h
+	m_crtc_map.write_byte(0x40, chip == Chip::Trio64 ? 0x30 : 0xa4); // SYS_CNFG reset (DB014-B §16, DB02-C §8).
 	m_crtc_map.write_byte(0x42, 0x00); // Mode Control 2- can set interlace vs non
-	s3.strapping = (uint32_t)s3_cr36_from_memsize(vga.svga_intf.vram_size, true);
+	s3.strapping = chip == Chip::Trio64 ? s3_cr36_from_memsize(vga.svga_intf.vram_size, true)
+		: 0x138f; // DB02-C §7, CR36/37: 2 MiB, ISA, byte ROM, setup on bit 4, MEMCS16.
+	if (chip == Chip::S3_86C928D) {
+		s3.cr3a = 0xd0; // DB02-C §7, MISC_1.
+		s3.cr5a = 0x0a; // DB02-C §9, LAW_POS.
+	}
 	vga.gc.memory_map_sel = 3; // color text mode
 	state.vga_mem_updated = 1;
 
 	// init MAME fields
-	s3.id_high = 0x88;    // 86C764 Trio64
-	s3.id_low = 0x11;
+	s3.id_high = chip == Chip::Trio64 ? 0x88 : 0;    // 86C764 Trio64
+	s3.id_low = chip == Chip::Trio64 ? 0x11 : 0;
 	s3.revision = 0x00;
-	s3.id_cr30 = 0xE1;    // Trio64 (per datasheet)
+	s3.id_cr30 = chip == Chip::Trio64 ? 0xe1 : 0x91; // Chip family and stepping (DB02-C §7, DB014-B §15).
 
 	// lets make it decent - redraw time
 	timing.vrefresh_hz = 60.0;
@@ -2183,13 +2223,7 @@ void CS3Trio64::init()
 	m_8514.start();
 
 	refresh_pitch_offset(); // do it initially, just for sanity sake
-
-	myThread = 0;
-
-	printf("%s: $Id$\n",
-		devid_string);
 }
-
 
 void CS3Trio64::recompute_scanline_layout()
 {
@@ -2414,6 +2448,8 @@ CS3Trio64::ScanTiming CS3Trio64::scan_timing() const
 	const u8 color_mode = s3.ext_misc_ctrl_2 >> 4;
 	if (color_mode == 3 || color_mode == 5)
 		dots_per_character /= 2.0;
+	if (chip == Chip::S3_86C928D)
+		dclk = external_clock_hz(); // External DCLK, DB02-C §12.6.
 	t.characters_per_second = dclk / dots_per_character;
 	// Modular end comparators wrap to the next match, including equal low
 	// bits (32 horizontal / 16 vertical). The equal-edge priority is not
@@ -2613,11 +2649,29 @@ void CS3Trio64::ResetPCI()
 	m_video_subsys_enable = 0;
 	m_setup_option_select_0102 = 0;
 	s3.cr65 = 0;
-	CPCIDevice::ResetPCI();
+	if (chip == Chip::Trio64) {
+		CPCIDevice::ResetPCI();
+	} else {
+		// ISA RESET clears the 928 registers and window while the on-board VRAM stays allocated.
+		auto* memory = vga.memory;
+		auto intf = vga.svga_intf;
+		vga = {};
+		vga.memory = memory;
+		vga.svga_intf = intf;
+		svga = {};
+		s3 = {};
+		m_ioas = false;
+		m_scan = {};
+		m_scan_initialized = false;
+		m_8514.ibm8514.advfunction_ctrl = 0;
+		reset_video_registers();
+		on_crtc_linear_regs_changed();
+	}
 }
 
 bool CS3Trio64::normal_access_enabled() const noexcept
 {
+	// The Jensen firmware enables the 928 through ISA POS setup (DB02-C secs. 3.3, 6.6).
 	return (m_video_subsys_enable & 0x18) == 0x08 &&
 		(m_setup_option_select_0102 & 0x01);
 }
@@ -2640,6 +2694,8 @@ bool CS3Trio64::decodes_memory_access(int index, u64 address, int dsize,
 {
 	if (index >= PCI_RANGE_BASE)
 	{
+		if (chip == Chip::S3_86C928D)
+			return false;
 		if (!CPCIDevice::decodes_memory_access(index, address, dsize, write))
 			return false;
 		// PCI configuration and expansion-ROM decoding remain independent:
@@ -2653,15 +2709,29 @@ bool CS3Trio64::decodes_memory_access(int index, u64 address, int dsize,
 		}
 		return true;
 	}
-	if (index < 0 || index >= MAX_DEV_RANGES || !device_at[0])
+	if (chip == Chip::S3_86C928D && index >= 10 && index < MAX_DEV_RANGES && index != 12 && index != 32) {
+		const bool translated = index >= 40;
+		if (translated != bool(s3.cr43 & 0x10))
+			return false;
+	}
+	if (index < 0 || index >= MAX_DEV_RANGES || (chip == Chip::Trio64 && !device_at[0]))
 		return false;
 
 	// Trio32/Trio64 DB014-B, sections 6.1.2 and 19 (COMMAND, bits 0/1):
 	// PCI I/O and memory responses require their respective command enable.
 	const u32 enable = dev_range_is_io[index] ? 1U : 2U;
-	if ((pci_state.config_data[0][1] & endian_32(enable)) == 0)
+	if (chip == Chip::Trio64 && (pci_state.config_data[0][1] & endian_32(enable)) == 0)
 		return false;
 
+	if (chip == Chip::S3_86C928D && index == DEV_LFB_IDX) {
+		const u32 phys = lfb_base + (u32)address;
+		const bool mmio = (s3.cr53 & 0x10) || (m_8514.ibm8514.advfunction_ctrl & 0x20);
+		return normal_access_enabled() && (vga.miscellaneous_output & 2) && lfb_active &&
+			address < lfb_size && !(phys >= 0xc0000 && phys < 0xc8000) &&
+			!(mmio && phys >= 0xa0000 && phys < 0xb0000);
+	}
+	if (chip == Chip::S3_86C928D && index == 5)
+		return !write && address < 0x8000; // DB02-C §7, CR36 BIOS ROM decode.
 	if (index == 12 || index == 32)
 		return address == 0 && io_access_enabled(index == 12 ? 0x46e8U : 0x0102U, write);
 	// PCI 2.1 section 3.7.1: the first addressed byte selects the target.
@@ -2672,7 +2742,7 @@ bool CS3Trio64::decodes_memory_access(int index, u64 address, int dsize,
 	{
 		// COMMAND.5 makes RAMDAC writes passive: never assert DEVSEL for
 		// a transaction starting at 3C6-3C9 (DB014-B 8-4, 19-2). 
-		if (write && address >= 6 && address <= 9 &&
+		if (chip == Chip::Trio64 && write && address >= 6 && address <= 9 &&
 			(pci_state.config_data[0][1] & endian_32(0x20U)))
 			return false;
 		return address < 16 && io_access_enabled(0x3c0U + (u32)address, write);
@@ -2691,9 +2761,16 @@ bool CS3Trio64::decodes_memory_access(int index, u64 address, int dsize,
 	case 9: // 3DA
 		return color_io;
 	case 4: // A0000-BFFFF, address is relative to A0000
+		if (chip == Chip::S3_86C928D) {
+			const bool mmio = (s3.cr53 & 0x10) || (m_8514.ibm8514.advfunction_ctrl & 0x20);
+			if (mmio && address < 0x10000)
+				return true;
+			if (lfb_active && ((0xa0000 + address) - lfb_base < lfb_size || (s3.memory_config & 8)))
+				return false;
+		}
 		// MMIO decoding remains separate
-		if ((s3.cr53 & 0x18) ||
-			(m_8514.ibm8514.advfunction_ctrl & 0x20))
+		if (chip == Chip::Trio64 && ((s3.cr53 & 0x18) ||
+			(m_8514.ibm8514.advfunction_ctrl & 0x20)))
 			return true;
 
 		// DB014-B 17-6 and 18-3: either linear-enable bit suppresses the
@@ -2797,6 +2874,8 @@ u32 CS3Trio64::ReadMem_Legacy(int index, u32 address, int dsize)
 {
 	if (!decodes_memory_access(index, address, dsize, false))
 		return dsize == 8 ? 0xffU : dsize == 16 ? 0xffffU : 0xffffffffU;
+	if (chip == Chip::S3_86C928D && index >= 40)
+		index -= 30;
 	u32 data = 0;
 	switch (index)
 	{
@@ -2819,6 +2898,11 @@ u32 CS3Trio64::ReadMem_Legacy(int index, u32 address, int dsize)
 	case 4:
 		data = legacy_read(address, dsize);
 		break;
+
+	case 5:
+		return rom_read(address, dsize);
+	case DEV_LFB_IDX:
+		return mem_read(address + (lfb_size == 0x10000 && (s3.memory_config & 1) ? u32(cpu_bank()) << 16 : 0), dsize);
 
 		// IO Port 0x3d4
 	case 8:
@@ -2869,6 +2953,8 @@ void CS3Trio64::WriteMem_Legacy(int index, u32 address, int dsize, u32 data)
 {
 	if (!decodes_memory_access(index, address, dsize, true))
 		return;
+	if (chip == Chip::S3_86C928D && index >= 40)
+		index -= 30;
 	switch (index)
 	{
 		// IO Port 0x3b4
@@ -2889,6 +2975,9 @@ void CS3Trio64::WriteMem_Legacy(int index, u32 address, int dsize, u32 data)
 		// VGA Memory
 	case 4:
 		legacy_write(address, dsize, data);
+		return;
+	case DEV_LFB_IDX:
+		mem_write(address + (lfb_size == 0x10000 && (s3.memory_config & 1) ? u32(cpu_bank()) << 16 : 0), dsize, data);
 		return;
 
 		// IO Port 0x3d4
@@ -3023,6 +3112,8 @@ u32 CS3Trio64::AccelIORead(u32 port, int dsize)
 		if (port + lane == 0xbee8 && lane + 1 < dsize / 8 && s3.enable_8514)
 		{
 			result |= (u32)m_8514.ibm8514_multifunc_r(m_video_subsys_enable) << (lane * 8);
+			if (chip == Chip::S3_86C928D)
+				m_8514.ibm8514.multifunc_sel &= 7; // DB02-C sec. 10, READ_SEL.
 			++lane;
 		}
 		else
@@ -3058,6 +3149,7 @@ void CS3Trio64::AccelIOWrite(u32 port, u8 data)
 		write16_low_high(s3.mmio_4ae8, port, data);
 		dev->ibm8514_advfunc_w(s3.mmio_4ae8);
 		on_crtc_linear_regs_changed("ADVFUNC");
+		if (chip == Chip::S3_86C928D) s3_define_video_mode();
 		break;
 
 		// CUR_Y (82E8h) — MAME sets prev_y too
@@ -3236,7 +3328,7 @@ void CS3Trio64::AccelIOWrite(u32 port, u8 data)
 			dev->ibm8514_pixel_xfer_complete();
 		}
 		else if (dev->ibm8514.bus_size == 1) {
-			if ((dev->ibm8514.current_cmd & 0x02) || (dev->ibm8514.color_bpp == 0)) {
+			if (chip == Chip::S3_86C928D || (dev->ibm8514.current_cmd & 0x02) || (dev->ibm8514.color_bpp == 0)) {
 				switch (port & 0x0001) {
 				case 0: dev->ibm8514.pixel_xfer = (dev->ibm8514.pixel_xfer & 0xffffff00) | data; break;
 				case 1: dev->ibm8514.pixel_xfer = (dev->ibm8514.pixel_xfer & 0xffff00ff) | (data << 8);
@@ -3396,6 +3488,8 @@ void CS3Trio64::WriteMem_Bar(int func, int bar, u32 address, int dsize, u32 data
 // --- Only include LFB here; legacy VGA paths fall through to vga_device ---
 u64 CS3Trio64::ReadMem(int index, u64 address, int dsize)
 {
+	if (chip == Chip::S3_86C928D)
+		return ReadMem_Legacy(index, (u32)address, dsize);
 	if (index == DEV_LFB_IDX && !normal_access_enabled())
 		return dsize == 8 ? 0xffU : dsize == 16 ? 0xffffU : dsize == 32 ? 0xffffffffU : ~U64(0);
 	// LFB window (registered by update_linear_mapping)
@@ -3464,6 +3558,10 @@ u64 CS3Trio64::ReadMem(int index, u64 address, int dsize)
 
 void CS3Trio64::WriteMem(int index, u64 address, int dsize, u64 data)
 {
+	if (chip == Chip::S3_86C928D) {
+		WriteMem_Legacy(index, (u32)address, dsize, (u32)data);
+		return;
+	}
 	if (index == DEV_LFB_IDX && !normal_access_enabled())
 		return;
 	if (index == DEV_LFB_IDX && lfb_active && lfb_size)
@@ -3528,6 +3626,13 @@ static inline u64 alpha_pio_phys_from_linear_base(u32 base)
 
 void CS3Trio64::lfb_recalc_and_map()
 {
+	if (chip == Chip::S3_86C928D) {
+		// ISA ignores address bits 25:24 and aligns the window to its size (DB02-C §9, LAW_POS).
+		lfb_base = (lfb_base & 0xffffff) & ~(lfb_size - 1);
+		cSystem->set_isa_memory_window(*this, DEV_LFB_IDX, myPCIBus, lfb_base,
+			lfb_active ? lfb_size : 0, 16);
+		return;
+	}
 	// BAR-only implementation: rely on BAR0 decoding in PCI core.
 	// Just refresh cached enable/base/size; no RegisterMemory calls here.
 	lfb_recalc_and_cache();
@@ -3668,7 +3773,7 @@ int CS3Trio64::SaveState(FILE* f)
 	if (!f || !vga.memory || !vga.svga_intf.vram_size)
 		return -1;
 	advance_scan(cSystem->device_access_time());
-	const int res = CPCIDevice::SaveState(f);
+	const int res = chip == Chip::Trio64 ? CPCIDevice::SaveState(f) : 0;
 	if (res)
 		return res;
 
@@ -3716,7 +3821,7 @@ int CS3Trio64::RestoreState(FILE* f)
 			~ReplayGuard() { flag = previous; }
 		} guard{m_replaying_pci_state, m_replaying_pci_state};
 		m_replaying_pci_state = true;
-		res = CPCIDevice::RestoreState(f);
+		res = chip == Chip::Trio64 ? CPCIDevice::RestoreState(f) : 0;
 	}
 	if (res)
 		return res;
@@ -3864,6 +3969,12 @@ void CS3Trio64::mem_write(u32 address, int dsize, u32 data)
  **/
 u32 CS3Trio64::legacy_read(u32 address, int dsize)
 {
+	if (chip == Chip::S3_86C928D && address < 0x10000) {
+		if ((s3.cr53 & 0x10) || (m_8514.ibm8514.advfunction_ctrl & 0x20))
+			return address < 0x8000 ? AccelIORead(0xe2e8 + (address & 3), dsize) : 0xffffffff; // DB02-C §3.4.3.
+		if (s3.memory_config & 8)
+			return mem_read(address + ((s3.memory_config & 1) ? u32(cpu_bank()) << 16 : 0), dsize);
+	}
 	// MMIO alias active ?
 	if (s3.cr53 & 0x10) {
 		const u32 base = s3_mmio_base_off(state);
@@ -3914,6 +4025,19 @@ u32 CS3Trio64::legacy_read(u32 address, int dsize)
  // --- Legacy VGA memory write with S3 MMIO alias support ---
 void CS3Trio64::legacy_write(u32 address, int dsize, u32 data)
 {
+	if (chip == Chip::S3_86C928D && address < 0x10000) {
+		if ((s3.cr53 & 0x10) || (m_8514.ibm8514.advfunction_ctrl & 0x20)) {
+			if (address < 0x8000)
+				io_write(0xe2e8 + (address & 3), dsize, data);
+			else if (IsAccelPort(address) && address < 0xc000)
+				io_write(address, dsize, data);
+			return;
+		}
+		if (s3.memory_config & 8) {
+			mem_write(address + ((s3.memory_config & 1) ? u32(cpu_bank()) << 16 : 0), dsize, data);
+			return;
+		}
+	}
 	switch (dsize) {
 	case 8:
 		mem_w(address, (u8)data);
@@ -3992,7 +4116,9 @@ u32 CS3Trio64::io_read(u32 address, int dsize)
 
 	if (dsize != 8)
 		FAILURE(InvalidArgument, "Unsupported dsize");
-
+	u8 dac;
+	if (address >= 0x3c6 && address <= 0x3c9 && external_dac_read(address, dac))
+		return dac;
 
 	switch (address)
 	{
@@ -4001,6 +4127,8 @@ u32 CS3Trio64::io_read(u32 address, int dsize)
 		break;
 
 	case 0x3c5:
+		if (chip == Chip::S3_86C928D && vga.sequencer.index > 4)
+			return 0xff; // DB02-C sec. 6.2, VGA sequencer.
 		if (vga.sequencer.index > 0x08 && vga.sequencer.data[0x08] != 0x06)
 			data = vga.sequencer.data[vga.sequencer.index];
 		else
@@ -4082,6 +4210,14 @@ void CS3Trio64::io_write(u32 address, int dsize, u32 data)
 			AccelIOWrite(address, (u8)data);
 			return;
 		case 16:
+			if (chip == Chip::S3_86C928D && address == 0xe2e8) {
+				// OUT DX,AX feeds one host transfer even in 8-bit mode (DB02-C secs. 10, 11.3.4).
+				if (m_8514.ibm8514.bus_size == 1)
+					m_8514.ibm8514_pixel_xfer_w(0, (u16)data);
+				else
+					AccelIOWrite(address, (u8)data);
+				return;
+			}
 			if (address == 0x42e8) {
 				// SUBSYS_CNTL has action fields: apply both lanes once.
 				m_8514.ibm8514_subcontrol_w(u16(data));
@@ -4151,6 +4287,9 @@ void CS3Trio64::io_write_b(u32 address, u8 data)
 {
 	if (!io_access_enabled(address, true))
 		return;
+	// The 928 exposes attribute data, feature control and miscellaneous output readbacks here (DB02-C Table A-3).
+	if (chip == Chip::S3_86C928D && (address == 0x3c1 || address == 0x3ca || address == 0x3cc))
+		return;
 	// Finish elapsed scan time with the old registers before a timing write.
 	// Every claimant in this PCI transaction receives the same sampled instant.
 	if (address == 0x3c2 || address == 0x3c5 ||
@@ -4191,6 +4330,8 @@ void CS3Trio64::io_write_b(u32 address, u8 data)
 		break;
 
 	case 0x3c5:
+		if (chip == Chip::S3_86C928D && vga.sequencer.index > 4)
+			break;
 		// PLL lock gate: SR09+ requires SR08 == 0x06
 		if (vga.sequencer.index > 0x08 && vga.sequencer.data[0x08] != 0x06)
 			break;
@@ -4288,7 +4429,10 @@ void CS3Trio64::write_b_3c2(u8 value)
 
 	// MAME canonical store (flat byte)
 	vga.miscellaneous_output = value;
-	load_dclk();
+	if (chip == Chip::Trio64)
+		load_dclk();
+	else
+		s3_define_video_mode();
 
 #ifdef DEBUG_VGA_NOISY
 	printf("%s: Miscellaneous output=%02x color=%u RAM=%u clock=%u "
@@ -4436,7 +4580,7 @@ void CS3Trio64::get_display_size(unsigned& width, unsigned& height)
 
 	const unsigned char_clocks = GRAPHIC_MODE ? 8 : VGA_CH_WIDTH;
 	const unsigned divisor = timing.divisor > 0 ? (unsigned)timing.divisor : 1;
-	width = (vga.crtc.horz_disp_end + 1u) * char_clocks / divisor;
+	width = (vga.crtc.horz_disp_end + 1u) * char_clocks * pixels_per_clock() / divisor;
 	height = LINES;
 }
 

@@ -114,6 +114,17 @@ public:
   virtual void  start_threads() override;
   virtual void  stop_threads() override;
 protected:
+  enum class Chip { Trio64, S3_86C928D };
+  CS3Trio64(CConfigurator* cfg, CSystem* system, int bus, int slot, bx_gui_c& display, Chip chip);
+  const Chip chip;
+  virtual int external_clock_hz() const { return 0; }
+  virtual unsigned pixels_per_clock() const { return 1; }
+  virtual u8 AccelIORead(u32 port);
+  virtual void AccelIOWrite(u32 port, u8 data);
+  virtual bool external_dac_read(u32 port, u8& value) { return false; }
+  virtual void ramdac_write_b(u32 address, u8 data);
+  void recompute_params_clock(int divisor, int xtal);
+  void mark_video_dirty() { state.vga_mem_updated = true; }
   virtual u16      line_compare_mask() override;
 
   // MAME S3 state
@@ -249,6 +260,7 @@ private:
   // MAME CODE HERE
   ibm8514a_device m_8514;
   void refresh_pitch_offset();
+  void reset_video_registers();
   // END MAME CODE - rest is es40 specific or pending removal
 
   // DB014-B 14-47/48: one setup register, selected by CR65.2, and
@@ -305,8 +317,6 @@ private:
   int      m_frames_since_render = 0;  // forced-refresh counter so cursor/text blink still animate when static
 
   // accel I/O (S3 Trio uses 0x42E8/0x4AE8)
-  void          AccelIOWrite(u32 port, u8 data);
-  u8            AccelIORead(u32 port);
   u32           AccelIORead(u32 port, int dsize);
   bool    IsAccelPort(u32 port) const;
   int     BytesPerPixel() const;
@@ -315,7 +325,6 @@ private:
   // Register helpers
   void recompute_scanline_layout();
   inline uint8_t current_char_width_px() const;
-  void recompute_params_clock(int divisor, int xtal);
 
   void  update_linear_mapping();
   void  update_pci_bar0_from_crtc(u32 value, u32 register_bits);
@@ -326,7 +335,6 @@ private:
   void  io_write(u32 address, int dsize, u32 data);
 
   void  io_write_b(u32 address, u8 data);
-  void  ramdac_write_b(u32 address, u8 data);
 
   void  write_b_3c2(u8 data);
 

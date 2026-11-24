@@ -97,6 +97,10 @@ constexpr AlphaIPRReadDescriptor ev4_describe_ipr_read(std::uint32_t instruction
     return {AlphaIPRReadKind::ExceptionAddress, false, true};
   if (selector.banks == 0x40) {
     switch (selector.index) {
+    case 2: // DTB_PTE latches and advances even to R31 (21064 HRM 5.3.2).
+      return {AlphaIPRReadKind::Helper, false, false};
+    case 3: // DTB_PTE_TEMP returns the latched PTE (21064 HRM 5.3.3).
+      return {AlphaIPRReadKind::Helper, false, true};
     case 4: // MM_CSR (21064 HRM 5.3.4).
       return {AlphaIPRReadKind::MemoryFaultStatus, false, true};
     // Reading VA unlocks VA and MM_CSR even to R31 (21064 HRM Table 4-7, 5.3.4, 5.3.5).

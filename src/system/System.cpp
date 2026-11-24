@@ -1895,7 +1895,8 @@ static const u32 system_state_magic = 0xa1fae540;
 // 2.14 uses registered Cirrus video memory.
 // 2.15 uses registered Cirrus VGA state.
 // 2.16 saves scan-code set 3 key types and the pending keyboard command.
-static const u32 system_state_version = 0x00020010;
+// 2.17 saves the EV4 DTB_PTE_TEMP readback latch (21064 HRM 5.3.3).
+static const u32 system_state_version = 0x00020011;
 static const u32 snapshot_identity_limit = 65536;
 
 void CSystem::flush_storage()

@@ -40,9 +40,9 @@ unsigned CAlphaCPU::ev4_advance_itb_pointer()
 }
 
 template<typename Entry>
-static u64 ev4_itb_read_image(const Entry& entry)
+static u64 ev4_pte_read_image(const Entry& entry)
 {
-  u64 value = entry.phys | (u64(entry.asm_bit) << 34); // 21064 HRM Fig. 5-4.
+  u64 value = entry.phys | (u64(entry.asm_bit) << 34); // Both PTEs share PFN, ASM and read enables (21064 HRM Figs. 5-4, 5-20).
   for (unsigned mode = 0; mode < 4; ++mode)
     value |= u64(entry.access[0][mode]) << (9 + mode);
   return value;
@@ -50,7 +50,7 @@ static u64 ev4_itb_read_image(const Entry& entry)
 
 void CAlphaCPU::ev4_latch_itb_pte()
 {
-  state.ev4_itb_pte_temp = ev4_itb_read_image(state.tb[TB_INDEX_ITB][ev4_advance_itb_pointer()]);
+  state.ev4_itb_pte_temp = ev4_pte_read_image(state.tb[TB_INDEX_ITB][ev4_advance_itb_pointer()]);
 }
 
 void CAlphaCPU::ev4_write_itb_pte(u64 value)
@@ -65,7 +65,7 @@ void CAlphaCPU::ev4_write_itb_pte(u64 value)
   for (unsigned mode = 0; mode < 4; ++mode)
     entry.access[0][mode] = (value >> (8 + mode)) & 1;
   entry.valid = true; // PALcode checks V and FOE before filling the ITB (21064 HRM 4.7.1.1).
-  state.ev4_itb_pte_temp = ev4_itb_read_image(entry);
+  state.ev4_itb_pte_temp = ev4_pte_read_image(entry);
   itb_mapping_changed();
 }
 
@@ -102,6 +102,15 @@ u64 ev4_read_ipr(CAlphaCPU& cpu, u32 instruction)
   case 0x31:
   case 0x32:
     return ev4_interrupt_fields(state.aster, state.sien, state.eien, state.slen, state.pcen, state.cren);
+  case 0x42: { // DTB_PTE latches the selected entry in DTB_PTE_TEMP (21064 HRM 5.3.2-3).
+    const auto& entry = state.tb[TB_INDEX_DATA][cpu.ev4_advance_dtb_pointer()];
+    u64 value = ev4_pte_read_image(entry) | (u64(entry.fault[0]) << 3) | (u64(entry.fault[1]) << 4);
+    for (unsigned mode = 0; mode < 4; ++mode)
+      value |= u64(entry.access[1][mode]) << (5 + mode);
+    state.ev4_dtb_pte_temp = value;
+    return 0; // Model the unpredictable GPR result as zero (21064 HRM 4.6, restriction 16).
+  }
+  case 0x43: return state.ev4_dtb_pte_temp; // DTB_PTE_TEMP (21064 HRM Fig. 5-20).
   case 0x44: return state.mm_stat; // MM_CSR stays latched until VA is read (21064 HRM 5.3.4).
   case 0x45: // VA (21064 HRM 5.3.5).
     state.ev4_va_locked = 0;

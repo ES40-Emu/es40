@@ -58,6 +58,7 @@ inline void ev4_visit_ipr_state(State& state, BIU& biu, Visit visit)
   visit(state.ev4_itb_next[0]);
   visit(state.ev4_itb_next[1]);
   visit(state.ev4_itb_pte_temp);
+  visit(state.ev4_dtb_pte_temp);
   visit(state.next_tb[TB_INDEX_DATA]);
   auto visit_pte = [&](auto& entry) {
     visit(entry.virt);
@@ -107,7 +108,7 @@ inline void ev4_replay_memory_state(CAlphaCPU& cpu, u32 value)
 }
 
 inline constexpr AlphaJitVerifyPolicy kEv4JitVerifyPolicy{
-  26 + kEv4ItbEntries * 10 + kEv4DtbEntries * 16,
+  27 + kEv4ItbEntries * 10 + kEv4DtbEntries * 16,
   &ev4_capture_ipr_state, &ev4_restore_ipr_state, &ev4_restore_ipr_state,
   [](int, u64 left, u64 right, bool) { return left != right; },
   &ev4_capture_memory_state, &ev4_replay_memory_state

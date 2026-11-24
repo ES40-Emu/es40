@@ -401,6 +401,7 @@ private:
   void            ev4_write_itb_pte(u64 value);
   void            ev4_write_dtb_pte(u64 value);
   void            ev4_set_dtb_pointer(int next);
+  int             ev4_advance_dtb_pointer();
   void            note_dtb_hit(int slot);
   void            ev4_latch_itb_pte();
   unsigned        ev4_advance_itb_pointer();
@@ -964,6 +965,7 @@ private:
       u64 pmpc;
       u64 ev4_itb_pte_temp; // ITB readback latch (21064 HRM 5.2.4).
     };
+    u64   ev4_dtb_pte_temp; // DTB readback latch (21064 HRM 5.3.3).
     u64   fpcr;         /**< Floating-Point Control Register [HRM p 2-36] */
     bool  bIntrFlag;
 

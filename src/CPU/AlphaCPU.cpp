@@ -4851,6 +4851,13 @@ void CAlphaCPU::note_dtb_hit(int slot)
 		ev4_set_dtb_pointer(slot + 1);
 }
 
+int CAlphaCPU::ev4_advance_dtb_pointer()
+{
+	const int slot = state.next_tb[TB_INDEX_DATA] & (kEv4DtbEntries - 1);
+	ev4_set_dtb_pointer(slot + 1); // Every PTE port read or write advances, even on a refill (21064 HRM 5.3.2).
+	return slot;
+}
+
 void CAlphaCPU::ev4_write_dtb_pte(u64 pte)
 {
 	const u64 pa = ((pte >> 32) & 0x1fffff) << 13; // DTB_PTE installs the PFN with the staged TB_TAG (21064 HRM 5.3.2).
@@ -4875,8 +4882,7 @@ void CAlphaCPU::add_tb(u64 virt, u64 pte_phys, u64 pte_flags, int flags, int asn
 	const auto fill = m_profile.tb_fill.decode(*this, virt, pte_phys, pte_flags, flags);
 	int i = -1;
 	if (t == TB_INDEX_DATA && m_profile.tb_fill.indexed_dtb_entries) {
-		i = state.next_tb[t] & (kEv4DtbEntries - 1);
-		ev4_set_dtb_pointer(i + 1); // Every PTE port write advances, even on a refill (21064 HRM 5.3.2).
+		i = ev4_advance_dtb_pointer();
 	} else
 	{
 		const int h = (int)m_tb_idx[t][tb_idx_slot(fill.virt)] - 1;

@@ -189,8 +189,6 @@ private:
   void                set_tx_state(int tx_state);
   void                set_rx_state(int rx_state);
 
-  inline u32          bswap32_local(u32 v);
-
   CPacketQueue*       rx_queue;
   CNetworkBackend*    net_backend;
   bool                calc_crc;

@@ -199,11 +199,6 @@ static const int nic_tx_capacity = 2048;
 
 //#define DEBUG_NIC_IRQ
 
-static u16 pkt_be16(const u8* p)
-{
-	return (u16)(((u16)p[0] << 8) | p[1]);
-}
-
 static void pkt_format_mac(char* out, const u8* mac)
 {
 	sprintf(out, "%02x:%02x:%02x:%02x:%02x:%02x",
@@ -735,7 +730,7 @@ void CDEC21143::trace_packet(const char* dir, const u8* frame, int len)
 
 	pkt_format_mac(dst, &frame[0]);
 	pkt_format_mac(src, &frame[6]);
-	ether_type = pkt_be16(&frame[12]);
+	ether_type = get_be16(&frame[12]);
 
 	if (ether_type == 0x0806 && len >= 42)
 	{
@@ -743,7 +738,7 @@ void CDEC21143::trace_packet(const char* dir, const u8* frame, int len)
 		char tha[18];
 		char spa[16];
 		char tpa[16];
-		u16 op = pkt_be16(&frame[20]);
+		u16 op = get_be16(&frame[20]);
 
 		pkt_format_mac(sha, &frame[22]);
 		pkt_format_ip(spa, &frame[28]);
@@ -777,8 +772,8 @@ void CDEC21143::trace_packet(const char* dir, const u8* frame, int len)
 		{
 			const u8* udp = ip + ihl;
 			int udp_payload_len = len - 14 - ihl - 8;
-			u16 sport = pkt_be16(&udp[0]);
-			u16 dport = pkt_be16(&udp[2]);
+			u16 sport = get_be16(&udp[0]);
+			u16 dport = get_be16(&udp[2]);
 			char dhcp[220];
 
 			dhcp[0] = '\0';
@@ -1532,7 +1527,7 @@ int CDEC21143::dec21143_rx()
 	do_pci_read(state.rx.cur_addr, descr, 4, 4);
 	// respect DBO bit - swap descriptor byte order if needed
 	if (state.reg[CSR_BUSMODE / 8] & BUSMODE_DBO) {
-		for (int i = 0; i < 4; i++) descr[i] = bswap32_local(descr[i]);
+		for (int i = 0; i < 4; i++) descr[i] = swap_32(descr[i]);
 	}
 
 	rdes0 = descr[0];
@@ -1680,7 +1675,7 @@ int CDEC21143::dec21143_rx()
 	// respect DBO bit - swap descriptor byte order if needed
 	{
 		u32 w0 = rdes0;
-		if (state.reg[CSR_BUSMODE / 8] & BUSMODE_DBO) w0 = bswap32_local(w0);
+		if (state.reg[CSR_BUSMODE / 8] & BUSMODE_DBO) w0 = swap_32(w0);
 		do_pci_write(state.rx.cur_addr, &w0, 4, 1);
 	}
 
@@ -1740,7 +1735,7 @@ int CDEC21143::dec21143_tx()
 	do_pci_read(addr, descr, 4, 4);
 
 	if (state.reg[CSR_BUSMODE / 8] & BUSMODE_DBO) {
-		for (int i = 0; i < 4; i++) descr[i] = bswap32_local(descr[i]);
+		for (int i = 0; i < 4; i++) descr[i] = swap_32(descr[i]);
 	}
 	tdes0 = descr[0];
 	tdes1 = descr[1];
@@ -1950,7 +1945,7 @@ int CDEC21143::dec21143_tx()
 
 	descr[0] = tdes0;
 	if (state.reg[CSR_BUSMODE / 8] & BUSMODE_DBO)
-	    descr[0] = bswap32_local(descr[0]);
+	    descr[0] = swap_32(descr[0]);
 	do_pci_write(addr, descr, 1, 4);
 
 	return 1;
@@ -2427,15 +2422,6 @@ int CDEC21143::RestoreState(FILE* f)
 }
 
 // Helper functions
-
-/* Helper for descriptor endianness when CSR0.DBO is set. */
-inline u32 CDEC21143::bswap32_local(u32 v)
-{
-	return ((v & 0x000000ffU) << 24) |
-		((v & 0x0000ff00U) << 8) |
-		((v & 0x00ff0000U) >> 8) |
-		((v & 0xff000000U) >> 24);
-}
 
 /* ----- IRQ recompute: set/clear INTx instantly (level-triggered) ----- */
 void CDEC21143::update_irq()

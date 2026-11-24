@@ -194,12 +194,12 @@ u64 CPCIDevice::pci_io_address(u32 port) const
 	return U64(0x00000801fc000000) + (U64(0x0000000200000000) * myPCIBus) + port;
 }
 
-void CPCIDevice::add_legacy_io(int id, u32 base, u32 length)
+void CPCIDevice::add_legacy_io(int id, u32 base, u32 length, int max_dsize)
 {
 	if (id < 0 || id >= MAX_DEV_RANGES)
 		FAILURE(InvalidArgument, "Legacy PCI range index out of bounds");
 	dev_range_is_io[id] = true;
-	cSystem->register_legacy_io(*this, id, myPCIBus, base, length);
+	cSystem->register_legacy_io(*this, id, myPCIBus, base, length, max_dsize);
 }
 
 void CPCIDevice::add_legacy_mem(int id, u32 base, u32 length)

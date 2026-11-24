@@ -50,6 +50,7 @@ public:
   void bind_dma(CDMA& controller);
   const CSystemComponent* isa_decode_owner() const noexcept override;
   void register_isa_io(CSystemComponent& device, int index, u16 port, u32 length) override;
+  void set_isa_memory_window(CSystemComponent& device, int index, u32 base, u32 length, int max_dsize);
   // Register the maximum native I/O width in bits.
   void register_eisa_io(CSystemComponent& device, int index, u16 port, u32 length, int max_dsize);
   // Product ID bytes are in ascending port order.

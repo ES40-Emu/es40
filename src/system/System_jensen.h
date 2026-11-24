@@ -42,8 +42,9 @@ public:
   explicit Jensen(CConfigurator* cfg);
   ~Jensen() override;
   void attach_board_devices(CConfigurator* cfg) override;
-  void register_legacy_io(CSystemComponent& device, int index, int bus, u32 port, u32 length) override;
+  void register_legacy_io(CSystemComponent& device, int index, int bus, u32 port, u32 length, int max_dsize) override;
   void register_legacy_mem(CSystemComponent& device, int index, int bus, u32 address, u32 length) override;
+  void set_isa_memory_window(CSystemComponent& device, int index, int bus, u32 address, u32 length, int max_dsize) override;
   void ResetMem(unsigned int membits) override;
   u64 cpu_read_locked(int cpuid, u64 phys, int size_bits, CSystemComponent* source) override;
   u64 cpu_stx_c(int cpuid, u64 phys, int size_bits, u64 value, CSystemComponent* source) override;

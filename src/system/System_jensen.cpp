@@ -448,22 +448,29 @@ void Jensen::attach_board_devices(CConfigurator* cfg)
   });
 }
 
-void Jensen::register_legacy_io(CSystemComponent& device, int index, int bus, u32 port, u32 length)
+void Jensen::register_legacy_io(CSystemComponent& device, int index, int bus, u32 port, u32 length, int max_dsize)
 {
-  // Fixed-address ports are ISA ports, which the EISA bus decodes.
-  CISABus* owner = isa_bus(bus);
+  // The EISA bus decodes fixed-address ISA ports at the width signaled by IO16(L) (PB22H-KB, Table B-5).
+  auto* owner = dynamic_cast<EISABus*>(isa_bus(bus));
   if (!owner || port > 0xffff)
     FAILURE_2(Configuration, "Port %x is not on ISA bus isa%d", port, bus);
-  owner->register_isa_io(device, index, (u16)port, length);
+  owner->register_eisa_io(device, index, (u16)port, length, max_dsize);
 }
 
 void Jensen::register_legacy_mem(CSystemComponent& device, int index, int bus, u32 address, u32 length)
 {
-  // Fixed-address memory is ISA memory; like the ports it gives no size signal, so it is an 8-bit slave.
+  // Fixed-address ISA memory registered here gives no size signal, so it is an 8-bit slave.
   auto* owner = dynamic_cast<EISABus*>(isa_bus(bus));
   if (!owner)
     FAILURE_2(Configuration, "Address %x is not on ISA bus isa%d", address, bus);
   owner->register_eisa_mem(device, index, address, length, 8);
+}
+
+void Jensen::set_isa_memory_window(CSystemComponent& device, int index, int bus, u32 address, u32 length, int max_dsize)
+{
+  if (bus != 0 || !eisa)
+    FAILURE_2(Configuration, "Address %x is not on ISA bus isa%d", address, bus);
+  eisa->set_isa_memory_window(device, index, address, length, max_dsize);
 }
 
 CSerial& Jensen::serial_port(unsigned number) const

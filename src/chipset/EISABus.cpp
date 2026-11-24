@@ -27,6 +27,7 @@
 
 #include "StdAfx.h"
 #include "EISABus.h"
+#include <algorithm>
 
 static constexpr unsigned last_expansion_slot = 15;
 static constexpr unsigned slot_control_offset = 4; // xC84 follows the four product ID bytes.
@@ -88,6 +89,26 @@ void EISABus::register_slot_mem(unsigned slot, CSystemComponent& device, int ind
   if (!slot_registered(slot))
     FAILURE(Configuration, "EISA memory range needs a registered expansion slot");
   register_mem(slot, device, index, address, length, max_dsize);
+}
+
+void EISABus::set_isa_memory_window(CSystemComponent& device, int index, u32 base, u32 length, int max_dsize)
+{
+  if (!valid_io_width(max_dsize) || (length && length - 1 > 0xffffffffU - base))
+    FAILURE(Configuration, "Invalid ISA memory window");
+  const auto window = std::find_if(mem_ranges.begin(), mem_ranges.end(), [&](const MemRange& range) {
+    return range.device == &device && range.index == index && range.slot == 0;
+  });
+  if (!length) {
+    if (window != mem_ranges.end())
+      mem_ranges.erase(window);
+    return;
+  }
+  // Programmable ranges can overlap. Each device must claim the cycle at decode time.
+  const MemRange range{&device, index, base, length, max_dsize, 0};
+  if (window == mem_ranges.end())
+    mem_ranges.push_back(range);
+  else
+    *window = range;
 }
 
 void EISABus::register_mem(unsigned slot, CSystemComponent& device, int index,

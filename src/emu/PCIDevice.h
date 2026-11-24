@@ -123,7 +123,7 @@ protected:
   bool  do_pci_interrupt(int func, bool asserted);
   void  add_function(int func, u32 data[64], u32 mask[64]);
   u64   pci_io_address(u32 port) const;
-  void  add_legacy_io(int id, u32 base, u32 length);
+  void  add_legacy_io(int id, u32 base, u32 length, int max_dsize = 8);
   void  add_legacy_mem(int id, u32 base, u32 length);
 
   int   myPCIBus;

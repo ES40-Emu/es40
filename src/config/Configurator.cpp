@@ -157,6 +157,7 @@
 //#endif
 #include "storage/FloppyController.h"
 #include "gui/plugin.h"
+#include "network/DE422.h"
 #if defined(HAVE_PCAP) || defined(HAVE_TAP_NET) || defined(HAVE_VMNET) || defined(HAVE_SLIRP)
 #include "network/DEC21143.h"
 #endif
@@ -769,6 +770,9 @@ static const char* const kv_serial[] = {
 static const char* const kv_ali[] = { "vga_console", "lpt.outfile", "timezone", 0 };
 static const char* const kv_ali_ide[] = { "dma", 0 };
 static const char* const kv_aha1742[] = { "floppy", 0 };
+static const char* const kv_de422[] = {
+  "mac", "type", "adapter", "drop_privileges",
+  "network", "gateway", "dhcp_start", "dhcp_end", "dns", "dhcp_lease", 0 };
 static const char* const kv_vga[] = { "rom", 0 };
 static const char* const kv_cirrus[] = { "rom", "model", 0 };
 static const char* const kv_gloria[] = {
@@ -851,6 +855,7 @@ classinfo classes[] = {
   {"mpu401", c_mpu401, IS_ISA | ON_CS, kv_mpu401},
   {"wss", c_wss, IS_ISA | ON_CS, kv_wss},
   {"aha1742", c_aha1742, IS_ISA | ON_CS | HAS_DISK, kv_aha1742},
+  {"de422", c_de422, IS_ISA | ON_CS, kv_de422},
   {"es1370", c_es1370, IS_PCI, kv_es1370},
   {"es1371", c_es1371, IS_PCI, kv_es1371},
   {0, c_none, 0, 0}
@@ -1318,6 +1323,7 @@ void CConfigurator::initialize()
 		}
 		break;
 	}
+	case c_de422:
 	case c_aha1742:
 	{
 		auto* system = static_cast<CSystem*>(pParent->myDevice);
@@ -1327,6 +1333,10 @@ void CConfigurator::initialize()
 		// The card identifies itself by slot, which only an EISA bus provides.
 		auto* eisa = dynamic_cast<EISABus*>(system->isa_bus(bus));
 		if (!eisa) FAILURE_1(Configuration, "%s needs an EISA slot", myName);
+		if (myClassId == c_de422) {
+			myDevice = new DE422(this, system, *eisa, slot);
+			break;
+		}
 		// J6 selects primary or secondary diskette ports and can disable the controller (Adaptec TRM, p. 3-15).
 		const char* setting = get_text_value("floppy", "primary");
 		const bool enabled = strcasecmp(setting, "disabled") != 0;

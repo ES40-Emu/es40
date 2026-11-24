@@ -494,6 +494,8 @@ list(APPEND ES40_SOURCES
     src/AlphaSim.cpp
     src/graphics/Cirrus.cpp
     src/config/Configurator.cpp
+    src/network/Am7990.cpp
+    src/network/DE422.cpp
     src/network/DEC21143.cpp
     src/storage/Disk.cpp
     src/storage/DiskController.cpp

@@ -79,14 +79,28 @@ void EISABus::register_io(unsigned owner_slot, CSystemComponent& device, int ind
 
 void EISABus::register_eisa_mem(CSystemComponent& device, int index, u32 address, u32 length, int max_dsize)
 {
+  register_mem(0, device, index, address, length, max_dsize);
+}
+
+void EISABus::register_slot_mem(unsigned slot, CSystemComponent& device, int index,
+  u32 address, u32 length, int max_dsize)
+{
+  if (!slot_registered(slot))
+    FAILURE(Configuration, "EISA memory range needs a registered expansion slot");
+  register_mem(slot, device, index, address, length, max_dsize);
+}
+
+void EISABus::register_mem(unsigned slot, CSystemComponent& device, int index,
+  u32 address, u32 length, int max_dsize)
+{
   if (!valid_io_width(max_dsize))
     FAILURE(Configuration, "Invalid EISA memory width");
   if (!length || length - 1 > 0xffffffffU - address)
     FAILURE(Configuration, "Invalid EISA memory range");
   for (const auto& range : mem_ranges)
-    if (address < (u64)range.base + range.length && range.base < (u64)address + length)
+    if (slot == range.slot && address < (u64)range.base + range.length && range.base < (u64)address + length)
       FAILURE(Configuration, "Overlapping EISA memory ranges");
-  mem_ranges.push_back({&device, index, address, length, max_dsize});
+  mem_ranges.push_back({&device, index, address, length, max_dsize, slot});
 }
 
 void EISABus::register_slot_id(unsigned slot, const std::array<u8, 4>& product_id)
@@ -137,12 +151,10 @@ int EISABus::io_slave_width(u16 port) const noexcept
   return range ? range->max_dsize : 8;
 }
 
-int EISABus::mem_slave_width(u32 address) const noexcept
+int EISABus::mem_slave_width(u32 address, int dsize, bool write) const noexcept
 {
-  for (const auto& range : mem_ranges)
-    if (address >= range.base && address - range.base < range.length)
-      return range.max_dsize;
-  return 8;
+  const auto* range = decode_mem(address, dsize, write, true);
+  return range ? range->max_dsize : 8;
 }
 
 CISABus::IsaIoDecode EISABus::isa_io_decode(u32 port) const noexcept
@@ -396,21 +408,27 @@ bool EISABus::write_port(u16 port, int dsize, u32 data)
   return true;
 }
 
-const EISABus::MemRange* EISABus::decode_mem(u32 address, int dsize, bool write) const noexcept
+const EISABus::MemRange* EISABus::decode_mem(u32 address, int dsize, bool write, bool sizing) const noexcept
 {
   if (!valid_io_width(dsize))
     return nullptr;
+  const MemRange* selected = nullptr;
   for (const auto& range : mem_ranges) {
     if (address < range.base || address - range.base >= range.length)
       continue;
+    if (range.slot && !slot_enabled(range.slot))
+      continue;
     const u32 offset = address - range.base;
+    const int width = sizing && dsize > range.max_dsize ? range.max_dsize : dsize;
     // As with I/O, a cycle wider than the range's native width or running past it is not claimed.
-    if (dsize > range.max_dsize || (u32)dsize / 8 > range.length - offset ||
-        !range.device->decodes_memory_access(range.index, offset, dsize, write))
-      return nullptr;
-    return &range;
+    if (width > range.max_dsize || (u32)width / 8 > range.length - offset ||
+        !range.device->decodes_memory_access(range.index, offset, width, write))
+      continue;
+    if (selected)
+      return nullptr; // Two enabled boards driving the same address cannot supply a unique value.
+    selected = &range;
   }
-  return nullptr;
+  return selected;
 }
 
 bool EISABus::read_mem(u32 address, int dsize, u32& data)

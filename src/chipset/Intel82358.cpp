@@ -126,7 +126,7 @@ bool Intel82358::write_port(u16 port, int dsize, u32 data)
 
 bool Intel82358::read_mem(u32 address, int dsize, u32& data)
 {
-  const int unit = bus.mem_slave_width(address);
+  const int unit = bus.mem_slave_width(address, dsize);
   if (unit >= dsize)
     return bus.read_mem(address, dsize, data);
   u32 value = 0xffffffffU >> (32 - dsize);
@@ -144,7 +144,7 @@ bool Intel82358::read_mem(u32 address, int dsize, u32& data)
 
 bool Intel82358::write_mem(u32 address, int dsize, u32 data)
 {
-  const int unit = bus.mem_slave_width(address);
+  const int unit = bus.mem_slave_width(address, dsize, true);
   if (unit >= dsize)
     return bus.write_mem(address, dsize, data);
   return split_cycle(address, dsize, unit, [&](u32 at, int width, int shift) {

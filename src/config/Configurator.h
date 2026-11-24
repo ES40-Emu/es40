@@ -109,6 +109,7 @@ typedef enum
   c_mpu401,
   c_wss,
   c_aha1742,
+  c_de422,
 
   // pci devices
   c_ali,

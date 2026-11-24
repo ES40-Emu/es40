@@ -27,7 +27,7 @@
 
 /**
  * \file
- * Abstract interface separating the emulated DEC 21143 NIC from the host
+ * Abstract interface separating the emulated DEC 21143 and DE422 NICs from the host
  * networking method used to get packets on and off the wire.
  *
  * Implementations:

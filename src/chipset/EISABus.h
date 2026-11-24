@@ -59,10 +59,12 @@ public:
     u16 port, u32 length, int max_dsize);
   // Register a memory range with its maximum native width in bits.
   void register_eisa_mem(CSystemComponent& device, int index, u32 address, u32 length, int max_dsize);
+  // Slot cards decode their programmed memory windows within the registered range (EK-DE422-OM, Table A-1).
+  void register_slot_mem(unsigned slot, CSystemComponent& device, int index, u32 address, u32 length, int max_dsize);
   bool slot_enabled(unsigned slot) const noexcept;
   // Data size in bits of the slave at an address; a slave giving no size signal is 8-bit.
   int io_slave_width(u16 port) const noexcept;
-  int mem_slave_width(u32 address) const noexcept;
+  int mem_slave_width(u32 address, int dsize = 8, bool write = false) const noexcept;
   IsaIoDecode isa_io_decode(u32 port) const noexcept override;
   // Cards report IRQ and DRQ levels under the device-bus lock, even while disabled.
   void set_slot_irq(unsigned slot, int irq, bool asserted);
@@ -114,6 +116,7 @@ private:
     u32 base;
     u32 length;
     int max_dsize;
+    unsigned slot;
   };
 
   struct RequestLines {
@@ -123,6 +126,8 @@ private:
 
   void register_io(unsigned owner_slot, CSystemComponent& device, int index,
     u16 port, u32 length, int max_dsize);
+  void register_mem(unsigned slot, CSystemComponent& device, int index,
+    u32 address, u32 length, int max_dsize);
   bool slot_registered(unsigned slot) const noexcept;
   bool slot_allows_dma(unsigned slot, int channel) const;
   RequestLines active_requests() const noexcept;
@@ -131,7 +136,7 @@ private:
   void set_request(Mask& requests, int line, bool asserted);
   const IoRange* find_io(u32 port, unsigned bytes = 1) const noexcept;
   const IoRange* decode_io(u16 port, int dsize, bool write) const noexcept;
-  const MemRange* decode_mem(u32 address, int dsize, bool write) const noexcept;
+  const MemRange* decode_mem(u32 address, int dsize, bool write, bool sizing = false) const noexcept;
   std::vector<IoRange> io_ranges;
   std::vector<MemRange> mem_ranges;
   State state;

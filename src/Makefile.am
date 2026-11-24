@@ -208,6 +208,8 @@ noinst_HEADERS += storage/Disk.h \
        config/NumberQuestion.h \
        config/Question.h \
        config/ShrinkingChoiceQuestion.h \
+       network/Am7990.h \
+       network/DE422.h \
        network/DEC21143.h \
        network/DEC21143_mii.h \
        network/DEC21143_tulipreg.h \
@@ -290,6 +292,8 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        graphics/Cirrus.cpp \
        graphics/Cirrus.h \
        config/Configurator.cpp \
+       network/Am7990.cpp \
+       network/DE422.cpp \
        network/DEC21143.cpp \
        storage/Disk.cpp \
        storage/DiskController.cpp \

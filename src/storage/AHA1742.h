@@ -55,9 +55,11 @@ private:
   enum { StatusWord = 0x00, HostAdapterStatus = 0x02, ResidualCount = 0x04, ResidualAddress = 0x08 };
   enum { ReadInquiryData = 0x0a }; // Operation code (AHA-1740A TRM, p. 6-4).
   enum { DisableInterrupt = 0x0080, SuppressUnderrunError = 0x0400, DisableStatusBlock = 0x4000 }; // Flag word 1 bits 7, 10 and 14 (AHA-1740A TRM, pp. 6-5, 6-6).
-  enum { CommandDone = 0x0001, DataUnderrun = 0x0002, InterruptIssued = 0x0080, MajorError = 0x1000 }; // Status word bits 0, 1, 7 and 12 (AHA-1740A TRM, pp. 6-14 to 6-16).
+  enum { CommandDone = 0x0001, DataUnderrun = 0x0002, QueueFull = 0x0008, InterruptIssued = 0x0080, MajorError = 0x1000 }; // Status word bits 0, 1, 3, 7 and 12 (AHA-1740A TRM, pp. 6-14 to 6-16).
   enum { UnderrunOccurred = 0x12 }; // Host adapter status (AHA-1740A TRM, p. 6-17).
+  enum { QueueSize = 64 }; // Control blocks the adapter holds at once (AHA-1740A TRM, p. 6-2).
   void start_ccb(u32 address);
+  void post_completion();
   void drive_irq(bool pending);
   EISABus& bus;
   const unsigned slot;
@@ -69,6 +71,10 @@ private:
   u8 g2stat = MailboxOutEmpty;
   u8 g2intst = 0;
   u8 mboxin[4]{};
+  // Completions wait here, oldest first, for the mailbox in: G2INTST value in bits 39-32 over the control block address (AHA-1740A TRM, p. 4-20).
+  u64 completions[QueueSize]{};
+  u8 completion_head = 0;
+  u8 completion_count = 0;
   bool in_reset = false;
 };
 

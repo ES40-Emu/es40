@@ -59,6 +59,9 @@ AHA1742::AHA1742(CConfigurator* cfg, CSystem* system, EISABus& bus, unsigned slo
   save_item(g2stat, "g2stat");
   save_item(g2intst, "g2intst");
   save_item(mboxin, "mboxin");
+  save_item(completions, "completions");
+  save_item(completion_head, "completion_head");
+  save_item(completion_count, "completion_count");
   save_item(in_reset, "in_reset");
 }
 
@@ -128,12 +131,16 @@ void AHA1742::WriteMem(int index, u64 address, int dsize, u64 data)
   if (data & HardReset) {
     in_reset = true;
     g2stat |= Busy;
+    // The local processor loses what it held, waiting completions included (AHA-1740A TRM, p. 4-8).
+    completion_count = 0;
   } else if (in_reset) {
     // Released with diagnostics passing: 00 is loaded in MBOXIN0, Busy clears and the mailbox out is empty (AHA-1740A TRM, pp. 4-20, 4-21).
     in_reset = false;
     mboxin[0] = 0;
     g2stat = MailboxOutEmpty;
   }
+  // Clearing the interrupt tells the local processor the mailbox in is free for the next completion (AHA-1740A TRM, p. 4-20).
+  post_completion();
 }
 
 void AHA1742::start_ccb(u32 address)
@@ -143,12 +150,18 @@ void AHA1742::start_ccb(u32 address)
   // Only Read Host Adapter Inquiry Data is carried out; the option flags in bits 14-12 are not part of the operation code (AHA-1740A TRM, p. 6-4).
   if (!bus.slot_master_read(slot, address, ecb, sizeof(ecb)) || (get_le16(ecb + CommandWord) & 0x0fff) != ReadInquiryData)
     return;
+  u8 status[32]{};
+  // With every completion slot taken the control block is refused with Queue Full and no action is taken on it (AHA-1740A TRM, p. 6-14).
+  if (completion_count == QueueSize) {
+    put_le16(status + StatusWord, QueueFull);
+    bus.slot_master_write(slot, get_le32(ecb + StatusBlockPointer), status, sizeof(status));
+    return;
+  }
   const u16 flags = get_le16(ecb + FlagWord1);
   const u32 pointer = get_le32(ecb + DataPointer), length = get_le32(ecb + DataLength);
   // The data is cut to the length the host allows, and a longer buffer is left short (AHA-1740A TRM, pp. 6-30, 6-32).
   const u32 count = length < sizeof(inquiry_data) ? length : u32(sizeof(inquiry_data));
   bus.slot_master_write(slot, pointer, inquiry_data, count);
-  u8 status[32]{};
   u16 word = CommandDone;
   if (count < length) {
     // An underrun reports the residual count and buffer address, and is an error unless the host suppressed it (AHA-1740A TRM, pp. 6-14, 6-18).
@@ -166,9 +179,22 @@ void AHA1742::start_ccb(u32 address)
     bus.slot_master_write(slot, get_le32(ecb + StatusBlockPointer), status, sizeof(status));
   if (!interrupt)
     return;
-  // The control block address is loaded in the mailbox in, then the status code and target set the interrupt (AHA-1740A TRM, pp. 4-20, 4-22).
-  put_le32(mboxin, address);
-  g2intst = u8(((word & CommandDone) ? CompletedGood : CompletedError) << 4 | (attn & 0x0f));
+  // The completion waits its turn with its status code and target, behind any the host has not yet taken (AHA-1740A TRM, pp. 4-20, 4-22).
+  const u8 code = u8(((word & CommandDone) ? CompletedGood : CompletedError) << 4 | (attn & 0x0f));
+  completions[(completion_head + completion_count++) % QueueSize] = u64(code) << 32 | address;
+  post_completion();
+}
+
+// With the EISA interrupt clear, the oldest completion is loaded in the mailbox in and its status code sets the interrupt (AHA-1740A TRM, pp. 4-20, 4-22).
+void AHA1742::post_completion()
+{
+  if ((g2stat & InterruptPending) || !completion_count)
+    return;
+  const u64 completion = completions[completion_head];
+  completion_head = u8((completion_head + 1) % QueueSize);
+  --completion_count;
+  put_le32(mboxin, u32(completion));
+  g2intst = u8(completion >> 32);
   g2stat |= InterruptPending;
   drive_irq(true);
 }

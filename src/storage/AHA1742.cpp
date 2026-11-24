@@ -63,6 +63,7 @@ AHA1742::AHA1742(CConfigurator* cfg, CSystem* system, EISABus& bus, unsigned slo
   save_item(mboxout, "mboxout");
   save_item(attn, "attn");
   save_item(g2stat, "g2stat");
+  save_item(g2intst, "g2intst");
   save_item(mboxin, "mboxin");
   save_item(in_reset, "in_reset");
 }
@@ -83,6 +84,8 @@ u64 AHA1742::ReadMem(int index, u64 address, int dsize)
     return mboxout[address - MBOXOUT0];
   if (address == ATTN)
     return attn;
+  if (address == G2INTST)
+    return g2intst;
   if (address == G2STAT)
     return g2stat;
   if (address >= MBOXIN0 && address < MBOXIN0 + sizeof(mboxin))
@@ -96,7 +99,12 @@ void AHA1742::WriteMem(int index, u64 address, int dsize, u64 data)
     return;
   // Each configuration register is write/read, so a write is kept whole and read back as written.
   if (index == Configuration) {
+    // A new INTSEL moves the interrupt to another line, so the old line is let go first (AHA-1740A TRM, p. 4-15).
+    if (address == INTDEF && ((config[INTDEF] ^ data) & INTSEL))
+      drive_irq(false);
     config[address] = u8(data);
+    if (address == INTDEF)
+      drive_irq((g2stat & InterruptPending) != 0);
     return;
   }
   if (address < MBOXOUT0 + sizeof(mboxout)) {
@@ -117,6 +125,11 @@ void AHA1742::WriteMem(int index, u64 address, int dsize, u64 data)
   }
   if (address != G2CNTRL)
     return;
+  // Clear EISA Interrupt drops a pending interrupt, and a Hard Reset returns the registers to their reset condition (AHA-1740A TRM, pp. 4-8, 4-22).
+  if (data & (ClearInterrupt | HardReset)) {
+    g2stat &= ~InterruptPending;
+    drive_irq(false);
+  }
   // Hard Reset holds the adapter in reset, with Busy set, until the bit is cleared (AHA-1740A TRM, p. 4-22).
   if (data & HardReset) {
     in_reset = true;
@@ -150,8 +163,24 @@ void AHA1742::start_ccb(u32 address)
     put_u32le(status + ResidualCount, length - count);
     put_u32le(status + ResidualAddress, pointer);
   }
-  put_u16le(status + StatusWord, word);
+  // The host is interrupted unless the command is done without error and it set Disable Interrupt (AHA-1740A TRM, pp. 6-5, 6-15).
+  const bool interrupt = !(word & CommandDone) || !(flags & DisableInterrupt);
+  put_u16le(status + StatusWord, u16(word | (interrupt ? InterruptIssued : 0)));
   // The status block is left out only when the command is done without error and the host disabled it (AHA-1740A TRM, p. 6-11).
   if (!(word & CommandDone) || !(flags & DisableStatusBlock))
     bus.slot_master_write(slot, get_u32le(ecb + StatusBlockPointer), status, sizeof(status));
+  if (!interrupt)
+    return;
+  // The control block address is loaded in the mailbox in, then the status code and target set the interrupt (AHA-1740A TRM, pp. 4-20, 4-22).
+  put_u32le(mboxin, address);
+  g2intst = u8(((word & CommandDone) ? CompletedGood : CompletedError) << 4 | (attn & 0x0f));
+  g2stat |= InterruptPending;
+  drive_irq(true);
+}
+
+// The pending interrupt reaches the line INTSEL names while INTEN is set; INTHIGH's electrical sense is not carried by the bus (AHA-1740A TRM, p. 4-15).
+void AHA1742::drive_irq(bool pending)
+{
+  static const u8 line[8] = {9, 10, 11, 12, 0, 14, 15, 0}; // 0 where the manual has "Not used"; the bus ignores it.
+  bus.set_slot_irq(slot, line[config[INTDEF] & INTSEL], pending && (config[INTDEF] & INTEN));
 }

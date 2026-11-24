@@ -32,6 +32,8 @@
 
 static constexpr u16 dma_low_page_base = 0x81;
 static constexpr u16 dma_high_page_base = 0x481;
+static constexpr u16 refresh_low_page_port = 0x8f;
+static constexpr u16 refresh_high_page_port = 0x48f;
 static constexpr u16 dma0_chaining_mode_port = 0x40a;
 static constexpr u16 dma1_chaining_mode_port = 0x4d4;
 static constexpr u16 dma_chain_expiration_control_port = 0x40c;
@@ -46,7 +48,7 @@ class Intel82357::Dma final : public CDMA
 {
 public:
   Dma(CConfigurator* cfg, CSystem* system, Intel82357& isp);
-  enum class Register { None, Legacy, HighPage, HighCount, Stop, Chaining, Expiration, ExtendedMode };
+  enum class Register { None, Legacy, HighPage, RefreshPage, HighCount, Stop, Chaining, Expiration, ExtendedMode };
   struct DecodedPort {
     Register reg;
     int channel = 0;
@@ -88,6 +90,7 @@ private:
   Intel82357& isp;
   bool chaining_irq_asserted = false;
   struct {
+    u8 refresh_page[2]; // Independent low and high refresh page bytes (82357 §2.4).
     bool extended_address[8]; // 82357 high page was written last for the current buffer.
     bool base_extended_address[8]; // Address carry mode for the base registers.
     u8 extended_mode[8]; // Bits 7:2 of each channel's extended-mode register.
@@ -120,6 +123,7 @@ bool Intel82357::access_dma_port(u16 port, u8& data, bool write)
 Intel82357::Dma::Dma(CConfigurator* cfg, CSystem* system, Intel82357& isp)
   : CDMA(cfg, system, isp, 0xffffffU), isp(isp)
 {
+  save_item(state.refresh_page, "dma.refresh_page");
   save_item(state.extended_address, "dma.extended_address");
   save_item(state.base_extended_address, "dma.base_extended_address");
   save_item(state.extended_mode, "dma.extended_mode");
@@ -196,9 +200,7 @@ bool Intel82357::Dma::decodes_legacy_port(u16 port, bool write)
   int ctrlr, reg;
   if (!legacy_register(port, ctrlr, reg))
     return page_channel(port, dma_low_page_base) >= 0;
-  // The upper bank uses even ports and omits channel 4's address and count.
-  if (ctrlr == 1 && ((port & 1) || reg < 2))
-    return false;
+  // The upper bank uses even base ports with A0 ignored, including cascade address/count (82357 §13.0).
   return write || reg <= 0x08 || reg == 0x0f;
 }
 
@@ -215,6 +217,10 @@ Intel82357::Dma::DecodedPort Intel82357::Dma::decode_port(u16 port, bool write)
   if (stop_register(port, num, shift))
     return {Register::Stop, num, shift};
   switch (port) {
+  case refresh_low_page_port:
+  case refresh_low_page_port | 0x10: // Low page decode ignores A4 (82357 §13.0).
+  case refresh_high_page_port:
+    return {Register::RefreshPage};
   case dma0_chaining_mode_port:
   case dma1_chaining_mode_port:
     return {Register::Chaining};
@@ -244,6 +250,14 @@ bool Intel82357::Dma::access_port(u16 port, u8& data, bool write)
     else
       data = read_high_page_port(port);
     return true;
+  case Register::RefreshPage: {
+    u8& page = state.refresh_page[port == refresh_high_page_port];
+    if (write)
+      page = data;
+    else
+      data = page;
+    return true;
+  }
   case Register::HighCount:
     if (write)
       program_count(decoded.channel, 0xffff, (u32)data << 16);

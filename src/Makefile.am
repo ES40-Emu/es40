@@ -338,6 +338,8 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        emu/PCIDevice.cpp \
        io/Port80.cpp \
        graphics/S3Trio64.cpp \
+       graphics/Bt485.cpp \
+       graphics/Bt485.h \
        graphics/GloriaSynergy.cpp \
        graphics/GloriaSynergy.h \
        graphics/Permedia2.cpp \

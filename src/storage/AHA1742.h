@@ -64,12 +64,14 @@ private:
   enum { LogicalUnit = 0x0007, NoDisconnect = 0x0040 }; // Flag word 2 bits 2-0 and 6 (AHA-1740A TRM, p. 6-7).
   // Status word bits 0, 1, 3, 4, 5, 7 and 12 (AHA-1740A TRM, pp. 6-14 to 6-16).
   enum { CommandDone = 0x0001, DataUnderrun = 0x0002, QueueFull = 0x0008, SpecificationCheck = 0x0010, DataOverrun = 0x0020, InterruptIssued = 0x0080, MajorError = 0x1000 };
-  enum { SelectionTimeout = 0x11, OverrunOrUnderrun = 0x12, InvalidParameter = 0x18 }; // Host adapter status codes (AHA-1740A TRM, p. 6-17).
+  enum { SelectionTimeout = 0x11, OverrunOrUnderrun = 0x12, InvalidParameter = 0x18, InvalidList = 0x1a }; // Host adapter status codes (AHA-1740A TRM, p. 6-17).
   enum { QueueSize = 64 }; // Control blocks the adapter holds at once (AHA-1740A TRM, p. 6-2).
   void start_ccb(u32 address);
   void read_inquiry_data(const u8* ecb, u8* status);
   void initiator_command(const u8* ecb, u8* status);
-  void account_transfer(const u8* ecb, u8* status, u32 moved, bool overrun);
+  // The data area is given as 8-byte {pointer, length} pairs: the control block's own, or its scatter/gather list (AHA-1740A TRM, pp. 6-10, 6-11).
+  u32 move_data(const u8* list, u32 entries, u32 skip, u8* data, u32 count, bool to_host);
+  void account_transfer(const u8* ecb, u8* status, const u8* list, u32 entries, u32 moved, bool overrun);
   void post_completion();
   void drive_irq(bool pending);
   EISABus& bus;

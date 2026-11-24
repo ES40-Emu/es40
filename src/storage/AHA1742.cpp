@@ -169,8 +169,8 @@ void AHA1742::start_ccb(u32 address)
     return;
   // The option flags in bits 14-12 are not part of the operation code (AHA-1740A TRM, p. 6-4).
   const u16 operation = get_le16(ecb + CommandWord) & 0x0fff, flags = get_le16(ecb + FlagWord1);
-  // Other operations are not carried out yet, nor is an Initiator SCSI Command whose data is a scatter/gather list.
-  if (operation != ReadInquiryData && (operation != InitiatorCommand || (flags & ScatterGather)))
+  // Other operations are not carried out yet.
+  if (operation != InitiatorCommand && operation != ReadInquiryData)
     return;
   u8 status[32]{};
   // With every completion slot taken the control block is refused with Queue Full and no action is taken on it (AHA-1740A TRM, p. 6-14).
@@ -205,7 +205,7 @@ void AHA1742::read_inquiry_data(const u8* ecb, u8* status)
   const u32 count = length < sizeof(inquiry_data) ? length : u32(sizeof(inquiry_data));
   bus.slot_master_write(slot, get_le32(ecb + DataPointer), inquiry_data, count);
   put_le16(status + StatusWord, CommandDone);
-  account_transfer(ecb, status, count, false);
+  account_transfer(ecb, status, ecb + DataPointer, 1, count, false);
 }
 
 // Initiator SCSI Command: the adapter selects the target and follows it through the bus phases of one command (AHA-1740A TRM, p. 6-26).
@@ -213,12 +213,27 @@ void AHA1742::initiator_command(const u8* ecb, u8* status)
 {
   const u8 target = attn & 0x0f, cdb_length = ecb[CDBLength];
   const u16 flags2 = get_le16(ecb + FlagWord2);
-  const u32 pointer = get_le32(ecb + DataPointer), length = get_le32(ecb + DataLength);
   // A CDB is 6, 10 or 12 bytes long; another length is an invalid parameter, and no action is taken on the control block (AHA-1740A TRM, pp. 6-12, 6-15, 6-17).
   if (cdb_length != 6 && cdb_length != 10 && cdb_length != 12) {
     put_le16(status + StatusWord, SpecificationCheck);
     status[HostAdapterStatus] = InvalidParameter;
     return;
+  }
+  // The data area is the control block's own pointer and length, or with Scatter/Gather set the list of such pairs they locate (AHA-1740A TRM, pp. 6-5, 6-10).
+  u8 gathered[1024];
+  const u8* list = ecb + DataPointer;
+  u32 entries = 1;
+  if (get_le16(ecb + FlagWord1) & ScatterGather) {
+    // A list holds up to 128 pairs: a length that is zero, not a multiple of 8 or over 1 KByte makes it invalid (AHA-1740A TRM, pp. 6-10, 6-11, 6-17).
+    const u32 length = get_le32(ecb + DataLength);
+    if (!length || (length & 7) || length > sizeof(gathered)) {
+      put_le16(status + StatusWord, SpecificationCheck);
+      status[HostAdapterStatus] = InvalidList;
+      return;
+    }
+    bus.slot_master_read(slot, get_le32(ecb + DataPointer), gathered, length);
+    list = gathered;
+    entries = length / 8;
   }
   // The adapter is the only initiator on its bus, so it wins arbitration with the ID in SCSIDEF bits 3-0 (AHA-1740A TRM, p. 4-16).
   scsi_initiator_id[0] = config[SCSIDEF] & HSCSIID;
@@ -235,26 +250,22 @@ void AHA1742::initiator_command(const u8* ecb, u8* status)
   // The target chooses each bus phase and the adapter answers it, until the target frees the bus.
   for (int phase; (phase = scsi_get_phase(0)) != SCSI_PHASE_FREE; scsi_xfer_done(0)) {
     const size_t bytes = scsi_expected_xfer(0);
-    const u32 room = length - moved, count = bytes < room ? u32(bytes) : room;
     if (phase == SCSI_PHASE_MSG_OUT) {
       // The identify message names the LUN and allows disconnection, the default, unless No Disconnect is set (AHA-1740A TRM, pp. 4-29, 6-7).
       *static_cast<u8*>(scsi_xfer_ptr(0, 1)) = u8(0x80 | ((flags2 & NoDisconnect) ? 0 : 0x40) | (flags2 & LogicalUnit));
     } else if (phase == SCSI_PHASE_COMMAND) {
       memcpy(scsi_xfer_ptr(0, cdb_length), ecb + CDBBytes, cdb_length);
-    } else if (phase == SCSI_PHASE_DATA_OUT) {
-      // A target that asks for more than the data length is sent none of it, and the command ends there as a data overrun (AHA-1740A TRM, pp. 6-9, 6-15).
-      if (bytes > room) {
+    } else if (phase == SCSI_PHASE_DATA_OUT || phase == SCSI_PHASE_DATA_IN) {
+      const u32 done = move_data(list, entries, moved, static_cast<u8*>(scsi_xfer_ptr(0, bytes)), u32(bytes), phase == SCSI_PHASE_DATA_IN);
+      moved += done;
+      // A target that wants more than the data area holds is a data overrun: data in is taken without being stored, and data out ends the command there (AHA-1740A TRM, pp. 6-9, 6-15).
+      if (done < bytes) {
         overrun = true;
-        scsi_bus[0]->free_bus(target);
-        break;
+        if (phase == SCSI_PHASE_DATA_OUT) {
+          scsi_bus[0]->free_bus(target);
+          break;
+        }
       }
-      bus.slot_master_read(slot, pointer + moved, scsi_xfer_ptr(0, bytes), bytes);
-      moved += count;
-    } else if (phase == SCSI_PHASE_DATA_IN) {
-      // Data past the data length is taken from the target without being stored, which is also a data overrun (AHA-1740A TRM, p. 6-15).
-      bus.slot_master_write(slot, pointer + moved, scsi_xfer_ptr(0, bytes), count);
-      overrun = overrun || bytes > room;
-      moved += count;
     } else {
       // The status phase gives the target status; the Command Complete message that follows needs no answer (AHA-1740A TRM, p. 6-17).
       const u8* data = static_cast<u8*>(scsi_xfer_ptr(0, bytes));
@@ -264,14 +275,46 @@ void AHA1742::initiator_command(const u8* ecb, u8* status)
   }
   // Only Good status leaves the command done without error, and a check condition is not a major error (AHA-1740A TRM, pp. 6-14, 6-16).
   put_le16(status + StatusWord, status[TargetStatus] ? 0 : CommandDone);
-  account_transfer(ecb, status, moved, overrun);
+  account_transfer(ecb, status, list, entries, moved, overrun);
 }
 
-// Fewer bytes moved than the data length is an underrun, an error unless the host suppressed it; an overrun always is one (AHA-1740A TRM, pp. 6-14, 6-15).
-void AHA1742::account_transfer(const u8* ecb, u8* status, u32 moved, bool overrun)
+// Moves up to count bytes between the target's buffer and the data area, from skip bytes into the area, and returns how many the area had room for.
+u32 AHA1742::move_data(const u8* list, u32 entries, u32 skip, u8* data, u32 count, bool to_host)
 {
-  const u32 length = get_le32(ecb + DataLength);
-  if (!overrun && moved == length)
+  u32 done = 0;
+  for (u32 i = 0; i < entries && done < count; ++i) {
+    const u32 address = get_le32(list + 8 * i), length = get_le32(list + 8 * i + 4);
+    // The pairs are used in list order, so those already used up are passed over (AHA-1740A TRM, p. 6-10).
+    if (skip >= length) {
+      skip -= length;
+      continue;
+    }
+    const u32 part = length - skip < count - done ? length - skip : count - done;
+    if (to_host)
+      bus.slot_master_write(slot, address + skip, data + done, part);
+    else
+      bus.slot_master_read(slot, address + skip, data + done, part);
+    done += part;
+    skip = 0;
+  }
+  return done;
+}
+
+// Fewer bytes moved than the data area holds is an underrun, an error unless the host suppressed it; an overrun always is one (AHA-1740A TRM, pp. 6-14, 6-15).
+void AHA1742::account_transfer(const u8* ecb, u8* status, const u8* list, u32 entries, u32 moved, bool overrun)
+{
+  // The pair used last holds the last byte moved, or is the first one when nothing moved; total ends as the size of the data area.
+  u32 last = 0;
+  u64 total = 0, end = get_le32(list + 4);
+  for (u32 i = 0; i < entries; ++i) {
+    const u32 length = get_le32(list + 8 * i + 4);
+    if (total < moved) {
+      last = i;
+      end = total + length;
+    }
+    total += length;
+  }
+  if (!overrun && moved == total)
     return;
   u16 word = u16(get_le16(status + StatusWord) | (overrun ? DataOverrun : DataUnderrun));
   if (overrun || !(get_le16(ecb + FlagWord1) & SuppressUnderrunError)) {
@@ -279,9 +322,10 @@ void AHA1742::account_transfer(const u8* ecb, u8* status, u32 moved, bool overru
     status[HostAdapterStatus] = OverrunOrUnderrun;
   }
   put_le16(status + StatusWord, word);
-  // The residual count is zero after an overrun, and without a scatter/gather list the address is the data pointer (AHA-1740A TRM, p. 6-18).
-  put_le32(status + ResidualCount, overrun ? 0 : length - moved);
-  put_le32(status + ResidualAddress, get_le32(ecb + DataPointer));
+  // The residual count is what is left of the pair used last, or zero after an overrun (AHA-1740A TRM, p. 6-18).
+  put_le32(status + ResidualCount, overrun ? 0 : u32(end - moved));
+  // The residual address is the data pointer, or with Scatter/Gather set the address in the list of the pair used last (AHA-1740A TRM, pp. 6-18, 6-19).
+  put_le32(status + ResidualAddress, get_le32(ecb + DataPointer) + ((get_le16(ecb + FlagWord1) & ScatterGather) ? 8 * last : 0));
 }
 
 // With the EISA interrupt clear, the oldest completion is loaded in the mailbox in and its status code sets the interrupt (AHA-1740A TRM, pp. 4-20, 4-22).

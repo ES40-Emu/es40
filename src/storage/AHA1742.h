@@ -37,13 +37,23 @@ class AHA1742 final : public CSystemComponent
 {
 public:
   AHA1742(CConfigurator* cfg, CSystem* system, EISABus& bus, unsigned slot);
+  bool decodes_memory_access(int index, u64 address, int dsize, bool write) const noexcept override;
   u64 ReadMem(int index, u64 address, int dsize) override;
   void WriteMem(int index, u64 address, int dsize, u64 data) override;
 
 private:
-  enum { Configuration };
+  enum { Configuration, Group2 };
+  // Offsets from zCD0 of the Enhanced Mode registers (AHA-1740A TRM, pp. 4-21 to 4-23).
+  enum { G2CNTRL = 5, G2STAT = 7, MBOXIN0 = 8 };
+  enum { HardReset = 0x80 }; // G2CNTRL bit 7 (AHA-1740A TRM, p. 4-22).
+  enum { Busy = 0x01 }; // G2STAT bit 0 (AHA-1740A TRM, p. 4-23).
+  EISABus& bus;
+  const unsigned slot;
   // PORTADDR, BIOSADDR, INTDEF, SCSIDEF, BUSDEF and three reserved bytes, zCC0-zCC7 (AHA-1740A TRM, pp. 4-13 to 4-16).
   u8 config[8]{};
+  u8 g2stat = 0;
+  u8 mboxin[4]{};
+  bool in_reset = false;
 };
 
 #endif

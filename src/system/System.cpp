@@ -1896,7 +1896,8 @@ static const u32 system_state_magic = 0xa1fae540;
 // 2.15 uses registered Cirrus VGA state.
 // 2.16 saves scan-code set 3 key types and the pending keyboard command.
 // 2.17 saves the EV4 DTB_PTE_TEMP readback latch (21064 HRM 5.3.3).
-static const u32 system_state_version = 0x00020011;
+// 2.18 saves per-drive floppy interrupt status (Intel 82077, sec. 5.2.4).
+static const u32 system_state_version = 0x00020012;
 static const u32 snapshot_identity_limit = 65536;
 
 void CSystem::flush_storage()

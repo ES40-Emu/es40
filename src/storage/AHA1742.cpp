@@ -29,6 +29,7 @@
 #include "AHA1742.h"
 #include "chipset/EISABus.h"
 #include "Disk.h"
+#include "Intel82077A.h"
 #include "SCSIBus.h"
 
 // What Read Host Adapter Inquiry Data returns; a real board's name and release fields are not known (AHA-1740A TRM, pp. 6-31 to 6-33).
@@ -46,13 +47,16 @@ static const u8 inquiry_data[] = {
   0x00, 0x00, 0x00, 0x00, // Firmware checksum, then a reserved word.
 };
 
-AHA1742::AHA1742(CConfigurator* cfg, CSystem* system, EISABus& bus, unsigned slot)
+AHA1742::AHA1742(CConfigurator* cfg, CSystem* system, EISABus& bus, unsigned slot,
+  CConfigurator* floppy_cfg, bool secondary_floppy)
   : CSystemComponent(cfg, system), CDiskController(1, 8), bus(bus), slot(slot)
 {
   // The adapter is the initiator on its SCSI bus and takes no ID as a target, since Target Mode stays disabled (AHA-1740A TRM, p. 5-10).
   scsi_bus[0] = new CSCSIBus(cfg, system);
-  // HID0-HID3 spell "ADP", product 00h, revision 02h for the AHA-1742A (AHA-1740A TRM, pp. 4-11, 4-12).
-  bus.register_slot_id(slot, {0x04, 0x90, 0x00, 0x02});
+  // HID0-HID3 spell ADP0002 with J6 floppy enable fitted, ADP0001 without (Adaptec TRM, pp. 3-15, 4-11).
+  bus.register_slot_id(slot, {0x04, 0x90, 0x00, u8(floppy_cfg ? 0x02 : 0x01)});
+  if (floppy_cfg)
+    floppy = new Intel82077A(floppy_cfg, system, bus, slot, secondary_floppy);
   // The configuration registers are byte-wide and accessible at any time (AHA-1740A TRM, p. 4-12).
   bus.register_slot_io(slot, *this, Configuration, u16((slot << 12) | 0xcc0), sizeof(config), 8);
   // The Enhanced Mode (Group 2) registers occupy zCD0-zCDC (AHA-1740A TRM, pp. 4-21 to 4-23).

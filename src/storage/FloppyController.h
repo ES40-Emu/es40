@@ -106,11 +106,17 @@ public:
   virtual void  init();
   virtual void  check_state() override;
 
+protected:
+  CFloppyController(CConfigurator* cfg, CSystem* c, int id, bool pc_at);
+  virtual void drive_irq(bool asserted);
+  virtual bool transfer_dma(u8* buffer, size_t length, bool to_memory);
+  const u32 isa_io_base;
+
 private:
   // Borrowed routing owner; not part of the saved device state.
-  const CAliM1543C* isa_bridge = nullptr;
+  CAliM1543C* isa_bridge = nullptr;
   CDMA* isa_dma = nullptr;
-  const u32 isa_io_base;
+  const bool pc_at;
 
   void          service_pending_media_actions_if_idle();
   struct SFloppyGeometry {
@@ -164,7 +170,7 @@ private:
 
     bool interrupt;
     u8 dor;
-    u8 reset_sense_cnt;
+    u8 pending_st0[4];
 
     struct {
       bool active;

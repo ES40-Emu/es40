@@ -258,7 +258,8 @@ void Intel82357::set_isa_irq(int irq, bool asserted)
   if (irq < 0 || irq >= 16 || irq == 2)
     return;
   std::lock_guard<std::recursive_mutex> lock(cSystem->get_device_bus_mutex());
-  pic.set_line(irq >> 3, irq & 7, asserted);
+  // External IRQ inputs must remain active until the first INTA (PB22H-KB, ch. 17, p. 17-28).
+  pic.set_line(irq >> 3, irq & 7, asserted, Pic8259::EdgeRelease::Withdraw);
 }
 
 void Intel82357::set_dma_chaining_irq(bool asserted)

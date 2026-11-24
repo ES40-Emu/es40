@@ -768,6 +768,7 @@ static const char* const kv_serial[] = {
   "wait_for_connection", 0 };
 static const char* const kv_ali[] = { "vga_console", "lpt.outfile", "timezone", 0 };
 static const char* const kv_ali_ide[] = { "dma", 0 };
+static const char* const kv_aha1742[] = { "floppy", 0 };
 static const char* const kv_vga[] = { "rom", 0 };
 static const char* const kv_cirrus[] = { "rom", "model", 0 };
 static const char* const kv_gloria[] = {
@@ -849,7 +850,7 @@ classinfo classes[] = {
   {"X11", c_x11, N_P | IS_GUI, kv_gui_x11},
   {"mpu401", c_mpu401, IS_ISA | ON_CS, kv_mpu401},
   {"wss", c_wss, IS_ISA | ON_CS, kv_wss},
-  {"aha1742", c_aha1742, IS_ISA | ON_CS | HAS_DISK, kv_none},
+  {"aha1742", c_aha1742, IS_ISA | ON_CS | HAS_DISK, kv_aha1742},
   {"es1370", c_es1370, IS_PCI, kv_es1370},
   {"es1371", c_es1371, IS_PCI, kv_es1371},
   {0, c_none, 0, 0}
@@ -1057,7 +1058,8 @@ void CConfigurator::initialize()
 			FAILURE_2(Configuration, "Class %s for %s needs a parent", myValue, myName);
 	}
 
-	if (myFlags & ON_CS)
+	const bool aha_floppy = myClassId == c_floppy && pParent->get_class_id() == c_aha1742;
+	if ((myFlags & ON_CS) && !aha_floppy)
 	{
 		if (!(pParent->get_flags() & IS_CS))
 			FAILURE_2(Configuration, "Class %s for %s needs a chipset parent",
@@ -1218,7 +1220,11 @@ void CConfigurator::initialize()
 		 * CDiskController part of the class as it's used
 		 * to register disks to.
 		 */
-		myDevice = (CDiskController*) new CFloppyController(this, (CSystem*)pParent->get_device(), fdcbus);
+		if (aha_floppy) {
+			auto* card = static_cast<AHA1742*>(static_cast<CDiskController*>(pParent->get_device()));
+			myDevice = card->floppy_controller();
+		} else
+			myDevice = (CDiskController*) new CFloppyController(this, (CSystem*)pParent->get_device(), fdcbus);
 		break;
 
 	case c_ali_ide:
@@ -1321,8 +1327,28 @@ void CConfigurator::initialize()
 		// The card identifies itself by slot, which only an EISA bus provides.
 		auto* eisa = dynamic_cast<EISABus*>(system->isa_bus(bus));
 		if (!eisa) FAILURE_1(Configuration, "%s needs an EISA slot", myName);
+		// J6 selects primary or secondary diskette ports and can disable the controller (Adaptec TRM, p. 3-15).
+		const char* setting = get_text_value("floppy", "primary");
+		const bool enabled = strcasecmp(setting, "disabled") != 0;
+		const bool secondary = !strcasecmp(setting, "secondary");
+		if (enabled && !secondary && strcasecmp(setting, "primary"))
+			FAILURE_1(Configuration, "AHA-1742A floppy must be primary, secondary or disabled (got %s)", setting);
+		CConfigurator* floppy = nullptr;
+		for (int i = 0; i < iNumChildren; ++i) {
+			auto* child = pChildren[i];
+			if (strcasecmp(child->myValue, "floppy")) continue;
+			if (!enabled || floppy || strcasecmp(child->myName, "fdc0"))
+				FAILURE_1(Configuration, "%s accepts one fdc0=floppy child with its floppy jumper enabled", myName);
+			floppy = child;
+		}
+		if (enabled && !floppy) {
+			if (iNumChildren >= CFG_MAX_CHILDREN) FAILURE(Configuration, "No room for the AHA-1742A floppy controller");
+			static char fdc_name[] = "fdc0", fdc_class[] = "floppy";
+			floppy = new CConfigurator(this, fdc_name, fdc_class, nullptr, 0);
+			pChildren[iNumChildren++] = floppy;
+		}
 		// As with the other disk controllers, myDevice is the CDiskController part that disks register with.
-		myDevice = static_cast<CDiskController*>(new AHA1742(this, system, *eisa, slot));
+		myDevice = static_cast<CDiskController*>(new AHA1742(this, system, *eisa, slot, floppy, secondary));
 		break;
 	}
 	case c_es1370:
@@ -1448,7 +1474,7 @@ void CConfigurator::initialize()
 		break;
 	}
 
-	// The ES40 has a built-in 3.5-inch 1.44 MB drive A.
+	// The ES40 has a built-in 3.5-inch 1.44 MB drive A; Jensen connects drive A to the AHA-1742A (EK-A0636-TM, Table 5-2).
 	if (myClassId == c_floppy && fdcbus == 0)
 	{
 		bool have_drive_a = false;
@@ -1475,7 +1501,7 @@ void CConfigurator::initialize()
 					"No room to add the built-in floppy drive A");
 
 			printf("%%SYS-I-DEFAULTFLOPPY: disk0.0 is not configured; "
-				"adding the built-in 3.5-inch 1.44 MB drive with no media.\n");
+				"adding the built-in 3.5-inch %sdrive with no media.\n", aha_floppy ? "" : "1.44 MB ");
 
 			char* dname;
 			CHECK_ALLOCATION(dname = (char*)malloc(8));

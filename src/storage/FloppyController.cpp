@@ -101,19 +101,37 @@
    * Constructor.
    **/
 CFloppyController::CFloppyController(CConfigurator* cfg, CSystem* c, int id) :
-	CSystemComponent(cfg, c), CDiskController(1, 2),
-	isa_io_base(0x3f0u - 0x80u * (u32)id)
+	CFloppyController(cfg, c, id, false)
 {
 	c->RegisterMemory(this, 1536, U64(0x00000801fc0003f0) - (0x80 * id), 6);
 	c->RegisterMemory(this, 1537, U64(0x00000801fc0003f7) - (0x80 * id), 1);
+}
 
+CFloppyController::CFloppyController(CConfigurator* cfg, CSystem* c, int id, bool pc_at) :
+	CSystemComponent(cfg, c), CDiskController(1, 2),
+	isa_io_base(0x3f0u - 0x80u * (u32)id), pc_at(pc_at)
+{
 	memset(&state, 0, sizeof(state));
 	state.status.rqm = true;
 	state.dma = true;
-	state.dor = 0x0C;
+	state.dor = pc_at ? 0 : 0x0C; // Channel reset clears the AHA diskette DOR (Adaptec TRM, p. 4-23).
 
 	printf("%s: $Id$\n",
 		devid_string);
+}
+
+bool CFloppyController::transfer_dma(u8* buffer, size_t length, bool to_memory)
+{
+	const auto result = to_memory ? isa_dma->send_data(2, buffer, length)
+		: isa_dma->recv_data(2, buffer, length);
+	return result.transferred == length;
+}
+
+static u64 fdc_register_offset(int index, u64 address)
+{
+	if (index == 1536) return address;
+	if (index == 1537) return FDC_REG_DIR + address;
+	return index + address; // AHA ranges start at the individual diskette registers (Adaptec TRM, p. 4-23).
 }
 
 /**
@@ -257,7 +275,8 @@ void CFloppyController::reset_controller(bool raise_irq)
 	state.drive[0].seeking = 0;
 	state.drive[1].seeking = 0;
 	state.dma = true;
-	state.reset_sense_cnt = raise_irq ? 4 : 0;
+	for (unsigned drive = 0; drive < 4; ++drive)
+		state.pending_st0[drive] = raise_irq ? 0xc0 | drive : 0; // Reset polls four drive numbers (82077 data sheet, sec. 7.4).
 	clear_interrupt();
 	if (raise_irq)
 		do_interrupt();
@@ -561,8 +580,7 @@ void CFloppyController::WriteMem(int index, u64 address, int dsize, u64 data)
 	std::lock_guard<std::recursive_mutex> bus_lock(cSystem->get_device_bus_mutex());
 	std::lock_guard<std::recursive_mutex> lock(controller_mutex);
 
-	if (index == 1537)
-		address += 7;
+	address = fdc_register_offset(index, address);
 
 	//printf("FDC: Write port %d, value: %x\n", address, data);
 
@@ -578,13 +596,13 @@ void CFloppyController::WriteMem(int index, u64 address, int dsize, u64 data)
 		u8 old_dor = state.dor;
 		state.dor = (u8)data;
 		// bit 4 = drive 0 motor, bit 5 = drive 1 motor
-		// bit 3 = IRQ/DMA output gate (PS/2 reserved?)
+		// bit 3 = IRQ/DMA output gate in PC/AT mode (Adaptec TRM, p. 4-24)
 		// bit 2 = 1: fdc enable (reset), 0: hold at reset
-		// bits 1-0:  drive select 0: a, 1: b, I assume 2 & 3 are reserved.
+		// bits 1-0: drive select, with bit 1 reserved on the AHA (Adaptec TRM, p. 4-24).
 
 		state.drive[0].motor = (data & 0x10) >> 4;
 		state.drive[1].motor = (data & 0x20) >> 5;
-		state.drive_select = data & 0x03;
+		state.drive_select = data & (pc_at ? 1 : 3);
 
 		FDC_DEBUG("FDC:  motor a: %s, motor b: %s, dma/irq gate: %s, drive: %s\n",
 			state.drive[0].motor ? "on" : "off",
@@ -596,13 +614,10 @@ void CFloppyController::WriteMem(int index, u64 address, int dsize, u64 data)
 			reset_controller(false);
 		} else if ((old_dor & 0x04) == 0) {
 			reset_controller(true);
-		} else if (((old_dor ^ data) & 0x08) && state.interrupt && theAli) {
+		} else if (((old_dor ^ data) & 0x08) && state.interrupt) {
 			// DOR bit 3 gates the external IRQ pin; it does not select the
 			// transfer mode, which comes from SPECIFY's ND bit.
-			if (data & 0x08)
-				theAli->pic_interrupt(0, 6);
-			else
-				theAli->pic_deassert(0, 6);
+			drive_irq((data & 0x08) != 0);
 		}
 		break;
 	}
@@ -627,6 +642,8 @@ void CFloppyController::WriteMem(int index, u64 address, int dsize, u64 data)
 
 	case FDC_REG_COMMAND:
 		// the excitement happens here.
+		if (pc_at && !(state.dor & 0x04))
+			break; // DOR reset holds the controller idle (82077AA data sheet, sec. 2.2.2).
 		if (dsize > 8) {
 			int bytes = dsize / 8;
 			if (bytes > 8)
@@ -795,11 +812,11 @@ void CFloppyController::WriteMem(int index, u64 address, int dsize, u64 data)
 					size_t fdc_count = sectors_to_read * 512;
 					size_t count;
 					if (state.dma) {
-						if (!isa_dma) {
+						if (!isa_dma || (pc_at && !(state.dor & 0x08))) {
 							fail_rw(ST1_OR);
 							break;
 						}
-						size_t dma_count = isa_dma->get_count(2) + 1;
+						size_t dma_count = isa_dma->get_transfer_size(2);
 						count = (fdc_count < dma_count) ? fdc_count : dma_count;
 					} else {
 						count = fdc_count;
@@ -913,55 +930,58 @@ void CFloppyController::WriteMem(int index, u64 address, int dsize, u64 data)
 						break;
 					}
 
-					u8* buffer = new u8[count];
-					memset(buffer, 0, count);
+					std::vector<u8> buffer(count);
 
 					FDC_DEBUG("FDC [LBA]: Calculated LBA = %d (offset 0x%x)\n", pos, pos * 512);
 
 					bool io_ok = false;
 					if (cmd == 6) {
 						io_ok = disk->seek_byte(byte_offset) &&
-							disk->read_bytes(buffer, first_count) == first_count;
+							disk->read_bytes(buffer.data(), first_count) == first_count;
 						if (io_ok && second_count > 0) {
 							io_ok = disk->seek_byte(second_offset) &&
-								disk->read_bytes(buffer + first_count, second_count) ==
+								disk->read_bytes(buffer.data() + first_count, second_count) ==
 								second_count;
 						}
 #if defined(DEBUG_FDC)
 						printf("FDC: read data:  %zx @ %x\n  ", count, pos * 512);
 						for (int i = 0; i < count; i++)
 						{
-							printf("%02x ", *((char*)buffer + i) & 0xff);
+							printf("%02x ", buffer[i]);
 							if (i % 16 == 15)
 								printf("\n  ");
 						}
 						printf("\n");
 #endif
-						if (io_ok)
-							isa_dma->send_data(2, buffer, count);
+						if (io_ok && !transfer_dma(buffer.data(), count, true)) {
+							fail_rw(ST1_OR);
+							break;
+						}
 					} else {
-						isa_dma->recv_data(2, buffer, count);
+						if (!transfer_dma(buffer.data(), count, false)) {
+							fail_rw(ST1_OR);
+							break;
+						}
 #if defined(DEBUG_FDC)
 						printf("FDC: write data:  %zx @ %x\n  ", count, pos * 512);
 						for (int i = 0; i < count; i++)
 						{
-							printf("%02x ", *((char*)buffer + i) & 0xff);
+							printf("%02x ", buffer[i]);
 							if (i % 16 == 15)
 								printf("\n  ");
 						}
 						printf("\n");
 #endif
 						io_ok = disk->seek_byte(byte_offset) &&
-							disk->write_bytes(buffer, first_count) == first_count;
+							disk->write_bytes(buffer.data(), first_count) == first_count;
 						if (io_ok && second_count > 0) {
 							io_ok = disk->seek_byte(second_offset) &&
-								disk->write_bytes(buffer + first_count, second_count) ==
+								disk->write_bytes(buffer.data() + first_count, second_count) ==
 								second_count;
 						}
 						if (io_ok)
 							disk->flush();
 					}
-					delete[] buffer;
 
 					if (io_ok) {
 						prepare_rw_result(drive_idx, head, eot, geometry,
@@ -1014,14 +1034,17 @@ void CFloppyController::WriteMem(int index, u64 address, int dsize, u64 data)
 
 					size_t id_bytes = (size_t)sector_count * 4;
 					if (state.dma) {
-						if (!isa_dma || isa_dma->get_transfer_size(2) < id_bytes) {
+						if (!isa_dma || (pc_at && !(state.dor & 0x08)) || isa_dma->get_transfer_size(2) < id_bytes) {
 							fail_format(0x40 | (head << 2) | drive_idx, ST1_OR);
 							break;
 						}
 
 						u8 sector_ids[256 * 4];
 						memset(sector_ids, 0, sizeof(sector_ids));
-						isa_dma->recv_data(2, sector_ids, id_bytes);
+						if (!transfer_dma(sector_ids, id_bytes, false)) {
+							fail_format(0x40 | (head << 2) | drive_idx, ST1_OR);
+							break;
+						}
 						format_track(drive_idx, head, sector_size, sector_count,
 							fill, sector_ids, id_bytes);
 						do_interrupt();
@@ -1050,6 +1073,10 @@ void CFloppyController::WriteMem(int index, u64 address, int dsize, u64 data)
 				case 7: // recalibrate
 				{
 					int drive_idx = state.cmd_parms[1] & 3;
+					if (pc_at) {
+						const bool track_zero = drive_idx < 2 && FDISK(drive_idx);
+						state.pending_st0[drive_idx] = (track_zero ? 0x20 : 0x70) | drive_idx; // TRK0 controls seek end and equipment check (82077, sec. 5.2.2).
+					}
 					if (drive_idx < 2) {
 						state.drive[drive_idx].seeking = 3; // wait for 3 status reads to finish seek.
 						state.drive[drive_idx].cylinder = 0;
@@ -1061,14 +1088,27 @@ void CFloppyController::WriteMem(int index, u64 address, int dsize, u64 data)
 				break;
 
 				case 8: // sense interrupt status
-					if (!state.interrupt){
+					if (pc_at) {
+						unsigned drive = 0;
+						while (drive < 4 && !state.pending_st0[drive])
+							++drive;
+						if (drive < 4) {
+							state.cmd_res[0] = state.pending_st0[drive]; // Report the interrupt cause for this drive (82077, sec. 5.2.4).
+							state.cmd_res[1] = drive < 2 ? state.drive[drive].cylinder : 0;
+							state.pending_st0[drive] = 0;
+						} else {
+							state.cmd_res[0] = 0x80;
+							state.cmd_res_max = 1; // No pending interrupt returns ST0 alone (Intel 82077, sec. 5.2.4).
+						}
+						clear_interrupt();
+					} else if (!state.interrupt){
 						state.cmd_res[0] = 0x80;
 						state.cmd_res[1] = 0;
 					} else {
 						int drive_idx = state.drive_select & 3;
 						state.cmd_res[0] = 0x20 | drive_idx; // Seek End
 						clear_interrupt();
-						state.cmd_res[1] = state.drive[drive_idx].cylinder; // present cylinder number
+						state.cmd_res[1] = drive_idx < 2 ? state.drive[drive_idx].cylinder : 0; // present cylinder number
 					}
 					break;
 
@@ -1126,6 +1166,7 @@ void CFloppyController::WriteMem(int index, u64 address, int dsize, u64 data)
 					// 1: bit 2 = HDS (head), 1 = DS1, 0 = DS0 
 					// 2: NCN = new cylinder number
 					int drive_idx = state.cmd_parms[1] & 3;
+					if (pc_at) state.pending_st0[drive_idx] = 0x20 | drive_idx; // Seek end reports the command's unit (82077, sec. 5.2.3).
 					if (drive_idx < 2) {
 						state.drive[drive_idx].seeking = 3; // wait 3 status reads to finish seek.
 						state.drive[drive_idx].cylinder = state.cmd_parms[2];
@@ -1197,8 +1238,7 @@ u64 CFloppyController::ReadMem(int index, u64 address, int dsize)
 	u64 data = 0;
 	bool log_read = true;
 
-	if (index == 1537)
-		address += 7;
+	address = fdc_register_offset(index, address);
 
 	switch (address)
 	{
@@ -1399,24 +1439,29 @@ int CFloppyController::RestoreState(FILE* f)
 
 void CFloppyController::init()
 {
-    if (theAli)
+    if (isa_bridge)
     {
         bool hasA = (FDISK(0) != NULL);
         bool hasB = (FDISK(1) != NULL);
-        theAli->set_floppy_presence(hasA, hasB);
+        isa_bridge->set_floppy_presence(hasA, hasB);
     }
+}
+
+void CFloppyController::drive_irq(bool asserted) {
+	if (!isa_bridge) return;
+	if (asserted) isa_bridge->pic_interrupt(0, 6);
+	else isa_bridge->pic_deassert(0, 6);
 }
 
 void CFloppyController::do_interrupt() {
 	state.interrupt = true;
-	if (theAli && (state.dor & 0x08))
-		theAli->pic_interrupt(0, 6);
+	if (state.dor & 0x08)
+		drive_irq(true);
 }
 
 void CFloppyController::clear_interrupt() {
 	state.interrupt = false;
-	if (theAli)
-		theAli->pic_deassert(0, 6);
+	drive_irq(false);
 }
 
 

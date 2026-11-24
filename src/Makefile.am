@@ -166,6 +166,7 @@ noinst_HEADERS += storage/Disk.h \
        storage/DiskFileBinCue.h \
        storage/DiskRam.h \
        storage/FloppyController.h \
+       storage/Intel82077A.h \
        storage/AHA1742.h \
        storage/LSI53C1020.h \
        storage/SCSIBus.h \
@@ -320,6 +321,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        network/Ethernet.cpp \
        system/Flash.cpp \
        storage/FloppyController.cpp \
+       storage/Intel82077A.cpp \
        io/Keyboard.cpp \
        qmp/QmpInput.cpp \
        network/lockstep.cpp \

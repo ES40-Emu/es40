@@ -38,7 +38,9 @@ class EISABus;
 class AHA1742 final : public CSystemComponent, public CDiskController, public CSCSIDevice
 {
 public:
-  AHA1742(CConfigurator* cfg, CSystem* system, EISABus& bus, unsigned slot);
+  AHA1742(CConfigurator* cfg, CSystem* system, EISABus& bus, unsigned slot,
+    CConfigurator* floppy_cfg, bool secondary_floppy);
+  CDiskController* floppy_controller() const { return floppy; }
   void register_disk(CDisk* dsk, int bus, int dev) override;
   bool decodes_memory_access(int index, u64 address, int dsize, bool write) const noexcept override;
   u64 ReadMem(int index, u64 address, int dsize) override;
@@ -66,6 +68,7 @@ private:
   void drive_irq(bool pending);
   EISABus& bus;
   const unsigned slot;
+  CDiskController* floppy = nullptr; // The 1742A carries a separate Intel 82077A (Adaptec TRM, Fig. 2-1).
   // PORTADDR, BIOSADDR, INTDEF, SCSIDEF, BUSDEF and three reserved bytes, zCC0-zCC7 (AHA-1740A TRM, pp. 4-13 to 4-16).
   u8 config[8]{};
   u8 mboxout[4]{};

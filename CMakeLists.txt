@@ -525,6 +525,7 @@ list(APPEND ES40_SOURCES
     src/network/Ethernet.cpp
     src/system/Flash.cpp
     src/storage/FloppyController.cpp
+    src/storage/Intel82077A.cpp
     src/graphics/GloriaSynergy.cpp
     src/system/i2c_spd.cpp
     src/graphics/ibm8514a.cpp

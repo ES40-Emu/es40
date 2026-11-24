@@ -340,6 +340,8 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        graphics/S3Trio64.cpp \
        graphics/Bt485.cpp \
        graphics/Bt485.h \
+       graphics/Icd2061A.cpp \
+       graphics/Icd2061A.h \
        graphics/GloriaSynergy.cpp \
        graphics/GloriaSynergy.h \
        graphics/Permedia2.cpp \

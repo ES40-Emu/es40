@@ -504,6 +504,7 @@ list(APPEND ES40_SOURCES
     src/chipset/DMA.cpp
     src/chipset/EISABus.cpp
     src/chipset/Intel82357.cpp
+    src/chipset/Intel82357_clock.cpp
     src/chipset/Intel82357_dma.cpp
     src/chipset/Intel28F008SA.cpp
     src/chipset/Intel82358.cpp

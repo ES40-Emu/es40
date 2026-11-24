@@ -29,13 +29,18 @@
 #define ES40_INTEL82357_H
 
 #include "DMA.h"
+#include "Intel82357Timer.h"
 #include "Pic8259.h"
+#include <chrono>
+#include <condition_variable>
+#include <thread>
 
 class Intel82357 : public CSystemComponent, public CDMAHost
 {
 public:
   Intel82357(CConfigurator* cfg, CSystem* system, CDMAHost& memory_host,
-    std::function<void(bool)> interrupt_output);
+    std::function<void(bool)> interrupt_output, std::function<void(bool)> nmi_output = {});
+  ~Intel82357() override;
   CDMA& dma_controller() const;
   bool decodes_port(u16 port, bool write) const;
   bool read_port(u16 port, u8& data);
@@ -44,6 +49,10 @@ public:
 
   void set_isa_irq(int irq, bool asserted) override;
   void ResetPCI() override;
+  void start_threads() override;
+  void stop_threads() override;
+  int SaveState(FILE* f) override;
+  int RestoreState(FILE* f) override;
   void finalize_restore() noexcept override;
 
   const CSystemComponent* isa_decode_owner() const noexcept override
@@ -61,6 +70,28 @@ private:
   static bool decodes_dma_port(u16 port, bool write);
   bool access_dma_port(u16 port, u8& data, bool write);
   void set_dma_chaining_irq(bool asserted);
+
+  using Clock = std::chrono::steady_clock;
+  void reset_timers();
+  void refresh_timers();
+  void advance_timers(u64 nanoseconds);
+  u64 next_timer_event_ns() const;
+  void run_timers();
+  void timer_settings_changed() { timer_wakeup.notify_one(); }
+  bool access_timer_port(u16 port, u8& data, bool write);
+  void apply_timer_edges(unsigned index, u64 rises);
+  void sync_nmi_output();
+
+  Intel82357Timer timer[5]{};
+  u64 clock_phase[3]{};
+  u8 port_b = 0;
+  u8 extended_nmi = 0;
+  bool nmi_masked = true;
+  bool nmi_acknowledged = false;
+  std::function<void(bool)> nmi_output;
+  Clock::time_point timer_sample{};
+  std::condition_variable_any timer_wakeup;
+  std::thread timer_worker;
 
   CDMAHost& memory_host;
   Pic8259::State pic_state{};

@@ -104,6 +104,10 @@ JensenHostBus::JensenHostBus(CConfigurator* cfg, Jensen* system)
     isp(new Intel82357(cfg, system, *this, [system](bool asserted) {
       if (system->get_cpu_num())
         system->get_cpu(0)->irq_h(1, asserted, 0);
+    }, [system](bool asserted) {
+      // The ISP NMI pin drives EV4 IRQ2 (PB22H-KB, Table 6-4 and p. 9-8).
+      if (system->get_cpu_num())
+        system->get_cpu(0)->irq_h(2, asserted, 0);
     })),
     ebc(*isp)
 {

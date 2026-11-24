@@ -44,14 +44,18 @@ public:
 private:
   enum { Configuration, Group2 };
   // Offsets from zCD0 of the Enhanced Mode registers (AHA-1740A TRM, pp. 4-21 to 4-23).
-  enum { G2CNTRL = 5, G2STAT = 7, MBOXIN0 = 8 };
+  enum { MBOXOUT0 = 0, ATTN = 4, G2CNTRL = 5, G2STAT = 7, MBOXIN0 = 8 };
+  enum { StartCCB = 4 }; // ATTN bits 7-4 (AHA-1740A TRM, p. 4-22).
   enum { HardReset = 0x80 }; // G2CNTRL bit 7 (AHA-1740A TRM, p. 4-22).
-  enum { Busy = 0x01 }; // G2STAT bit 0 (AHA-1740A TRM, p. 4-23).
+  enum { MailboxOutEmpty = 0x04, Busy = 0x01 }; // G2STAT bits 2 and 0 (AHA-1740A TRM, p. 4-23).
   EISABus& bus;
   const unsigned slot;
   // PORTADDR, BIOSADDR, INTDEF, SCSIDEF, BUSDEF and three reserved bytes, zCC0-zCC7 (AHA-1740A TRM, pp. 4-13 to 4-16).
   u8 config[8]{};
-  u8 g2stat = 0;
+  u8 mboxout[4]{};
+  u8 attn = 0;
+  // The host starts by waiting for Mailbox Out Empty, so power-on and a completed reset leave it set (AHA-1740A TRM, p. 4-20).
+  u8 g2stat = MailboxOutEmpty;
   u8 mboxin[4]{};
   bool in_reset = false;
 };

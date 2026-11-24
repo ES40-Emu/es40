@@ -39,6 +39,8 @@ AHA1742::AHA1742(CConfigurator* cfg, CSystem* system, EISABus& bus, unsigned slo
   // The Enhanced Mode (Group 2) registers occupy zCD0-zCDC (AHA-1740A TRM, pp. 4-21 to 4-23).
   bus.register_slot_io(slot, *this, Group2, u16((slot << 12) | 0xcd0), 13, 8);
   save_item(config, "config");
+  save_item(mboxout, "mboxout");
+  save_item(attn, "attn");
   save_item(g2stat, "g2stat");
   save_item(mboxin, "mboxin");
   save_item(in_reset, "in_reset");
@@ -56,6 +58,10 @@ u64 AHA1742::ReadMem(int index, u64 address, int dsize)
     return 0xff;
   if (index == Configuration)
     return config[address];
+  if (address < MBOXOUT0 + sizeof(mboxout))
+    return mboxout[address - MBOXOUT0];
+  if (address == ATTN)
+    return attn;
   if (address == G2STAT)
     return g2stat;
   if (address >= MBOXIN0 && address < MBOXIN0 + sizeof(mboxin))
@@ -72,6 +78,20 @@ void AHA1742::WriteMem(int index, u64 address, int dsize, u64 data)
     config[address] = u8(data);
     return;
   }
+  if (address < MBOXOUT0 + sizeof(mboxout)) {
+    // Writing any mailbox out byte clears Mailbox Out Empty (AHA-1740A TRM, p. 4-23).
+    mboxout[address - MBOXOUT0] = u8(data);
+    g2stat &= ~MailboxOutEmpty;
+    return;
+  }
+  if (address == ATTN) {
+    attn = u8(data);
+    // The local processor reads ATTN at once, so the Busy bit this write sets is never seen set (AHA-1740A TRM, p. 4-23).
+    // For Start CCB it then reads the mailbox out address and sets Mailbox Out Empty (AHA-1740A TRM, p. 4-20).
+    if (!in_reset && attn >> 4 == StartCCB)
+      g2stat |= MailboxOutEmpty;
+    return;
+  }
   if (address != G2CNTRL)
     return;
   // Hard Reset holds the adapter in reset, with Busy set, until the bit is cleared (AHA-1740A TRM, p. 4-22).
@@ -79,9 +99,9 @@ void AHA1742::WriteMem(int index, u64 address, int dsize, u64 data)
     in_reset = true;
     g2stat |= Busy;
   } else if (in_reset) {
-    // Released with diagnostics passing: 00 is loaded in MBOXIN0 and Busy clears (AHA-1740A TRM, pp. 4-20, 4-21).
+    // Released with diagnostics passing: 00 is loaded in MBOXIN0, Busy clears and the mailbox out is empty (AHA-1740A TRM, pp. 4-20, 4-21).
     in_reset = false;
     mboxin[0] = 0;
-    g2stat &= ~Busy;
+    g2stat = MailboxOutEmpty;
   }
 }

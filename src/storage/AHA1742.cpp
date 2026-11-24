@@ -165,8 +165,12 @@ void AHA1742::start_ccb(u32 address)
 {
   // Control and status block fields are stored least significant byte first (AHA-1740A TRM, p. 6-10).
   u8 ecb[48];
-  // Only Read Host Adapter Inquiry Data is carried out; the option flags in bits 14-12 are not part of the operation code (AHA-1740A TRM, p. 6-4).
-  if (!bus.slot_master_read(slot, address, ecb, sizeof(ecb)) || (get_le16(ecb + CommandWord) & 0x0fff) != ReadInquiryData)
+  if (!bus.slot_master_read(slot, address, ecb, sizeof(ecb)))
+    return;
+  // The option flags in bits 14-12 are not part of the operation code (AHA-1740A TRM, p. 6-4).
+  const u16 operation = get_le16(ecb + CommandWord) & 0x0fff, flags = get_le16(ecb + FlagWord1);
+  // Other operations are not carried out yet, nor is an Initiator SCSI Command whose data is a scatter/gather list.
+  if (operation != ReadInquiryData && (operation != InitiatorCommand || (flags & ScatterGather)))
     return;
   u8 status[32]{};
   // With every completion slot taken the control block is refused with Queue Full and no action is taken on it (AHA-1740A TRM, p. 6-14).
@@ -175,21 +179,12 @@ void AHA1742::start_ccb(u32 address)
     bus.slot_master_write(slot, get_le32(ecb + StatusBlockPointer), status, sizeof(status));
     return;
   }
-  const u16 flags = get_le16(ecb + FlagWord1);
-  const u32 pointer = get_le32(ecb + DataPointer), length = get_le32(ecb + DataLength);
-  // The data is cut to the length the host allows, and a longer buffer is left short (AHA-1740A TRM, pp. 6-30, 6-32).
-  const u32 count = length < sizeof(inquiry_data) ? length : u32(sizeof(inquiry_data));
-  bus.slot_master_write(slot, pointer, inquiry_data, count);
-  u16 word = CommandDone;
-  if (count < length) {
-    // An underrun reports the residual count and buffer address, and is an error unless the host suppressed it (AHA-1740A TRM, pp. 6-14, 6-18).
-    const bool error = !(flags & SuppressUnderrunError);
-    word = u16(error ? DataUnderrun | MajorError : CommandDone | DataUnderrun);
-    status[HostAdapterStatus] = error ? UnderrunOccurred : 0;
-    put_le32(status + ResidualCount, length - count);
-    put_le32(status + ResidualAddress, pointer);
-  }
+  if (operation == InitiatorCommand)
+    initiator_command(ecb, status);
+  else
+    read_inquiry_data(ecb, status);
   // The host is interrupted unless the command is done without error and it set Disable Interrupt (AHA-1740A TRM, pp. 6-5, 6-15).
+  const u16 word = get_le16(status + StatusWord);
   const bool interrupt = !(word & CommandDone) || !(flags & DisableInterrupt);
   put_le16(status + StatusWord, u16(word | (interrupt ? InterruptIssued : 0)));
   // The status block is left out only when the command is done without error and the host disabled it (AHA-1740A TRM, p. 6-11).
@@ -201,6 +196,92 @@ void AHA1742::start_ccb(u32 address)
   const u8 code = u8(((word & CommandDone) ? CompletedGood : CompletedError) << 4 | (attn & 0x0f));
   completions[(completion_head + completion_count++) % QueueSize] = u64(code) << 32 | address;
   post_completion();
+}
+
+// Read Host Adapter Inquiry Data: the data is cut to the length the host allows, and a longer buffer is left short (AHA-1740A TRM, pp. 6-30, 6-32).
+void AHA1742::read_inquiry_data(const u8* ecb, u8* status)
+{
+  const u32 length = get_le32(ecb + DataLength);
+  const u32 count = length < sizeof(inquiry_data) ? length : u32(sizeof(inquiry_data));
+  bus.slot_master_write(slot, get_le32(ecb + DataPointer), inquiry_data, count);
+  put_le16(status + StatusWord, CommandDone);
+  account_transfer(ecb, status, count, false);
+}
+
+// Initiator SCSI Command: the adapter selects the target and follows it through the bus phases of one command (AHA-1740A TRM, p. 6-26).
+void AHA1742::initiator_command(const u8* ecb, u8* status)
+{
+  const u8 target = attn & 0x0f, cdb_length = ecb[CDBLength];
+  const u16 flags2 = get_le16(ecb + FlagWord2);
+  const u32 pointer = get_le32(ecb + DataPointer), length = get_le32(ecb + DataLength);
+  // A CDB is 6, 10 or 12 bytes long; another length is an invalid parameter, and no action is taken on the control block (AHA-1740A TRM, pp. 6-12, 6-15, 6-17).
+  if (cdb_length != 6 && cdb_length != 10 && cdb_length != 12) {
+    put_le16(status + StatusWord, SpecificationCheck);
+    status[HostAdapterStatus] = InvalidParameter;
+    return;
+  }
+  // The adapter is the only initiator on its bus, so it wins arbitration with the ID in SCSIDEF bits 3-0 (AHA-1740A TRM, p. 4-16).
+  scsi_initiator_id[0] = config[SCSIDEF] & HSCSIID;
+  scsi_arbitrate(0);
+  // With no target at the ID in ATTN bits 3-0 the selection times out, which is a major error (AHA-1740A TRM, pp. 6-16, 6-17, 6-26).
+  if (!scsi_select(0, target)) {
+    scsi_free(0);
+    put_le16(status + StatusWord, MajorError);
+    status[HostAdapterStatus] = SelectionTimeout;
+    return;
+  }
+  u32 moved = 0;
+  bool overrun = false;
+  // The target chooses each bus phase and the adapter answers it, until the target frees the bus.
+  for (int phase; (phase = scsi_get_phase(0)) != SCSI_PHASE_FREE; scsi_xfer_done(0)) {
+    const size_t bytes = scsi_expected_xfer(0);
+    const u32 room = length - moved, count = bytes < room ? u32(bytes) : room;
+    if (phase == SCSI_PHASE_MSG_OUT) {
+      // The identify message names the LUN and allows disconnection, the default, unless No Disconnect is set (AHA-1740A TRM, pp. 4-29, 6-7).
+      *static_cast<u8*>(scsi_xfer_ptr(0, 1)) = u8(0x80 | ((flags2 & NoDisconnect) ? 0 : 0x40) | (flags2 & LogicalUnit));
+    } else if (phase == SCSI_PHASE_COMMAND) {
+      memcpy(scsi_xfer_ptr(0, cdb_length), ecb + CDBBytes, cdb_length);
+    } else if (phase == SCSI_PHASE_DATA_OUT) {
+      // A target that asks for more than the data length is sent none of it, and the command ends there as a data overrun (AHA-1740A TRM, pp. 6-9, 6-15).
+      if (bytes > room) {
+        overrun = true;
+        scsi_bus[0]->free_bus(target);
+        break;
+      }
+      bus.slot_master_read(slot, pointer + moved, scsi_xfer_ptr(0, bytes), bytes);
+      moved += count;
+    } else if (phase == SCSI_PHASE_DATA_IN) {
+      // Data past the data length is taken from the target without being stored, which is also a data overrun (AHA-1740A TRM, p. 6-15).
+      bus.slot_master_write(slot, pointer + moved, scsi_xfer_ptr(0, bytes), count);
+      overrun = overrun || bytes > room;
+      moved += count;
+    } else {
+      // The status phase gives the target status; the Command Complete message that follows needs no answer (AHA-1740A TRM, p. 6-17).
+      const u8* data = static_cast<u8*>(scsi_xfer_ptr(0, bytes));
+      if (phase == SCSI_PHASE_STATUS && bytes)
+        status[TargetStatus] = data[0];
+    }
+  }
+  // Only Good status leaves the command done without error, and a check condition is not a major error (AHA-1740A TRM, pp. 6-14, 6-16).
+  put_le16(status + StatusWord, status[TargetStatus] ? 0 : CommandDone);
+  account_transfer(ecb, status, moved, overrun);
+}
+
+// Fewer bytes moved than the data length is an underrun, an error unless the host suppressed it; an overrun always is one (AHA-1740A TRM, pp. 6-14, 6-15).
+void AHA1742::account_transfer(const u8* ecb, u8* status, u32 moved, bool overrun)
+{
+  const u32 length = get_le32(ecb + DataLength);
+  if (!overrun && moved == length)
+    return;
+  u16 word = u16(get_le16(status + StatusWord) | (overrun ? DataOverrun : DataUnderrun));
+  if (overrun || !(get_le16(ecb + FlagWord1) & SuppressUnderrunError)) {
+    word = u16((word & ~CommandDone) | MajorError);
+    status[HostAdapterStatus] = OverrunOrUnderrun;
+  }
+  put_le16(status + StatusWord, word);
+  // The residual count is zero after an overrun, and without a scatter/gather list the address is the data pointer (AHA-1740A TRM, p. 6-18).
+  put_le32(status + ResidualCount, overrun ? 0 : length - moved);
+  put_le32(status + ResidualAddress, get_le32(ecb + DataPointer));
 }
 
 // With the EISA interrupt clear, the oldest completion is loaded in the mailbox in and its status code sets the interrupt (AHA-1740A TRM, pp. 4-20, 4-22).

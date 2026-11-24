@@ -49,6 +49,7 @@ public:
 private:
   enum { Configuration, Group2 };
   enum { INTDEF = 2, INTEN = 0x10, INTSEL = 0x07 }; // Offset of INTDEF from zCC0, then its bit 4 and bits 2-0 (AHA-1740A TRM, p. 4-15).
+  enum { SCSIDEF = 3, HSCSIID = 0x0f }; // Offset of SCSIDEF from zCC0, then its bits 3-0 (AHA-1740A TRM, p. 4-16).
   // Offsets from zCD0 of the Enhanced Mode registers (AHA-1740A TRM, pp. 4-21 to 4-23).
   enum { MBOXOUT0 = 0, ATTN = 4, G2CNTRL = 5, G2INTST = 6, G2STAT = 7, MBOXIN0 = 8 };
   enum { StartCCB = 4 }; // ATTN bits 7-4 (AHA-1740A TRM, p. 4-22).
@@ -56,14 +57,19 @@ private:
   enum { CompletedGood = 0x1, CompletedError = 0xc }; // G2INTST bits 7-4 (AHA-1740A TRM, p. 4-22).
   enum { MailboxOutEmpty = 0x04, InterruptPending = 0x02, Busy = 0x01 }; // G2STAT bits 2, 1 and 0 (AHA-1740A TRM, p. 4-23).
   // Byte offsets in the 48-byte control block and the 32-byte status block (AHA-1740A TRM, pp. 6-3, 6-13).
-  enum { CommandWord = 0x00, FlagWord1 = 0x02, DataPointer = 0x08, DataLength = 0x0c, StatusBlockPointer = 0x10 };
-  enum { StatusWord = 0x00, HostAdapterStatus = 0x02, ResidualCount = 0x04, ResidualAddress = 0x08 };
-  enum { ReadInquiryData = 0x0a }; // Operation code (AHA-1740A TRM, p. 6-4).
-  enum { DisableInterrupt = 0x0080, SuppressUnderrunError = 0x0400, DisableStatusBlock = 0x4000 }; // Flag word 1 bits 7, 10 and 14 (AHA-1740A TRM, pp. 6-5, 6-6).
-  enum { CommandDone = 0x0001, DataUnderrun = 0x0002, QueueFull = 0x0008, InterruptIssued = 0x0080, MajorError = 0x1000 }; // Status word bits 0, 1, 3, 7 and 12 (AHA-1740A TRM, pp. 6-14 to 6-16).
-  enum { UnderrunOccurred = 0x12 }; // Host adapter status (AHA-1740A TRM, p. 6-17).
+  enum { CommandWord = 0x00, FlagWord1 = 0x02, FlagWord2 = 0x04, DataPointer = 0x08, DataLength = 0x0c, StatusBlockPointer = 0x10, CDBLength = 0x21, CDBBytes = 0x24 };
+  enum { StatusWord = 0x00, HostAdapterStatus = 0x02, TargetStatus = 0x03, ResidualCount = 0x04, ResidualAddress = 0x08 };
+  enum { InitiatorCommand = 0x01, ReadInquiryData = 0x0a }; // Operation codes (AHA-1740A TRM, p. 6-4).
+  enum { DisableInterrupt = 0x0080, SuppressUnderrunError = 0x0400, ScatterGather = 0x1000, DisableStatusBlock = 0x4000 }; // Flag word 1 bits 7, 10, 12 and 14 (AHA-1740A TRM, pp. 6-5, 6-6).
+  enum { LogicalUnit = 0x0007, NoDisconnect = 0x0040 }; // Flag word 2 bits 2-0 and 6 (AHA-1740A TRM, p. 6-7).
+  // Status word bits 0, 1, 3, 4, 5, 7 and 12 (AHA-1740A TRM, pp. 6-14 to 6-16).
+  enum { CommandDone = 0x0001, DataUnderrun = 0x0002, QueueFull = 0x0008, SpecificationCheck = 0x0010, DataOverrun = 0x0020, InterruptIssued = 0x0080, MajorError = 0x1000 };
+  enum { SelectionTimeout = 0x11, OverrunOrUnderrun = 0x12, InvalidParameter = 0x18 }; // Host adapter status codes (AHA-1740A TRM, p. 6-17).
   enum { QueueSize = 64 }; // Control blocks the adapter holds at once (AHA-1740A TRM, p. 6-2).
   void start_ccb(u32 address);
+  void read_inquiry_data(const u8* ecb, u8* status);
+  void initiator_command(const u8* ecb, u8* status);
+  void account_transfer(const u8* ecb, u8* status, u32 moved, bool overrun);
   void post_completion();
   void drive_irq(bool pending);
   EISABus& bus;

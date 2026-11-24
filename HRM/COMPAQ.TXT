@@ -1,0 +1,399 @@
+    Compaq Super VGA chips.
+
+There are 3 "Families" of Compaq VGA chips:
+
+Integrated Video Graphics System (IVGS):
+Supports 640x480x16c. BitBLT functions
+
+Advanced VGA System (AVGA):
+Supports 800x600x16c and 640x480x256c. BitBLT functions.
+
+QVision:
+Supports 1024x768x256c. Newer versions support 1280x1024 and/or TrueColor.
+Hardware Cursor, BitBLT.
+
+
+
+3CEh index 0Bh (R/W):
+bit    1  If set the ROM is 16bit wide, 8 if clear
+       2  If set video memory is 16bit wide, 8 if clear
+
+3CEh index 0Ch (R/W):
+bit  3-7  Version.
+            03h: IVGS
+            05h: AVGA
+            06h: QVision 1024
+            0Eh: QVision 1280 or 1024
+            10h: Advanced VGA Port
+
+3CEh index 0Fh (R/W):  Environment Register
+bit  0-3  writing 5 to this register unlocks the extended registers.
+     4-7  0Ah if in AVGA mode, 0 if in QVision mode
+Note: The QVision has a specific mode for AVGA support (Mode 29h and 2Eh),
+      where the AVGA accelerator function and registers are used.
+
+3CEh index 10h (R/W):  BLTConf
+bit    2  If set the 2xxxh-3xxxh register block is mapped at 4xxxh-5xxxh
+     3-4  Video interrupt. 0= Active Low, 1,3=Active High, 2=Disabled.
+       5  Tri-state if set
+
+3CEh index 40h (R/W):  Control Register 0
+bit    0  If set accesses to the upper bank (0A8000h-0AFFFFh) are calculated
+          from 0A8000h (I.e.. to create a 64K unified window index 46h should
+          be programmed with a value 8 larger than index 45h). If clear
+          accesses are relative to 0A0000h (I.e.. use same value in index 45h
+          and 46h).
+
+3CEh index 42h (R/W):
+bit    0  Bit 8 of the Display Offset (3d4h index 13h)
+     2-3  Display start offset bit 16-17.
+       7  Set in 1280x1024 modes ??
+
+3CEh index 43h (R/W):
+
+3CEh index 45h (R/W):  Page Register 0
+bit  0-7  Bank number in 4KB blocks for accesses to A000h-A7FFh.
+Note: In the QVision 1280 the bank can be in units of 16KB
+
+3CEh index 46h (R/W):  Page Register 1
+bit  0-7  Bank number in 4KB units for accesses to A800h-AFFFh
+          If index 40h bit 0 is set this value must be 8 larger than the value
+          in index 45h (8*4k = 32k) to provide a 64k unified window. If index
+          40h bit 0 is clear this value should be the same as in index 45h.
+
+3CEh index 48h (R/W): 
+bit  0-3  High Area Memory (0=disabled, 1-0Eh = the 1MB boundary the HMA
+          starts at). The HMA is a 1MB continuos mapping of the video buffer.
+     0-7  Lower 8 bits of the HMA start address
+
+3CEh index 49h (R/W):
+bit  0-7  Upper 8 bits of the HMA start address
+
+3CEh index 50h
+bit  3-6  Monitor (0,2,6??)
+             00h  Compaq Internal Monitor
+             02h  Compaq 16" Advanced Graphics Color Monitor
+             03h  Compaq 1024 Color Monitor
+             04h  QVision 200 (20") Color Monitor
+             05h  Compaq SVGA Color Monitor
+             06h  QVision 150 (15") Color Monitor or
+                  Compaq 151 FS Color Monitor
+             0Eh  Compaq 14" VGA Monitor (31.5 kHz)
+
+3CEh index 51h (R/W):
+
+3CEh index 54h (R/W):                                           (QVision only)
+bit  0-7  Video Memory. 2: 512k, 4: 1024k, 8: 2048k
+Note: For the QVision 1024, 0 apparently means 1024KB.
+
+3CEh index 56h (R/W):                                           (QVision only)
+bit    2  (R) Set for QVision 1280, clear for QVision 1024
+
+3CEh index 5Ah (R/W):                                           (QVision only)
+bit  0-5  1 for copy, 2 for fill
+     6-7  Set to 3 or 0 ??
+
+3CEh index 80h (R/W):
+bit  2-3  2=Plasma system.
+     4-6  Palette option: 1=Standard palette, 2=Option B, 5=option A,
+            6=option C.
+
+3CEh index 81h (R/W):
+bit   2  Set for Palette option A-C and Standard palette, clear for option D.
+
+13C7h (R/W): 
+bit  0-7  Data port for the Hardware Cursor map.
+          There are 2 128byte (32x32 bit) maps. Set 3C8h to 0 and then write
+          the 128 byte cursor bitmap to this register to load the actual icon.
+        . Set 3C8h to 80h and write the 128 byte cursor mask to this register
+          to mask any areas not included in the cursor.
+
+13C8h (R/W)
+bit  0-7  60h=4bit packed, 40h=8bit packed, 10h=24bit packed, 30h=15bit,
+          38h=16bit
+
+13C9h (R/W):
+bit   0-1  Set to 2 to enable the Hardware cursor, 0 to disable ??.
+      2-7  Always 8 ???
+
+23C0h W(R/W): Source Address                                 (IVGS, AVGA only)
+bit  0-15  Address of source in DWORDs (256colors) or bytes (16colors).
+           (AVGA) Bit 16-17 are in 23C4h.
+           The exact address and size of the BitBLT can be adjusted by
+           33C0h,33C1h,33C8h and 33C9h
+
+23C2h (R/W):  Width of area                                  (IVGS, AVGA only)
+bit   0-7  Width in DWORDs of the Blit area.
+
+23C2h W(R/W): Width of BitBLT operation                         (QVision only)
+bit   0-9  Width of the BitBLT area in pixels
+
+23C4h W(R/W): Height of the BitBLT area
+bit   0-9  Number of lines in Blit area.
+    10-11  (AVGA) Bit 8-9 of the Scanline Width. Bit 0-15 are in 
+    12-13  (AVGA) Bit 16-17 of the distance. Bit 0-15 are in 23CCh.
+    14-15  (AVGA) Bit 16-17 of Source address. Bit 0-15 are in 23C0h.
+
+23CAh W(R/W):  Scanline width.                               (IVGS, AVGA only)
+bit  0-15  Width of destination in DWORDs (256color) or bytes (16color).
+           Negative if moving backwards.
+
+23CCh W(R/W): Destination Address                            (IVGS, AVGA only)
+bit  0-15  Distance between the Destination and the Source Address in DWORDs
+           (256colors) or bytes (16colors).
+           (AVGA) Bit 16-17 are in 23C4h bit 12-13.
+
+23CEh W(R/W):  Scanline width.                               (IVGS, AVGA only)
+bit  0-15  Width of destination in DWORDs. Negative if moving backwards.
+Note: one must be source and the other destination width
+
+33C0h (R/W):                                                 (IVGS, AVGA only)
+bit  0-7  Start pixel of BitBLT source
+
+33C1h (R/W):                                                 (IVGS, AVGA only)
+bit  0-7  Ending pixel of BitBLT destination
+
+33C7h (R/W):                                                 (IVGS, AVGA only)
+
+
+33C8h (R/W):                                                 (IVGS, AVGA only)
+bit  0-1  
+Note: this is the same registers as 3CEh index 3  ??
+
+33C9h (R/W):                                                 (IVGS, AVGA only)
+
+33CAh W(R/W):  Fore/Back ground color ?
+
+33CCh W(R/W):  Fore/Background color
+Note: Apparently the Fore/Background color registers must be written twice to
+      work properly. 
+
+33CEh (R/W):  COP Status/Command
+bit    0  (R) If set the CoProcessor is busy.
+     0-5  (W) 11h = Copy. 9 = Fill.
+       6  (W) Copy/Fill backwards if set
+
+33CFh (R/W): 
+
+63C0h W(R/W): Source Bitmap X-address                           (QVision only)
+bit   0-9  The X co-ordinate of the start of the Source Data.
+
+63C2h W(R/W): Source Bitmap Y-address                           (QVision only)
+bit   0-9  The Y co-ordinate of the start of the Source Data.
+
+63CAh (R/W): 
+bit   0-2  1=4bit packed, 3=8bit packed, 5= 15bit, 7=24 bit (packed as RGBa)
+        6  After loading the BitMap Address and Size registers, wait for this
+           bit to be 0 before setting final registers and starting the
+           command.
+        7  Wait for this bit to be 0, before loading the Source/Destination
+           address and BitMap size registers.
+
+63CCh W(R/W): Destination Bitmap X-address                      (QVision only)
+bit   0-9  The X co-ordinate of the start of the Destination Data
+
+63CEh W(R/W): Destination Bitmap Y-address                      (QVision only)
+bit   0-9  The Y co-ordinate of the start of the Destination Data
+
+83C6h (R/W):
+bit     1  If set the DAC is 8bit, if clear 6bit.
+
+83C8h
+
+93C6h W(R/W): Hardware Cursor Y-position
+bit   0-9  The X-position of the right pixel of the hardware cursor.
+
+93C8h W(R/W): Hardware Cursor X-position
+bit   0-9  The Y-position of the lower scanline of the hardware cursor.
+
+Note: Registers 3C6h-3C9h, 13C6h-13C9h, 83C6h-83C9h and 93C6h-93C9h are
+      physically in the Brooktree DAC.
+
+
+  ID Compaq super VGA:
+
+  old:=rdinx($3CE,$F);
+  wrinx($3CE,$F,0);
+  if not testinx($3CE,$45) then
+  begin
+    wrinx($3CE,$F,5);
+    if testinx($3CE,$45) then
+    begin
+      SubVers:=rdinx($3CE,$C) shr 3;
+      case SubVers of
+        3:name:='Compaq IVGS';
+        5:name:='Compaq AVGA';
+        6:name:='Compaq QVision 1024';
+       $E:if (rdinx(GRC,$56) and 4)>0 then name:='Compaq QVision 1280'
+                                      else name:='Compaq QVision 1024';
+      $10:name:='Compaq AVPort';
+      else UNK(Compaq)
+      end;
+    end;
+  end;
+  wrinx($3CE,$F,old);
+
+
+
+    Video Modes:
+    
+  22h  T   132x 43
+  23h  T   132x 25
+  27h  T   132x 50
+  28h  T   132x 60
+  29h  G   800x 600   16c  PL4
+  2Eh  G   640x 480  256c  P8.  Each scan line is 1024 bytes wide.
+  32h  G   640x 480  256c  P8   Each scan line is 1024 bytes wide
+  33h  G   640x 400  256c  P8   Each scan line is 1024 bytes wide
+  34h  G   800x 600  256c  P8   Each scan line is 1024 bytes wide
+  37h  G  1024x 768   16c  P4
+  38h  G  1024x 768  256c  P8
+  39h  G  1280x1024   16c  P4
+  3Ah  G  1280x1024  256c  P8   Each scan line is 2048 bytes wide
+  3Eh  G   640x 480   32k  P15
+  40h  G   640  400     2       Compaq Portable only
+  4Dh  G   512x 480   16m  P32  Four bytes per pixel
+  4Eh  G   640x 400   16m  P32  Four bytes per pixel
+
+
+BitBLTs:
+
+There appear to be two different systems: mode 2Eh uses a system based on the
+memory address of the bitmaps involved, and with some fields packed.
+Is this to keep compatibility with something ??
+Mode 32h, 37h and 38h use a system based on the pixel addresses of the bitmaps
+Also some of the registers appear to be mapped to more than one address ??
+I.e.. drivers some time adds a value to the register address.
+
+
+  Compaq BIOS extensions:
+
+----------10BF00-----------------------------
+INT 10 - VIDEO - Compaq Portable Extensions - SELECT EXTERNAL MONITOR
+        AX = BF00h
+Note: all registers preserved and the internal monitor is blanked
+      the external monitor becomes the active monitor
+----------10BF01-----------------------------
+INT 10 - VIDEO - Compaq Portable Extensions - SELECT INTERNAL MONITOR
+        AX = BF01h
+Note: all registers preserved and the external monitor is blanked
+      the internal monitor becomes the active monitor
+----------10BF02-----------------------------
+INT 10 - VIDEO - Compaq Portable Extensions - SET MASTER MODE OF CURRENT CTRLR
+        AX = BF02h
+        BH = master mode
+            04h CGA
+            05h EGA
+            07h MDA
+----------10BF03BX0000-----------------------
+INT 10 - VIDEO - Compaq Portable/Systempro Extensions - GET ENVIRONMENT
+        AX = BF03h
+        BX = 0000h
+Return: BH = active monitor
+            00h = external
+            01h = internal
+        BL = master mode
+            00h = switchable VDU not present
+            04h = CGA
+            05h = EGA
+            07h = MDA
+            08h = switchable LCD controller present
+        CH = 00h (reserved)
+        CL = switchable VDU mode supported
+            bit    0 = CGA supported
+            bits 1,2 = reserved (1)
+            bit    3 = MDA supported
+            bits 4-7 = reserved (1)
+        DH = internal monitor type
+            00h = none
+            01h = Dual-mode monitor
+            02h = 5153 RGB monitor
+            03h = Compaq Color monitor
+            04h = 640x400 flat panel
+            07h = LCD VGA
+        DL = external monitor type
+            00h = none
+            01h = dual-mode monitor
+            02h = 5153 RGB monitor
+            03h = Compaq Color monitor
+            04h = 640x400 flat panel
+            05h = VGC monochrome
+            06h = VGC color
+----------10BF04-----------------------------
+INT 10 - VIDEO - Compaq Portable Extensions - SET MODE SWITCH DELAY
+        AX = BF04h
+        BH = new state of delay
+             00h enabled
+             01h disabled
+----------10BF05-----------------------------
+INT 10 - VIDEO - Compaq Systempro Extensions - ENABLE/DISABLE DISPLAY
+        AX = BF05h
+        BH = new state of video
+             00h off
+             01h on
+----------10BF06-----------------------------
+INT 10 - VIDEO - Compaq SLT/286 - READ GRAY SCALE TABLE
+        AX = BF06h
+        CL = address to be read from grey scale table
+Return: AL = bit 3-0 - Value read from grey scale table
+        CL = address to be read from grey scale table
+----------10BF07-----------------------------
+INT 10 - VIDEO - Compaq SLT/286 - WRITE GRAY SCALE TABLE
+        AX = BF07h
+        CH = value to write to grey scale table
+        CL = address to be written to grey scale table
+----------10BF08-----------------------------
+INT 10 - VIDEO - Compaq SLT/286 - WRITE COLOR MIX REGISTERS
+        AX = BF08h
+        CH = bits 7-4 - Green weight
+             bits 3-0 - Blue weight
+        CL = bits 7-4 - unused
+             bits 3-0 - Red weight
+--------b-10BF09-----------------------------
+INT 10 - VIDEO - Compaq LTE Lite - ENABLE ???
+        AX = BF09h
+Return: CF clear
+Note: sets bit 6 of port 03CEh index 81h; in some cases also sets index 84h
+      to 6Fh and index 83h to 04h
+--------b-10BF0A-----------------------------
+INT 10 - VIDEO - Compaq LTE Lite - DISABLE ???
+        AX = BF0Ah
+Return: CF clear
+Note: clears bit 6 of port 03CEh index 81h; in some cases also sets index 84h
+      to 80h and index 83h to FBh
+--------b-10BF0B-----------------------------
+INT 10 - VIDEO - Compaq LTE Lite - CHECK WHETHER ??? ENABLED
+        AX = BF0Bh
+Return: CF clear
+        AX = state (0000h disabled, 0001h enabled)
+----------10BF0C------------------------------------
+INT 10 - VIDEO - Compaq QVision -
+        AX = BF0Ch
+Clears I/O port 83C6h bit 1. Select 6bit DAC
+----------10BF0D------------------------------------
+INT 10 - VIDEO - Compaq QVision
+        AX = BF0Dh
+Sets I/O port 83C6h bit 1. Selects 8bit DAC
+----------10BF0E------------------------------------
+INT 10 - VIDEO - Compaq QVision -
+        AX = BF0Eh
+Return: AL = 00h  if 6bit DAC
+             01h  if 8bit DAC
+----------10BF0F------------------------------------
+INT 10 - VIDEO - Compaq QVision -
+        AX = BF0Fh
+        BX = HMA start address or 0FFFFh
+Return: AX = HMA start address
+----------10BF10------------------------------------
+INT 10 - VIDEO - Compaq QVision -
+        AX = BF10h
+Return: AX = HMA start address in ??
+----------10BF11------------------------------------
+INT 10 - VIDEO - Compaq QVision -
+        AX = BF11h
+Return: AL = BFh
+     ES:SI -> 
+     ES:DI -> COMPAQ text and date
+----------10BFE0------------------------------------
+INT 10 - VIDEO - Compaq QVision  (later models ??)
+        AX = BFE0h

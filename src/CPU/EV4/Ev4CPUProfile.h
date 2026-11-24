@@ -134,6 +134,7 @@ constexpr AlphaCPUProfile ev4_cpu_profile()
   profile.instruction_fault.handle = [](CAlphaCPU& cpu, u64 va, int flags, u32 ins, AlphaInstructionFaultSource) {
     return ev4_memory_fault(cpu, va, flags, ins, 0, AlphaPALException::InstructionAccessViolation);
   };
+  profile.data_fault.unmasked_quad_va = true;
   profile.data_fault.unaligned = [](CAlphaCPU& cpu, u64 va, int flags, u32 ins, int) {
     ev4_memory_fault(cpu, va, flags, ins, 0, AlphaPALException::Unaligned);
   };

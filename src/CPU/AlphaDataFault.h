@@ -53,6 +53,8 @@ struct AlphaDataFaultPolicy
   int (*access_fault)(CAlphaCPU& cpu, std::uint64_t address,
                        int access_flags, std::uint32_t instruction,
                        bool fault_on_read, bool fault_on_write);
+
+  bool unmasked_quad_va = false; // LDQ_U/STQ_U report Rb + disp on a D-stream fault (21064 HRM §5.3.5).
 };
 
 #endif

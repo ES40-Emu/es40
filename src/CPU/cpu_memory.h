@@ -87,7 +87,14 @@
 
 #define DO_LDQ_L  READ_VIRT_LOCK(state.r[REG_2] + DISP_16, 64, state.r[REG_1]);
 
-#define DO_LDQ_U  if ((REG_1 & 0x1f) != 31) { READ_VIRT((state.r[REG_2] + DISP_16) & ~U64(0x7), 64, state.r[REG_1]); }
+// EV4 translates the effective VA; LDQ_U/STQ_U transfer the containing quadword (21064 HRM §§4.7.1.2, 5.3.5).
+#define DATA_PHYS_QUAD_U(flags) {                                                  \
+  const u64 va = state.r[REG_2] + DISP_16;                                        \
+  DATA_PHYS_NT(m_profile.data_fault.unmasked_quad_va ? va : (va & ~U64(7)), flags); \
+  phys_address = ALIGN_PHYS(8);                                                   \
+}
+
+#define DO_LDQ_U  if ((REG_1 & 0x1f) != 31) { DATA_PHYS_QUAD_U(ACCESS_READ); state.r[REG_1] = READ_PHYS(64); }
 
 #define DO_LDWU   if ((REG_1 & 0x1f) != 31) { READ_VIRT_F(state.r[REG_2] + DISP_16, 16, state.r[REG_1], zext_u64_16); }
 
@@ -101,6 +108,6 @@
 
 #define DO_STQ_C  WRITE_VIRT_COND(state.r[REG_2] + DISP_16, 64, state.r[REG_1], state.r[REG_1]);
 
-#define DO_STQ_U  WRITE_VIRT((state.r[REG_2] + DISP_16) & ~U64(0x07), 64, state.r[REG_1]);
+#define DO_STQ_U  { DATA_PHYS_QUAD_U(ACCESS_WRITE); WRITE_PHYS(state.r[REG_1], 64); }
 
 #define DO_STW    WRITE_VIRT(state.r[REG_2] + DISP_16, 16, state.r[REG_1]);

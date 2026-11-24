@@ -2583,9 +2583,18 @@ int CAlphaCPU::jit_unaligned_rw(CAlphaCPU* cpu, u64 va, int size_bits, u32 ins, 
 	return 0;
 }
 
-// JIT load helper (static). descr[7:0] is size_bits; production loads also
-// carry the instruction in descr[63:32]. That lets alignment/translation faults enter PAL
-// exactly once instead of returning to execute() to repeat the faulting instruction.
+static int jit_translate_memop(CAlphaCPU& cpu, u64 va, u64& phys, int flags, u32 ins)
+{
+	const u32 opcode = I_GETOP(ins);
+	// Retry an EV4 LDQ_U/STQ_U fault with live Rb so VA retains bits 2:0 (21064 HRM §5.3.5).
+	const bool retry_fault = cpu.get_profile().data_fault.unmasked_quad_va && (opcode == 0x0b || opcode == 0x0f);
+	if (retry_fault) flags |= FAKE | DTB_REFERENCE;
+	if (cpu.virt2phys(va, &phys, flags, nullptr, ins)) return retry_fault ? 1 : 2;
+	return 0;
+}
+
+// JIT load helper (static). descr[7:0] is size_bits; production loads also carry the instruction in descr[63:32].
+// Alignment/translation faults enter PAL directly unless the interpreter needs the original effective VA.
 int CAlphaCPU::jit_read(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 {
 	const int size_bits = (int)(descr & 0xff);
@@ -2610,9 +2619,9 @@ int CAlphaCPU::jit_read(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 #endif
 		if (ins && !cpu->m_jit_vreplay)
 		{
-			// The emitted cold stub installed state.current_pc before this call. 
-			// A nonzero result means virt2phys has already selected native-PAL fault.
-			if (cpu->virt2phys(va, &phys, ACCESS_READ, nullptr, ins)) return 2;
+			// The emitted cold stub installed state.current_pc for native PAL or interpreter retry.
+			const int result = jit_translate_memop(*cpu, va, phys, ACCESS_READ, ins);
+			if (result) return result;
 		}
 		else if (cpu->virt2phys(va, &phys, ACCESS_READ | FAKE | DTB_REFERENCE, nullptr, ins)) return 1;
 		dpc.phys_base = phys & ~U64(0x1FFF);
@@ -3076,7 +3085,8 @@ int CAlphaCPU::jit_write(CAlphaCPU* cpu, u64 va, u64 descr, u64 value)
 #endif
 		if (ins && !cpu->m_jit_vreplay)
 		{
-			if (cpu->virt2phys(va, &phys, ACCESS_WRITE, nullptr, ins)) return 2;
+			const int result = jit_translate_memop(*cpu, va, phys, ACCESS_WRITE, ins);
+			if (result) return result;
 		}
 		else
 		{

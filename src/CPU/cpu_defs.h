@@ -632,7 +632,7 @@ inline u64 fsqrt64(u64 asig, s32 exp)
   {                                                                             \
     /* HRM 6.8.2: UNALIGN is a fault regardless of translation page size.       \
      * Enter PAL before translation or any memory/device side effect.          \
-     * HW_LD/HW_ST use DATA_PHYS_NT; LDQ_U/STQ_U already align their address. */ \
+     * HW_LD/HW_ST use DATA_PHYS_NT; LDQ_U/STQ_U align the memory transfer. */  \
     m_profile.data_fault.unaligned(*this, (addr), (flags), ins, (align));        \
     ES40_EXECUTE_END();                                                         \
   }

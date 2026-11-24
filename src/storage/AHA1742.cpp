@@ -161,6 +161,11 @@ void AHA1742::WriteMem(int index, u64 address, int dsize, u64 data)
     in_reset = false;
     mboxin[0] = 0;
     g2stat = MailboxOutEmpty;
+    // With RSTPWR set the power-on sequence after a Hard Reset resets the SCSI bus, and the host is not notified (AHA-1740A TRM, pp. 4-16, 6-46).
+    if (config[SCSIDEF] & RSTPWR)
+      for (int id = 0; id < 8; ++id)
+        if (CDisk* disk = get_disk(0, id))
+          disk->scsi_reset();
   }
   // Clearing the interrupt tells the local processor the mailbox in is free for the next completion (AHA-1740A TRM, p. 4-20).
   post_completion();
@@ -242,9 +247,10 @@ void AHA1742::read_inquiry_data(const u8* ecb, u8* status)
 void AHA1742::initiator_command(const u8* ecb, u8 target, u8* status)
 {
   const u8 cdb_length = ecb[CDBLength];
-  const u16 flags1 = get_le16(ecb + FlagWord1);
-  // A CDB is 6, 10 or 12 bytes long; another length is an invalid parameter, and no action is taken on the control block (AHA-1740A TRM, pp. 6-12, 6-15, 6-17).
-  if (cdb_length != 6 && cdb_length != 10 && cdb_length != 12) {
+  const u16 flags1 = get_le16(ecb + FlagWord1), flags2 = get_le16(ecb + FlagWord2);
+  // A CDB is 6, 10 or 12 bytes long, and Suppress Transfer is for data in: anything else is an invalid parameter, and no action is taken on the control block (AHA-1740A TRM, pp. 6-9, 6-12, 6-15, 6-17).
+  const bool suppress_out = (flags2 & (DataTransfer | Direction | SuppressTransfer)) == (DataTransfer | SuppressTransfer);
+  if ((cdb_length != 6 && cdb_length != 10 && cdb_length != 12) || suppress_out) {
     put_le16(status + StatusWord, SpecificationCheck);
     status[HostAdapterStatus] = InvalidParameter;
     return;
@@ -265,7 +271,7 @@ void AHA1742::initiator_command(const u8* ecb, u8 target, u8* status)
     list = gathered;
     entries = length / 8;
   }
-  const scsi_result command = scsi_command(ecb, target, ecb + CDBBytes, cdb_length, list, entries);
+  const scsi_result command = scsi_command(target, flags2, ecb + CDBBytes, cdb_length, list, entries);
   if (!report_target(command, status))
     return;
   // With Automatic Request Sense set, a check condition is followed at once by a Request Sense (AHA-1740A TRM, p. 6-6).
@@ -296,12 +302,12 @@ void AHA1742::read_sense_information(const u8* ecb, u8 target, u8* status)
   account_transfer(ecb, status, pair, 1, sense.moved, sense.overrun);
 }
 
-// What the target made of a command: no answer to the selection is a timeout and a major error, and only Good status leaves the command done without error (AHA-1740A TRM, pp. 6-14, 6-16, 6-17).
+// What the target made of a command: no answer to the selection is a timeout and a data phase against the Direction flag an invalid phase, both major errors; only Good status leaves the command done without error (AHA-1740A TRM, pp. 6-8, 6-14, 6-16, 6-17).
 bool AHA1742::report_target(const scsi_result& result, u8* status)
 {
-  if (!result.selected) {
+  if (!result.selected || result.wrong_phase) {
     put_le16(status + StatusWord, MajorError);
-    status[HostAdapterStatus] = SelectionTimeout;
+    status[HostAdapterStatus] = result.selected ? InvalidPhase : SelectionTimeout;
     return false;
   }
   status[TargetStatus] = result.status;
@@ -315,7 +321,8 @@ AHA1742::scsi_result AHA1742::request_sense(const u8* ecb, u8 target, u8* pair)
   put_le32(pair, get_le32(ecb + SensePointer));
   put_le32(pair + 4, ecb[SenseLength]);
   const u8 cdb[6] = {0x03, 0, 0, 0, ecb[SenseLength], 0};
-  return scsi_command(ecb, target, cdb, u8(sizeof(cdb)), pair, 1);
+  // It goes to the same LUN under the same disconnect rule; the data flags of the host's own command do not apply to it.
+  return scsi_command(target, u16(get_le16(ecb + FlagWord2) & (LogicalUnit | NoDisconnect)), cdb, u8(sizeof(cdb)), pair, 1);
 }
 
 // Sense Information Stored comes with one byte of additional status, byte 14, which counts the sense bytes stored (AHA-1740A TRM, pp. 6-16, 6-19).
@@ -326,10 +333,9 @@ void AHA1742::sense_stored(u8* status, u32 count)
   status[StoredSenseLength] = u8(count);
 }
 
-// One command on the adapter's SCSI bus, from selection to the target's status byte, for the control block's target and its LUN.
-AHA1742::scsi_result AHA1742::scsi_command(const u8* ecb, u8 target, const u8* cdb, u8 cdb_length, const u8* list, u32 entries)
+// One command on the adapter's SCSI bus, from selection to the target's status byte, under the options of flag word 2.
+AHA1742::scsi_result AHA1742::scsi_command(u8 target, u16 flags2, const u8* cdb, u8 cdb_length, const u8* list, u32 entries)
 {
-  const u16 flags2 = get_le16(ecb + FlagWord2);
   scsi_result result{};
   // The adapter is the only initiator on its bus, so it wins arbitration with the ID in SCSIDEF bits 3-0 (AHA-1740A TRM, p. 4-16).
   scsi_initiator_id[0] = config[SCSIDEF] & HSCSIID;
@@ -348,7 +354,18 @@ AHA1742::scsi_result AHA1742::scsi_command(const u8* ecb, u8 target, const u8* c
     } else if (phase == SCSI_PHASE_COMMAND) {
       memcpy(scsi_xfer_ptr(0, cdb_length), cdb, cdb_length);
     } else if (phase == SCSI_PHASE_DATA_OUT || phase == SCSI_PHASE_DATA_IN) {
-      const u32 done = move_data(list, entries, result.moved, static_cast<u8*>(scsi_xfer_ptr(0, bytes)), u32(bytes), phase == SCSI_PHASE_DATA_IN);
+      const bool in = phase == SCSI_PHASE_DATA_IN;
+      // With Data Transfer set, a data phase against the Direction flag is not carried out and ends the command as an invalid phase (AHA-1740A TRM, pp. 6-8, 6-9).
+      if ((flags2 & DataTransfer) && in != ((flags2 & Direction) != 0)) {
+        result.wrong_phase = true;
+        scsi_bus[0]->free_bus(target);
+        break;
+      }
+      // Suppress Transfer takes the data from the target and counts it against the data area without storing it (AHA-1740A TRM, p. 6-9).
+      u8* data = static_cast<u8*>(scsi_xfer_ptr(0, bytes));
+      if ((flags2 & DataTransfer) && (flags2 & SuppressTransfer))
+        data = nullptr;
+      const u32 done = move_data(list, entries, result.moved, data, u32(bytes), in);
       result.moved += done;
       // A target that wants more than the data area holds is a data overrun: data in is taken without being stored, and data out ends the command there (AHA-1740A TRM, pp. 6-9, 6-15).
       if (done < bytes) {
@@ -368,7 +385,7 @@ AHA1742::scsi_result AHA1742::scsi_command(const u8* ecb, u8 target, const u8* c
   return result;
 }
 
-// Moves up to count bytes between the target's buffer and the data area, from skip bytes into the area, and returns how many the area had room for.
+// Moves up to count bytes between the target's buffer and the data area, from skip bytes into the area, and returns how many the area had room for; with no buffer they are only counted.
 u32 AHA1742::move_data(const u8* list, u32 entries, u32 skip, u8* data, u32 count, bool to_host)
 {
   u32 done = 0;
@@ -380,9 +397,9 @@ u32 AHA1742::move_data(const u8* list, u32 entries, u32 skip, u8* data, u32 coun
       continue;
     }
     const u32 part = length - skip < count - done ? length - skip : count - done;
-    if (to_host)
+    if (data && to_host)
       bus.slot_master_write(slot, address + skip, data + done, part);
-    else
+    else if (data)
       bus.slot_master_read(slot, address + skip, data + done, part);
     done += part;
     skip = 0;

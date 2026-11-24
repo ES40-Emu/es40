@@ -146,6 +146,7 @@ void Intel28F008SA::write(u32 address, u8 data, bool vpp_high)
     break;
   case 0x50:
     chip.errors = 0;
+    chip.mode = ReadArray; // Clear Status returns to array reads (Intel AP-364, §2.5, Table 3).
     break;
   case 0x40:
   case 0x10:

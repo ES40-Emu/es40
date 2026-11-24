@@ -49,7 +49,7 @@ public:
 private:
   enum { Configuration, Group2 };
   enum { INTDEF = 2, INTEN = 0x10, INTSEL = 0x07 }; // Offset of INTDEF from zCC0, then its bit 4 and bits 2-0 (AHA-1740A TRM, p. 4-15).
-  enum { SCSIDEF = 3, HSCSIID = 0x0f }; // Offset of SCSIDEF from zCC0, then its bits 3-0 (AHA-1740A TRM, p. 4-16).
+  enum { SCSIDEF = 3, RSTPWR = 0x10, HSCSIID = 0x0f }; // Offset of SCSIDEF from zCC0, then its bit 4 and bits 3-0 (AHA-1740A TRM, p. 4-16).
   // Offsets from zCD0 of the Enhanced Mode registers (AHA-1740A TRM, pp. 4-21 to 4-23).
   enum { MBOXOUT0 = 0, ATTN = 4, G2CNTRL = 5, G2INTST = 6, G2STAT = 7, MBOXIN0 = 8 };
   enum { StartCCB = 4 }; // ATTN bits 7-4 (AHA-1740A TRM, p. 4-22).
@@ -62,15 +62,16 @@ private:
   enum { InitiatorCommand = 0x01, ReadSenseInformation = 0x08, ReadInquiryData = 0x0a }; // Operation codes (AHA-1740A TRM, p. 6-4).
   // Flag word 1 bits 7, 10, 12, 14 and 15 (AHA-1740A TRM, pp. 6-5, 6-6).
   enum { DisableInterrupt = 0x0080, SuppressUnderrunError = 0x0400, ScatterGather = 0x1000, DisableStatusBlock = 0x4000, AutomaticRequestSense = 0x8000 };
-  enum { LogicalUnit = 0x0007, NoDisconnect = 0x0040 }; // Flag word 2 bits 2-0 and 6 (AHA-1740A TRM, p. 6-7).
+  // Flag word 2 bits 2-0, 6, 8, 9 and 10 (AHA-1740A TRM, pp. 6-7 to 6-9).
+  enum { LogicalUnit = 0x0007, NoDisconnect = 0x0040, DataTransfer = 0x0100, Direction = 0x0200, SuppressTransfer = 0x0400 };
   // Status word bits 0, 1, 3, 4, 5, 7, 8, 9 and 12; the status word figure and p. 6-19 put Additional Status Available at bit 8 (AHA-1740A TRM, pp. 6-14 to 6-16, 6-19).
   enum { CommandDone = 0x0001, DataUnderrun = 0x0002, QueueFull = 0x0008, SpecificationCheck = 0x0010, DataOverrun = 0x0020, InterruptIssued = 0x0080, AdditionalStatus = 0x0100, SenseStored = 0x0200, MajorError = 0x1000 };
   // Host adapter status codes (AHA-1740A TRM, p. 6-17).
-  enum { SelectionTimeout = 0x11, OverrunOrUnderrun = 0x12, InvalidParameter = 0x18, InvalidList = 0x1a, RequestSenseFailed = 0x1b };
+  enum { SelectionTimeout = 0x11, OverrunOrUnderrun = 0x12, InvalidPhase = 0x14, InvalidParameter = 0x18, InvalidList = 0x1a, RequestSenseFailed = 0x1b };
   enum { CheckCondition = 0x02 }; // Target status (AHA-1740A TRM, p. 6-17).
   enum { QueueSize = 64 }; // Control blocks the adapter holds at once (AHA-1740A TRM, p. 6-2).
-  // What one command on the SCSI bus came to: whether a target answered, its status byte, the bytes moved and whether it wanted to move more.
-  struct scsi_result { bool selected; u8 status; u32 moved; bool overrun; };
+  // What one command on the SCSI bus came to: whether a target answered, its status byte, the bytes moved, whether it wanted to move more, and whether its data phase went against the Direction flag.
+  struct scsi_result { bool selected; u8 status; u32 moved; bool overrun; bool wrong_phase; };
   void start_ccb(u32 address, u8 target);
   void read_inquiry_data(const u8* ecb, u8* status);
   void initiator_command(const u8* ecb, u8 target, u8* status);
@@ -78,7 +79,7 @@ private:
   bool report_target(const scsi_result& result, u8* status);
   scsi_result request_sense(const u8* ecb, u8 target, u8* pair);
   void sense_stored(u8* status, u32 count);
-  scsi_result scsi_command(const u8* ecb, u8 target, const u8* cdb, u8 cdb_length, const u8* list, u32 entries);
+  scsi_result scsi_command(u8 target, u16 flags2, const u8* cdb, u8 cdb_length, const u8* list, u32 entries);
   // The data area is given as 8-byte {pointer, length} pairs: the control block's own, or its scatter/gather list (AHA-1740A TRM, pp. 6-10, 6-11).
   u32 move_data(const u8* list, u32 entries, u32 skip, u8* data, u32 count, bool to_host);
   void account_transfer(const u8* ecb, u8* status, const u8* list, u32 entries, u32 moved, bool overrun);

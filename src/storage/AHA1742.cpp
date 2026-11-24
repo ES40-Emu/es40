@@ -211,8 +211,8 @@ void AHA1742::read_inquiry_data(const u8* ecb, u8* status)
 // Initiator SCSI Command: the adapter selects the target and follows it through the bus phases of one command (AHA-1740A TRM, p. 6-26).
 void AHA1742::initiator_command(const u8* ecb, u8* status)
 {
-  const u8 target = attn & 0x0f, cdb_length = ecb[CDBLength];
-  const u16 flags2 = get_le16(ecb + FlagWord2);
+  const u8 cdb_length = ecb[CDBLength];
+  const u16 flags1 = get_le16(ecb + FlagWord1);
   // A CDB is 6, 10 or 12 bytes long; another length is an invalid parameter, and no action is taken on the control block (AHA-1740A TRM, pp. 6-12, 6-15, 6-17).
   if (cdb_length != 6 && cdb_length != 10 && cdb_length != 12) {
     put_le16(status + StatusWord, SpecificationCheck);
@@ -223,7 +223,7 @@ void AHA1742::initiator_command(const u8* ecb, u8* status)
   u8 gathered[1024];
   const u8* list = ecb + DataPointer;
   u32 entries = 1;
-  if (get_le16(ecb + FlagWord1) & ScatterGather) {
+  if (flags1 & ScatterGather) {
     // A list holds up to 128 pairs: a length that is zero, not a multiple of 8 or over 1 KByte makes it invalid (AHA-1740A TRM, pp. 6-10, 6-11, 6-17).
     const u32 length = get_le32(ecb + DataLength);
     if (!length || (length & 7) || length > sizeof(gathered)) {
@@ -235,18 +235,51 @@ void AHA1742::initiator_command(const u8* ecb, u8* status)
     list = gathered;
     entries = length / 8;
   }
-  // The adapter is the only initiator on its bus, so it wins arbitration with the ID in SCSIDEF bits 3-0 (AHA-1740A TRM, p. 4-16).
-  scsi_initiator_id[0] = config[SCSIDEF] & HSCSIID;
-  scsi_arbitrate(0);
+  const scsi_result command = scsi_command(ecb, ecb + CDBBytes, cdb_length, list, entries);
   // With no target at the ID in ATTN bits 3-0 the selection times out, which is a major error (AHA-1740A TRM, pp. 6-16, 6-17, 6-26).
-  if (!scsi_select(0, target)) {
-    scsi_free(0);
+  if (!command.selected) {
     put_le16(status + StatusWord, MajorError);
     status[HostAdapterStatus] = SelectionTimeout;
     return;
   }
-  u32 moved = 0;
-  bool overrun = false;
+  // Only Good status leaves the command done without error, and a check condition is not a major error (AHA-1740A TRM, pp. 6-14, 6-16).
+  status[TargetStatus] = command.status;
+  put_le16(status + StatusWord, command.status ? 0 : CommandDone);
+  // With Automatic Request Sense set, a check condition is followed at once by a Request Sense for as many bytes as the sense length allows (AHA-1740A TRM, pp. 6-6, 6-12).
+  if (command.status == CheckCondition && (flags1 & AutomaticRequestSense)) {
+    u8 pair[8];
+    put_le32(pair, get_le32(ecb + SensePointer));
+    put_le32(pair + 4, ecb[SenseLength]);
+    const u8 cdb[6] = {0x03, 0, 0, 0, ecb[SenseLength], 0};
+    const scsi_result sense = scsi_command(ecb, cdb, u8(sizeof(cdb)), pair, 1);
+    if (sense.selected && !sense.status) {
+      // Sense Information Stored comes with one byte of additional status, byte 14, which counts the sense bytes stored (AHA-1740A TRM, pp. 6-16, 6-19).
+      put_le16(status + StatusWord, AdditionalStatus | SenseStored);
+      put_le16(status + AdditionalStatusLength, 1);
+      status[StoredSenseLength] = u8(sense.moved);
+    } else {
+      // A Request Sense that does not end with Good status is a major error of its own (AHA-1740A TRM, p. 6-17).
+      put_le16(status + StatusWord, MajorError);
+      status[HostAdapterStatus] = RequestSenseFailed;
+    }
+  }
+  account_transfer(ecb, status, list, entries, command.moved, command.overrun);
+}
+
+// One command on the adapter's SCSI bus, from selection to the target's status byte, for the target in ATTN bits 3-0 and the LUN in the control block.
+AHA1742::scsi_result AHA1742::scsi_command(const u8* ecb, const u8* cdb, u8 cdb_length, const u8* list, u32 entries)
+{
+  const u8 target = attn & 0x0f;
+  const u16 flags2 = get_le16(ecb + FlagWord2);
+  scsi_result result{};
+  // The adapter is the only initiator on its bus, so it wins arbitration with the ID in SCSIDEF bits 3-0 (AHA-1740A TRM, p. 4-16).
+  scsi_initiator_id[0] = config[SCSIDEF] & HSCSIID;
+  scsi_arbitrate(0);
+  if (!scsi_select(0, target)) {
+    scsi_free(0);
+    return result;
+  }
+  result.selected = true;
   // The target chooses each bus phase and the adapter answers it, until the target frees the bus.
   for (int phase; (phase = scsi_get_phase(0)) != SCSI_PHASE_FREE; scsi_xfer_done(0)) {
     const size_t bytes = scsi_expected_xfer(0);
@@ -254,13 +287,13 @@ void AHA1742::initiator_command(const u8* ecb, u8* status)
       // The identify message names the LUN and allows disconnection, the default, unless No Disconnect is set (AHA-1740A TRM, pp. 4-29, 6-7).
       *static_cast<u8*>(scsi_xfer_ptr(0, 1)) = u8(0x80 | ((flags2 & NoDisconnect) ? 0 : 0x40) | (flags2 & LogicalUnit));
     } else if (phase == SCSI_PHASE_COMMAND) {
-      memcpy(scsi_xfer_ptr(0, cdb_length), ecb + CDBBytes, cdb_length);
+      memcpy(scsi_xfer_ptr(0, cdb_length), cdb, cdb_length);
     } else if (phase == SCSI_PHASE_DATA_OUT || phase == SCSI_PHASE_DATA_IN) {
-      const u32 done = move_data(list, entries, moved, static_cast<u8*>(scsi_xfer_ptr(0, bytes)), u32(bytes), phase == SCSI_PHASE_DATA_IN);
-      moved += done;
+      const u32 done = move_data(list, entries, result.moved, static_cast<u8*>(scsi_xfer_ptr(0, bytes)), u32(bytes), phase == SCSI_PHASE_DATA_IN);
+      result.moved += done;
       // A target that wants more than the data area holds is a data overrun: data in is taken without being stored, and data out ends the command there (AHA-1740A TRM, pp. 6-9, 6-15).
       if (done < bytes) {
-        overrun = true;
+        result.overrun = true;
         if (phase == SCSI_PHASE_DATA_OUT) {
           scsi_bus[0]->free_bus(target);
           break;
@@ -270,12 +303,10 @@ void AHA1742::initiator_command(const u8* ecb, u8* status)
       // The status phase gives the target status; the Command Complete message that follows needs no answer (AHA-1740A TRM, p. 6-17).
       const u8* data = static_cast<u8*>(scsi_xfer_ptr(0, bytes));
       if (phase == SCSI_PHASE_STATUS && bytes)
-        status[TargetStatus] = data[0];
+        result.status = data[0];
     }
   }
-  // Only Good status leaves the command done without error, and a check condition is not a major error (AHA-1740A TRM, pp. 6-14, 6-16).
-  put_le16(status + StatusWord, status[TargetStatus] ? 0 : CommandDone);
-  account_transfer(ecb, status, list, entries, moved, overrun);
+  return result;
 }
 
 // Moves up to count bytes between the target's buffer and the data area, from skip bytes into the area, and returns how many the area had room for.

@@ -66,9 +66,10 @@ int sparse_io_width(u64 address)
 class JensenHostBus : public CSystemComponent, public CDMAHost
 {
   Jensen& board;
+  bool& lock_flag;
   JensenFlash feprom[2];
 public:
-  JensenHostBus(CConfigurator* cfg, Jensen* system);
+  JensenHostBus(CConfigurator* cfg, Jensen* system, bool& lock_flag);
   ~JensenHostBus() override;
   void start_threads() override;
   void stop_threads() override;
@@ -85,6 +86,7 @@ public:
   void WriteMem(int index, u64 address, int dsize, u64 data) override;
   void ResetPCI() override
   {
+    lock_flag = false; // Reset clears the system module's lock flag (PB22H-KB, p. 3-2).
     hae = 0;
     board.write_sysctl(0);
     for (auto& socket : feprom)
@@ -98,8 +100,8 @@ private:
   u8 hae = 0;
 };
 
-JensenHostBus::JensenHostBus(CConfigurator* cfg, Jensen* system)
-  : CSystemComponent(cfg, system), board(*system),
+JensenHostBus::JensenHostBus(CConfigurator* cfg, Jensen* system, bool& lock_flag)
+  : CSystemComponent(cfg, system), board(*system), lock_flag(lock_flag),
     feprom{{cfg, *system, 0}, {cfg, *system, 1}},
     isp(new Intel82357(cfg, system, *this, [system](bool asserted) {
       if (system->get_cpu_num())
@@ -169,8 +171,10 @@ void JensenHostBus::flush_storage()
 
 int JensenHostBus::SaveState(FILE* file)
 {
-  if (fwrite("JFL2", 4, 1, file) != 1 || fputc(board.read_sysctl(), file) == EOF ||
-      CSystemComponent::SaveState(file))
+  const u16 locks = ebc.eisa_bus().snapshot_state().lock_requests;
+  if (fwrite("JFL3", 4, 1, file) != 1 || fputc(board.read_sysctl(), file) == EOF ||
+      fputc(lock_flag, file) == EOF || fputc(locks & 0xff, file) == EOF ||
+      fputc(locks >> 8, file) == EOF || CSystemComponent::SaveState(file))
     return -1;
   return feprom[0].save(file) && feprom[1].save(file) ? 0 : -1;
 }
@@ -185,20 +189,33 @@ int JensenHostBus::RestoreState(FILE* file)
   // Older snapshots used a contiguous array of installed RAM.
   const auto bits = board.get_memory_bits();
   int sysctl = bits == 27 ? 0xa0 : bits == 26 ? 0x20 : 0;
+  bool held = false;
+  u16 locks = 0;
   if (!legacy) {
     char tag[4];
     if (fread(tag, sizeof(tag), 1, file) != 1)
       return -1;
-    if (memcmp(tag, "JFL2", sizeof(tag)) == 0) {
+    const bool has_locks = memcmp(tag, "JFL3", sizeof(tag)) == 0;
+    if (has_locks || memcmp(tag, "JFL2", sizeof(tag)) == 0) {
       sysctl = fgetc(file);
       if (sysctl == EOF)
         return -1;
     } else if (memcmp(tag, "JFL1", sizeof(tag)) != 0)
       return -1;
+    if (has_locks) {
+      const int flag = fgetc(file), low = fgetc(file), high = fgetc(file);
+      if ((flag != 0 && flag != 1) || low == EOF || high == EOF || (low & 1))
+        return -1;
+      held = flag != 0;
+      locks = u16(low | (high << 8));
+    }
   }
-  if (CSystemComponent::RestoreState(file) || !feprom[0].restore(file, legacy) ||
+  auto& bus = ebc.eisa_bus().snapshot_state();
+  if (CSystemComponent::RestoreState(file) || (locks & ~bus.enabled_slots) || !feprom[0].restore(file, legacy) ||
       !feprom[1].restore(file, legacy))
     return -1;
+  lock_flag = held;
+  bus.lock_requests = locks;
   board.write_sysctl(u8(sysctl));
   return 0;
 }
@@ -299,6 +316,10 @@ void JensenHostBus::dma_read_memory(u32 address, void* dest, size_t bytes)
 
 void JensenHostBus::dma_write_memory(u32 address, const void* source, size_t bytes)
 {
+  if (!bytes)
+    return;
+  std::lock_guard<std::recursive_mutex> guard(cSystem->get_device_bus_mutex());
+  lock_flag = false; // Every DMA write clears the flag, including misses (PB22H-KB, p. 3-2).
   const auto* in = static_cast<const u8*>(source);
   for (size_t offset = 0; offset < bytes; ) {
     size_t count = bytes - offset;
@@ -325,6 +346,39 @@ Jensen::~Jensen()
 void Jensen::ResetMem(unsigned int membits)
 {
   CSystem::ResetMem(checked_memory_bits(membits));
+  lock_flag = false;
+}
+
+u64 Jensen::cpu_read_locked(int, u64 phys, int size_bits, CSystemComponent* source)
+{
+  std::lock_guard<std::recursive_mutex> guard(get_device_bus_mutex());
+  const u64 value = ReadMem(phys, size_bits, source);
+  if (!(phys >> 32)) // Only quadrant 0 is cacheable (PB22H-KB, p. 2-7 and Table 15-1).
+    lock_flag = true;
+  return value;
+}
+
+u64 Jensen::cpu_stx_c(int, u64 phys, int size_bits, u64 value, CSystemComponent* source)
+{
+  std::lock_guard<std::recursive_mutex> guard(get_device_bus_mutex());
+  if (!(phys >> 32)) {
+    // A cacheable STxC tests and clears the flag without comparing addresses (PB22H-KB, p. 3-2).
+    const bool held = lock_flag;
+    lock_flag = false;
+    if (!held)
+      return 0;
+  }
+  if (eisa && eisa->lock_pending())
+    return 0;
+  // Noncacheable STxC preserves the flag and uses the responder's completion (PB22H-KB, Table 15-1).
+  WriteMem(phys, size_bits, value, source);
+  return 1;
+}
+
+void Jensen::cpu_clear_lock(int)
+{
+  std::lock_guard<std::recursive_mutex> guard(get_device_bus_mutex());
+  lock_flag = false;
 }
 
 void Jensen::write_sysctl(u8 value)
@@ -376,8 +430,9 @@ u64 Jensen::linear_ram_size() const noexcept
 
 void Jensen::attach_board_devices(CConfigurator* cfg)
 {
-  auto* host = new JensenHostBus(cfg, this);
-  register_isa_bus(0, host->ebc.eisa_bus());
+  auto* host = new JensenHostBus(cfg, this, lock_flag);
+  eisa = &host->ebc.eisa_bus();
+  register_isa_bus(0, *eisa);
   // IRQK and IRQM share CPU IRQ3 on Jensen (PB22H-KB, Table 6-4).
   combo = new VL82C106(cfg, this, U64(0x1c0000000), [this](bool asserted) {
     if (get_cpu_num())

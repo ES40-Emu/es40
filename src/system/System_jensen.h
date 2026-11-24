@@ -33,6 +33,7 @@
 #include <mutex>
 
 class CSerial;
+class EISABus;
 class VL82C106;
 
 class Jensen final : public CSystem
@@ -44,6 +45,9 @@ public:
   void register_legacy_io(CSystemComponent& device, int index, int bus, u32 port, u32 length) override;
   void register_legacy_mem(CSystemComponent& device, int index, int bus, u32 address, u32 length) override;
   void ResetMem(unsigned int membits) override;
+  u64 cpu_read_locked(int cpuid, u64 phys, int size_bits, CSystemComponent* source) override;
+  u64 cpu_stx_c(int cpuid, u64 phys, int size_bits, u64 value, CSystemComponent* source) override;
+  void cpu_clear_lock(int cpuid) override;
   CSerial& serial_port(unsigned number) const;
   u8 read_sysctl() const noexcept { return sysctl.load(std::memory_order_relaxed); }
   void write_sysctl(u8 value);
@@ -54,6 +58,8 @@ private:
   void set_serial_irq(unsigned channel, bool asserted);
   void finish_board_restore() override;
   std::atomic<u8> sysctl{0};
+  EISABus* eisa = nullptr;
+  bool lock_flag = false;
   VL82C106* combo = nullptr;
   std::mutex serial_irq_mutex;
   unsigned serial_irqs = 0;

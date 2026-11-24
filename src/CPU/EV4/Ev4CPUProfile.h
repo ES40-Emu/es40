@@ -154,8 +154,7 @@ constexpr AlphaCPUProfile ev4_cpu_profile()
   profile.interrupt.service = [](CAlphaCPU& cpu) {
     return cpu.get_profile().interrupt.pending(cpu) ? AlphaInterruptResult::EnterPAL : AlphaInterruptResult::Continue;
   };
-  // Use the 21064 HRM Fig. A-26 example until Jensen supplies its own lock flag (PB22H-KB, p. 3-2).
-  profile.llsc.matches = [](u64 locked, u64 address) { return (locked >> 5) == (address >> 5); };
+  // The 21064 HRM Fig. A-26 example compares addresses. Jensen supplies its own lock flag (PB22H-KB, p. 3-2).
   return profile;
 }
 

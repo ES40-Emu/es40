@@ -1220,7 +1220,7 @@ bool CSystem::cpu_take_lock(int cpuid, u64 address, u64* expected, bool* same_ad
  * STx_C: consume the lock and perform the conditional store. 
  **/
 u64 CSystem::cpu_stx_c(int cpuid, u64 phys, int size_bits, u64 value,
-	char* dram, u64 dram_sz, CSystemComponent* source)
+	CSystemComponent* source)
 {
 	phys &= physical_address_mask;
 	u64  expected = 0;
@@ -1229,7 +1229,7 @@ u64 CSystem::cpu_stx_c(int cpuid, u64 phys, int size_bits, u64 value,
 		return 0;
 
 	const u64 offset = ram_offset(phys);
-	if (offset >= dram_sz)
+	if (offset >> iNumMemoryBits)
 	{
 		WriteMem(phys, size_bits, value, source);   // I/O-space conditional store
 		return 1;
@@ -1241,11 +1241,11 @@ u64 CSystem::cpu_stx_c(int cpuid, u64 phys, int size_bits, u64 value,
 	if (m_ll_buckets[b].sequence.load(std::memory_order_relaxed) != m_ll_reservations[cpuid].sequence)
 		ok = 0;    // a store hit this reservation bucket since our LDx_L
 	else if (same_address)
-		ok = dram_cas(dram, offset, expected, value, size_bits) ? 1 : 0;
+		ok = dram_cas(ram_data(), offset, expected, value, size_bits) ? 1 : 0;
 	else
 	{
 		// STx_C to a different quadword in the locked line: no value to compare.
-		dram_write(dram, offset, size_bits, value);
+		dram_write(ram_data(), offset, size_bits, value);
 		ok = 1;
 	}
 	if (ok)

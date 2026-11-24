@@ -354,13 +354,12 @@ public:
   };
 
   // LDx_L and STx_C accept naturally aligned 32- or 64-bit accesses.
-  u64           cpu_read_locked(int cpuid, u64 phys, int size_bits,
+  virtual u64   cpu_read_locked(int cpuid, u64 phys, int size_bits,
                                 CSystemComponent* source);   // LDx_L: read and reserve atomically
   void          cpu_write_ram(u64 phys, int size_bits, u64 value); // CPU store + reservation invalidation
-  bool          cpu_take_lock(int cpuid, u64 address, u64* expected, bool* same_address);
-  u64           cpu_stx_c(int cpuid, u64 phys, int size_bits, u64 value,
-                          char* dram, u64 dram_sz, CSystemComponent* source);  // STx_C: 1 = success
-  void          cpu_clear_lock(int cpuid);                     // exception/interrupt: drop the lock
+  virtual u64   cpu_stx_c(int cpuid, u64 phys, int size_bits, u64 value,
+                          CSystemComponent* source);          // STx_C: 1 = success
+  virtual void  cpu_clear_lock(int cpuid);                     // exception/interrupt: drop the lock
 
   // Detected-idle naps on SMP guests. A CPU arms the physical 64-byte lines
   // its idle loop reads; a store to one changes that line's LL bucket
@@ -491,6 +490,7 @@ private:
   void enter_ll_jit(int cpuid) noexcept;
   void watch_ll_line(int cpuid, u64 phys);
   void cpu_lock(int cpuid, u64 address, u64 value); // caller holds the RAM bucket
+  bool cpu_take_lock(int cpuid, u64 address, u64* expected, bool* same_address);
   void cpu_lock_bucket(u32 bucket);
 
   // At most two buckets for a scalar access. Acquire in bucket order, including

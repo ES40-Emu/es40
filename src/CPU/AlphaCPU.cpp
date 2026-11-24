@@ -2836,8 +2836,9 @@ int CAlphaCPU::jit_fltv(CAlphaCPU* cpu, u32 ins)
 	return cpu->m_jit_fltv_trapped ? 2 : 0;   // vax_trap GO_PAL'd -> caller honors state.pc
 }
 
-// JIT load-locked helper (static). LDx_L: the verify-checked load PLUS cpu_lock -- the LL/SC
-// exclusive monitor. cpu_lock is per-CPU + atomic + idempotent.
+// JIT load-locked helper (static). LDx_L: the verify-checked load PLUS cpu_lock -- the EV68 LL/SC
+// exclusive monitor. cpu_lock establishes the per-CPU RAM reservation atomically with the load.
+// Jensen sets its board lock flag on a cacheable LDx_L (PB22H-KB, Table 15-1).
 int CAlphaCPU::jit_read_locked(CAlphaCPU* cpu, u64 va, u64 descr, u64* out)
 {
 	const int size_bits = (int)(descr & 0xff);
@@ -3128,9 +3129,10 @@ int CAlphaCPU::jit_write_phys(CAlphaCPU* cpu, u64 phys, int size_bits, u64 value
 	return 0;
 }
 
-// JIT store-conditional helper (static). Same-address STx_C uses the emulator's
+// JIT store-conditional helper (static). On EV68, same-address STx_C uses the emulator's
 // CAS-backed MP model; different-address same-line STx_C stores without comparing
 // against the LDx_L datum.
+// Jensen tests and clears its board lock flag on a cacheable STx_C (PB22H-KB, p. 3-2).
 u64 CAlphaCPU::jit_stc(CAlphaCPU* cpu, u64 va, u64 descr, u64 value)
 {
 	const int size_bits = (int)(descr & 0xff);

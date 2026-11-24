@@ -673,7 +673,7 @@ private:
   u64 store_conditional_physical(u64 phys, int size, u64 value)
   {
     if (state.ev4_dc_stat_unlocked) note_ev4_dcache_access(m_ev4_dcache.hits(phys));
-    return cSystem->cpu_stx_c(state.iProcNum, phys, size, value, dram_ptr, dram_size, this);
+    return cSystem->cpu_stx_c(state.iProcNum, phys, size, value, this);
   }
   u64 bus_address(u64 phys, bool write = false)
   {

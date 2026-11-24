@@ -741,8 +741,7 @@ inline u64 fsqrt64(u64 asig, s32 exp)
     if (pbc)                                                \
     {                                                       \
       /* page-crossing STx_C fails; still consumes the lock */ \
-      u64 _stc_exp; bool _stc_sa;                           \
-      cSystem->cpu_take_lock(state.iProcNum, phys_address, &_stc_exp, &_stc_sa); \
+      cSystem->cpu_clear_lock(state.iProcNum);              \
       dest = 0;                                             \
     }                                                       \
     else                                                    \

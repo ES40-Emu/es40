@@ -55,6 +55,8 @@ AHA1742::AHA1742(CConfigurator* cfg, CSystem* system, EISABus& bus, unsigned slo
   save_item(completions, "completions");
   save_item(completion_head, "completion_head");
   save_item(completion_count, "completion_count");
+  save_item(immediate_status, "immediate_status");
+  save_item(immediate_error, "immediate_error");
   save_item(held, "held");
   save_item(held_count, "held_count");
   save_item(allegiance, "allegiance");
@@ -119,10 +121,13 @@ void AHA1742::WriteMem(int index, u64 address, int dsize, u64 data)
   if (address == ATTN) {
     attn = u8(data);
     // The local processor reads ATTN at once, so the Busy bit this write sets is never seen set (AHA-1740A TRM, p. 4-23).
-    // For Start CCB it then reads the mailbox out address and sets Mailbox Out Empty (AHA-1740A TRM, p. 4-20).
-    if (!in_reset && attn >> 4 == StartCCB) {
+    // It then reads the mailbox out, a control block address for Start CCB or else an immediate command, and sets Mailbox Out Empty (AHA-1740A TRM, p. 4-20).
+    if (!in_reset && (attn >> 4 == StartCCB || attn >> 4 == ImmediateCommand)) {
       g2stat |= MailboxOutEmpty;
-      start_ccb(get_le32(mboxout), attn & 0x0f);
+      if (attn >> 4 == StartCCB)
+        start_ccb(get_le32(mboxout), attn & 0x0f);
+      else
+        immediate_command(get_le32(mboxout), attn & 0x0f);
     }
     return;
   }
@@ -139,6 +144,7 @@ void AHA1742::WriteMem(int index, u64 address, int dsize, u64 data)
     g2stat |= Busy;
     // The local processor loses what it held, waiting completions and kept control blocks included, and a reset ends every allegiance (AHA-1740A TRM, pp. 4-8, 6-18).
     completion_count = 0;
+    immediate_status = 0;
     held_count = 0;
     allegiance = 0;
   } else if (in_reset) {
@@ -148,12 +154,67 @@ void AHA1742::WriteMem(int index, u64 address, int dsize, u64 data)
     g2stat = MailboxOutEmpty;
     // With RSTPWR set the power-on sequence after a Hard Reset resets the SCSI bus, and the host is not notified (AHA-1740A TRM, pp. 4-16, 6-46).
     if (config[SCSIDEF] & RSTPWR)
-      for (int id = 0; id < 8; ++id)
-        if (CDisk* disk = get_disk(0, id))
-          disk->scsi_reset();
+      reset_scsi_bus();
   }
   // Clearing the interrupt tells the local processor the mailbox in is free for the next completion (AHA-1740A TRM, p. 4-20).
   post_completion();
+}
+
+// An immediate command is carried out at once on the 32 bits given in the mailbox out, for the SCSI ID in ATTN bits 3-0 (AHA-1740A TRM, p. 6-42).
+void AHA1742::immediate_command(u32 command, u8 target)
+{
+  u8 error = 0;
+  if (u8(command) == ImmediateReset && target == (config[SCSIDEF] & HSCSIID)) {
+    // Reset with the adapter's own ID drops the control blocks and queued interrupts of every target, and resets the SCSI bus unless the Adapter Reset Option is set (AHA-1740A TRM, p. 6-45).
+    forget(true, target);
+    allegiance = 0;
+    if (!(command & AdapterResetOption))
+      reset_scsi_bus();
+  } else if (u8(command) == ImmediateReset) {
+    // Reset with another ID drops that target's control blocks and queued interrupts (AHA-1740A TRM, p. 6-43).
+    forget(false, target);
+    if (!(command & DeviceResetOption)) {
+      // Unless the Device Reset Option is set the target is then sent a bus device reset, which also ends its allegiance; no answer to the selection is an error (AHA-1740A TRM, pp. 6-18, 6-44).
+      allegiance &= u16(~(1 << target));
+      if (CDisk* disk = target < 8 ? get_disk(0, target) : nullptr)
+        disk->scsi_reset();
+      else
+        error = SelectionTimeout;
+    }
+  } else if (u8(command) != ImmediateResume || (command & ResumeNoInterrupt)) {
+    // Resume ends an extended contingent allegiance, which never arises here, so it does nothing and may ask for no interrupt; other commands are not supported (AHA-1740A TRM, pp. 6-42, 6-46).
+    return;
+  }
+  // The host is told with the SCSI ID in the status code, and after an error with its code in the first mailbox in byte (AHA-1740A TRM, pp. 4-22, 6-43).
+  immediate_status = u8((error ? ImmediateError : ImmediateGood) << 4 | target);
+  immediate_error = error;
+  post_completion();
+}
+
+// The adapter drops the control blocks it keeps and the completions it has not yet presented, for one target or for all (AHA-1740A TRM, pp. 6-43, 6-45).
+void AHA1742::forget(bool all, u8 target)
+{
+  u8 kept = 0;
+  for (u8 i = 0; i < held_count; ++i)
+    if (!all && u8(held[i] >> 32) != target)
+      held[kept++] = held[i];
+  held_count = kept;
+  u8 waiting = 0;
+  for (u8 i = 0; i < completion_count; ++i) {
+    // A waiting completion carries its target in the low four bits of its status code.
+    const u64 completion = completions[(completion_head + i) % QueueSize];
+    if (!all && (completion >> 32 & 0x0f) != target)
+      completions[(completion_head + waiting++) % QueueSize] = completion;
+  }
+  completion_count = waiting;
+}
+
+// A SCSI bus reset returns every target on the bus to its power-on state.
+void AHA1742::reset_scsi_bus()
+{
+  for (int id = 0; id < 8; ++id)
+    if (CDisk* disk = get_disk(0, id))
+      disk->scsi_reset();
 }
 
 // A control block is started with the SCSI ID that was in ATTN bits 3-0 when its address was given (AHA-1740A TRM, p. 6-20).
@@ -434,16 +495,22 @@ void AHA1742::account_transfer(const u8* ecb, u8* status, const u8* list, u32 en
   put_le32(status + ResidualAddress, (get_le16(ecb + FlagWord1) & ScatterGather) ? get_le32(ecb + DataPointer) + 8 * last : get_le32(list));
 }
 
-// With the EISA interrupt clear, the oldest completion is loaded in the mailbox in and its status code sets the interrupt (AHA-1740A TRM, pp. 4-20, 4-22).
+// With the EISA interrupt clear, the next completion is loaded in the mailbox in and its status code sets the interrupt: an immediate command's first, then the oldest control block's (AHA-1740A TRM, pp. 4-20, 4-22, 6-44).
 void AHA1742::post_completion()
 {
-  if ((g2stat & InterruptPending) || !completion_count)
+  if ((g2stat & InterruptPending) || (!immediate_status && !completion_count))
     return;
-  const u64 completion = completions[completion_head];
-  completion_head = u8((completion_head + 1) % QueueSize);
-  --completion_count;
-  put_le32(mboxin, u32(completion));
-  g2intst = u8(completion >> 32);
+  if (immediate_status) {
+    put_le32(mboxin, immediate_error);
+    g2intst = immediate_status;
+    immediate_status = 0;
+  } else {
+    const u64 completion = completions[completion_head];
+    completion_head = u8((completion_head + 1) % QueueSize);
+    --completion_count;
+    put_le32(mboxin, u32(completion));
+    g2intst = u8(completion >> 32);
+  }
   g2stat |= InterruptPending;
   drive_irq(true);
 }

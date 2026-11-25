@@ -52,9 +52,11 @@ private:
   enum { SCSIDEF = 3, RSTPWR = 0x10, HSCSIID = 0x0f }; // Offset of SCSIDEF from zCC0, then its bit 4 and bits 3-0 (AHA-1740A TRM, p. 4-16).
   // Offsets from zCD0 of the Enhanced Mode registers (AHA-1740A TRM, pp. 4-21 to 4-23).
   enum { MBOXOUT0 = 0, ATTN = 4, G2CNTRL = 5, G2INTST = 6, G2STAT = 7, MBOXIN0 = 8 };
-  enum { StartCCB = 4 }; // ATTN bits 7-4 (AHA-1740A TRM, p. 4-22).
+  enum { ImmediateCommand = 1, StartCCB = 4 }; // ATTN bits 7-4 (AHA-1740A TRM, p. 4-22).
   enum { HardReset = 0x80, ClearInterrupt = 0x40 }; // G2CNTRL bits 7 and 6 (AHA-1740A TRM, p. 4-22).
-  enum { CompletedGood = 0x1, CompletedError = 0xc }; // G2INTST bits 7-4 (AHA-1740A TRM, p. 4-22).
+  enum { CompletedGood = 0x1, ImmediateGood = 0xa, CompletedError = 0xc, ImmediateError = 0xe }; // G2INTST bits 7-4 (AHA-1740A TRM, p. 4-22).
+  // Immediate commands, in the first mailbox out byte, and their option bits 2, 3 and 5 of byte 2 (AHA-1740A TRM, pp. 6-43 to 6-46).
+  enum { ImmediateReset = 0x80, ImmediateResume = 0x90, DeviceResetOption = 0x040000, AdapterResetOption = 0x080000, ResumeNoInterrupt = 0x200000 };
   enum { MailboxOutEmpty = 0x04, InterruptPending = 0x02, Busy = 0x01 }; // G2STAT bits 2, 1 and 0 (AHA-1740A TRM, p. 4-23).
   // Byte offsets in the 48-byte control block and the 32-byte status block (AHA-1740A TRM, pp. 6-3, 6-13).
   enum { CommandWord = 0x00, FlagWord1 = 0x02, FlagWord2 = 0x04, DataPointer = 0x08, DataLength = 0x0c, StatusBlockPointer = 0x10, SensePointer = 0x1c, SenseLength = 0x20, CDBLength = 0x21, CDBBytes = 0x24 };
@@ -73,6 +75,9 @@ private:
   // What one command on the SCSI bus came to: whether a target answered, its status byte, the bytes moved, whether it wanted to move more, and whether its data phase went against the Direction flag.
   struct scsi_result { bool selected; u8 status; u32 moved; bool overrun; bool wrong_phase; };
   void start_ccb(u32 address, u8 target);
+  void immediate_command(u32 command, u8 target);
+  void forget(bool all, u8 target);
+  void reset_scsi_bus();
   void read_inquiry_data(const u8* ecb, u8* status);
   void initiator_command(const u8* ecb, u8 target, u8* status);
   void read_sense_information(const u8* ecb, u8 target, u8* status);
@@ -100,6 +105,9 @@ private:
   u64 completions[QueueSize]{};
   u8 completion_head = 0;
   u8 completion_count = 0;
+  // An immediate command's completion waits apart from those: its G2INTST value, zero for none, and the error code for the first mailbox in byte (AHA-1740A TRM, p. 6-43).
+  u8 immediate_status = 0;
+  u8 immediate_error = 0;
   // Control blocks kept while their target is in contingent allegiance, oldest first: the target in bits 35-32 over the address (AHA-1740A TRM, p. 6-18).
   u64 held[QueueSize]{};
   u8 held_count = 0;

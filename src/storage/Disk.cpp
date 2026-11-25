@@ -133,6 +133,8 @@
 
 #include <memory>
 
+static constexpr size_t cd_sector_bytes = 2048;
+
 #define SCSI_MEDIA_STATE_STABLE             0
 #define SCSI_MEDIA_STATE_REMOVED            1
 #define SCSI_MEDIA_STATE_CHANGED           -1
@@ -159,8 +161,9 @@ CDisk::CDisk(CConfigurator* cfg, CSystem* sys, CDiskController* ctrl,
 
 	a = myCfg->get_myName();
 	b = myCfg->get_myValue();
-	c = myCfg->get_myParent()->get_myName();
-	d = myCfg->get_myParent()->get_myValue();
+	auto* controller = myCfg->get_myParent();
+	c = controller->get_myName();
+	d = controller->get_myValue();
 
 	free(devid_string); // we override the default to include the controller.
 	CHECK_ALLOCATION(devid_string = (char*)malloc(
@@ -180,7 +183,10 @@ CDisk::CDisk(CConfigurator* cfg, CSystem* sys, CDiskController* ctrl,
 	cylinders = 0;
 	heads = 0;
 	sectors = 0;
-	state.block_size = is_cdrom ? 2048 : 512;
+	// Jensen installs the RRD42 MODE jumper for 512-byte blocks (EK-A0636-TM, Table A-1; EK-RRD42-OM, p. 2-5).
+	auto* board = controller->get_myParent();
+	const bool jensen_rrd42 = controller->get_class_id() == c_aha1742 && board && board->get_class_id() == c_jensen;
+	state.block_size = is_cdrom && !jensen_rrd42 ? cd_sector_bytes : 512;
 	state.byte_pos = 0;
 	state.scsi.sense.available = false;
 	state.scsi.locked = false;
@@ -1536,10 +1542,7 @@ int CDisk::do_scsi_command()
 				feature_ptr[2] = (0 << 6) | (0 << 2) | (1 << 1) |
 					(inserted << 0); // version 0, persistent = 1
 				feature_ptr[3] = 8;											// additional length = 8
-				feature_ptr[4] = 0x00;										// Logical Block Size:
-				feature_ptr[5] = 0x00;										//   2048 (0x800)
-				feature_ptr[6] = 0x08;										//
-				feature_ptr[7] = 0x00;										//
+				put_be32(feature_ptr + 4, (u32)get_block_size()); // Logical Block Size.
 				feature_ptr[8] = (16 >> 8);				// blocking
 				feature_ptr[9] = (16 & 0xFF);
 				feature_ptr[10] = (0 << 0); // PP = 0
@@ -2165,6 +2168,7 @@ int CDisk::do_scsi_command()
 	case SCSICMD_READ_10:
 	case SCSICMD_READ_12:
 	case SCSICMD_READ_CD:
+	{
 #if defined(DEBUG_SCSI)
 		printf("%s: READ.\n", devid_string);
 #endif
@@ -2221,7 +2225,7 @@ int CDisk::do_scsi_command()
 			// Win2K's cdrom.sys sometimes issues this with byte 9 == 0x00 (no
 			// fields explicitly requested) — most real drives treat that as the
 			// default data-only read. We handle 0x00 (default) and 0x10 (user
-			// data only) identically: a plain 2048-byte-per-block read. Anything
+			// data only) identically: 2048 bytes per sector regardless of MODE SELECT (MMC, sec. 5.1.8). Anything
 			// requesting sync/header/ECC subfields is rejected with INVALID
 			// FIELD IN CDB so the driver can fall back to a basic READ.
 			const u8 sub = state.scsi.cmd.data[9];
@@ -2241,15 +2245,16 @@ int CDisk::do_scsi_command()
 				state.scsi.cmd.data[8];
 		}
 
+		const size_t block_bytes = cdrom() && state.scsi.cmd.data[0] == SCSICMD_READ_CD ? cd_sector_bytes : get_block_size();
 		// Within bounds?
-		if ((u64(ofs) + retlen) > u64(get_lba_size()))
+		if ((u64(ofs) + retlen) > u64(byte_size) / block_bytes)
 		{
 			do_scsi_error(SCSI_LBA_RANGE);
 			break;
 		}
 
 		// Would exceed buffer?
-		if (retlen > DATI_BUFSZ / get_block_size())
+		if (retlen > DATI_BUFSZ / block_bytes)
 		{
 			printf("%s: read too big (%d)\n", devid_string, retlen);
 			do_scsi_error(SCSI_TOO_BIG);
@@ -2257,12 +2262,13 @@ int CDisk::do_scsi_command()
 		}
 
 		//  Return data:
+		const unsigned int bytes = (unsigned int)(retlen * block_bytes);
 		state.scsi.dati.read = 0;
 		state.scsi.dati.available = 0;
 		try
 		{
-			if (retlen && (!seek_block(ofs) ||
-				read_blocks(state.scsi.dati.data, retlen) != retlen))
+			if (bytes && (!seek_byte(off_t_large(ofs) * block_bytes) ||
+				read_bytes(state.scsi.dati.data, bytes) != bytes))
 			{
 				do_scsi_error(is_offline() ? SCSI_OFFLINE : SCSI_HARDWARE_ERROR);
 				break;
@@ -2274,13 +2280,14 @@ int CDisk::do_scsi_command()
 			do_scsi_error(SCSI_HARDWARE_ERROR);
 			break;
 		}
-		state.scsi.dati.available = retlen * get_block_size();
+		state.scsi.dati.available = bytes;
 
 #if defined(DEBUG_SCSI)
 		printf("%s: READ  ofs=%d size=%d\n", devid_string, ofs, retlen);
 #endif
 		do_scsi_error(SCSI_OK);
 		break;
+	}
 
 	case SCSICMD_READ_LONG:
 #if defined(DEBUG_SCSI)
@@ -2559,7 +2566,7 @@ int CDisk::do_scsi_command()
                 }
                 else
                 {
-                    long lba = trk->startLBA;
+                    const u32 lba = (u32)(u64(trk->startLBA) * cd_sector_bytes / get_block_size());
                     state.scsi.dati.data[q2++] = (u8)(lba >> 24);
                     state.scsi.dati.data[q2++] = (u8)(lba >> 16);
                     state.scsi.dati.data[q2++] = (u8)(lba >>  8);
@@ -2571,7 +2578,7 @@ int CDisk::do_scsi_command()
             // Always emitted regardless of start_track_req: many OS TOC
             // parsers (including OpenVMS) require the lead-out entry.
             {
-                long leadout_lba = last->endLBA;
+                const long leadout_sector = last->endLBA;
 
                 state.scsi.dati.data[q2++] = 0;      // reserved
                 state.scsi.dati.data[q2++] = 0x16;   // ADR/Control: data, copy
@@ -2580,7 +2587,7 @@ int CDisk::do_scsi_command()
 
                 if (msf_flag)
                 {
-                    u32 x = lba2msf(leadout_lba);
+                    u32 x = lba2msf(leadout_sector);
                     state.scsi.dati.data[q2++] = 0;
                     state.scsi.dati.data[q2++] = (x >> 16) & 0xff;
                     state.scsi.dati.data[q2++] = (x >>  8) & 0xff;
@@ -2588,6 +2595,7 @@ int CDisk::do_scsi_command()
                 }
                 else
                 {
+                    const u32 leadout_lba = (u32)(u64(leadout_sector) * cd_sector_bytes / get_block_size());
                     state.scsi.dati.data[q2++] = (u8)(leadout_lba >> 24);
                     state.scsi.dati.data[q2++] = (u8)(leadout_lba >> 16);
                     state.scsi.dati.data[q2++] = (u8)(leadout_lba >>  8);
@@ -2612,7 +2620,7 @@ int CDisk::do_scsi_command()
 
         // -----------------------------------------------------------------
         // Original single-track response for plain ISO / raw images.
-        // This code is IDENTICAL to the original; OpenVMS relies on it.
+        // OpenVMS relies on this layout; MSF counts CD frames and LBA counts logical blocks (SCSI-2, sec. 14.2.11).
         // -----------------------------------------------------------------
         single_track_toc:
 
@@ -2660,7 +2668,7 @@ int CDisk::do_scsi_command()
 
             if (msf_flag)
             {
-                u32 x = lba2msf(get_lba_size());
+                u32 x = lba2msf(cdrom() ? byte_size / cd_sector_bytes : get_lba_size());
                 state.scsi.dati.data[q2++] = 0;
                 state.scsi.dati.data[q2++] = (x & 0xff0000) >> 16;
                 state.scsi.dati.data[q2++] = (x & 0x00ff00) >>  8;

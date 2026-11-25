@@ -190,7 +190,7 @@ private:
   void service_input();
   void service_input_release();
   bool apply_input_key(u32 key, size_t source = INPUT_SOURCES);
-  bool gen_scancode_locked(u32 key, bool repeat = false);
+  bool gen_scancode_locked(u32 key, bool repeat = false, bool local = false);
 
   u8        read_60();
   void      write_60(u8 data);
@@ -198,6 +198,8 @@ private:
   void      write_64(u8 data);
   void      resetinternals(bool powerup);
   void      enQ(u8 scancode);
+  bool      deQ(u8& code);
+  void      clear_scancodes();
   void      kbd_response_enQ(u8 data);
   bool      controller_deQ();
   bool      input_transaction_active() const;
@@ -309,7 +311,8 @@ protected:
     struct SAli_kbdib
     {
       int   num_elements;
-      u8    buffer[BX_KBD_ELEMENTS];
+      u8    buffer[BX_KBD_ELEMENTS + 1]; // Sixteen scan bytes and an overrun code (IBM Keyboard TRM, p. 19).
+      bool  overrun;
       int   head;
       bool  expecting_typematic;
       bool  expecting_led_write;

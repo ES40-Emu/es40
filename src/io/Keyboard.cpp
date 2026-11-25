@@ -600,23 +600,21 @@ bool CKeyboard::apply_input_key(u32 key, size_t source)
 	bool& held = external ? external_keys[source][code] : local_keys[code];
 	const bool other = other_key_held(code, source);
 	const bool down = (key & BX_KEY_RELEASED) == 0;
-	if (!external && down
-		&& (!state.kbd_clock_enabled || !state.kbd_internal_buffer.scanning_enabled))
+	if (!external && down && !state.kbd_internal_buffer.scanning_enabled)
 		return false;
 	if (!external && !down)
 		held = false;
-	if ((!other || (down && held)) && !gen_scancode_locked(key, down && held))
+	if ((!other || (down && held)) && !gen_scancode_locked(key, down && held, !external))
 		return false;
 	held = down;
 	return true;
 }
 
-bool CKeyboard::gen_scancode_locked(u32 key, bool repeat)
+bool CKeyboard::gen_scancode_locked(u32 key, bool repeat, bool local)
 {
 	if ((key & ~BX_KEY_RELEASED) >= BX_KEY_NBKEYS || state.current_scancodes_set >= 3)
 		return false;
-	unsigned char* scancode;
-	u8              i;
+	const u8* scancode;
 
 #ifdef DEBUG_KBD
 	printf("gen_scancode(): %s %s  \n", bx_keymap->getBXKeyName(key),
@@ -625,13 +623,18 @@ bool CKeyboard::gen_scancode_locked(u32 key, bool repeat)
 		BX_DEBUG(("keyboard: gen_scancode with scancode_translate cleared"));
 #endif
 
-	// Ignore scancode if keyboard clock is driven low
-	if (state.kbd_clock_enabled == 0)
-		return false;
-
 	// Ignore scancode if scanning is disabled
 	if (state.kbd_internal_buffer.scanning_enabled == 0)
 		return false;
+
+	// A low clock inhibits transmission; the keyboard buffers transitions and suppresses repeats (IBM PS/2 HITR, Keyboards, pp. 19–20).
+	if (!state.kbd_clock_enabled)
+	{
+		if (!local || input_locked())
+			return false;
+		if (repeat)
+			return true;
+	}
 
 	// Source: http://www.win.tue.nl/~aeb/linux/kbd/scancodes-10.html
 	//
@@ -695,21 +698,40 @@ bool CKeyboard::gen_scancode_locked(u32 key, bool repeat)
 			return true;
 	}
 	if (key & BX_KEY_RELEASED)
-		scancode = (unsigned char*)scancodes[(key & 0xFF)][state.current_scancodes_set].brek;
+		scancode = (const u8*)scancodes[(key & 0xFF)][state.current_scancodes_set].brek;
 	else
-		scancode = (unsigned char*)scancodes[(key & 0xFF)][state.current_scancodes_set].make;
+		scancode = (const u8*)scancodes[(key & 0xFF)][state.current_scancodes_set].make;
 	if (input_locked())
 	{
 		password_scancodes(scancode, (key & BX_KEY_RELEASED) != 0);
 		return true;
 	}
-	unsigned bytes = 0;
-	for (const unsigned char* p = scancode; *p; ++p)
-		if (!state.scancodes_translate || *p != 0xf0)
-			++bytes;
-	if (bytes > (unsigned)(BX_KBD_ELEMENTS - state.kbd_internal_buffer.num_elements))
-		return false;
+	const size_t bytes = strlen((const char*)scancode);
+	auto& fifo = state.kbd_internal_buffer;
+	if (!bytes)
+		return true;
+	if (fifo.overrun)
+		return local;
+	if (bytes > size_t(BX_KBD_ELEMENTS - fifo.num_elements))
+	{
+		if (!local)
+			return false;
+		// An entire sequence fits or one overrun code follows the buffered bytes (IBM Keyboard TRM, pp. 19, 27).
+		fifo.overrun = true;
+		enQ(state.current_scancodes_set ? 0x00 : 0xff);
+	}
+	else
+	{
+		for (size_t i = 0; i < bytes; ++i)
+			enQ(scancode[i]);
+	}
+	// Event-driven: deliver to the output buffer now (if free) and drive the IRQ instead of waiting for the 20ms poll.
+	kbd_service();
+	return true;
+}
 
+bool CKeyboard::deQ(u8& code)
+{
 	// Translation
 	//
 	// The 8042 microprocessor translates the incoming byte stream
@@ -740,42 +762,24 @@ bool CKeyboard::gen_scancode_locked(u32 key, bool repeat)
 	// | e0 |     e0 e1 e2 e3 e4 e5 e6 e7 e8 e9 ea eb ec ed ee ef |
 	// | f0 |     -  f1 f2 f3     f4 f5 f6 f7 f8 f9 fa fb fc fd fe ff |
 	// +----+-------------------------------------------------+
-	if (state.scancodes_translate)
+	auto& fifo = state.kbd_internal_buffer;
+	u8 escaped = 0;
+	while (fifo.num_elements)
 	{
-
-		// Translate before send
-		u8  escaped = 0x00;
-
-		for (i = 0; i < strlen((const char*)scancode); i++)
+		code = fifo.buffer[fifo.head];
+		fifo.head = int((fifo.head + 1) % sizeof(fifo.buffer));
+		--fifo.num_elements;
+		fifo.overrun = false; // New keys can enter when transmission resumes (IBM Keyboard TRM, p. 19).
+		if (!state.scancodes_translate)
+			return true;
+		if (code != 0xf0)
 		{
-			if (scancode[i] == 0xF0)
-			{
-				escaped = 0x80;
-			}
-			else
-			{
-#ifdef DEBUG_KBD
-				printf("gen_scancode(): writing translated %02x   \n",
-					translation8042[scancode[i]] | escaped);
-#endif
-				enQ(translation8042[scancode[i]] | escaped);
-				escaped = 0x00;
-			}
+			code = translation8042[code] | escaped;
+			return true;
 		}
+		escaped = 0x80;
 	}
-	else
-	{
-
-		// Send raw data
-		for (i = 0; i < strlen((const char*)scancode); i++)
-		{
-#ifdef DEBUG_KBD
-			printf("gen_scancode(): writing raw %02x   \n", scancode[i]);
-#endif
-			enQ(scancode[i]);
-		}
-	}
-	return true;
+	return false;
 }
 
 /**
@@ -784,12 +788,8 @@ bool CKeyboard::gen_scancode_locked(u32 key, bool repeat)
 void CKeyboard::resetinternals(bool powerup)
 {
 	discard_input_type(InputEvent::Type::Key);
-	state.kbd_internal_buffer.num_elements = 0;
-	for (int i = 0; i < BX_KBD_ELEMENTS; i++)
-		state.kbd_internal_buffer.buffer[i] = 0;
-	state.kbd_internal_buffer.head = 0;
-	state.deferred_scancode = 0;
-	state.deferred_scancode_valid = false;
+	clear_scancodes();
+	memset(state.kbd_internal_buffer.buffer, 0, sizeof(state.kbd_internal_buffer.buffer));
 
 	state.kbd_internal_buffer.expecting_typematic = 0;
 	state.kbd_internal_buffer.expecting_key_id = false;
@@ -813,34 +813,19 @@ void CKeyboard::resetinternals(bool powerup)
  **/
 void CKeyboard::enQ(u8 scancode)
 {
-	int tail;
+	auto& fifo = state.kbd_internal_buffer;
+	const size_t tail = (fifo.head + fifo.num_elements) % sizeof(fifo.buffer);
+	fifo.buffer[tail] = scancode;
+	++fifo.num_elements;
+}
 
-#ifdef DEBUG_KBD
-	printf("enQ(0x%02x)", (unsigned)scancode);
-#endif
-	if (state.kbd_internal_buffer.num_elements >= BX_KBD_ELEMENTS)
-	{
-		printf("internal keyboard buffer full, ignoring scancode.(%02x)  \n",
-			(unsigned)scancode);
-		return;
-	}
-
-	/* enqueue scancode in multibyte internal keyboard buffer */
-#ifdef DEBUG_KBD
-	BX_DEBUG(("enQ: putting scancode 0x%02x in internal buffer", (unsigned)scancode));
-#endif
-	tail =
-		(
-			state.kbd_internal_buffer.head +
-			state.kbd_internal_buffer.num_elements
-			) %
-		BX_KBD_ELEMENTS;
-	state.kbd_internal_buffer.buffer[tail] = scancode;
-	state.kbd_internal_buffer.num_elements++;
-
-	// Event-driven: deliver to the output buffer now (if free) and drive the
-	// IRQ, instead of waiting for the 20ms poll. 
-	kbd_service();
+void CKeyboard::clear_scancodes()
+{
+	state.kbd_internal_buffer.head = 0;
+	state.kbd_internal_buffer.num_elements = 0;
+	state.kbd_internal_buffer.overrun = false;
+	state.deferred_scancode = 0;
+	state.deferred_scancode_valid = false;
 }
 
 /**
@@ -1225,10 +1210,7 @@ void CKeyboard::write_64(u8 value)
 #endif
 		// A controller self-test discards pending asynchronous keyboard input.
 		discard_input_type(InputEvent::Type::Key);
-		state.kbd_internal_buffer.head = 0;
-		state.kbd_internal_buffer.num_elements = 0;
-		state.deferred_scancode = 0;
-		state.deferred_scancode_valid = false;
+		clear_scancodes();
 
 		if (kbd_initialized == 0)
 		{
@@ -1243,10 +1225,6 @@ void CKeyboard::write_64(u8 value)
 		{
 			printf("kbd: OUTB set and command 0x%02x encountered", value);
 
-			//break;
-			// drain the queue?
-			state.kbd_internal_buffer.head = 0;
-			state.kbd_internal_buffer.num_elements = 0;
 			state.status.outb = 0;
 		}
 
@@ -1574,9 +1552,7 @@ void CKeyboard::discard_device_input()
 {
 	discard_input_locked();
 	prepare_command_response();
-	state.deferred_scancode_valid = false;
-	state.kbd_internal_buffer.num_elements = 0;
-	state.kbd_internal_buffer.head = 0;
+	clear_scancodes();
 }
 
 /**
@@ -1861,9 +1837,7 @@ void CKeyboard::ctrl_to_kbd(u8 value)
 			state.set3_key_command = types[value - 0xfb];
 			state.kbd_internal_buffer.expecting_key_id = true;
 		}
-		state.kbd_internal_buffer.num_elements = 0;
-		state.kbd_internal_buffer.head = 0;
-		state.deferred_scancode_valid = false;
+		clear_scancodes();
 		kbd_response_enQ(0xFA);
 		break;
 	}
@@ -2415,14 +2389,8 @@ void CKeyboard::kbd_service()
 			state.aux_output_is_stream = false;
 		}
 		else if (!input_transaction_active()
-			&& state.kbd_internal_buffer.num_elements
-			&& state.kbd_clock_enabled)
+			&& state.kbd_clock_enabled && deQ(state.kbd_output_buffer))
 		{
-			state.kbd_output_buffer =
-				state.kbd_internal_buffer.buffer[state.kbd_internal_buffer.head];
-			state.kbd_internal_buffer.head =
-				(state.kbd_internal_buffer.head + 1) % BX_KBD_ELEMENTS;
-			state.kbd_internal_buffer.num_elements--;
 			state.status.outb = 1;
 			state.status.auxb = 0;
 			state.kbd_output_is_scancode = true;
@@ -2587,6 +2555,10 @@ int CKeyboard::RestoreState(FILE* f)
 		return -1;
 	}
 
+	const auto& fifo = restored.kbd_internal_buffer;
+	if (unsigned(fifo.head) >= sizeof(fifo.buffer) || unsigned(fifo.num_elements) > sizeof(fifo.buffer) ||
+		(fifo.num_elements > BX_KBD_ELEMENTS && !fifo.overrun))
+		return -1;
 	if (restored.set3_key_command >= Set3KeyType::TypematicMakeBreak ||
 		(restored.kbd_internal_buffer.expecting_key_id && restored.set3_key_command == Set3KeyType::Default))
 		return -1;

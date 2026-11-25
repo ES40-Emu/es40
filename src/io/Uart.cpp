@@ -176,18 +176,17 @@ u64 Uart::next_event_ns() const
 Uart::Output Uart::advance(u64 elapsed_ns)
 {
   Output output{};
-  u64 rx_elapsed = elapsed_ns;
-  while (rx_remaining_ns && rx_elapsed >= rx_remaining_ns)
+  if (rx_remaining_ns && elapsed_ns >= rx_remaining_ns)
   {
-    rx_elapsed -= rx_remaining_ns;
     rx_remaining_ns = 0;
     receive(queue.bytes[queue.read++]);
     if (!input_staged())
       queue.read = queue.write = 0;
+    // Start the next host byte at SIN when this frame reaches RBR (PB22H-KB, p. 20-17).
     start_receive();
   }
-  if (rx_remaining_ns)
-    rx_remaining_ns -= rx_elapsed;
+  else if (rx_remaining_ns)
+    rx_remaining_ns -= elapsed_ns;
   while (tx.remaining_ns && elapsed_ns >= tx.remaining_ns)
   {
     elapsed_ns -= tx.remaining_ns;

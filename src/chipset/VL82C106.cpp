@@ -402,8 +402,6 @@ bool VL82C106::handle_controller_command(u8 command)
 
 bool VL82C106::handle_controller_parameter(u8 command, u8 data)
 {
-  if (command == 0)
-    return !state.kbd_clock_enabled; // AD inhibits keyboard transmission (PB22H-KB, p. 23-12).
   if (at_mode() && command == 0x60) {
     at_inhibit_override = data & 8;
     set_mode_byte(data & 0x75); // Bit 1 is reserved in AT mode (VL82C106, Fig. 1).
@@ -423,6 +421,7 @@ bool VL82C106::handle_controller_parameter(u8 command, u8 data)
     output_latch = data & 3; // D1 changes only P20/P21 (PB22H-KB, p. 23-13).
     return true;
   }
+  // AD inhibits keyboard input until AE or a direct port 60h write (PB22H-KB, pp. 23-10, 23-12).
   return false;
 }
 

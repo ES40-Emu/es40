@@ -32,6 +32,7 @@
 #include <atomic>
 #include <cerrno>
 #include <cstdio>
+#include <cstring>
 #include <string>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -67,7 +68,7 @@ public:
       if (fd < 0)
       {
         if (errno == EEXIST) continue;
-        FAILURE_1(Runtime, "Can't create temporary state file beside %s", destination);
+        FAILURE_2(Runtime, "Can't create temporary state file %s: %s", temporary_.c_str(), std::strerror(errno));
       }
 #if defined(_WIN32)
       file_ = _fdopen(fd, "wb");

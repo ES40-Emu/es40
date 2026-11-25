@@ -32,21 +32,6 @@
 #include "Intel82077A.h"
 #include "SCSIBus.h"
 
-// What Read Host Adapter Inquiry Data returns; a real board's name and release fields are not known (AHA-1740A TRM, pp. 6-31 to 6-33).
-static const u8 inquiry_data[] = {
-  0x23, 0x00, // Processor device; Target Mode is supported and a reset leaves it disabled (AHA-1740A TRM, pp. 5-10, 6-32).
-  0x02, 0x00, // SCSI-2, with no asynchronous event notification accepted.
-  0x33, 0x00, // Bytes that follow, then no LUNs enabled for Target Mode.
-  0x40, 0x18, // 64 control blocks (AHA-1740A TRM, p. 6-2); linked commands and synchronous transfers, single-ended, 8-bit.
-  'A', 'd', 'a', 'p', 't', 'e', 'c', ' ', // Vendor.
-  'A', 'H', 'A', '-', '1', '7', '4', '2', // Product.
-  'E', 'n', 'h', 'a', 'n', 'c', 'e', 'd', // Firmware type.
-  'A', ' ', ' ', ' ', // Firmware revision level, which starts at "A".
-  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // Release date.
-  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // Release time.
-  0x00, 0x00, 0x00, 0x00, // Firmware checksum, then a reserved word.
-};
-
 AHA1742::AHA1742(CConfigurator* cfg, CSystem* system, EISABus& bus, unsigned slot,
   CConfigurator* floppy_cfg, bool secondary_floppy)
   : CSystemComponent(cfg, system), CDiskController(1, 8), bus(bus), slot(slot)
@@ -236,6 +221,20 @@ void AHA1742::start_ccb(u32 address, u8 target)
 // Read Host Adapter Inquiry Data: the data is cut to the length the host allows, and a longer buffer is left short (AHA-1740A TRM, pp. 6-30, 6-32).
 void AHA1742::read_inquiry_data(const u8* ecb, u8* status)
 {
+  // Read Host Adapter Inquiry Data returns fixed-width ASCII identification fields (AHA-1740A TRM, pp. 6-31 to 6-33).
+  const u8 inquiry_data[] = {
+    0x23, 0x00, // Processor device; Target Mode is supported and a reset leaves it disabled (AHA-1740A TRM, pp. 5-10, 6-32).
+    0x02, 0x00, // SCSI-2, with no asynchronous event notification accepted.
+    0x33, 0x00, // Bytes that follow, then no LUNs enabled for Target Mode.
+    0x40, 0x18, // 64 control blocks (AHA-1740A TRM, p. 6-2); linked commands and synchronous transfers, single-ended, 8-bit.
+    'A', 'D', 'A', 'P', 'T', 'E', 'C', ' ', // Vendor.
+    'A', 'H', 'A', '1', '7', '4', u8(floppy ? '2' : '0'), 'A', // J6 disabled identifies a 1740A (AHA-1740A TRM, p. 3-15).
+    'E', 'N', 'H', 'A', 'N', 'C', 'E', 'D', // Firmware type.
+    'H', ' ', ' ', ' ', // Minimum firmware revision in the OSF/1 aha driver.
+    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // Release date, unknown for H.
+    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // Release time, unknown for H.
+    0x00, 0x00, 0x00, 0x00, // Firmware checksum, unknown for H, then a reserved word.
+  };
   const u32 length = get_le32(ecb + DataLength);
   const u32 count = length < sizeof(inquiry_data) ? length : u32(sizeof(inquiry_data));
   bus.slot_master_write(slot, get_le32(ecb + DataPointer), inquiry_data, count);

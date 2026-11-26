@@ -36,6 +36,7 @@ class PelicanFlash : public CSystemComponent
 {
 public:
   PelicanFlash(CConfigurator* cfg, CSystem* system);
+  void load_firmware(char* system_ram, char* io_ram) const;
   std::string snapshot_identity() const override;
   bool decodes_memory_access(int index, u64 address, int dsize, bool write) const noexcept override;
   u64 ReadMem(int index, u64 address, int dsize) override;

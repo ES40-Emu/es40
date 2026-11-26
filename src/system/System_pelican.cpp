@@ -26,6 +26,7 @@
  */
 
 #include "StdAfx.h"
+#include "CPU/AlphaCPU.h"
 #include "system/System_pelican.h"
 #include "system/PelicanFlash.h"
 #include <sstream>
@@ -123,18 +124,32 @@ Pelican::Pelican(CConfigurator* cfg) : Pelican(cfg, MemoryPopulation::from_confi
 }
 
 Pelican::Pelican(CConfigurator* cfg, MemoryPopulation installed)
-  : CSystem(cfg, ~U64(0), installed.backing_bits()), population(installed)
+  : CSystem(cfg, ~U64(0), installed.backing_bits()), population(installed),
+    direct_srm(cfg->get_bool_value("boot.direct_srm", false))
 {
+  if (direct_srm && cfg->get_text_value("rom.srom"))
+    FAILURE(Configuration, "Choose either Pelican boot.direct_srm or rom.srom");
 }
 
 void Pelican::attach_board_devices(CConfigurator* cfg)
 {
   new Registers(cfg, *this);
-  new PelicanFlash(cfg, this);
+  flash = new PelicanFlash(cfg, this);
 }
 
 int Pelican::LoadROM()
 {
+  if (direct_srm) {
+    // V7's decompressor runs in PALmode in low RAM before MACHINE_RESET (EK-D3SYS-PM, §§12.1, 14.1).
+    constexpr u64 system_base = 0x4000;
+    flash->load_firmware(PtrToMem(system_base), PtrToMem(0x44000));
+    // S889 saves R20 at 0x580c8 and reads its low longword as installed MiB at 0x6659c (EK-D3SYS-PM, §12.1).
+    get_cpu(0)->set_r(20, population.bytes >> 20);
+    get_cpu(0)->set_PAL_BASE(system_base);
+    get_cpu(0)->set_pc(system_base | 1);
+    printf("%%PEL-I-DIRECTSRM: Starting SYSROM in PALmode at physical 0x4000.\n");
+    return 0;
+  }
   const char* path = config()->get_text_value("rom.srom");
   if (!path || !*path)
     FAILURE(Configuration, "Pelican cold boot requires a DEC 3000 Model 300X CPU serial ROM (rom.srom)");

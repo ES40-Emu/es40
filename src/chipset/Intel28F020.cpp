@@ -37,6 +37,6 @@ Intel28F020::Intel28F020(std::vector<u8> image) : array(std::move(image))
 
 u8 Intel28F020::read(u32 offset) const noexcept
 {
-  // With programming inhibited the device powers up in read-array mode (Intel 290245-009, §2.2.2).
+  // The device powers up in read-array mode (Intel 290245-009, §2.2.2.1).
   return offset < capacity ? array[offset] : 0xff;
 }

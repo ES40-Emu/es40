@@ -35,7 +35,7 @@
 class Intel28F020
 {
 public:
-  // The 28F020 has 256 KiB on an 8-bit data bus (Intel 290245-009, §1.0).
+  // A0–A17 select one byte on DQ0–DQ7 (Intel 290245-009, Fig. 2).
   static constexpr u32 capacity = 1u << 18;
   explicit Intel28F020(std::vector<u8> image);
   u8 read(u32 offset) const noexcept;

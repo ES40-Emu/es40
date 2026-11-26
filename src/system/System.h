@@ -221,6 +221,7 @@ public:
   unsigned int  get_memory_bits() const;
   char* ram_data() const noexcept { return static_cast<char*>(memory); }
   virtual u64 ram_offset(u64 address) const noexcept { return address; }
+  virtual bool bypasses_cpu_cache(u64) const noexcept { return false; }
   virtual u64 linear_ram_size() const noexcept { return U64(1) << iNumMemoryBits; }
   virtual u64 default_cpu_hz() const noexcept { return 500000000; }
   virtual bool accepts_ev4_srom_size(u64 bytes, size_t stream_bytes) const noexcept { return bytes == stream_bytes; }

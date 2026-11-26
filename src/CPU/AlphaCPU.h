@@ -668,30 +668,31 @@ private:
   // Locked accesses sample the primary tag and go to the system bus (21064 HRM 5.3.16, 6.4.10).
   u64 read_locked_physical(u64 phys, int size)
   {
-    if (state.ev4_dc_stat_unlocked) note_ev4_dcache_access(m_ev4_dcache.hits(phys));
+    if (state.ev4_dc_stat_unlocked) note_ev4_dcache_access(m_ev4_dcache.hits(phys) && !cSystem->bypasses_cpu_cache(phys));
     return cSystem->cpu_read_locked(state.iProcNum, phys, size, this);
   }
   u64 store_conditional_physical(u64 phys, int size, u64 value)
   {
-    if (state.ev4_dc_stat_unlocked) note_ev4_dcache_access(m_ev4_dcache.hits(phys));
+    if (state.ev4_dc_stat_unlocked) note_ev4_dcache_access(m_ev4_dcache.hits(phys) && !cSystem->bypasses_cpu_cache(phys));
     return cSystem->cpu_stx_c(state.iProcNum, phys, size, value, this);
   }
   u64 bus_address(u64 phys, bool write = false)
   {
-    return !(m_ev4_bcache.control & 1) ? phys : m_ev4_bcache.probe(phys, is_ram(phys), write,
-        m_ev4_biu.bc_tag_unlocked ? &m_ev4_biu.bc_tag : nullptr);
+    if (!(m_ev4_bcache.control & 1) || cSystem->bypasses_cpu_cache(phys)) return phys;
+    return m_ev4_bcache.probe(phys, is_ram(phys), write, m_ev4_biu.bc_tag_unlocked ? &m_ev4_biu.bc_tag : nullptr);
   }
   u64 read_physical(u64 phys, int size)
   {
     if (phys < direct_ram_size) return dram_read(dram_ptr, phys, size);
     const auto read_ram = [&](u64 address) { return dram_read(dram_ptr, address, size); };
     std::uint64_t value;
-    const bool hit = m_ev4_dcache.read_hit(phys, size, read_ram, value);
+    const bool bypass = m_ev4_dcache.active() && cSystem->bypasses_cpu_cache(phys);
+    const bool hit = !bypass && m_ev4_dcache.read_hit(phys, size, read_ram, value);
     note_ev4_dcache_access(hit);
     if (hit) return value;
     const u64 bus = bus_address(phys);
     const u64 backing = cSystem->ram_offset(bus);
-    if (m_ev4_dcache.active()) m_ev4_dcache.fill(phys, backing, dram_size);
+    if (m_ev4_dcache.active()) m_ev4_dcache.fill(phys, bypass ? UINT64_MAX : backing, dram_size);
     return backing < dram_size ? read_ram(backing) : cSystem->ReadMem(bus, size, this);
   }
   void write_physical(u64 phys, int size, u64 value)
@@ -702,7 +703,8 @@ private:
     }
     const u64 bus = bus_address(phys, true);
     const u64 backing = cSystem->ram_offset(bus);
-    note_ev4_dcache_access(m_ev4_dcache.store(phys, backing, size, value));
+    const bool bypass = m_ev4_dcache.active() && cSystem->bypasses_cpu_cache(phys);
+    note_ev4_dcache_access(!bypass && m_ev4_dcache.store(phys, backing, size, value));
     if (backing < dram_size)
       cSystem->cpu_write_ram(backing, size, value);
     else

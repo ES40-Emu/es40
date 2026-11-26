@@ -39,6 +39,8 @@ public:
   int LoadROM() override;
   void ResetMem(unsigned int membits) override;
   u64 ram_offset(u64 address) const noexcept override;
+  // Table 5 maps PA<31:30> = 01 to the non-cacheable memory window (EK-D3SYS-PM).
+  bool bypasses_cpu_cache(u64 address) const noexcept override { return (address >> 30) == 1; }
   u64 linear_ram_size() const noexcept override { return population.bytes; }
   u8 diagnostic_leds();
 

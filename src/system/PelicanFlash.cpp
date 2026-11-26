@@ -63,6 +63,21 @@ PelicanFlash::PelicanFlash(CConfigurator* cfg, CSystem* system) : CSystemCompone
   save_item(support, "ssr");
 }
 
+std::string PelicanFlash::snapshot_identity() const
+{
+  std::string id = CSystemComponent::snapshot_identity();
+  for (const auto& image : images) {
+    id += ':';
+    if (image.empty())
+      continue;
+    u64 hash = U64(14695981039346656037);
+    for (u8 byte : image)
+      hash = (hash ^ byte) * U64(1099511628211);
+    id += std::to_string(hash);
+  }
+  return id;
+}
+
 unsigned PelicanFlash::selected_bank() const noexcept
 {
   return ((support >> 8) & 2) | ((support >> 7) & 1);

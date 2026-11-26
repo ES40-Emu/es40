@@ -762,7 +762,7 @@ static const char* const kv_tsunami[] = {
 static const char* const kv_jensen[] = {
   "memory.bits", "rom.srom", "rom.flash0", "rom.flash1", "rom.toy", "time", "qmp.port", 0 };
 static const char* const kv_pelican[] = {
-  "memory.bits", "memory.pairs", "rom.srom", 0 };
+  "memory.bits", "memory.pairs", "rom.srom", "rom.flash0", "rom.flash1", "rom.flash2", "rom.flash3", 0 };
 static const char* const kv_alpha_cpu[] = {
   "speed", "palcode.vms.nohle", "idle_nap", "idle_detect",
   "idle_spin_count", "idle_nap_poll_us", "idle_pc_lo", "idle_pc_hi",

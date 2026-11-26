@@ -27,6 +27,7 @@
 
 #include "StdAfx.h"
 #include "system/System_pelican.h"
+#include "system/PelicanFlash.h"
 #include <sstream>
 
 class Pelican::Registers final : public CSystemComponent
@@ -129,6 +130,7 @@ Pelican::Pelican(CConfigurator* cfg, MemoryPopulation installed)
 void Pelican::attach_board_devices(CConfigurator* cfg)
 {
   new Registers(cfg, *this);
+  new PelicanFlash(cfg, this);
 }
 
 int Pelican::LoadROM()

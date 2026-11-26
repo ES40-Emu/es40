@@ -191,7 +191,9 @@ noinst_HEADERS += storage/Disk.h \
        system/Flash.h \
        system/System.h \
        system/JensenFlash.h \
+       system/PelicanFlash.h \
        system/System_jensen.h \
+       system/System_pelican.h \
        system/System_tsunami.h \
        system/i2c_spd.h \
        io/Keyboard.h \
@@ -369,7 +371,9 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        emu/SystemComponent.cpp \
        system/System.cpp \
        system/JensenFlash.cpp \
+       system/PelicanFlash.cpp \
        system/System_jensen.cpp \
+       system/System_pelican.cpp \
        system/System_es40.cpp \
        system/System_tsunami.cpp \
        SnapshotFile.h \

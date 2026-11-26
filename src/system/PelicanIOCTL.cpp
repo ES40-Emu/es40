@@ -26,18 +26,18 @@
  */
 
 #include "StdAfx.h"
-#include "system/PelicanFlash.h"
+#include "system/PelicanIOCTL.h"
 #include "system/System.h"
 #include <fstream>
+#include <utility>
 
-enum PelicanFlashRange { DenseROM, SparseROM, DenseSSR, SparseSSR };
-static constexpr size_t flash_size = 256 * 1024;
+enum PelicanIOCTLRange { DenseROM, SparseROM, DenseSSR, SparseSSR };
 static constexpr u32 support_mask = 0x0f0002bf; // ROM controls, read mask and system-OK LED (EK-D3SYS-PM, §7.3.11).
 
-PelicanFlash::PelicanFlash(CConfigurator* cfg, CSystem* system) : CSystemComponent(cfg, system)
+PelicanIOCTL::PelicanIOCTL(CConfigurator* cfg, CSystem* system) : CSystemComponent(cfg, system)
 {
   unsigned fitted = 0;
-  for (size_t bank = 0; bank < images.size(); ++bank) {
+  for (size_t bank = 0; bank < chips.size(); ++bank) {
     const std::string key = "rom.flash" + std::to_string(bank);
     const char* path = cfg->get_text_value(key.c_str(), "");
     if (!*path)
@@ -47,31 +47,32 @@ PelicanFlash::PelicanFlash(CConfigurator* cfg, CSystem* system) : CSystemCompone
     std::ifstream file(path, std::ios::binary | std::ios::ate);
     if (!file)
       FAILURE(Configuration, std::string("Cannot open 300X flash image: ") + path);
-    if (file.tellg() != std::streamoff(flash_size))
+    if (file.tellg() != std::streamoff(Intel28F020::capacity))
       FAILURE(Configuration, std::string("300X flash image must be a raw 256 KiB device: ") + path);
-    images[bank].resize(flash_size);
+    std::vector<u8> image(Intel28F020::capacity);
     file.seekg(0);
-    if (!file.read(reinterpret_cast<char*>(images[bank].data()), flash_size))
+    if (!file.read(reinterpret_cast<char*>(image.data()), Intel28F020::capacity))
       FAILURE(IO, std::string("Cannot read 300X flash image: ") + path);
+    chips[bank].emplace(std::move(image));
   }
 
   // Slot 5 maps each dense longword to an even sparse longword (EK-D3SYS-PM, Table 16 and App. A.1).
-  system->RegisterMemory(this, DenseROM, U64(0x1a0000000), flash_size);
-  system->RegisterMemory(this, SparseROM, U64(0x1b0000000), flash_size * 2);
+  system->RegisterMemory(this, DenseROM, U64(0x1a0000000), Intel28F020::capacity);
+  system->RegisterMemory(this, SparseROM, U64(0x1b0000000), Intel28F020::capacity * 2);
   system->RegisterMemory(this, DenseSSR, U64(0x1a0040100), 4);
   system->RegisterMemory(this, SparseSSR, U64(0x1b0080200), 8);
   save_item(support, "ssr");
 }
 
-std::string PelicanFlash::snapshot_identity() const
+std::string PelicanIOCTL::snapshot_identity() const
 {
   std::string id = CSystemComponent::snapshot_identity();
-  for (const auto& image : images) {
+  for (const auto& chip : chips) {
     id += ':';
-    if (image.empty())
+    if (!chip)
       continue;
     u64 hash = U64(14695981039346656037);
-    for (u8 byte : image)
+    for (u8 byte : chip->bytes())
       hash = (hash ^ byte) * U64(1099511628211);
     id += std::to_string(hash);
   }
@@ -83,25 +84,25 @@ static u32 flash_longword(const u8* p)
   return u32(p[0]) | (u32(p[1]) << 8) | (u32(p[2]) << 16) | (u32(p[3]) << 24);
 }
 
-void PelicanFlash::load_firmware(char* system_ram, char* io_ram) const
+void PelicanIOCTL::load_firmware(char* system_ram, char* io_ram) const
 {
   constexpr size_t header = 0x40;
   auto body_length = [&](unsigned bank, const char* module, const char* object, u32 edit) {
-    const auto& image = images[bank];
+    const u8* image = chips[bank] ? chips[bank]->bytes().data() : nullptr;
     // The V7 payload follows the packed TURBOchannel and ROM object headers (EK-D3SYS-PM, §13.3).
-    if (image.empty() || flash_longword(&image[4]) != 0xffaa0055 ||
+    if (!image || flash_longword(&image[4]) != 0xffaa0055 ||
         memcmp(&image[8], "V7.0    DEC     ", 16) || memcmp(&image[0x18], module, 8) ||
         memcmp(&image[0x20], "ALPH", 4) || (image[0x29] & 0xf) != 1 || image[0x2b] == 0 ||
         memcmp(&image[0x30], object, 12) || flash_longword(&image[0x3c]) != edit)
       FAILURE_2(Configuration, "Pelican direct SRM requires V7.0 %s for EV4 pass 3 in rom.flash%u", module, bank);
     const size_t length = flash_longword(&image[0x2c]);
-    if (length == 0 || (length & 3) || length > image.size() - header - 1)
+    if (length == 0 || (length & 3) || length > Intel28F020::capacity - header - 1)
       FAILURE_1(Configuration, "Invalid Pelican ROM object length in rom.flash%u", bank);
     // DEC's M300 V7.0 updater stores the rotate-and-add checksum in the last chip byte (EK-D3SYS-PM, §13.3).
     u8 checksum = 0;
     for (size_t i = 0; i < header + length; ++i)
       checksum = static_cast<u8>(((checksum << 1) | (checksum >> 7)) + image[i]);
-    if (checksum != image.back())
+    if (checksum != image[Intel28F020::capacity - 1])
       FAILURE_1(Configuration, "Invalid Pelican firmware checksum in rom.flash%u", bank);
     return length;
   };
@@ -109,18 +110,18 @@ void PelicanFlash::load_firmware(char* system_ram, char* io_ram) const
   const size_t sys_length = body_length(2, "PELI_SYS", "SYSTEM_ROM  ", 0x889);
   const size_t io_length = body_length(0, "PELI_IO ", "IO_ROM      ", 0x21f);
   // The SROM clears low memory before loading the two flash objects (EK-D3SYS-PM, §14.1, Table 46).
-  memset(system_ram + sys_length, 0, flash_size - sys_length);
-  memset(io_ram + io_length, 0, flash_size - io_length);
-  memcpy(system_ram, &images[2][header], sys_length);
-  memcpy(io_ram, &images[0][header], io_length);
+  memset(system_ram + sys_length, 0, Intel28F020::capacity - sys_length);
+  memset(io_ram + io_length, 0, Intel28F020::capacity - io_length);
+  memcpy(system_ram, chips[2]->bytes().data() + header, sys_length);
+  memcpy(io_ram, chips[0]->bytes().data() + header, io_length);
 }
 
-unsigned PelicanFlash::selected_bank() const noexcept
+unsigned PelicanIOCTL::selected_bank() const noexcept
 {
   return ((support >> 8) & 2) | ((support >> 7) & 1);
 }
 
-bool PelicanFlash::decodes_memory_access(int index, u64 address, int dsize, bool) const noexcept
+bool PelicanIOCTL::decodes_memory_access(int index, u64 address, int dsize, bool) const noexcept
 {
   if (dsize != 32 && dsize != 64)
     return false;
@@ -129,16 +130,19 @@ bool PelicanFlash::decodes_memory_access(int index, u64 address, int dsize, bool
     return false;
   if (index == DenseSSR || index == SparseSSR)
     return address == 0;
-  return !images[selected_bank()].empty();
+  return chips[selected_bank()].has_value();
 }
 
-u32 PelicanFlash::read_word(size_t offset) const
+u32 PelicanIOCTL::read_word(u32 offset) const
 {
-  const auto& image = images[selected_bank()];
+  const auto& chip = *chips[selected_bank()];
   // SSR<26> selects one ROM byte at SSR<25:24>, otherwise IOCTL packs four bytes (EK-D3SYS-PM, §7.2).
   if (support & (1U << 26))
-    return image[offset + ((support >> 24) & 3)];
-  return flash_longword(&image[offset]);
+    return chip.read(offset + ((support >> 24) & 3));
+  u32 word = 0;
+  for (unsigned lane = 0; lane < 4; ++lane)
+    word |= u32(chip.read(offset + lane)) << (lane * 8);
+  return word;
 }
 
 static u32 enabled_bytes(u32 enables)
@@ -150,11 +154,11 @@ static u32 enabled_bytes(u32 enables)
   return result;
 }
 
-u64 PelicanFlash::ReadMem(int index, u64 address, int dsize)
+u64 PelicanIOCTL::ReadMem(int index, u64 address, int dsize)
 {
   const bool sparse = index == SparseROM || index == SparseSSR;
   const bool is_ssr = index == DenseSSR || index == SparseSSR;
-  const size_t offset = size_t(sparse ? address >> 1 : address);
+  const u32 offset = static_cast<u32>(sparse ? address >> 1 : address);
   u32 low = is_ssr ? support : read_word(offset);
   if (sparse && (support & 0x10)) // Set bits suppress their sparse read lanes (EK-D3SYS-PM, §7.3.11).
     low &= ~enabled_bytes(support);
@@ -166,7 +170,7 @@ u64 PelicanFlash::ReadMem(int index, u64 address, int dsize)
   return (u64(high) << 32) | low;
 }
 
-void PelicanFlash::WriteMem(int index, u64, int dsize, u64 data)
+void PelicanIOCTL::WriteMem(int index, u64, int dsize, u64 data)
 {
   if (index == DenseROM || index == SparseROM)
     return; // W1 in the write-disable position inhibits FEPROM writes (EK-D3SYS-PM, §9.5.2).

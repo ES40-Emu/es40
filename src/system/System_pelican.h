@@ -30,7 +30,7 @@
 
 #include "System.h"
 
-class PelicanFlash;
+class PelicanIOCTL;
 
 class Pelican final : public CSystem
 {
@@ -59,7 +59,7 @@ private:
 
   Pelican(CConfigurator* cfg, MemoryPopulation installed);
   MemoryPopulation population;
-  PelicanFlash* flash = nullptr;
+  PelicanIOCTL* io_control = nullptr;
   const bool direct_srm;
   u8 lit_leds = 0xff;
 };

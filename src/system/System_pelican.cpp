@@ -28,7 +28,7 @@
 #include "StdAfx.h"
 #include "CPU/AlphaCPU.h"
 #include "system/System_pelican.h"
-#include "system/PelicanFlash.h"
+#include "system/PelicanIOCTL.h"
 #include <sstream>
 
 class Pelican::Registers final : public CSystemComponent
@@ -134,7 +134,7 @@ Pelican::Pelican(CConfigurator* cfg, MemoryPopulation installed)
 void Pelican::attach_board_devices(CConfigurator* cfg)
 {
   new Registers(cfg, *this);
-  flash = new PelicanFlash(cfg, this);
+  io_control = new PelicanIOCTL(cfg, this);
 }
 
 int Pelican::LoadROM()
@@ -142,7 +142,7 @@ int Pelican::LoadROM()
   if (direct_srm) {
     // V7's decompressor runs in PALmode in low RAM before MACHINE_RESET (EK-D3SYS-PM, §§12.1, 14.1).
     constexpr u64 system_base = 0x4000;
-    flash->load_firmware(PtrToMem(system_base), PtrToMem(0x44000));
+    io_control->load_firmware(PtrToMem(system_base), PtrToMem(0x44000));
     // S889 saves R20 at 0x580c8 and reads its low longword as installed MiB at 0x6659c (EK-D3SYS-PM, §12.1).
     get_cpu(0)->set_r(20, population.bytes >> 20);
     get_cpu(0)->set_PAL_BASE(system_base);

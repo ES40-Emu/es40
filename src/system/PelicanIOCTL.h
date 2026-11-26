@@ -25,17 +25,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ES40_PELICAN_FLASH_H
-#define ES40_PELICAN_FLASH_H
+#ifndef ES40_PELICAN_IOCTL_H
+#define ES40_PELICAN_IOCTL_H
 
+#include "chipset/Intel28F020.h"
 #include "emu/SystemComponent.h"
 #include <array>
-#include <vector>
+#include <optional>
 
-class PelicanFlash : public CSystemComponent
+class PelicanIOCTL : public CSystemComponent
 {
 public:
-  PelicanFlash(CConfigurator* cfg, CSystem* system);
+  PelicanIOCTL(CConfigurator* cfg, CSystem* system);
   void load_firmware(char* system_ram, char* io_ram) const;
   std::string snapshot_identity() const override;
   bool decodes_memory_access(int index, u64 address, int dsize, bool write) const noexcept override;
@@ -45,10 +46,10 @@ public:
 
 private:
   unsigned selected_bank() const noexcept;
-  u32 read_word(size_t offset) const;
+  u32 read_word(u32 offset) const;
 
   // Each configured image corresponds to the literal SSR<9,7> chip select (EK-D3SYS-PM, §7.3.11).
-  std::array<std::vector<u8>, 4> images;
+  std::array<std::optional<Intel28F020>, 4> chips;
   u32 support = 0;
 };
 

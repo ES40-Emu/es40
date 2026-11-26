@@ -183,6 +183,7 @@ noinst_HEADERS += storage/Disk.h \
        chipset/Intel82357.h \
        chipset/Intel82357Timer.h \
        chipset/Intel28F008SA.h \
+       chipset/Intel28F020.h \
        chipset/Intel82358.h \
        chipset/VL82C106.h \
        chipset/MC146818.h \
@@ -191,7 +192,7 @@ noinst_HEADERS += storage/Disk.h \
        system/Flash.h \
        system/System.h \
        system/JensenFlash.h \
-       system/PelicanFlash.h \
+       system/PelicanIOCTL.h \
        system/System_jensen.h \
        system/System_pelican.h \
        system/System_tsunami.h \
@@ -310,6 +311,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        chipset/Intel82357_clock.cpp \
        chipset/Intel82357_dma.cpp \
        chipset/Intel28F008SA.cpp \
+       chipset/Intel28F020.cpp \
        chipset/Intel82358.cpp \
        chipset/VL82C106.cpp \
        chipset/VL82C106_rtc.cpp \
@@ -371,7 +373,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        emu/SystemComponent.cpp \
        system/System.cpp \
        system/JensenFlash.cpp \
-       system/PelicanFlash.cpp \
+       system/PelicanIOCTL.cpp \
        system/System_jensen.cpp \
        system/System_pelican.cpp \
        system/System_es40.cpp \

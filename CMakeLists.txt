@@ -509,6 +509,7 @@ list(APPEND ES40_SOURCES
     src/chipset/Intel82357_clock.cpp
     src/chipset/Intel82357_dma.cpp
     src/chipset/Intel28F008SA.cpp
+    src/chipset/Intel28F020.cpp
     src/chipset/Intel82358.cpp
     src/chipset/VL82C106.cpp
     src/chipset/VL82C106_rtc.cpp
@@ -564,7 +565,7 @@ list(APPEND ES40_SOURCES
     src/storage/Sym53C895.cpp
     src/system/System.cpp
     src/system/JensenFlash.cpp
-    src/system/PelicanFlash.cpp
+    src/system/PelicanIOCTL.cpp
     src/system/System_jensen.cpp
     src/system/System_pelican.cpp
     src/system/System_es40.cpp

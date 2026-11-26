@@ -1132,7 +1132,7 @@ void CAlphaCPU::init()
 	cc_borrow = 0;
 	cc_wall_remainder = 0;
 
-	cpu_hz = myCfg->get_num_value("speed", true, 500000000);
+	cpu_hz = myCfg->get_num_value("speed", true, cSystem->default_cpu_hz());
 	idle_nap_enabled = myCfg->get_bool_value("idle_nap", false);
 	m_unaligned_fixup = myCfg->get_bool_value("unaligned_fixup", true);
 	load_idle_config();
@@ -1332,7 +1332,7 @@ void CAlphaCPU::ResetForSystemReset()
 	cc_wall_remainder = 0;
 	state.iProcNum = savedProcNum;
 
-	cpu_hz = myCfg->get_num_value("speed", true, 500000000);
+	cpu_hz = myCfg->get_num_value("speed", true, cSystem->default_cpu_hz());
 	idle_nap_enabled = myCfg->get_bool_value("idle_nap", false);
 	m_unaligned_fixup = myCfg->get_bool_value("unaligned_fixup", true);
 	load_idle_config();

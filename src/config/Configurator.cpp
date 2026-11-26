@@ -133,6 +133,7 @@
 #ifndef CONFIGURATION_ONLY
 
 #include "system/System_jensen.h"
+#include "system/System_pelican.h"
 #include "system/System_tsunami.h"
 #include "CPU/AlphaCPU.h"
 #include "CPU/EV4/Ev4CPUProfile.h"
@@ -760,6 +761,8 @@ static const char* const kv_tsunami[] = {
   "debug.shared_read_policy", "debug.shared_read_claimant", "framebuffer.path", 0 };
 static const char* const kv_jensen[] = {
   "memory.bits", "rom.srom", "rom.flash0", "rom.flash1", "rom.toy", "time", "qmp.port", 0 };
+static const char* const kv_pelican[] = {
+  "memory.bits", "memory.pairs", "rom.srom", 0 };
 static const char* const kv_alpha_cpu[] = {
   "speed", "palcode.vms.nohle", "idle_nap", "idle_detect",
   "idle_spin_count", "idle_nap_poll_us", "idle_pc_lo", "idle_pc_hi",
@@ -829,6 +832,7 @@ static const char* const kv_wss[] = { "io_port", 0 };
 classinfo classes[] = {
   {"tsunami", c_tsunami, N_P | IS_CS | HAS_PCI, kv_tsunami},
   {"jensen", c_jensen, N_P | IS_CS | HAS_ISA, kv_jensen},
+  {"pelican", c_pelican, N_P | IS_CS, kv_pelican},
   {"ev68cb", c_ev68cb, ON_CS, kv_alpha_cpu},
   {"ev4", c_ev4, ON_CS, kv_alpha_cpu},
   {"ali", c_ali, IS_PCI | HAS_ISA, kv_ali},
@@ -1012,6 +1016,9 @@ void CConfigurator::initialize()
 	myFlags = device->flags;
 	if (myClassId == c_none)
 		FAILURE_2(Configuration, "Class %s for %s not known", myValue, myName);
+	if (myClassId == c_pelican &&
+		(iNumChildren != 1 || config_class(pChildren[0]->myValue).id != c_ev4))
+		FAILURE(Configuration, "The DEC 3000 Model 300X requires one EV4 CPU as its only configured child");
 
 #if defined(_WIN32) && !defined(CONFIGURATION_ONLY)
 	// Override the GUI in memory.
@@ -1191,12 +1198,15 @@ void CConfigurator::initialize()
 	{
 	case c_tsunami:
 	case c_jensen:
+	case c_pelican:
 	{
 		CSystem* system;
 		if (myClassId == c_tsunami)
 			system = new Tsunami(this);
-		else
+		else if (myClassId == c_jensen)
 			system = new Jensen(this);
+		else
+			system = new Pelican(this);
 		myDevice = system;
 		system->attach_board_devices(this);
 		break;

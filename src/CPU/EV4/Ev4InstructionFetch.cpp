@@ -104,19 +104,19 @@ void Ev4InstructionFetch::preload_srom(CAlphaCPU& cpu)
     return;
   if (!*path)
     FAILURE(Configuration, "EV4 SROM preload requires rom.srom");
-  std::ifstream rom(path, std::ios::binary);
+  std::ifstream rom(path, std::ios::binary | std::ios::ate);
   if (!rom)
     FAILURE(Configuration, std::string("Cannot open EV4 SROM: ") + path);
 
   u8 image[line_count * 293 / 8];
-  rom.read(reinterpret_cast<char*>(image), sizeof(image));
-  const auto size = static_cast<size_t>(rom.gcount());
-  if (rom.bad())
+  const auto length = rom.tellg();
+  if (length < 0 || !cpu.cSystem->accepts_ev4_srom_size(static_cast<u64>(length), sizeof(image)))
+    FAILURE(Configuration, std::string("Invalid EV4 SROM size for this board: ") + path);
+  const size_t size = static_cast<size_t>(std::min<u64>(static_cast<u64>(length), sizeof(image)));
+  rom.seekg(0);
+  if (!rom.read(reinterpret_cast<char*>(image), size))
     FAILURE(Configuration, std::string("Error reading EV4 SROM: ") + path);
-  if (size == 8192) // The Jensen PROM returns ones after its last bit.
-    memset(image + size, 0xff, sizeof(image) - size);
-  else if (size != sizeof(image))
-    FAILURE(Configuration, std::string("Incomplete EV4 SROM (expected 9376 bytes or an 8192-byte Jensen PROM): ") + path);
+  memset(image + size, 0xff, sizeof(image) - size); // The Jensen PROM returns ones after its last bit.
 
   unsigned bit = 0;
   auto read_bits = [&](unsigned count) {

@@ -40,6 +40,7 @@ class Jensen final : public CSystem
 {
 public:
   explicit Jensen(CConfigurator* cfg);
+  bool accepts_ev4_srom_size(u64 bytes, size_t stream_bytes) const noexcept override { return bytes == 8192 || bytes >= stream_bytes; }
   ~Jensen() override;
   void attach_board_devices(CConfigurator* cfg) override;
   void register_legacy_io(CSystemComponent& device, int index, int bus, u32 port, u32 length, int max_dsize) override;

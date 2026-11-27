@@ -27,7 +27,7 @@
 
 #include "StdAfx.h"
 #include "VL82C106.h"
-#include "MC146818.h"
+#include "MC146818Calendar.h"
 #include "SnapshotFile.h"
 #include "config/Configurator.h"
 #include "system/System.h"
@@ -44,122 +44,7 @@ constexpr u32 uip_begin = update_begin - 244000;
 constexpr u32 update_end = update_begin + 1984000;
 
 enum : u8 { reg_a = 10, reg_b, reg_c, reg_d };
-enum : u8 { day_saving = 1, hours_24 = 2, binary = 4, uf = 0x10, af = 0x20, pf = 0x40, set = 0x80 };
-
-unsigned number(u8 value, u8 mode)
-{
-  return (mode & binary) ? value : mc146818::from_bcd(value);
-}
-
-u8 encoded(unsigned value, u8 mode)
-{
-  return (mode & binary) ? u8(value) : mc146818::to_bcd(value);
-}
-
-u8 encoded_hour(unsigned hour, u8 mode)
-{
-  if (mode & hours_24)
-    return encoded(hour, mode);
-  return encoded((hour + 11) % 12 + 1, mode) | (hour >= 12 ? 0x80 : 0);
-}
-
-unsigned hours(u8 value, u8 mode)
-{
-  if (mode & hours_24)
-    return number(value, mode);
-  return number(value & 0x7f, mode) % 12 + ((value & 0x80) ? 12 : 0);
-}
-
-unsigned month_length(unsigned month, unsigned year)
-{
-  static constexpr u8 days[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-  if (month < 1 || month > 12)
-    return 0;
-  return days[month - 1] + (month == 2 && year % 4 == 0);
-}
-
-void next_date(u8* regs)
-{
-  const u8 mode = regs[reg_b];
-  const unsigned weekday = number(regs[6], mode);
-  if (weekday >= 1 && weekday <= 7)
-    regs[6] = encoded(weekday % 7 + 1, mode);
-  const unsigned day = number(regs[7], mode);
-  const unsigned month = number(regs[8], mode);
-  const unsigned year = number(regs[9], mode);
-  const unsigned last = month_length(month, year);
-  if (!day || day > last || year > 99)
-    return;
-  regs[7] = encoded(day == last ? 1 : day + 1, mode);
-  if (day == last) {
-    regs[8] = encoded(month % 12 + 1, mode);
-    if (month == 12)
-      regs[9] = encoded((year + 1) % 100, mode);
-  }
-}
-
-bool alarm_matches(u8 alarm, u8 value)
-{
-  return alarm >= 0xc0 || alarm == value; // Wildcards are 11xxxxxx (PB22H-KB, p. 22-16).
-}
-
-void check_alarm(u8* regs, unsigned first, unsigned last)
-{
-  if ((regs[reg_c] & af) || first > last)
-    return;
-  const u8 mode = regs[reg_b];
-  const unsigned sec = number(regs[1], mode);
-  if (regs[1] < 0xc0 && (sec >= 60 || encoded(sec, mode) != regs[1]))
-    return;
-  for (unsigned minute = first / 60; minute <= last / 60; ++minute) {
-    if (!alarm_matches(regs[5], encoded_hour(minute / 60, mode)) ||
-        !alarm_matches(regs[3], encoded(minute % 60, mode)))
-      continue;
-    const unsigned when = minute * 60 + sec;
-    if (regs[1] >= 0xc0 || (when >= first && when <= last)) {
-      regs[reg_c] |= af;
-      return;
-    }
-  }
-}
-
-void advance_calendar(u8* regs, u64 elapsed, bool& fall_back)
-{
-  const u8 mode = regs[reg_b];
-  const unsigned hour = hours(regs[4], mode);
-  const unsigned min = number(regs[2], mode);
-  const unsigned sec = number(regs[0], mode);
-  if (hour >= 24 || min >= 60 || sec >= 60 || encoded_hour(hour, mode) != regs[4])
-    return;
-  unsigned now = hour * 3600 + min * 60 + sec;
-  while (elapsed) {
-    const unsigned month = number(regs[8], mode);
-    const unsigned day = number(regs[7], mode);
-    // DSE changes the clock on the last Sundays of April and October (PB22H-KB, p. 22-10).
-    const bool dst = (mode & day_saving) && regs[6] == 1 && now < 7200 &&
-      ((month == 4 && day >= 24 && day <= 30) || (month == 10 && day >= 25 && day <= 31 && !fall_back));
-    const unsigned boundary = dst ? 7200 : 86400;
-    const unsigned count = unsigned((std::min)(elapsed, u64(boundary - now)));
-    const unsigned end = now + count;
-    check_alarm(regs, now + 1, end == boundary ? end - 1 : end);
-    elapsed -= count;
-    now = end;
-    if (end == boundary) {
-      if (dst) {
-        fall_back = month == 10;
-        now = fall_back ? 3600 : 10800;
-      } else {
-        next_date(regs);
-        now = 0;
-        fall_back = false;
-      }
-      check_alarm(regs, now, now);
-    }
-  }
-  regs[0] = encoded(now % 60, mode);
-  regs[2] = encoded(now / 60 % 60, mode);
-  regs[4] = encoded_hour(now / 3600, mode);
-}
+enum : u8 { hours_24 = 2, binary = 4, uf = 0x10, af = 0x20, pf = 0x40, set = 0x80 };
 }
 
 void VL82C106::rtc_seed(const std::tm& now)
@@ -175,14 +60,7 @@ void VL82C106::rtc_seed(const std::tm& now)
 
 void VL82C106::rtc_set_calendar(const std::tm& now)
 {
-  const u8 mode = rtc_bytes[reg_b];
-  rtc_bytes[0] = encoded(now.tm_sec, mode);
-  rtc_bytes[2] = encoded(now.tm_min, mode);
-  rtc_bytes[4] = encoded_hour(now.tm_hour, mode);
-  rtc_bytes[6] = encoded(now.tm_wday + 1, mode);
-  rtc_bytes[7] = encoded(now.tm_mday, mode);
-  rtc_bytes[8] = encoded(now.tm_mon + 1, mode);
-  rtc_bytes[9] = encoded((now.tm_year % 100 + 100) % 100, mode);
+  MC146818Calendar::set_calendar(rtc_bytes, now);
   rtc_fall_back = false;
 }
 
@@ -222,7 +100,7 @@ void VL82C106::rtc_advance(u64 elapsed_ns)
   }
   if (updates && !(rtc_bytes[reg_b] & set)) {
     rtc_bytes[reg_c] |= uf;
-    advance_calendar(rtc_bytes, updates, rtc_fall_back);
+    MC146818Calendar::advance_calendar(rtc_bytes, updates, rtc_fall_back, MC146818Calendar::AprilSunday::Last);
   }
 }
 
@@ -326,9 +204,9 @@ bool valid_bcd_calendar(const u8* regs)
     const unsigned value = mc146818::from_bcd(regs[index]);
     return value >= low && value <= high && mc146818::to_bcd(value) == regs[index];
   };
-  const unsigned hour = hours(regs[4], 0);
-  const unsigned last_day = month_length(mc146818::from_bcd(regs[8]), mc146818::from_bcd(regs[9]));
-  return valid(0, 0, 59) && valid(2, 0, 59) && encoded_hour(hour, 0) == regs[4] &&
+  const unsigned hour = MC146818Calendar::hours(regs[4], 0);
+  const unsigned last_day = MC146818Calendar::month_length(mc146818::from_bcd(regs[8]), mc146818::from_bcd(regs[9]));
+  return valid(0, 0, 59) && valid(2, 0, 59) && MC146818Calendar::encoded_hour(hour, 0) == regs[4] &&
     valid(6, 1, 7) && valid(7, 1, last_day) && valid(8, 1, 12) && valid(9, 0, 99);
 }
 
@@ -341,7 +219,7 @@ bool recover_legacy_clock(u8* regs)
     return false;
   for (unsigned index : {0, 2, 7, 8, 9})
     regs[index] = u8(mc146818::from_bcd(regs[index]));
-  regs[4] = u8(hours(regs[4], 0));
+  regs[4] = u8(MC146818Calendar::hours(regs[4], 0));
   return true;
 }
 

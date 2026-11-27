@@ -41,6 +41,7 @@ public:
   {
     u8 mode[15], buffer[15], delay[4], rate[4];
     u8 held[128], held_code[128], held_count;
+    u8 deferred[128], deferred_count;
     u8 fifo[32], count, locked_ack, locked, overflow;
     u8 repeat_key, repeat_enabled, repeat_inhibit, last_code;
     u8 pending[2], pending_count, extended, testing, stuck;
@@ -53,12 +54,13 @@ public:
   void command(u8 byte);
   bool next_byte(u8& byte, u64 now_ns);
   void rebase_clock(u64 now_ns);
-  void prepare_snapshot();
+  void prepare_snapshot() { collect_input(); }
   bool valid_state() const;
   State& state() { return device; }
   void gen_scancode(u32 key) override;
 
 private:
+  void collect_input();
   void defaults();
   void power_up_reply();
   void queue(u8 byte);

@@ -125,6 +125,8 @@ void PelicanIOCTL::register_keyboard_state()
   save_item(k.held, "lk401.held");
   save_item(k.held_code, "lk401.held_code");
   save_item(k.held_count, "lk401.held_count");
+  save_item(k.deferred, "lk401.deferred");
+  save_item(k.deferred_count, "lk401.deferred_count");
   save_item(k.fifo, "lk401.fifo");
   save_item(k.count, "lk401.count");
   save_item(k.locked_ack, "lk401.locked_ack");

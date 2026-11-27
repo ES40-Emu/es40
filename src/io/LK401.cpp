@@ -33,6 +33,8 @@
 
 enum KeyMode : u8 { Down, Repeat, RepeatUp, DownUp };
 
+static_assert(BX_KEY_NBKEYS <= sizeof(LK401::State::held));
+
 static u8 matrix_code(u32 key, bool extended)
 {
   // Matrix positions and key divisions come from VCB02 TM Table B-3.
@@ -136,7 +138,7 @@ void LK401::defaults()
   for (unsigned i : {1, 2, 3, 7, 8}) device.mode[i] = Repeat;
   for (unsigned i : {6, 9}) device.mode[i] = DownUp;
   // The four repeat buffers have independent delays and rates (VCB02 TM Tables B-10–11).
-  std::fill(std::begin(device.buffer), std::end(device.buffer), 0);
+  std::fill(std::begin(device.buffer), std::end(device.buffer), u8{0});
   for (unsigned i : {3, 7, 8}) device.buffer[i] = 1;
   for (unsigned i = 0; i < 4; ++i) {
     device.delay[i] = (i & 1) ? 60 : 100;
@@ -200,12 +202,39 @@ void LK401::gen_scancode(u32 key)
   }
 }
 
-void LK401::prepare_snapshot()
+void LK401::collect_input()
 {
   std::lock_guard<std::mutex> lock(input_mutex);
-  for (u32 key : input)
-    key_event(key);
-  input.clear();
+  // A full transmit buffer suspends matrix scanning (LK401 PS §3.3.2.4; VCB02 TM §B.5.6.2).
+  auto can_scan = [&] { return device.locked ? device.count < 4 : device.count + 4u <= sizeof(device.fifo); };
+  unsigned scanned = 0;
+  while (scanned < device.deferred_count && can_scan()) {
+    const u8 event = device.deferred[scanned++];
+    key_event((event & 0x7f) | (event & 0x80 ? BX_KEY_RELEASED : 0));
+  }
+  if (scanned) {
+    std::move(device.deferred + scanned, device.deferred + device.deferred_count, device.deferred);
+    device.deferred_count -= u8(scanned);
+  }
+  while (!input.empty()) {
+    const u32 key = input.front();
+    input.pop_front();
+    if (can_scan()) {
+      key_event(key);
+      continue;
+    }
+    if (!matrix_code(u8(key), device.extended != 0)) continue;
+    if (device.locked) device.overflow = 1;
+    // A switch that changes twice between scans returns to its previous position (LK401 PS §3.3.2.1).
+    u8* end = device.deferred + device.deferred_count;
+    u8* prior = std::find_if(device.deferred, end, [key](u8 event) { return (event & 0x7f) == u8(key); });
+    if (prior == end) {
+      device.deferred[device.deferred_count++] = u8(key) | (key & BX_KEY_RELEASED ? 0x80 : 0);
+    } else {
+      std::move(prior + 1, end, prior);
+      --device.deferred_count;
+    }
+  }
 }
 
 void LK401::rebase_clock(u64 now_ns)
@@ -213,10 +242,15 @@ void LK401::rebase_clock(u64 now_ns)
   last_ns = now_ns;
   std::lock_guard<std::mutex> lock(input_mutex);
   input.clear();
+  bool held[128]{};
+  for (unsigned i = 0; i < device.held_count; ++i)
+    held[device.held[i]] = true;
+  for (unsigned i = 0; i < device.deferred_count; ++i) {
+    const u8 event = device.deferred[i];
+    held[event & 0x7f] = !(event & 0x80);
+  }
   for (unsigned key = 0; key < BX_KEY_NBKEYS; ++key) {
-    const auto end = device.held + device.held_count;
-    const bool held = std::find(device.held, end, key) != end;
-    if (held != host_down[key])
+    if (held[key] != host_down[key])
       input.push_back(host_down[key] ? key : key | BX_KEY_RELEASED);
   }
 }
@@ -253,8 +287,8 @@ void LK401::key_event(u32 key)
   }
   if (device.testing) return;
   // PC keys can share one LK switch, including both shifts in compatibility mode.
-  const u8* other_end = device.held_code + device.held_count - unsigned(down);
-  if (std::find(static_cast<const u8*>(device.held_code), other_end, code) != other_end) return;
+  u8* other_end = device.held_code + device.held_count - unsigned(down);
+  if (std::find(device.held_code, other_end, code) != other_end) return;
 
   const u8 mode = device.mode[division(code)];
   if (down) {
@@ -332,6 +366,10 @@ void LK401::execute(u8 cmd, const u8* params, unsigned count)
     case 0x8b:
       if (device.locked) device.wire_wait_ns = frame_ns;
       device.locked = 0;
+      if (device.overflow && device.count < sizeof(device.fifo)) {
+        device.overflow = 0;
+        queue(0xb5);
+      }
       return;
     case 0x99: device.click = 8; return;
     case 0x9f: case 0xa7: return;
@@ -408,7 +446,7 @@ bool LK401::next_byte(u8& byte, u64 now_ns)
       device.repeat_wait_ns = 1000000000ULL / device.rate[device.buffer[division(device.repeat_key)]];
     }
   }
-  prepare_snapshot();
+  collect_input();
   if (device.wire_wait_ns > 0) return false;
   if (device.locked_ack) {
     byte = 0xb7;
@@ -429,7 +467,7 @@ bool LK401::next_byte(u8& byte, u64 now_ns)
 
 bool LK401::valid_state() const
 {
-  if (device.held_count > BX_KEY_NBKEYS || device.count > sizeof(device.fifo) ||
+  if (device.held_count > BX_KEY_NBKEYS || device.deferred_count > BX_KEY_NBKEYS || device.count > sizeof(device.fifo) ||
       device.pending_count > sizeof(device.pending) || device.leds & ~12 ||
       device.click > 8 || device.bell > 8 || device.ctrl_click > 1 ||
       device.locked > 1 || device.locked_ack > 1 || device.overflow > 1 || device.stuck > 1 ||
@@ -448,6 +486,12 @@ bool LK401::valid_state() const
     if (key >= BX_KEY_NBKEYS || down[key] || !code ||
         (matrix_code(key, false) != code && matrix_code(key, true) != code)) return false;
     down[key] = true;
+  }
+  bool changed[128]{};
+  for (unsigned i = 0; i < device.deferred_count; ++i) {
+    const u8 key = device.deferred[i] & 0x7f;
+    if (key >= BX_KEY_NBKEYS || changed[key]) return false;
+    changed[key] = true;
   }
   return true;
 }

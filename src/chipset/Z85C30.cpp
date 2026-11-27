@@ -70,6 +70,18 @@ bool Z85C30::can_receive(Channel channel) const
   return (p.wr[3] & 0x21) == 1 && !(p.wr[14] & 0x10) && p.count < sizeof p.rx;
 }
 
+bool Z85C30::transmit_dma_request(Channel channel) const
+{
+  const auto& p = port(channel);
+  return (p.wr[14] & 4) && !p.tx_full; // /DTR/REQ requests a byte when the transmitter buffer empties (UM010901, §2.5.2.3).
+}
+
+bool Z85C30::receive_dma_request(Channel channel) const
+{
+  const auto& p = port(channel);
+  return (p.wr[1] & 0xe0) == 0xe0 && p.count && !p.rx_locked; // /W/REQ signals an available receive byte (UM010901, §2.5.2.4).
+}
+
 bool Z85C30::receive(Channel channel, u8 value)
 {
   auto& p = port(channel);

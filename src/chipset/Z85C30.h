@@ -59,6 +59,8 @@ public:
   void write_data(Channel channel, u8 value);
   bool can_receive(Channel channel) const;
   bool receive(Channel channel, u8 value);
+  bool transmit_dma_request(Channel channel) const;
+  bool receive_dma_request(Channel channel) const;
   bool interrupt() const;
   void set_transmit(Transmit callback);
   State& state() { return chip; }

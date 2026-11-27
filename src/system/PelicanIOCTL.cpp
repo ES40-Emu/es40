@@ -34,9 +34,12 @@
 enum PelicanIOCTLRange { DenseROM, SparseROM, DenseCSR, SparseCSR, DenseSCC0, SparseSCC0, DenseSCC1, SparseSCC1, DenseTOY, SparseTOY };
 static constexpr u32 rtc_reset_n = 1U << 10; // SSR<10> releases the RTC from reset (EK-D3SYS-PM, §7.3.11).
 static constexpr u32 scc_reset_n = 1U << 11; // SSR<11> releases both SCCs from reset (EK-D3SYS-PM, §7.3.11).
-static constexpr u32 support_mask = 0x0f0002bf | rtc_reset_n | scc_reset_n; // ROM controls, read mask, SCC/RTC resets and system-OK LED (§7.3.11).
+static constexpr u32 receive_dma_enable = 1U << 30, transmit_dma_enable = 1U << 31;
+static constexpr u32 support_mask = 0x0f0002bf | rtc_reset_n | scc_reset_n | receive_dma_enable | transmit_dma_enable; // ROM controls, read mask, SCC/RTC resets, serial DMA and system-OK LED (§7.3.11).
 static constexpr u32 scc0_interrupt = 1U << 6; // SIR<6> and SIR<7> are the SCC0 and SCC1 interrupt pins (EK-D3SYS-PM, §7.3.12).
 static constexpr u32 scc1_interrupt = 1U << 7;
+static constexpr u32 receive_overrun = 1U << 28, receive_half_page = 1U << 29;
+static constexpr u32 transmit_read_error = 1U << 30, transmit_page_end = 1U << 31;
 
 static bool is_sparse(int index)
 {
@@ -78,8 +81,8 @@ PelicanIOCTL::PelicanIOCTL(CConfigurator* cfg, Pelican* system) : CSystemCompone
   // Slot 5 maps each dense longword to an even sparse longword (EK-D3SYS-PM, Table 16 and App. A.1).
   system->RegisterMemory(this, DenseROM, U64(0x1a0000000), Intel28F020::capacity);
   system->RegisterMemory(this, SparseROM, U64(0x1b0000000), Intel28F020::capacity * 2);
-  system->RegisterMemory(this, DenseCSR, U64(0x1a0040100), 0x24);
-  system->RegisterMemory(this, SparseCSR, U64(0x1b0080200), 0x48);
+  system->RegisterMemory(this, DenseCSR, U64(0x1a0040000), 0x194);
+  system->RegisterMemory(this, SparseCSR, U64(0x1b0080000), 0x328);
   system->RegisterMemory(this, DenseSCC0, U64(0x1a0100000), 16);
   system->RegisterMemory(this, SparseSCC0, U64(0x1b0200000), 32);
   system->RegisterMemory(this, DenseSCC1, U64(0x1a0180000), 16);
@@ -98,6 +101,10 @@ PelicanIOCTL::PelicanIOCTL(CConfigurator* cfg, Pelican* system) : CSystemCompone
   });
   save_item(support, "ssr");
   save_item(interrupt_mask, "simr");
+  save_item(dma_transmit_pointer, "scc.dma_tx_pointer");
+  save_item(dma_receive_pointer, "scc.dma_rx_pointer");
+  save_item(dma_interrupts, "scc.dma_interrupts");
+  save_item(scc_dma_slot, "scc.dma_slot");
   mouse.reset();
   mouse.rebase_clock(serial_clock_ns);
   keyboard.reset();
@@ -202,7 +209,7 @@ PelicanIOCTL::~PelicanIOCTL()
 
 std::string PelicanIOCTL::snapshot_identity() const
 {
-  std::string id = CSystemComponent::snapshot_identity() + ":LK401:DS1287A";
+  std::string id = CSystemComponent::snapshot_identity() + ":LK401:DS1287A:SCC0-DMA";
   for (const auto& chip : chips) {
     id += ':';
     if (!chip)
@@ -266,7 +273,8 @@ bool PelicanIOCTL::decodes_memory_access(int index, u64 address, int dsize, bool
     return false;
   if (index == DenseCSR || index == SparseCSR) {
     const u64 offset = sparse ? address >> 1 : address;
-    return offset == 0 || offset == 0x10 || offset == 0x20;
+    return offset == 0x30 || offset == 0x40 || offset == 0x100 || offset == 0x110
+        || offset == 0x120 || offset == 0x180 || offset == 0x190;
   }
   if (is_scc(index))
     return (sparse ? address >> 1 : address) < 16;
@@ -302,9 +310,13 @@ u32 PelicanIOCTL::read_register(int index, u32 offset, u32 lanes)
     return read_word(offset);
   if (index == DenseCSR || index == SparseCSR) {
     switch (offset) {
-    case 0:    return support;
-    case 0x10: return serial_interrupts();
-    case 0x20: return interrupt_mask;
+    case 0x30:  return dma_transmit_pointer;
+    case 0x40:  return dma_receive_pointer;
+    case 0x100: return support;
+    case 0x110: return serial_interrupts();
+    case 0x120: return interrupt_mask;
+    case 0x180: return scc_dma_slot[0];
+    case 0x190: return scc_dma_slot[1];
     default:   return 0xffffffffU;
     }
   }
@@ -348,7 +360,7 @@ u64 PelicanIOCTL::ReadMem(int index, u64 address, int dsize)
 void PelicanIOCTL::write_register(int index, u32 offset, u32 value, u32 mask)
 {
   if (index == DenseCSR || index == SparseCSR) {
-    if (offset == 0) {
+    if (offset == 0x100) {
       mask &= support_mask;
       const u32 previous = support;
       support = (support & ~mask) | (value & mask);
@@ -357,8 +369,16 @@ void PelicanIOCTL::write_register(int index, u32 offset, u32 value, u32 mask)
       if ((previous & ~support) & scc_reset_n)
         for (auto& controller : scc)
           controller.reset();
-    } else if (offset == 0x20) {
+    } else if (offset == 0x110) {
+      dma_interrupts &= value | ~mask; // SIR<31:28> clears individual DMA reasons on a zero write (EK-D3SYS-PM, §7.3.12).
+    } else if (offset == 0x120) {
       interrupt_mask = (interrupt_mask & ~mask) | (value & mask);
+    } else if (offset == 0x30 || offset == 0x40) {
+      auto& pointer = offset == 0x30 ? dma_transmit_pointer : dma_receive_pointer;
+      pointer = (pointer & ~mask) | (value & mask);
+    } else if (offset == 0x180 || offset == 0x190) {
+      auto& slot = scc_dma_slot[offset == 0x190];
+      slot = ((slot & ~mask) | (value & mask)) & 0x3ff; // The SCC DMA slots supply a chip select and register address (EK-D3SYS-PM, §§7.3.18–19).
     }
     return;
   }
@@ -390,6 +410,7 @@ void PelicanIOCTL::WriteMem(int index, u64 address, int dsize, u64 data)
   write_register(index, offset, u32(data), mask);
   if (!sparse && dsize == 64)
     write_register(index, offset + 4, u32(data >> 32), 0xffffffffU);
+  service_scc_dma();
   board.update_io_irq();
   board.update_clock_irq();
   if (index == DenseTOY || index == SparseTOY)
@@ -398,7 +419,51 @@ void PelicanIOCTL::WriteMem(int index, u64 address, int dsize, u64 data)
 
 u32 PelicanIOCTL::serial_interrupts() const
 {
-  return (scc[0].interrupt() ? scc0_interrupt : 0) | (scc[1].interrupt() ? scc1_interrupt : 0);
+  return dma_interrupts | (scc[0].interrupt() ? scc0_interrupt : 0) | (scc[1].interrupt() ? scc1_interrupt : 0);
+}
+
+static u64 scc_dma_address(u32 pointer)
+{
+  return (u64(pointer & 31) << 29) | ((pointer >> 3) & 0x1ffffffc); // IOCTL splits PA<33:29,28:2> across its pointer (EK-D3SYS-PM, §§7.3.2–3).
+}
+
+static u32 scc_dma_pointer(u64 address)
+{
+  return (u32(address) << 3) | ((address >> 29) & 31);
+}
+
+void PelicanIOCTL::service_scc_dma()
+{
+  if (!(support & scc_reset_n) || !(support & (receive_dma_enable | transmit_dma_enable)) || scc_dma_slot[0] != 0x14)
+    return; // Slot select 4, register address 1 select the SCC0-B data register (EK-D3SYS-PM, §§7.3.18, 9.5.2.4).
+  auto& controller = scc[0];
+  const auto channel = Z85C30::Channel::B;
+  for (;;) {
+    if ((support & receive_dma_enable) && !(dma_interrupts & receive_overrun) && controller.receive_dma_request(channel)) {
+      const u64 address = scc_dma_address(dma_receive_pointer);
+      if (address < board.linear_ram_size()) {
+        board.WriteMem(address, 32, u32(controller.read_data(channel)) << 8, this);
+        dma_receive_pointer = scc_dma_pointer(address + 4);
+        if (((address + 4) & 0x7ff) == 0)
+          dma_interrupts |= receive_half_page; // The half-page notice is latched at both 2 KiB boundaries (EK-D3SYS-PM, §7.3.12).
+        if (((address + 4) & 0xfff) == 0)
+          dma_interrupts |= receive_overrun;
+        continue;
+      }
+    }
+    if (!(support & transmit_dma_enable) || (dma_interrupts & (transmit_page_end | transmit_read_error))
+        || !controller.transmit_dma_request(channel))
+      return;
+    const u64 address = scc_dma_address(dma_transmit_pointer);
+    if (address >= board.linear_ram_size()) {
+      dma_interrupts |= transmit_read_error;
+      return;
+    }
+    controller.write_data(channel, u8(board.ReadMem(address, 32, this) >> 8)); // Only byte lane 1 feeds the SCC transmitter (EK-D3SYS-PM, §9.5.2.5).
+    dma_transmit_pointer = scc_dma_pointer(address + 4);
+    if (((address + 4) & 0xfff) == 0)
+      dma_interrupts |= transmit_page_end;
+  }
 }
 
 bool PelicanIOCTL::interrupt() const
@@ -473,6 +538,8 @@ void PelicanIOCTL::flush_storage()
 void PelicanIOCTL::ResetPCI()
 {
   support = interrupt_mask = 0;
+  dma_transmit_pointer = dma_receive_pointer = dma_interrupts = 0;
+  scc_dma_slot[0] = scc_dma_slot[1] = 0;
   rtc.set_reset(true);
   for (auto& controller : scc)
     controller.reset();
@@ -493,6 +560,8 @@ void PelicanIOCTL::prepare_snapshot()
 int PelicanIOCTL::RestoreState(FILE* file)
 {
   if (CSystemComponent::RestoreState(file))
+    return -1;
+  if ((support & ~support_mask) || (dma_interrupts & 0x0fffffffU) || ((scc_dma_slot[0] | scc_dma_slot[1]) & ~0x3ffU))
     return -1;
   return scc[0].valid_state() && scc[1].valid_state() && mouse.valid_state() && keyboard.valid_state() &&
          rtc.valid_state() && rtc.state.reset_held == !(support & rtc_reset_n) ? 0 : -1;

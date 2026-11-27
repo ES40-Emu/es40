@@ -74,6 +74,7 @@ private:
   void register_clock_state();
   u32 serial_interrupts() const;
   void refresh_devices();
+  void service_scc_dma();
   Pelican& board;
   void run_devices();
 
@@ -81,6 +82,8 @@ private:
   std::array<std::optional<Intel28F020>, 4> chips;
   u32 support = 0;
   u32 interrupt_mask = 0;
+  u32 dma_transmit_pointer = 0, dma_receive_pointer = 0, dma_interrupts = 0;
+  u32 scc_dma_slot[2]{};
   std::array<Z85C30, 2> scc;
   DS1287A rtc;
   VSXXXMouse mouse;

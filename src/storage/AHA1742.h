@@ -52,7 +52,7 @@ private:
   enum { SCSIDEF = 3, RSTPWR = 0x10, HSCSIID = 0x0f }; // Offset of SCSIDEF from zCC0, then its bit 4 and bits 3-0 (AHA-1740A TRM, p. 4-16).
   // Offsets from zCD0 of the Enhanced Mode registers (AHA-1740A TRM, pp. 4-21 to 4-23).
   enum { MBOXOUT0 = 0, ATTN = 4, G2CNTRL = 5, G2INTST = 6, G2STAT = 7, MBOXIN0 = 8 };
-  enum { ImmediateCommand = 1, StartCCB = 4 }; // ATTN bits 7-4 (AHA-1740A TRM, p. 4-22).
+  enum { ImmediateCommand = 1, StartCCB = 4, AbortCCB = 5 }; // ATTN bits 7-4 (AHA-1740A TRM, p. 4-22).
   enum { HardReset = 0x80, ClearInterrupt = 0x40 }; // G2CNTRL bits 7 and 6 (AHA-1740A TRM, p. 4-22).
   enum { CompletedGood = 0x1, ImmediateGood = 0xa, CompletedError = 0xc, ImmediateError = 0xe }; // G2INTST bits 7-4 (AHA-1740A TRM, p. 4-22).
   // Immediate commands, in the first mailbox out byte, and their option bits 2, 3 and 5 of byte 2 (AHA-1740A TRM, pp. 6-43 to 6-46).
@@ -69,12 +69,13 @@ private:
   // Status word bits 0, 1, 3, 4, 5, 7, 8, 9 and 12; the status word figure and p. 6-19 put Additional Status Available at bit 8 (AHA-1740A TRM, pp. 6-14 to 6-16, 6-19).
   enum { CommandDone = 0x0001, DataUnderrun = 0x0002, QueueFull = 0x0008, SpecificationCheck = 0x0010, DataOverrun = 0x0020, InterruptIssued = 0x0080, AdditionalStatus = 0x0100, SenseStored = 0x0200, MajorError = 0x1000 };
   // Host adapter status codes (AHA-1740A TRM, p. 6-17).
-  enum { SelectionTimeout = 0x11, OverrunOrUnderrun = 0x12, InvalidPhase = 0x14, InvalidParameter = 0x18, InvalidList = 0x1a, RequestSenseFailed = 0x1b };
+  enum { AbortedByHost = 0x04, SelectionTimeout = 0x11, OverrunOrUnderrun = 0x12, InvalidPhase = 0x14, InvalidParameter = 0x18, InvalidList = 0x1a, RequestSenseFailed = 0x1b };
   enum { CheckCondition = 0x02 }; // Target status (AHA-1740A TRM, p. 6-17).
   enum { QueueSize = 64 }; // Control blocks the adapter holds at once (AHA-1740A TRM, p. 6-2).
   // What one command on the SCSI bus came to: whether a target answered, its status byte, the bytes moved, whether it wanted to move more, and whether its data phase went against the Direction flag.
   struct scsi_result { bool selected; u8 status; u32 moved; bool overrun; bool wrong_phase; };
   void start_ccb(u32 address, u8 target);
+  void abort_ccb(u32 address);
   void immediate_command(u32 command, u8 target);
   void forget(bool all, u8 target);
   void reset_scsi_bus();

@@ -121,13 +121,15 @@ void AHA1742::WriteMem(int index, u64 address, int dsize, u64 data)
   if (address == ATTN) {
     attn = u8(data);
     // The local processor reads ATTN at once, so the Busy bit this write sets is never seen set (AHA-1740A TRM, p. 4-23).
-    // It then reads the mailbox out, a control block address for Start CCB or else an immediate command, and sets Mailbox Out Empty (AHA-1740A TRM, p. 4-20).
-    if (!in_reset && (attn >> 4 == StartCCB || attn >> 4 == ImmediateCommand)) {
+    // It then reads the mailbox out, a control block address to start or to abort or else an immediate command, and sets Mailbox Out Empty (AHA-1740A TRM, pp. 4-20, 6-39).
+    if (!in_reset && (attn >> 4 == StartCCB || attn >> 4 == ImmediateCommand || attn >> 4 == AbortCCB)) {
       g2stat |= MailboxOutEmpty;
       if (attn >> 4 == StartCCB)
         start_ccb(get_le32(mboxout), attn & 0x0f);
-      else
+      else if (attn >> 4 == ImmediateCommand)
         immediate_command(get_le32(mboxout), attn & 0x0f);
+      else
+        abort_ccb(get_le32(mboxout));
     }
     return;
   }
@@ -277,6 +279,28 @@ void AHA1742::start_ccb(u32 address, u8 target)
     else
       held[held_count++] = entry;
   }
+}
+
+// Abort CCB looks for a control block by its address: one the adapter does not have, or has already completed, is left alone and no interrupt is posted (AHA-1740A TRM, pp. 6-39, 6-40).
+void AHA1742::abort_ccb(u32 address)
+{
+  u8 found = 0;
+  while (found < held_count && u32(held[found]) != address)
+    ++found;
+  u8 pointer[4];
+  if (found == held_count || !bus.slot_master_read(slot, address + StatusBlockPointer, pointer, sizeof(pointer)))
+    return;
+  const u8 target = u8(held[found] >> 32);
+  --held_count;
+  for (u8 i = found; i < held_count; ++i)
+    held[i] = held[i + 1];
+  // A kept control block has not reached the SCSI bus: it is terminated with a major error, aborted by the host, and its completion with error waits its turn with its address (AHA-1740A TRM, pp. 6-17, 6-40).
+  u8 status[32]{};
+  put_le16(status + StatusWord, MajorError | InterruptIssued);
+  status[HostAdapterStatus] = AbortedByHost;
+  bus.slot_master_write(slot, get_le32(pointer), status, sizeof(status));
+  completions[(completion_head + completion_count++) % QueueSize] = u64(CompletedError << 4 | target) << 32 | address;
+  post_completion();
 }
 
 // Read Host Adapter Inquiry Data: the data is cut to the length the host allows, and a longer buffer is left short (AHA-1740A TRM, pp. 6-30, 6-32).

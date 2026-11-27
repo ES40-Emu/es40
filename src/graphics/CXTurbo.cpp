@@ -30,19 +30,23 @@
 #include "system/System_pelican.h"
 #include "es40_endian.h"
 
-enum CXTurboRange { Asic, Ramdac, Display, Alternate, Offscreen, DisplayAlias, OffscreenAlias, GP0, GP1 };
+enum CXTurboRange { Asic, Ramdac, Display, Alternate, Offscreen, DisplayAlias, OffscreenAlias, GP0, GP1, AtSlotBase = 0x10 };
 
 CXTurbo::CXTurbo(CConfigurator* cfg, Pelican& system)
   : CSystemComponent(cfg, &system), CDisplayOutputProvider(0), board(system),
     sfb(machine_config{}, "sfb", nullptr, 25000000), dac(machine_config{}, "ramdac", nullptr, 0)
 {
-  // Onboard CXTurbo responds only in slot 4 dense space (EK-D3SYS-PM, §6.1 and Table 14).
-  board.RegisterMemory(this, Asic, U64(0x1c2100000), 0x20000);
-  board.RegisterMemory(this, GP0, U64(0x1c2140000), 0x40000);
-  board.RegisterMemory(this, GP1, U64(0x1c2180000), 0x40000);
-  board.RegisterMemory(this, Ramdac, U64(0x1c21c0000), 0x40000);
-  for (int index = Display; index <= OffscreenAlias; ++index)
-    board.RegisterMemory(this, index, U64(0x1c2200000) + (index - Display) * decsfb_device::vram_size, decsfb_device::vram_size);
+  // Onboard CXTurbo responds only in slot 6 dense space (EK-D3SYS-PM, Table 6 and §6.1).
+  auto map_window = [this](u64 base, int alias) {
+    board.RegisterMemory(this, Asic | alias, base + 0x100000, 0x20000);
+    board.RegisterMemory(this, GP0 | alias, base + 0x140000, 0x40000);
+    board.RegisterMemory(this, GP1 | alias, base + 0x180000, 0x40000);
+    board.RegisterMemory(this, Ramdac | alias, base + 0x1c0000, 0x40000);
+    for (int index = Display; index <= OffscreenAlias; ++index)
+      board.RegisterMemory(this, index | alias, base + (index - Display + 1) * decsfb_device::vram_size, decsfb_device::vram_size);
+  };
+  map_window(U64(0x1c2000000), 0); // SRM uses the window in EK-D3SYS-PM, Table 14.
+  map_window(U64(0x1c0000000), AtSlotBase); // DEC OSF/1 addresses the same SFB at KN16AA_CFB_ADDR.
   sfb.set_save_owner(*this);
   dac.set_save_owner(*this);
   sfb.set_time_source([this] { return clock_ns(); });
@@ -75,6 +79,7 @@ void CXTurbo::bind_display()
 
 bool CXTurbo::decodes_memory_access(int index, u64 offset, int dsize, bool write) const noexcept
 {
+  index &= ~AtSlotBase;
   if (!write && (index == GP0 || index == GP1))
     return false;
   return (dsize == 32 || dsize == 64) && (offset & (dsize / 8 - 1)) == 0;
@@ -90,6 +95,7 @@ u64 CXTurbo::clock_ns() const
 
 u32 CXTurbo::read_word(int index, u32 offset)
 {
+  index &= ~AtSlotBase;
   if (index == Asic)
     return sfb.read(offset >> 2);
   if (index == Ramdac)
@@ -101,6 +107,7 @@ u32 CXTurbo::read_word(int index, u32 offset)
 
 void CXTurbo::write_word(int index, u32 offset, u32 value)
 {
+  index &= ~AtSlotBase;
   if (index == GP0 || index == GP1) {
     gp_outputs[index - GP0] = value & 1; // GP0 and GP1 each latch one output bit (EK-D3SYS-PM, Table 14).
     return;

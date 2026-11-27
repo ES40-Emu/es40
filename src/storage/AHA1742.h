@@ -54,7 +54,7 @@ private:
   enum { MBOXOUT0 = 0, ATTN = 4, G2CNTRL = 5, G2INTST = 6, G2STAT = 7, MBOXIN0 = 8 };
   enum { ImmediateCommand = 1, StartCCB = 4, AbortCCB = 5 }; // ATTN bits 7-4 (AHA-1740A TRM, p. 4-22).
   enum { HardReset = 0x80, ClearInterrupt = 0x40 }; // G2CNTRL bits 7 and 6 (AHA-1740A TRM, p. 4-22).
-  enum { CompletedGood = 0x1, ImmediateGood = 0xa, CompletedError = 0xc, ImmediateError = 0xe }; // G2INTST bits 7-4 (AHA-1740A TRM, p. 4-22).
+  enum { CompletedGood = 0x1, ImmediateGood = 0xa, CompletedError = 0xc, EventNotification = 0xd, ImmediateError = 0xe }; // G2INTST bits 7-4 (AHA-1740A TRM, p. 4-22).
   // Immediate commands, in the first mailbox out byte, and their option bits 2, 3 and 5 of byte 2 (AHA-1740A TRM, pp. 6-43 to 6-46).
   enum { ImmediateReset = 0x80, ImmediateResume = 0x90, DeviceResetOption = 0x040000, AdapterResetOption = 0x080000, ResumeNoInterrupt = 0x200000 };
   enum { MailboxOutEmpty = 0x04, InterruptPending = 0x02, Busy = 0x01 }; // G2STAT bits 2, 1 and 0 (AHA-1740A TRM, p. 4-23).
@@ -68,14 +68,16 @@ private:
   enum { LogicalUnit = 0x0007, NoDisconnect = 0x0040, DataTransfer = 0x0100, Direction = 0x0200, SuppressTransfer = 0x0400 };
   // Status word bits 0, 1, 3, 4, 5, 7, 8, 9 and 12; the status word figure and p. 6-19 put Additional Status Available at bit 8 (AHA-1740A TRM, pp. 6-14 to 6-16, 6-19).
   enum { CommandDone = 0x0001, DataUnderrun = 0x0002, QueueFull = 0x0008, SpecificationCheck = 0x0010, DataOverrun = 0x0020, InterruptIssued = 0x0080, AdditionalStatus = 0x0100, SenseStored = 0x0200, MajorError = 0x1000 };
-  // Host adapter status codes (AHA-1740A TRM, p. 6-17).
-  enum { AbortedByHost = 0x04, SelectionTimeout = 0x11, OverrunOrUnderrun = 0x12, InvalidPhase = 0x14, InvalidParameter = 0x18, InvalidList = 0x1a, RequestSenseFailed = 0x1b };
+  // Host adapter status codes; 22h is also the reset code an event notification gives in the mailbox in (AHA-1740A TRM, pp. 6-17, 6-41).
+  enum { AbortedByHost = 0x04, AbortedByAdapter = 0x05, SelectionTimeout = 0x11, OverrunOrUnderrun = 0x12, InvalidPhase = 0x14, InvalidParameter = 0x18, InvalidList = 0x1a, RequestSenseFailed = 0x1b, ResetByAdapter = 0x22 };
   enum { CheckCondition = 0x02 }; // Target status (AHA-1740A TRM, p. 6-17).
   enum { QueueSize = 64 }; // Control blocks the adapter holds at once (AHA-1740A TRM, p. 6-2).
+  enum { InterruptQueueSize = QueueSize + 1 }; // Their completions can all wait at once, and one event notification with them (AHA-1740A TRM, p. 6-47).
   // What one command on the SCSI bus came to: whether a target answered, its status byte, the bytes moved, whether it wanted to move more, and whether its data phase went against the Direction flag.
   struct scsi_result { bool selected; u8 status; u32 moved; bool overrun; bool wrong_phase; };
   void start_ccb(u32 address, u8 target);
   void abort_ccb(u32 address);
+  void terminate(u32 address, u8 target, u8 reason);
   void immediate_command(u32 command, u8 target);
   void forget(bool all, u8 target);
   void reset_scsi_bus();
@@ -102,8 +104,8 @@ private:
   u8 g2stat = MailboxOutEmpty;
   u8 g2intst = 0;
   u8 mboxin[4]{};
-  // Completions wait here, oldest first, for the mailbox in: G2INTST value in bits 39-32 over the control block address (AHA-1740A TRM, p. 4-20).
-  u64 completions[QueueSize]{};
+  // Completions wait here, oldest first, for the mailbox in: G2INTST value in bits 39-32 over the control block address, or over an event notification's reset code (AHA-1740A TRM, pp. 4-20, 6-41).
+  u64 completions[InterruptQueueSize]{};
   u8 completion_head = 0;
   u8 completion_count = 0;
   // An immediate command's completion waits apart from those: its G2INTST value, zero for none, and the error code for the first mailbox in byte (AHA-1740A TRM, p. 6-43).
@@ -113,6 +115,7 @@ private:
   u64 held[QueueSize]{};
   u8 held_count = 0;
   u16 allegiance = 0; // One bit for each SCSI ID that is in contingent allegiance.
+  bool event_pending = false; // Set from the adapter's own reset of the SCSI bus until the host acknowledges the event notification (AHA-1740A TRM, p. 6-47).
   bool in_reset = false;
 };
 

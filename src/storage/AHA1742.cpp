@@ -60,6 +60,7 @@ AHA1742::AHA1742(CConfigurator* cfg, CSystem* system, EISABus& bus, unsigned slo
   save_item(held, "held");
   save_item(held_count, "held_count");
   save_item(allegiance, "allegiance");
+  save_item(event_pending, "event_pending");
   save_item(in_reset, "in_reset");
 }
 
@@ -137,6 +138,9 @@ void AHA1742::WriteMem(int index, u64 address, int dsize, u64 data)
     return;
   // Clear EISA Interrupt drops a pending interrupt, and a Hard Reset returns the registers to their reset condition (AHA-1740A TRM, pp. 4-8, 4-22).
   if (data & (ClearInterrupt | HardReset)) {
+    // Clearing the interrupt of an event notification is the host's acknowledgment of it (AHA-1740A TRM, p. 6-47).
+    if ((g2stat & InterruptPending) && g2intst >> 4 == EventNotification)
+      event_pending = false;
     g2stat &= ~InterruptPending;
     drive_irq(false);
   }
@@ -144,11 +148,12 @@ void AHA1742::WriteMem(int index, u64 address, int dsize, u64 data)
   if (data & HardReset) {
     in_reset = true;
     g2stat |= Busy;
-    // The local processor loses what it held, waiting completions and kept control blocks included, and a reset ends every allegiance (AHA-1740A TRM, pp. 4-8, 6-18).
+    // The local processor loses what it held, waiting completions, kept control blocks and an unacknowledged event included, and a reset ends every allegiance (AHA-1740A TRM, pp. 4-8, 6-18).
     completion_count = 0;
     immediate_status = 0;
     held_count = 0;
     allegiance = 0;
+    event_pending = false;
   } else if (in_reset) {
     // Released with diagnostics passing: 00 is loaded in MBOXIN0, Busy clears and the mailbox out is empty (AHA-1740A TRM, pp. 4-20, 4-21).
     in_reset = false;
@@ -167,9 +172,10 @@ void AHA1742::immediate_command(u32 command, u8 target)
 {
   u8 error = 0;
   if (u8(command) == ImmediateReset && target == (config[SCSIDEF] & HSCSIID)) {
-    // Reset with the adapter's own ID drops the control blocks and queued interrupts of every target, and resets the SCSI bus unless the Adapter Reset Option is set (AHA-1740A TRM, p. 6-45).
+    // Reset with the adapter's own ID drops the control blocks and queued interrupts of every target, a waiting event notification with them, and resets the SCSI bus unless the Adapter Reset Option is set (AHA-1740A TRM, p. 6-45).
     forget(true, target);
     allegiance = 0;
+    event_pending = false;
     if (!(command & AdapterResetOption))
       reset_scsi_bus();
   } else if (u8(command) == ImmediateReset) {
@@ -204,9 +210,9 @@ void AHA1742::forget(bool all, u8 target)
   u8 waiting = 0;
   for (u8 i = 0; i < completion_count; ++i) {
     // A waiting completion carries its target in the low four bits of its status code.
-    const u64 completion = completions[(completion_head + i) % QueueSize];
+    const u64 completion = completions[(completion_head + i) % InterruptQueueSize];
     if (!all && (completion >> 32 & 0x0f) != target)
-      completions[(completion_head + waiting++) % QueueSize] = completion;
+      completions[(completion_head + waiting++) % InterruptQueueSize] = completion;
   }
   completion_count = waiting;
 }
@@ -233,9 +239,14 @@ void AHA1742::start_ccb(u32 address, u8 target)
     return;
   u8 status[32]{};
   // With every slot taken, by waiting completions and kept control blocks, the control block is refused with Queue Full and no action is taken on it (AHA-1740A TRM, p. 6-14).
-  if (completion_count + held_count == QueueSize) {
+  if (completion_count + held_count >= QueueSize) {
     put_le16(status + StatusWord, QueueFull);
     bus.slot_master_write(slot, get_le32(ecb + StatusBlockPointer), status, sizeof(status));
+    return;
+  }
+  // From its reset of the SCSI bus until the host acknowledges the event notification, the adapter returns each control block it receives as aborted by the host adapter (AHA-1740A TRM, p. 6-47).
+  if (event_pending) {
+    terminate(address, target, AbortedByAdapter);
     return;
   }
   // While its target is in contingent allegiance a control block is accepted and kept, not carried out, unless it is the Read Sense Information that ends it (AHA-1740A TRM, p. 6-18).
@@ -253,6 +264,14 @@ void AHA1742::start_ccb(u32 address, u8 target)
   // A check condition whose sense information was not stored puts the target in contingent allegiance (AHA-1740A TRM, p. 6-18).
   if (status[TargetStatus] == CheckCondition && !(word & SenseStored))
     allegiance |= u16(1 << target);
+  // An invalid bus phase is an error the adapter cannot recover from: it resets the SCSI bus, which ends every allegiance, and its event notification waits ahead of this control block's completion (AHA-1740A TRM, pp. 6-17, 6-41, 6-47).
+  const bool reset = status[HostAdapterStatus] == InvalidPhase;
+  if (reset) {
+    reset_scsi_bus();
+    allegiance = 0;
+    event_pending = true;
+    completions[(completion_head + completion_count++) % InterruptQueueSize] = u64(EventNotification << 4 | (config[SCSIDEF] & HSCSIID)) << 32 | ResetByAdapter;
+  }
   // The host is interrupted unless the command is done without error and it set Disable Interrupt (AHA-1740A TRM, pp. 6-5, 6-15).
   const bool interrupt = !(word & CommandDone) || !(flags & DisableInterrupt);
   put_le16(status + StatusWord, u16(word | (interrupt ? InterruptIssued : 0)));
@@ -262,11 +281,11 @@ void AHA1742::start_ccb(u32 address, u8 target)
   if (interrupt) {
     // The completion waits its turn with its status code and target, behind any the host has not yet taken (AHA-1740A TRM, pp. 4-20, 4-22).
     const u8 code = u8(((word & CommandDone) ? CompletedGood : CompletedError) << 4 | target);
-    completions[(completion_head + completion_count++) % QueueSize] = u64(code) << 32 | address;
+    completions[(completion_head + completion_count++) % InterruptQueueSize] = u64(code) << 32 | address;
     post_completion();
   }
   // Completion of Read Sense Information releases the allegiance, and the target's kept control blocks are started in the order they came (AHA-1740A TRM, pp. 6-18, 6-34).
-  if (operation != ReadSenseInformation || !(allegiance >> target & 1))
+  if (!reset && (operation != ReadSenseInformation || !(allegiance >> target & 1)))
     return;
   allegiance &= u16(~(1 << target));
   const u8 kept = held_count;
@@ -274,7 +293,10 @@ void AHA1742::start_ccb(u32 address, u8 target)
   for (u8 i = 0; i < kept; ++i) {
     // One of them can bring the allegiance back, and those after it are then kept again in the same order.
     const u64 entry = held[i];
-    if (u8(entry >> 32) == target)
+    // After a bus reset, here or in one of them, every control block still kept is instead returned as aborted by the host adapter (AHA-1740A TRM, p. 6-47).
+    if (event_pending)
+      terminate(u32(entry), u8(entry >> 32), AbortedByAdapter);
+    else if (u8(entry >> 32) == target)
       start_ccb(u32(entry), target);
     else
       held[held_count++] = entry;
@@ -287,19 +309,26 @@ void AHA1742::abort_ccb(u32 address)
   u8 found = 0;
   while (found < held_count && u32(held[found]) != address)
     ++found;
-  u8 pointer[4];
-  if (found == held_count || !bus.slot_master_read(slot, address + StatusBlockPointer, pointer, sizeof(pointer)))
+  if (found == held_count)
     return;
   const u8 target = u8(held[found] >> 32);
   --held_count;
   for (u8 i = found; i < held_count; ++i)
     held[i] = held[i + 1];
-  // A kept control block has not reached the SCSI bus: it is terminated with a major error, aborted by the host, and its completion with error waits its turn with its address (AHA-1740A TRM, pp. 6-17, 6-40).
-  u8 status[32]{};
+  // A kept control block has not reached the SCSI bus, so it only has to be terminated, as aborted by the host (AHA-1740A TRM, pp. 6-17, 6-40).
+  terminate(address, target, AbortedByHost);
+}
+
+// A control block that is not carried out is terminated with a major error and the reason as host adapter status, and its completion with error waits its turn with its address (AHA-1740A TRM, pp. 6-17, 6-40, 6-47).
+void AHA1742::terminate(u32 address, u8 target, u8 reason)
+{
+  u8 pointer[4], status[32]{};
+  if (!bus.slot_master_read(slot, address + StatusBlockPointer, pointer, sizeof(pointer)))
+    return;
   put_le16(status + StatusWord, MajorError | InterruptIssued);
-  status[HostAdapterStatus] = AbortedByHost;
+  status[HostAdapterStatus] = reason;
   bus.slot_master_write(slot, get_le32(pointer), status, sizeof(status));
-  completions[(completion_head + completion_count++) % QueueSize] = u64(CompletedError << 4 | target) << 32 | address;
+  completions[(completion_head + completion_count++) % InterruptQueueSize] = u64(CompletedError << 4 | target) << 32 | address;
   post_completion();
 }
 
@@ -530,7 +559,7 @@ void AHA1742::post_completion()
     immediate_status = 0;
   } else {
     const u64 completion = completions[completion_head];
-    completion_head = u8((completion_head + 1) % QueueSize);
+    completion_head = u8((completion_head + 1) % InterruptQueueSize);
     --completion_count;
     put_le32(mboxin, u32(completion));
     g2intst = u8(completion >> 32);

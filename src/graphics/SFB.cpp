@@ -123,8 +123,9 @@ u32 decsfb_device::read(offs_t offset)
       // Count dot clock / 4 for 256 TC cycles (EK-D3SYS-PM §6.4.11, WRL 93/1 Table 2).
       u64 duration = (256000000000ULL + m_tc_clock - 1) / m_tc_clock;
       u64 elapsed = std::min<u64>(now_ns - m_clock_start_ns, duration);
+      // Pelican V7 polls until zero at 0x8b6fc; EK-D3SYS-PM §6.4.11 reverses the two status values.
       if (reg == TcClockCount)
-        return elapsed == duration ? 0xff : 0;
+        return elapsed < duration ? 0xff : 0;
       return static_cast<u32>((elapsed * (dot_clock / 1000) + 2000000) / 4000000) & 0x3ff;
     }
     case Bcont:

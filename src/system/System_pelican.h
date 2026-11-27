@@ -31,6 +31,8 @@
 #include "System.h"
 
 class PelicanIOCTL;
+class PelicanTCDS;
+class CDiskController;
 class CXTurbo;
 
 class Pelican final : public CSystem
@@ -43,6 +45,7 @@ public:
   void finish_board_restore() override;
   void update_io_irq(bool force = false);
   void update_clock_irq(bool force = false);
+  CDiskController& scsi_controller();
   int LoadROM() override;
   void ResetMem(unsigned int membits) override;
   u64 ram_offset(u64 address) const noexcept override;
@@ -71,6 +74,7 @@ private:
   bool io_irq_asserted = false;
   bool clock_irq_asserted = false;
   PelicanIOCTL* io_control = nullptr;
+  PelicanTCDS* tcds = nullptr;
   const bool direct_srm;
   u8 lit_leds = 0xff;
 };

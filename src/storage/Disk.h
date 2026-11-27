@@ -107,7 +107,7 @@ public:
   virtual void    scsi_xfer_done_me(int bus);
   virtual void    service_pending_media_actions() {}
   virtual bool    has_pending_media_actions() const noexcept { return false; }
-  void            scsi_reset();
+  void            scsi_reset() override;
 
   void            set_atapi_mode() { atapi_mode = true; };
 

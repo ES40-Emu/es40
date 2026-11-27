@@ -139,7 +139,8 @@ typedef enum
   c_gui_null,
   c_sdl,
   c_win32,
-  c_x11
+  c_x11,
+  c_tcds
 } classid;
 
 class CConfigurator

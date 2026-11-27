@@ -121,7 +121,7 @@ bool CSCSIBus::arbitrate(int initiator)
  * The initiator calling this function should have succesfully arbitrated
  * for the SCSI bus first.
  **/
-bool CSCSIBus::select(int initiator, int target)
+bool CSCSIBus::select(int initiator, int target, bool attention)
 {
 	if (state.phase != SCSI_PHASE_ARBITRATION || state.initiator != initiator)
 		FAILURE(IllegalState,
@@ -132,7 +132,17 @@ bool CSCSIBus::select(int initiator, int target)
 
 	state.target = target;
 	targets[target]->scsi_select_me(target_bus_no[target]);
+	if (!attention && state.phase == SCSI_PHASE_MSG_OUT)
+		state.phase = SCSI_PHASE_COMMAND;
 	return(state.phase >= 0);
+}
+
+void CSCSIBus::reset_bus()
+{
+	state.phase = SCSI_PHASE_FREE;
+	for (auto* device : targets)
+		if (device)
+			device->scsi_reset();
 }
 
 /**

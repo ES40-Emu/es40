@@ -561,6 +561,7 @@ list(APPEND ES40_SOURCES
     src/graphics/SFB.cpp
     src/graphics/Bt485.cpp
     src/graphics/Icd2061A.cpp
+    src/storage/NCR53C94.cpp
     src/storage/SCSIBus.cpp
     src/storage/SCSIDevice.cpp
     src/io/Serial.cpp
@@ -573,6 +574,7 @@ list(APPEND ES40_SOURCES
     src/system/System.cpp
     src/system/JensenFlash.cpp
     src/system/PelicanIOCTL.cpp
+    src/system/PelicanTCDS.cpp
     src/system/System_jensen.cpp
     src/system/System_pelican.cpp
     src/system/System_es40.cpp

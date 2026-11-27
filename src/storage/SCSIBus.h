@@ -59,7 +59,8 @@ public:
   void          scsi_unregister(CSCSIDevice* dev, int target);
 
   bool          arbitrate(int initiator);
-  bool          select(int initiator, int target);
+  bool          select(int initiator, int target, bool attention = true);
+  void          reset_bus();
   void          set_phase(int target, int phase);
   int           get_phase() { return state.phase; };
 

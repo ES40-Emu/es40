@@ -55,6 +55,7 @@ public:
   bool            scsi_arbitrate(int bus);
   bool            scsi_select(int bus, int target);
   virtual void    scsi_select_me(int bus);
+  virtual void    scsi_reset() {}
   void            scsi_set_phase(int bus, int phase);
   int             scsi_get_phase(int bus);
   void            scsi_free(int bus);

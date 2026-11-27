@@ -29,31 +29,34 @@
 #include "CPU/AlphaCPU.h"
 #include "system/System_pelican.h"
 #include "system/PelicanIOCTL.h"
+#include "system/PelicanTCDS.h"
 #include "graphics/CXTurbo.h"
 #include <sstream>
 
 class Pelican::Registers final : public CSystemComponent
 {
+  enum { MemoryAndLeds, Interrupt, SparseInterrupt };
 public:
   Registers(CConfigurator* cfg, Pelican& system) : CSystemComponent(cfg, &system), board(system)
   {
     // MCR and LED occupy consecutive dense quadwords in slot 7 (EK-D3SYS-PM, Tables 6 and 9).
-    board.RegisterMemory(this, 0, U64(0x1e0000010), 16);
-    board.RegisterMemory(this, 1, U64(0x1e0000000), 8);
+    board.RegisterMemory(this, MemoryAndLeds, U64(0x1e0000010), 16);
+    board.RegisterMemory(this, Interrupt, U64(0x1e0000000), 8);
+    board.RegisterMemory(this, SparseInterrupt, U64(0x1f0000000), 8); // PELI_IO I21F's SCSI interrupt test reads IR via I/O descriptor 4 (offset 0x19c50).
     save_item(board.lit_leds, "lit_leds");
   }
 
   bool decodes_memory_access(int index, u64 address, int dsize, bool write) const noexcept override
   {
-    if (index == 1)
-      return !write && address == 0 && (dsize == 32 || dsize == 64);
+    if (index != MemoryAndLeds)
+      return !write && address == 0 && (dsize == 32 || (index == Interrupt && dsize == 64));
     return (dsize == 32 || dsize == 64) && address == (write ? 8u : 0u);
   }
 
   u64 ReadMem(int index, u64, int) override
   {
-    if (index == 1)
-      return board.interrupt_reasons(); // IR<4> is slot 5 I/O and IR<2> is CXTurbo (EK-D3SYS-PM, §3.2.1).
+    if (index != MemoryAndLeds)
+      return board.interrupt_reasons(); // IR<4:2> report slot 5 I/O, TCDS and CXTurbo (EK-D3SYS-PM, §3.2.1).
     return board.population.size_straps;
   }
 
@@ -142,6 +145,12 @@ void Pelican::attach_board_devices(CConfigurator* cfg)
   new Registers(cfg, *this);
   io_control = new PelicanIOCTL(cfg, this);
   graphics = new CXTurbo(cfg, *this);
+  tcds = new PelicanTCDS(cfg, this);
+}
+
+CDiskController& Pelican::scsi_controller()
+{
+  return *tcds;
 }
 
 void Pelican::bind_board_devices()
@@ -152,6 +161,7 @@ void Pelican::bind_board_devices()
 u32 Pelican::interrupt_reasons() const
 {
   return (io_control && io_control->interrupt() ? 1U << 4 : 0)
+       | (tcds && tcds->interrupt() ? 1U << 3 : 0)
        | (graphics && graphics->interrupt() ? 1U << 2 : 0);
 }
 

@@ -851,6 +851,7 @@ classinfo classes[] = {
   {"sym53c895", c_sym53c895, IS_PCI | HAS_DISK, kv_none},
   {"sym53c810", c_sym53c810, IS_PCI | HAS_DISK, kv_none},
   {"floppy", c_floppy, ON_CS | HAS_DISK, kv_none},
+  {"tcds", c_tcds, ON_CS | HAS_DISK, kv_none},
   {"file", c_file, IS_DISK, kv_disk_file},
   {"device", c_device, IS_DISK, kv_disk_device},
   {"ramdisk", c_ramdisk, IS_DISK, kv_disk_ram},
@@ -1020,9 +1021,33 @@ void CConfigurator::initialize()
 	myFlags = device->flags;
 	if (myClassId == c_none)
 		FAILURE_2(Configuration, "Class %s for %s not known", myValue, myName);
-	if (myClassId == c_pelican &&
-		(iNumChildren != 1 || config_class(pChildren[0]->myValue).id != c_ev4))
-		FAILURE(Configuration, "The DEC 3000 Model 300X requires one EV4 CPU as its only configured child");
+	if (myClassId == c_pelican)
+	{
+		unsigned cpus = 0, controllers = 0;
+		for (int child = 0; child < iNumChildren; ++child) {
+			const auto id = config_class(pChildren[child]->myValue).id;
+			if (id == c_ev4) ++cpus;
+			else if (id == c_tcds) ++controllers;
+			else FAILURE_1(Configuration, "Class %s is unavailable on Pelican", pChildren[child]->myValue);
+		}
+		if (cpus != 1 || controllers > 1)
+			FAILURE(Configuration, "Pelican requires one EV4 CPU and accepts one onboard scsi0=tcds");
+	}
+	if (myClassId == c_tcds)
+	{
+		if (pParent->get_class_id() != c_pelican || strcasecmp(myName, "scsi0"))
+			FAILURE(Configuration, "Name the onboard Pelican SCSI controller scsi0=tcds");
+		unsigned targets = 0;
+		for (int child = 0; child < iNumChildren; ++child) {
+			const char* name = pChildren[child]->myName;
+			if (!(config_class(pChildren[child]->myValue).flags & IS_DISK) || strncasecmp(name, "disk0.", 6) ||
+				name[6] < '0' || name[6] > '6' || name[7])
+				FAILURE_1(Configuration, "Pelican SCSI target %s must be disk0.0 through disk0.6", name);
+			const unsigned bit = 1u << (name[6] - '0');
+			if (targets & bit) FAILURE_1(Configuration, "Duplicate Pelican SCSI target %s", name);
+			targets |= bit;
+		}
+	}
 
 #if defined(_WIN32) && !defined(CONFIGURATION_ONLY)
 	// Override the GUI in memory.
@@ -1221,6 +1246,9 @@ void CConfigurator::initialize()
 		break;
 	case c_ev4:
 		myDevice = new CAlphaCPU(this, (CSystem*)pParent->get_device(), kEv4Profile);
+		break;
+	case c_tcds:
+		myDevice = &static_cast<Pelican*>(static_cast<CSystem*>(pParent->get_device()))->scsi_controller();
 		break;
 
 	case c_ali:

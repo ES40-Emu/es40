@@ -186,7 +186,9 @@ CDisk::CDisk(CConfigurator* cfg, CSystem* sys, CDiskController* ctrl,
 	// Jensen installs the RRD42 MODE jumper for 512-byte blocks (EK-A0636-TM, Table A-1; EK-RRD42-OM, p. 2-5).
 	auto* board = controller->get_myParent();
 	const bool jensen_rrd42 = controller->get_class_id() == c_aha1742 && board && board->get_class_id() == c_jensen;
-	state.block_size = is_cdrom && !jensen_rrd42 ? cd_sector_bytes : 512;
+	// The Pelican RRD42 uses the same MODE jumper (EK-RRD42-OM, p. 2-5).
+	const bool mode_jumper = jensen_rrd42 || controller->get_class_id() == c_tcds;
+	state.block_size = is_cdrom && !mode_jumper ? cd_sector_bytes : 512;
 	state.byte_pos = 0;
 	state.scsi.sense.available = false;
 	state.scsi.locked = false;

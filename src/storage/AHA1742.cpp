@@ -225,7 +225,7 @@ void AHA1742::start_ccb(u32 address, u8 target)
   if (!bus.slot_master_read(slot, address, ecb, sizeof(ecb)))
     return;
   // The option flags in bits 14-12 are not part of the operation code (AHA-1740A TRM, p. 6-4).
-  const u16 operation = get_le16(ecb + CommandWord) & 0x0fff, flags = get_le16(ecb + FlagWord1);
+  const u16 operation = get_le16(ecb + CommandWord) & 0x0fff, flags = get_le16(ecb + FlagWord1), flags2 = get_le16(ecb + FlagWord2);
   // Run Diagnostic Test, Initialize SCSI Subsystem, Download Firmware and Target SCSI Command are not carried out yet.
   if (operation == RunDiagnosticTest || operation == InitializeSubsystem || operation == DownloadFirmware || operation == TargetCommand)
     return;
@@ -246,18 +246,23 @@ void AHA1742::start_ccb(u32 address, u8 target)
     held[held_count++] = u64(target) << 32 | address;
     return;
   }
-  if (operation == InitiatorCommand)
+  // Flag word 1 bits kept to certain operations: Chain No Error to Initiator SCSI Command and No Operation, Scatter/Gather and Automatic Request Sense to Initiator SCSI Command (AHA-1740A TRM, pp. 6-5, 6-6).
+  const u16 refused = u16(operation == InitiatorCommand ? 0 : operation == NoOperation ? ScatterGather | AutomaticRequestSense : ChainNoError | ScatterGather | AutomaticRequestSense);
+  // Any code but these four is not an operation of this adapter (AHA-1740A TRM, pp. 6-4, 6-17).
+  if (operation != NoOperation && operation != InitiatorCommand && operation != ReadSenseInformation && operation != ReadInquiryData)
+    specification_check(status, InvalidOperation);
+  // One of those bits on another operation is an invalid parameter; so are Calculate Checksum, kept to Download Firmware, and Error Recovery outside an extended contingent allegiance, which never arises here (AHA-1740A TRM, pp. 6-5, 6-6, 6-9, 6-10).
+  else if ((flags & refused) || (flags2 & (CalculateChecksum | ErrorRecovery)))
+    specification_check(status, InvalidParameter);
+  else if (operation == InitiatorCommand)
     initiator_command(ecb, target, status);
   else if (operation == ReadSenseInformation)
     read_sense_information(ecb, target, status);
   else if (operation == ReadInquiryData)
     read_inquiry_data(ecb, status);
   // No Operation stays off the SCSI bus and only reports back, to test the interface or to mark progress in a chain (AHA-1740A TRM, pp. 6-27, 6-28).
-  else if (operation == NoOperation)
-    put_le16(status + StatusWord, CommandDone);
-  // Any other code is not an operation of this adapter (AHA-1740A TRM, pp. 6-4, 6-17).
   else
-    specification_check(status, InvalidOperation);
+    put_le16(status + StatusWord, CommandDone);
   const u16 word = get_le16(status + StatusWord);
   // A check condition whose sense information was not stored puts the target in contingent allegiance (AHA-1740A TRM, p. 6-18).
   if (status[TargetStatus] == CheckCondition && !(word & SenseStored))
@@ -282,8 +287,8 @@ void AHA1742::start_ccb(u32 address, u8 target)
     completions[(completion_head + completion_count++) % InterruptQueueSize] = u64(code) << 32 | address;
     post_completion();
   }
-  // Completion of Read Sense Information releases the allegiance, and the target's kept control blocks are started in the order they came (AHA-1740A TRM, pp. 6-18, 6-34).
-  if (!reset && (operation != ReadSenseInformation || !(allegiance >> target & 1)))
+  // Completion of Read Sense Information, unless it was rejected, releases the allegiance, and the target's kept control blocks are started in the order they came (AHA-1740A TRM, pp. 6-18, 6-34).
+  if (!reset && (operation != ReadSenseInformation || (word & SpecificationCheck) || !(allegiance >> target & 1)))
     return;
   allegiance &= u16(~(1 << target));
   const u8 kept = held_count;

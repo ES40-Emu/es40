@@ -63,10 +63,10 @@ private:
   enum { StatusWord = 0x00, HostAdapterStatus = 0x02, TargetStatus = 0x03, ResidualCount = 0x04, ResidualAddress = 0x08, AdditionalStatusLength = 0x0c, StoredSenseLength = 0x0e };
   // Operation codes (AHA-1740A TRM, p. 6-4).
   enum { NoOperation = 0x00, InitiatorCommand = 0x01, RunDiagnosticTest = 0x05, InitializeSubsystem = 0x06, ReadSenseInformation = 0x08, DownloadFirmware = 0x09, ReadInquiryData = 0x0a, TargetCommand = 0x10 };
-  // Flag word 1 bits 7, 10, 12, 14 and 15 (AHA-1740A TRM, pp. 6-5, 6-6).
-  enum { DisableInterrupt = 0x0080, SuppressUnderrunError = 0x0400, ScatterGather = 0x1000, DisableStatusBlock = 0x4000, AutomaticRequestSense = 0x8000 };
-  // Flag word 2 bits 2-0, 6, 8, 9 and 10 (AHA-1740A TRM, pp. 6-7 to 6-9).
-  enum { LogicalUnit = 0x0007, NoDisconnect = 0x0040, DataTransfer = 0x0100, Direction = 0x0200, SuppressTransfer = 0x0400 };
+  // Flag word 1 bits 0, 7, 10, 12, 14 and 15 (AHA-1740A TRM, pp. 6-5, 6-6).
+  enum { ChainNoError = 0x0001, DisableInterrupt = 0x0080, SuppressUnderrunError = 0x0400, ScatterGather = 0x1000, DisableStatusBlock = 0x4000, AutomaticRequestSense = 0x8000 };
+  // Flag word 2 bits 2-0, 6, 8, 9, 10, 11 and 14 (AHA-1740A TRM, pp. 6-7 to 6-10).
+  enum { LogicalUnit = 0x0007, NoDisconnect = 0x0040, DataTransfer = 0x0100, Direction = 0x0200, SuppressTransfer = 0x0400, CalculateChecksum = 0x0800, ErrorRecovery = 0x4000 };
   // Status word bits 0, 1, 3, 4, 5, 7, 8, 9 and 12; the status word figure and p. 6-19 put Additional Status Available at bit 8 (AHA-1740A TRM, pp. 6-14 to 6-16, 6-19).
   enum { CommandDone = 0x0001, DataUnderrun = 0x0002, QueueFull = 0x0008, SpecificationCheck = 0x0010, DataOverrun = 0x0020, InterruptIssued = 0x0080, AdditionalStatus = 0x0100, SenseStored = 0x0200, MajorError = 0x1000 };
   // Host adapter status codes; 22h is also the reset code an event notification gives in the mailbox in (AHA-1740A TRM, pp. 6-17, 6-41).

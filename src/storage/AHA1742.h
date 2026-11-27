@@ -82,7 +82,6 @@ private:
   void specification_check(u8* status, u8 reason);
   void immediate_command(u32 command, u8 target);
   void forget(bool all, u8 target);
-  void reset_scsi_bus();
   void read_inquiry_data(const u8* ecb, u8* status);
   void initiator_command(const u8* ecb, u8 target, u8* status);
   void read_sense_information(const u8* ecb, u8 target, u8* status);

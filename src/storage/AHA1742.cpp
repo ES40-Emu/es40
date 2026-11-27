@@ -161,7 +161,7 @@ void AHA1742::WriteMem(int index, u64 address, int dsize, u64 data)
     g2stat = MailboxOutEmpty;
     // With RSTPWR set the power-on sequence after a Hard Reset resets the SCSI bus, and the host is not notified (AHA-1740A TRM, pp. 4-16, 6-46).
     if (config[SCSIDEF] & RSTPWR)
-      reset_scsi_bus();
+      scsi_bus[0]->reset_bus();
   }
   // Clearing the interrupt tells the local processor the mailbox in is free for the next completion (AHA-1740A TRM, p. 4-20).
   post_completion();
@@ -177,7 +177,7 @@ void AHA1742::immediate_command(u32 command, u8 target)
     allegiance = 0;
     event_pending = false;
     if (!(command & AdapterResetOption))
-      reset_scsi_bus();
+      scsi_bus[0]->reset_bus();
   } else if (u8(command) == ImmediateReset) {
     // Reset with another ID drops that target's control blocks and queued interrupts (AHA-1740A TRM, p. 6-43).
     forget(false, target);
@@ -215,14 +215,6 @@ void AHA1742::forget(bool all, u8 target)
       completions[(completion_head + waiting++) % InterruptQueueSize] = completion;
   }
   completion_count = waiting;
-}
-
-// A SCSI bus reset returns every target on the bus to its power-on state.
-void AHA1742::reset_scsi_bus()
-{
-  for (int id = 0; id < 8; ++id)
-    if (CDisk* disk = get_disk(0, id))
-      disk->scsi_reset();
 }
 
 // A control block is started with the SCSI ID that was in ATTN bits 3-0 when its address was given (AHA-1740A TRM, p. 6-20).
@@ -273,7 +265,7 @@ void AHA1742::start_ccb(u32 address, u8 target)
   // An invalid bus phase is an error the adapter cannot recover from: it resets the SCSI bus, which ends every allegiance, and its event notification waits ahead of this control block's completion (AHA-1740A TRM, pp. 6-17, 6-41, 6-47).
   const bool reset = status[HostAdapterStatus] == InvalidPhase;
   if (reset) {
-    reset_scsi_bus();
+    scsi_bus[0]->reset_bus();
     allegiance = 0;
     event_pending = true;
     completions[(completion_head + completion_count++) % InterruptQueueSize] = u64(EventNotification << 4 | (config[SCSIDEF] & HSCSIID)) << 32 | ResetByAdapter;

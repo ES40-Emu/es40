@@ -131,6 +131,7 @@
 #include "Disk.h"
 #include "DiskFile.h"
 
+#include <algorithm>
 #include <memory>
 
 static constexpr size_t cd_sector_bytes = 2048;
@@ -1353,7 +1354,6 @@ int CDisk::do_scsi_command()
 
 		u8  qual_dev = state.scsi.lun_selected ? 0x7F : (cdrom() ? 0x05 : 0x00);
 
-		retlen = state.scsi.cmd.data[4];
 		state.scsi.dati.data[0] = qual_dev; // device type
 		if (state.scsi.cmd.data[1] & 0x01)
 		{
@@ -1393,21 +1393,18 @@ int CDisk::do_scsi_command()
 				state.scsi.dati.data[2] = 0x00; // reserved
 #endif
 			}
+			retlen = 4 + state.scsi.dati.data[3];
 		}
 		else
 		{
 
-			//  Return values:
-			if (retlen < 36)
-			{
-				printf("%s: SCSI inquiry len=%i, <36!\n", devid_string, retlen);
-				retlen = 36;
-			}
+			// Standard INQUIRY returns the identification through the revision field (SCSI-2, §8.2.5.1).
+			retlen = 36;
 
 			state.scsi.dati.data[1] = 0;      // not removable;
 			state.scsi.dati.data[2] = 0x02;   // ANSI scsi 2
 			state.scsi.dati.data[3] = 0x02;   // response format
-			state.scsi.dati.data[4] = 32;     // additional length
+			state.scsi.dati.data[4] = u8(retlen - 5); // additional length
 			state.scsi.dati.data[5] = 0;      // reserved
 			state.scsi.dati.data[6] = 0x04;   // reserved
 			state.scsi.dati.data[7] = 0x60;   // capabilities
@@ -1426,11 +1423,11 @@ int CDisk::do_scsi_command()
 		}
 
 		state.scsi.dati.read = 0;
-		state.scsi.dati.available = retlen;
+		state.scsi.dati.available = std::min<unsigned>(retlen, state.scsi.cmd.data[4]);
 
 #if defined(DEBUG_SCSI)
 		printf("%s: Returning data: ", devid_string);
-		for (unsigned int x1 = 0; x1 < 36; x1++)
+		for (unsigned int x1 = 0; x1 < state.scsi.dati.available; x1++)
 			printf("%02x ", state.scsi.dati.data[x1]);
 		printf("\n");
 #endif

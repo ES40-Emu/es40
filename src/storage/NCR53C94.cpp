@@ -424,7 +424,7 @@ bool ncr53c94_device::send_byte(u8 data, bool end_message)
       scsi_xfer_done(0);
     break;
   case SCSI_PHASE_COMMAND: {
-    // The target requests the CDB length implied by the opcode group (SCSI-2, Table 7).
+    // The target requests the CDB length implied by the opcode group (SCSI-2, section 7.2.1).
     static constexpr u8 length[] = {6, 10, 10, 6, 16, 12, 6, 10};
     if (!cdb_remaining)
       cdb_remaining = length[data >> 5];

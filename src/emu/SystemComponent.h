@@ -101,6 +101,7 @@ class CDMA;
    **/
 class CSystemComponent
 {
+  friend class device_t;
 public:
   virtual int   RestoreState(FILE* f);
   virtual int   SaveState(FILE* f);

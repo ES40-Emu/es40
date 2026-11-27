@@ -30,6 +30,7 @@
 // mame code compat shims
 
 #include "StdAfx.h"
+#include "emu/SystemComponent.h"
 #include <cstdint>
 #include <cstring>
 #include <vector>
@@ -184,6 +185,7 @@ public:
   const rectangle& visible_area() const { return m_visarea; }
 
   uint64_t frame_number() const { return m_frame_number; }
+  void     set_frame_number(uint64_t frame) { m_frame_number = frame; }
   void     tick_frame() { m_frame_number++; }
 
   // Stubs for MAME timing APIs (not meaningful in ES40)
@@ -254,7 +256,8 @@ class device_t : public mame_machine_provider
 public:
   device_t() = default;
   device_t(const machine_config& /*mconfig*/, device_type /*type*/,
-    const char* /*tag*/, device_t* /*owner*/, uint32_t /*clock*/)
+    const char* tag, device_t* /*owner*/, uint32_t /*clock*/)
+    : m_tag(tag ? tag : "")
   {
   }
 
@@ -263,8 +266,9 @@ public:
   void start() { device_start(); }
   void reset() { device_reset(); }
 
-  // Tag system (stub)
-  const char* tag() const { return ""; }
+  // Embedded devices save tag-qualified fields in their ES40 component.
+  const char* tag() const { return m_tag.c_str(); }
+  void set_save_owner(CSystemComponent& owner) { m_save_owner = &owner; }
 
   // Sub-device lookup stub
   template<typename T>
@@ -273,6 +277,46 @@ protected:
   // MAME lifecycle — overridden by subclasses
   virtual void device_start() {}
   virtual void device_reset() {}
+
+  template <typename T>
+  void save_item(T& item, const char* name, int index = 0)
+  {
+    if (m_save_owner)
+      m_save_owner->save_item(item, (m_tag + "." + name).c_str(), index);
+  }
+
+  template <typename T>
+  void save_pointer(T& data, const char* name, uint32_t count, int index = 0)
+  {
+    if (m_save_owner)
+      m_save_owner->save_pointer(data, (m_tag + "." + name).c_str(), count, index);
+  }
+
+private:
+  std::string m_tag;
+  CSystemComponent* m_save_owner = nullptr;
+};
+
+class devcb_write_line
+{
+public:
+  explicit devcb_write_line(device_t&) {}
+
+  class binder
+  {
+  public:
+    explicit binder(std::function<void(int)>& target) : m_target(target) {}
+    template <typename F> void set(F&& f) { m_target = std::forward<F>(f); }
+
+  private:
+    std::function<void(int)>& m_target;
+  };
+
+  binder bind() { return binder(m_callback); }
+  void operator()(int level) const { if (m_callback) m_callback(level); }
+
+private:
+  std::function<void(int)> m_callback;
 };
 
 template<typename T>

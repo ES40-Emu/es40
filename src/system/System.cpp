@@ -1808,12 +1808,12 @@ void CSystem::set_isa_memory_window(CSystemComponent& device, int index, int bus
 void CSystem::init()
 {
 	SDeviceAccessScope time_scope(this);
-	// Count outputs as well as cards, including future multi-output devices.
+	bind_board_devices();
+	// Count outputs as well as cards, including integrated and multi-output devices.
 	// Reject before init creates display resources.
 	if (!graphics_multihead && get_display_outputs().size() > 1)
 		FAILURE(Configuration,
 			"Multiple display outputs require graphics.multihead=true in the system configuration");
-	bind_board_devices();
 	{
 		// Owner links are bound above, after the ranges were registered.
 		std::lock_guard<std::recursive_mutex> bus_lock(device_bus_mutex);

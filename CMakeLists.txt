@@ -555,6 +555,9 @@ list(APPEND ES40_SOURCES
     src/graphics/RV200.cpp
     src/graphics/S3Trio64.cpp
     src/graphics/NumberNineGXE.cpp
+    src/graphics/Bt459.cpp
+    src/graphics/CXTurbo.cpp
+    src/graphics/SFB.cpp
     src/graphics/Bt485.cpp
     src/graphics/Icd2061A.cpp
     src/storage/SCSIBus.cpp

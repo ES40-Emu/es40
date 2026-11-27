@@ -352,7 +352,13 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        graphics/S3Trio64.cpp \
        graphics/NumberNineGXE.cpp \
        graphics/NumberNineGXE.h \
+       graphics/Bt459.cpp \
+       graphics/CXTurbo.cpp \
+       graphics/SFB.cpp \
        graphics/Bt485.cpp \
+       graphics/Bt459.h \
+       graphics/CXTurbo.h \
+       graphics/SFB.h \
        graphics/Bt485.h \
        graphics/Icd2061A.cpp \
        graphics/Icd2061A.h \

@@ -392,10 +392,18 @@ void bx_gui_c::graphics_tile_update_in_place(unsigned x0, unsigned y0,
 // Export ownership changes only on the configuration thread.
 static CDisplayOutput* exported_output = nullptr;
 
+CDisplayOutput::CDisplayOutput(unsigned id) : m_id(id) {}
+
 CDisplayOutput::CDisplayOutput(unsigned id, bx_gui_c& display, CConfigurator* cfg)
-	: m_id(id), m_display(display)
+	: CDisplayOutput(id)
 {
-	const char* path = cfg->get_myParent()->get_text_value("framebuffer.path", "");
+	bind(display, cfg->get_myParent());
+}
+
+void CDisplayOutput::bind(bx_gui_c& display, CConfigurator* system_cfg)
+{
+	m_display = &display;
+	const char* path = system_cfg->get_text_value("framebuffer.path", "");
 	if (path && *path && !exported_output)
 	{
 		try
@@ -421,7 +429,7 @@ void CDisplayOutput::initialize(unsigned tile_width, unsigned tile_height)
 {
 	if (!m_initialized)
 	{
-		m_display.init(tile_width, tile_height);
+		m_display->init(tile_width, tile_height);
 		m_initialized = true;
 	}
 }
@@ -430,7 +438,7 @@ void CDisplayOutput::resize_argb32(unsigned width, unsigned height, bool force)
 {
 	if (force || !m_dimensions_valid || width != m_width || height != m_height)
 	{
-		m_display.dimension_update(width, height, 0, 0, 32);
+		m_display->dimension_update(width, height, 0, 0, 32);
 		m_width = width;
 		m_height = height;
 		m_dimensions_valid = true;
@@ -442,14 +450,14 @@ void CDisplayOutput::present_argb32(const u32* pixels,
 {
 	resize_argb32(width, height);
 	export_frame(pixels, width, height);
-	m_display.graphics_frame_update(pixels, width, height);
+	m_display->graphics_frame_update(pixels, width, height);
 }
 
 void CDisplayOutput::clear_screen()
 {
 	if (m_width && m_height)
 		export_frame(nullptr, m_width, m_height);
-	m_display.clear_screen();
+	m_display->clear_screen();
 }
 
 void CDisplayOutput::export_frame(const u32* pixels, unsigned width, unsigned height)

@@ -26,9 +26,8 @@
  */
 
 #include "StdAfx.h"
-#include "CPU/AlphaCPU.h"
 #include "system/PelicanIOCTL.h"
-#include "system/System.h"
+#include "system/System_pelican.h"
 #include <fstream>
 #include <utility>
 
@@ -53,7 +52,7 @@ static unsigned scc_number(int index)
   return (index == DenseSCC1 || index == SparseSCC1) ? 1 : 0;
 }
 
-PelicanIOCTL::PelicanIOCTL(CConfigurator* cfg, CSystem* system) : CSystemComponent(cfg, system)
+PelicanIOCTL::PelicanIOCTL(CConfigurator* cfg, Pelican* system) : CSystemComponent(cfg, system), board(*system)
 {
   unsigned fitted = 0;
   for (size_t bank = 0; bank < chips.size(); ++bank) {
@@ -312,7 +311,7 @@ u64 PelicanIOCTL::ReadMem(int index, u64 address, int dsize)
     value |= u64(high) << 32;
   }
   if (serial)
-    update_irq();
+    board.update_io_irq();
   return value;
 }
 
@@ -354,7 +353,7 @@ void PelicanIOCTL::WriteMem(int index, u64 address, int dsize, u64 data)
   write_register(index, offset, u32(data), mask);
   if (!sparse && dsize == 64)
     write_register(index, offset + 4, u32(data >> 32), 0xffffffffU);
-  update_irq();
+  board.update_io_irq();
 }
 
 u32 PelicanIOCTL::serial_interrupts() const
@@ -366,16 +365,6 @@ bool PelicanIOCTL::interrupt() const
 {
   // SIMR gates the CPU interrupt without clearing the pending SIR bit (EK-D3SYS-PM, §7.3.13).
   return (interrupt_mask & serial_interrupts()) != 0;
-}
-
-void PelicanIOCTL::update_irq()
-{
-  const bool asserted = interrupt();
-  if (asserted != irq_asserted) {
-    irq_asserted = asserted;
-    if (cSystem->get_cpu_num())
-      cSystem->get_cpu(0)->irq_h(3, asserted, 0); // Slot 5 drives IR<4> and CPU IRQ3 (EK-D3SYS-PM, §§3.2.1, 17.5).
-  }
 }
 
 void PelicanIOCTL::refresh_serial()
@@ -399,7 +388,7 @@ void PelicanIOCTL::run_serial()
   std::unique_lock<std::recursive_mutex> lock(cSystem->get_device_bus_mutex());
   while (serial_sample != std::chrono::steady_clock::time_point{}) {
     refresh_serial();
-    update_irq();
+    board.update_io_irq();
     serial_wakeup.wait_for(lock, std::chrono::nanoseconds(LK401::frame_ns));
   }
 }
@@ -419,7 +408,7 @@ void PelicanIOCTL::stop_threads()
     std::lock_guard<std::recursive_mutex> guard(cSystem->get_device_bus_mutex());
     if (serial_sample != std::chrono::steady_clock::time_point{}) {
       refresh_serial();
-      update_irq();
+      board.update_io_irq();
       serial_sample = {};
       serial_wakeup.notify_all();
     }
@@ -437,7 +426,7 @@ void PelicanIOCTL::ResetPCI()
   mouse.rebase_clock(serial_clock_ns);
   keyboard.reset();
   keyboard.rebase_clock(serial_clock_ns);
-  update_irq();
+  board.update_io_irq();
 }
 
 void PelicanIOCTL::prepare_snapshot()
@@ -457,6 +446,4 @@ void PelicanIOCTL::finalize_restore() noexcept
 {
   mouse.rebase_clock(serial_clock_ns);
   keyboard.rebase_clock(serial_clock_ns);
-  irq_asserted = !interrupt();
-  update_irq();
 }

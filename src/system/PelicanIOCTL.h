@@ -38,10 +38,12 @@
 #include <optional>
 #include <thread>
 
+class Pelican;
+
 class PelicanIOCTL : public CSystemComponent
 {
 public:
-  PelicanIOCTL(CConfigurator* cfg, CSystem* system);
+  PelicanIOCTL(CConfigurator* cfg, Pelican* system);
   ~PelicanIOCTL() override;
   KeyboardInput* keyboard_input() { return &keyboard; }
   MouseInput* mouse_input() { return &mouse; }
@@ -67,7 +69,7 @@ private:
   void register_keyboard_state();
   u32 serial_interrupts() const;
   void refresh_serial();
-  void update_irq();
+  Pelican& board;
   void run_serial();
 
   // Each configured image corresponds to the literal SSR<9,7> chip select (EK-D3SYS-PM, §7.3.11).
@@ -77,7 +79,6 @@ private:
   std::array<Z85C30, 2> scc;
   VSXXXMouse mouse;
   LK401 keyboard;
-  bool irq_asserted = false;
   std::thread serial_thread;
   std::condition_variable_any serial_wakeup;
   u64 serial_clock_ns = 0;

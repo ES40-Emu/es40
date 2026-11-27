@@ -29,6 +29,7 @@
 #include "CPU/AlphaCPU.h"
 #include "system/System_pelican.h"
 #include "system/PelicanIOCTL.h"
+#include "graphics/CXTurbo.h"
 #include <sstream>
 
 class Pelican::Registers final : public CSystemComponent
@@ -52,7 +53,7 @@ public:
   u64 ReadMem(int index, u64, int) override
   {
     if (index == 1)
-      return board.io_control->interrupt() ? 1U << 4 : 0; // IR<4> is the slot 5 I/O interrupt (EK-D3SYS-PM, §3.2.1).
+      return board.interrupt_reasons(); // IR<4> is slot 5 I/O and IR<2> is CXTurbo (EK-D3SYS-PM, §3.2.1).
     return board.population.size_straps;
   }
 
@@ -140,6 +141,32 @@ void Pelican::attach_board_devices(CConfigurator* cfg)
 {
   new Registers(cfg, *this);
   io_control = new PelicanIOCTL(cfg, this);
+  graphics = new CXTurbo(cfg, *this);
+}
+
+void Pelican::bind_board_devices()
+{
+  graphics->bind_display();
+}
+
+u32 Pelican::interrupt_reasons() const
+{
+  return (io_control && io_control->interrupt() ? 1U << 4 : 0)
+       | (graphics && graphics->interrupt() ? 1U << 2 : 0);
+}
+
+void Pelican::update_io_irq(bool force)
+{
+  const bool level = interrupt_reasons() != 0;
+  if (get_cpu_num() && (force || level != io_irq_asserted)) {
+    io_irq_asserted = level;
+    get_cpu(0)->irq_h(3, level, 0); // TURBOchannel interrupt sources share IRQ3 (EK-D3SYS-PM, §§3.2.1, 17.5).
+  }
+}
+
+void Pelican::finish_board_restore()
+{
+  update_io_irq(true);
 }
 
 MouseInput* Pelican::mouse_input()

@@ -213,11 +213,14 @@ class CShmFramebuffer;
 class CDisplayOutput
 {
 public:
+  explicit CDisplayOutput(unsigned id);
+  void bind(bx_gui_c& display, CConfigurator* system_cfg);
   CDisplayOutput(unsigned id, bx_gui_c& display, CConfigurator* cfg);
   ~CDisplayOutput();
 
   unsigned id() const { return m_id; }
-  bx_gui_c& display() const { return m_display; }
+  bool bound() const { return m_display != nullptr; }
+  bx_gui_c& display() const { return *m_display; }
   bool initialized() const { return m_initialized; }
 
   // Callers retain GUI locking and flushing.
@@ -230,7 +233,7 @@ public:
 private:
   void export_frame(const u32* pixels, unsigned width, unsigned height);
   const unsigned m_id;
-  bx_gui_c& m_display;
+  bx_gui_c* m_display = nullptr;
   std::unique_ptr<CShmFramebuffer> m_export;
   bool m_initialized = false;
   bool m_dimensions_valid = false;
@@ -241,15 +244,16 @@ private:
 class CDisplayOutputProvider
 {
 public:
+  explicit CDisplayOutputProvider(unsigned id) : m_output(id) {}
   CDisplayOutputProvider(unsigned id, bx_gui_c& display, CConfigurator* cfg)
     : m_output(id, display, cfg) {}
 
   virtual ~CDisplayOutputProvider() = default;
-  virtual std::size_t output_count() const { return 1; }
+  virtual std::size_t output_count() const { return m_output.bound() ? 1 : 0; }
   // Returns a borrowed binding, or nullptr when out of range.
   virtual const CDisplayOutput* output_at(std::size_t ordinal) const
   {
-    return ordinal == 0 ? &m_output : nullptr;
+    return ordinal < output_count() ? &m_output : nullptr;
   }
 
 protected:

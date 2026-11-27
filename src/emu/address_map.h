@@ -82,7 +82,7 @@ auto bind_map_member(Owner* owner, Member member)
 {
   static_assert(std::is_member_function_pointer_v<Member>,
     "FUNC requires a member function");
-  return [owner, member](auto&&... args) -> decltype(auto) {
+  return [owner, member](auto&&... args) -> decltype(std::invoke(member, owner, std::forward<decltype(args)>(args)...)) {
     return std::invoke(member, owner, std::forward<decltype(args)>(args)...);
   };
 }
@@ -105,25 +105,44 @@ public:
     : m_map(parent), m_lo(lo), m_hi(hi), m_mirror(0), m_select(0) {
   }
 
+  // MAME single-register handlers may omit the address offset.
+  template <typename T>
+  static auto byte_reader(T&& fn)
+  {
+    if constexpr (std::is_invocable_v<T&, offs_t>)
+      return std::forward<T>(fn);
+    else
+      return [read = std::forward<T>(fn)](offs_t) mutable { return read(); };
+  }
+
+  template <typename T>
+  static auto byte_writer(T&& fn)
+  {
+    if constexpr (std::is_invocable_v<T&, offs_t, u8>)
+      return std::forward<T>(fn);
+    else
+      return [write = std::forward<T>(fn)](offs_t, u8 data) mutable { write(data); };
+  }
+
   // Byte member handlers use the same dispatch and offset rules as lambdas.
   template <typename T>
   address_map_entry& r(T&& read_fn, const char* name)
   {
-    return lr8(std::forward<T>(read_fn), name);
+    return lr8(byte_reader(std::forward<T>(read_fn)), name);
   }
 
   template <typename T>
   address_map_entry& w(T&& write_fn, const char* name)
   {
-    return lw8(std::forward<T>(write_fn), name);
+    return lw8(byte_writer(std::forward<T>(write_fn)), name);
   }
 
   template <typename T, typename U>
   address_map_entry& rw(T&& read_fn, const char* read_name,
     U&& write_fn, const char* write_name)
   {
-    return lrw8(std::forward<T>(read_fn), read_name,
-      std::forward<U>(write_fn), write_name);
+    return lrw8(byte_reader(std::forward<T>(read_fn)), read_name,
+      byte_writer(std::forward<U>(write_fn)), write_name);
   }
 
   /// .lrw8(read_fn, read_name, write_fn, write_name)

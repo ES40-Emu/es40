@@ -762,7 +762,7 @@ static const char* const kv_tsunami[] = {
 static const char* const kv_jensen[] = {
   "memory.bits", "rom.srom", "rom.flash0", "rom.flash1", "rom.toy", "time", "qmp.port", 0 };
 static const char* const kv_pelican[] = {
-  "memory.bits", "memory.pairs", "boot.direct_srm", "rom.srom", "rom.flash0", "rom.flash1", "rom.flash2", "rom.flash3", 0 };
+  "memory.bits", "memory.pairs", "boot.direct_srm", "rom.srom", "rom.flash0", "rom.flash1", "rom.flash2", "rom.flash3", "framebuffer.path", 0 };
 static const char* const kv_alpha_cpu[] = {
   "speed", "palcode.vms.nohle", "idle_nap", "idle_detect",
   "idle_spin_count", "idle_nap_poll_us", "idle_pc_lo", "idle_pc_hi",
@@ -998,7 +998,11 @@ void CConfigurator::initialize()
 			}
 		}
 #endif
-		for (int i = 0; i < iNumChildren; ++i) pChildren[i]->initialize();
+		// Bind the host GUI before constructing boards with integrated or plug-in displays.
+		for (bool gui_first : { true, false })
+			for (int i = 0; i < iNumChildren; ++i)
+				if (bool(config_class(pChildren[i]->myValue).flags & IS_GUI) == gui_first)
+					pChildren[i]->initialize();
 		return;
 	}
 

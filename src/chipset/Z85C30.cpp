@@ -163,8 +163,8 @@ u8 Z85C30::pending() const
   u8 bits = 0;
   for (const auto& p : chip.channels) {
     const unsigned mode = (p.wr[1] >> 3) & 3;
-    const bool special = p.rx_error();
-    const bool rx = (p.count && (mode == 2 || (mode == 1 && p.rx_first))) || (mode && special);
+    // All-character IP follows the FIFO; first/special and special-only signal a locked error byte (UM010901, §§2.4.7.3–5).
+    const bool rx = (p.count && (mode == 2 || (mode == 1 && p.rx_first))) || ((mode == 1 || mode == 3) && p.rx_locked);
     bits = (bits << 3) | (rx ? 4 : 0) | (p.tx_pending ? 2 : 0);
   }
   return bits;

@@ -31,6 +31,7 @@
 #include "chipset/Intel28F020.h"
 #include "chipset/Z85C30.h"
 #include "emu/SystemComponent.h"
+#include "io/LK401.h"
 #include "io/VSXXXMouse.h"
 #include <array>
 #include <condition_variable>
@@ -42,6 +43,7 @@ class PelicanIOCTL : public CSystemComponent
 public:
   PelicanIOCTL(CConfigurator* cfg, CSystem* system);
   ~PelicanIOCTL() override;
+  KeyboardInput* keyboard_input() { return &keyboard; }
   MouseInput* mouse_input() { return &mouse; }
   bool interrupt() const;
   void load_firmware(char* system_ram, char* io_ram) const;
@@ -61,21 +63,25 @@ private:
   u32 read_word(u32 offset) const;
   u32 read_register(int index, u32 offset, u32 lanes);
   void write_register(int index, u32 offset, u32 value, u32 mask);
-  void refresh_mouse();
+  void register_scc_state(unsigned chip);
+  void register_keyboard_state();
+  u32 serial_interrupts() const;
+  void refresh_serial();
   void update_irq();
-  void run_mouse();
+  void run_serial();
 
   // Each configured image corresponds to the literal SSR<9,7> chip select (EK-D3SYS-PM, §7.3.11).
   std::array<std::optional<Intel28F020>, 4> chips;
   u32 support = 0;
   u32 interrupt_mask = 0;
-  Z85C30 scc;
+  std::array<Z85C30, 2> scc;
   VSXXXMouse mouse;
+  LK401 keyboard;
   bool irq_asserted = false;
-  std::thread mouse_thread;
-  std::condition_variable_any mouse_wakeup;
-  u64 mouse_clock_ns = 0;
-  std::chrono::steady_clock::time_point mouse_sample{};
+  std::thread serial_thread;
+  std::condition_variable_any serial_wakeup;
+  u64 serial_clock_ns = 0;
+  std::chrono::steady_clock::time_point serial_sample{};
 };
 
 #endif

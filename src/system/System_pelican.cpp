@@ -147,6 +147,11 @@ MouseInput* Pelican::mouse_input()
   return io_control ? io_control->mouse_input() : nullptr;
 }
 
+KeyboardInput* Pelican::keyboard_input()
+{
+  return io_control ? io_control->keyboard_input() : nullptr;
+}
+
 int Pelican::LoadROM()
 {
   if (direct_srm) {

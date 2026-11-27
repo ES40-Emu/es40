@@ -437,6 +437,11 @@ CSystem::CSystem(CConfigurator* cfg, u64 address_mask, unsigned memory_bits)
 		cfg->get_myName(), cfg->get_myValue());
 }
 
+KeyboardInput* CSystem::keyboard_input()
+{
+	return theKeyboard;
+}
+
 MouseInput* CSystem::mouse_input()
 {
 	return theKeyboard;

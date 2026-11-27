@@ -59,6 +59,7 @@
 
 #include "emu/SystemComponent.h"
 #include "gui/gui.h"
+#include "KeyboardInput.h"
 #include "MouseInput.h"
 #include <array>
 #include <atomic>
@@ -76,7 +77,7 @@ class CAliM1543C;
   /**
    * \brief Emulated keyboard controller, keyboard and mouse.
    **/
-class CKeyboard : public CSystemComponent, public CRunnable, public MouseInput
+class CKeyboard : public CSystemComponent, public CRunnable, public MouseInput, public KeyboardInput
 {
 public:
   CKeyboard(CConfigurator* cfg, CSystem* c);
@@ -97,7 +98,7 @@ public:
   virtual void  run();
   void          execute();
 
-  void          gen_scancode(u32 key);
+  void          gen_scancode(u32 key) override;
   void          mouse_motion(int delta_x, int delta_y, int delta_z, unsigned button_state) override;
   void          set_mouse_capture(bool val) override;
 

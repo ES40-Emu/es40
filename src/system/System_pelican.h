@@ -46,6 +46,7 @@ public:
   u64 linear_ram_size() const noexcept override { return population.bytes; }
   u8 diagnostic_leds();
   MouseInput* mouse_input() override;
+  KeyboardInput* keyboard_input() override;
 
 private:
   class Registers;

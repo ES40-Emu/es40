@@ -60,7 +60,8 @@
 #include "gui.h"
 #include "keymap.h"
 #include "config/Configurator.h"
-#include "io/Keyboard.h"
+#include "io/KeyboardInput.h"
+#include "io/MouseInput.h"
 #include "system/System.h"
 #include "x11_dispatch.h"
 #include "x11_hotkey.h"
@@ -181,7 +182,7 @@ class bx_x11_gui_c : public bx_gui_c
     void configure_window(int width, int height);
     void load_video_settings();
     x11_dispatcher dispatcher;
-    CKeyboard* guest_keyboard = nullptr;
+    KeyboardInput* guest_keyboard = nullptr;
     MouseInput* guest_mouse = nullptr;
     CSystem* guest_system = nullptr;
     bool input_paused = false, input_detached = false, retired = false;
@@ -512,8 +513,8 @@ void bx_x11_gui_c::main_thread_init()
 {
   if(retired || !dispatcher.start())
     FAILURE(Runtime, "Invalid X11 application initialization");
-  guest_keyboard = theKeyboard;
   guest_system = theSystem;
+  guest_keyboard = guest_system ? guest_system->keyboard_input() : nullptr;
   guest_mouse = guest_system ? guest_system->mouse_input() : nullptr;
 }
 

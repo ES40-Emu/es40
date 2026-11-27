@@ -162,6 +162,7 @@
 class CDisplayOutput;
 class CISABus;
 class QmpInput;
+class KeyboardInput;
 class MouseInput;
 class vga_device;
 
@@ -306,6 +307,7 @@ public:
   bool          native_pal_requested() { return bNativePal; };
 
   virtual       ~CSystem();
+  virtual KeyboardInput* keyboard_input();
   virtual MouseInput* mouse_input();
   unsigned int  iNumMemoryBits;
 

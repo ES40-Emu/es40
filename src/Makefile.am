@@ -199,7 +199,9 @@ noinst_HEADERS += storage/Disk.h \
        system/System_tsunami.h \
        system/i2c_spd.h \
        io/Keyboard.h \
+       io/KeyboardInput.h \
        io/MouseInput.h \
+       io/LK401.h \
        io/VSXXXMouse.h \
        qmp/QmpInput.h \
        qmp/QmpKeymap.h \
@@ -335,6 +337,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        storage/FloppyController.cpp \
        storage/Intel82077A.cpp \
        io/Keyboard.cpp \
+       io/LK401.cpp \
        io/VSXXXMouse.cpp \
        qmp/QmpInput.cpp \
        network/lockstep.cpp \

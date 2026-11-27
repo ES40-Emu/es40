@@ -534,6 +534,7 @@ list(APPEND ES40_SOURCES
     src/system/i2c_spd.cpp
     src/graphics/ibm8514a.cpp
     src/io/Keyboard.cpp
+    src/io/LK401.cpp
     src/io/VSXXXMouse.cpp
     src/qmp/QmpInput.cpp
     src/qmp/QmpInput.h

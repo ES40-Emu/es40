@@ -73,7 +73,8 @@
 #include <vector>
 
 #include "config/Configurator.h"
-#include "io/Keyboard.h"
+#include "io/KeyboardInput.h"
+#include "io/MouseInput.h"
 #include "system/System.h"
 #include "keymap.h"
 #include "gui.h"
@@ -540,7 +541,7 @@ private:
 	bool fullscreen_handoff = false;
 	EXECUTION_STATE previous_execution_state = 0;
 	std::atomic<bool> running{ false };
-	CKeyboard* keyboard = nullptr;
+	KeyboardInput* keyboard = nullptr;
 	MouseInput* mouse = nullptr;
 	CSystem* system = nullptr;
 	bool guest_mouse_captured = false;
@@ -1100,8 +1101,8 @@ void win32_application::initialize()
 		0, 0, HWND_MESSAGE, nullptr, GetModuleHandle(nullptr), this);
 	if (!dispatcher)
 		FAILURE(Win32, "Unable to create display dispatcher");
-	keyboard = theKeyboard;
 	system = theSystem;
+	keyboard = system ? system->keyboard_input() : nullptr;
 	mouse = system ? system->mouse_input() : nullptr;
 	if (mouse) mouse->set_mouse_capture(false);
 	// Match SDL's default: guest video keeps the host display on even when

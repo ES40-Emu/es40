@@ -310,7 +310,7 @@ static u32          convertStringToSDLKey(const char* string);
 static std::atomic<bool> sdl_main_thread_owns_sdl(false);
 
 // Main-thread-only attachment, outside guest state.
-static CKeyboard* sdl_guest_keyboard = NULL;
+static KeyboardInput* sdl_guest_keyboard = NULL;
 static MouseInput* sdl_guest_mouse = NULL;
 static bool sdl_guest_input_paused = false;
 static bool sdl_poll_in_progress = false;
@@ -378,7 +378,7 @@ void bx_sdl_gui_c::main_thread_init()
 		FAILURE_1(SDL, "Unable to initialize SDL3 video subsystem: %s", SDL_GetError());
 
 	application.initialize_keymap();
-	sdl_guest_keyboard = theKeyboard;
+	sdl_guest_keyboard = theSystem ? theSystem->keyboard_input() : NULL;
 	sdl_guest_mouse = theSystem ? theSystem->mouse_input() : NULL;
 	sdl_main_thread_owns_sdl.store(true, std::memory_order_release);
 }
@@ -1556,6 +1556,11 @@ void bx_sdl_gui_c::flush(void)
 	//
 }
 
+static bool sdl_pairs_lock_key(u32 key)
+{
+	return (key == BX_KEY_NUM_LOCK || key == BX_KEY_CAPS_LOCK) && dynamic_cast<CKeyboard*>(sdl_guest_keyboard);
+}
+
 void bx_sdl_gui_c::handle_keyboard_event_impl(const SDL_Event& event)
 {
 	u32 key_event;
@@ -1679,8 +1684,8 @@ void bx_sdl_gui_c::handle_keyboard_event_impl(const SDL_Event& event)
 		}
 		sdl_event_dispatcher::send_guest_key(key_event);
 
-		// Locks: generate immediate press+release pair
-		if ((key_event == BX_KEY_NUM_LOCK) || (key_event == BX_KEY_CAPS_LOCK))
+		// PS/2 locks generate an immediate press+release pair on each SDL edge.
+		if (sdl_pairs_lock_key(key_event))
 		{
 			sdl_event_dispatcher::send_guest_key(key_event | BX_KEY_RELEASED);
 			if (event.key.scancode > SDL_SCANCODE_UNKNOWN &&
@@ -1715,7 +1720,7 @@ void bx_sdl_gui_c::handle_keyboard_event_impl(const SDL_Event& event)
 		if (key_event == BX_KEY_UNHANDLED)
 			break;
 
-		if ((key_event == BX_KEY_NUM_LOCK) || (key_event == BX_KEY_CAPS_LOCK))
+		if (sdl_pairs_lock_key(key_event))
 		{
 			sdl_event_dispatcher::send_guest_key(key_event);
 		}

@@ -41,6 +41,7 @@ static constexpr u32 dma_enable = 1U << 8;
 static constexpr u32 dma_reset_n = 1U << 10;
 static constexpr u32 cir_dreq = 1U << 16;
 static constexpr u32 cir_irq = 1U << 18;
+static constexpr u32 prefetch_irq = 1U << 20;
 static constexpr u32 dma_error = 1U << 22;
 static constexpr u8 read_prefetch = 0x40;
 static constexpr u8 write_memory = 0x80;
@@ -144,6 +145,7 @@ void PelicanTCDS::write_word(u32 offset, u32 value, u32 mask)
         std::fill_n(channel[i].buffer, 32, 0); // The DMA engine reset clears its buffer (EK-D3SYS-PM, §8.5).
         if (!i) {
           asc.reset();
+          channel[i].control &= 0xff;
           dma_active = pending_irq = false;
         }
       }
@@ -153,7 +155,7 @@ void PelicanTCDS::write_word(u32 offset, u32 value, u32 mask)
     imer = (imer & ~mask) | (value & mask);
     const u32 enabled = (~previous & imer) << 16;
     if (asc.drq_state()) cir |= enabled & cir_dreq;
-    if (asc.irq_state() && (enabled & cir_irq)) pending_irq = true;
+    if (asc.irq_state() && (enabled & (cir_irq | prefetch_irq))) pending_irq = true;
   } else if (offset >= asc_offset && offset < asc_offset + 64) {
     if (cir & dma_reset_n)
       asc.write((offset - asc_offset) >> 2, u8(value)); // NCR register writes ignore byte enables (EK-D3SYS-PM, §8.3).
@@ -165,7 +167,8 @@ void PelicanTCDS::write_word(u32 offset, u32 value, u32 mask)
       port.address = (port.address & ~mask) | (value & mask);
       if (!index && mask) dma_active = false;
     } else if (offset == sda_offset + 4) {
-      port.control = u8((port.control & ~mask) | (value & mask));
+      const u32 controls = mask & 0xff;
+      port.control = (port.control & ~controls) | (value & controls);
       if (!index && (mask & 0xff)) dma_active = false;
     } else if (offset >= buffer_offset && offset < buffer_offset + sizeof(port.buffer))
       port.buffer[(offset - buffer_offset) >> 2] = value; // Diagnostic buffer writes ignore byte enables (EK-D3SYS-PM, §8.5).
@@ -246,6 +249,7 @@ void PelicanTCDS::advance_dma_address()
     buffer_index = (buffer_index + 1) & 31;
     if (prefetched) --prefetched;
   }
+  channel[0].control = (channel[0].control & ~3U) | lane; // DIC<1:0> holds the DMA byte offset (EK-D3SYS-PM, §8.2.4).
 }
 
 void PelicanTCDS::fill_read_buffer()
@@ -290,9 +294,17 @@ void PelicanTCDS::service_dma()
   }
   if (cir & imer & dma_error)
     cir &= ~dma_enable; // An unmasked DMA error disables its channel (EK-D3SYS-PM, §8.2.1).
-  if (pending_irq && (!(cir & dma_enable) || !asc.drq_state())) {
-    cir |= (imer << 16) & cir_irq; // Post the NCR interrupt after pending DMA has drained (EK-D3SYS-PM, §8.2.1).
+  const bool prefetch = ((imer << 16) & prefetch_irq) != 0;
+  if (pending_irq && (!(cir & dma_enable) || !asc.drq_state()) && !(prefetch && (cir & prefetch_irq))) {
     pending_irq = dma_active = false;
+    cir |= (imer << 16) & cir_irq; // Post the NCR interrupt after pending DMA has drained (EK-D3SYS-PM, §8.2.1).
+    if (prefetch && asc.irq_state()) {
+      const u32 status = asc.read(4);
+      const u32 fifo = asc.read(7);
+      const u32 reason = asc.read(5); // Reading the interrupt register acknowledges the NCR (EK-D3SYS-PM, §9.6.5.2).
+      port.control = (port.control & 0xff) | (status << 8) | (fifo << 16) | (reason << 24); // DEC OSF/1 dme_tcds_94_dma.c, tcds_dma_enable.
+      cir |= prefetch_irq;
+    }
   }
   board.update_io_irq();
 }

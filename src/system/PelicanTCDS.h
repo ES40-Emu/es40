@@ -55,7 +55,7 @@ public:
 private:
   struct Channel {
     u32 address = 0;
-    u8 control = 0;
+    u32 control = 0;
     u32 first = 0;
     u32 last = 0;
     u32 buffer[32]{};

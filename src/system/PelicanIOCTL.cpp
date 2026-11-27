@@ -1,4 +1,4 @@
-/* ES40 emulator -- DEC 3000 Model 300X IOCTL flash window and SCC interface
+/* ES40 emulator -- DEC 3000 Model 300X IOCTL flash, SCC and TOY interfaces
  * Copyright (C) 2026 by gdwnldsKSC
  * All rights reserved.
  *
@@ -31,15 +31,16 @@
 #include <fstream>
 #include <utility>
 
-enum PelicanIOCTLRange { DenseROM, SparseROM, DenseCSR, SparseCSR, DenseSCC0, SparseSCC0, DenseSCC1, SparseSCC1 };
+enum PelicanIOCTLRange { DenseROM, SparseROM, DenseCSR, SparseCSR, DenseSCC0, SparseSCC0, DenseSCC1, SparseSCC1, DenseTOY, SparseTOY };
+static constexpr u32 rtc_reset_n = 1U << 10; // SSR<10> releases the RTC from reset (EK-D3SYS-PM, §7.3.11).
 static constexpr u32 scc_reset_n = 1U << 11; // SSR<11> releases both SCCs from reset (EK-D3SYS-PM, §7.3.11).
-static constexpr u32 support_mask = 0x0f0002bf | scc_reset_n; // ROM controls, read mask, SCC reset and system-OK LED (§7.3.11).
+static constexpr u32 support_mask = 0x0f0002bf | rtc_reset_n | scc_reset_n; // ROM controls, read mask, SCC/RTC resets and system-OK LED (§7.3.11).
 static constexpr u32 scc0_interrupt = 1U << 6; // SIR<6> and SIR<7> are the SCC0 and SCC1 interrupt pins (EK-D3SYS-PM, §7.3.12).
 static constexpr u32 scc1_interrupt = 1U << 7;
 
 static bool is_sparse(int index)
 {
-  return index == SparseROM || index == SparseCSR || index == SparseSCC0 || index == SparseSCC1;
+  return index == SparseROM || index == SparseCSR || index == SparseSCC0 || index == SparseSCC1 || index == SparseTOY;
 }
 
 static bool is_scc(int index)
@@ -83,6 +84,10 @@ PelicanIOCTL::PelicanIOCTL(CConfigurator* cfg, Pelican* system) : CSystemCompone
   system->RegisterMemory(this, SparseSCC0, U64(0x1b0200000), 32);
   system->RegisterMemory(this, DenseSCC1, U64(0x1a0180000), 16);
   system->RegisterMemory(this, SparseSCC1, U64(0x1b0300000), 32);
+  system->RegisterMemory(this, DenseTOY, U64(0x1a0200000), 64 * 4);
+  system->RegisterMemory(this, SparseTOY, U64(0x1b0400000), 64 * 8);
+  rtc.load_battery(cfg->get_text_value("rom.toy", "pelican-toy.rom"));
+  rtc.set_reset(true);
   scc[0].set_transmit([this](Z85C30::Channel channel, u8 value) {
     if (channel == Z85C30::Channel::A)
       mouse.command(value);
@@ -112,6 +117,16 @@ PelicanIOCTL::PelicanIOCTL(CConfigurator* cfg, Pelican* system) : CSystemCompone
   register_scc_state(0);
   register_scc_state(1);
   register_keyboard_state();
+  register_clock_state();
+}
+
+void PelicanIOCTL::register_clock_state()
+{
+  save_item(rtc.state.regs, "rtc.regs");
+  save_item(rtc.state.visible, "rtc.visible");
+  save_item(rtc.state.phase_ns, "rtc.phase_ns");
+  save_item(rtc.state.fall_back, "rtc.fall_back");
+  save_item(rtc.state.reset_held, "rtc.reset_held");
 }
 
 void PelicanIOCTL::register_keyboard_state()
@@ -178,11 +193,16 @@ void PelicanIOCTL::register_scc_state(unsigned number)
 PelicanIOCTL::~PelicanIOCTL()
 {
   stop_threads();
+  try {
+    flush_storage();
+  } catch (const CException& error) {
+    printf("%%RTC-F-NOSAVE: %s\n", error.displayText().c_str());
+  }
 }
 
 std::string PelicanIOCTL::snapshot_identity() const
 {
-  std::string id = CSystemComponent::snapshot_identity() + ":LK401";
+  std::string id = CSystemComponent::snapshot_identity() + ":LK401:DS1287A";
   for (const auto& chip : chips) {
     id += ':';
     if (!chip)
@@ -250,6 +270,8 @@ bool PelicanIOCTL::decodes_memory_access(int index, u64 address, int dsize, bool
   }
   if (is_scc(index))
     return (sparse ? address >> 1 : address) < 16;
+  if (index == DenseTOY || index == SparseTOY)
+    return (sparse ? address >> 1 : address) < 64 * 4;
   return chips[selected_bank()].has_value();
 }
 
@@ -286,6 +308,8 @@ u32 PelicanIOCTL::read_register(int index, u32 offset, u32 lanes)
     default:   return 0xffffffffU;
     }
   }
+  if (index == DenseTOY || index == SparseTOY)
+    return (lanes & 0xff) ? rtc.read(offset >> 2) : 0; // TOY registers use D<7:0> (EK-D3SYS-PM, §9.5.2.7).
   // Channel B precedes A on both SCCs; both transfer on D<15:8> (EK-D3SYS-PM, Table 23 and §9.5.2.4).
   if (!(lanes & 0xff00))
     return 0;
@@ -301,8 +325,9 @@ u64 PelicanIOCTL::ReadMem(int index, u64 address, int dsize)
   // Set bits suppress their sparse read lanes (EK-D3SYS-PM, §7.3.11).
   const u32 lanes = sparse && (support & 0x10) ? ~enabled_bytes(support) : 0xffffffffU;
   const bool serial = is_scc(index);
-  if (serial)
-    refresh_serial();
+  const bool clock = index == DenseTOY || index == SparseTOY;
+  if (serial || clock)
+    refresh_devices();
   const u32 low = read_register(index, offset, lanes) & lanes;
   u64 value = low;
   if (dsize == 64) {
@@ -312,6 +337,11 @@ u64 PelicanIOCTL::ReadMem(int index, u64 address, int dsize)
   }
   if (serial)
     board.update_io_irq();
+  if (clock) {
+    board.update_clock_irq();
+    if (offset == 0x30) // Reading register C acknowledges the clock interrupt (EK-D3SYS-PM, §17.5).
+      device_wakeup.notify_one();
+  }
   return value;
 }
 
@@ -322,12 +352,19 @@ void PelicanIOCTL::write_register(int index, u32 offset, u32 value, u32 mask)
       mask &= support_mask;
       const u32 previous = support;
       support = (support & ~mask) | (value & mask);
+      if ((previous ^ support) & rtc_reset_n)
+        rtc.set_reset(!(support & rtc_reset_n));
       if ((previous & ~support) & scc_reset_n)
         for (auto& controller : scc)
           controller.reset();
     } else if (offset == 0x20) {
       interrupt_mask = (interrupt_mask & ~mask) | (value & mask);
     }
+    return;
+  }
+  if (index == DenseTOY || index == SparseTOY) {
+    if (mask & 0xff)
+      rtc.write(offset >> 2, u8(value));
     return;
   }
   if (!(support & scc_reset_n) || !(mask & 0xff00))
@@ -349,11 +386,14 @@ void PelicanIOCTL::WriteMem(int index, u64 address, int dsize, u64 data)
   const u32 offset = static_cast<u32>(sparse ? address >> 1 : address);
   // Sparse STQ carries byte enables in the high longword (EK-D3SYS-PM, App. A.1).
   const u32 mask = sparse && dsize == 64 ? enabled_bytes(u32(data >> 32)) : 0xffffffffU;
-  refresh_serial();
+  refresh_devices();
   write_register(index, offset, u32(data), mask);
   if (!sparse && dsize == 64)
     write_register(index, offset + 4, u32(data >> 32), 0xffffffffU);
   board.update_io_irq();
+  board.update_clock_irq();
+  if (index == DenseTOY || index == SparseTOY)
+    device_wakeup.notify_one();
 }
 
 u32 PelicanIOCTL::serial_interrupts() const
@@ -367,14 +407,16 @@ bool PelicanIOCTL::interrupt() const
   return (interrupt_mask & serial_interrupts()) != 0;
 }
 
-void PelicanIOCTL::refresh_serial()
+void PelicanIOCTL::refresh_devices()
 {
-  if (serial_sample == std::chrono::steady_clock::time_point{})
+  if (device_sample == std::chrono::steady_clock::time_point{})
     return;
   const auto now = cSystem->device_access_time();
-  if (now > serial_sample) {
-    serial_clock_ns += std::chrono::duration_cast<std::chrono::nanoseconds>(now - serial_sample).count();
-    serial_sample = now;
+  if (now > device_sample) {
+    const u64 elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(now - device_sample).count();
+    rtc.advance(elapsed);
+    serial_clock_ns += elapsed;
+    device_sample = now;
   }
   u8 byte;
   while (mouse.next_byte(byte, serial_clock_ns))
@@ -383,22 +425,25 @@ void PelicanIOCTL::refresh_serial()
     scc[1].receive(Z85C30::Channel::A, byte);
 }
 
-void PelicanIOCTL::run_serial()
+void PelicanIOCTL::run_devices()
 {
   std::unique_lock<std::recursive_mutex> lock(cSystem->get_device_bus_mutex());
-  while (serial_sample != std::chrono::steady_clock::time_point{}) {
-    refresh_serial();
+  while (device_sample != std::chrono::steady_clock::time_point{}) {
+    refresh_devices();
     board.update_io_irq();
-    serial_wakeup.wait_for(lock, std::chrono::nanoseconds(LK401::frame_ns));
+    board.update_clock_irq();
+    const u64 next_clock = rtc.next_irq_ns();
+    const u64 wait_ns = next_clock ? std::min<u64>(next_clock, LK401::frame_ns) : LK401::frame_ns;
+    device_wakeup.wait_for(lock, std::chrono::nanoseconds(wait_ns));
   }
 }
 
 void PelicanIOCTL::start_threads()
 {
   std::lock_guard<std::recursive_mutex> guard(cSystem->get_device_bus_mutex());
-  if (!serial_thread.joinable()) {
-    serial_sample = cSystem->device_access_time();
-    serial_thread = std::thread(&PelicanIOCTL::run_serial, this);
+  if (!device_thread.joinable()) {
+    device_sample = cSystem->device_access_time();
+    device_thread = std::thread(&PelicanIOCTL::run_devices, this);
   }
 }
 
@@ -406,20 +451,29 @@ void PelicanIOCTL::stop_threads()
 {
   {
     std::lock_guard<std::recursive_mutex> guard(cSystem->get_device_bus_mutex());
-    if (serial_sample != std::chrono::steady_clock::time_point{}) {
-      refresh_serial();
+    if (device_sample != std::chrono::steady_clock::time_point{}) {
+      refresh_devices();
       board.update_io_irq();
-      serial_sample = {};
-      serial_wakeup.notify_all();
+      board.update_clock_irq();
+      device_sample = {};
+      device_wakeup.notify_all();
     }
   }
-  if (serial_thread.joinable())
-    serial_thread.join();
+  if (device_thread.joinable())
+    device_thread.join();
+}
+
+void PelicanIOCTL::flush_storage()
+{
+  std::lock_guard<std::recursive_mutex> guard(cSystem->get_device_bus_mutex());
+  refresh_devices();
+  rtc.save_battery();
 }
 
 void PelicanIOCTL::ResetPCI()
 {
   support = interrupt_mask = 0;
+  rtc.set_reset(true);
   for (auto& controller : scc)
     controller.reset();
   mouse.reset();
@@ -427,6 +481,7 @@ void PelicanIOCTL::ResetPCI()
   keyboard.reset();
   keyboard.rebase_clock(serial_clock_ns);
   board.update_io_irq();
+  board.update_clock_irq();
 }
 
 void PelicanIOCTL::prepare_snapshot()
@@ -439,11 +494,13 @@ int PelicanIOCTL::RestoreState(FILE* file)
 {
   if (CSystemComponent::RestoreState(file))
     return -1;
-  return scc[0].valid_state() && scc[1].valid_state() && mouse.valid_state() && keyboard.valid_state() ? 0 : -1;
+  return scc[0].valid_state() && scc[1].valid_state() && mouse.valid_state() && keyboard.valid_state() &&
+         rtc.valid_state() && rtc.state.reset_held == !(support & rtc_reset_n) ? 0 : -1;
 }
 
 void PelicanIOCTL::finalize_restore() noexcept
 {
+  rtc.restored();
   mouse.rebase_clock(serial_clock_ns);
   keyboard.rebase_clock(serial_clock_ns);
 }

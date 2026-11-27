@@ -42,6 +42,7 @@ public:
   void bind_board_devices() override;
   void finish_board_restore() override;
   void update_io_irq(bool force = false);
+  void update_clock_irq(bool force = false);
   int LoadROM() override;
   void ResetMem(unsigned int membits) override;
   u64 ram_offset(u64 address) const noexcept override;
@@ -68,6 +69,7 @@ private:
   u32 interrupt_reasons() const;
   CXTurbo* graphics = nullptr;
   bool io_irq_asserted = false;
+  bool clock_irq_asserted = false;
   PelicanIOCTL* io_control = nullptr;
   const bool direct_srm;
   u8 lit_leds = 0xff;

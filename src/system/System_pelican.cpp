@@ -164,9 +164,19 @@ void Pelican::update_io_irq(bool force)
   }
 }
 
+void Pelican::update_clock_irq(bool force)
+{
+  const bool level = io_control && io_control->clock_interrupt();
+  if (get_cpu_num() && (force || level != clock_irq_asserted)) {
+    clock_irq_asserted = level;
+    get_cpu(0)->irq_h(1, level, 0); // The TOY drives IRQ1 directly (EK-D3SYS-PM, §17.5).
+  }
+}
+
 void Pelican::finish_board_restore()
 {
   update_io_irq(true);
+  update_clock_irq(true);
 }
 
 MouseInput* Pelican::mouse_input()

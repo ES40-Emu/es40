@@ -1,4 +1,4 @@
-/* ES40 emulator -- DEC 3000 Model 300X IOCTL flash window and SCC interface
+/* ES40 emulator -- DEC 3000 Model 300X IOCTL flash, SCC and TOY interfaces
  * Copyright (C) 2026 by gdwnldsKSC
  * All rights reserved.
  *
@@ -28,6 +28,7 @@
 #ifndef ES40_PELICAN_IOCTL_H
 #define ES40_PELICAN_IOCTL_H
 
+#include "chipset/DS1287A.h"
 #include "chipset/Intel28F020.h"
 #include "chipset/Z85C30.h"
 #include "emu/SystemComponent.h"
@@ -48,6 +49,7 @@ public:
   KeyboardInput* keyboard_input() { return &keyboard; }
   MouseInput* mouse_input() { return &mouse; }
   bool interrupt() const;
+  bool clock_interrupt() const { return rtc.interrupt(); }
   void load_firmware(char* system_ram, char* io_ram) const;
   std::string snapshot_identity() const override;
   bool decodes_memory_access(int index, u64 address, int dsize, bool write) const noexcept override;
@@ -57,6 +59,8 @@ public:
   void start_threads() override;
   void stop_threads() override;
   void prepare_snapshot() override;
+  void check_state() override { flush_storage(); }
+  void flush_storage() override;
   int RestoreState(FILE* file) override;
   void finalize_restore() noexcept override;
 
@@ -67,22 +71,24 @@ private:
   void write_register(int index, u32 offset, u32 value, u32 mask);
   void register_scc_state(unsigned chip);
   void register_keyboard_state();
+  void register_clock_state();
   u32 serial_interrupts() const;
-  void refresh_serial();
+  void refresh_devices();
   Pelican& board;
-  void run_serial();
+  void run_devices();
 
   // Each configured image corresponds to the literal SSR<9,7> chip select (EK-D3SYS-PM, §7.3.11).
   std::array<std::optional<Intel28F020>, 4> chips;
   u32 support = 0;
   u32 interrupt_mask = 0;
   std::array<Z85C30, 2> scc;
+  DS1287A rtc;
   VSXXXMouse mouse;
   LK401 keyboard;
-  std::thread serial_thread;
-  std::condition_variable_any serial_wakeup;
+  std::thread device_thread;
+  std::condition_variable_any device_wakeup;
   u64 serial_clock_ns = 0;
-  std::chrono::steady_clock::time_point serial_sample{};
+  std::chrono::steady_clock::time_point device_sample{};
 };
 
 #endif

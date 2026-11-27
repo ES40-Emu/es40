@@ -1174,9 +1174,11 @@ u64 CSystem::cpu_read_locked(int cpuid, u64 phys, int size_bits, CSystemComponen
 
 	watch_ll_line(cpuid, offset);
 	CLLRAMGuard guard(this, offset);
-	const u64 value = dram_read(ram_data(), offset, size_bits);
-	cpu_lock(cpuid, phys, size_bits == 32 ? sext_u64_32(value) : value);
-	return value;
+	// An aligned LDL_L can pair with STQ_C at the same address (Alpha A.R.M. §§4.2.4–5).
+	const bool capture_quadword = size_bits == 32 && !(offset & 7);
+	const u64 value = dram_read(ram_data(), offset, capture_quadword ? 64 : size_bits);
+	cpu_lock(cpuid, phys, value);
+	return capture_quadword ? static_cast<u32>(value) : value;
 }
 
 void CSystem::cpu_write_ram(u64 phys, int size_bits, u64 value)
@@ -1209,12 +1211,18 @@ void CSystem::cpu_lock(int cpuid, u64 address, u64 value)
 	reservation.valid = true;
 }
 
+bool CSystem::lock_addresses_match(int cpuid, u64 locked, u64 address) const
+{
+	const auto matches = acCPUs[cpuid]->get_profile().llsc.matches;
+	return matches && matches(locked, address);
+}
+
 bool CSystem::cpu_take_lock(int cpuid, u64 address, u64* expected, bool* same_address)
 {
 	auto& reservation = m_ll_reservations[cpuid];
 	const auto& policy = acCPUs[cpuid]->get_profile().llsc;
 	const bool held = (policy.unreserved_store && policy.unreserved_store(address))
-		|| (reservation.valid && policy.matches && policy.matches(reservation.address, address));
+		|| (reservation.valid && lock_addresses_match(cpuid, reservation.address, address));
 
 	// STx_C always consumes this CPU's lock, success or fail.
 	reservation.valid = false;

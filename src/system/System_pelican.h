@@ -68,6 +68,7 @@ private:
   };
 
   Pelican(CConfigurator* cfg, MemoryPopulation installed);
+  bool lock_addresses_match(int cpuid, u64 locked, u64 address) const override;
   MemoryPopulation population;
   u32 interrupt_reasons() const;
   CXTurbo* graphics = nullptr;

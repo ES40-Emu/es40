@@ -232,6 +232,12 @@ u64 Pelican::ram_offset(u64 address) const noexcept
   return offset < population.bytes ? offset : ~U64(0);
 }
 
+bool Pelican::lock_addresses_match(int, u64 locked, u64 address) const
+{
+  // A RAM LDx_L/STx_C pair is guaranteed within one aligned 16-byte block (Alpha A.R.M. §§4.2.4–5).
+  return (locked ^ address) < 16 && ram_offset(address) < population.bytes;
+}
+
 u8 Pelican::diagnostic_leds()
 {
   std::lock_guard<std::recursive_mutex> guard(get_device_bus_mutex());

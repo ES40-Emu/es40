@@ -425,6 +425,7 @@ protected:
   virtual void flush_boot_rom() {}
   virtual void reset_chipset() {}
   virtual void finish_board_restore() {}
+  virtual bool lock_addresses_match(int cpuid, u64 locked, u64 address) const;
   virtual bool allows_shared_access(u64 address, int dsize) const { return false; }
   virtual u64 read_unmapped(u64 address, int dsize, CSystemComponent* source);
   virtual void write_unmapped(u64 address, int dsize, u64 data, CSystemComponent* source) {}

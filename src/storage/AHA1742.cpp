@@ -234,8 +234,8 @@ void AHA1742::start_ccb(u32 address, u8 target)
     return;
   // The option flags in bits 14-12 are not part of the operation code (AHA-1740A TRM, p. 6-4).
   const u16 operation = get_le16(ecb + CommandWord) & 0x0fff, flags = get_le16(ecb + FlagWord1);
-  // Other operations are not carried out yet.
-  if (operation != InitiatorCommand && operation != ReadSenseInformation && operation != ReadInquiryData)
+  // Run Diagnostic Test, Initialize SCSI Subsystem, Download Firmware and Target SCSI Command are not carried out yet.
+  if (operation == RunDiagnosticTest || operation == InitializeSubsystem || operation == DownloadFirmware || operation == TargetCommand)
     return;
   u8 status[32]{};
   // With every slot taken, by waiting completions and kept control blocks, the control block is refused with Queue Full and no action is taken on it (AHA-1740A TRM, p. 6-14).
@@ -258,8 +258,14 @@ void AHA1742::start_ccb(u32 address, u8 target)
     initiator_command(ecb, target, status);
   else if (operation == ReadSenseInformation)
     read_sense_information(ecb, target, status);
-  else
+  else if (operation == ReadInquiryData)
     read_inquiry_data(ecb, status);
+  // No Operation stays off the SCSI bus and only reports back, to test the interface or to mark progress in a chain (AHA-1740A TRM, pp. 6-27, 6-28).
+  else if (operation == NoOperation)
+    put_le16(status + StatusWord, CommandDone);
+  // Any other code is not an operation of this adapter (AHA-1740A TRM, pp. 6-4, 6-17).
+  else
+    specification_check(status, InvalidOperation);
   const u16 word = get_le16(status + StatusWord);
   // A check condition whose sense information was not stored puts the target in contingent allegiance (AHA-1740A TRM, p. 6-18).
   if (status[TargetStatus] == CheckCondition && !(word & SenseStored))
@@ -332,6 +338,13 @@ void AHA1742::terminate(u32 address, u8 target, u8 reason)
   post_completion();
 }
 
+// A specification check rejects a control block for an error in one of its fields, which the host adapter status names, and no action is taken on it (AHA-1740A TRM, pp. 6-15, 6-17).
+void AHA1742::specification_check(u8* status, u8 reason)
+{
+  put_le16(status + StatusWord, SpecificationCheck);
+  status[HostAdapterStatus] = reason;
+}
+
 // Read Host Adapter Inquiry Data: the data is cut to the length the host allows, and a longer buffer is left short (AHA-1740A TRM, pp. 6-30, 6-32).
 void AHA1742::read_inquiry_data(const u8* ecb, u8* status)
 {
@@ -364,8 +377,7 @@ void AHA1742::initiator_command(const u8* ecb, u8 target, u8* status)
   // A CDB is 6, 10 or 12 bytes long, and Suppress Transfer is for data in: anything else is an invalid parameter, and no action is taken on the control block (AHA-1740A TRM, pp. 6-9, 6-12, 6-15, 6-17).
   const bool suppress_out = (flags2 & (DataTransfer | Direction | SuppressTransfer)) == (DataTransfer | SuppressTransfer);
   if ((cdb_length != 6 && cdb_length != 10 && cdb_length != 12) || suppress_out) {
-    put_le16(status + StatusWord, SpecificationCheck);
-    status[HostAdapterStatus] = InvalidParameter;
+    specification_check(status, InvalidParameter);
     return;
   }
   // The data area is the control block's own pointer and length, or with Scatter/Gather set the list of such pairs they locate (AHA-1740A TRM, pp. 6-5, 6-10).
@@ -376,8 +388,7 @@ void AHA1742::initiator_command(const u8* ecb, u8 target, u8* status)
     // A list holds up to 128 pairs: a length that is zero, not a multiple of 8 or over 1 KByte makes it invalid (AHA-1740A TRM, pp. 6-10, 6-11, 6-17).
     const u32 length = get_le32(ecb + DataLength);
     if (!length || (length & 7) || length > sizeof(gathered)) {
-      put_le16(status + StatusWord, SpecificationCheck);
-      status[HostAdapterStatus] = InvalidList;
+      specification_check(status, InvalidList);
       return;
     }
     bus.slot_master_read(slot, get_le32(ecb + DataPointer), gathered, length);

@@ -61,7 +61,8 @@ private:
   // Byte offsets in the 48-byte control block and the 32-byte status block (AHA-1740A TRM, pp. 6-3, 6-13).
   enum { CommandWord = 0x00, FlagWord1 = 0x02, FlagWord2 = 0x04, DataPointer = 0x08, DataLength = 0x0c, StatusBlockPointer = 0x10, SensePointer = 0x1c, SenseLength = 0x20, CDBLength = 0x21, CDBBytes = 0x24 };
   enum { StatusWord = 0x00, HostAdapterStatus = 0x02, TargetStatus = 0x03, ResidualCount = 0x04, ResidualAddress = 0x08, AdditionalStatusLength = 0x0c, StoredSenseLength = 0x0e };
-  enum { InitiatorCommand = 0x01, ReadSenseInformation = 0x08, ReadInquiryData = 0x0a }; // Operation codes (AHA-1740A TRM, p. 6-4).
+  // Operation codes (AHA-1740A TRM, p. 6-4).
+  enum { NoOperation = 0x00, InitiatorCommand = 0x01, RunDiagnosticTest = 0x05, InitializeSubsystem = 0x06, ReadSenseInformation = 0x08, DownloadFirmware = 0x09, ReadInquiryData = 0x0a, TargetCommand = 0x10 };
   // Flag word 1 bits 7, 10, 12, 14 and 15 (AHA-1740A TRM, pp. 6-5, 6-6).
   enum { DisableInterrupt = 0x0080, SuppressUnderrunError = 0x0400, ScatterGather = 0x1000, DisableStatusBlock = 0x4000, AutomaticRequestSense = 0x8000 };
   // Flag word 2 bits 2-0, 6, 8, 9 and 10 (AHA-1740A TRM, pp. 6-7 to 6-9).
@@ -69,7 +70,7 @@ private:
   // Status word bits 0, 1, 3, 4, 5, 7, 8, 9 and 12; the status word figure and p. 6-19 put Additional Status Available at bit 8 (AHA-1740A TRM, pp. 6-14 to 6-16, 6-19).
   enum { CommandDone = 0x0001, DataUnderrun = 0x0002, QueueFull = 0x0008, SpecificationCheck = 0x0010, DataOverrun = 0x0020, InterruptIssued = 0x0080, AdditionalStatus = 0x0100, SenseStored = 0x0200, MajorError = 0x1000 };
   // Host adapter status codes; 22h is also the reset code an event notification gives in the mailbox in (AHA-1740A TRM, pp. 6-17, 6-41).
-  enum { AbortedByHost = 0x04, AbortedByAdapter = 0x05, SelectionTimeout = 0x11, OverrunOrUnderrun = 0x12, InvalidPhase = 0x14, InvalidParameter = 0x18, InvalidList = 0x1a, RequestSenseFailed = 0x1b, ResetByAdapter = 0x22 };
+  enum { AbortedByHost = 0x04, AbortedByAdapter = 0x05, SelectionTimeout = 0x11, OverrunOrUnderrun = 0x12, InvalidPhase = 0x14, InvalidOperation = 0x16, InvalidParameter = 0x18, InvalidList = 0x1a, RequestSenseFailed = 0x1b, ResetByAdapter = 0x22 };
   enum { CheckCondition = 0x02 }; // Target status (AHA-1740A TRM, p. 6-17).
   enum { QueueSize = 64 }; // Control blocks the adapter holds at once (AHA-1740A TRM, p. 6-2).
   enum { InterruptQueueSize = QueueSize + 1 }; // Their completions can all wait at once, and one event notification with them (AHA-1740A TRM, p. 6-47).
@@ -78,6 +79,7 @@ private:
   void start_ccb(u32 address, u8 target);
   void abort_ccb(u32 address);
   void terminate(u32 address, u8 target, u8 reason);
+  void specification_check(u8* status, u8 reason);
   void immediate_command(u32 command, u8 target);
   void forget(bool all, u8 target);
   void reset_scsi_bus();

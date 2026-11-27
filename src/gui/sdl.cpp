@@ -311,6 +311,7 @@ static std::atomic<bool> sdl_main_thread_owns_sdl(false);
 
 // Main-thread-only attachment, outside guest state.
 static CKeyboard* sdl_guest_keyboard = NULL;
+static MouseInput* sdl_guest_mouse = NULL;
 static bool sdl_guest_input_paused = false;
 static bool sdl_poll_in_progress = false;
 // At most one event can have been removed when SDL_PollEvent runs a pause
@@ -378,6 +379,7 @@ void bx_sdl_gui_c::main_thread_init()
 
 	application.initialize_keymap();
 	sdl_guest_keyboard = theKeyboard;
+	sdl_guest_mouse = theSystem ? theSystem->mouse_input() : NULL;
 	sdl_main_thread_owns_sdl.store(true, std::memory_order_release);
 }
 
@@ -394,7 +396,7 @@ void bx_sdl_gui_c::resume_guest_input()
 void bx_sdl_gui_c::detach_guest_input()
 {
 	// Do not send releases or alter guest capture during teardown.
-	on_main_thread([] { sdl_guest_keyboard = NULL; });
+	on_main_thread([] { sdl_guest_keyboard = NULL; sdl_guest_mouse = NULL; });
 }
 
 void bx_sdl_gui_c::main_thread_pump()
@@ -1158,14 +1160,14 @@ void sdl_event_dispatcher::send_guest_key(u32 key)
 
 void sdl_event_dispatcher::send_guest_mouse(int dx, int dy, int dz, unsigned buttons)
 {
-	if (sdl_guest_keyboard && !sdl_guest_input_paused)
-		sdl_guest_keyboard->mouse_motion(dx, dy, dz, buttons);
+	if (sdl_guest_mouse && !sdl_guest_input_paused)
+		sdl_guest_mouse->mouse_motion(dx, dy, dz, buttons);
 }
 
 void sdl_event_dispatcher::notify_guest_capture(bool captured)
 {
-	if (sdl_guest_keyboard && !sdl_guest_input_paused)
-		sdl_guest_keyboard->set_mouse_capture(captured);
+	if (sdl_guest_mouse && !sdl_guest_input_paused)
+		sdl_guest_mouse->set_mouse_capture(captured);
 }
 
 void sdl_event_dispatcher::release_guest_key(SDL_Scancode scancode)

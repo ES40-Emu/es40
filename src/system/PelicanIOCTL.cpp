@@ -1,4 +1,4 @@
-/* ES40 emulator -- DEC 3000 Model 300X IOCTL flash window
+/* ES40 emulator -- DEC 3000 Model 300X IOCTL flash window and SCC interface
  * Copyright (C) 2026 by gdwnldsKSC
  * All rights reserved.
  *
@@ -26,13 +26,21 @@
  */
 
 #include "StdAfx.h"
+#include "CPU/AlphaCPU.h"
 #include "system/PelicanIOCTL.h"
 #include "system/System.h"
 #include <fstream>
 #include <utility>
 
-enum PelicanIOCTLRange { DenseROM, SparseROM, DenseSSR, SparseSSR };
-static constexpr u32 support_mask = 0x0f0002bf; // ROM controls, read mask and system-OK LED (EK-D3SYS-PM, §7.3.11).
+enum PelicanIOCTLRange { DenseROM, SparseROM, DenseCSR, SparseCSR, DenseSCC, SparseSCC };
+static constexpr u32 scc_reset_n = 1U << 11; // SSR<11> releases both SCCs from reset (EK-D3SYS-PM, §7.3.11).
+static constexpr u32 support_mask = 0x0f0002bf | scc_reset_n; // ROM controls, read mask, SCC reset and system-OK LED (§7.3.11).
+static constexpr u32 scc0_interrupt = 1U << 6; // SIR<6> is the SCC0 interrupt pin (EK-D3SYS-PM, §7.3.12).
+
+static bool is_sparse(int index)
+{
+  return index == SparseROM || index == SparseCSR || index == SparseSCC;
+}
 
 PelicanIOCTL::PelicanIOCTL(CConfigurator* cfg, CSystem* system) : CSystemComponent(cfg, system)
 {
@@ -59,9 +67,56 @@ PelicanIOCTL::PelicanIOCTL(CConfigurator* cfg, CSystem* system) : CSystemCompone
   // Slot 5 maps each dense longword to an even sparse longword (EK-D3SYS-PM, Table 16 and App. A.1).
   system->RegisterMemory(this, DenseROM, U64(0x1a0000000), Intel28F020::capacity);
   system->RegisterMemory(this, SparseROM, U64(0x1b0000000), Intel28F020::capacity * 2);
-  system->RegisterMemory(this, DenseSSR, U64(0x1a0040100), 4);
-  system->RegisterMemory(this, SparseSSR, U64(0x1b0080200), 8);
+  system->RegisterMemory(this, DenseCSR, U64(0x1a0040100), 0x24);
+  system->RegisterMemory(this, SparseCSR, U64(0x1b0080200), 0x48);
+  system->RegisterMemory(this, DenseSCC, U64(0x1a0100000), 16);
+  system->RegisterMemory(this, SparseSCC, U64(0x1b0200000), 32);
+  scc.set_transmit([this](Z85C30::Channel channel, u8 value) {
+    if (channel == Z85C30::Channel::A)
+      mouse.command(value);
+  });
   save_item(support, "ssr");
+  save_item(interrupt_mask, "simr");
+  mouse.reset();
+  mouse.rebase_clock(mouse_clock_ns);
+  auto& pointer = mouse.state();
+  save_item(pointer.stream_wait_ns, "mouse.stream_wait_ns");
+  save_item(pointer.wire_wait_ns, "mouse.wire_wait_ns");
+  save_item(pointer.dx, "mouse.dx");
+  save_item(pointer.dy, "mouse.dy");
+  save_item(pointer.buttons, "mouse.buttons");
+  save_item(pointer.buttons_changed, "mouse.buttons_changed");
+  save_item(pointer.streaming, "mouse.streaming");
+  save_item(pointer.testing, "mouse.testing");
+  save_item(pointer.report, "mouse.report");
+  save_item(pointer.position, "mouse.position");
+  save_item(pointer.length, "mouse.length");
+  auto& chip = scc.state();
+  save_item(chip.pointer, "scc.pointer");
+  save_item(chip.vector, "scc.vector");
+  save_item(chip.wr9, "scc.wr9");
+  save_item(chip.in_service, "scc.in_service");
+  for (int i = 0; i < 2; ++i) {
+    auto& p = chip.channels[i];
+    save_item(p.wr, "scc.wr", i);
+    save_item(p.wr7_prime, "scc.wr7_prime", i);
+    save_item(p.rx, "scc.rx", i);
+    save_item(p.count, "scc.count", i);
+    save_item(p.rx_errors, "scc.rx_errors", i);
+    save_item(p.overrun, "scc.overrun", i);
+    save_item(p.rx_locked, "scc.rx_locked", i);
+    save_item(p.last_rx, "scc.last_rx", i);
+    save_item(p.tx, "scc.tx", i);
+    save_item(p.tx_full, "scc.tx_full", i);
+    save_item(p.tx_pending, "scc.tx_pending", i);
+    save_item(p.rx_first, "scc.rx_first", i);
+    save_item(p.underrun, "scc.underrun", i);
+  }
+}
+
+PelicanIOCTL::~PelicanIOCTL()
+{
+  stop_threads();
 }
 
 std::string PelicanIOCTL::snapshot_identity() const
@@ -125,11 +180,15 @@ bool PelicanIOCTL::decodes_memory_access(int index, u64 address, int dsize, bool
 {
   if (dsize != 32 && dsize != 64)
     return false;
-  const bool sparse = index == SparseROM || index == SparseSSR;
+  const bool sparse = is_sparse(index);
   if (address & ((sparse || dsize == 64) ? 7 : 3))
     return false;
-  if (index == DenseSSR || index == SparseSSR)
-    return address == 0;
+  if (index == DenseCSR || index == SparseCSR) {
+    const u64 offset = sparse ? address >> 1 : address;
+    return offset == 0 || offset == 0x10 || offset == 0x20;
+  }
+  if (index == DenseSCC || index == SparseSCC)
+    return (sparse ? address >> 1 : address) < 16;
   return chips[selected_bank()].has_value();
 }
 
@@ -154,28 +213,173 @@ static u32 enabled_bytes(u32 enables)
   return result;
 }
 
-u64 PelicanIOCTL::ReadMem(int index, u64 address, int dsize)
+u32 PelicanIOCTL::read_register(int index, u32 offset, u32 lanes)
 {
-  const bool sparse = index == SparseROM || index == SparseSSR;
-  const bool is_ssr = index == DenseSSR || index == SparseSSR;
-  const u32 offset = static_cast<u32>(sparse ? address >> 1 : address);
-  u32 low = is_ssr ? support : read_word(offset);
-  if (sparse && (support & 0x10)) // Set bits suppress their sparse read lanes (EK-D3SYS-PM, §7.3.11).
-    low &= ~enabled_bytes(support);
-  if (dsize == 32)
-    return low;
-
-  // Dense LDQ reads two longwords; sparse LDQ duplicates one (EK-D3SYS-PM, Tables 75–76).
-  const u32 high = sparse ? low : (is_ssr ? 0xffffffffU : read_word(offset + 4));
-  return (u64(high) << 32) | low;
+  if (index == DenseROM || index == SparseROM)
+    return read_word(offset);
+  if (index == DenseCSR || index == SparseCSR) {
+    switch (offset) {
+    case 0:    return support;
+    case 0x10: return scc.interrupt() ? scc0_interrupt : 0;
+    case 0x20: return interrupt_mask;
+    default:   return 0xffffffffU;
+    }
+  }
+  // SCC0-B precedes SCC0-A; both transfer on D<15:8> (EK-D3SYS-PM, Table 23 and §9.5.2.4).
+  if (!(lanes & 0xff00))
+    return 0;
+  const auto channel = (offset & 8) ? Z85C30::Channel::A : Z85C30::Channel::B;
+  return u32((offset & 4) ? scc.read_data(channel) : scc.read_control(channel)) << 8;
 }
 
-void PelicanIOCTL::WriteMem(int index, u64, int dsize, u64 data)
+u64 PelicanIOCTL::ReadMem(int index, u64 address, int dsize)
+{
+  const bool sparse = is_sparse(index);
+  const u32 offset = static_cast<u32>(sparse ? address >> 1 : address);
+  // Set bits suppress their sparse read lanes (EK-D3SYS-PM, §7.3.11).
+  const u32 lanes = sparse && (support & 0x10) ? ~enabled_bytes(support) : 0xffffffffU;
+  const bool serial = index == DenseSCC || index == SparseSCC;
+  if (serial)
+    refresh_mouse();
+  const u32 low = read_register(index, offset, lanes) & lanes;
+  u64 value = low;
+  if (dsize == 64) {
+    // Dense LDQ reads two longwords; sparse LDQ duplicates one (EK-D3SYS-PM, Tables 75–76).
+    const u32 high = sparse ? low : read_register(index, offset + 4, lanes);
+    value |= u64(high) << 32;
+  }
+  if (serial)
+    update_irq();
+  return value;
+}
+
+void PelicanIOCTL::write_register(int index, u32 offset, u32 value, u32 mask)
+{
+  if (index == DenseCSR || index == SparseCSR) {
+    if (offset == 0) {
+      mask &= support_mask;
+      const u32 previous = support;
+      support = (support & ~mask) | (value & mask);
+      if ((previous & ~support) & scc_reset_n)
+        scc.reset();
+    } else if (offset == 0x20) {
+      interrupt_mask = (interrupt_mask & ~mask) | (value & mask);
+    }
+    return;
+  }
+  if (!(support & scc_reset_n) || !(mask & 0xff00))
+    return;
+  const auto channel = (offset & 8) ? Z85C30::Channel::A : Z85C30::Channel::B;
+  const u8 byte = static_cast<u8>(value >> 8);
+  if (offset & 4)
+    scc.write_data(channel, byte);
+  else
+    scc.write_control(channel, byte);
+}
+
+void PelicanIOCTL::WriteMem(int index, u64 address, int dsize, u64 data)
 {
   if (index == DenseROM || index == SparseROM)
     return; // W1 in the write-disable position inhibits FEPROM writes (EK-D3SYS-PM, §9.5.2).
-  u32 mask = support_mask;
-  if (index == SparseSSR && dsize == 64)
-    mask &= enabled_bytes(u32(data >> 32)); // Sparse STQ carries byte enables in the high longword (EK-D3SYS-PM, App. A.1).
-  support = (support & ~mask) | (u32(data) & mask);
+  const bool sparse = is_sparse(index);
+  const u32 offset = static_cast<u32>(sparse ? address >> 1 : address);
+  // Sparse STQ carries byte enables in the high longword (EK-D3SYS-PM, App. A.1).
+  const u32 mask = sparse && dsize == 64 ? enabled_bytes(u32(data >> 32)) : 0xffffffffU;
+  refresh_mouse();
+  write_register(index, offset, u32(data), mask);
+  if (!sparse && dsize == 64)
+    write_register(index, offset + 4, u32(data >> 32), 0xffffffffU);
+  update_irq();
+}
+
+bool PelicanIOCTL::interrupt() const
+{
+  // SIMR gates the CPU interrupt without clearing the pending SIR bit (EK-D3SYS-PM, §7.3.13).
+  return (interrupt_mask & scc0_interrupt) && scc.interrupt();
+}
+
+void PelicanIOCTL::update_irq()
+{
+  const bool asserted = interrupt();
+  if (asserted != irq_asserted) {
+    irq_asserted = asserted;
+    if (cSystem->get_cpu_num())
+      cSystem->get_cpu(0)->irq_h(3, asserted, 0); // Slot 5 drives IR<4> and CPU IRQ3 (EK-D3SYS-PM, §§3.2.1, 17.5).
+  }
+}
+
+void PelicanIOCTL::refresh_mouse()
+{
+  if (mouse_sample == std::chrono::steady_clock::time_point{})
+    return;
+  const auto now = cSystem->device_access_time();
+  if (now > mouse_sample) {
+    mouse_clock_ns += std::chrono::duration_cast<std::chrono::nanoseconds>(now - mouse_sample).count();
+    mouse_sample = now;
+  }
+  u8 byte;
+  while (mouse.next_byte(byte, mouse_clock_ns))
+    scc.receive(Z85C30::Channel::A, byte);
+}
+
+void PelicanIOCTL::run_mouse()
+{
+  std::unique_lock<std::recursive_mutex> lock(cSystem->get_device_bus_mutex());
+  while (mouse_sample != std::chrono::steady_clock::time_point{}) {
+    refresh_mouse();
+    update_irq();
+    mouse_wakeup.wait_for(lock, std::chrono::nanoseconds(VSXXXMouse::frame_ns));
+  }
+}
+
+void PelicanIOCTL::start_threads()
+{
+  std::lock_guard<std::recursive_mutex> guard(cSystem->get_device_bus_mutex());
+  if (!mouse_thread.joinable()) {
+    mouse_sample = cSystem->device_access_time();
+    mouse_thread = std::thread(&PelicanIOCTL::run_mouse, this);
+  }
+}
+
+void PelicanIOCTL::stop_threads()
+{
+  {
+    std::lock_guard<std::recursive_mutex> guard(cSystem->get_device_bus_mutex());
+    if (mouse_sample != std::chrono::steady_clock::time_point{}) {
+      refresh_mouse();
+      update_irq();
+      mouse_sample = {};
+      mouse_wakeup.notify_all();
+    }
+  }
+  if (mouse_thread.joinable())
+    mouse_thread.join();
+}
+
+void PelicanIOCTL::ResetPCI()
+{
+  support = interrupt_mask = 0;
+  scc.reset();
+  mouse.reset();
+  mouse.rebase_clock(mouse_clock_ns);
+  update_irq();
+}
+
+void PelicanIOCTL::prepare_snapshot()
+{
+  mouse.prepare_snapshot();
+}
+
+int PelicanIOCTL::RestoreState(FILE* file)
+{
+  if (CSystemComponent::RestoreState(file))
+    return -1;
+  return scc.valid_state() && mouse.valid_state() ? 0 : -1;
+}
+
+void PelicanIOCTL::finalize_restore() noexcept
+{
+  mouse.rebase_clock(mouse_clock_ns);
+  irq_asserted = !interrupt();
+  update_irq();
 }

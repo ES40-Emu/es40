@@ -162,6 +162,7 @@
 class CDisplayOutput;
 class CISABus;
 class QmpInput;
+class MouseInput;
 class vga_device;
 
 #if defined(PROFILE)
@@ -305,6 +306,7 @@ public:
   bool          native_pal_requested() { return bNativePal; };
 
   virtual       ~CSystem();
+  virtual MouseInput* mouse_input();
   unsigned int  iNumMemoryBits;
 
   void          panic(char* message, int flags);

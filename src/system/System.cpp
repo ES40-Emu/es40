@@ -437,6 +437,11 @@ CSystem::CSystem(CConfigurator* cfg, u64 address_mask, unsigned memory_bits)
 		cfg->get_myName(), cfg->get_myValue());
 }
 
+MouseInput* CSystem::mouse_input()
+{
+	return theKeyboard;
+}
+
 /**
  * Destructor. Calls the destructors for registered devices, and
  * frees used memory.

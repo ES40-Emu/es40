@@ -474,7 +474,7 @@ public:
 	void poll_input(unsigned current_key_scan = 512);
 	void pause_input();
 	void resume_input() { input_paused = false; release_grabbed_keys(); set_keyboard_capture(capture_owner != nullptr); }
-	void detach_input() { keyboard = nullptr; system = nullptr; set_keyboard_capture(false); }
+	void detach_input() { keyboard = nullptr; mouse = nullptr; system = nullptr; set_keyboard_capture(false); }
 	void request_shutdown();
 	void record_callback_error() noexcept;
 	void observe_key(unsigned scan, unsigned virtual_key, bool released, bool repeat, bool release_previous_press = true);
@@ -541,6 +541,7 @@ private:
 	EXECUTION_STATE previous_execution_state = 0;
 	std::atomic<bool> running{ false };
 	CKeyboard* keyboard = nullptr;
+	MouseInput* mouse = nullptr;
 	CSystem* system = nullptr;
 	bool guest_mouse_captured = false;
 	double mouse_speed = 1.0;
@@ -1101,7 +1102,8 @@ void win32_application::initialize()
 		FAILURE(Win32, "Unable to create display dispatcher");
 	keyboard = theKeyboard;
 	system = theSystem;
-	if (keyboard) keyboard->set_mouse_capture(false);
+	mouse = system ? system->mouse_input() : nullptr;
+	if (mouse) mouse->set_mouse_capture(false);
 	// Match SDL's default: guest video keeps the host display on even when
 	// there is no host input. Restore the caller's thread state at shutdown.
 	previous_execution_state = SetThreadExecutionState(ES_CONTINUOUS | ES_DISPLAY_REQUIRED);
@@ -1646,12 +1648,12 @@ bool win32_application::media_key_event(UINT msg, WPARAM wparam, LPARAM lparam, 
 
 void win32_application::sync_input()
 {
-	if (input_paused || !keyboard || !input_reset_pending) return;
+	if (input_paused || (!keyboard && !mouse) || !input_reset_pending) return;
 	input_reset_pending = false;
 	release_guest_keys();
-	if (guest_mouse_captured) keyboard->mouse_motion(0, 0, 0, 0);
+	if (mouse && guest_mouse_captured) mouse->mouse_motion(0, 0, 0, 0);
 	guest_mouse_captured = capture_owner != nullptr;
-	keyboard->set_mouse_capture(guest_mouse_captured);
+	if (mouse) mouse->set_mouse_capture(guest_mouse_captured);
 	mouse_buttons = 0;
 }
 
@@ -1804,15 +1806,15 @@ void win32_application::send_ctrl_alt_delete()
 
 void win32_application::send_mouse(int dx, int dy, int dz, unsigned buttons)
 {
-	if (keyboard && !input_paused)
-		keyboard->mouse_motion(dx, dy, dz, buttons);
+	if (mouse && !input_paused)
+		mouse->mouse_motion(dx, dy, dz, buttons);
 }
 
 void win32_application::send_host_mouse(double dx, double dy, int dz,
 	unsigned buttons)
 {
-	if (!keyboard || input_paused) return;
-	// The window has already converted host Y to the PS/2 positive-up axis.
+	if (!mouse || input_paused) return;
+	// The window has already converted host Y to the positive-up axis used by PS/2 and DEC mice.
 	mouse_remainder_x += dx * (mouse_invert_x ? -mouse_speed : mouse_speed);
 	mouse_remainder_y += dy * (mouse_invert_y ? -mouse_speed : mouse_speed);
 	// Raw motion has signed 32-bit counts rather than client-pixel deltas.
@@ -1945,10 +1947,10 @@ void win32_application::set_mouse_capture(bx_win32_gui_c* target)
 	if (!capture_owner) set_raw_mouse_target(nullptr);
 	set_keyboard_capture(capture_owner != nullptr);
 	SetCursor(capture_owner ? nullptr : LoadCursor(nullptr, IDC_ARROW));
-	if (keyboard && !input_paused)
+	if (mouse && !input_paused)
 	{
 		guest_mouse_captured = capture_owner != nullptr;
-		keyboard->set_mouse_capture(guest_mouse_captured);
+		mouse->set_mouse_capture(guest_mouse_captured);
 	}
 }
 

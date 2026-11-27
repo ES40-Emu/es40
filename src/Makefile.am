@@ -184,6 +184,7 @@ noinst_HEADERS += storage/Disk.h \
        chipset/Intel82357Timer.h \
        chipset/Intel28F008SA.h \
        chipset/Intel28F020.h \
+       chipset/Z85C30.h \
        chipset/Intel82358.h \
        chipset/VL82C106.h \
        chipset/MC146818.h \
@@ -198,6 +199,8 @@ noinst_HEADERS += storage/Disk.h \
        system/System_tsunami.h \
        system/i2c_spd.h \
        io/Keyboard.h \
+       io/MouseInput.h \
+       io/VSXXXMouse.h \
        qmp/QmpInput.h \
        qmp/QmpKeymap.h \
        io/Port80.h \
@@ -312,6 +315,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        chipset/Intel82357_dma.cpp \
        chipset/Intel28F008SA.cpp \
        chipset/Intel28F020.cpp \
+       chipset/Z85C30.cpp \
        chipset/Intel82358.cpp \
        chipset/VL82C106.cpp \
        chipset/VL82C106_rtc.cpp \
@@ -331,6 +335,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        storage/FloppyController.cpp \
        storage/Intel82077A.cpp \
        io/Keyboard.cpp \
+       io/VSXXXMouse.cpp \
        qmp/QmpInput.cpp \
        network/lockstep.cpp \
        network/NetworkBackend.cpp \

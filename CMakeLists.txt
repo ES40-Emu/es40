@@ -510,6 +510,7 @@ list(APPEND ES40_SOURCES
     src/chipset/Intel82357_dma.cpp
     src/chipset/Intel28F008SA.cpp
     src/chipset/Intel28F020.cpp
+    src/chipset/Z85C30.cpp
     src/chipset/Intel82358.cpp
     src/chipset/VL82C106.cpp
     src/chipset/VL82C106_rtc.cpp
@@ -533,6 +534,7 @@ list(APPEND ES40_SOURCES
     src/system/i2c_spd.cpp
     src/graphics/ibm8514a.cpp
     src/io/Keyboard.cpp
+    src/io/VSXXXMouse.cpp
     src/qmp/QmpInput.cpp
     src/qmp/QmpInput.h
     src/qmp/QmpKeymap.h

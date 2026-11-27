@@ -45,6 +45,7 @@ public:
   bool bypasses_cpu_cache(u64 address) const noexcept override { return (address >> 30) == 1; }
   u64 linear_ram_size() const noexcept override { return population.bytes; }
   u8 diagnostic_leds();
+  MouseInput* mouse_input() override;
 
 private:
   class Registers;

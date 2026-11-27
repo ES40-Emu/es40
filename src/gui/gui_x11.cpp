@@ -182,6 +182,7 @@ class bx_x11_gui_c : public bx_gui_c
     void load_video_settings();
     x11_dispatcher dispatcher;
     CKeyboard* guest_keyboard = nullptr;
+    MouseInput* guest_mouse = nullptr;
     CSystem* guest_system = nullptr;
     bool input_paused = false, input_detached = false, retired = false;
     bool keyboard_focused = true, detectable_repeat = false;
@@ -513,6 +514,7 @@ void bx_x11_gui_c::main_thread_init()
     FAILURE(Runtime, "Invalid X11 application initialization");
   guest_keyboard = theKeyboard;
   guest_system = theSystem;
+  guest_mouse = guest_system ? guest_system->mouse_input() : nullptr;
 }
 
 void bx_x11_gui_c::main_thread_pump()
@@ -542,6 +544,7 @@ void bx_x11_gui_c::detach_guest_input()
     mouse_enabled_changed_impl(false);
     input_detached = true;
     guest_keyboard = nullptr;
+    guest_mouse = nullptr;
     guest_system = nullptr;
     for(auto& key : pressed_keys) key = {};
     CTRL_pressed = false;
@@ -608,6 +611,7 @@ void bx_x11_gui_c::exit()
   invoke([this] {
     retired = true;
     guest_keyboard = nullptr;
+    guest_mouse = nullptr;
     guest_system = nullptr;
     input_detached = true;
     exit_impl();
@@ -937,10 +941,10 @@ void bx_x11_gui_c::mouse_enabled_changed_impl(bool val)
 
 void bx_x11_gui_c::sync_mouse_capture()
 {
-  if(!mouse_sync_pending || input_paused || input_detached || !guest_keyboard) return;
+  if(!mouse_sync_pending || input_paused || input_detached || !guest_mouse) return;
   // Deliver button release before the guest stops accepting mouse packets.
-  if(guest_mouse_captured) guest_keyboard->mouse_motion(0, 0, 0, 0);
-  guest_keyboard->set_mouse_capture(mouse_captured);
+  if(guest_mouse_captured) guest_mouse->mouse_motion(0, 0, 0, 0);
+  guest_mouse->set_mouse_capture(mouse_captured);
   guest_mouse_captured = mouse_captured;
   mouse_sync_pending = false;
 }
@@ -983,7 +987,7 @@ void bx_x11_gui_c::reset_absolute_mouse_position()
 void bx_x11_gui_c::reconcile_mouse_buttons()
 {
   if(!mouse_captured || input_paused || input_detached ||
-     !guest_keyboard || !keyboard_focused || retired || XPending(bx_x_display)) return;
+     !guest_mouse || !keyboard_focused || retired || XPending(bx_x_display)) return;
   Window root, child;
   int root_x, root_y, x, y;
   unsigned state;
@@ -997,7 +1001,7 @@ void bx_x11_gui_c::reconcile_mouse_buttons()
   if(held != mouse_buttons)
   {
     sync_mouse_capture();
-    guest_keyboard->mouse_motion(0, 0, 0, held);
+    guest_mouse->mouse_motion(0, 0, 0, held);
     mouse_buttons = held;
   }
 }
@@ -1011,7 +1015,7 @@ void bx_x11_gui_c::mouse_button(XButtonEvent* event, bool released)
     if(released) ignored_mouse_buttons &= ~bit;
     return;
   }
-  if(input_paused || input_detached || !guest_keyboard || !keyboard_focused || retired) return;
+  if(input_paused || input_detached || !guest_mouse || !keyboard_focused || retired) return;
   if(mouse_absolute && !released && (event->x < 0 || event->y < 0 ||
      (unsigned)event->x >= client_width || (unsigned)event->y >= client_height))
   {
@@ -1038,7 +1042,7 @@ void bx_x11_gui_c::mouse_button(XButtonEvent* event, bool released)
   const unsigned buttons = released ? mouse_buttons & ~bit : mouse_buttons | bit;
   const int wheel = released ? 0 : event->button == Button4 ? 1 : event->button == Button5 ? -1 : 0;
   if(buttons != mouse_buttons || wheel)
-    guest_keyboard->mouse_motion(0, 0, wheel, buttons);
+    guest_mouse->mouse_motion(0, 0, wheel, buttons);
   mouse_buttons = buttons;
 }
 
@@ -1046,7 +1050,7 @@ void bx_x11_gui_c::mouse_motion(XMotionEvent* event)
 {
   if(!mouse_captured || event->serial < mouse_input_serial ||
      event->serial < mouse_motion_serial || input_paused ||
-     input_detached || !guest_keyboard || !keyboard_focused || retired) return;
+     input_detached || !guest_mouse || !keyboard_focused || retired) return;
   if(mouse_absolute && (event->x < 0 || event->y < 0 ||
      (unsigned)event->x >= client_width || (unsigned)event->y >= client_height))
   {
@@ -1070,7 +1074,7 @@ void bx_x11_gui_c::mouse_motion(XMotionEvent* event)
 
 void bx_x11_gui_c::send_mouse_motion(double dx, double dy)
 {
-  if(!mouse_captured || input_paused || input_detached || !guest_keyboard ||
+  if(!mouse_captured || input_paused || input_detached || !guest_mouse ||
      !keyboard_focused || retired) return;
   mouse_remainder_x += dx * (mouse_invert_x ? -mouse_speed : mouse_speed);
   mouse_remainder_y += dy * (mouse_invert_y ? -mouse_speed : mouse_speed);
@@ -1082,7 +1086,7 @@ void bx_x11_gui_c::send_mouse_motion(double dx, double dy)
   mouse_remainder_x -= scaled_x;
   mouse_remainder_y -= scaled_y;
   sync_mouse_capture();
-  if(scaled_x || scaled_y) guest_keyboard->mouse_motion(scaled_x, scaled_y, 0, mouse_buttons);
+  if(scaled_x || scaled_y) guest_mouse->mouse_motion(scaled_x, scaled_y, 0, mouse_buttons);
 }
 
 // Leave input queued during pause while allowing repaint and close events.

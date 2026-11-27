@@ -38,16 +38,21 @@ public:
   {
     // MCR and LED occupy consecutive dense quadwords in slot 7 (EK-D3SYS-PM, Tables 6 and 9).
     board.RegisterMemory(this, 0, U64(0x1e0000010), 16);
+    board.RegisterMemory(this, 1, U64(0x1e0000000), 8);
     save_item(board.lit_leds, "lit_leds");
   }
 
-  bool decodes_memory_access(int, u64 address, int dsize, bool write) const noexcept override
+  bool decodes_memory_access(int index, u64 address, int dsize, bool write) const noexcept override
   {
+    if (index == 1)
+      return !write && address == 0 && (dsize == 32 || dsize == 64);
     return (dsize == 32 || dsize == 64) && address == (write ? 8u : 0u);
   }
 
-  u64 ReadMem(int, u64, int) override
+  u64 ReadMem(int index, u64, int) override
   {
+    if (index == 1)
+      return board.io_control->interrupt() ? 1U << 4 : 0; // IR<4> is the slot 5 I/O interrupt (EK-D3SYS-PM, §3.2.1).
     return board.population.size_straps;
   }
 
@@ -135,6 +140,11 @@ void Pelican::attach_board_devices(CConfigurator* cfg)
 {
   new Registers(cfg, *this);
   io_control = new PelicanIOCTL(cfg, this);
+}
+
+MouseInput* Pelican::mouse_input()
+{
+  return io_control ? io_control->mouse_input() : nullptr;
 }
 
 int Pelican::LoadROM()

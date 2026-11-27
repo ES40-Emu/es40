@@ -170,6 +170,7 @@ noinst_HEADERS += storage/Disk.h \
        storage/AHA1742.h \
        storage/LSI53C1020.h \
        storage/SCSIBus.h \
+       storage/NCR53C94.h \
        storage/SCSIDevice.h \
        storage/Sym53C810.h \
        storage/Sym53C895.h \
@@ -194,6 +195,7 @@ noinst_HEADERS += storage/Disk.h \
        system/System.h \
        system/JensenFlash.h \
        system/PelicanIOCTL.h \
+       system/PelicanTCDS.h \
        system/System_jensen.h \
        system/System_pelican.h \
        system/System_tsunami.h \
@@ -375,6 +377,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        graphics/REALimage2100.cpp \
        graphics/REALimage2100.h \
        storage/SCSIBus.cpp \
+       storage/NCR53C94.cpp \
        storage/SCSIDevice.cpp \
        io/Serial.cpp \
        io/Uart.cpp \
@@ -388,6 +391,7 @@ es40_SOURCES = chipset/AliM1543C.cpp \
        system/System.cpp \
        system/JensenFlash.cpp \
        system/PelicanIOCTL.cpp \
+       system/PelicanTCDS.cpp \
        system/System_jensen.cpp \
        system/System_pelican.cpp \
        system/System_es40.cpp \
